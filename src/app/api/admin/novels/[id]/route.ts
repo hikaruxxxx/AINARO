@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-// TODO: Phase 1で管理者認証チェックを追加する
+import { requireAdminApi } from "@/lib/supabase/auth";
 
 /**
  * PUT /api/admin/novels/[id] — 作品更新
@@ -11,6 +10,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authCheck = await requireAdminApi();
+    if (!authCheck.authorized) return authCheck.response;
+
     const { id } = await params;
     const body = await request.json();
     const {
@@ -89,6 +91,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authCheck = await requireAdminApi();
+    if (!authCheck.authorized) return authCheck.response;
+
     const { id } = await params;
     const supabase = createAdminClient();
 

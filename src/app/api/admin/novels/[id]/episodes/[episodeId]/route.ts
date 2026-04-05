@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-// TODO: Phase 1で管理者認証チェックを追加する
+import { requireAdminApi } from "@/lib/supabase/auth";
 
 /**
  * 作品の集計値を再計算して更新（エピソードRoute用のコピー）
@@ -39,6 +38,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string; episodeId: string }> }
 ) {
   try {
+    const authCheck = await requireAdminApi();
+    if (!authCheck.authorized) return authCheck.response;
+
     const { id: novelId, episodeId } = await params;
     const body = await request.json();
     const { episode_number, title, body_md, is_free, published_at } = body;
@@ -100,6 +102,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; episodeId: string }> }
 ) {
   try {
+    const authCheck = await requireAdminApi();
+    if (!authCheck.authorized) return authCheck.response;
+
     const { id: novelId, episodeId } = await params;
     const supabase = createAdminClient();
 

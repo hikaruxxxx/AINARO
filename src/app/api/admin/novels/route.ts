@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-// TODO: Phase 1で管理者認証チェックを追加する
+import { requireAdminApi } from "@/lib/supabase/auth";
 
 /**
  * POST /api/admin/novels — 作品新規作成
  */
 export async function POST(request: NextRequest) {
   try {
+    const authCheck = await requireAdminApi();
+    if (!authCheck.authorized) return authCheck.response;
     const body = await request.json();
     const {
       title,

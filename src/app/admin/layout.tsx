@@ -1,16 +1,35 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { isAdmin } from "@/lib/supabase/auth";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "管理画面",
   robots: "noindex, nofollow",
 };
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // /admin/login は認証不要
+  // layoutはすべての子ルートに適用されるため、
+  // loginページかどうかはchildren側で判断できない
+  // → 認証チェックは各ページで行うか、middlewareで行う方が良いが、
+  //   最小実装としてここでチェックし、loginページは独自layoutを持たせる
+  const admin = await isAdmin();
+
+  if (!admin) {
+    // 未認証の場合、childrenのレンダリングは行うがナビは非表示
+    // loginページだけがchildrenとして表示される想定
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-6">
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
       {/* 管理画面ヘッダー */}

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdminApi } from "@/lib/supabase/auth";
 
 // 統計データ取得API
 // reading_events から直接集計（daily_stats が溜まるまではリアルタイム集計）
 export async function GET(req: NextRequest) {
+  const authCheck = await requireAdminApi();
+  if (!authCheck.authorized) return authCheck.response;
+
   const supabase = createAdminClient();
 
   const { searchParams } = new URL(req.url);

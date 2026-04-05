@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdminApi } from "@/lib/supabase/auth";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
-
-// TODO: Phase 1で管理者認証チェックを追加する
 
 // Vercel Serverless Functionのタイムアウトを60秒に延長
 export const maxDuration = 60;
@@ -23,6 +22,9 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authCheck = await requireAdminApi();
+    if (!authCheck.authorized) return authCheck.response;
+
     const { id } = await params;
     const supabase = createAdminClient();
 

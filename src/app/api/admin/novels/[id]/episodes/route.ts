@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-// TODO: Phase 1で管理者認証チェックを追加する
+import { requireAdminApi } from "@/lib/supabase/auth";
 
 /**
  * 作品の集計値（total_chapters, total_characters, latest_chapter_at）を再計算して更新
@@ -40,6 +39,9 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authCheck = await requireAdminApi();
+    if (!authCheck.authorized) return authCheck.response;
+
     const { id: novelId } = await params;
     const body = await request.json();
     const { episode_number, title, body_md, is_free, published_at } = body;
