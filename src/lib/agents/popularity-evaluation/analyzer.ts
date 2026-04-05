@@ -157,7 +157,8 @@ function analyzeHookStrength(text: string): PopularityMetric {
 
 /**
  * テンポ（ペーシング）を評価
- * 文の長さのバリエーションとテンポ感
+ * v2検証結果: 人気作品はCV 0.5-0.7（安定した緩急）。CV > 0.8は散漫で不人気の特徴。
+ * 短文率は0.25-0.40が最適。0.45超は短文頼りで不人気の特徴。
  */
 function analyzePacing(text: string): PopularityMetric {
   const sentences = splitSentences(text);
@@ -168,47 +169,51 @@ function analyzePacing(text: string): PopularityMetric {
   const lengths = sentences.map((s) => s.length);
   const avgLength = lengths.reduce((a, b) => a + b, 0) / lengths.length;
 
-  // 標準偏差を計算（バリエーションの指標）
   const variance =
     lengths.reduce((acc, l) => acc + (l - avgLength) ** 2, 0) / lengths.length;
   const stdDev = Math.sqrt(variance);
 
-  // 変動係数（平均に対するばらつき）
   const cv = avgLength > 0 ? stdDev / avgLength : 0;
 
   let score = 50;
   const details: string[] = [];
 
-  // 適度なバリエーション（CV 0.4-0.8が理想）
-  if (cv >= 0.4 && cv <= 0.8) {
+  // 文長CV: 人気作品の中央値0.625。0.5-0.7が安定した緩急
+  if (cv >= 0.5 && cv <= 0.7) {
     score += 25;
-    details.push("文の長さに適度な緩急がある");
-  } else if (cv >= 0.3 && cv <= 1.0) {
+    details.push("文の長さに安定した緩急がある");
+  } else if (cv >= 0.4 && cv <= 0.8) {
     score += 15;
     details.push("文の長さにやや緩急がある");
-  } else if (cv < 0.3) {
-    details.push("文の長さが均一でテンポが単調");
+  } else if (cv < 0.4) {
+    details.push("文の長さが均一すぎる");
   } else {
-    score += 5;
-    details.push("文の長さのばらつきがやや大きい");
+    score -= 10;
+    details.push("文の長さのばらつきが大きすぎる（構成が散漫）");
   }
 
-  // 短文（20文字以下）の割合
+  // 短文率: 人気作品の中央値0.329。0.45超は不人気の特徴
   const shortRatio = lengths.filter((l) => l <= 20).length / lengths.length;
-  if (shortRatio >= 0.2 && shortRatio <= 0.5) {
+  if (shortRatio >= 0.2 && shortRatio <= 0.4) {
     score += 15;
     details.push("短文が効果的に使われている");
-  } else if (shortRatio > 0.5) {
+  } else if (shortRatio > 0.45) {
+    score -= 10;
+    details.push("短文が多すぎる（テンション頼りの傾向）");
+  } else if (shortRatio < 0.15) {
     score += 5;
-    details.push("短文が多すぎる傾向");
+    details.push("短文が少なめ");
   }
 
-  // 平均文長（日本語小説では30-50文字が読みやすい）
-  if (avgLength >= 25 && avgLength <= 55) {
+  // 平均文長: 人気作品の中央値32字。25-45字が適切
+  if (avgLength >= 25 && avgLength <= 45) {
     score += 10;
     details.push(`平均文長${Math.round(avgLength)}文字で適切`);
-  } else if (avgLength > 70) {
+  } else if (avgLength < 20) {
     score -= 10;
+    details.push(`平均文長${Math.round(avgLength)}文字で短すぎる`);
+  } else if (avgLength > 55) {
+    score -= 5;
     details.push(`平均文長${Math.round(avgLength)}文字でやや長い`);
   }
 
@@ -217,7 +222,8 @@ function analyzePacing(text: string): PopularityMetric {
 
 /**
  * 会話比率を評価
- * 40%前後が理想
+ * v2検証結果: 人気作品の中央値は20%。15-30%が最適。
+ * 会話が多すぎる（30%超）は不人気の特徴。地の文・描写の密度が人気に寄与。
  */
 function analyzeDialogueRatio(text: string): PopularityMetric {
   const dialogues = extractDialogue(text);
@@ -234,34 +240,33 @@ function analyzeDialogueRatio(text: string): PopularityMetric {
   let score: number;
   const details: string[] = [];
 
-  // 理想は35-45%
-  if (ratio >= 0.35 && ratio <= 0.45) {
-    score = 90;
-    details.push(`会話比率${percentage}%で理想的`);
-  } else if (ratio >= 0.25 && ratio <= 0.55) {
-    score = 70;
-    details.push(`会話比率${percentage}%でほぼ良好`);
-  } else if (ratio >= 0.15 && ratio <= 0.65) {
-    score = 50;
-    details.push(`会話比率${percentage}%でやや偏りがある`);
-  } else if (ratio < 0.15) {
+  // 人気作品の中央値: 20%。15-30%が最適
+  if (ratio >= 0.15 && ratio <= 0.30) {
+    score = 85;
+    details.push(`会話比率${percentage}%で地の文とのバランスが良い`);
+  } else if (ratio >= 0.10 && ratio <= 0.40) {
+    score = 65;
+    details.push(`会話比率${percentage}%で許容範囲`);
+  } else if (ratio > 0.40) {
+    score = 35;
+    details.push(`会話比率${percentage}%で会話に頼りすぎ（描写を増やすべき）`);
+  } else if (ratio < 0.05) {
     score = 30;
-    details.push(`会話比率${percentage}%で地の文が多すぎる`);
+    details.push(`会話比率${percentage}%で会話が少なすぎる`);
   } else {
-    score = 30;
-    details.push(`会話比率${percentage}%で会話が多すぎる`);
+    score = 50;
+    details.push(`会話比率${percentage}%`);
   }
 
-  // 会話の数も考慮
+  // 会話の平均長
   if (dialogues.length > 0) {
-    const avgDialogueLength =
-      dialogueText.length / dialogues.length;
+    const avgDialogueLength = dialogueText.length / dialogues.length;
     if (avgDialogueLength > 100) {
       score -= 10;
       details.push("一つの台詞が長すぎる傾向");
     }
   } else {
-    score = 20;
+    score = 25;
     details.push("会話がまったくない");
   }
 
@@ -605,15 +610,17 @@ interface MetricWeights {
 }
 
 function getGenreWeights(genre?: PopularityGenre): MetricWeights {
-  // デフォルト（女性向けファンタジー寄り）
+  // v2検証結果に基づく重み配分
+  // 構成の安定感(pacing) > 感情(emotionalArc) > 引き(cliffhanger) > 会話バランス(dialogueRatio)
+  // > 冒頭(hookStrength) > 読みやすさ(readability) > 内面(innerMonologue) > 五感(sensoryDescription)
   const base: MetricWeights = {
-    hookStrength: 15,
-    pacing: 12,
-    dialogueRatio: 13,
-    innerMonologue: 10,
+    hookStrength: 12,
+    pacing: 18,         // v2で最も分離に寄与した特徴量群（CV, 短文率, バースト比）
+    dialogueRatio: 14,  // v2で強い分離（効果量0.655）
+    innerMonologue: 8,
     cliffhanger: 13,
-    emotionalArc: 15,
-    sensoryDescription: 10,
+    emotionalArc: 16,   // 感情密度は人気作品が高い
+    sensoryDescription: 7,  // v2で逆の相関（不人気のほうが高い）→ 重み下げ
     readability: 12,
   };
 
@@ -682,18 +689,19 @@ function generateImprovements(
 ): string[] {
   const improvements: string[] = [];
 
+  // v2検証データに基づく改善提案
   const suggestions: Record<string, string[]> = {
     hookStrength: [
-      "冒頭に疑問文や短い衝撃的な文を入れてみてください",
+      "冒頭3行で状況・感情・謎のいずれかを提示してください",
       "最初の3行で読者の感情を動かす描写を追加しましょう",
     ],
     pacing: [
-      "長文と短文を意識的に使い分けてリズムを作りましょう",
-      "アクションシーンでは短文を、心理描写では長文を使うと効果的です",
+      "文長のばらつきを抑え、安定した緩急を意識してください（CV 0.5-0.7が理想）",
+      "短文に頼りすぎず、描写を充実させた30字前後の文を増やしましょう",
     ],
     dialogueRatio: [
-      "会話と地の文のバランスを40%前後に調整してみてください",
-      "会話で情報を伝えつつ、地の文で心情や状況を補完しましょう",
+      "会話を15-30%に抑え、地の文・描写の密度を上げてください（人気作品の中央値は20%）",
+      "会話で進めがちな展開を、描写や心理で補強しましょう",
     ],
     innerMonologue: [
       "主人公の心の声を（）括弧で入れると感情移入しやすくなります",
@@ -704,15 +712,15 @@ function generateImprovements(
       "「――その時」「まさか」など、緊張感のある引きを入れましょう",
     ],
     emotionalArc: [
-      "喜怒哀楽の起伏を意識的に配置しましょう",
-      "後半にクライマックスを設けると読後感が良くなります",
+      "感情語を具体的な身体反応や行動で描写してください（説明より描写）",
+      "後半にクライマックスを設け、感情の起伏を明確にしましょう",
     ],
     sensoryDescription: [
-      "視覚・聴覚だけでなく、触覚・嗅覚・味覚も取り入れましょう",
-      "各シーンに最低1つの五感描写を入れると臨場感が増します",
+      "五感描写は量より質。各シーンに1つ、印象的なものを入れましょう",
+      "五感語彙の羅列は避け、物語に溶け込む描写を心がけてください",
     ],
     readability: [
-      "1文を短めにし、読点は1文に2つまでを目安にしましょう",
+      "平均文長25-45字を目安に。短すぎる文の連続は避けてください",
       "段落を適度な長さで区切り、改行を意識しましょう",
     ],
   };
