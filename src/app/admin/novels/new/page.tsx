@@ -36,6 +36,7 @@ export default function NewNovelPage() {
   const [synopsis, setSynopsis] = useState("");
   const [genre, setGenre] = useState("fantasy");
   const [tags, setTags] = useState("");
+  const [authorType, setAuthorType] = useState<"self" | "external">("self");
   const [authorName, setAuthorName] = useState("編集部");
   const [status, setStatus] = useState("serial");
   const [isR18, setIsR18] = useState(false);
@@ -66,6 +67,7 @@ export default function NewNovelPage() {
           genre,
           tags,
           status,
+          author_type: authorType,
           author_name: authorName,
           is_r18: isR18,
         }),
@@ -179,13 +181,34 @@ export default function NewNovelPage() {
           />
         </div>
 
-        {/* 著者名 */}
+        {/* 著者タイプ */}
         <div>
-          <label className="mb-1 block text-sm font-medium">著者名</label>
+          <label className="mb-1 block text-sm font-medium">著者タイプ</label>
+          <select
+            value={authorType}
+            onChange={(e) => {
+              const v = e.target.value as "self" | "external";
+              setAuthorType(v);
+              if (v === "self") setAuthorName("編集部");
+            }}
+            className="border border-border rounded px-3 py-2 w-full"
+          >
+            <option value="self">自社制作</option>
+            <option value="external">外部作者</option>
+          </select>
+        </div>
+
+        {/* 著者名（ペンネーム） */}
+        <div>
+          <label className="mb-1 block text-sm font-medium">
+            {authorType === "external" ? "ペンネーム *" : "著者名"}
+          </label>
           <input
             type="text"
             value={authorName}
             onChange={(e) => setAuthorName(e.target.value)}
+            required={authorType === "external"}
+            placeholder={authorType === "external" ? "作者のペンネーム" : "編集部"}
             className="border border-border rounded px-3 py-2 w-full"
           />
         </div>

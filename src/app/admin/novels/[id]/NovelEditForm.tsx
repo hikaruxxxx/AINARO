@@ -29,6 +29,8 @@ export default function NovelEditForm({ novel }: { novel: Novel }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [coverImageUrl, setCoverImageUrl] = useState(novel.cover_image_url);
+  const [generating, setGenerating] = useState(false);
 
   // フォーム状態（既存データで初期化）
   const [title, setTitle] = useState(novel.title);
@@ -37,6 +39,7 @@ export default function NovelEditForm({ novel }: { novel: Novel }) {
   const [synopsis, setSynopsis] = useState(novel.synopsis || "");
   const [genre, setGenre] = useState(novel.genre);
   const [tags, setTags] = useState(novel.tags.join(", "));
+  const [authorType, setAuthorType] = useState<"self" | "external">(novel.author_type);
   const [authorName, setAuthorName] = useState(novel.author_name);
   const [status, setStatus] = useState(novel.status);
   const [isR18, setIsR18] = useState(novel.is_r18);
@@ -67,6 +70,7 @@ export default function NovelEditForm({ novel }: { novel: Novel }) {
           genre,
           tags,
           status,
+          author_type: authorType,
           author_name: authorName,
           is_r18: isR18,
         }),
@@ -172,6 +176,51 @@ export default function NovelEditForm({ novel }: { novel: Novel }) {
           />
         </div>
 
+        {/* 表紙画像 */}
+        <div>
+          <label className="mb-1 block text-sm font-medium">表紙画像</label>
+          {coverImageUrl && (
+            <div className="mb-2">
+              <img
+                src={coverImageUrl}
+                alt="表紙プレビュー"
+                className="h-48 w-32 rounded border border-border object-cover"
+              />
+            </div>
+          )}
+          <button
+            type="button"
+            disabled={generating}
+            onClick={async () => {
+              setGenerating(true);
+              setError("");
+              try {
+                const res = await fetch(
+                  `/api/admin/novels/${novel.id}/cover`,
+                  { method: "POST" }
+                );
+                const data = await res.json();
+                if (!res.ok) {
+                  setError(data.error || "画像生成に失敗しました");
+                  return;
+                }
+                setCoverImageUrl(data.cover_image_url);
+              } catch {
+                setError("画像生成中に通信エラーが発生しました");
+              } finally {
+                setGenerating(false);
+              }
+            }}
+            className="border border-border rounded px-4 py-2 text-sm hover:bg-surface transition disabled:opacity-50"
+          >
+            {generating
+              ? "生成中...（30〜60秒かかります）"
+              : coverImageUrl
+                ? "表紙画像を再生成"
+                : "表紙画像を生成"}
+          </button>
+        </div>
+
         {/* ジャンル */}
         <div>
           <label className="mb-1 block text-sm font-medium">ジャンル *</label>
@@ -200,13 +249,34 @@ export default function NovelEditForm({ novel }: { novel: Novel }) {
           />
         </div>
 
-        {/* 著者名 */}
+        {/* 著者タイプ */}
         <div>
-          <label className="mb-1 block text-sm font-medium">著者名</label>
+          <label className="mb-1 block text-sm font-medium">著者タイプ</label>
+          <select
+            value={authorType}
+            onChange={(e) => {
+              const v = e.target.value as "self" | "external";
+              setAuthorType(v);
+              if (v === "self") setAuthorName("編集部");
+            }}
+            className="border border-border rounded px-3 py-2 w-full"
+          >
+            <option value="self">自社制作</option>
+            <option value="external">外部作者</option>
+          </select>
+        </div>
+
+        {/* 著者名（ペンネーム） */}
+        <div>
+          <label className="mb-1 block text-sm font-medium">
+            {authorType === "external" ? "ペンネーム *" : "著者名"}
+          </label>
           <input
             type="text"
             value={authorName}
             onChange={(e) => setAuthorName(e.target.value)}
+            required={authorType === "external"}
+            placeholder={authorType === "external" ? "作者のペンネーム" : "編集部"}
             className="border border-border rounded px-3 py-2 w-full"
           />
         </div>

@@ -3,8 +3,11 @@ export type Novel = {
   id: string;
   slug: string;
   title: string;
+  title_en: string | null;
   tagline: string | null;
+  tagline_en: string | null;
   synopsis: string | null;
+  synopsis_en: string | null;
   cover_image_url: string | null;
   author_type: "self" | "external";
   author_id: string | null;
@@ -29,8 +32,11 @@ export type Episode = {
   novel_id: string;
   episode_number: number;
   title: string;
+  title_en: string | null;
   body_md: string;
+  body_md_en: string | null;
   body_html: string | null;
+  body_html_en: string | null;
   character_count: number;
   is_free: boolean;
   pv: number;

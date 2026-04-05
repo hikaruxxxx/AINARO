@@ -142,8 +142,7 @@
     "creatorBody1": "AI-written, human-written, or a mix — we don't judge the tools. We only ask: did the reader enjoy it? Methods are free; results are what count.",
     "creatorBody2": "Current novels are produced using AI with human planning and editorial oversight. Quality is continuously improved based on reader behavior data.",
     "contactTitle": "Contact",
-    "contactBody": "For feedback, requests, or bug reports, please reach out via our {link}.",
-    "contactLink": "contact page",
+    "contactBody": "For feedback, requests, or bug reports, please reach out via our <link>contact page</link>.",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy"
   },
@@ -158,8 +157,7 @@
     "emailBody": "For urgent or detailed inquiries, please use email.",
     "beforeTitle": "Before You Contact Us",
     "beforeContent": "For content issues (inappropriate expressions, etc.), please include the novel title and episode number.",
-    "beforePrivacy": "For requests regarding personal data disclosure, correction, or deletion, please review our {link} first.",
-    "privacyLink": "Privacy Policy",
+    "beforePrivacy": "For requests regarding personal data disclosure, correction, or deletion, please review our <link>Privacy Policy</link> first.",
     "responseTime": "We typically respond within 3 business days."
   },
   "privacy": {
@@ -205,13 +203,11 @@
     "s8Intro": "Users have the following rights regarding their personal information held by this site:",
     "s8a": "Right to disclosure, correction, and deletion",
     "s8b": "Right to request suspension of use",
-    "s8Contact": "Please contact us via our {link} to exercise these rights.",
-    "s8ContactLink": "contact page",
+    "s8Contact": "Please contact us via our <link>contact page</link> to exercise these rights.",
     "s9Title": "9. Changes to This Policy",
     "s9Body": "We may modify this policy as needed. Updated policies take effect when published on this site.",
     "s10Title": "10. Contact",
-    "s10Body": "For inquiries about this policy, please contact us via our {link}.",
-    "s10ContactLink": "contact page"
+    "s10Body": "For inquiries about this policy, please contact us via our <link>contact page</link>."
   },
   "terms": {
     "metaTitle": "Terms of Service",
@@ -242,8 +238,7 @@
     "a5a": "This site does not guarantee the accuracy, completeness, or usefulness of content.",
     "a5b": "This site shall not be liable for any damages arising from the use of the Service.",
     "a5c": "This site may change, suspend, or terminate the Service without prior notice.",
-    "a5d": "Due to the nature of AI-generated content, unintended expressions may occur. If you discover problematic expressions, please contact us via our {link}.",
-    "a5dLink": "contact page",
+    "a5d": "Due to the nature of AI-generated content, unintended expressions may occur. If you discover problematic expressions, please contact us via our <link>contact page</link>.",
     "a6Title": "Article 6 (Intellectual Property)",
     "a6Body": "All intellectual property rights related to the Service belong to the site operator or legitimate rights holders. The license to use the Service under these Terms does not constitute a license to use intellectual property.",
     "a7Title": "Article 7 (External Links)",

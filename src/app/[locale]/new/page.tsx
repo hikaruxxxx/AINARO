@@ -1,24 +1,29 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { fetchRecentEpisodes } from "@/lib/data";
 import { formatRelativeTime } from "@/lib/utils/format";
-import type { Metadata } from "next";
 
-export const revalidate = 300; // 5分ごとに再生成
+export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "新着エピソード",
-  description: "最近公開されたエピソードの一覧。最新話をいち早くチェック。",
-};
+export async function generateMetadata() {
+  const t = await getTranslations("pages");
+  return {
+    title: t("newEpisodes"),
+    description: t("newEpisodesDescription"),
+  };
+}
 
 export default async function NewEpisodesPage() {
-  const episodes = await fetchRecentEpisodes(30);
+  const locale = await getLocale();
+  const t = await getTranslations();
+  const episodes = await fetchRecentEpisodes(30, locale);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-text">新着エピソード</h1>
+      <h1 className="mb-6 text-2xl font-bold text-text">{t("pages.newEpisodes")}</h1>
 
       {episodes.length === 0 ? (
-        <p className="py-12 text-center text-muted">まだエピソードが公開されていません。</p>
+        <p className="py-12 text-center text-muted">{t("pages.noNewEpisodes")}</p>
       ) : (
         <ul className="divide-y divide-border">
           {episodes.map((ep) => (
@@ -31,11 +36,11 @@ export default async function NewEpisodesPage() {
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted">{ep.novel_title}</p>
                     <h2 className="mt-0.5 font-bold text-text">
-                      第{ep.episode_number}話 {ep.title}
+                      {t("episode.epTitle", { num: ep.episode_number, title: ep.title })}
                     </h2>
                     <div className="mt-1 flex gap-3 text-xs text-muted">
-                      <span>{ep.character_count.toLocaleString()}字</span>
-                      <span>{formatRelativeTime(ep.published_at)}</span>
+                      <span>{t("episode.charCount", { count: ep.character_count.toLocaleString() })}</span>
+                      <span>{formatRelativeTime(ep.published_at, locale)}</span>
                     </div>
                   </div>
                 </div>

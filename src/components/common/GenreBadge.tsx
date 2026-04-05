@@ -1,22 +1,19 @@
-const GENRE_LABELS: Record<string, string> = {
-  fantasy: "異世界ファンタジー",
-  romance: "恋愛",
-  villainess: "悪役令嬢",
-  horror: "ホラー",
-  mystery: "ミステリー",
-  scifi: "SF",
-  drama: "現代ドラマ",
-  comedy: "コメディ",
-  action: "アクション",
-  other: "その他",
-};
+"use client";
+
+import { useTranslations } from "next-intl";
+
+// ジャンルキー一覧（サーバーコンポーネントからの参照用）
+export const GENRE_KEYS = [
+  "fantasy", "romance", "villainess", "horror", "mystery",
+  "scifi", "drama", "comedy", "action", "other",
+] as const;
 
 export default function GenreBadge({ genre }: { genre: string }) {
+  const t = useTranslations("genre");
+
   return (
     <span className="inline-block rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-      {GENRE_LABELS[genre] || genre}
+      {t.has(genre) ? t(genre) : genre}
     </span>
   );
 }
-
-export { GENRE_LABELS };

@@ -32,13 +32,16 @@ export default async function EpisodeReaderPage({ params }: Props) {
   const num = Number(episodeNum);
   if (isNaN(num) || num < 1) notFound();
 
-  const novel = await fetchNovelBySlug(slug);
+  const { getLocale } = await import("next-intl/server");
+  const locale = await getLocale();
+
+  const novel = await fetchNovelBySlug(slug, locale);
   if (!novel) notFound();
 
   // 現在話 + 次話 + 全エピソード一覧を並行取得
   const [epRange, allEpisodes] = await Promise.all([
-    fetchEpisodeRange(novel.id, num, num + 1),
-    fetchEpisodes(novel.id),
+    fetchEpisodeRange(novel.id, num, num + 1, locale),
+    fetchEpisodes(novel.id, locale),
   ]);
   if (epRange.length === 0) notFound();
 

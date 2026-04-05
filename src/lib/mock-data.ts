@@ -14,7 +14,10 @@ export const MOCK_NOVELS: Novel[] = [
     id: "novel-001",
     slug: "akuyaku-reijou-tensei",
     title: "悪役令嬢に転生したので、破滅フラグを全力で回避します",
+    title_en: null,
     tagline: "気づいたら乙女ゲームの悪役令嬢だった。でも、破滅エンドは絶対に回避してみせる！",
+    tagline_en: null,
+    synopsis_en: null,
     synopsis:
       "目覚めたら前世で遊んでいた乙女ゲーム「聖女の花園」の悪役令嬢・カタリナに転生していた。\n\nこのままでは攻略対象の王子に婚約破棄され、国外追放か処刑という破滅エンドが待っている。\n\n前世の記憶を武器に、カタリナは全力で破滅フラグの回避に乗り出す。しかし、フラグを折るたびに新たなフラグが立ち、なぜか攻略対象たち全員から好感度が上がっていく——。\n\n「いや、私はただ破滅を回避したいだけなのに！」",
     cover_image_url: null,
@@ -38,7 +41,10 @@ export const MOCK_NOVELS: Novel[] = [
     id: "novel-002",
     slug: "saikyou-maou-slow-life",
     title: "最強魔王、辺境でスローライフを始めます",
+    title_en: null,
     tagline: "世界を滅ぼせる力を持つ魔王が、辺境の村でのんびり暮らす。でも平穏はなかなか訪れない。",
+    tagline_en: null,
+    synopsis_en: null,
     synopsis:
       "千年の眠りから覚めた最強魔王ヴェルザード。\n\nかつての戦いに疲れた彼は、辺境の小さな村で農業をしながら静かに暮らすことを決意する。\n\nしかし、規格外の魔力で畑を耕せば異常な速度で作物が育ち、野良モンスターを追い払えば村人たちから英雄扱い。\n\nさらに勇者の末裔を名乗る少女や、旧知の魔族幹部が次々とやってきて——。\n\n「もう世界征服はいいから、今日の夕飯のことだけ考えさせてくれ」",
     cover_image_url: null,
@@ -62,7 +68,10 @@ export const MOCK_NOVELS: Novel[] = [
     id: "novel-003",
     slug: "shinigami-cafe",
     title: "死神が営むカフェには、訳ありの客しか来ない",
+    title_en: null,
     tagline: "あの世とこの世の境にあるカフェ。死神のマスターが淹れるコーヒーは、忘れた記憶を蘇らせる。",
+    tagline_en: null,
+    synopsis_en: null,
     synopsis:
       "駅裏の路地の奥に、地図には載っていないカフェがある。\n\nマスターは自称・死神の青年。メニューに載っているのは一杯のコーヒーだけ。\n\nそのコーヒーを飲むと、忘れていた——あるいは忘れたかった——記憶が鮮やかに蘇る。\n\n今夜もまた、訳ありの客がドアを開ける。\n\n連作短編形式で綴る、切なくて温かい物語。",
     cover_image_url: null,
@@ -92,6 +101,7 @@ export const MOCK_EPISODES: Episode[] = [
     novel_id: "novel-001",
     episode_number: 1,
     title: "目覚めたら破滅フラグだらけだった",
+    title_en: null,
     body_md: `朝の光が瞼を刺す。
 
 頭がぼんやりする。昨夜は遅くまでゲームをしていたせいだろうか。
@@ -164,6 +174,8 @@ export const MOCK_EPISODES: Episode[] = [
 
 絶対に、破滅エンドは回避してみせる。`,
     body_html: null,
+    body_md_en: null,
+    body_html_en: null,
     character_count: 5200,
     is_free: true,
     pv: 0,
@@ -176,6 +188,7 @@ export const MOCK_EPISODES: Episode[] = [
     novel_id: "novel-001",
     episode_number: 2,
     title: "令嬢教育と剣術修行",
+    title_en: null,
     body_md: `転生から三日が経った。
 
 この三日間で分かったことがある。カタリナ・フォン・クラウゼヴィッツの生活は、想像以上に忙しい。
@@ -236,6 +249,8 @@ export const MOCK_EPISODES: Episode[] = [
 
 破滅フラグ回避計画、順調に進行中。`,
     body_html: null,
+    body_md_en: null,
+    body_html_en: null,
     character_count: 4800,
     is_free: true,
     pv: 0,
@@ -248,6 +263,7 @@ export const MOCK_EPISODES: Episode[] = [
     novel_id: "novel-001",
     episode_number: 3,
     title: "王子との初対面で、早速フラグが立つ",
+    title_en: null,
     body_md: `転生から一ヶ月。
 
 魔法修行と剣術稽古のおかげで、体力も少しついてきた。ベルトラン先生によると、私の基礎属性は「風」。攻撃力は低いが、身体強化と移動速度の強化に向いているらしい。
@@ -342,6 +358,8 @@ export const MOCK_EPISODES: Episode[] = [
 
 破滅フラグ回避計画、予定外の方向に進行中。`,
     body_html: null,
+    body_md_en: null,
+    body_html_en: null,
     character_count: 5100,
     is_free: true,
     pv: 0,
@@ -354,6 +372,7 @@ export const MOCK_EPISODES: Episode[] = [
     novel_id: "novel-001",
     episode_number: 4,
     title: "第二王子と図書館での遭遇",
+    title_en: null,
     body_md: `初対面から半年が経ち、レオンとは月に一度のペースで会うようになった。
 
 会うたびに彼の表情は柔らかくなり、最近では手紙のやり取りまで始まった。手紙の内容は庭の薔薇の話ばかりだが。
@@ -446,6 +465,8 @@ export const MOCK_EPISODES: Episode[] = [
 
 破滅フラグ回避計画。フラグは折れないが、味方は増えている。多分。`,
     body_html: null,
+    body_md_en: null,
+    body_html_en: null,
     character_count: 5000,
     is_free: true,
     pv: 0,
@@ -458,6 +479,7 @@ export const MOCK_EPISODES: Episode[] = [
     novel_id: "novel-001",
     episode_number: 5,
     title: "従者キースと、領地改革の第一歩",
+    title_en: null,
     body_md: `九歳の誕生日を迎えた。
 
 転生してから一年。この一年で、私は原作のカタリナとは全く違う人間になりつつある。
@@ -532,6 +554,8 @@ export const MOCK_EPISODES: Episode[] = [
 
 九歳の誕生日。破滅回避の道は明るいが、想定外の方角に明るい。`,
     body_html: null,
+    body_md_en: null,
+    body_html_en: null,
     character_count: 4900,
     is_free: true,
     pv: 0,
@@ -546,6 +570,7 @@ export const MOCK_EPISODES: Episode[] = [
     novel_id: "novel-002",
     episode_number: 1,
     title: "千年の眠りから覚めたら、世界が平和になっていた",
+    title_en: null,
     body_md: `目が覚めた。
 
 暗い。冷たい。石の棺の中だ。
@@ -642,6 +667,8 @@ export const MOCK_EPISODES: Episode[] = [
 
 静かに暮らしたかったんだが。`,
     body_html: null,
+    body_md_en: null,
+    body_html_en: null,
     character_count: 5000,
     is_free: true,
     pv: 0,
@@ -654,6 +681,7 @@ export const MOCK_EPISODES: Episode[] = [
     novel_id: "novel-002",
     episode_number: 2,
     title: "勇者の末裔がやってきた",
+    title_en: null,
     body_md: `辺境の村に居を構えて一ヶ月。
 
 畑は順調すぎるほど順調だ。キャベツが人の頭ほどの大きさに育ち、トマトは信じられないほど甘い。村人たちに分けても余るので、隣の町に出荷を始めた。「辺境のやたらうまい野菜」として、じわじわと評判になっているらしい。
@@ -740,6 +768,8 @@ export const MOCK_EPISODES: Episode[] = [
 
 千年前の私たちが見たら、何と言うだろうか。`,
     body_html: null,
+    body_md_en: null,
+    body_html_en: null,
     character_count: 5000,
     is_free: true,
     pv: 0,
@@ -752,6 +782,7 @@ export const MOCK_EPISODES: Episode[] = [
     novel_id: "novel-002",
     episode_number: 3,
     title: "村祭りと、意外な来客",
+    title_en: null,
     body_md: `リーゼが村に来て二週間。
 
 彼女はすっかり村に馴染み、冒険者としてのスキルを活かして村の雑務を手伝っている。魔物退治、狩り、薪割り。「勇者の末裔」の身体能力は伊達ではなく、村人たちにも頼りにされている。
@@ -844,6 +875,8 @@ export const MOCK_EPISODES: Episode[] = [
 
 魔族の問題は、明日考えればいい。`,
     body_html: null,
+    body_md_en: null,
+    body_html_en: null,
     character_count: 5000,
     is_free: true,
     pv: 0,
@@ -858,6 +891,7 @@ export const MOCK_EPISODES: Episode[] = [
     novel_id: "novel-003",
     episode_number: 1,
     title: "最初の客——忘れた約束",
+    title_en: null,
     body_md: `駅裏の路地を三回曲がると、そこにある。
 
 「カフェ・リメンバー」。
@@ -950,6 +984,8 @@ export const MOCK_EPISODES: Episode[] = [
 
 そして、マスターは——自称、死神だ。`,
     body_html: null,
+    body_md_en: null,
+    body_html_en: null,
     character_count: 5000,
     is_free: true,
     pv: 0,
@@ -962,6 +998,7 @@ export const MOCK_EPISODES: Episode[] = [
     novel_id: "novel-003",
     episode_number: 2,
     title: "二人目の客——消えた夏の日",
+    title_en: null,
     body_md: `雨の夜だった。
 
 カフェ・リメンバーに、若い女性が飛び込んできた。二十代後半。ずぶ濡れで、傘を持っていない。
@@ -1070,6 +1107,8 @@ export const MOCK_EPISODES: Episode[] = [
 
 死神の仕事は、魂を連れて行くことだけではない。`,
     body_html: null,
+    body_md_en: null,
+    body_html_en: null,
     character_count: 5000,
     is_free: true,
     pv: 0,
