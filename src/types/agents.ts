@@ -41,9 +41,18 @@ export interface PopularityEvaluationResult {
     sensoryDescription: PopularityMetric; // 五感描写
     readability: PopularityMetric; // 読みやすさ
   };
+  pvPrediction: PVPrediction; // PV予測（89作品のリッジ回帰モデル）
   strengths: string[]; // 強み（日本語）
   improvements: string[]; // 改善提案（日本語）
   summary: string; // 日本語の総評
+}
+
+// PV予測（globalPoint回帰モデル）
+export interface PVPrediction {
+  predictedGP: number; // 予測globalPoint
+  confidenceRange: { low: number; high: number }; // 予測区間（4倍誤差を反映）
+  tier: "top" | "upper" | "mid" | "lower" | "bottom"; // 予測tier
+  detail: string;
 }
 
 // 人気評価のジャンル

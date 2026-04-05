@@ -779,6 +779,167 @@ function generateSummary(
   return summary;
 }
 
+// ─── PV予測（リッジ回帰モデル） ───
+
+/**
+ * 89作品のLOO-CVで検証済みのリッジ回帰モデル。
+ * スピアマン0.459、ピアソン0.474。予測誤差中央値4倍。
+ * 特徴量: 21個。ターゲット: log10(globalPoint)。lambda=100。
+ */
+
+// モデルの係数と標準化パラメータ（predict-pv.tsの出力から転記）
+const PV_MODEL = {
+  featureNames: [
+    "avgSentenceLen", "sentenceLenCV", "shortSentenceRatio", "longSentenceRatio",
+    "medSentenceRatio", "burstRatio", "paragraphLenCV", "avgParagraphLen",
+    "dialogueRatio", "innerMonologueRatio", "narrativeRatio", "emotionDensity",
+    "uniqueEmotionRatio", "questionRatio", "exclamationRatio", "commaPerSentence",
+    "bigramTTR", "kanjiRatio", "katakanaRatio", "hiraganaRatio", "conjDensity",
+  ],
+  // 特徴量の平均・標準偏差（標準化用）
+  featureStats: [
+    { mean: 31.2076, std: 8.1853 }, // avgSentenceLen
+    { mean: 0.6288, std: 0.1167 },  // sentenceLenCV
+    { mean: 0.3459, std: 0.1145 },  // shortSentenceRatio
+    { mean: 0.0915, std: 0.065 },   // longSentenceRatio
+    { mean: 0.5626, std: 0.115 },   // medSentenceRatio
+    { mean: 0.6555, std: 0.0811 },  // burstRatio
+    { mean: 0.7048, std: 0.1906 },  // paragraphLenCV
+    { mean: 73.5, std: 32.5 },      // avgParagraphLen
+    { mean: 0.2507, std: 0.0973 },  // dialogueRatio
+    { mean: 0.0174, std: 0.0291 },  // innerMonologueRatio
+    { mean: 0.7319, std: 0.0964 },  // narrativeRatio
+    { mean: 0.2136, std: 0.0785 },  // emotionDensity
+    { mean: 0.5927, std: 0.2525 },  // uniqueEmotionRatio
+    { mean: 0.0878, std: 0.039 },   // questionRatio
+    { mean: 0.0712, std: 0.0536 },  // exclamationRatio
+    { mean: 1.1688, std: 0.3525 },  // commaPerSentence
+    { mean: 0.6843, std: 0.0579 },  // bigramTTR
+    { mean: 0.2647, std: 0.0349 },  // kanjiRatio
+    { mean: 0.0461, std: 0.0224 },  // katakanaRatio
+    { mean: 0.4272, std: 0.0366 },  // hiraganaRatio
+    { mean: 2.4325, std: 0.8791 },  // conjDensity
+  ],
+  targetMean: 4.0648,
+  targetStd: 1.7042,
+  // リッジ回帰係数（lambda=100）
+  coefficients: [
+    -0.0137, -0.0755, -0.0902, 0.0154, 0.1176,
+    -0.0674, -0.0928, 0.0266, -0.0545, 0.0733,
+    0.0302, -0.0458, -0.0699, -0.0592, 0.0008,
+    0.0144, 0.0004, 0.0486, -0.0462, 0.0240,
+    -0.0935,
+  ],
+};
+
+/** テキストからPV予測用の特徴量を抽出 */
+function extractPVFeatures(text: string): number[] | null {
+  const sentences = text.split(/(?<=[。！？!?])/).map(s => s.trim()).filter(s => s.length > 0);
+  if (sentences.length < 5) return null;
+
+  const paragraphs = text.split(/\n\s*\n|\n/).map(p => p.trim()).filter(p => p.length > 0);
+  const chars = text.replace(/\s/g, "").length;
+  const sLens = sentences.map(s => s.length);
+  const sAvg = sLens.reduce((a, b) => a + b, 0) / sLens.length;
+  const sStd = Math.sqrt(sLens.reduce((acc, l) => acc + (l - sAvg) ** 2, 0) / sLens.length);
+
+  const pLens = paragraphs.map(p => p.length);
+  const pAvg = pLens.reduce((a, b) => a + b, 0) / pLens.length;
+  const pStd = Math.sqrt(pLens.reduce((acc, l) => acc + (l - pAvg) ** 2, 0) / pLens.length);
+
+  const dialoguesText = (text.match(/「[^」]*」/g) || []).join("");
+  const monologuesText = (text.match(/（[^）]*）/g) || []).join("");
+
+  const diffs: number[] = [];
+  for (let i = 1; i < sLens.length; i++) diffs.push(Math.abs(sLens[i] - sLens[i - 1]));
+  const meanDiff = diffs.length > 0 ? diffs.reduce((a, b) => a + b, 0) / diffs.length : 0;
+
+  const posCount = POSITIVE_EMO.filter(w => text.includes(w)).length;
+  const negCount = NEGATIVE_EMO.filter(w => text.includes(w)).length;
+  const totalEmo = posCount + negCount;
+
+  const kanji = text.match(/[\u4e00-\u9fff]/g) || [];
+  const katakana = text.match(/[\u30a0-\u30ff]/g) || [];
+  const hiragana = text.match(/[\u3040-\u309f]/g) || [];
+  const commas = (text.match(/、/g) || []).length;
+  const questions = sentences.filter(s => s.includes("？") || s.includes("?")).length;
+  const exclamations = sentences.filter(s => s.includes("！") || s.includes("!")).length;
+  const cleanChars = [...text.replace(/[\s\n\r、。！？!?「」『』（）\(\)・…―─ー]/g, "")];
+  const bigrams = new Set<string>();
+  for (let i = 0; i < cleanChars.length - 1; i++) bigrams.add(cleanChars[i] + cleanChars[i + 1]);
+
+  const CONJ = ["しかし", "そして", "また", "さらに", "そのため", "ところが", "けれど", "だが", "それでも", "つまり", "すると", "やがて", "それから", "だから"];
+  const conjUsed = CONJ.reduce((acc, w) => acc + (text.match(new RegExp(w, "g"))?.length || 0), 0);
+
+  return [
+    sAvg,
+    sAvg > 0 ? sStd / sAvg : 0,
+    sLens.filter(l => l <= 20).length / sLens.length,
+    sLens.filter(l => l >= 50).length / sLens.length,
+    sLens.filter(l => l > 20 && l < 50).length / sLens.length,
+    sAvg > 0 ? meanDiff / sAvg : 0,
+    pAvg > 0 ? pStd / pAvg : 0,
+    pAvg,
+    chars > 0 ? dialoguesText.length / chars : 0,
+    chars > 0 ? monologuesText.length / chars : 0,
+    chars > 0 ? (chars - dialoguesText.length - monologuesText.length) / chars : 0,
+    chars > 0 ? totalEmo / (chars / 1000) : 0,
+    totalEmo > 0 ? new Set([...POSITIVE_EMO.filter(w => text.includes(w)), ...NEGATIVE_EMO.filter(w => text.includes(w))]).size / totalEmo : 0,
+    questions / sentences.length,
+    exclamations / sentences.length,
+    commas / sentences.length,
+    cleanChars.length > 1 ? bigrams.size / (cleanChars.length - 1) : 0,
+    chars > 0 ? kanji.length / chars : 0,
+    chars > 0 ? katakana.length / chars : 0,
+    chars > 0 ? hiragana.length / chars : 0,
+    chars > 0 ? conjUsed / (chars / 1000) : 0,
+  ];
+}
+
+// PV予測用の感情語リスト（軽量版）
+const POSITIVE_EMO = ["嬉しい", "嬉し", "喜び", "幸せ", "楽しい", "好き", "愛し", "感動", "ときめ", "安心", "微笑", "笑顔", "笑い", "笑っ"];
+const NEGATIVE_EMO = ["悲しい", "悲し", "泣い", "涙", "辛い", "苦しい", "痛い", "怖い", "恐怖", "不安", "心配", "焦っ", "怒り", "怒っ", "悔し", "絶望", "寂し"];
+
+/** PV（globalPoint）を予測する */
+function predictPV(text: string): { predictedGP: number; confidenceRange: { low: number; high: number }; tier: "top" | "upper" | "mid" | "lower" | "bottom"; detail: string } {
+  const features = extractPVFeatures(text);
+  if (!features) {
+    return { predictedGP: 0, confidenceRange: { low: 0, high: 0 }, tier: "mid" as const, detail: "テキストが短すぎて予測不能" };
+  }
+
+  // 標準化
+  const standardized = features.map((v, i) => {
+    const s = PV_MODEL.featureStats[i];
+    return s.std > 0 ? (v - s.mean) / s.std : 0;
+  });
+
+  // 予測（標準化空間）
+  let predStd = 0;
+  for (let i = 0; i < standardized.length; i++) {
+    predStd += standardized[i] * PV_MODEL.coefficients[i];
+  }
+
+  // 元のスケールに戻す
+  const predLog = predStd * PV_MODEL.targetStd + PV_MODEL.targetMean;
+  const predictedGP = Math.round(Math.pow(10, predLog));
+
+  // 信頼区間（RMSE 1.129 → 約4倍の誤差を反映）
+  const low = Math.round(Math.pow(10, predLog - 1.129));
+  const high = Math.round(Math.pow(10, predLog + 1.129));
+
+  // tier推定
+  let tier: "top" | "upper" | "mid" | "lower" | "bottom";
+  if (predictedGP >= 200000) tier = "top";
+  else if (predictedGP >= 100000) tier = "upper";
+  else if (predictedGP >= 40000) tier = "mid";
+  else if (predictedGP >= 5000) tier = "lower";
+  else tier = "bottom";
+
+  const detail = `予測globalPoint: ${predictedGP.toLocaleString()}（${low.toLocaleString()}〜${high.toLocaleString()}）。${tier} tier相当`;
+
+  return { predictedGP, confidenceRange: { low, high }, tier, detail };
+}
+
 // ─── メインの分析関数 ───
 
 /**
@@ -801,6 +962,9 @@ export function analyzePopularity(
     sensoryDescription: analyzeSensoryDescription(text),
     readability: analyzeReadability(text),
   };
+
+  // PV予測
+  const pvPrediction = predictPV(text);
 
   // ジャンル別の重み付けで総合スコアを計算
   const weights = getGenreWeights(genre);
@@ -826,6 +990,7 @@ export function analyzePopularity(
     overallScore,
     grade,
     metrics,
+    pvPrediction,
     strengths,
     improvements,
     summary,

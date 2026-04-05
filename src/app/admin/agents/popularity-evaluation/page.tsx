@@ -215,6 +215,40 @@ export default function PopularityEvaluationPage() {
             </div>
           </div>
 
+          {/* PV��測 */}
+          {result.pvPrediction && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+              <h3 className="mb-3 text-sm font-bold text-blue-800">PV予測（globalPoint推定）</h3>
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-700">
+                    {result.pvPrediction.predictedGP.toLocaleString()}
+                  </div>
+                  <div className="mt-1 text-xs text-blue-500">予測gP</div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-block rounded px-2 py-0.5 text-xs font-bold ${
+                      result.pvPrediction.tier === "top" ? "bg-purple-100 text-purple-700" :
+                      result.pvPrediction.tier === "upper" ? "bg-blue-100 text-blue-700" :
+                      result.pvPrediction.tier === "mid" ? "bg-green-100 text-green-700" :
+                      result.pvPrediction.tier === "lower" ? "bg-yellow-100 text-yellow-700" :
+                      "bg-gray-100 text-gray-700"
+                    }`}>
+                      {result.pvPrediction.tier} tier
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-blue-600">
+                    予測範囲: {result.pvPrediction.confidenceRange.low.toLocaleString()} 〜 {result.pvPrediction.confidenceRange.high.toLocaleString()}
+                  </p>
+                  <p className="mt-1 text-xs text-muted">
+                    89作品で検証済み。スピアマン相関0.459。予測誤差中央値4倍。
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 総評 */}
           <div className="rounded-lg border border-border bg-surface p-4">
             <h3 className="mb-2 text-sm font-bold text-text">総評</h3>
