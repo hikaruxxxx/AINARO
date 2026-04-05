@@ -7,7 +7,7 @@
  * 2. どの特徴量が最も分離に寄与するか
  * 3. ジャンル別の差異はあるか
  *
- * 実行: npx tsx scripts/validate-popularity-v2.ts
+ * 実行: npx tsx scripts/validate-popularity.ts
  */
 
 import * as fs from "fs";

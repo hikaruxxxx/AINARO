@@ -1,18 +1,13 @@
 #!/usr/bin/env npx tsx
-// カクヨム層別サンプリング（Playwright使用）
-// 検索ページからジャンル×ソート順で作品リストを収集
-//
-// 使い方:
-//   npx tsx scripts/crawler/kakuyomu-search.ts
-//   npx tsx scripts/crawler/kakuyomu-search.ts --dry-run
+// カクヨム層別サンプリング v2 — 拡大版（目標: 2,000作品）
+// ジャンル × ソート順 × 複数ページ
 
-import { chromium, type Browser, type Page } from "playwright";
+import { chromium, type Browser } from "playwright";
 import fs from "fs/promises";
 import path from "path";
 
 const BASE_URL = "https://kakuyomu.jp";
 
-// カクヨムのジャンル名（URLパラメータ）
 const GENRES: Record<string, string> = {
   "異世界ファンタジー": "fantasy",
   "現代ファンタジー": "action",
@@ -28,40 +23,36 @@ const GENRES: Record<string, string> = {
   "詩・童話・その他": "others",
 };
 
-// ソート順（ポピュラリティ層の代替）
-const SORT_ORDERS: Record<string, string> = {
-  "top":    "weekly",                    // 週間ランキング上位
-  "mid":    "total",                     // 累計上位（中堅寄り）
-  "new":    "last_episode_published_at", // 最新更新（PV少ないものも含む）
-};
+// ソート順 × ページで階層を実現
+const SORT_PAGES = [
+  // 人気順の上位
+  { tier: "top",    sort: "weekly",                    pages: [1, 2, 3] },
+  // 累計上位（中堅）
+  { tier: "upper",  sort: "total",                     pages: [1, 2, 3] },
+  // フォロワー数順
+  { tier: "mid",    sort: "follower",                  pages: [1, 2, 3] },
+  // 最新更新（新しい作品、PV未知数）
+  { tier: "new",    sort: "last_episode_published_at", pages: [1, 2, 3, 5, 10] },
+  // 公開日が古い順（長期公開 × 低人気 = 真の不人気）
+  { tier: "unpopular", sort: "published_at",           pages: [1, 2, 3, 5, 10] },
+];
 
 interface KakuyomuWork {
   workId: string;
   title: string;
-  author: string;
   searchGenre: string;
   tier: string;
 }
 
 let browser: Browser | null = null;
 
-async function getBrowser(): Promise<Browser> {
-  if (!browser) {
-    browser = await chromium.launch({ headless: true });
-  }
-  return browser;
-}
-
-/** 検索ページから作品リストを取得 */
-async function scrapeSearchPage(
-  genreName: string,
+async function scrapePage(
   genreSlug: string,
-  sortName: string,
   sortValue: string,
-  pageNum: number = 1
-): Promise<KakuyomuWork[]> {
-  const b = await getBrowser();
-  const context = await b.newContext({
+  pageNum: number
+): Promise<{ workId: string; title: string }[]> {
+  if (!browser) browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({
     userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
     locale: "ja-JP",
   });
@@ -70,15 +61,13 @@ async function scrapeSearchPage(
   try {
     const url = `${BASE_URL}/search?genre_name=${genreSlug}&order=${sortValue}&page=${pageNum}`;
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
-    await page.waitForTimeout(2000); // SPAレンダリング待ち
+    await page.waitForTimeout(2000);
 
-    const works: KakuyomuWork[] = [];
-
-    // 作品リンクを取得（/works/{id} パターン）
-    const workLinks = await page.locator('a[href^="/works/"]').all();
+    const works: { workId: string; title: string }[] = [];
+    const links = await page.locator('a[href^="/works/"]').all();
     const seen = new Set<string>();
 
-    for (const link of workLinks) {
+    for (const link of links) {
       const href = await link.getAttribute("href") || "";
       const match = href.match(/^\/works\/(\d+)$/);
       if (!match || seen.has(match[1])) continue;
@@ -90,9 +79,6 @@ async function scrapeSearchPage(
       works.push({
         workId: match[1],
         title: title.trim().split("\n")[0],
-        author: "", // 検索結果からは取りにくいので空
-        searchGenre: genreName,
-        tier: sortName,
       });
     }
 
@@ -102,106 +88,90 @@ async function scrapeSearchPage(
   }
 }
 
-/** 層別サンプリング */
-async function stratifiedSample(dryRun: boolean) {
-  const allWorks: KakuyomuWork[] = [];
+async function main() {
+  // 既存データの重複排除
   const seen = new Set<string>();
-  const genreEntries = Object.entries(GENRES);
-  const sortEntries = Object.entries(SORT_ORDERS);
+  try {
+    const prev = JSON.parse(await fs.readFile("data/targets/kakuyomu_stratified.json", "utf-8"));
+    for (const p of prev) seen.add(p.ncode);
+    console.log(`📂 既存${seen.size}作品を重複排除対象に\n`);
+  } catch {}
 
-  console.log(`📊 ${genreEntries.length}ジャンル × ${sortEntries.length}ソート × 2ページ\n`);
+  const allWorks: KakuyomuWork[] = [];
+  const genreEntries = Object.entries(GENRES);
+
+  console.log(`🔬 カクヨム層別サンプリング v2`);
+  console.log(`  ${genreEntries.length}ジャンル × ${SORT_PAGES.length}ソート\n`);
 
   for (const [genreName, genreSlug] of genreEntries) {
     console.log(`\n📁 ${genreName}`);
 
-    if (dryRun) continue;
-
-    for (const [sortName, sortValue] of sortEntries) {
-      // 2ページ分取得（各ページ約20件）
-      for (let pageNum = 1; pageNum <= 2; pageNum++) {
+    for (const sp of SORT_PAGES) {
+      for (const pageNum of sp.pages) {
         try {
-          const works = await scrapeSearchPage(genreName, genreSlug, sortName, sortValue, pageNum);
+          const works = await scrapePage(genreSlug, sp.sort, pageNum);
           let added = 0;
           for (const w of works) {
             if (!seen.has(w.workId)) {
               seen.add(w.workId);
-              allWorks.push(w);
+              allWorks.push({
+                ...w,
+                searchGenre: genreName,
+                tier: sp.tier,
+              });
               added++;
             }
           }
-          console.log(`  ${sortName.padEnd(5)} p${pageNum}: ${works.length}件 → ${added}件追加`);
+          if (added > 0) {
+            console.log(`  ${sp.tier.padEnd(10)} p${pageNum}: ${works.length}件 → ${added}件追加`);
+          }
         } catch (err) {
-          console.error(`  ❌ ${sortName} p${pageNum}: ${err instanceof Error ? err.message : err}`);
+          console.error(`  ❌ ${sp.tier} p${pageNum}: ${err instanceof Error ? err.message : err}`);
         }
 
-        // レート制限（3〜6秒）
-        const delay = 3000 + Math.random() * 3000;
-        await new Promise((r) => setTimeout(r, delay));
+        await new Promise((r) => setTimeout(r, 3000 + Math.random() * 3000));
       }
     }
   }
 
-  return allWorks;
-}
+  console.log(`\n${"═".repeat(60)}`);
+  console.log(`📊 結果: ${allWorks.length}作品（重複除外済み）`);
 
-async function main() {
-  const dryRun = process.argv.includes("--dry-run");
-
-  console.log("🔬 カクヨム層別サンプリング");
-  if (dryRun) console.log("   （ドライラン）");
-
-  try {
-    const works = await stratifiedSample(dryRun);
-
-    if (dryRun) {
-      console.log("\n💡 --dry-run を外して実行してください");
-      return;
-    }
-
-    // 統計
-    console.log(`\n${"═".repeat(60)}`);
-    console.log(`📊 結果: ${works.length}作品（重複除外済み）`);
-
-    const byGenre = new Map<string, number>();
-    const byTier = new Map<string, number>();
-    for (const w of works) {
-      byGenre.set(w.searchGenre, (byGenre.get(w.searchGenre) || 0) + 1);
-      byTier.set(w.tier, (byTier.get(w.tier) || 0) + 1);
-    }
-
-    console.log("\n【ジャンル別】");
-    for (const [g, c] of [...byGenre.entries()].sort((a, b) => b[1] - a[1])) {
-      console.log(`  ${g.padEnd(20)} ${c}件`);
-    }
-
-    console.log("\n【ソート別】");
-    for (const [t, c] of byTier) {
-      console.log(`  ${t.padEnd(8)} ${c}件`);
-    }
-
-    // 保存（なろうと同じ形式に合わせる）
-    const output = works.map((w) => ({
-      ncode: w.workId,
-      title: w.title,
-      writer: w.author,
-      episodes: 0, // 不明
-      length: 0,
-      globalPoint: 0,
-      bookmarks: 0,
-      genre: 0,
-      status: "unknown",
-      searchGenre: w.searchGenre,
-      tier: w.tier,
-      site: "kakuyomu",
-    }));
-
-    const outputPath = "data/targets/kakuyomu_stratified.json";
-    await fs.mkdir(path.dirname(outputPath), { recursive: true });
-    await fs.writeFile(outputPath, JSON.stringify(output, null, 2), "utf-8");
-    console.log(`\n💾 保存: ${outputPath}`);
-  } finally {
-    if (browser) await browser.close();
+  const byGenre = new Map<string, number>();
+  const byTier = new Map<string, number>();
+  for (const w of allWorks) {
+    byGenre.set(w.searchGenre, (byGenre.get(w.searchGenre) || 0) + 1);
+    byTier.set(w.tier, (byTier.get(w.tier) || 0) + 1);
   }
+  console.log("\n【ジャンル別】");
+  for (const [g, c] of [...byGenre.entries()].sort((a, b) => b[1] - a[1])) {
+    console.log(`  ${g.padEnd(20)} ${c}件`);
+  }
+  console.log("\n【階層別】");
+  for (const [t, c] of byTier) console.log(`  ${t.padEnd(12)} ${c}件`);
+
+  // 保存
+  const output = allWorks.map((w) => ({
+    ncode: w.workId,
+    title: w.title,
+    writer: "",
+    episodes: 0,
+    length: 0,
+    globalPoint: 0,
+    bookmarks: 0,
+    genre: 0,
+    status: "unknown",
+    searchGenre: w.searchGenre,
+    tier: w.tier,
+    site: "kakuyomu",
+  }));
+
+  const outputPath = "data/targets/kakuyomu_stratified_v2.json";
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+  await fs.writeFile(outputPath, JSON.stringify(output, null, 2), "utf-8");
+  console.log(`\n💾 保存: ${outputPath}`);
+
+  if (browser) await browser.close();
 }
 
 main().catch((err) => {

@@ -21,7 +21,7 @@ import * as path from "path";
 // tsxではパスエイリアスが使えないので、ビルド済みを使うか直接パスで参照
 // ここでは特徴量を抽出して、スコアリングロジックを再現する
 
-// --- 特徴量抽出（validate-popularity-v2.tsと同じ） ---
+// --- 特徴量抽出（validate-popularity.tsと同じ） ---
 
 const EMOTION_WORDS = [
   "嬉しい", "嬉し", "喜び", "喜ん", "幸せ", "楽しい", "楽し",
