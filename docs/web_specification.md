@@ -889,4 +889,156 @@ Stripe連携。プレミアム会員管理。広告非表示制御。
 
 ---
 
+---
+
+## 13. エンゲージメントシステム（Phase 1向け。Phase 0ではOFF）
+
+戦略的な導入フェーズと判断基準の詳細は [engagement_strategy.md](engagement_strategy.md) を参照。
+
+### 13.1 追加テーブル
+
+#### episodes テーブル拡張
+```sql
+ALTER TABLE episodes ADD COLUMN unlock_at TIMESTAMPTZ;       -- NULLなら即時公開
+ALTER TABLE episodes ADD COLUMN unlock_price INTEGER DEFAULT 0; -- ポイント先読みコスト
+```
+Phase 0では全エピソードの`unlock_at = NULL`、`unlock_price = 0`（完全無料）。
+
+#### ポイントエコノミー
+```sql
+-- ユーザーポイント残高
+CREATE TABLE user_points (
+  user_id UUID PRIMARY KEY,
+  balance INTEGER NOT NULL DEFAULT 0,
+  total_earned INTEGER NOT NULL DEFAULT 0,
+  total_spent INTEGER NOT NULL DEFAULT 0,
+  last_login_bonus_at DATE
+);
+
+-- ポイント取引履歴
+CREATE TABLE point_transactions (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL,
+  amount INTEGER NOT NULL,       -- 正: 獲得、負: 消費
+  type TEXT NOT NULL,             -- daily_login / episode_complete / comment / unlock_episode / purchase
+  reference_id UUID,
+  description TEXT
+);
+
+-- エピソード先読み解放記録
+CREATE TABLE point_unlocks (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL,
+  episode_id UUID NOT NULL REFERENCES episodes(id),
+  points_spent INTEGER NOT NULL,
+  UNIQUE(user_id, episode_id)
+);
+```
+
+#### コンテンツ選別ファネル
+```sql
+CREATE TABLE content_candidates (
+  id UUID PRIMARY KEY,
+  novel_id UUID REFERENCES novels(id),
+  title TEXT NOT NULL,
+  synopsis TEXT,
+  genre TEXT NOT NULL REFERENCES genres(id),
+  phase TEXT NOT NULL DEFAULT 'plot',  -- plot → pilot → serial → archived
+  pilot_completion_rate REAL,
+  pilot_next_rate REAL,
+  pilot_bookmark_rate REAL,
+  pilot_score REAL,                     -- completion × (1 + next_rate) × (1 + bookmark_rate)
+  decision TEXT,                        -- promote / revise / archive
+  decided_at TIMESTAMPTZ,
+  decision_reason TEXT
+);
+```
+
+#### A/Bテスト基盤
+```sql
+-- テスト定義
+CREATE TABLE ab_tests (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  novel_id UUID NOT NULL REFERENCES novels(id),
+  episode_id UUID NOT NULL REFERENCES episodes(id),
+  status TEXT NOT NULL DEFAULT 'draft',    -- draft / running / completed
+  variants JSONB NOT NULL,                  -- [{id:"A",name:"オリジナル"},{id:"B",name:"展開変更版"}]
+  traffic_split JSONB DEFAULT '{"A":50,"B":50}',
+  primary_metric TEXT DEFAULT 'next_episode_rate',
+  winner_variant TEXT,
+  results JSONB
+);
+
+-- バリアント本文
+CREATE TABLE episode_variants (
+  id UUID PRIMARY KEY,
+  ab_test_id UUID REFERENCES ab_tests(id),
+  variant_id TEXT NOT NULL,
+  body_md TEXT NOT NULL,
+  UNIQUE(ab_test_id, variant_id)
+);
+
+-- セッション→バリアント割り当て
+CREATE TABLE ab_assignments (
+  id UUID PRIMARY KEY,
+  ab_test_id UUID REFERENCES ab_tests(id),
+  session_id TEXT NOT NULL,
+  variant_id TEXT NOT NULL,
+  UNIQUE(ab_test_id, session_id)
+);
+
+-- reading_eventsにバリアント追跡カラム追加
+ALTER TABLE reading_events ADD COLUMN variant_id TEXT;
+```
+
+### 13.2 追加API
+
+```
+-- ポイント
+GET    /api/points                              → ポイント残高
+POST   /api/points/login-bonus                  → ログインボーナス受取
+POST   /api/points/earn                         → 読了・コメントボーナス
+GET    /api/points/history                      → 取引履歴
+
+-- エピソード解放
+POST   /api/episodes/unlock                     → ポイントで先読み解放
+GET    /api/episodes/unlock?episode_ids=...      → 解放済みエピソード一覧
+
+-- A/Bテスト
+POST   /api/ab-test/assign                      → バリアント割り当て
+GET    /api/admin/ab-tests                       → テスト一覧
+POST   /api/admin/ab-tests                       → テスト作成
+PATCH  /api/admin/ab-tests/[id]                  → テスト状態変更（start/complete）
+
+-- コンテンツファネル
+GET    /api/admin/content-funnel                 → 候補一覧
+POST   /api/admin/content-funnel                 → 候補登録
+PATCH  /api/admin/content-funnel/[id]            → フェーズ変更・判定
+POST   /api/admin/content-funnel/[id]/evaluate   → パイロットスコア自動算出
+```
+
+### 13.3 追加管理画面
+
+```
+/admin/ab-tests          → A/Bテスト管理（作成・開始・終了・結果比較）
+/admin/content-funnel    → コンテンツ選別ファネル（フェーズ管理・スコア表示）
+/admin/retention         → 章単位離脱分析（リテンションファネル・スクロールヒートマップ）
+```
+
+### 13.4 章単位離脱分析の強化
+
+```sql
+-- daily_statsにスクロール分布JSONBを追加
+ALTER TABLE daily_stats ADD COLUMN scroll_distribution JSONB;
+
+-- 章→章リテンションファネルビュー
+CREATE VIEW episode_retention_funnel AS ...
+
+-- スクロール深度ヒートマップビュー
+CREATE VIEW episode_scroll_heatmap AS ...
+```
+
+---
+
 *本仕様書はPhase 0-1のMVPを対象とする。Phase 2以降の外部投稿機能、パーソナライズ機能、レベニューシェア管理は別途仕様を策定する。*

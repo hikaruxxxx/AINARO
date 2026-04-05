@@ -5,7 +5,10 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Novel, Episode } from "@/types/novel";
 import { useReadingTracker } from "@/hooks/useReadingTracker";
+import { useABTest } from "@/hooks/useABTest";
+import { usePoints } from "@/hooks/usePoints";
 import { markEpisodeRead } from "@/lib/reading-history";
+import EpisodeLockOverlay from "./EpisodeLockOverlay";
 import {
   getReadingSettings,
   saveReadingSettings,
@@ -34,10 +37,23 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
   const nextTriggerRef = useRef<HTMLDivElement>(null);
   const lastTapTime = useRef(0);
 
-  // 読書行動トラッキング
+  // エピソードロック判定
+  const isLocked = currentEpisode.unlock_at
+    ? new Date(currentEpisode.unlock_at) > new Date()
+    : false;
+  const [unlocked, setUnlocked] = useState(!isLocked);
+
+  // A/Bテストのバリアント取得
+  const abTest = useABTest(currentEpisode.id);
+
+  // 読了ポイント獲得
+  const { earnFromComplete } = usePoints();
+
+  // 読書行動トラッキング（A/BテストのバリアントIDを含む）
   const { trackNext } = useReadingTracker({
     novelId: novel.id,
     episodeId: currentEpisode.id,
+    variantId: abTest.variantId ?? undefined,
   });
 
   // ローカル読書履歴に記録
@@ -49,6 +65,23 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
   useEffect(() => {
     setSettings(getReadingSettings());
   }, []);
+
+  // 読了時にポイント獲得（1回だけ）
+  const hasEarnedRef = useRef(false);
+  useEffect(() => {
+    if (!unlocked) return;
+    const handleScroll = () => {
+      if (hasEarnedRef.current) return;
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight > 0 && scrollTop / docHeight >= 0.95) {
+        hasEarnedRef.current = true;
+        earnFromComplete(currentEpisode.id);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [unlocked, currentEpisode.id, earnFromComplete]);
 
   const hasPrev = currentNum > 1;
   const hasNext = currentNum < novel.total_chapters;
@@ -93,7 +126,24 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
     return () => observer.disconnect();
   }, [hasNext, nextLoading, router, novel.slug, currentNum, trackNext]);
 
-  const paragraphs = currentEpisode.body_md.split(/\n\n+/).filter(Boolean);
+  // 表示する本文を決定（A/Bテスト時はバリアント本文を使用）
+  const displayBodyMd = abTest.bodyMd ?? currentEpisode.body_md;
+  const paragraphs = displayBodyMd.split(/\n\n+/).filter(Boolean);
+
+  // ロック中はロック画面を表示
+  if (!unlocked) {
+    return (
+      <div className={`relative min-h-[100dvh] ${theme.bg} ${theme.text}`}>
+        <EpisodeLockOverlay
+          episodeId={currentEpisode.id}
+          episodeNumber={currentNum}
+          unlockAt={currentEpisode.unlock_at!}
+          unlockPrice={currentEpisode.unlock_price}
+          onUnlocked={() => setUnlocked(true)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={`relative min-h-[100dvh] ${theme.bg} ${theme.text}`} onClick={handleTap}>

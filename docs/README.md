@@ -7,6 +7,7 @@
 
 ### 現行計画（実行中）
 - **[platform_strategy_v3.md](platform_strategy_v3.md)** — 事業計画 v3（最新・採用版）。1人開発・VCなし・自社AI制作→プラットフォーム化。90%還元モデル
+- **[engagement_strategy.md](engagement_strategy.md)** — エンゲージメント・マネタイズ戦略。「面白さが実証されるまで課金しない」。ポイント経済圏・時限解放・A/Bテスト・コンテンツ選別ファネルの段階的導入設計
 - **[web_specification.md](web_specification.md)** — Web設計仕様書。Phase 0-1 MVPの技術仕様・DB設計・ページ設計・API設計
 - **[ai_generation_architecture.md](ai_generation_architecture.md)** — AI小説生成アーキテクチャ。ツール構成・生成パイプライン・プロンプト設計・コスト試算
 

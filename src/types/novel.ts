@@ -39,6 +39,8 @@ export type Episode = {
   body_html_en: string | null;
   character_count: number;
   is_free: boolean;
+  unlock_at: string | null;     // NULLなら即時解放、値があればその時刻まではロック
+  unlock_price: number;          // 先読みに必要なポイント数（0 = 無料）
   pv: number;
   published_at: string;
   created_at: string;
@@ -71,7 +73,7 @@ export type NovelScore = Novel & {
   score: number;
 };
 
-// 読書行動イベント
+// 読書行動イベント（variant_id: A/Bテスト時のバリアントID）
 export type ReadingEventType = "start" | "progress" | "complete" | "next" | "bookmark" | "drop";
 
 export type ReadingEvent = {
@@ -83,6 +85,7 @@ export type ReadingEvent = {
   event_type: ReadingEventType;
   scroll_depth: number | null;
   reading_time_sec: number | null;
+  variant_id: string | null;
   created_at: string;
 };
 
@@ -100,4 +103,126 @@ export type DailyStats = {
   avg_scroll_depth: number | null;
   bookmark_rate: number | null;
   drop_rate: number | null;
+  scroll_distribution: Record<string, number> | null;  // {"0":5,"10":8,...} 10%刻みの分布
+};
+
+// ===== ポイントエコノミー =====
+
+export type UserPoints = {
+  user_id: string;
+  balance: number;
+  total_earned: number;
+  total_spent: number;
+  last_login_bonus_at: string | null;
+  updated_at: string;
+};
+
+export type PointTransactionType =
+  | "daily_login"
+  | "episode_complete"
+  | "comment"
+  | "unlock_episode"
+  | "purchase"
+  | "admin_grant";
+
+export type PointTransaction = {
+  id: string;
+  user_id: string;
+  amount: number;
+  type: PointTransactionType;
+  reference_id: string | null;
+  description: string | null;
+  created_at: string;
+};
+
+export type PointUnlock = {
+  id: string;
+  user_id: string;
+  episode_id: string;
+  points_spent: number;
+  created_at: string;
+};
+
+// ===== コンテンツ選別ファネル =====
+
+export type ContentCandidatePhase = "plot" | "pilot" | "serial" | "archived";
+export type ContentDecision = "promote" | "revise" | "archive";
+
+export type ContentCandidate = {
+  id: string;
+  novel_id: string | null;
+  title: string;
+  synopsis: string | null;
+  genre: string;
+  phase: ContentCandidatePhase;
+  pilot_episodes: number;
+  pilot_completion_rate: number | null;
+  pilot_next_rate: number | null;
+  pilot_bookmark_rate: number | null;
+  pilot_avg_read_sec: number | null;
+  pilot_score: number | null;
+  decision: ContentDecision | null;
+  decided_at: string | null;
+  decision_reason: string | null;
+  tags: string[];
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+// ===== A/Bテスト =====
+
+export type ABTestStatus = "draft" | "running" | "completed";
+export type ABTestMetric = "completion_rate" | "next_episode_rate" | "avg_read_duration" | "bookmark_rate";
+
+export type ABTestVariant = {
+  id: string;  // "A", "B", etc.
+  name: string;
+};
+
+export type ABTest = {
+  id: string;
+  name: string;
+  description: string | null;
+  novel_id: string;
+  episode_id: string;
+  status: ABTestStatus;
+  variants: ABTestVariant[];
+  traffic_split: Record<string, number>;
+  primary_metric: ABTestMetric;
+  winner_variant: string | null;
+  results: Record<string, Record<string, number>> | null;
+  started_at: string | null;
+  ended_at: string | null;
+  created_at: string;
+};
+
+export type EpisodeVariant = {
+  id: string;
+  ab_test_id: string;
+  variant_id: string;
+  body_md: string;
+  body_html: string | null;
+  character_count: number;
+  created_at: string;
+};
+
+export type ABAssignment = {
+  id: string;
+  ab_test_id: string;
+  session_id: string;
+  user_id: string | null;
+  variant_id: string;
+  created_at: string;
+};
+
+// ===== 章→章リテンションファネル =====
+
+export type EpisodeRetention = {
+  novel_id: string;
+  episode_number: number;
+  title: string;
+  readers: number;
+  continued_to_next: number;
+  retention_rate: number | null;
 };

@@ -6,11 +6,12 @@ import { trackReadingEvent, getScrollDepth } from "@/lib/tracking";
 type Params = {
   novelId: string;
   episodeId: string;
+  variantId?: string;  // A/Bテスト時のバリアントID
 };
 
 // 読書行動トラッキングフック
 // start / progress(30秒ごと) / complete / drop を自動送信
-export function useReadingTracker({ novelId, episodeId }: Params) {
+export function useReadingTracker({ novelId, episodeId, variantId }: Params) {
   const startTime = useRef(Date.now());
   const hasCompleted = useRef(false);
   const hasSentStart = useRef(false);
@@ -30,10 +31,11 @@ export function useReadingTracker({ novelId, episodeId }: Params) {
       novelId,
       episodeId,
       eventType: "start",
+      variantId,
       scrollDepth: 0,
       readingTimeSec: 0,
     });
-  }, [novelId, episodeId]);
+  }, [novelId, episodeId, variantId]);
 
   // progress イベント（30秒ごと）
   useEffect(() => {
@@ -44,6 +46,7 @@ export function useReadingTracker({ novelId, episodeId }: Params) {
         novelId,
         episodeId,
         eventType: "progress",
+        variantId,
         scrollDepth: getScrollDepth(),
         readingTimeSec: getElapsedSec(),
       });
@@ -52,7 +55,7 @@ export function useReadingTracker({ novelId, episodeId }: Params) {
     return () => {
       if (progressInterval.current) clearInterval(progressInterval.current);
     };
-  }, [novelId, episodeId, getElapsedSec]);
+  }, [novelId, episodeId, variantId, getElapsedSec]);
 
   // complete イベント（末尾到達を検知）
   useEffect(() => {
@@ -66,6 +69,7 @@ export function useReadingTracker({ novelId, episodeId }: Params) {
           novelId,
           episodeId,
           eventType: "complete",
+          variantId,
           scrollDepth: 1.0,
           readingTimeSec: getElapsedSec(),
         });
@@ -74,19 +78,17 @@ export function useReadingTracker({ novelId, episodeId }: Params) {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [novelId, episodeId, getElapsedSec]);
+  }, [novelId, episodeId, variantId, getElapsedSec]);
 
   // drop イベント（ページ離脱時、未読了なら送信）
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (hasCompleted.current) return;
-
-      // sendBeacon で確実に送信（navigator.sendBeacon は Supabase クライアント非対応のため、
-      // 離脱時は同期的に trackReadingEvent を呼ぶ。ブラウザが送信を保証しない可能性あり）
       trackReadingEvent({
         novelId,
         episodeId,
         eventType: "drop",
+        variantId,
         scrollDepth: getScrollDepth(),
         readingTimeSec: getElapsedSec(),
       });
@@ -99,6 +101,7 @@ export function useReadingTracker({ novelId, episodeId }: Params) {
           novelId,
           episodeId,
           eventType: "drop",
+          variantId,
           scrollDepth: getScrollDepth(),
           readingTimeSec: getElapsedSec(),
         });
@@ -112,7 +115,7 @@ export function useReadingTracker({ novelId, episodeId }: Params) {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [novelId, episodeId, getElapsedSec]);
+  }, [novelId, episodeId, variantId, getElapsedSec]);
 
   // next イベント（呼び出し側が次話遷移時に実行）
   const trackNext = useCallback(() => {
@@ -120,10 +123,11 @@ export function useReadingTracker({ novelId, episodeId }: Params) {
       novelId,
       episodeId,
       eventType: "next",
+      variantId,
       scrollDepth: getScrollDepth(),
       readingTimeSec: getElapsedSec(),
     });
-  }, [novelId, episodeId, getElapsedSec]);
+  }, [novelId, episodeId, variantId, getElapsedSec]);
 
   return { trackNext };
 }

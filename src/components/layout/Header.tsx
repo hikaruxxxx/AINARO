@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useState, useEffect, useRef } from "react";
 import LanguageSwitcher from "./LanguageSwitcher";
+import PointsBadge from "@/components/novel/PointsBadge";
 
 export default function Header() {
   const t = useTranslations("header");
@@ -66,6 +67,7 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          <PointsBadge />
           <LanguageSwitcher />
         </nav>
 

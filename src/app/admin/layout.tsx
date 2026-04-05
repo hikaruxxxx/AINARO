@@ -51,6 +51,15 @@ export default async function AdminLayout({
           <Link href="/admin/agents/proofreading" className="text-muted hover:text-text transition">
             校正
           </Link>
+          <Link href="/admin/ab-tests" className="text-muted hover:text-text transition">
+            A/Bテスト
+          </Link>
+          <Link href="/admin/content-funnel" className="text-muted hover:text-text transition">
+            選別ファネル
+          </Link>
+          <Link href="/admin/retention" className="text-muted hover:text-text transition">
+            離脱分析
+          </Link>
         </nav>
       </div>
       {children}

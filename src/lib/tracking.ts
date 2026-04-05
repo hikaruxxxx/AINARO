@@ -28,6 +28,7 @@ export async function trackReadingEvent(params: {
   eventType: ReadingEventType;
   scrollDepth?: number;
   readingTimeSec?: number;
+  variantId?: string;  // A/Bテスト時のバリアントID
 }) {
   const supabase = createClient();
   const sessionId = getSessionId();
@@ -44,6 +45,7 @@ export async function trackReadingEvent(params: {
     event_type: params.eventType,
     scroll_depth: params.scrollDepth ?? null,
     reading_time_sec: params.readingTimeSec ?? null,
+    variant_id: params.variantId ?? null,
   });
 }
 
