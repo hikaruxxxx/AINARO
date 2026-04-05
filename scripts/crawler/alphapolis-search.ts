@@ -69,25 +69,35 @@ async function extractNovelLinks(pageUrl: string): Promise<{ novelPath: string; 
 }
 
 async function main() {
-  const maxDepth = 2; // おすすめの深さ
-  const targetCount = 200; // 目標作品数
+  const maxDepth = 4; // おすすめの深さ
+  const targetCount = 1000; // 目標作品数
 
-  console.log(`🔬 アルファポリス作品収集（芋づる式）`);
+  console.log(`🔬 アルファポリス作品収集（芋づる式 v2）`);
   console.log(`  目標: ${targetCount}作品 / 深さ: ${maxDepth}段\n`);
 
   const allWorks = new Map<string, AlphaWork>();
   const queue: { url: string; depth: number }[] = [];
 
-  // シード: 年間ランキング
-  console.log("📊 シード取得: 年間ランキング");
-  const seeds = await extractNovelLinks(`${BASE_URL}/novel/ranking/annual`);
-  for (const s of seeds) {
-    if (!allWorks.has(s.novelPath)) {
+  // 既存のリストをシードとして読み込み
+  try {
+    const existing = JSON.parse(await fs.readFile("data/targets/alphapolis_stratified.json", "utf-8"));
+    for (const w of existing) {
+      const novelPath = w.ncode;
+      allWorks.set(novelPath, { novelPath, title: w.title, depth: 0 });
+      // 既存作品のおすすめからさらに辿る
+      queue.push({ url: `${BASE_URL}/novel/${novelPath}`, depth: 1 });
+    }
+    console.log(`📂 既存${allWorks.size}作品をシードに\n`);
+  } catch {
+    // 既存なければランキングから
+    console.log("📊 シード取得: 年間ランキング");
+    const seeds = await extractNovelLinks(`${BASE_URL}/novel/ranking/annual`);
+    for (const s of seeds) {
       allWorks.set(s.novelPath, { ...s, depth: 0 });
       queue.push({ url: `${BASE_URL}/novel/${s.novelPath}`, depth: 1 });
     }
+    console.log(`  → ${seeds.length}件のシード作品\n`);
   }
-  console.log(`  → ${seeds.length}件のシード作品\n`);
 
   // 芋づる式に拡張
   while (queue.length > 0 && allWorks.size < targetCount) {

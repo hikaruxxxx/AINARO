@@ -105,12 +105,8 @@ async function getPairForCategory(
 
   await new Promise((r) => setTimeout(r, 1000));
 
-  // 不人気（ncode昇順 = 古い投稿順で500件 → 年フィルタで同時期の不人気作を抽出）
-  // ncode昇順の上位は2000年代なので、新しめの不人気作にはオフセットが必要
-  // st上限2000なので1500から取得
-  const bottomResults = await queryAPI({ ...baseParams, order: "ncodedesc", st: "1" });
-  // ncodedesc（新しいncode順 = 最近投稿）で取ると人気作が混ざるが、
-  // 年フィルタ後にポイントでソートして下位を取ればいい
+  // 不人気（評価順の1500〜2000位を取得 = APIのst上限2000以内で最も低評価な層）
+  const bottomResults = await queryAPI({ ...baseParams, order: "hyoka", st: "1500" });
 
   // 年でフィルタ
   const filterByYear = (results: NarouResult[]) =>
