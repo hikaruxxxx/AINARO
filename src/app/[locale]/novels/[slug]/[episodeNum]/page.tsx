@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 
 export const revalidate = 3600;
 
-type Props = { params: Promise<{ slug: string; episodeNum: string }> };
+type Props = { params: Promise<{ slug: string; episodeNum: string; locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, episodeNum } = await params;
@@ -35,7 +35,7 @@ export default async function EpisodeReaderPage({ params }: Props) {
   const novel = await fetchNovelBySlug(slug);
   if (!novel) notFound();
 
-  // 現在話 + 次話 + 全エピソード一覧を取得
+  // 現在話 + 次話 + 全エピソード一覧を並行取得
   const [epRange, allEpisodes] = await Promise.all([
     fetchEpisodeRange(novel.id, num, num + 1),
     fetchEpisodes(novel.id),

@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Novel, Episode } from "@/types/novel";
 import { useReadingTracker } from "@/hooks/useReadingTracker";
@@ -24,6 +24,7 @@ type Props = {
 };
 
 export default function EpisodeReader({ novel, currentEpisode, nextEpisode, currentNum, episodes }: Props) {
+  const t = useTranslations("episode");
   const router = useRouter();
   const [showUI, setShowUI] = useState(true);
   const [nextLoading, setNextLoading] = useState(false);
@@ -69,7 +70,6 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
     if (now - lastTapTime.current < 300) return;
     lastTapTime.current = now;
     setShowUI((prev) => !prev);
-    // 設定パネル・目次が開いていたら閉じる
     setShowSettings(false);
     setShowToc(false);
   }, []);
@@ -97,7 +97,7 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
 
   return (
     <div className={`relative min-h-[100dvh] ${theme.bg} ${theme.text}`} onClick={handleTap}>
-      {/* フローティングUI（タップで表示/非表示） */}
+      {/* フローティングUI */}
       <div
         className={`fixed top-0 left-0 right-0 z-40 ${theme.bg} backdrop-blur border-b border-border/30 transition-all duration-300 ${
           showUI ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
@@ -106,14 +106,14 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
         <div className="mx-auto flex h-11 max-w-3xl items-center justify-between px-4">
           <Link
             href={`/novels/${novel.slug}`}
-            className="text-sm opacity-60 hover:opacity-100"
+            className="text-sm text-secondary"
             onClick={(e) => e.stopPropagation()}
           >
-            ← 目次
+            {t("backToToc")}
           </Link>
           <div className="flex-1 text-center">
             <p className="truncate text-xs opacity-50">{novel.title}</p>
-            <p className="truncate text-sm font-medium">第{currentNum}話 {currentEpisode.title}</p>
+            <p className="truncate text-sm font-medium">{t("epTitle", { num: currentNum, title: currentEpisode.title })}</p>
           </div>
           <div className="flex items-center gap-2">
             {/* 目次ボタン */}
@@ -153,7 +153,7 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-4">
-            <h3 className="mb-3 text-sm font-bold">目次</h3>
+            <h3 className="mb-3 text-sm font-bold">{t("backToTocLink")}</h3>
             <ul className="space-y-1">
               {episodes.map((ep) => (
                 <li key={ep.episode_number}>
@@ -164,7 +164,7 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
                     }`}
                     onClick={() => setShowToc(false)}
                   >
-                    第{ep.episode_number}話 {ep.title}
+                    {t("epTitle", { num: ep.episode_number, title: ep.title })}
                   </Link>
                 </li>
               ))}
@@ -207,16 +207,16 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
               <p className="mb-2 text-xs opacity-60">テーマ</p>
               <div className="flex gap-2">
                 {(Object.keys(THEME_STYLES) as ReadingTheme[]).map((key) => {
-                  const t = THEME_STYLES[key];
+                  const ts = THEME_STYLES[key];
                   return (
                     <button
                       key={key}
                       onClick={() => updateSettings({ theme: key })}
-                      className={`flex-1 rounded-lg border-2 py-2 text-center text-xs transition ${t.bg} ${t.text} ${
+                      className={`flex-1 rounded-lg border-2 py-2 text-center text-xs transition ${ts.bg} ${ts.text} ${
                         settings.theme === key ? "border-secondary" : "border-transparent"
                       }`}
                     >
-                      {t.label}
+                      {ts.label}
                     </button>
                   );
                 })}
@@ -228,13 +228,11 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
 
       {/* 本文エリア */}
       <article className="novel-body px-5 pt-16 pb-24" style={{ fontSize: `${settings.fontSize}px` }}>
-        {/* エピソードタイトル */}
         <header className="mb-8 border-b border-current/10 pb-4 text-center">
-          <p className="text-xs opacity-50">第{currentNum}話</p>
+          <p className="text-xs opacity-50">{t("epNumber", { num: currentNum })}</p>
           <h1 className="mt-1 text-xl font-bold">{currentEpisode.title}</h1>
         </header>
 
-        {/* 本文 */}
         {paragraphs.map((p, i) => (
           <p key={i}>{p}</p>
         ))}
@@ -253,19 +251,19 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
                   trackNext();
                 }}
               >
-                次の話を読む →
+                {t("nextEpisode")}
               </Link>
 
               {nextEpisode && (
                 <p className="text-sm opacity-50">
-                  第{currentNum + 1}話「{nextEpisode.title}」
+                  {t("nextPreview", { num: currentNum + 1, title: nextEpisode.title })}
                 </p>
               )}
             </>
           ) : (
             <div className="text-center">
-              <p className="mb-2 text-lg font-bold">最新話です</p>
-              <p className="text-sm opacity-50">次の更新をお楽しみに！</p>
+              <p className="mb-2 text-lg font-bold">{t("latestEpisode")}</p>
+              <p className="text-sm opacity-50">{t("stayTuned")}</p>
             </div>
           )}
 
@@ -276,7 +274,7 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
                 className="text-sm opacity-50 hover:opacity-100 transition"
                 onClick={(e) => e.stopPropagation()}
               >
-                ← 前の話
+                {t("prevEpisode")}
               </Link>
             )}
             <Link
@@ -284,24 +282,24 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
               className="text-sm opacity-50 hover:opacity-100 transition"
               onClick={(e) => e.stopPropagation()}
             >
-              目次に戻る
+              {t("backToTocLink")}
             </Link>
           </div>
         </div>
       </div>
 
-      {/* 次話自動遷移トリガー（スクロール末端） */}
+      {/* 次話自動遷移トリガー */}
       {hasNext && (
         <div ref={nextTriggerRef} className="flex items-center justify-center py-12">
           {nextLoading ? (
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-secondary border-t-transparent" />
           ) : (
-            <p className="text-xs opacity-30">↓ スクロールで次の話へ</p>
+            <p className="text-xs opacity-30">{t("scrollForNext")}</p>
           )}
         </div>
       )}
 
-      {/* ボトムUI（タップで表示） */}
+      {/* ボトムUI */}
       <div
         className={`fixed bottom-0 left-0 right-0 z-40 ${theme.bg} backdrop-blur border-t border-border/30 transition-all duration-300 ${
           showUI ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
@@ -314,14 +312,14 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
               className="rounded-lg border border-current/20 px-4 py-1.5 text-sm transition active:bg-black/5"
               onClick={(e) => e.stopPropagation()}
             >
-              ← 前
+              {t("prev")}
             </Link>
           ) : (
             <div />
           )}
 
           <span className="text-xs opacity-50">
-            {currentEpisode.character_count.toLocaleString()}字
+            {t("charCount", { count: currentEpisode.character_count.toLocaleString() })}
           </span>
 
           {hasNext ? (
@@ -333,7 +331,7 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
                 trackNext();
               }}
             >
-              次 →
+              {t("next")}
             </Link>
           ) : (
             <div />
