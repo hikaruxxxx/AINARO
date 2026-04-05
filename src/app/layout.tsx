@@ -18,7 +18,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: "cover", // iPhoneのノッチ・ホームバー対応
+  viewportFit: "cover",
+  colorScheme: "light",
 };
 
 export const metadata: Metadata = {
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: siteName,
   },
 };
@@ -42,8 +43,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={`${notoSansJP.variable} h-full`}>
-      <body className="min-h-full flex flex-col font-[family-name:var(--font-noto-sans-jp)] antialiased">
+    <html lang="ja" className={`${notoSansJP.variable} h-full`} style={{ colorScheme: "light" }}>
+      <body className="min-h-full flex flex-col bg-bg font-[family-name:var(--font-noto-sans-jp)] antialiased">
         <Header />
         <main className="flex-1 pb-14 md:pb-0">{children}</main>
         <Footer />

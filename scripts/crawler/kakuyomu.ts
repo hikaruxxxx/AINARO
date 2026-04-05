@@ -45,64 +45,41 @@ export async function fetchNovelMeta(
   const page = await getPage();
   try {
     await page.goto(`${BASE_URL}/works/${workId}`, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
       timeout: 30000,
     });
 
     // 作品タイトル
-    const title = await page.locator('[id="workTitle"] a, h1 a').first().innerText().catch(() => "");
+    const title = await page.locator("h1").first().innerText().catch(() => "");
 
-    // 作者名
-    const author = await page.locator('[id="workAuthor-activityName"] a').first().innerText().catch(() => "");
+    // 作者名（作者リンクから取得）
+    const author = await page.locator('a[href*="/users/"]').first().innerText().catch(() => "");
 
     // 目次からエピソードリスト取得
     const chapters: ChapterInfo[] = [];
-    let currentChapter: ChapterInfo = { title: "(序章)", episodes: [] };
+    let currentChapter: ChapterInfo = { title: "(本編)", episodes: [] };
 
-    // 目次の章とエピソードを取得
-    const tocItems = await page.locator('.widget-toc-main .widget-toc-chapter, .widget-toc-main .widget-toc-episode').all()
-      .catch(() => [] as any[]);
+    // 作品ページ内のエピソードリンクを取得
+    // /works/{id}/episodes/{epId} パターンのみ抽出（SNSリンク等を除外）
+    const episodes = await page.locator(`a[href^="/works/${workId}/episodes/"]`).all();
+    const seen = new Set<string>();
 
-    // 目次が新UIの場合
-    if (tocItems.length === 0) {
-      // 新UIの目次構造を試す
-      const episodes = await page.locator('a[href*="/episodes/"]').all();
-      for (const ep of episodes) {
-        const href = await ep.getAttribute("href") || "";
-        const epTitle = await ep.innerText().catch(() => "");
-        const match = href.match(/episodes\/(\d+)/);
-        if (match && epTitle.trim()) {
-          currentChapter.episodes.push({
-            number: currentChapter.episodes.length + 1,
-            title: epTitle.trim(),
-            url: `${BASE_URL}${href}`,
-            updatedAt: "",
-          });
-        }
-      }
-    } else {
-      for (const item of tocItems) {
-        const className = await item.getAttribute("class") || "";
-        if (className.includes("chapter")) {
-          if (currentChapter.episodes.length > 0) {
-            chapters.push(currentChapter);
-          }
-          const chTitle = await item.innerText().catch(() => "");
-          currentChapter = { title: chTitle.trim(), episodes: [] };
-        } else {
-          const link = await item.locator("a").first();
-          const href = await link.getAttribute("href").catch(() => "") || "";
-          const epTitle = await link.innerText().catch(() => "");
-          const match = href.match(/episodes\/(\d+)/);
-          if (match) {
-            currentChapter.episodes.push({
-              number: currentChapter.episodes.length + 1,
-              title: epTitle.trim(),
-              url: `${BASE_URL}${href}`,
-              updatedAt: "",
-            });
-          }
-        }
+    for (const ep of episodes) {
+      const href = await ep.getAttribute("href") || "";
+      const epTitle = await ep.innerText().catch(() => "");
+      const match = href.match(/episodes\/(\d+)/);
+
+      // 重複排除（「1話目から読む」ボタン等）+ タイトルが空のもの除外
+      if (match && epTitle.trim() && !seen.has(match[1])) {
+        seen.add(match[1]);
+        // タイトルから日付部分を除去（「第1話 タイトル\n2020年12月12日公開」→「第1話 タイトル」）
+        const cleanTitle = epTitle.trim().split("\n")[0];
+        currentChapter.episodes.push({
+          number: currentChapter.episodes.length + 1,
+          title: cleanTitle,
+          url: `${BASE_URL}${href}`,
+          updatedAt: "",
+        });
       }
     }
 
@@ -145,19 +122,19 @@ export async function fetchEpisode(
   const page = await getPage();
   try {
     await page.goto(`${BASE_URL}/works/${workId}/episodes/${episodeId}`, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
       timeout: 30000,
     });
 
     // エピソードタイトル
-    const title = await page.locator('.widget-episodeTitle, [class*="EpisodeTitle"]').first().innerText()
+    const title = await page.locator(".widget-episodeTitle").first().innerText()
       .catch(() => "");
 
     // 本文取得
-    const bodyText = await page.locator('.widget-episodeBody, [class*="EpisodeBody"]').first().innerText()
+    const bodyText = await page.locator(".widget-episodeBody").first().innerText()
       .catch(async () => {
-        // フォールバック: 本文っぽいコンテナを探す
-        return await page.locator('main p').allInnerTexts().then(texts => texts.join("\n"));
+        // フォールバック
+        return await page.locator("main p").allInnerTexts().then((texts) => texts.join("\n"));
       });
 
     return {

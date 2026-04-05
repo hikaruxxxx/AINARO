@@ -19,7 +19,7 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-bg/95 backdrop-blur md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white md:hidden">
       <div className="flex h-14 items-center justify-around">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
@@ -28,7 +28,7 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] transition ${
-                isActive ? "text-secondary" : "text-muted"
+                isActive ? "text-primary" : "text-muted"
               }`}
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

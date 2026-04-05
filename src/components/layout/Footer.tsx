@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="mt-auto border-t border-border bg-surface">
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="flex flex-col items-center gap-4 text-sm text-muted">
-          <p className="font-medium text-text">
+          <p className="font-bold text-primary">
             {process.env.NEXT_PUBLIC_SITE_NAME || "Novelis"}
           </p>
           <p>もっと面白い小説を、すべての人に</p>
