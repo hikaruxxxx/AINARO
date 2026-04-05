@@ -1,6 +1,11 @@
-import Link from "next/link";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 export default function Footer() {
+  const t = useTranslations("footer");
+
   return (
     <footer className="mt-auto border-t border-border bg-surface">
       <div className="mx-auto max-w-5xl px-4 py-8">
@@ -8,19 +13,19 @@ export default function Footer() {
           <p className="font-bold text-primary">
             {process.env.NEXT_PUBLIC_SITE_NAME || "Novelis"}
           </p>
-          <p>もっと面白い小説を、すべての人に</p>
+          <p>{t("tagline")}</p>
           <nav className="flex flex-wrap justify-center gap-4">
             <Link href="/about" className="hover:text-text transition">
-              サイト概要
+              {t("about")}
             </Link>
             <Link href="/terms" className="hover:text-text transition">
-              利用規約
+              {t("terms")}
             </Link>
             <Link href="/privacy" className="hover:text-text transition">
-              プライバシーポリシー
+              {t("privacy")}
             </Link>
             <Link href="/contact" className="hover:text-text transition">
-              お問い合わせ
+              {t("contact")}
             </Link>
           </nav>
           <p className="text-xs">&copy; {new Date().getFullYear()} Novelis</p>

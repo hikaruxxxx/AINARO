@@ -17,13 +17,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select("episode_number, updated_at, novel_id, novels(slug)")
     .order("updated_at", { ascending: false });
 
+  // ジャンル一覧（sitemap用）
+  const { data: genres } = await supabase.from("genres").select("id");
+
   const staticPages: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
     { url: `${SITE_URL}/novels`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
+    { url: `${SITE_URL}/ranking`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
+    { url: `${SITE_URL}/new`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.7 },
     { url: `${SITE_URL}/about`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/terms`, changeFrequency: "monthly", priority: 0.2 },
     { url: `${SITE_URL}/privacy`, changeFrequency: "monthly", priority: 0.2 },
   ];
+
+  const genrePages: MetadataRoute.Sitemap = (genres || []).map((g) => ({
+    url: `${SITE_URL}/genre/${g.id}`,
+    changeFrequency: "daily" as const,
+    priority: 0.6,
+  }));
 
   const novelPages: MetadataRoute.Sitemap = (novels || []).map((n) => ({
     url: `${SITE_URL}/novels/${n.slug}`,
@@ -43,5 +54,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  return [...staticPages, ...novelPages, ...episodePages];
+  return [...staticPages, ...genrePages, ...novelPages, ...episodePages];
 }

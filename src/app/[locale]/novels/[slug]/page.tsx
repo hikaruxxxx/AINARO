@@ -4,6 +4,7 @@ import { fetchNovelBySlug, fetchEpisodes, fetchRelatedNovels } from "@/lib/data"
 import GenreBadge from "@/components/common/GenreBadge";
 import StatusBadge from "@/components/common/StatusBadge";
 import ContinueReadingButton from "@/components/novel/ContinueReadingButton";
+import BookmarkButton from "@/components/novel/BookmarkButton";
 import { formatPV, formatCharCount, formatDate } from "@/lib/utils/format";
 import type { Metadata } from "next";
 
@@ -51,7 +52,10 @@ export default async function NovelDetailPage({ params }: Props) {
         </div>
 
         <div className="flex flex-1 flex-col gap-2">
-          <h1 className="text-2xl font-bold">{novel.title}</h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-2xl font-bold">{novel.title}</h1>
+            <BookmarkButton novelId={novel.id} />
+          </div>
           {novel.tagline && <p className="text-sm text-muted">{novel.tagline}</p>}
           <p className="text-sm text-muted">著者: {novel.author_name}</p>
           <div className="flex flex-wrap gap-2">

@@ -44,17 +44,17 @@ export async function fetchNovelMeta(
   const page = await getPage();
   try {
     await page.goto(`${BASE_URL}/novel/${novelPath}`, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
       timeout: 30000,
     });
+    // SPA レンダリング待ち
+    await page.waitForSelector(".episodes", { timeout: 10000 }).catch(() => {});
 
     // 作品タイトル
-    const title = await page.locator(".title h2, .content-main h1, h1.title").first().innerText()
-      .catch(() => "");
+    const title = await page.locator("h1").first().innerText().catch(() => "");
 
     // 作者名
-    const author = await page.locator('.author a, a[href*="/author/"]').first().innerText()
-      .catch(() => "");
+    const author = await page.locator(".author a").first().innerText().catch(() => "");
 
     // エピソードリスト
     const chapters: ChapterInfo[] = [];
@@ -106,18 +106,19 @@ export async function fetchEpisode(
   const page = await getPage();
   try {
     await page.goto(episodeUrl, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
       timeout: 30000,
     });
+    await page.waitForSelector(".novel-body", { timeout: 10000 }).catch(() => {});
 
     // エピソードタイトル
-    const title = await page.locator(".episode-title, h1, h2").first().innerText()
+    const title = await page.locator(".episode-title").first().innerText()
       .catch(() => "");
 
     // 本文取得
-    const bodyText = await page.locator('#novelBoby, .text, .novel-body, #novel_body, .episode-body').first().innerText()
+    const bodyText = await page.locator(".novel-body").first().innerText()
       .catch(async () => {
-        return await page.locator("main p").allInnerTexts().then((texts) => texts.join("\n"));
+        return await page.locator(".episode-text p").allInnerTexts().then((texts) => texts.join("\n"));
       });
 
     return {

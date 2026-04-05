@@ -9,7 +9,8 @@ async function main() {
 
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
-  await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+  await page.waitForTimeout(3000); // SPAレンダリング待ち
 
   // ページタイトル
   console.log("【title】", await page.title());

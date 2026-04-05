@@ -1,20 +1,22 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
 import { useState, useEffect, useRef } from "react";
-
-const NAV_LINKS = [
-  { href: "/novels", label: "作品一覧" },
-  { href: "/new", label: "新着" },
-  { href: "/ranking", label: "ランキング" },
-];
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Header() {
+  const t = useTranslations("header");
   const [menuOpen, setMenuOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
   const pathname = usePathname();
+
+  const NAV_LINKS = [
+    { href: "/novels" as const, label: t("novels") },
+    { href: "/new" as const, label: t("new") },
+    { href: "/ranking" as const, label: t("ranking") },
+  ];
 
   // エピソード閲覧中はスクロール方向でヘッダーの表示/非表示を切り替え
   const isReading = /^\/novels\/[^/]+\/\d+/.test(pathname);
@@ -64,13 +66,14 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          <LanguageSwitcher />
         </nav>
 
         {/* モバイルメニュー */}
         <button
           className="flex h-8 w-8 items-center justify-center rounded-md text-muted transition hover:bg-surface md:hidden"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="メニュー"
+          aria-label={t("menu")}
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             {menuOpen ? (
@@ -95,6 +98,9 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          <div className="pt-2 border-t border-border mt-2">
+            <LanguageSwitcher />
+          </div>
         </nav>
       )}
     </header>

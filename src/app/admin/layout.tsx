@@ -29,6 +29,9 @@ export default function AdminLayout({
           <Link href="/admin/agents/popularity-evaluation" className="text-muted hover:text-text transition">
             人気評価
           </Link>
+          <Link href="/admin/agents/proofreading" className="text-muted hover:text-text transition">
+            校正
+          </Link>
         </nav>
       </div>
       {children}

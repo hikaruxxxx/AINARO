@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { fetchNovels } from "@/lib/data";
-import GenreBadge from "@/components/common/GenreBadge";
+import { fetchNovels, fetchNovelsByGenre } from "@/lib/data";
+import GenreBadge, { GENRE_LABELS } from "@/components/common/GenreBadge";
 import StatusBadge from "@/components/common/StatusBadge";
 import { formatPV, formatCharCount, formatRelativeTime } from "@/lib/utils/format";
 import type { Metadata } from "next";
@@ -12,15 +12,46 @@ export const metadata: Metadata = {
   description: "面白さで選ばれた小説だけが並ぶ場所。異世界ファンタジー、恋愛、ホラーなど多ジャンルの作品をお楽しみください。",
 };
 
-export default async function NovelsPage() {
-  const novels = await fetchNovels();
+type Props = {
+  searchParams: Promise<{ genre?: string }>;
+};
+
+export default async function NovelsPage({ searchParams }: Props) {
+  const { genre } = await searchParams;
+  const novels = genre ? await fetchNovelsByGenre(genre) : await fetchNovels();
+  const genres = Object.entries(GENRE_LABELS);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-text">作品一覧</h1>
+      <h1 className="mb-4 text-2xl font-bold text-text">作品一覧</h1>
+
+      {/* ジャンルフィルター */}
+      <div className="mb-6 flex flex-wrap gap-2">
+        <Link
+          href="/novels"
+          className={`rounded-full px-3 py-1 text-sm transition ${
+            !genre ? "bg-primary text-white" : "bg-surface text-muted hover:text-text"
+          }`}
+        >
+          すべて
+        </Link>
+        {genres.map(([id, label]) => (
+          <Link
+            key={id}
+            href={`/novels?genre=${id}`}
+            className={`rounded-full px-3 py-1 text-sm transition ${
+              genre === id ? "bg-primary text-white" : "bg-surface text-muted hover:text-text"
+            }`}
+          >
+            {label}
+          </Link>
+        ))}
+      </div>
 
       {novels.length === 0 ? (
-        <p className="py-12 text-center text-muted">作品はまだ公開されていません。</p>
+        <p className="py-12 text-center text-muted">
+          {genre ? "このジャンルの作品はまだありません。" : "作品はまだ公開されていません。"}
+        </p>
       ) : (
         <ul className="divide-y divide-border">
           {novels.map((novel) => (
