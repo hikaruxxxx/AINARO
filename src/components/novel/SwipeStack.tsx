@@ -74,31 +74,29 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
   }
 
   return (
-    <div className="flex h-full flex-col">
-      {/* カードエリア */}
-      <div className="relative flex-1">
-        {visibleCards.reverse().map((idx) => (
-          <SwipeCard
-            key={novels[idx].id}
-            novel={novels[idx]}
-            index={idx}
-            stackPosition={idx - currentIndex}
-            offsetX={idx === currentIndex ? offsetX : 0}
-            rotation={idx === currentIndex ? rotation : 0}
-            overlayOpacity={idx === currentIndex ? overlayOpacity : 0}
-            isAnimating={idx === currentIndex ? isAnimating : false}
-            handlers={idx === currentIndex ? handlers : undefined}
-            onReadProgress={idx === currentIndex ? onReadProgress : undefined}
-          />
-        ))}
-      </div>
+    <div className="relative h-full">
+      {/* カードエリア（全画面） */}
+      {visibleCards.reverse().map((idx) => (
+        <SwipeCard
+          key={novels[idx].id}
+          novel={novels[idx]}
+          index={idx}
+          stackPosition={idx - currentIndex}
+          offsetX={idx === currentIndex ? offsetX : 0}
+          rotation={idx === currentIndex ? rotation : 0}
+          overlayOpacity={idx === currentIndex ? overlayOpacity : 0}
+          isAnimating={idx === currentIndex ? isAnimating : false}
+          handlers={idx === currentIndex ? handlers : undefined}
+          onReadProgress={idx === currentIndex ? onReadProgress : undefined}
+        />
+      ))}
 
-      {/* ボタン */}
-      <div className="flex items-center justify-center gap-6 px-4 pb-8 pt-4">
+      {/* ボタン（カードの上にオーバーレイ） */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-8 pb-8 pt-4">
         <button
           onClick={() => triggerSwipe("left")}
           disabled={isAnimating}
-          className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-red-300 text-red-400 shadow-sm transition hover:bg-red-50 active:scale-95 disabled:opacity-50"
+          className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-red-500 shadow-lg backdrop-blur-sm transition hover:bg-white active:scale-90 disabled:opacity-50"
           aria-label={t("skip")}
         >
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -106,14 +104,14 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
           </svg>
         </button>
 
-        <span className="text-xs text-gray-400">
+        <span className="pointer-events-auto rounded-full bg-black/30 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
           {currentIndex + 1} / {novels.length}
         </span>
 
         <button
           onClick={() => triggerSwipe("right")}
           disabled={isAnimating}
-          className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-green-300 text-green-500 shadow-sm transition hover:bg-green-50 active:scale-95 disabled:opacity-50"
+          className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-green-500 shadow-lg backdrop-blur-sm transition hover:bg-white active:scale-90 disabled:opacity-50"
           aria-label={t("interested")}
         >
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -121,10 +119,6 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
           </svg>
         </button>
       </div>
-
-      <p className="pb-4 text-center text-xs text-gray-400">
-        {t("hint")}
-      </p>
     </div>
   );
 }

@@ -75,8 +75,8 @@ export default function SwipeCard({
     }
   }, [episodes.length, novel.id, novel.total_chapters, onReadProgress]);
 
-  const scale = 1 - stackPosition * 0.05;
-  const translateY = stackPosition * 12;
+  const scale = 1 - stackPosition * 0.03;
+  const translateY = stackPosition * 8;
 
   const cardStyle: React.CSSProperties = stackPosition === 0
     ? {
@@ -96,7 +96,7 @@ export default function SwipeCard({
 
   return (
     <div
-      className="absolute inset-4 overflow-hidden rounded-2xl shadow-2xl"
+      className="absolute inset-0 overflow-hidden"
       style={cardStyle}
     >
       <div
@@ -111,7 +111,7 @@ export default function SwipeCard({
         onMouseLeave={stackPosition === 0 ? (handlers as Record<string, unknown>)?.onMouseLeave as React.MouseEventHandler : undefined}
       >
         {/* ヒーローエリア */}
-        <div className="relative" style={{ height: "calc(100vh - 140px)" }}>
+        <div className="relative" style={{ height: "calc(100vh - 200px)" }}>
           {novel.cover_image_url ? (
             <img src={novel.cover_image_url} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
           ) : (

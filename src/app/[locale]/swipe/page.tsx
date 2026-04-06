@@ -81,34 +81,31 @@ export default function SwipePage() {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      {/* ヘッダー */}
-      <div className="flex items-center justify-between px-4 pt-4">
+    <div className="relative h-full">
+      {/* ヘッダー（オーバーレイ） */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between px-4 pt-4">
         <Link
           href="/"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200"
+          className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white/80 backdrop-blur-sm transition hover:bg-black/50"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </Link>
-        <div className="text-center">
-          <h1 className="text-sm font-bold text-gray-900">{t("title")}</h1>
-          <p className="text-[10px] text-gray-400">{t("subtitle")}</p>
+        <div className="pointer-events-auto rounded-full bg-black/30 px-3 py-1 text-center backdrop-blur-sm">
+          <h1 className="text-xs font-bold text-white">{t("title")}</h1>
         </div>
         <div className="w-8" />
       </div>
 
-      {/* カードスタック */}
-      <div className="flex-1">
-        <SwipeStack
-          novels={novels}
-          onSwipe={handleSwipe}
-          onReadProgress={handleReadProgress}
-          onReset={handleReset}
-          likedCount={likedCount}
-        />
-      </div>
+      {/* カードスタック（全画面） */}
+      <SwipeStack
+        novels={novels}
+        onSwipe={handleSwipe}
+        onReadProgress={handleReadProgress}
+        onReset={handleReset}
+        likedCount={likedCount}
+      />
     </div>
   );
 }
