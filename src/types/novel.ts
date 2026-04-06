@@ -16,6 +16,7 @@ export type Novel = {
   tags: string[];
   status: "serial" | "complete" | "hiatus";
   is_r18: boolean;
+  content_warnings: ContentWarningType[];
   total_chapters: number;
   total_characters: number;
   total_pv: number;
@@ -45,6 +46,16 @@ export type Episode = {
   published_at: string;
   created_at: string;
   updated_at: string;
+};
+
+// 目次用の軽量エピソード型（body_mdを含まない）
+export type EpisodeTocItem = {
+  episode_number: number;
+  title: string;
+  title_en: string | null;
+  character_count: number;
+  is_free: boolean;
+  published_at: string;
 };
 
 // ジャンルマスタ
@@ -213,6 +224,62 @@ export type ABAssignment = {
   session_id: string;
   user_id: string | null;
   variant_id: string;
+  created_at: string;
+};
+
+// ===== ソーシャル機能 =====
+
+// いいね（エピソード単位）
+export type EpisodeLike = {
+  id: string;
+  user_id: string | null;
+  session_id: string;
+  episode_id: string;
+  created_at: string;
+};
+
+// コメント（エピソード末尾）
+export type EpisodeComment = {
+  id: string;
+  user_id: string | null;
+  session_id: string;
+  episode_id: string;
+  novel_id: string;
+  display_name: string;
+  body: string;
+  created_at: string;
+};
+
+// フォロー（作品単位）
+export type NovelFollow = {
+  id: string;
+  user_id: string | null;
+  session_id: string;
+  novel_id: string;
+  created_at: string;
+};
+
+// コンテンツ警告タグ
+export type ContentWarningType =
+  | "violence"    // 暴力
+  | "gore"        // グロテスク
+  | "sexual"      // 性的表現
+  | "death"       // 死亡描写
+  | "abuse"       // 虐待
+  | "suicide"     // 自殺
+  | "horror"      // ホラー表現
+  | "drug";       // 薬物
+
+// Push通知サブスクリプション
+export type PushSubscription = {
+  id: string;
+  user_id: string | null;
+  session_id: string;
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
   created_at: string;
 };
 

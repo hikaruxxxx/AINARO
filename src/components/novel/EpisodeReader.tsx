@@ -9,6 +9,9 @@ import { useABTest } from "@/hooks/useABTest";
 import { usePoints } from "@/hooks/usePoints";
 import { markEpisodeRead } from "@/lib/reading-history";
 import EpisodeLockOverlay from "./EpisodeLockOverlay";
+import LikeButton from "./LikeButton";
+import ShareButton from "./ShareButton";
+import EpisodeComments from "./EpisodeComments";
 import {
   getReadingSettings,
   saveReadingSettings,
@@ -287,6 +290,22 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
           <p key={i}>{p}</p>
         ))}
       </article>
+
+      {/* いいね・シェアエリア */}
+      <div className="border-t border-current/10 px-5 py-6" onClick={(e) => e.stopPropagation()}>
+        <div className="mx-auto max-w-md flex flex-col items-center gap-4">
+          <p className="text-xs opacity-40">この話はいかがでしたか？</p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <LikeButton episodeId={currentEpisode.id} />
+            <ShareButton
+              title={`${novel.title} ${t("epTitle", { num: currentNum, title: currentEpisode.title })}`}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* コメント */}
+      <EpisodeComments episodeId={currentEpisode.id} novelId={novel.id} />
 
       {/* エピソード間ナビゲーション */}
       <div className="border-t border-current/10 px-5 py-8">
