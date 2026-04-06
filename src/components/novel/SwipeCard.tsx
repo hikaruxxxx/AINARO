@@ -91,7 +91,7 @@ export default function SwipeCard({
         {...(stackPosition === 0 ? handlers : {})}
       >
         {/* ヒーローエリア（ビジュアル部分 — カード全体と同じ高さ） */}
-        <div className="relative" style={{ minHeight: "100%" }}>
+        <div className="relative" style={{ height: "calc(100vh - 140px)" }}>
           {/* 背景 */}
           {novel.cover_image_url ? (
             <img
