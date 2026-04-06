@@ -22,7 +22,8 @@ type SwipeCardProps = {
   rotation?: number;
   overlayOpacity?: number;
   isAnimating?: boolean;
-  handlers?: Record<string, (e: never) => void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  handlers?: Record<string, any>;
   stackPosition: number;
   // 読み進めた時の好み信号コールバック
   onReadProgress?: (novelId: string, episodesRead: number) => void;
@@ -100,7 +101,14 @@ export default function SwipeCard({
     >
       <div
         className="absolute inset-0 overflow-y-auto overscroll-contain"
-        {...(stackPosition === 0 ? handlers : {})}
+        ref={stackPosition === 0 && handlers ? (handlers as Record<string, unknown>).ref as React.Ref<HTMLDivElement> : undefined}
+        onTouchStart={stackPosition === 0 ? handlers?.onTouchStart : undefined}
+        onTouchMove={stackPosition === 0 ? handlers?.onTouchMove : undefined}
+        onTouchEnd={stackPosition === 0 ? handlers?.onTouchEnd : undefined}
+        onMouseDown={stackPosition === 0 ? handlers?.onMouseDown : undefined}
+        onMouseMove={stackPosition === 0 ? handlers?.onMouseMove : undefined}
+        onMouseUp={stackPosition === 0 ? handlers?.onMouseUp : undefined}
+        onMouseLeave={stackPosition === 0 ? (handlers as Record<string, unknown>)?.onMouseLeave as React.MouseEventHandler : undefined}
       >
         {/* ヒーローエリア */}
         <div className="relative" style={{ height: "calc(100vh - 140px)" }}>
@@ -148,10 +156,28 @@ export default function SwipeCard({
               <span>{novel.author_name}</span>
             </div>
 
+            {/* 試し読みCTA — 大きく目立たせる */}
             {episodes.length > 0 && (
-              <div className="mt-4 flex flex-col items-center">
-                <span className="mb-1 text-[10px] text-white/40">↓ スクロールで試し読み</span>
-                <div className="h-1 w-8 rounded-full bg-white/20" />
+              <div className="mt-5 flex flex-col items-center gap-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // 本文エリアまでスクロール
+                    const container = (e.target as HTMLElement).closest('.overflow-y-auto');
+                    container?.scrollTo({ top: container.clientHeight, behavior: 'smooth' });
+                  }}
+                  className="flex items-center gap-2 rounded-full bg-white/20 px-5 py-2.5 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/30"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                  </svg>
+                  第1話を試し読み
+                </button>
+                <div className="animate-bounce">
+                  <svg className="h-5 w-5 text-white/40" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
+                  </svg>
+                </div>
               </div>
             )}
           </div>
