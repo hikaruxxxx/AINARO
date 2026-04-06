@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import SwipeStack from "@/components/novel/SwipeStack";
 import { addSwipe, getSwipedNovelIds, clearSwipeHistory } from "@/lib/swipe-history";
 import type { Novel } from "@/types/novel";
@@ -11,19 +10,23 @@ export default function SwipePage() {
   const t = useTranslations("swipe");
   const [novels, setNovels] = useState<Novel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [likedCount, setLikedCount] = useState(0);
 
   const fetchNovels = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/discover");
+      if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       const swipedIds = getSwipedNovelIds();
       const unswipedNovels = (data.novels || []).filter(
         (n: Novel) => !swipedIds.has(n.id)
       );
       setNovels(unswipedNovels);
-    } catch {
+    } catch (e) {
+      setError("作品の読み込みに失敗しました");
       setNovels([]);
     } finally {
       setLoading(false);
@@ -36,12 +39,14 @@ export default function SwipePage() {
 
   const handleSwipe = useCallback(
     (novelId: string, direction: "right" | "left", novel: Novel) => {
-      addSwipe({
-        novelId,
-        direction,
-        genre: novel.genre,
-        tags: novel.tags,
-      });
+      try {
+        addSwipe({
+          novelId,
+          direction,
+          genre: novel.genre,
+          tags: novel.tags,
+        });
+      } catch {}
       if (direction === "right") {
         setLikedCount((prev) => prev + 1);
       }
@@ -49,13 +54,14 @@ export default function SwipePage() {
     []
   );
 
-  // 2話以上読んだら暗黙の「気になる」信号として記録
   const handleReadProgress = useCallback(
     (novelId: string, episodesRead: number) => {
       if (episodesRead >= 2) {
         const novel = novels.find((n) => n.id === novelId);
         if (novel) {
-          addSwipe({ novelId, direction: "right", genre: novel.genre, tags: novel.tags });
+          try {
+            addSwipe({ novelId, direction: "right", genre: novel.genre, tags: novel.tags });
+          } catch {}
           setLikedCount((prev) => prev + 1);
         }
       }
@@ -64,41 +70,35 @@ export default function SwipePage() {
   );
 
   const handleReset = useCallback(() => {
-    clearSwipeHistory();
+    try { clearSwipeHistory(); } catch {}
     setLikedCount(0);
     fetchNovels();
   }, [fetchNovels]);
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-gray-600" />
-          <p className="text-sm text-gray-500">{t("loading")}</p>
-        </div>
+      <div className="flex h-full items-center justify-center bg-gray-50">
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-gray-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center bg-gray-50 px-8 text-center">
+        <p className="mb-4 text-sm text-gray-500">{error}</p>
+        <button
+          onClick={fetchNovels}
+          className="rounded-full bg-gray-900 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
+        >
+          再読み込み
+        </button>
       </div>
     );
   }
 
   return (
     <div className="relative h-full">
-      {/* ヘッダー（オーバーレイ） */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between px-4 pt-4">
-        <Link
-          href="/"
-          className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white/80 backdrop-blur-sm transition hover:bg-black/50"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </Link>
-        <div className="pointer-events-auto rounded-full bg-black/30 px-3 py-1 text-center backdrop-blur-sm">
-          <h1 className="text-xs font-bold text-white">{t("title")}</h1>
-        </div>
-        <div className="w-8" />
-      </div>
-
-      {/* カードスタック（全画面） */}
       <SwipeStack
         novels={novels}
         onSwipe={handleSwipe}

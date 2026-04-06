@@ -48,12 +48,14 @@ export default function SwipeCard({
   // トップカードの場合のみ第1話を取得
   useEffect(() => {
     if (stackPosition !== 0) return;
+    let cancelled = false;
     fetch(`/api/episodes/read?novelId=${novel.id}&episodeNumber=1`)
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
-        if (data?.episode) setEpisodes([data.episode]);
+        if (!cancelled && data?.episode) setEpisodes([data.episode]);
       })
       .catch(() => {});
+    return () => { cancelled = true; };
   }, [novel.id, stackPosition]);
 
   // 次の話を読む
