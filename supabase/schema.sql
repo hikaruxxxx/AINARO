@@ -36,6 +36,7 @@ CREATE TABLE novels (
   tags TEXT[] DEFAULT '{}',
   status TEXT NOT NULL DEFAULT 'serial',
   is_r18 BOOLEAN DEFAULT FALSE,
+  content_warnings TEXT[] DEFAULT '{}',
   total_chapters INTEGER DEFAULT 0,
   total_characters INTEGER DEFAULT 0,
   total_pv BIGINT DEFAULT 0,
@@ -278,3 +279,112 @@ BEGIN
     drop_rate = EXCLUDED.drop_rate;
 END;
 $$ LANGUAGE plpgsql;
+
+-- ============================================================
+-- 物語状態管理テーブル（数百話スケール対応）
+-- 詳細: supabase/migrations/20260406_story_state_tables.sql
+-- ============================================================
+
+-- 伏線台帳
+CREATE TABLE foreshadowing_items (
+  id TEXT NOT NULL,
+  novel_id UUID NOT NULL REFERENCES novels(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  planted_episode INTEGER NOT NULL,
+  planned_payoff_from INTEGER,
+  planned_payoff_to INTEGER,
+  actual_payoff_episode INTEGER,
+  status TEXT NOT NULL DEFAULT '未回収',
+  importance TEXT NOT NULL DEFAULT 'B',
+  memo TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (novel_id, id)
+);
+
+-- 読者既知情報
+CREATE TABLE reader_knowledge_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  novel_id UUID NOT NULL REFERENCES novels(id) ON DELETE CASCADE,
+  episode_number INTEGER NOT NULL,
+  category TEXT,
+  info TEXT NOT NULL,
+  reader_knows BOOLEAN NOT NULL DEFAULT FALSE,
+  protagonist_knows BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ドラマティック・アイロニー
+CREATE TABLE dramatic_irony_items (
+  id TEXT NOT NULL,
+  novel_id UUID NOT NULL REFERENCES novels(id) ON DELETE CASCADE,
+  info TEXT NOT NULL,
+  reader_knows BOOLEAN NOT NULL DEFAULT FALSE,
+  protagonist_knows BOOLEAN NOT NULL DEFAULT FALSE,
+  character_knowledge JSONB DEFAULT '{}',
+  planted_episode INTEGER,
+  resolution_episode INTEGER,
+  effect TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (novel_id, id)
+);
+
+-- エピソードプロット
+CREATE TABLE episode_plots (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  novel_id UUID NOT NULL REFERENCES novels(id) ON DELETE CASCADE,
+  episode_number INTEGER NOT NULL,
+  plot_content TEXT NOT NULL,
+  is_auto_generated BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(novel_id, episode_number)
+);
+
+-- 生成ロック（排他制御）
+CREATE TABLE generation_locks (
+  novel_id UUID PRIMARY KEY REFERENCES novels(id) ON DELETE CASCADE,
+  locked_by TEXT NOT NULL,
+  locked_at TIMESTAMPTZ DEFAULT NOW(),
+  episode_number INTEGER,
+  expires_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '30 minutes'
+);
+
+CREATE INDEX idx_foreshadowing_status ON foreshadowing_items(novel_id, status);
+CREATE INDEX idx_foreshadowing_payoff ON foreshadowing_items(novel_id, planned_payoff_from, planned_payoff_to);
+CREATE INDEX idx_foreshadowing_importance ON foreshadowing_items(novel_id, importance) WHERE importance = 'S';
+CREATE INDEX idx_reader_knowledge_novel_ep ON reader_knowledge_items(novel_id, episode_number DESC);
+CREATE INDEX idx_dramatic_irony_active ON dramatic_irony_items(novel_id) WHERE is_active = TRUE;
+
+-- body_md 分離テーブル（数百話スケール時の最適化）
+-- 詳細: supabase/migrations/20260406_episode_bodies_separation.sql
+CREATE TABLE episode_bodies (
+  episode_id UUID PRIMARY KEY REFERENCES episodes(id) ON DELETE CASCADE,
+  body_md TEXT NOT NULL,
+  body_md_en TEXT,
+  body_html TEXT,
+  body_html_en TEXT
+);
+
+-- reading_events アーカイブテーブル
+-- 詳細: supabase/migrations/20260406_reading_events_archive.sql
+CREATE TABLE reading_events_archive (
+  id UUID PRIMARY KEY,
+  user_id UUID,
+  session_id TEXT NOT NULL,
+  novel_id UUID NOT NULL,
+  episode_id UUID NOT NULL,
+  event_type TEXT NOT NULL,
+  scroll_depth REAL,
+  reading_time_sec INTEGER,
+  variant_id TEXT,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+-- 集計ログ
+CREATE TABLE daily_stats_log (
+  target_date DATE PRIMARY KEY,
+  aggregated_at TIMESTAMPTZ DEFAULT NOW()
+);

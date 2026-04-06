@@ -108,11 +108,12 @@ $ARGUMENTS を解析してください:
 
 各作品・各話を順次生成。/generate コマンドのフローに従う。
 
+**排他制御**: 各作品の生成開始前に generation_locks でロック取得。取得失敗=別プロセス生成中なのでスキップ。全話完了後に解放。30分自動期限切れ。DB未接続時は .generation.lock ファイルで代替。
+
 **生成順序:**
 ```
-作品A: ep1 → ep2 → ep3 → ... → epN
-作品B: ep1 → ep2 → ep3 → ... → epN
-...
+作品A: [lock] ep1 → ep2 → ... → epN [unlock]
+作品B: [lock] ep1 → ep2 → ... → epN [unlock]
 ```
 
 （同一作品内は順次。前話の文脈が必要なため）
@@ -142,11 +143,13 @@ $ARGUMENTS を解析してください:
 
 ## Step 6: 台帳一括更新
 
-全作品の以下を更新:
-- 伏線台帳
-- 読者既知情報
-- ワールドステート（該当する場合）
-- ドラマティック・アイロニー
+全作品の以下を更新（DB優先、フォールバック: Markdownファイル）:
+- **伏線台帳**: `foreshadowing_items` テーブル（新規INSERT + 回収済UPDATE）
+- **読者既知情報**: `reader_knowledge_items` テーブル（各話の新規情報をINSERT）
+- **ドラマティック・アイロニー**: `dramatic_irony_items` テーブル（状態更新）
+- **ワールドステート**: `_world_state/ep{num}_snapshot.md`（適応的間隔: ep1-50は5話ごと、ep51以降は10話ごと）
+
+DB未接続時は従来のMarkdownファイルに書き込む。
 
 ---
 
