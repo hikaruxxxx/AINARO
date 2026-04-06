@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useState, useEffect, useRef } from "react";
 import LanguageSwitcher from "./LanguageSwitcher";
+import SearchBar from "./SearchBar";
 import PointsBadge from "@/components/novel/PointsBadge";
 
 export default function Header() {
@@ -67,6 +68,7 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          <SearchBar />
           <PointsBadge />
           <LanguageSwitcher />
         </nav>
@@ -100,6 +102,13 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/search"
+            className="block py-2 text-sm text-text transition hover:text-primary"
+            onClick={() => setMenuOpen(false)}
+          >
+            検索
+          </Link>
           <div className="pt-2 border-t border-border mt-2">
             <LanguageSwitcher />
           </div>
