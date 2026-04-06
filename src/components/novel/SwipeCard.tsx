@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import GenreBadge from "@/components/common/GenreBadge";
 import type { Novel, Episode } from "@/types/novel";
 
@@ -23,6 +24,8 @@ type SwipeCardProps = {
   isAnimating?: boolean;
   handlers?: Record<string, (e: never) => void>;
   stackPosition: number;
+  // 読み進めた時の好み信号コールバック
+  onReadProgress?: (novelId: string, episodesRead: number) => void;
 };
 
 export default function SwipeCard({
@@ -34,33 +37,42 @@ export default function SwipeCard({
   isAnimating = false,
   handlers,
   stackPosition,
+  onReadProgress,
 }: SwipeCardProps) {
   const t = useTranslations("swipe");
   const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length];
-  const [episode, setEpisode] = useState<Episode | null>(null);
+  const [episodes, setEpisodes] = useState<Episode[]>([]);
+  const [loadingNext, setLoadingNext] = useState(false);
 
   // トップカードの場合のみ第1話を取得
   useEffect(() => {
     if (stackPosition !== 0) return;
-    fetch(`/api/novels/batch?slugs=${novel.slug}`)
-      .then((r) => r.json())
-      .then((data) => {
-        // batch APIがない場合のフォールバック: 個別取得
-        if (data.error) return;
-      })
-      .catch(() => {});
-
-    // エピソード本文を直接取得
     fetch(`/api/episodes/read?novelId=${novel.id}&episodeNumber=1`)
-      .then((r) => {
-        if (!r.ok) return null;
-        return r.json();
-      })
+      .then((r) => r.ok ? r.json() : null)
       .then((data) => {
-        if (data?.episode) setEpisode(data.episode);
+        if (data?.episode) setEpisodes([data.episode]);
       })
       .catch(() => {});
-  }, [novel.id, novel.slug, stackPosition]);
+  }, [novel.id, stackPosition]);
+
+  // 次の話を読む
+  const loadNextEpisode = useCallback(async () => {
+    const nextNum = episodes.length + 1;
+    if (nextNum > novel.total_chapters) return;
+    setLoadingNext(true);
+    try {
+      const res = await fetch(`/api/episodes/read?novelId=${novel.id}&episodeNumber=${nextNum}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data?.episode) {
+        setEpisodes((prev) => [...prev, data.episode]);
+        // 2話以上読んだ = 明確な好み信号
+        onReadProgress?.(novel.id, nextNum);
+      }
+    } catch {} finally {
+      setLoadingNext(false);
+    }
+  }, [episodes.length, novel.id, novel.total_chapters, onReadProgress]);
 
   const scale = 1 - stackPosition * 0.05;
   const translateY = stackPosition * 12;
@@ -79,27 +91,21 @@ export default function SwipeCard({
       };
 
   const direction = offsetX > 0 ? "right" : offsetX < 0 ? "left" : null;
+  const hasMoreEpisodes = episodes.length < novel.total_chapters;
 
   return (
     <div
       className="absolute inset-4 overflow-hidden rounded-2xl shadow-2xl"
       style={cardStyle}
     >
-      {/* スクロール可能な内側コンテナ — 横スワイプはhandlersで処理 */}
       <div
         className="absolute inset-0 overflow-y-auto overscroll-contain"
         {...(stackPosition === 0 ? handlers : {})}
       >
-        {/* ヒーローエリア（ビジュアル部分 — カード全体と同じ高さ） */}
+        {/* ヒーローエリア */}
         <div className="relative" style={{ height: "calc(100vh - 140px)" }}>
-          {/* 背景 */}
           {novel.cover_image_url ? (
-            <img
-              src={novel.cover_image_url}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-              draggable={false}
-            />
+            <img src={novel.cover_image_url} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
           ) : (
             <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
           )}
@@ -142,8 +148,7 @@ export default function SwipeCard({
               <span>{novel.author_name}</span>
             </div>
 
-            {/* スクロールヒント */}
-            {episode && (
+            {episodes.length > 0 && (
               <div className="mt-4 flex flex-col items-center">
                 <span className="mb-1 text-[10px] text-white/40">↓ スクロールで試し読み</span>
                 <div className="h-1 w-8 rounded-full bg-white/20" />
@@ -152,22 +157,60 @@ export default function SwipeCard({
           </div>
         </div>
 
-        {/* 第1話本文（スクロールで表示） */}
-        {episode && (
-          <div className="bg-white px-6 py-8">
-            <div className="mb-6 border-b border-gray-200 pb-4">
-              <p className="text-xs font-medium text-gray-400">第1話</p>
-              <h3 className="text-lg font-bold text-gray-900">{episode.title}</h3>
-            </div>
-            <div
-              className="novel-body select-text text-gray-800"
-              dangerouslySetInnerHTML={{
-                __html: episode.body_html || episode.body_md.replace(/\n/g, "<br/>"),
-              }}
-            />
-            <div className="mt-8 border-t border-gray-200 pt-6 text-center">
-              <p className="mb-2 text-sm text-gray-500">気に入りましたか？</p>
-              <p className="text-xs text-gray-400">上に戻って右スワイプで「気になる」に追加</p>
+        {/* エピソード本文 — 読み進められる */}
+        {episodes.length > 0 && (
+          <div className="bg-white">
+            {episodes.map((ep, i) => (
+              <div key={ep.episode_number} className="border-b border-gray-100 px-6 py-8">
+                <div className="mb-6 border-b border-gray-200 pb-4">
+                  <p className="text-xs font-medium text-gray-400">第{ep.episode_number}話</p>
+                  <h3 className="text-lg font-bold text-gray-900">{ep.title}</h3>
+                </div>
+                <div
+                  className="novel-body select-text text-gray-800"
+                  dangerouslySetInnerHTML={{
+                    __html: ep.body_html || ep.body_md.replace(/\n/g, "<br/>"),
+                  }}
+                />
+              </div>
+            ))}
+
+            {/* 次の話 or 完了 */}
+            <div className="px-6 py-8 text-center">
+              {hasMoreEpisodes ? (
+                <button
+                  onClick={loadNextEpisode}
+                  disabled={loadingNext}
+                  className="rounded-full bg-gray-900 px-8 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-gray-800 disabled:opacity-50"
+                >
+                  {loadingNext ? (
+                    <span className="flex items-center gap-2">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+                      読み込み中...
+                    </span>
+                  ) : (
+                    `第${episodes.length + 1}話を読む →`
+                  )}
+                </button>
+              ) : (
+                <p className="text-sm text-gray-500">最新話まで読了しました</p>
+              )}
+
+              {/* 作品ページへのリンク */}
+              <div className="mt-4">
+                <Link
+                  href={`/novels/${novel.slug}`}
+                  className="text-sm font-medium text-blue-600 hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  作品ページを見る →
+                </Link>
+              </div>
+
+              {/* スワイプに戻るヒント */}
+              <p className="mt-6 text-xs text-gray-400">
+                ↑ 上に戻ってスワイプで次の作品へ
+              </p>
             </div>
           </div>
         )}

@@ -10,11 +10,12 @@ import type { Novel } from "@/types/novel";
 type SwipeStackProps = {
   novels: Novel[];
   onSwipe: (novelId: string, direction: "right" | "left", novel: Novel) => void;
+  onReadProgress?: (novelId: string, episodesRead: number) => void;
   onReset: () => void;
   likedCount: number;
 };
 
-export default function SwipeStack({ novels, onSwipe, onReset, likedCount }: SwipeStackProps) {
+export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, likedCount }: SwipeStackProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const t = useTranslations("swipe");
 
@@ -87,6 +88,7 @@ export default function SwipeStack({ novels, onSwipe, onReset, likedCount }: Swi
             overlayOpacity={idx === currentIndex ? overlayOpacity : 0}
             isAnimating={idx === currentIndex ? isAnimating : false}
             handlers={idx === currentIndex ? handlers : undefined}
+            onReadProgress={idx === currentIndex ? onReadProgress : undefined}
           />
         ))}
       </div>

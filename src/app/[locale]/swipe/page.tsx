@@ -49,6 +49,20 @@ export default function SwipePage() {
     []
   );
 
+  // 2話以上読んだら暗黙の「気になる」信号として記録
+  const handleReadProgress = useCallback(
+    (novelId: string, episodesRead: number) => {
+      if (episodesRead >= 2) {
+        const novel = novels.find((n) => n.id === novelId);
+        if (novel) {
+          addSwipe({ novelId, direction: "right", genre: novel.genre, tags: novel.tags });
+          setLikedCount((prev) => prev + 1);
+        }
+      }
+    },
+    [novels]
+  );
+
   const handleReset = useCallback(() => {
     clearSwipeHistory();
     setLikedCount(0);
@@ -90,6 +104,7 @@ export default function SwipePage() {
         <SwipeStack
           novels={novels}
           onSwipe={handleSwipe}
+          onReadProgress={handleReadProgress}
           onReset={handleReset}
           likedCount={likedCount}
         />
