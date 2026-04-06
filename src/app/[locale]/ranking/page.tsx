@@ -2,7 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { fetchRankedNovels } from "@/lib/data";
 import GenreBadge from "@/components/common/GenreBadge";
-import { GENRE_KEYS } from "@/components/common/GenreBadge";
+import { GENRE_KEYS } from "@/lib/constants";
 import StatusBadge from "@/components/common/StatusBadge";
 // PV表示は初期段階では非表示（データ蓄積後に復活）
 

@@ -2,11 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
-// ジャンルキー一覧（サーバーコンポーネントからの参照用）
-export const GENRE_KEYS = [
-  "fantasy", "romance", "villainess", "horror", "mystery",
-  "scifi", "drama", "comedy", "action", "other",
-] as const;
+// 後方互換: サーバーコンポーネントからは @/lib/constants を使うこと
+export { GENRE_KEYS } from "@/lib/constants";
 
 export default function GenreBadge({ genre }: { genre: string }) {
   const t = useTranslations("genre");

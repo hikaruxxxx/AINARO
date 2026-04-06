@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { fetchNovelsByGenre } from "@/lib/data";
-import { GENRE_KEYS } from "@/components/common/GenreBadge";
+import { GENRE_KEYS } from "@/lib/constants";
 import GenreBadge from "@/components/common/GenreBadge";
 import StatusBadge from "@/components/common/StatusBadge";
 import { formatCharCount, formatRelativeTime } from "@/lib/utils/format";
