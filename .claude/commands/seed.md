@@ -43,6 +43,8 @@ content/works/{slug}/
 ├── _reader_knowledge.md
 ├── _tension_curve.md
 ├── _dramatic_irony.md
+├── _pipeline_state.md    # パイプライン状態管理
+├── _timeline.md          # 作中時間軸管理
 └── _world_state/         # （空。生成開始後に使う）
 ```
 
@@ -120,6 +122,81 @@ content/works/{slug}/
 - キャラが隠している秘密
 - 物語の核心的な真実
 
+#### 3-11. _pipeline_state.md（パイプライン状態管理）
+
+自律オーケストレータがエピソードの生成→校正→公開を自動管理するための状態ファイル。
+
+```markdown
+# Pipeline State: {slug}
+
+## Config
+- auto_publish: true
+- max_daily_publish: 2
+- min_grade: B
+- target_episodes: {想定話数}
+
+## Episodes
+
+| ep | status | grade | score | retries | updated |
+|----|--------|-------|-------|---------|---------|
+| 1 | planned | - | - | 0 | - |
+
+## Queue
+- publish_queue: []
+- exception_review: []
+- next_action: generate ep1
+```
+
+**status の取りうる値:**
+- `planned`: プロット未生成
+- `plot_ready`: プロット生成済み、本文未生成
+- `generating`: 生成中（排他ロック中）
+- `drafted`: 本文生成済み、校正前
+- `proofreading`: 校正中
+- `approved`: 品質ゲート通過、公開待ち
+- `published`: 公開済み
+- `auto_fixing`: 自動修正中（grade C）
+- `regen`: 再生成中（grade D、最大2回）
+- `exception_review`: 人間レビュー待ち
+
+#### 3-12. _timeline.md（作中時間軸管理）
+
+物語内の時間経過を明示的に管理し、季節・日付の矛盾を防止する。
+
+```markdown
+# Timeline: {slug}
+
+## 時間基準
+- 暦: {世界観に応じた暦の名称}
+- 開始: {物語開始時点の日付}
+- 1話あたりの平均経過: {推定}（日常: 1-3日、クライマックス: 1日以内）
+
+## 季節サイクル
+- 春: {月名/期間}
+- 夏: {月名/期間}
+- 秋: {月名/期間}
+- 冬: {月名/期間}
+
+## 固定イベント（物語開始前に確定しているもの）
+| 作中日付 | イベント | 関連アーク | 備考 |
+|---------|---------|-----------|------|
+| {日付} | {イベント名} | arc{N} | {補足} |
+
+## エピソード時系列
+| ep | 作中日付 | 経過日数 | 時間帯 | 季節 | 主要イベント |
+|----|---------|---------|--------|------|-------------|
+（第1話生成後に更新開始）
+
+## 制約メモ
+- {物語上の時間制約。例: 「卒業式は498年春」「聖女召喚は冬至」等}
+```
+
+**設計のポイント:**
+- 世界観が現実準拠なら西暦を使用。独自世界なら架空暦を定義
+- 季節サイクルと固定イベントは /seed 時点で埋める
+- エピソード時系列は /generate 時に自動追記される
+- 「固定イベント」はアーク設計時に逆算して配置する
+
 ### Step 4: 第1話のプロット自動生成確認
 
 _plot/episodes/ep001.md のプロットを確認表示:
@@ -147,6 +224,8 @@ slug: {slug}
   _foreshadowing_ledger.md ✓
   _reader_knowledge.md ✓
   _dramatic_irony.md ✓
+  _pipeline_state.md ✓
+  _timeline.md ✓
 
 次のステップ:
   /generate {slug}     → 第1話を生成

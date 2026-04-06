@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzePopularity } from "@/lib/agents/popularity-evaluation/analyzer";
-import type { PopularityGenre } from "@/types/agents";
+import type { PopularityGenre, LLMQualityScores } from "@/types/agents";
 
 const VALID_GENRES: PopularityGenre[] = [
   "fantasy",
@@ -19,7 +19,7 @@ const MIN_TEXT_LENGTH = 500;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { text, genre } = body;
+    const { text, genre, llmScores } = body;
 
     // テキストのバリデーション
     if (!text || typeof text !== "string") {
@@ -49,8 +49,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // LLMスコアのバリデーション（指定された場合のみ）
+    let validatedLLMScores: LLMQualityScores | undefined;
+    if (llmScores && typeof llmScores === "object") {
+      const axes = ["hook", "character", "originality", "prose", "tension", "pull"] as const;
+      const valid = axes.every(a => typeof llmScores[a] === "number" && llmScores[a] >= 1 && llmScores[a] <= 10);
+      if (valid) {
+        validatedLLMScores = llmScores as LLMQualityScores;
+      }
+    }
+
     // 分析実行
-    const result = analyzePopularity(trimmedText, genre as PopularityGenre | undefined);
+    const result = analyzePopularity(trimmedText, genre as PopularityGenre | undefined, validatedLLMScores);
 
     return NextResponse.json(result);
   } catch {

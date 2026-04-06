@@ -229,3 +229,55 @@ content/
 - 旧 `_plot.md` はそのまま残す（参照用）
 - `/generate` は `_plot/episodes/` を優先し、なければ旧 `_plot.md` にフォールバック
 - `_characters/` がなければ `_settings.md` のキャラ情報を使用
+
+---
+
+## v3 拡張: 自律オーケストレーション + 動的コンテキスト（2026-04-06追加）
+
+v2のコマンド体系を維持しつつ、以下の3レイヤーを追加。
+
+### 拡張1: 自律オーケストレータ（_pipeline_state.md）
+
+各作品に `_pipeline_state.md` を追加。エピソードごとの状態を管理し、`/daily` がステートマシンとして自動的に次アクションを決定する。
+
+**状態遷移:**
+```
+planned → plot_ready → generating → drafted → proofreading
+  → approved → published
+  → auto_fixing → (approved | exception_review)
+  → regen(max 2) → (drafted | exception_review)
+```
+
+**優先度ルール:**
+1. exception_review > 3件の作品 → 新規生成停止
+2. publish_queue が空の作品 → 最優先で生成
+3. 中途状態のエピソードを先に完了
+4. 読者指標が高い作品を優先
+
+### 拡張2: 動的コンテキストプロファイル
+
+話の性質に応じて、コンテキストバジェット配分を自動最適化。
+
+| プロファイル | 判定条件 | L3の重点 |
+|---|---|---|
+| `climax` | テンション★5、決戦・告白 | キャラ状態+伏線を拡大 |
+| `daily_life` | テンション★1-2、日常 | 世界観描写を拡大 |
+| `revelation` | 真相判明、伏線回収3件+ | 伏線+読者既知+アイロニーを最大化 |
+| `arc_transition` | アーク転換点 | ワールドステート+キャラ+タイムライン拡大 |
+| `balanced` | デフォルト | 均等配分 |
+
+### 拡張3: 追加ファイル
+
+| ファイル | 用途 | 更新タイミング |
+|---|---|---|
+| `_pipeline_state.md` | エピソード状態管理 | 毎アクション後 |
+| `_timeline.md` | 作中時間軸 | 毎話生成後 |
+| `_world_state/ep{N}_delta.md` | 前話からの差分コンテキスト | 毎話生成後 |
+| 伏線台帳の `tags` フィールド | セマンティック検索用キーワード | 伏線設置時 |
+
+### v2→v3 移行
+
+1. 既存作品に `_pipeline_state.md` を追加（既存epは `published` として初期化）
+2. 既存作品に `_timeline.md` を追加（既存epの時系列を復元）
+3. 既存伏線に `tags` を後付けで付与
+4. `/daily` のステートマシンモードが自動的に有効化される

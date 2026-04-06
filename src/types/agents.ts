@@ -47,12 +47,23 @@ export interface PopularityEvaluationResult {
   summary: string; // 日本語の総評
 }
 
-// PV予測（globalPoint回帰モデル）
+// PV予測（globalPoint回帰モデル v3）
 export interface PVPrediction {
   predictedGP: number; // 予測globalPoint
-  confidenceRange: { low: number; high: number }; // 予測区間（4倍誤差を反映）
+  confidenceRange: { low: number; high: number }; // 予測区間
   tier: "top" | "upper" | "mid" | "lower" | "bottom"; // 予測tier
   detail: string;
+  hasLLMScores: boolean; // LLM特徴量込みかどうか
+}
+
+// LLM品質スコア（6軸、各1-10）
+export interface LLMQualityScores {
+  hook: number;        // 冒頭の衝撃度
+  character: number;   // キャラの声の独自性
+  originality: number; // 設定・展開の独自性
+  prose: number;       // 文章力
+  tension: number;     // 緊張感の持続
+  pull: number;        // 続きを読みたいか
 }
 
 // 人気評価のジャンル

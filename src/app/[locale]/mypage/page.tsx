@@ -3,7 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
-import { getAllReadingHistory } from "@/lib/reading-history";
+import { getAllReadingHistory, type ReadingHistoryEntry } from "@/lib/reading-history";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 type NovelInfo = {
@@ -30,30 +30,69 @@ export default function MyPage() {
   useEffect(() => {
     async function loadHistory() {
       const readHistory = getAllReadingHistory();
-      const novelIds = Object.keys(readHistory);
 
-      if (novelIds.length === 0) {
+      if (readHistory.length === 0) {
         setLoading(false);
         return;
       }
 
-      const res = await fetch("/api/novels/batch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: novelIds }),
-      });
-      const { novels } = await res.json() as { novels: NovelInfo[] };
+      // リッチデータ（slug付き）がある場合はAPIコール不要
+      const richEntries = readHistory.filter((e) => e.slug);
+      const poorEntries = readHistory.filter((e) => !e.slug);
 
-      const entries: HistoryEntry[] = [];
-      for (const novel of novels) {
-        const lastRead = readHistory[novel.id];
-        entries.push({
-          novel,
-          lastReadEpisode: lastRead,
-          hasUnread: lastRead < novel.total_chapters,
-        });
+      const entries: HistoryEntry[] = richEntries.map((e) => ({
+        novel: {
+          id: e.novelId,
+          slug: e.slug,
+          title: e.title,
+          cover_image_url: e.coverImageUrl,
+          total_chapters: e.totalChapters,
+          latest_chapter_at: null,
+        },
+        lastReadEpisode: e.lastEpisode,
+        hasUnread: e.lastEpisode < e.totalChapters,
+      }));
+
+      // メタデータがない旧形式エントリはAPIで補完
+      if (poorEntries.length > 0) {
+        try {
+          const res = await fetch("/api/novels/batch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids: poorEntries.map((e) => e.novelId) }),
+          });
+          const { novels } = await res.json() as { novels: NovelInfo[] };
+
+          for (const novel of novels) {
+            const entry = poorEntries.find((e) => e.novelId === novel.id);
+            if (entry) {
+              entries.push({
+                novel,
+                lastReadEpisode: entry.lastEpisode,
+                hasUnread: entry.lastEpisode < novel.total_chapters,
+              });
+            }
+          }
+        } catch {
+          // APIエラー時は旧データもそのまま表示
+          for (const e of poorEntries) {
+            entries.push({
+              novel: {
+                id: e.novelId,
+                slug: e.slug || e.novelId,
+                title: e.title || e.novelId,
+                cover_image_url: null,
+                total_chapters: e.totalChapters,
+                latest_chapter_at: null,
+              },
+              lastReadEpisode: e.lastEpisode,
+              hasUnread: false,
+            });
+          }
+        }
       }
 
+      // 未読ありを優先
       entries.sort((a, b) => {
         if (a.hasUnread !== b.hasUnread) return a.hasUnread ? -1 : 1;
         return 0;

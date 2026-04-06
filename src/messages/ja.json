@@ -19,7 +19,7 @@
   },
   "bottomNav": {
     "home": "ホーム",
-    "new": "新着",
+    "discover": "発見",
     "novels": "作品",
     "mypage": "マイページ"
   },
@@ -39,6 +39,31 @@
     "serial": "連載中",
     "complete": "完結",
     "hiatus": "休止"
+  },
+  "discover": {
+    "loading": "作品を読み込み中...",
+    "episode1": "第1話",
+    "episodes": "話",
+    "readNow": "読んでみる",
+    "details": "詳細",
+    "swipeHint": "↑ スワイプで次の作品",
+    "endOfFeed": "すべての作品を見ました",
+    "browseAll": "作品一覧を見る →"
+  },
+  "home": {
+    "continueReading": "続きを読む",
+    "continueFromEp": "第{ep}話から",
+    "forYou": "あなたへのおすすめ",
+    "highlyRated": "読者が夢中になった作品",
+    "bingeWorthy": "一気読みにおすすめ",
+    "allNovels": "全作品",
+    "viewAll": "すべて見る →",
+    "completionBadge": "読了率 {rate}%",
+    "nextEpBadge": "続読率 {rate}%",
+    "onboardingTitle": "どんな小説が好きですか？",
+    "onboardingSubtitle": "好きなジャンルを選ぶと、あなたに合った作品をおすすめします",
+    "onboardingSkip": "スキップ",
+    "onboardingStart": "はじめる"
   },
   "novel": {
     "episodes": "{count}話",

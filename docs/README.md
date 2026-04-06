@@ -11,9 +11,13 @@
 - **[web_specification.md](web_specification.md)** — Web設計仕様書。Phase 0-1 MVPの技術仕様・DB設計・ページ設計・API設計
 
 ### AI生成アーキテクチャ
+- **[generation_guidelines.md](generation_guidelines.md)** — 生成ガイドライン（実務指示書）。/generate, /seed, /batch が参照する、タイトル・あらすじ・本文・キーワード・ジャンル・品質ゲートの具体的な設計ルール
 - **[ai_pipeline_design.md](ai_pipeline_design.md)** — 運用設計書（上位文書）。生成→品質管理→配信→計測→改善の全サイクル
 - **[ai_generation_architecture.md](ai_generation_architecture.md)** — Phase 0 生成アーキテクチャ。Markdown + Claude、月100話規模
 - **[generation_architecture_v2.md](generation_architecture_v2.md)** — Phase 2 生成アーキテクチャ。AIプロット自動生成、月5,000-10,000話規模
+
+### 品質予測・データ分析
+- **[quality_prediction_analysis.md](quality_prediction_analysis.md)** — 品質予測モデル分析レポート。なろう3,793作品のあらすじ+264作品の本文LLM評価に基づく、gP予測モデル・ジャンル別成功パターン・AI生成への適用指針
 
 ### 市場分析
 - **[competitor_revenue_analysis.md](competitor_revenue_analysis.md)** — 競合4社（アルファポリス・カクヨム・なろう・エブリスタ）の収益モデル推定

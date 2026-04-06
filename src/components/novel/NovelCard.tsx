@@ -2,12 +2,22 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import type { Novel } from "@/types/novel";
+import type { Novel, NovelScore } from "@/types/novel";
 import GenreBadge from "@/components/common/GenreBadge";
 import StatusBadge from "@/components/common/StatusBadge";
+import QualityBadge from "@/components/novel/QualityBadge";
 import { formatCharCount } from "@/lib/utils/format";
 
-export default function NovelCard({ novel }: { novel: Novel }) {
+type Props = {
+  novel: Novel | NovelScore;
+};
+
+// NovelScoreかどうか判定
+function isNovelScore(n: Novel | NovelScore): n is NovelScore {
+  return "avg_completion_rate" in n;
+}
+
+export default function NovelCard({ novel }: Props) {
   const t = useTranslations("novel");
   const locale = useLocale();
 
@@ -30,6 +40,14 @@ export default function NovelCard({ novel }: { novel: Novel }) {
         <div className="flex flex-wrap items-center gap-2">
           <GenreBadge genre={novel.genre} />
           <StatusBadge status={novel.status} />
+          {isNovelScore(novel) && (
+            <QualityBadge
+              completionRate={novel.avg_completion_rate}
+              nextEpisodeRate={novel.avg_next_episode_rate}
+            />
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           {novel.tags.slice(0, 3).map((tag) => (
             <span key={tag} className="text-xs text-muted">#{tag}</span>
           ))}

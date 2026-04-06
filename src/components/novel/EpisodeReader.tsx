@@ -22,7 +22,7 @@ import {
 } from "@/lib/reading-settings";
 
 type Props = {
-  novel: Pick<Novel, "id" | "slug" | "title" | "total_chapters">;
+  novel: Pick<Novel, "id" | "slug" | "title" | "total_chapters" | "genre" | "cover_image_url">;
   currentEpisode: Episode;
   nextEpisode: Episode | null;
   currentNum: number;
@@ -61,7 +61,13 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
 
   // ローカル読書履歴に記録
   useEffect(() => {
-    markEpisodeRead(novel.id, currentNum);
+    markEpisodeRead(novel.id, currentNum, {
+      slug: novel.slug,
+      title: novel.title,
+      genre: novel.genre,
+      coverImageUrl: novel.cover_image_url,
+      totalChapters: novel.total_chapters,
+    });
   }, [novel.id, currentNum]);
 
   // 読書設定を読み込み

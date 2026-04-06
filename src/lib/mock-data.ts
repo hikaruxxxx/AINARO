@@ -2022,19 +2022,29 @@ export function getMockEpisodeById(episodeId: string) {
 }
 
 // 面白さスコア付きの小説一覧（モック版: PV順にフォールバック）
+// モック品質データ（作品IDごとのダミー読者行動指標）
+const MOCK_QUALITY: Record<string, { completion: number; next: number; bookmark: number }> = {
+  "novel-001": { completion: 88, next: 82, bookmark: 15 },
+  "novel-002": { completion: 75, next: 71, bookmark: 10 },
+  "novel-003": { completion: 92, next: 85, bookmark: 22 },
+};
+
 export function getMockRankedNovels(genre?: string, limit: number = 50) {
   let novels = MOCK_NOVELS;
   if (genre) novels = novels.filter((n) => n.genre === genre);
 
   return novels
-    .map((n) => ({
-      ...n,
-      recent_pv: n.total_pv,
-      avg_completion_rate: null,
-      avg_next_episode_rate: null,
-      avg_bookmark_rate: null,
-      score: n.total_pv, // データなし → PVのみ
-    }))
+    .map((n) => {
+      const q = MOCK_QUALITY[n.id] ?? { completion: 70, next: 65, bookmark: 8 };
+      return {
+        ...n,
+        recent_pv: n.total_pv,
+        avg_completion_rate: q.completion,
+        avg_next_episode_rate: q.next,
+        avg_bookmark_rate: q.bookmark,
+        score: n.total_pv + q.completion * 100 + q.next * 50,
+      };
+    })
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 }

@@ -19,7 +19,7 @@
   },
   "bottomNav": {
     "home": "Home",
-    "new": "New",
+    "discover": "Discover",
     "novels": "Novels",
     "mypage": "My Page"
   },
@@ -39,6 +39,31 @@
     "serial": "Ongoing",
     "complete": "Completed",
     "hiatus": "On Hiatus"
+  },
+  "discover": {
+    "loading": "Loading stories...",
+    "episode1": "Ep. 1:",
+    "episodes": " eps",
+    "readNow": "Start Reading",
+    "details": "Details",
+    "swipeHint": "↑ Swipe for next story",
+    "endOfFeed": "You've seen all stories",
+    "browseAll": "Browse All Novels →"
+  },
+  "home": {
+    "continueReading": "Continue Reading",
+    "continueFromEp": "From Ep. {ep}",
+    "forYou": "For You",
+    "highlyRated": "Readers Can't Put Down",
+    "bingeWorthy": "Binge-Worthy Completed Series",
+    "allNovels": "All Novels",
+    "viewAll": "View All →",
+    "completionBadge": "{rate}% finished",
+    "nextEpBadge": "{rate}% read on",
+    "onboardingTitle": "What kind of novels do you like?",
+    "onboardingSubtitle": "Pick your favorite genres and we'll recommend stories for you",
+    "onboardingSkip": "Skip",
+    "onboardingStart": "Let's Go"
   },
   "novel": {
     "episodes": "{count} eps",

@@ -2,6 +2,7 @@ import type {
   PopularityEvaluationResult,
   PopularityMetric,
   PopularityGenre,
+  LLMQualityScores,
 } from "@/types/agents";
 
 // ─── ユーティリティ ───
@@ -779,15 +780,18 @@ function generateSummary(
   return summary;
 }
 
-// ─── PV予測（リッジ回帰モデル） ───
+// ─── PV予測（リッジ回帰モデル v3） ───
 
 /**
- * 89作品のLOO-CVで検証済みのリッジ回帰モデル。
- * スピアマン0.459、ピアソン0.474。予測誤差中央値4倍。
- * 特徴量: 21個。ターゲット: log10(globalPoint)。lambda=100。
+ * 263作品で検証済みの品質予測モデル（v3）。
+ * 表層テキスト特徴量21個 + LLM特徴量6個 = 27特徴量。
+ * LLMスコアが提供されない場合は表層21特徴量のみで予測。
+ *
+ * フルモデル（交絡+表層+LLM）: Spearman=0.733
+ * 表層+LLM（交絡なし）: Spearman=0.415
  */
 
-// モデルの係数と標準化パラメータ（predict-pv.tsの出力から転記）
+// モデルの係数と標準化パラメータ（quality-prediction-v3.jsonから転記）
 const PV_MODEL = {
   featureNames: [
     "avgSentenceLen", "sentenceLenCV", "shortSentenceRatio", "longSentenceRatio",
@@ -795,41 +799,52 @@ const PV_MODEL = {
     "dialogueRatio", "innerMonologueRatio", "narrativeRatio", "emotionDensity",
     "uniqueEmotionRatio", "questionRatio", "exclamationRatio", "commaPerSentence",
     "bigramTTR", "kanjiRatio", "katakanaRatio", "hiraganaRatio", "conjDensity",
+    "llm_hook", "llm_character", "llm_originality", "llm_prose", "llm_tension", "llm_pull",
   ],
-  // 特徴量の平均・標準偏差（標準化用）
+  // 表層21 + LLM6 = 27特徴量の平均・標準偏差
   featureStats: [
-    { mean: 31.2076, std: 8.1853 }, // avgSentenceLen
-    { mean: 0.6288, std: 0.1167 },  // sentenceLenCV
-    { mean: 0.3459, std: 0.1145 },  // shortSentenceRatio
-    { mean: 0.0915, std: 0.065 },   // longSentenceRatio
-    { mean: 0.5626, std: 0.115 },   // medSentenceRatio
-    { mean: 0.6555, std: 0.0811 },  // burstRatio
-    { mean: 0.7048, std: 0.1906 },  // paragraphLenCV
-    { mean: 73.5, std: 32.5 },      // avgParagraphLen
-    { mean: 0.2507, std: 0.0973 },  // dialogueRatio
-    { mean: 0.0174, std: 0.0291 },  // innerMonologueRatio
-    { mean: 0.7319, std: 0.0964 },  // narrativeRatio
-    { mean: 0.2136, std: 0.0785 },  // emotionDensity
-    { mean: 0.5927, std: 0.2525 },  // uniqueEmotionRatio
-    { mean: 0.0878, std: 0.039 },   // questionRatio
-    { mean: 0.0712, std: 0.0536 },  // exclamationRatio
-    { mean: 1.1688, std: 0.3525 },  // commaPerSentence
-    { mean: 0.6843, std: 0.0579 },  // bigramTTR
-    { mean: 0.2647, std: 0.0349 },  // kanjiRatio
-    { mean: 0.0461, std: 0.0224 },  // katakanaRatio
-    { mean: 0.4272, std: 0.0366 },  // hiraganaRatio
-    { mean: 2.4325, std: 0.8791 },  // conjDensity
+    { mean: 29.360765, std: 6.598766 },  // avgSentenceLen
+    { mean: 0.650309, std: 0.138606 },   // sentenceLenCV
+    { mean: 0.392336, std: 0.130959 },   // shortSentenceRatio
+    { mean: 0.138871, std: 0.090108 },   // longSentenceRatio
+    { mean: 0.468794, std: 0.10548 },    // medSentenceRatio
+    { mean: 0.664887, std: 0.119684 },   // burstRatio
+    { mean: 0.645754, std: 0.143579 },   // paragraphLenCV
+    { mean: 38.702359, std: 12.957992 }, // avgParagraphLen
+    { mean: 0.211923, std: 0.155084 },   // dialogueRatio
+    { mean: 0.017303, std: 0.044983 },   // innerMonologueRatio
+    { mean: 0.770774, std: 0.15408 },    // narrativeRatio
+    { mean: 1.767171, std: 1.143647 },   // emotionDensity
+    { mean: 0.927757, std: 0.25889 },    // uniqueEmotionRatio
+    { mean: 0.094626, std: 0.080383 },   // questionRatio
+    { mean: 0.098737, std: 0.094014 },   // exclamationRatio
+    { mean: 0.805873, std: 0.324835 },   // commaPerSentence
+    { mean: 0.616589, std: 0.087156 },   // bigramTTR
+    { mean: 0.267104, std: 0.034591 },   // kanjiRatio
+    { mean: 0.084996, std: 0.060914 },   // katakanaRatio
+    { mean: 0.545811, std: 0.075974 },   // hiraganaRatio
+    { mean: 3.939106, std: 1.87841 },    // conjDensity
+    { mean: 4.923954, std: 1.757633 },   // llm_hook
+    { mean: 4.51711, std: 1.633389 },    // llm_character
+    { mean: 4.273764, std: 1.648007 },   // llm_originality
+    { mean: 4.847909, std: 1.63832 },    // llm_prose
+    { mean: 4.437262, std: 1.691755 },   // llm_tension
+    { mean: 4.973384, std: 1.875207 },   // llm_pull
   ],
-  targetMean: 4.0648,
-  targetStd: 1.7042,
-  // リッジ回帰係数（lambda=100）
+  targetMean: 3.998342,
+  targetStd: 1.283506,
+  // リッジ回帰係数（lambda=10、27特徴量）
   coefficients: [
-    -0.0137, -0.0755, -0.0902, 0.0154, 0.1176,
-    -0.0674, -0.0928, 0.0266, -0.0545, 0.0733,
-    0.0302, -0.0458, -0.0699, -0.0592, 0.0008,
-    0.0144, 0.0004, 0.0486, -0.0462, 0.0240,
-    -0.0935,
+    0.080298, -0.208103, -0.02543, 0.016909, 0.017128,
+    0.09273, 0.062229, -0.013566, -0.086758, 0.119524,
+    0.052429, 0.150001, -0.092451, -0.092982, -0.031234,
+    -0.062243, -0.107898, 0.066902, 0.080742, -0.082983,
+    0.036322,
+    // LLM特徴量の係数
+    0.143323, 0.100891, -0.203825, 0.0962, -0.08448, 0.273706,
   ],
+  // 表層のみで予測する場合の特徴量数
+  textOnlyFeatureCount: 21,
 };
 
 /** テキストからPV予測用の特徴量を抽出 */
@@ -900,12 +915,19 @@ function extractPVFeatures(text: string): number[] | null {
 const POSITIVE_EMO = ["嬉しい", "嬉し", "喜び", "幸せ", "楽しい", "好き", "愛し", "感動", "ときめ", "安心", "微笑", "笑顔", "笑い", "笑っ"];
 const NEGATIVE_EMO = ["悲しい", "悲し", "泣い", "涙", "辛い", "苦しい", "痛い", "怖い", "恐怖", "不安", "心配", "焦っ", "怒り", "怒っ", "悔し", "絶望", "寂し"];
 
-/** PV（globalPoint）を予測する */
-function predictPV(text: string): { predictedGP: number; confidenceRange: { low: number; high: number }; tier: "top" | "upper" | "mid" | "lower" | "bottom"; detail: string } {
-  const features = extractPVFeatures(text);
-  if (!features) {
-    return { predictedGP: 0, confidenceRange: { low: 0, high: 0 }, tier: "mid" as const, detail: "テキストが短すぎて予測不能" };
+/** PV（globalPoint）を予測する。LLMスコアがあれば精度向上 */
+function predictPV(text: string, llmScores?: LLMQualityScores): { predictedGP: number; confidenceRange: { low: number; high: number }; tier: "top" | "upper" | "mid" | "lower" | "bottom"; detail: string; hasLLMScores: boolean } {
+  const textFeatures = extractPVFeatures(text);
+  if (!textFeatures) {
+    return { predictedGP: 0, confidenceRange: { low: 0, high: 0 }, tier: "mid" as const, detail: "テキストが短すぎて予測不能", hasLLMScores: false };
   }
+
+  // LLMスコアがあれば27特徴量、なければ表層21特徴量のみ
+  const hasLLM = !!llmScores;
+  const features = hasLLM
+    ? [...textFeatures, llmScores.hook, llmScores.character, llmScores.originality, llmScores.prose, llmScores.tension, llmScores.pull]
+    : textFeatures;
+  const featureCount = hasLLM ? PV_MODEL.featureNames.length : PV_MODEL.textOnlyFeatureCount;
 
   // 標準化
   const standardized = features.map((v, i) => {
@@ -915,7 +937,7 @@ function predictPV(text: string): { predictedGP: number; confidenceRange: { low:
 
   // 予測（標準化空間）
   let predStd = 0;
-  for (let i = 0; i < standardized.length; i++) {
+  for (let i = 0; i < featureCount; i++) {
     predStd += standardized[i] * PV_MODEL.coefficients[i];
   }
 
@@ -923,9 +945,10 @@ function predictPV(text: string): { predictedGP: number; confidenceRange: { low:
   const predLog = predStd * PV_MODEL.targetStd + PV_MODEL.targetMean;
   const predictedGP = Math.round(Math.pow(10, predLog));
 
-  // 信頼区間（RMSE 1.129 → 約4倍の誤差を反映）
-  const low = Math.round(Math.pow(10, predLog - 1.129));
-  const high = Math.round(Math.pow(10, predLog + 1.129));
+  // 信頼区間（RMSE 1.17）
+  const rmse = 1.17;
+  const low = Math.round(Math.pow(10, predLog - rmse));
+  const high = Math.round(Math.pow(10, predLog + rmse));
 
   // tier推定
   let tier: "top" | "upper" | "mid" | "lower" | "bottom";
@@ -935,9 +958,10 @@ function predictPV(text: string): { predictedGP: number; confidenceRange: { low:
   else if (predictedGP >= 5000) tier = "lower";
   else tier = "bottom";
 
-  const detail = `予測globalPoint: ${predictedGP.toLocaleString()}（${low.toLocaleString()}〜${high.toLocaleString()}）。${tier} tier相当`;
+  const llmNote = hasLLM ? "（LLM特徴量込み）" : "（表層特徴量のみ）";
+  const detail = `予測globalPoint: ${predictedGP.toLocaleString()}（${low.toLocaleString()}〜${high.toLocaleString()}）。${tier} tier相当${llmNote}`;
 
-  return { predictedGP, confidenceRange: { low, high }, tier, detail };
+  return { predictedGP, confidenceRange: { low, high }, tier, detail, hasLLMScores: hasLLM };
 }
 
 // ─── メインの分析関数 ───
@@ -949,7 +973,8 @@ function predictPV(text: string): { predictedGP: number; confidenceRange: { low:
  */
 export function analyzePopularity(
   text: string,
-  genre?: PopularityGenre
+  genre?: PopularityGenre,
+  llmScores?: LLMQualityScores,
 ): PopularityEvaluationResult {
   // 各指標を分析
   const metrics = {
@@ -963,8 +988,8 @@ export function analyzePopularity(
     readability: analyzeReadability(text),
   };
 
-  // PV予測
-  const pvPrediction = predictPV(text);
+  // PV予測（LLMスコアがあれば精度向上: Spearman 0.415→0.733）
+  const pvPrediction = predictPV(text, llmScores);
 
   // ジャンル別の重み付けで総合スコアを計算
   const weights = getGenreWeights(genre);

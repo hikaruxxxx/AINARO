@@ -57,7 +57,7 @@ export default async function EpisodeReaderPage({ params }: Props) {
 
   return (
     <EpisodeReader
-      novel={{ id: novel.id, slug: novel.slug, title: novel.title, total_chapters: novel.total_chapters }}
+      novel={{ id: novel.id, slug: novel.slug, title: novel.title, total_chapters: novel.total_chapters, genre: novel.genre, cover_image_url: novel.cover_image_url }}
       currentEpisode={currentEp}
       nextEpisode={nextEp}
       currentNum={num}

@@ -57,3 +57,12 @@ body {
     line-height: 1.9;
   }
 }
+
+/* 横スクロールセクション用スクロールバー非表示 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
