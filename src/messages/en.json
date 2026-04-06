@@ -19,6 +19,7 @@
   },
   "bottomNav": {
     "home": "Home",
+    "recommend": "For You",
     "discover": "Discover",
     "novels": "Novels",
     "mypage": "My Page"
@@ -39,6 +40,15 @@
     "serial": "Ongoing",
     "complete": "Completed",
     "hiatus": "On Hiatus"
+  },
+  "recommend": {
+    "title": "For You",
+    "loading": "Loading recommendations...",
+    "basedOnHistory": "Based on your reading history",
+    "basedOnTaste": "Based on your genre preferences",
+    "noRecommendations": "No recommendations yet",
+    "tryDiscover": "Discover stories →",
+    "endOfFeed": "You've seen all recommendations"
   },
   "discover": {
     "loading": "Loading stories...",
@@ -140,6 +150,15 @@
     "dataManagementDesc": "Your reading history is saved in this browser's local storage.",
     "deleteHistory": "Delete Reading History",
     "deleteConfirm": "Delete all reading history? This action cannot be undone."
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search by title, tag, or keyword...",
+    "resultCount": "Results for \"{query}\": {count}",
+    "noResults": "No matching novels found.",
+    "noResultsHint": "Try a different keyword.",
+    "idle": "Search for novels by keyword",
+    "idleHint": "Search by title, tag, or synopsis."
   },
   "notFound": {
     "title": "Page Not Found",
@@ -273,5 +292,19 @@
     "a8Body": "This site may modify these Terms as needed. Modified terms take effect when published on the Service. Continued use of the Service after modification constitutes acceptance of the modified terms.",
     "a9Title": "Article 9 (Governing Law & Jurisdiction)",
     "a9Body": "These Terms shall be governed by the laws of Japan. Any disputes arising from the Service shall be subject to the exclusive jurisdiction of the court having jurisdiction over the operator's location as the court of first instance."
+  },
+  "swipe": {
+    "title": "Swipe to Discover",
+    "subtitle": "Swipe right → Interested / Swipe left → Skip",
+    "interested": "Interested",
+    "skip": "Skip",
+    "loading": "Loading stories...",
+    "empty": "You've checked all stories!",
+    "emptySubtitle": "Stay tuned for new releases",
+    "resetSwipes": "Swipe again",
+    "goToRecommend": "View recommendations →",
+    "goToDiscover": "Browse all novels →",
+    "likedCount": "Interested in {count} stories",
+    "hint": "← → Swipe to choose"
   }
 }

@@ -22,7 +22,7 @@ export default function Header() {
   ];
 
   // 発見・おすすめページでは非表示
-  if (pathname.startsWith("/discover") || pathname.startsWith("/recommend")) return null;
+  if (pathname.startsWith("/discover") || pathname.startsWith("/recommend") || pathname.startsWith("/swipe")) return null;
 
   const isReading = /^\/novels\/[^/]+\/\d+/.test(pathname);
   const isHome = pathname === "/" || pathname === "";

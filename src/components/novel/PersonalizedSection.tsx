@@ -7,6 +7,7 @@ import type { Novel } from "@/types/novel";
 import { getPersonalizedRecommendations } from "@/lib/recommendations";
 import { getAllReadingHistory } from "@/lib/reading-history";
 import { getTasteProfile } from "@/lib/taste-profile";
+import { getSwipeHistory } from "@/lib/swipe-history";
 import GenreBadge from "@/components/common/GenreBadge";
 
 type Props = {
@@ -27,7 +28,8 @@ export default function PersonalizedSection({ allNovels }: Props) {
         lastEpisode: h.lastEpisode,
         lastReadAt: h.updatedAt,
       }));
-      const recs = getPersonalizedRecommendations(allNovels, entries, 6);
+      const swipeHistory = getSwipeHistory();
+      const recs = getPersonalizedRecommendations(allNovels, entries, 6, swipeHistory);
       setRecommendations(recs);
     } else {
       // テイストプロファイルベース（オンボーディングで選んだジャンル）
