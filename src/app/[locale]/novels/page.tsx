@@ -5,6 +5,15 @@ import GenreBadge from "@/components/common/GenreBadge";
 import StatusBadge from "@/components/common/StatusBadge";
 import { formatCharCount, formatRelativeTime } from "@/lib/utils/format";
 
+const COVER_GRADIENTS = [
+  "from-indigo-500 to-purple-600",
+  "from-rose-500 to-orange-500",
+  "from-emerald-500 to-teal-600",
+  "from-sky-500 to-blue-600",
+  "from-amber-500 to-red-500",
+  "from-violet-500 to-fuchsia-600",
+];
+
 export const revalidate = 3600;
 
 export async function generateMetadata() {
@@ -21,45 +30,64 @@ export default async function NovelsPage() {
   const novels = await fetchNovels(locale);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-text">{t("pages.novelsList")}</h1>
+    <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
+      <h1 className="mb-2 text-2xl font-bold text-text">{t("pages.novelsList")}</h1>
+      <p className="mb-8 text-sm text-muted">{t("pages.novelsDescription")}</p>
 
       {novels.length === 0 ? (
-        <p className="py-12 text-center text-muted">{t("novel.noNovels")}</p>
+        <div className="flex flex-col items-center justify-center py-20">
+          <span className="mb-4 text-5xl">📖</span>
+          <p className="text-muted">{t("novel.noNovels")}</p>
+        </div>
       ) : (
-        <ul className="divide-y divide-border">
-          {novels.map((novel) => (
-            <li key={novel.id}>
-              <Link
-                href={`/novels/${novel.slug}`}
-                className="flex gap-4 py-4 transition hover:bg-surface"
-              >
-                <div className="h-24 w-16 flex-shrink-0 rounded-md bg-surface flex items-center justify-center overflow-hidden">
-                  {novel.cover_image_url ? (
-                    <img src={novel.cover_image_url} alt={novel.title} className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-2xl text-muted">📖</span>
-                  )}
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <h2 className="truncate font-bold text-text">{novel.title}</h2>
-                  {novel.tagline && <p className="truncate text-xs text-muted">{novel.tagline}</p>}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <GenreBadge genre={novel.genre} />
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {novels.map((novel, i) => (
+            <Link
+              key={novel.id}
+              href={`/novels/${novel.slug}`}
+              className="group flex flex-col"
+            >
+              {/* カバー */}
+              <div className="relative mb-3 aspect-[2/3] w-full overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-lg group-hover:ring-black/10 group-hover:-translate-y-1">
+                {novel.cover_image_url ? (
+                  <img
+                    src={novel.cover_image_url}
+                    alt={novel.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${COVER_GRADIENTS[i % COVER_GRADIENTS.length]}`}>
+                    <span className="px-3 text-center text-sm font-bold leading-tight text-white/90 line-clamp-3">
+                      {novel.title}
+                    </span>
+                  </div>
+                )}
+                {/* オーバーレイ情報 */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2.5">
+                  <div className="flex items-center gap-1.5">
                     <StatusBadge status={novel.status} />
-                  </div>
-                  <div className="flex flex-wrap gap-3 text-xs text-muted">
-                    <span>{t("novel.episodes", { count: novel.total_chapters })}</span>
-                    <span>{formatCharCount(novel.total_characters, locale)}</span>
-                    {novel.latest_chapter_at && (
-                      <span>{t("novel.update", { time: formatRelativeTime(novel.latest_chapter_at, locale) })}</span>
-                    )}
+                    <span className="text-[10px] text-white/80">
+                      {t("novel.episodes", { count: novel.total_chapters })}
+                    </span>
                   </div>
                 </div>
-              </Link>
-            </li>
+              </div>
+
+              {/* テキスト情報 */}
+              <h2 className="mb-0.5 text-sm font-medium leading-tight text-text line-clamp-2 transition-colors group-hover:text-primary">
+                {novel.title}
+              </h2>
+              <div className="flex items-center gap-1.5">
+                <GenreBadge genre={novel.genre} />
+              </div>
+              {novel.latest_chapter_at && (
+                <span className="mt-0.5 text-[11px] text-muted">
+                  {t("novel.update", { time: formatRelativeTime(novel.latest_chapter_at, locale) })}
+                </span>
+              )}
+            </Link>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
