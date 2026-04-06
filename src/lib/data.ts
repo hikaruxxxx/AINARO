@@ -57,7 +57,10 @@ export async function fetchNovels(locale: string = "ja"): Promise<Novel[]> {
     .select("*")
     .order("latest_chapter_at", { ascending: false, nullsFirst: false })
     .limit(20);
-  return ((data as Novel[]) || []).map((n) => localizeNovel(n, locale));
+  const novels = (data as Novel[]) || [];
+  // DBが空の場合はモックデータにフォールバック
+  if (novels.length === 0) return getMockNovels().map((n) => localizeNovel(n, locale));
+  return novels.map((n) => localizeNovel(n, locale));
 }
 
 // 小説（slug指定）
@@ -73,7 +76,12 @@ export async function fetchNovelBySlug(slug: string, locale: string = "ja"): Pro
     .select("*")
     .eq("slug", slug)
     .single();
-  return data ? localizeNovel(data as Novel, locale) : null;
+  // DBにない場合はモックデータにフォールバック
+  if (!data) {
+    const mock = getMockNovelBySlug(slug);
+    return mock ? localizeNovel(mock, locale) : null;
+  }
+  return localizeNovel(data as Novel, locale);
 }
 
 // 小説（id指定）
@@ -86,7 +94,8 @@ export async function fetchNovelById(id: string): Promise<Novel | null> {
     .select("*")
     .eq("id", id)
     .single();
-  return (data as Novel) || null;
+  // DBにない場合はモックデータにフォールバック
+  return (data as Novel) || getMockNovelById(id);
 }
 
 // エピソード一覧
@@ -99,7 +108,10 @@ export async function fetchEpisodes(novelId: string, locale: string = "ja"): Pro
     .select("*")
     .eq("novel_id", novelId)
     .order("episode_number", { ascending: true });
-  return ((data as Episode[]) || []).map((e) => localizeEpisode(e, locale));
+  const episodes = (data as Episode[]) || [];
+  // DBが空の場合はモックデータにフォールバック
+  if (episodes.length === 0) return getMockEpisodes(novelId).map((e) => localizeEpisode(e, locale));
+  return episodes.map((e) => localizeEpisode(e, locale));
 }
 
 // 目次用エピソード一覧（body_mdを含まない軽量版、ページネーション対応）
@@ -175,9 +187,10 @@ export async function fetchEpisode(
       .eq("novel_id", novelId)
       .eq("episode_number", episodeNumber)
       .single();
-    return (fallback as Episode) || null;
+    // DBにもない場合はモックデータにフォールバック
+    return (fallback as Episode) || getMockEpisode(novelId, episodeNumber);
   }
-  return (data as Episode) || null;
+  return (data as Episode) || getMockEpisode(novelId, episodeNumber);
 }
 
 // エピソード（id指定）
@@ -199,9 +212,9 @@ export async function fetchEpisodeById(
       .select("*")
       .eq("id", episodeId)
       .single();
-    return (fallback as Episode) || null;
+    return (fallback as Episode) || getMockEpisodeById(episodeId);
   }
-  return (data as Episode) || null;
+  return (data as Episode) || getMockEpisodeById(episodeId);
 }
 
 // 面白さスコア順の小説一覧（トップページ・ランキング用）
@@ -228,7 +241,10 @@ export async function fetchRankedNovels(options?: {
   }
 
   const { data } = await query;
-  return ((data as NovelScore[]) || []).map((n) => localizeNovel(n, locale) as NovelScore);
+  const novels = (data as NovelScore[]) || [];
+  // DBが空の場合はモックデータにフォールバック
+  if (novels.length === 0) return getMockRankedNovels(options?.genre, limit).map((n) => localizeNovel(n, locale) as NovelScore);
+  return novels.map((n) => localizeNovel(n, locale) as NovelScore);
 }
 
 // 関連作品（同ジャンル・タグ重複で類似度計算）
@@ -276,7 +292,8 @@ export async function fetchRecentEpisodes(limit: number = 20, locale: string = "
     .order("published_at", { ascending: false })
     .limit(limit);
 
-  if (!data) return [];
+  // DBが空の場合はモックデータにフォールバック
+  if (!data || data.length === 0) return (getMockRecentEpisodes(limit) as RecentEpisode[]).map((e) => localizeEpisode(e, locale) as RecentEpisode);
   return data.map((ep: Record<string, unknown>) => {
     const novels = ep.novels as { title: string; slug: string };
     const episode = localizeEpisode(ep as unknown as Episode, locale);
@@ -298,7 +315,9 @@ export async function fetchNovelsByGenre(genreId: string, locale: string = "ja")
     .select("*")
     .eq("genre", genreId)
     .order("total_pv", { ascending: false });
-  return ((data as Novel[]) || []).map((n) => localizeNovel(n, locale));
+  const novels = (data as Novel[]) || [];
+  if (novels.length === 0) return getMockNovelsByGenre(genreId).map((n) => localizeNovel(n, locale));
+  return novels.map((n) => localizeNovel(n, locale));
 }
 
 // タグ別小説一覧
@@ -311,7 +330,9 @@ export async function fetchNovelsByTag(tag: string, locale: string = "ja"): Prom
     .select("*")
     .contains("tags", [tag])
     .order("total_pv", { ascending: false });
-  return ((data as Novel[]) || []).map((n) => localizeNovel(n, locale));
+  const novels = (data as Novel[]) || [];
+  if (novels.length === 0) return getMockNovelsByTag(tag).map((n) => localizeNovel(n, locale));
+  return novels.map((n) => localizeNovel(n, locale));
 }
 
 // 検索（タイトル・タグ・あらすじのキーワード検索）
@@ -339,7 +360,16 @@ export async function searchNovels(query: string, locale: string = "ja"): Promis
     );
   }
   const { data } = await queryBuilder.order("total_pv", { ascending: false }).limit(50);
-  return ((data as Novel[]) || []).map((n) => localizeNovel(n, locale));
+  const novels = (data as Novel[]) || [];
+  if (novels.length === 0) {
+    return getMockNovels()
+      .filter((n) => {
+        const text = [n.title, n.title_en, n.tagline, n.synopsis, ...n.tags].filter(Boolean).join(" ").toLowerCase();
+        return q.split(/\s+/).every((word) => text.includes(word));
+      })
+      .map((n) => localizeNovel(n, locale));
+  }
+  return novels.map((n) => localizeNovel(n, locale));
 }
 
 // エピソード（範囲取得 — 閲覧ページで現在話+次話を取得）
