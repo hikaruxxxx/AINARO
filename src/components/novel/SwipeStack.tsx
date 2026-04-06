@@ -38,26 +38,26 @@ export default function SwipeStack({ novels, onSwipe, onReset, likedCount }: Swi
   if (currentIndex >= novels.length) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-8 text-center">
-        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white/10">
-          <svg className="h-10 w-10 text-white/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
+          <svg className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h2 className="mb-2 text-xl font-bold text-white">{t("empty")}</h2>
-        <p className="mb-2 text-sm text-white/60">{t("emptySubtitle")}</p>
-        <p className="mb-8 text-lg font-bold text-green-400">
+        <h2 className="mb-2 text-xl font-bold text-gray-900">{t("empty")}</h2>
+        <p className="mb-2 text-sm text-gray-500">{t("emptySubtitle")}</p>
+        <p className="mb-8 text-lg font-bold text-green-600">
           {t("likedCount", { count: likedCount })}
         </p>
         <div className="flex flex-col gap-3">
           <button
             onClick={onReset}
-            className="rounded-full bg-white/15 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/25"
+            className="rounded-full bg-gray-900 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
           >
             {t("resetSwipes")}
           </button>
           <Link
             href="/novels"
-            className="rounded-full border border-white/20 px-6 py-2.5 text-sm text-white/80 transition hover:bg-white/10"
+            className="rounded-full border border-gray-300 px-6 py-2.5 text-sm text-gray-600 transition hover:bg-gray-100"
           >
             {t("goToDiscover")}
           </Link>
@@ -91,13 +91,12 @@ export default function SwipeStack({ novels, onSwipe, onReset, likedCount }: Swi
         ))}
       </div>
 
-      {/* ボタン（デスクトップ + モバイルフォールバック） */}
+      {/* ボタン */}
       <div className="flex items-center justify-center gap-6 px-4 pb-8 pt-4">
-        {/* スキップ */}
         <button
           onClick={() => triggerSwipe("left")}
           disabled={isAnimating}
-          className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-red-400/50 text-red-400 transition hover:bg-red-400/10 active:scale-95 disabled:opacity-50"
+          className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-red-300 text-red-400 shadow-sm transition hover:bg-red-50 active:scale-95 disabled:opacity-50"
           aria-label={t("skip")}
         >
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -105,16 +104,14 @@ export default function SwipeStack({ novels, onSwipe, onReset, likedCount }: Swi
           </svg>
         </button>
 
-        {/* カウンター */}
-        <span className="text-xs text-white/40">
+        <span className="text-xs text-gray-400">
           {currentIndex + 1} / {novels.length}
         </span>
 
-        {/* 気になる */}
         <button
           onClick={() => triggerSwipe("right")}
           disabled={isAnimating}
-          className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-green-400/50 text-green-400 transition hover:bg-green-400/10 active:scale-95 disabled:opacity-50"
+          className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-green-300 text-green-500 shadow-sm transition hover:bg-green-50 active:scale-95 disabled:opacity-50"
           aria-label={t("interested")}
         >
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -123,8 +120,7 @@ export default function SwipeStack({ novels, onSwipe, onReset, likedCount }: Swi
         </button>
       </div>
 
-      {/* ヒント */}
-      <p className="pb-4 text-center text-xs text-white/30">
+      <p className="pb-4 text-center text-xs text-gray-400">
         {t("hint")}
       </p>
     </div>
