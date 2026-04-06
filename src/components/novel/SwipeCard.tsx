@@ -90,8 +90,8 @@ export default function SwipeCard({
         className="h-full overflow-y-auto overscroll-contain"
         {...(stackPosition === 0 ? handlers : {})}
       >
-        {/* ヒーローエリア（ビジュアル部分） */}
-        <div className="relative" style={{ minHeight: "70%" }}>
+        {/* ヒーローエリア（ビジュアル部分 — カード全体と同じ高さ） */}
+        <div className="relative" style={{ minHeight: "100%" }}>
           {/* 背景 */}
           {novel.cover_image_url ? (
             <img
@@ -126,7 +126,7 @@ export default function SwipeCard({
           )}
 
           {/* 作品情報 */}
-          <div className="relative flex min-h-[70vh] flex-col justify-end p-6">
+          <div className="relative flex min-h-full flex-col justify-end p-6">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <GenreBadge genre={novel.genre} />
               {novel.tags.slice(0, 3).map((tag) => (
