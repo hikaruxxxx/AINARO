@@ -61,6 +61,10 @@
     "browseAll": "作品一覧を見る →"
   },
   "home": {
+    "heroTitle": "もっと面白い小説を、すべての人に",
+    "heroSubtitle": "面白さで選ばれた小説だけが並ぶ場所。読むのも、書くのも、ここから。",
+    "heroReadCTA": "作品を読む",
+    "heroWriteCTA": "作品を書く",
     "continueReading": "続きを読む",
     "continueFromEp": "第{ep}話から",
     "forYou": "あなたへのおすすめ",

@@ -61,6 +61,10 @@
     "browseAll": "Browse All Novels →"
   },
   "home": {
+    "heroTitle": "Discover Stories Worth Reading",
+    "heroSubtitle": "Where only the best stories rise to the top. Read or write — start here.",
+    "heroReadCTA": "Read Stories",
+    "heroWriteCTA": "Start Writing",
     "continueReading": "Continue Reading",
     "continueFromEp": "From Ep. {ep}",
     "forYou": "For You",
