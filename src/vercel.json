@@ -1,0 +1,24 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/daily-aggregate",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/compute-signals",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/extract-patterns",
+      "schedule": "0 5 * * 0"
+    },
+    {
+      "path": "/api/cron/judge-ab-tests",
+      "schedule": "0 6 * * 0"
+    },
+    {
+      "path": "/api/cron/update-patterns",
+      "schedule": "0 7 * * 0"
+    }
+  ]
+}

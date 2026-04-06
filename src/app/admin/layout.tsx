@@ -60,6 +60,12 @@ export default async function AdminLayout({
           <Link href="/admin/retention" className="text-muted hover:text-text transition">
             離脱分析
           </Link>
+          <Link href="/admin/learning-loop" className="text-muted hover:text-text transition">
+            学習ループ
+          </Link>
+          <Link href="/admin/patterns" className="text-muted hover:text-text transition">
+            パターン
+          </Link>
         </nav>
       </div>
       {children}
