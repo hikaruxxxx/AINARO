@@ -780,71 +780,101 @@ function generateSummary(
   return summary;
 }
 
-// ─── PV予測（リッジ回帰モデル v3） ───
+// ─── PV予測（リッジ回帰モデル v7） ───
 
 /**
- * 263作品で検証済みの品質予測モデル（v3）。
- * 表層テキスト特徴量21個 + LLM特徴量6個 = 27特徴量。
- * LLMスコアが提供されない場合は表層21特徴量のみで予測。
+ * 1,290作品（表層）/ 264作品（LLM込み）で訓練済みの品質予測モデル（v7）。
+ * 目的変数: log10(GP / log10(episodes + 1))（エピソード数正規化済み）
  *
- * フルモデル（交絡+表層+LLM）: Spearman=0.733
- * 表層+LLM（交絡なし）: Spearman=0.415
+ * モデルA: 表層21 + ジャンル2 = 23特徴量（Spearman=0.41, RMSE=1.20）— 1,290作品
+ * モデルB: 表層21 + ジャンル2 + LLM6 = 29特徴量（Spearman=0.60, RMSE=0.98）— 264作品
  */
 
-// モデルの係数と標準化パラメータ（quality-prediction-v3.jsonから転記）
-const PV_MODEL = {
-  featureNames: [
-    "avgSentenceLen", "sentenceLenCV", "shortSentenceRatio", "longSentenceRatio",
-    "medSentenceRatio", "burstRatio", "paragraphLenCV", "avgParagraphLen",
-    "dialogueRatio", "innerMonologueRatio", "narrativeRatio", "emotionDensity",
-    "uniqueEmotionRatio", "questionRatio", "exclamationRatio", "commaPerSentence",
-    "bigramTTR", "kanjiRatio", "katakanaRatio", "hiraganaRatio", "conjDensity",
-    "llm_hook", "llm_character", "llm_originality", "llm_prose", "llm_tension", "llm_pull",
-  ],
-  // 表層21 + LLM6 = 27特徴量の平均・標準偏差
+// フルモデル（表層+ジャンル+LLM）の係数と標準化パラメータ（264作品で訓練）
+const PV_MODEL_FULL = {
   featureStats: [
-    { mean: 29.360765, std: 6.598766 },  // avgSentenceLen
-    { mean: 0.650309, std: 0.138606 },   // sentenceLenCV
-    { mean: 0.392336, std: 0.130959 },   // shortSentenceRatio
-    { mean: 0.138871, std: 0.090108 },   // longSentenceRatio
-    { mean: 0.468794, std: 0.10548 },    // medSentenceRatio
-    { mean: 0.664887, std: 0.119684 },   // burstRatio
-    { mean: 0.645754, std: 0.143579 },   // paragraphLenCV
-    { mean: 38.702359, std: 12.957992 }, // avgParagraphLen
-    { mean: 0.211923, std: 0.155084 },   // dialogueRatio
-    { mean: 0.017303, std: 0.044983 },   // innerMonologueRatio
-    { mean: 0.770774, std: 0.15408 },    // narrativeRatio
-    { mean: 1.767171, std: 1.143647 },   // emotionDensity
-    { mean: 0.927757, std: 0.25889 },    // uniqueEmotionRatio
-    { mean: 0.094626, std: 0.080383 },   // questionRatio
-    { mean: 0.098737, std: 0.094014 },   // exclamationRatio
-    { mean: 0.805873, std: 0.324835 },   // commaPerSentence
-    { mean: 0.616589, std: 0.087156 },   // bigramTTR
-    { mean: 0.267104, std: 0.034591 },   // kanjiRatio
-    { mean: 0.084996, std: 0.060914 },   // katakanaRatio
-    { mean: 0.545811, std: 0.075974 },   // hiraganaRatio
-    { mean: 3.939106, std: 1.87841 },    // conjDensity
-    { mean: 4.923954, std: 1.757633 },   // llm_hook
-    { mean: 4.51711, std: 1.633389 },    // llm_character
-    { mean: 4.273764, std: 1.648007 },   // llm_originality
-    { mean: 4.847909, std: 1.63832 },    // llm_prose
-    { mean: 4.437262, std: 1.691755 },   // llm_tension
-    { mean: 4.973384, std: 1.875207 },   // llm_pull
+    { mean: 22.906576, std: 5.502595 },  // avgSentenceLen
+    { mean: 0.696750, std: 0.132727 },   // sentenceLenCV
+    { mean: 0.392838, std: 0.126425 },   // shortSentenceRatio
+    { mean: 0.072006, std: 0.065526 },   // longSentenceRatio
+    { mean: 0.535153, std: 0.108621 },   // medSentenceRatio
+    { mean: 0.191167, std: 0.114011 },   // burstRatio
+    { mean: 0.644573, std: 0.144578 },   // paragraphLenCV
+    { mean: 38.636598, std: 12.977314 }, // avgParagraphLen
+    { mean: 0.198307, std: 0.146131 },   // dialogueRatio
+    { mean: 0.020403, std: 0.043341 },   // innerMonologueRatio
+    { mean: 0.781290, std: 0.144906 },   // narrativeRatio
+    { mean: 3.644836, std: 2.434824 },   // emotionDensity
+    { mean: 0.590692, std: 0.246995 },   // uniqueEmotionRatio
+    { mean: 0.075499, std: 0.063303 },   // questionRatio
+    { mean: 0.079437, std: 0.081592 },   // exclamationRatio
+    { mean: 0.668451, std: 0.277175 },   // commaPerSentence
+    { mean: 0.553807, std: 0.083551 },   // bigramTTR
+    { mean: 0.250402, std: 0.033222 },   // kanjiRatio
+    { mean: 0.079243, std: 0.056385 },   // katakanaRatio
+    { mean: 0.512056, std: 0.073521 },   // hiraganaRatio
+    { mean: 3.473029, std: 1.720008 },   // conjDensity
+    { mean: 0.405303, std: 0.490951 },   // genre_fantasy
+    { mean: 0.579545, std: 0.493632 },   // genre_romance
+    { mean: 4.916667, std: 1.758278 },   // llm_hook
+    { mean: 4.507576, std: 1.637608 },   // llm_character
+    { mean: 4.265152, std: 1.650803 },   // llm_originality
+    { mean: 4.837121, std: 1.644546 },   // llm_prose
+    { mean: 4.428030, std: 1.695172 },   // llm_tension
+    { mean: 4.962121, std: 1.880544 },   // llm_pull
   ],
-  targetMean: 3.998342,
-  targetStd: 1.283506,
-  // リッジ回帰係数（lambda=10、27特徴量）
+  targetMean: 3.778215,
+  targetStd: 1.250410,
   coefficients: [
-    0.080298, -0.208103, -0.02543, 0.016909, 0.017128,
-    0.09273, 0.062229, -0.013566, -0.086758, 0.119524,
-    0.052429, 0.150001, -0.092451, -0.092982, -0.031234,
-    -0.062243, -0.107898, 0.066902, 0.080742, -0.082983,
-    0.036322,
-    // LLM特徴量の係数
-    0.143323, 0.100891, -0.203825, 0.0962, -0.08448, 0.273706,
+    0.070276, -0.080178, -0.016532, 0.021102, 0.006522,
+    0.002496, 0.045533, -0.003129, -0.038556, 0.052325,
+    0.023231, -0.024959, -0.026835, -0.081377, -0.015257,
+    -0.014190, -0.022988, 0.035441, 0.070135, -0.094908,
+    0.003961,
+    -0.197660, 0.214480, // ジャンル
+    0.071152, 0.021801, -0.043788, 0.110563, 0.060768, 0.088963, // LLM
   ],
-  // 表層のみで予測する場合の特徴量数
-  textOnlyFeatureCount: 21,
+  rmse: 0.9777,
+};
+
+// 表層+ジャンルのみモデルの係数（1,290作品で訓練）
+const PV_MODEL_SURFACE = {
+  featureStats: [
+    { mean: 26.168789, std: 12.558957 },
+    { mean: 0.686870, std: 0.199606 },
+    { mean: 0.395851, std: 0.143829 },
+    { mean: 0.102341, std: 0.095900 },
+    { mean: 0.501809, std: 0.125044 },
+    { mean: 0.397759, std: 0.276302 },
+    { mean: 0.653900, std: 0.177641 },
+    { mean: 36.828935, std: 15.603591 },
+    { mean: 0.214365, std: 0.153687 },
+    { mean: 0.018456, std: 0.050796 },
+    { mean: 0.767180, std: 0.156807 },
+    { mean: 2.088000, std: 2.396046 },
+    { mean: 0.733004, std: 0.326624 },
+    { mean: 0.080966, std: 0.066117 },
+    { mean: 0.094571, std: 0.116237 },
+    { mean: 0.717585, std: 0.346503 },
+    { mean: 0.499799, std: 0.154250 },
+    { mean: 0.257208, std: 0.045769 },
+    { mean: 0.074155, std: 0.045524 },
+    { mean: 0.514782, std: 0.073585 },
+    { mean: 3.340280, std: 1.789291 },
+    { mean: 0.359690, std: 0.479909 },
+    { mean: 0.217829, std: 0.412771 },
+  ],
+  targetMean: 3.618643,
+  targetStd: 1.293195,
+  coefficients: [
+    0.058159, -0.005455, -0.099349, 0.051887, 0.078510,
+    0.078405, 0.012117, -0.054191, -0.051634, 0.029936,
+    0.040674, -0.017032, -0.082070, 0.006833, -0.042826,
+    -0.091934, -0.161341, 0.008293, 0.051666, -0.015745,
+    -0.010212,
+    0.296764, 0.381672, // ジャンル
+  ],
+  rmse: 1.1953,
 };
 
 /** テキストからPV予測用の特徴量を抽出 */
@@ -915,53 +945,72 @@ function extractPVFeatures(text: string): number[] | null {
 const POSITIVE_EMO = ["嬉しい", "嬉し", "喜び", "幸せ", "楽しい", "好き", "愛し", "感動", "ときめ", "安心", "微笑", "笑顔", "笑い", "笑っ"];
 const NEGATIVE_EMO = ["悲しい", "悲し", "泣い", "涙", "辛い", "苦しい", "痛い", "怖い", "恐怖", "不安", "心配", "焦っ", "怒り", "怒っ", "悔し", "絶望", "寂し"];
 
-/** PV（globalPoint）を予測する。LLMスコアがあれば精度向上 */
-function predictPV(text: string, llmScores?: LLMQualityScores): { predictedGP: number; confidenceRange: { low: number; high: number }; tier: "top" | "upper" | "mid" | "lower" | "bottom"; detail: string; hasLLMScores: boolean } {
+/** ジャンルをモデル用カテゴリに変換 */
+function genreToCategory(genre?: PopularityGenre): "fantasy" | "romance" | "literary" {
+  if (!genre) return "literary";
+  if (genre === "fantasy" || genre === "horror" || genre === "scifi") return "fantasy";
+  if (genre === "romance") return "romance";
+  return "literary"; // mystery, slice_of_life
+}
+
+/** PV（正規化globalPoint）を予測する。v7モデル: 目的変数=log10(GP/log10(ep+1)) */
+function predictPV(text: string, genre?: PopularityGenre, llmScores?: LLMQualityScores): { predictedGP: number; confidenceRange: { low: number; high: number }; tier: "top" | "upper" | "mid" | "lower" | "bottom"; detail: string; hasLLMScores: boolean; reliability: "high" | "medium" | "low" } {
   const textFeatures = extractPVFeatures(text);
   if (!textFeatures) {
-    return { predictedGP: 0, confidenceRange: { low: 0, high: 0 }, tier: "mid" as const, detail: "テキストが短すぎて予測不能", hasLLMScores: false };
+    return { predictedGP: 0, confidenceRange: { low: 0, high: 0 }, tier: "mid" as const, detail: "テキストが短すぎて予測不能", hasLLMScores: false, reliability: "low" as const };
   }
 
-  // LLMスコアがあれば27特徴量、なければ表層21特徴量のみ
-  const hasLLM = !!llmScores;
-  const features = hasLLM
-    ? [...textFeatures, llmScores.hook, llmScores.character, llmScores.originality, llmScores.prose, llmScores.tension, llmScores.pull]
-    : textFeatures;
-  const featureCount = hasLLM ? PV_MODEL.featureNames.length : PV_MODEL.textOnlyFeatureCount;
+  // ジャンルone-hot（ファンタジー/恋愛の2変数、文芸がベースライン）
+  const genreCat = genreToCategory(genre);
+  const genreVec = [genreCat === "fantasy" ? 1.0 : 0.0, genreCat === "romance" ? 1.0 : 0.0];
 
-  // 標準化
+  const hasLLM = !!llmScores;
+
+  // モデル選択: LLMスコアありならフルモデル、なければ表層+ジャンルモデル
+  const model = hasLLM ? PV_MODEL_FULL : PV_MODEL_SURFACE;
+  const features = hasLLM
+    ? [...textFeatures, ...genreVec, llmScores.hook, llmScores.character, llmScores.originality, llmScores.prose, llmScores.tension, llmScores.pull]
+    : [...textFeatures, ...genreVec];
+
+  // 標準化（各モデル固有の統計量を使用）
   const standardized = features.map((v, i) => {
-    const s = PV_MODEL.featureStats[i];
+    const s = model.featureStats[i];
     return s.std > 0 ? (v - s.mean) / s.std : 0;
   });
 
   // 予測（標準化空間）
   let predStd = 0;
-  for (let i = 0; i < featureCount; i++) {
-    predStd += standardized[i] * PV_MODEL.coefficients[i];
+  for (let i = 0; i < features.length; i++) {
+    predStd += standardized[i] * model.coefficients[i];
   }
 
-  // 元のスケールに戻す
-  const predLog = predStd * PV_MODEL.targetStd + PV_MODEL.targetMean;
-  const predictedGP = Math.round(Math.pow(10, predLog));
+  // 元のスケールに戻す（正規化GP = GP/log10(ep+1)）
+  const predLog = predStd * model.targetStd + model.targetMean;
+  const predictedNormGP = Math.round(Math.pow(10, predLog));
 
-  // 信頼区間（RMSE 1.17）
-  const rmse = 1.17;
-  const low = Math.round(Math.pow(10, predLog - rmse));
-  const high = Math.round(Math.pow(10, predLog + rmse));
+  // 信頼区間（モデル固有のRMSE）
+  const low = Math.round(Math.pow(10, predLog - model.rmse));
+  const high = Math.round(Math.pow(10, predLog + model.rmse));
 
-  // tier推定
+  // tier推定（正規化GPのパーセンタイル閾値 — 1,290作品）
+  // P80=61,000 / P60=18,000 / P40=3,500 / P20=172
   let tier: "top" | "upper" | "mid" | "lower" | "bottom";
-  if (predictedGP >= 200000) tier = "top";
-  else if (predictedGP >= 100000) tier = "upper";
-  else if (predictedGP >= 40000) tier = "mid";
-  else if (predictedGP >= 5000) tier = "lower";
+  if (predictedNormGP >= 61000) tier = "top";
+  else if (predictedNormGP >= 18000) tier = "upper";
+  else if (predictedNormGP >= 3500) tier = "mid";
+  else if (predictedNormGP >= 172) tier = "lower";
   else tier = "bottom";
 
-  const llmNote = hasLLM ? "（LLM特徴量込み）" : "（表層特徴量のみ）";
-  const detail = `予測globalPoint: ${predictedGP.toLocaleString()}（${low.toLocaleString()}〜${high.toLocaleString()}）。${tier} tier相当${llmNote}`;
+  // 信頼度判定
+  const reliability: "high" | "medium" | "low" = hasLLM ? "medium" : "low";
+  const ratio = Math.round(Math.pow(10, model.rmse * 2));
 
-  return { predictedGP, confidenceRange: { low, high }, tier, detail, hasLLMScores: hasLLM };
+  const llmNote = hasLLM
+    ? `（LLM込み・Spearman 0.61・信頼区間${ratio}倍幅）`
+    : `⚠️ 表層のみ（Spearman 0.29・信頼区間${ratio}倍幅）— LLMスコア併用を推奨`;
+  const detail = `予測正規化GP: ${predictedNormGP.toLocaleString()}（${low.toLocaleString()}〜${high.toLocaleString()}）。${tier} tier相当${llmNote}`;
+
+  return { predictedGP: predictedNormGP, confidenceRange: { low, high }, tier, detail, hasLLMScores: hasLLM, reliability };
 }
 
 // ─── メインの分析関数 ───
@@ -989,7 +1038,7 @@ export function analyzePopularity(
   };
 
   // PV予測（LLMスコアがあれば精度向上: Spearman 0.415→0.733）
-  const pvPrediction = predictPV(text, llmScores);
+  const pvPrediction = predictPV(text, genre, llmScores);
 
   // ジャンル別の重み付けで総合スコアを計算
   const weights = getGenreWeights(genre);

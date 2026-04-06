@@ -41,7 +41,7 @@ export interface PopularityEvaluationResult {
     sensoryDescription: PopularityMetric; // 五感描写
     readability: PopularityMetric; // 読みやすさ
   };
-  pvPrediction: PVPrediction; // PV予測（89作品のリッジ回帰モデル）
+  pvPrediction: PVPrediction; // PV予測（1,882作品のリッジ回帰モデル v3）
   strengths: string[]; // 強み（日本語）
   improvements: string[]; // 改善提案（日本語）
   summary: string; // 日本語の総評
@@ -54,6 +54,7 @@ export interface PVPrediction {
   tier: "top" | "upper" | "mid" | "lower" | "bottom"; // 予測tier
   detail: string;
   hasLLMScores: boolean; // LLM特徴量込みかどうか
+  reliability: "high" | "medium" | "low"; // 予測信頼度（low=表層のみ/medium=LLM込み/high=将来用）
 }
 
 // LLM品質スコア（6軸、各1-10）

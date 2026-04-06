@@ -218,13 +218,13 @@ export default function PopularityEvaluationPage() {
           {/* PV��測 */}
           {result.pvPrediction && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <h3 className="mb-3 text-sm font-bold text-blue-800">PV予測（globalPoint推定）</h3>
+              <h3 className="mb-3 text-sm font-bold text-blue-800">PV予測 v7（正規化GP推定）</h3>
               <div className="flex items-center gap-6">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-700">
                     {result.pvPrediction.predictedGP.toLocaleString()}
                   </div>
-                  <div className="mt-1 text-xs text-blue-500">予測gP</div>
+                  <div className="mt-1 text-xs text-blue-500">正規化GP</div>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -241,9 +241,16 @@ export default function PopularityEvaluationPage() {
                   <p className="mt-1 text-xs text-blue-600">
                     予測範囲: {result.pvPrediction.confidenceRange.low.toLocaleString()} 〜 {result.pvPrediction.confidenceRange.high.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-xs text-muted">
-                    89作品で検証済み。スピアマン相関0.459。予測誤差中央値4倍。
-                  </p>
+                  {result.pvPrediction.reliability === "low" && (
+                    <p className="mt-1 text-xs font-bold text-amber-600">
+                      ⚠️ 表層+ジャンルのみ（Spearman 0.41）— LLMスコア併用で精度向上
+                    </p>
+                  )}
+                  {result.pvPrediction.reliability === "medium" && (
+                    <p className="mt-1 text-xs text-blue-500">
+                      LLM特徴量込み（Spearman 0.60）。1,290作品で検証済み
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

@@ -29,7 +29,7 @@ const PILOT_COUNT = 50;
 
 const DATA_DIR = path.resolve(__dirname, "../data");
 const CRAWLED_DIR = path.join(DATA_DIR, "crawled");
-const OUTPUT_FILE = path.join(DATA_DIR, "experiments/llm-feature-scores.json");
+const OUTPUT_FILE = path.join(DATA_DIR, "experiments/llm-feature-scores-v2-full.json");
 
 // ============================================================
 // 評価プロンプト
@@ -46,7 +46,7 @@ const SYSTEM_PROMPT = `あなたはWeb小説の熱心な読者です。
 - 9-10: 非常に優れている / 読者を強く惹きつける
 
 必ず以下のJSON形式のみで回答してください。説明は不要です。
-{"hook":N,"character":N,"clarity":N,"prose":N,"tension":N,"empathy":N}`;
+{"hook":N,"character":N,"originality":N,"prose":N,"tension":N,"pull":N}`;
 
 function buildUserPrompt(text: string): string {
   return `以下のWeb小説の第1話冒頭を読んで評価してください。
@@ -61,12 +61,12 @@ ${text}
 // ============================================================
 
 interface LLMScores {
-  hook: number;      // 冒頭の引き込み力
-  character: number; // キャラクターの魅力・個性
-  clarity: number;   // 状況設定の明快さ
-  prose: number;     // 文章の巧みさ
-  tension: number;   // 緊張感・ページターナー性
-  empathy: number;   // 感情移入のしやすさ
+  hook: number;        // 冒頭の引き込み力
+  character: number;   // キャラクターの魅力・個性
+  originality: number; // 設定・展開の独自性
+  prose: number;       // 文章の巧みさ
+  tension: number;     // 緊張感・ページターナー性
+  pull: number;        // 続きを読みたいか
 }
 
 interface WorkResult {
@@ -133,55 +133,7 @@ function collectTargets(): EvalTarget[] {
     } catch { continue; }
   }
 
-  // --- アルファポリス ---
-  const alphaTargets = JSON.parse(fs.readFileSync(path.join(DATA_DIR, "targets/alphapolis_stratified.json"), "utf-8"));
-  const alphaMap: Record<string, { tier: string; genre: string }> = {};
-  for (const t of alphaTargets) alphaMap[t.ncode] = { tier: t.tier, genre: t.searchGenre || "unknown" };
-
-  const alphaDirs = fs.readdirSync(CRAWLED_DIR).filter(d => d.startsWith("alphapolis_"));
-  for (const dir of alphaDirs) {
-    const parts = dir.split("_");
-    if (parts.length < 3) continue;
-    const ncode = `${parts[1]}/${parts[2]}`;
-    const info = alphaMap[ncode];
-    if (!info) continue;
-    const ep1 = path.join(CRAWLED_DIR, dir, "ep0001.json");
-    if (!fs.existsSync(ep1)) continue;
-    try {
-      const ep = JSON.parse(fs.readFileSync(ep1, "utf-8"));
-      if (!ep.bodyText || ep.bodyText.length < 300) continue;
-      targets.push({
-        ncode, tier: info.tier, gp: 0, site: "alphapolis",
-        genre: info.genre,
-        textSnippet: ep.bodyText.slice(0, MAX_TEXT_CHARS),
-      });
-    } catch { continue; }
-  }
-
-  // --- カクヨム ---
-  const kkV1 = JSON.parse(fs.readFileSync(path.join(DATA_DIR, "targets/kakuyomu_stratified.json"), "utf-8"));
-  const kkV2 = JSON.parse(fs.readFileSync(path.join(DATA_DIR, "targets/kakuyomu_stratified_v2.json"), "utf-8"));
-  const kkMap: Record<string, { tier: string; genre: string }> = {};
-  for (const t of kkV1) kkMap[t.ncode] = { tier: t.tier, genre: t.searchGenre || "unknown" };
-  for (const t of kkV2) kkMap[t.ncode] = { tier: t.tier, genre: t.searchGenre || "unknown" };
-
-  const kkDirs = fs.readdirSync(CRAWLED_DIR).filter(d => d.startsWith("kakuyomu_"));
-  for (const dir of kkDirs) {
-    const ncode = dir.replace("kakuyomu_", "");
-    const info = kkMap[ncode];
-    if (!info) continue;
-    const ep1 = path.join(CRAWLED_DIR, dir, "ep0001.json");
-    if (!fs.existsSync(ep1)) continue;
-    try {
-      const ep = JSON.parse(fs.readFileSync(ep1, "utf-8"));
-      if (!ep.bodyText || ep.bodyText.length < 300) continue;
-      targets.push({
-        ncode, tier: info.tier, gp: 0, site: "kakuyomu",
-        genre: info.genre,
-        textSnippet: ep.bodyText.slice(0, MAX_TEXT_CHARS),
-      });
-    } catch { continue; }
-  }
+  // --- アルファポリス・カクヨムは除外（なろう作品のみ） ---
 
   return targets;
 }
@@ -219,10 +171,10 @@ async function evaluateWork(
       const scores: LLMScores = {
         hook: clampScore(parsed.hook),
         character: clampScore(parsed.character),
-        clarity: clampScore(parsed.clarity),
+        originality: clampScore(parsed.originality),
         prose: clampScore(parsed.prose),
         tension: clampScore(parsed.tension),
-        empathy: clampScore(parsed.empathy),
+        pull: clampScore(parsed.pull),
       };
 
       return { scores, inputTokens, outputTokens };
@@ -348,8 +300,8 @@ async function main() {
       totalInput += result.inputTokens;
       totalOutput += result.outputTokens;
       const total = Math.round(
-        (result.scores.hook + result.scores.character + result.scores.clarity +
-         result.scores.prose + result.scores.tension + result.scores.empathy) / 6 * 10
+        (result.scores.hook + result.scores.character + result.scores.originality +
+         result.scores.prose + result.scores.tension + result.scores.pull) / 6 * 10
       ) / 10;
 
       const workResult: WorkResult = {
@@ -453,7 +405,7 @@ function analyzeResults(results: WorkResult[]) {
     console.log(`  total vs log(gP) Spearman: ${spearman(totals, logGP).toFixed(3)}`);
 
     // 各軸の相関
-    const axes: (keyof LLMScores)[] = ["hook", "character", "clarity", "prose", "tension", "empathy"];
+    const axes: (keyof LLMScores)[] = ["hook", "character", "originality", "prose", "tension", "pull"];
     for (const axis of axes) {
       const values = narouResults.map(r => r.scores[axis]);
       console.log(`  ${axis.padEnd(12)} vs log(gP) Spearman: ${spearman(values, logGP).toFixed(3)}`);
