@@ -1,16 +1,35 @@
 import { Link } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { fetchRankedNovels, fetchRecentEpisodes } from "@/lib/data";
+import { fetchRankedNovels } from "@/lib/data";
 import GenreBadge from "@/components/common/GenreBadge";
 import StatusBadge from "@/components/common/StatusBadge";
-import QualityBadge from "@/components/novel/QualityBadge";
 import ContinueReadingSection from "@/components/novel/ContinueReadingSection";
 import PersonalizedSection from "@/components/novel/PersonalizedSection";
 import TasteOnboarding from "@/components/novel/TasteOnboarding";
-import { formatRelativeTime } from "@/lib/utils/format";
 import type { NovelScore } from "@/types/novel";
 
 export const revalidate = 3600;
+
+// カバー画像のないときのグラデーション背景
+const COVER_GRADIENTS = [
+  "from-indigo-500 to-purple-600",
+  "from-rose-500 to-orange-500",
+  "from-emerald-500 to-teal-600",
+  "from-sky-500 to-blue-600",
+  "from-amber-500 to-red-500",
+  "from-violet-500 to-fuchsia-600",
+];
+
+function CoverPlaceholder({ title, index = 0, className = "" }: { title: string; index?: number; className?: string }) {
+  const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length];
+  return (
+    <div className={`flex items-center justify-center bg-gradient-to-br ${gradient} ${className}`}>
+      <span className="px-3 text-center text-sm font-bold leading-tight text-white/90 line-clamp-3">
+        {title}
+      </span>
+    </div>
+  );
+}
 
 export default async function HomePage() {
   const locale = await getLocale();
@@ -29,238 +48,208 @@ export default async function HomePage() {
     );
   }
 
-  // ジャンル別に作品を分類
-  const genreMap = new Map<string, NovelScore[]>();
-  for (const novel of novels) {
-    const list = genreMap.get(novel.genre) || [];
-    list.push(novel);
-    genreMap.set(novel.genre, list);
-  }
-  // 2作品以上あるジャンルのみセクション表示
-  const genreSections = Array.from(genreMap.entries())
-    .filter(([, list]) => list.length >= 2)
-    .slice(0, 3);
-
   // 完結作品（一気読みにおすすめ）
-  const completedNovels = novels.filter((n) => n.status === "complete").slice(0, 6);
+  const completedNovels = novels.filter((n) => n.status === "complete").slice(0, 8);
 
-  // 高評価作品（読了率・次話遷移率が高い）
+  // 高評価作品
   const highRated = novels
     .filter((n) => (n.avg_completion_rate ?? 0) >= 70)
-    .slice(0, 6);
+    .slice(0, 8);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
-      {/* テイストオンボーディング（初回訪問者のみ） */}
+    <div>
       <TasteOnboarding />
-
-      {/* 1. 続きを読む（最重要: Netflixの「視聴中」） */}
       <ContinueReadingSection />
 
-      {/* 2. ヒーローカード（最もスコアの高い作品） */}
-      <section className="mb-8">
-        <HeroCard novel={novels[0]} locale={locale} />
+      {/* ヒーローセクション — 最高スコア作品を大きく */}
+      <section className="mb-10">
+        <HeroCard
+          novel={novels[0]}
+          locale={locale}
+          episodesLabel={tNovel("episodes", { count: novels[0].total_chapters })}
+          readLabel={tNovel("readFromEp1")}
+          detailLabel={tNovel("viewDetails")}
+        />
       </section>
 
-      {/* 3. パーソナライズドレコメンド（読書履歴ベース） */}
-      <PersonalizedSection allNovels={novels} />
+      {/* パーソナライズ */}
+      <div className="mx-auto max-w-6xl px-4">
+        <PersonalizedSection allNovels={novels} />
+      </div>
 
-      {/* 4. 高評価作品（品質シグナル付き） */}
+      {/* 高評価 */}
       {highRated.length > 0 && (
-        <HorizontalSection
-          title={t("highlyRated")}
-          novels={highRated}
-          locale={locale}
-          showQuality
-        />
+        <ScrollSection title={t("highlyRated")} novels={highRated} locale={locale} />
       )}
 
-      {/* 5. ジャンル別セクション */}
-      {genreSections.map(([genre, list]) => (
-        <GenreSection key={genre} genre={genre} novels={list} locale={locale} />
-      ))}
+      {/* 全作品 */}
+      <ScrollSection title={t("allNovels")} novels={novels.slice(0, 12)} locale={locale} viewAllHref="/novels" viewAllLabel={t("viewAll")} />
 
-      {/* 6. 完結済み（一気読み向け） */}
+      {/* 完結済み */}
       {completedNovels.length > 0 && (
-        <HorizontalSection
-          title={t("bingeWorthy")}
-          novels={completedNovels}
-          locale={locale}
-        />
+        <ScrollSection title={t("bingeWorthy")} novels={completedNovels} locale={locale} />
       )}
-
-      {/* 7. 全作品一覧（フォールバック発見経路） */}
-      <section className="mt-2">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-text">{t("allNovels")}</h2>
-          <Link href="/novels" className="text-sm text-secondary hover:underline">
-            {t("viewAll")}
-          </Link>
-        </div>
-        <ul className="divide-y divide-border">
-          {novels.slice(0, 10).map((novel) => (
-            <li key={novel.id}>
-              <Link
-                href={`/novels/${novel.slug}`}
-                className="flex gap-4 py-4 transition hover:bg-surface"
-              >
-                <div className="h-24 w-16 flex-shrink-0 rounded-md bg-surface flex items-center justify-center overflow-hidden">
-                  {novel.cover_image_url ? (
-                    <img src={novel.cover_image_url} alt={novel.title} className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-2xl text-muted">📖</span>
-                  )}
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <h3 className="truncate font-bold text-text">{novel.title}</h3>
-                  {novel.tagline && <p className="truncate text-xs text-muted">{novel.tagline}</p>}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <GenreBadge genre={novel.genre} />
-                    <StatusBadge status={novel.status} />
-                    <QualityBadge
-                      completionRate={novel.avg_completion_rate}
-                      nextEpisodeRate={novel.avg_next_episode_rate}
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-3 text-xs text-muted">
-                    <span>{tNovel("episodes", { count: novel.total_chapters })}</span>
-                    {novel.latest_chapter_at && (
-                      <span>{tNovel("update", { time: formatRelativeTime(novel.latest_chapter_at, locale) })}</span>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }
 
-// ヒーローカード（トップ作品の大きなプレゼンテーション）
-function HeroCard({ novel, locale }: { novel: NovelScore; locale: string }) {
+// ヒーロー — Netflix風の全幅ビジュアルカード
+function HeroCard({
+  novel,
+  locale,
+  episodesLabel,
+  readLabel,
+  detailLabel,
+}: {
+  novel: NovelScore;
+  locale: string;
+  episodesLabel: string;
+  readLabel: string;
+  detailLabel: string;
+}) {
   return (
-    <Link
-      href={`/novels/${novel.slug}`}
-      className="group block overflow-hidden rounded-xl border border-border bg-white transition hover:shadow-md"
-    >
-      <div className="relative flex items-center justify-center bg-gradient-to-b from-surface to-white py-8">
-        <div className="h-48 w-32 rounded-lg bg-white shadow-sm flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
-          {novel.cover_image_url ? (
-            <img src={novel.cover_image_url} alt={novel.title} className="h-full w-full object-cover" />
-          ) : (
-            <span className="text-4xl">📖</span>
-          )}
-        </div>
-      </div>
-      <div className="p-5">
-        <h2 className="mb-1 text-lg font-bold text-text">{novel.title}</h2>
-        {novel.tagline && <p className="mb-2 text-sm text-muted">{novel.tagline}</p>}
-        {novel.synopsis && (
-          <p className="mb-3 text-sm leading-relaxed text-muted line-clamp-2">{novel.synopsis}</p>
-        )}
-        <div className="flex flex-wrap items-center gap-2">
-          <GenreBadge genre={novel.genre} />
-          <StatusBadge status={novel.status} />
-          <span className="text-xs text-muted">{novel.total_chapters} {locale === "en" ? "eps" : "話"}</span>
-          <QualityBadge
-            completionRate={novel.avg_completion_rate}
-            nextEpisodeRate={novel.avg_next_episode_rate}
-            size="md"
+    <Link href={`/novels/${novel.slug}`} className="group relative block">
+      {/* 背景 */}
+      <div className="relative overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800" style={{ minHeight: "420px" }}>
+        {novel.cover_image_url ? (
+          <img
+            src={novel.cover_image_url}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-30 transition-transform duration-700 group-hover:scale-105"
           />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-900" />
+        )}
+        {/* グラデーションオーバーレイ */}
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
+
+        {/* コンテンツ */}
+        <div className="relative mx-auto flex max-w-6xl items-end gap-8 px-6 pb-10 pt-20 md:px-8">
+          {/* カバー画像 */}
+          <div className="hidden flex-shrink-0 md:block">
+            <div className="h-56 w-40 overflow-hidden rounded-xl shadow-2xl ring-1 ring-white/10 transition-transform duration-500 group-hover:scale-105">
+              {novel.cover_image_url ? (
+                <img src={novel.cover_image_url} alt={novel.title} className="h-full w-full object-cover" />
+              ) : (
+                <CoverPlaceholder title={novel.title} className="h-full w-full text-lg" />
+              )}
+            </div>
+          </div>
+
+          {/* テキスト */}
+          <div className="flex-1">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <GenreBadge genre={novel.genre} />
+              <StatusBadge status={novel.status} />
+              <span className="text-xs text-white/60">
+                {episodesLabel}
+              </span>
+            </div>
+            <h1 className="mb-2 text-2xl font-bold leading-tight text-white md:text-3xl lg:text-4xl">
+              {novel.title}
+            </h1>
+            {novel.tagline && (
+              <p className="mb-3 text-sm leading-relaxed text-white/70 md:text-base">
+                {novel.tagline}
+              </p>
+            )}
+            {novel.synopsis && (
+              <p className="mb-5 max-w-xl text-sm leading-relaxed text-white/50 line-clamp-2">
+                {novel.synopsis}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-gray-900 shadow-lg transition group-hover:bg-white/90">
+                {readLabel}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 transition group-hover:border-white/40">
+                {detailLabel}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </Link>
   );
 }
 
-// 横スクロールセクション（Netflix型のカルーセル）
-function HorizontalSection({
+// Netflix風 横スクロールセクション
+function ScrollSection({
   title,
   novels,
   locale,
-  showQuality = false,
+  viewAllHref,
+  viewAllLabel,
 }: {
   title: string;
   novels: NovelScore[];
   locale: string;
-  showQuality?: boolean;
+  viewAllHref?: string;
+  viewAllLabel?: string;
 }) {
   return (
-    <section className="mb-8">
-      <h2 className="mb-3 text-lg font-bold text-text">{title}</h2>
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-        {novels.map((novel) => (
-          <Link
-            key={novel.id}
-            href={`/novels/${novel.slug}`}
-            className="flex w-32 flex-shrink-0 flex-col gap-1.5 rounded-lg border border-border p-2 transition hover:border-secondary hover:bg-surface"
-          >
-            <div className="mx-auto h-36 w-24 rounded bg-surface flex items-center justify-center overflow-hidden">
-              {novel.cover_image_url ? (
-                <img src={novel.cover_image_url} alt={novel.title} className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-2xl text-muted">📖</span>
-              )}
-            </div>
-            <h3 className="text-center text-xs font-medium leading-tight line-clamp-2">{novel.title}</h3>
-            <div className="flex justify-center">
-              <GenreBadge genre={novel.genre} />
-            </div>
-            {showQuality && (
-              <div className="flex justify-center">
-                <QualityBadge completionRate={novel.avg_completion_rate} />
-              </div>
-            )}
-          </Link>
-        ))}
+    <section className="mb-10">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-text">{title}</h2>
+          {viewAllHref && viewAllLabel && (
+            <Link href={viewAllHref} className="text-sm font-medium text-secondary hover:underline">
+              {viewAllLabel}
+            </Link>
+          )}
+        </div>
+      </div>
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+          {novels.map((novel, i) => (
+            <NovelCard key={novel.id} novel={novel} index={i} locale={locale} />
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-// ジャンル別セクション
-function GenreSection({
-  genre,
-  novels,
+// 作品カード — 縦長カバー + タイトル + メタ情報
+function NovelCard({
+  novel,
+  index,
   locale,
 }: {
-  genre: string;
-  novels: NovelScore[];
+  novel: NovelScore;
+  index: number;
   locale: string;
 }) {
-  // ジャンル名はクライアントサイドでしか翻訳できないので、サーバーではgenre idをそのまま使う
-  // i18nはGenreBadge内で処理されるが、セクションタイトルはサーバーで必要
-  // → 専用コンポーネントで処理
   return (
-    <section className="mb-8">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <GenreBadge genre={genre} />
+    <Link
+      href={`/novels/${novel.slug}`}
+      className="group flex w-36 flex-shrink-0 flex-col md:w-44"
+    >
+      {/* カバー */}
+      <div className="relative mb-2.5 aspect-[2/3] w-full overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-lg group-hover:ring-black/10 group-hover:-translate-y-1">
+        {novel.cover_image_url ? (
+          <img
+            src={novel.cover_image_url}
+            alt={novel.title}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <CoverPlaceholder title={novel.title} index={index} className="h-full w-full" />
+        )}
+        {/* ステータスオーバーレイ */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2.5">
+          <span className="text-[10px] font-medium text-white/90">
+            {novel.total_chapters}{locale === "en" ? " eps" : "話"}
+          </span>
         </div>
-        <Link href={`/genre/${genre}`} className="text-xs text-secondary hover:underline">
-          &gt;
-        </Link>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-        {novels.slice(0, 6).map((novel) => (
-          <Link
-            key={novel.id}
-            href={`/novels/${novel.slug}`}
-            className="flex w-28 flex-shrink-0 flex-col gap-1 rounded-lg border border-border p-2 transition hover:border-secondary hover:bg-surface"
-          >
-            <div className="mx-auto h-32 w-20 rounded bg-surface flex items-center justify-center overflow-hidden">
-              {novel.cover_image_url ? (
-                <img src={novel.cover_image_url} alt={novel.title} className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-xl text-muted">📖</span>
-              )}
-            </div>
-            <h3 className="text-center text-[11px] font-medium leading-tight line-clamp-2">{novel.title}</h3>
-          </Link>
-        ))}
-      </div>
-    </section>
+
+      {/* タイトル */}
+      <h3 className="mb-0.5 text-sm font-medium leading-tight text-text line-clamp-2 group-hover:text-primary transition-colors">
+        {novel.title}
+      </h3>
+      {/* ジャンル */}
+      <span className="text-xs text-muted">{novel.author_name}</span>
+    </Link>
   );
 }

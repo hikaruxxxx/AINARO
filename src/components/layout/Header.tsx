@@ -11,6 +11,7 @@ export default function Header() {
   const t = useTranslations("header");
   const [menuOpen, setMenuOpen] = useState(false);
   const [visible, setVisible] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
   const lastScrollY = useRef(0);
   const pathname = usePathname();
 
@@ -20,21 +21,23 @@ export default function Header() {
     { href: "/ranking" as const, label: t("ranking") },
   ];
 
-  // エピソード閲覧中はスクロール方向でヘッダーの表示/非表示を切り替え
+  // 発見・おすすめページでは非表示
+  if (pathname.startsWith("/discover") || pathname.startsWith("/recommend")) return null;
+
   const isReading = /^\/novels\/[^/]+\/\d+/.test(pathname);
+  const isHome = pathname === "/" || pathname === "";
 
   useEffect(() => {
-    if (!isReading) {
-      setVisible(true);
-      return;
-    }
-
     const handleScroll = () => {
       const currentY = window.scrollY;
-      if (currentY < lastScrollY.current || currentY < 50) {
-        setVisible(true);
-      } else {
-        setVisible(false);
+      setScrolled(currentY > 10);
+
+      if (isReading) {
+        if (currentY < lastScrollY.current || currentY < 50) {
+          setVisible(true);
+        } else {
+          setVisible(false);
+        }
       }
       lastScrollY.current = currentY;
     };
@@ -45,37 +48,57 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 border-b border-border bg-white transition-transform duration-300 ${
+      className={`sticky top-0 z-50 transition-all duration-300 ${
         visible ? "translate-y-0" : "-translate-y-full"
+      } ${
+        isHome && !scrolled
+          ? "bg-transparent"
+          : "border-b border-border/50 bg-white/95 backdrop-blur-md shadow-sm"
       }`}
     >
-      <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-4">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-8">
         {/* ロゴ */}
-        <Link href="/" className="text-xl font-bold text-primary">
-          {process.env.NEXT_PUBLIC_SITE_NAME || "Novelis"}
+        <Link href="/" className="flex items-center gap-2">
+          <span className={`text-xl font-bold tracking-tight transition-colors ${
+            isHome && !scrolled ? "text-white" : "text-gray-900"
+          }`}>
+            {process.env.NEXT_PUBLIC_SITE_NAME || "Novelis"}
+          </span>
         </Link>
 
         {/* PCナビ */}
-        <nav className="hidden items-center gap-6 text-sm md:flex">
+        <nav className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`transition hover:text-primary ${
-                pathname === link.href ? "font-bold text-primary" : "text-text"
+              className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                pathname === link.href
+                  ? isHome && !scrolled
+                    ? "bg-white/15 text-white"
+                    : "bg-gray-100 text-gray-900"
+                  : isHome && !scrolled
+                    ? "text-white/80 hover:bg-white/10 hover:text-white"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               }`}
             >
               {link.label}
             </Link>
           ))}
-          <SearchBar />
+          <div className="ml-2">
+            <SearchBar />
+          </div>
           <PointsBadge />
           <LanguageSwitcher />
         </nav>
 
         {/* モバイルメニュー */}
         <button
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted transition hover:bg-surface md:hidden"
+          className={`flex h-9 w-9 items-center justify-center rounded-lg transition md:hidden ${
+            isHome && !scrolled
+              ? "text-white/80 hover:bg-white/10"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={t("menu")}
         >
@@ -91,12 +114,16 @@ export default function Header() {
 
       {/* モバイルドロワー */}
       {menuOpen && (
-        <nav className="border-t border-border bg-white px-4 py-3 md:hidden">
+        <nav className="border-t border-gray-100 bg-white px-4 py-2 md:hidden">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="block py-2 text-sm text-text transition hover:text-primary"
+              className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                pathname === link.href
+                  ? "bg-gray-50 text-gray-900"
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
               onClick={() => setMenuOpen(false)}
             >
               {link.label}
@@ -104,12 +131,12 @@ export default function Header() {
           ))}
           <Link
             href="/search"
-            className="block py-2 text-sm text-text transition hover:text-primary"
+            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
             onClick={() => setMenuOpen(false)}
           >
             検索
           </Link>
-          <div className="pt-2 border-t border-border mt-2">
+          <div className="mt-2 border-t border-gray-100 pt-2">
             <LanguageSwitcher />
           </div>
         </nav>
