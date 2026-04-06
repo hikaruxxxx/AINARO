@@ -53,10 +53,13 @@ export default function NewEpisodePage() {
 
   return (
     <div>
-      <h2 className="mb-6 text-lg font-bold">エピソード新規作成</h2>
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-gray-900">エピソード新規作成</h2>
+        <p className="text-sm text-gray-500">新しいエピソードを追加</p>
+      </div>
 
       {error && (
-        <div className="mb-4 rounded border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-600">
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
           {error}
         </div>
       )}
@@ -64,32 +67,32 @@ export default function NewEpisodePage() {
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         {/* 話数 */}
         <div>
-          <label className="mb-1 block text-sm font-medium">話数 *</label>
+          <label className="mb-1 block text-sm font-medium text-gray-900">話数 *</label>
           <input
             type="number"
             value={episodeNumber}
             onChange={(e) => setEpisodeNumber(Number(e.target.value))}
             min={1}
             required
-            className="border border-border rounded px-3 py-2 w-full"
+            className="border border-gray-200 rounded-lg px-3 py-2 w-full bg-white"
           />
         </div>
 
         {/* タイトル */}
         <div>
-          <label className="mb-1 block text-sm font-medium">タイトル *</label>
+          <label className="mb-1 block text-sm font-medium text-gray-900">タイトル *</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="border border-border rounded px-3 py-2 w-full"
+            className="border border-gray-200 rounded-lg px-3 py-2 w-full bg-white"
           />
         </div>
 
         {/* 本文 */}
         <div>
-          <label className="mb-1 block text-sm font-medium">
+          <label className="mb-1 block text-sm font-medium text-gray-900">
             本文（Markdown） *
           </label>
           <textarea
@@ -97,9 +100,9 @@ export default function NewEpisodePage() {
             onChange={(e) => setBodyMd(e.target.value)}
             rows={20}
             required
-            className="border border-border rounded px-3 py-2 w-full font-mono text-sm"
+            className="border border-gray-200 rounded-lg px-3 py-2 w-full font-mono text-sm bg-white"
           />
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-gray-500">
             文字数: {characterCount.toLocaleString()}
           </p>
         </div>
@@ -112,7 +115,7 @@ export default function NewEpisodePage() {
             checked={isFree}
             onChange={(e) => setIsFree(e.target.checked)}
           />
-          <label htmlFor="is_free" className="text-sm">
+          <label htmlFor="is_free" className="text-sm text-gray-600">
             無料公開
           </label>
         </div>
@@ -122,14 +125,14 @@ export default function NewEpisodePage() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-secondary text-white rounded px-4 py-2 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
+            className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
           >
             {saving ? "保存中..." : "保存"}
           </button>
           <button
             type="button"
             onClick={() => router.push(`/admin/novels/${novelId}/episodes`)}
-            className="border border-border rounded px-4 py-2 text-sm"
+            className="border border-gray-200 bg-white text-gray-700 rounded-lg px-4 py-2 text-sm hover:bg-gray-50 transition"
           >
             キャンセル
           </button>

@@ -10,11 +10,11 @@ const PHASE_LABELS: Record<ContentCandidatePhase, string> = {
   archived: "アーカイブ",
 };
 
-const PHASE_COLORS: Record<ContentCandidatePhase, string> = {
-  plot: "bg-yellow-100 text-yellow-700",
-  pilot: "bg-blue-100 text-blue-700",
-  serial: "bg-green-100 text-green-700",
-  archived: "bg-gray-100 text-gray-600",
+const PHASE_DOT_COLORS: Record<ContentCandidatePhase, string> = {
+  plot: "bg-yellow-500",
+  pilot: "bg-blue-500",
+  serial: "bg-green-500",
+  archived: "bg-gray-400",
 };
 
 export default function ContentFunnelPage() {
@@ -67,12 +67,15 @@ export default function ContentFunnelPage() {
   };
 
   if (loading) {
-    return <div className="py-8 text-center text-sm opacity-50">読み込み中...</div>;
+    return <div className="py-8 text-center text-sm text-gray-500">読み込み中...</div>;
   }
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">コンテンツ選別ファネル</h2>
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-gray-900">コンテンツ選別ファネル</h2>
+        <p className="text-sm text-gray-500">プロットからの進行状況を管理</p>
+      </div>
 
       {/* ファネルサマリー */}
       <div className="mb-6 grid grid-cols-4 gap-3">
@@ -80,42 +83,48 @@ export default function ContentFunnelPage() {
           <button
             key={phase}
             onClick={() => setFilter(filter === phase ? "" : phase)}
-            className={`rounded-xl border p-3 text-center transition ${
-              filter === phase ? "border-secondary bg-secondary/5" : "border-border hover:bg-gray-50"
+            className={`rounded-xl border bg-white p-4 text-center shadow-sm transition ${
+              filter === phase ? "border-blue-600 ring-1 ring-blue-600" : "border-gray-200 hover:bg-gray-50"
             }`}
           >
-            <p className="text-2xl font-bold">{summary[phase]}</p>
-            <p className="text-xs opacity-60">{label}</p>
+            <p className="text-2xl font-bold text-gray-900">{summary[phase]}</p>
+            <p className="text-xs text-gray-500">{label}</p>
           </button>
         ))}
       </div>
 
       {/* 候補一覧 */}
       {candidates.length === 0 ? (
-        <p className="text-sm opacity-50">候補がありません</p>
+        <p className="text-sm text-gray-500">候補がありません</p>
       ) : (
         <div className="space-y-3">
           {candidates.map((c) => (
-            <div key={c.id} className="rounded-xl border border-border p-4">
+            <div key={c.id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold">{c.title}</h3>
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${PHASE_COLORS[c.phase]}`}>
-                      {PHASE_LABELS[c.phase]}
-                    </span>
-                    {c.decision && (
-                      <span className={`rounded-full px-2 py-0.5 text-xs ${
-                        c.decision === "promote" ? "bg-green-100 text-green-700"
-                          : c.decision === "revise" ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700"
-                      }`}>
-                        {c.decision === "promote" ? "連載化" : c.decision === "revise" ? "改稿" : "アーカイブ"}
+                    <h3 className="font-bold text-gray-900">{c.title}</h3>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 rounded-full ${PHASE_DOT_COLORS[c.phase]}`} />
+                      <span className="text-xs font-medium text-gray-600">
+                        {PHASE_LABELS[c.phase]}
                       </span>
+                    </div>
+                    {c.decision && (
+                      <div className="flex items-center gap-1.5">
+                        <span className={`h-1.5 w-1.5 rounded-full ${
+                          c.decision === "promote" ? "bg-green-500"
+                            : c.decision === "revise" ? "bg-yellow-500"
+                              : "bg-red-500"
+                        }`} />
+                        <span className="text-xs font-medium text-gray-600">
+                          {c.decision === "promote" ? "連載化" : c.decision === "revise" ? "改稿" : "アーカイブ"}
+                        </span>
+                      </div>
                     )}
                   </div>
-                  {c.synopsis && <p className="text-sm opacity-60 line-clamp-2">{c.synopsis}</p>}
-                  <div className="mt-1 flex gap-2 text-xs opacity-50">
+                  {c.synopsis && <p className="text-sm text-gray-500 line-clamp-2">{c.synopsis}</p>}
+                  <div className="mt-1 flex gap-2 text-xs text-gray-400">
                     <span>{c.genre}</span>
                     {c.tags.map((tag) => (
                       <span key={tag}>#{tag}</span>
@@ -126,8 +135,8 @@ export default function ContentFunnelPage() {
                 {/* パイロットスコア */}
                 {c.pilot_score !== null && (
                   <div className="text-right ml-4">
-                    <p className="text-2xl font-bold text-secondary">{c.pilot_score.toFixed(2)}</p>
-                    <p className="text-xs opacity-50">パイロットスコア</p>
+                    <p className="text-2xl font-bold text-blue-600">{c.pilot_score.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400">パイロットスコア</p>
                   </div>
                 )}
               </div>
@@ -135,21 +144,21 @@ export default function ContentFunnelPage() {
               {/* パイロット指標 */}
               {c.pilot_completion_rate !== null && (
                 <div className="mt-3 grid grid-cols-4 gap-2 text-xs">
-                  <div className="rounded bg-gray-50 p-2 text-center">
-                    <p className="font-bold">{(c.pilot_completion_rate * 100).toFixed(1)}%</p>
-                    <p className="opacity-50">読了率</p>
+                  <div className="rounded-lg bg-gray-50 p-2 text-center">
+                    <p className="font-bold text-gray-900">{(c.pilot_completion_rate * 100).toFixed(1)}%</p>
+                    <p className="text-gray-400">読了率</p>
                   </div>
-                  <div className="rounded bg-gray-50 p-2 text-center">
-                    <p className="font-bold">{c.pilot_next_rate !== null ? `${(c.pilot_next_rate * 100).toFixed(1)}%` : "-"}</p>
-                    <p className="opacity-50">次話遷移率</p>
+                  <div className="rounded-lg bg-gray-50 p-2 text-center">
+                    <p className="font-bold text-gray-900">{c.pilot_next_rate !== null ? `${(c.pilot_next_rate * 100).toFixed(1)}%` : "-"}</p>
+                    <p className="text-gray-400">次話遷移率</p>
                   </div>
-                  <div className="rounded bg-gray-50 p-2 text-center">
-                    <p className="font-bold">{c.pilot_bookmark_rate !== null ? `${(c.pilot_bookmark_rate * 100).toFixed(1)}%` : "-"}</p>
-                    <p className="opacity-50">BM率</p>
+                  <div className="rounded-lg bg-gray-50 p-2 text-center">
+                    <p className="font-bold text-gray-900">{c.pilot_bookmark_rate !== null ? `${(c.pilot_bookmark_rate * 100).toFixed(1)}%` : "-"}</p>
+                    <p className="text-gray-400">BM率</p>
                   </div>
-                  <div className="rounded bg-gray-50 p-2 text-center">
-                    <p className="font-bold">{c.pilot_avg_read_sec !== null ? `${Math.round(c.pilot_avg_read_sec)}秒` : "-"}</p>
-                    <p className="opacity-50">平均滞在</p>
+                  <div className="rounded-lg bg-gray-50 p-2 text-center">
+                    <p className="font-bold text-gray-900">{c.pilot_avg_read_sec !== null ? `${Math.round(c.pilot_avg_read_sec)}秒` : "-"}</p>
+                    <p className="text-gray-400">平均滞在</p>
                   </div>
                 </div>
               )}
@@ -159,7 +168,7 @@ export default function ContentFunnelPage() {
                 {c.phase === "plot" && (
                   <button
                     onClick={() => handlePhaseChange(c.id, "pilot")}
-                    className="rounded bg-blue-500 px-3 py-1 text-xs text-white hover:bg-blue-600"
+                    className="rounded-lg bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 transition"
                   >
                     パイロット版へ
                   </button>
@@ -168,25 +177,25 @@ export default function ContentFunnelPage() {
                   <>
                     <button
                       onClick={() => handleEvaluate(c.id)}
-                      className="rounded bg-purple-500 px-3 py-1 text-xs text-white hover:bg-purple-600"
+                      className="rounded-lg bg-purple-600 px-3 py-1 text-xs text-white hover:bg-purple-700 transition"
                     >
                       スコア算出
                     </button>
                     <button
                       onClick={() => handleDecision(c.id, "promote", "パイロット版の指標が基準を超えた")}
-                      className="rounded bg-green-500 px-3 py-1 text-xs text-white hover:bg-green-600"
+                      className="rounded-lg bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 transition"
                     >
                       連載化
                     </button>
                     <button
                       onClick={() => handleDecision(c.id, "revise", "指標改善の余地あり")}
-                      className="rounded bg-yellow-500 px-3 py-1 text-xs text-white hover:bg-yellow-600"
+                      className="rounded-lg bg-yellow-500 px-3 py-1 text-xs text-white hover:bg-yellow-600 transition"
                     >
                       改稿
                     </button>
                     <button
                       onClick={() => handleDecision(c.id, "archive", "基準未達")}
-                      className="rounded bg-red-500 px-3 py-1 text-xs text-white hover:bg-red-600"
+                      className="rounded-lg bg-red-500 px-3 py-1 text-xs text-white hover:bg-red-600 transition"
                     >
                       アーカイブ
                     </button>
@@ -195,7 +204,7 @@ export default function ContentFunnelPage() {
                 {c.phase === "pilot" && c.decision === "promote" && (
                   <button
                     onClick={() => handlePhaseChange(c.id, "serial")}
-                    className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700"
+                    className="rounded-lg bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 transition"
                   >
                     連載開始
                   </button>

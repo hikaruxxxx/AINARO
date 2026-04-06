@@ -61,13 +61,13 @@ function formatDuration(sec: number | null): string {
 
 // ヒートマップの色（離脱が多い箇所ほど赤）
 function heatColor(count: number, max: number): string {
-  if (max === 0) return "bg-surface";
+  if (max === 0) return "bg-gray-100";
   const ratio = count / max;
   if (ratio > 0.7) return "bg-emerald-500";
   if (ratio > 0.4) return "bg-emerald-300";
   if (ratio > 0.2) return "bg-emerald-200";
   if (ratio > 0) return "bg-emerald-100";
-  return "bg-surface";
+  return "bg-gray-100";
 }
 
 export default function StatsPage() {
@@ -92,7 +92,7 @@ export default function StatsPage() {
   }, [fetchStats]);
 
   if (loading && !data) {
-    return <div className="py-12 text-center text-muted">読み込み中...</div>;
+    return <div className="py-12 text-center text-gray-500">読み込み中...</div>;
   }
 
   if (!data) return null;
@@ -101,14 +101,17 @@ export default function StatsPage() {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-xl font-bold">読書統計ダッシュボード</h2>
+      <div>
+        <h2 className="text-xl font-bold text-gray-900">読書統計ダッシュボード</h2>
+        <p className="text-sm text-gray-500">リアルタイムの読書行動データを分析</p>
+      </div>
 
       {/* フィルター */}
       <div className="flex flex-wrap items-center gap-4">
         <select
           value={selectedNovelId}
           onChange={(e) => setSelectedNovelId(e.target.value)}
-          className="rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
         >
           <option value="">全作品</option>
           {novels.map((n) => (
@@ -121,7 +124,7 @@ export default function StatsPage() {
         <select
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
-          className="rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
         >
           <option value={1}>24時間</option>
           <option value={7}>7日間</option>
@@ -131,7 +134,7 @@ export default function StatsPage() {
 
         <button
           onClick={fetchStats}
-          className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface transition"
+          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
         >
           更新
         </button>
@@ -154,39 +157,39 @@ export default function StatsPage() {
       {/* エピソード別詳細 */}
       {realtime.by_episode.length > 0 && (
         <div>
-          <h3 className="mb-4 text-lg font-bold">エピソード別指標</h3>
-          <div className="overflow-x-auto">
+          <h3 className="mb-4 text-lg font-bold text-gray-900">エピソード別指標</h3>
+          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border text-left text-muted">
-                  <th className="px-3 py-2">エピソード</th>
-                  <th className="px-3 py-2 text-right">開始</th>
-                  <th className="px-3 py-2 text-right">読了</th>
-                  <th className="px-3 py-2 text-right">読了率</th>
-                  <th className="px-3 py-2 text-right">次話遷移率</th>
-                  <th className="px-3 py-2 text-right">離脱率</th>
-                  <th className="px-3 py-2 text-right">平均深度</th>
-                  <th className="px-3 py-2">スクロール分布</th>
+                <tr className="border-b border-gray-200 bg-gray-50/50 text-left text-gray-500">
+                  <th className="px-3 py-2 text-xs font-medium">エピソード</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium">開始</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium">読了</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium">読了率</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium">次話遷移率</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium">離脱率</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium">平均深度</th>
+                  <th className="px-3 py-2 text-xs font-medium">スクロール分布</th>
                 </tr>
               </thead>
               <tbody>
                 {realtime.by_episode.map((ep) => {
                   const maxBucket = Math.max(...ep.scroll_buckets, 1);
                   return (
-                    <tr key={ep.episode_id} className="border-b border-border/50">
-                      <td className="px-3 py-2 text-sm">
+                    <tr key={ep.episode_id} className="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                      <td className="px-3 py-2 text-sm text-gray-900">
                         {ep.episode_number != null ? (
                           <span>第{ep.episode_number}話 {ep.episode_title}</span>
                         ) : (
-                          <span className="font-mono text-xs text-muted">{ep.episode_id.slice(0, 8)}</span>
+                          <span className="font-mono text-xs text-gray-400">{ep.episode_id.slice(0, 8)}</span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-right">{ep.starts}</td>
-                      <td className="px-3 py-2 text-right">{ep.completes}</td>
-                      <td className="px-3 py-2 text-right">{pct(ep.completion_rate)}</td>
-                      <td className="px-3 py-2 text-right">{pct(ep.next_episode_rate)}</td>
-                      <td className="px-3 py-2 text-right">{pct(ep.drop_rate)}</td>
-                      <td className="px-3 py-2 text-right">{pct(ep.avg_scroll_depth)}</td>
+                      <td className="px-3 py-2 text-right text-gray-600">{ep.starts}</td>
+                      <td className="px-3 py-2 text-right text-gray-600">{ep.completes}</td>
+                      <td className="px-3 py-2 text-right text-gray-600">{pct(ep.completion_rate)}</td>
+                      <td className="px-3 py-2 text-right text-gray-600">{pct(ep.next_episode_rate)}</td>
+                      <td className="px-3 py-2 text-right text-gray-600">{pct(ep.drop_rate)}</td>
+                      <td className="px-3 py-2 text-right text-gray-600">{pct(ep.avg_scroll_depth)}</td>
                       <td className="px-3 py-2">
                         {/* ヒートマップ: 10%刻みのスクロール到達分布 */}
                         <div className="flex gap-0.5">
@@ -207,9 +210,9 @@ export default function StatsPage() {
           </div>
 
           {/* ヒートマップ凡例 */}
-          <div className="mt-2 flex items-center gap-2 text-xs text-muted">
+          <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
             <span>スクロール到達分布:</span>
-            <span className="inline-block h-3 w-3 rounded-sm bg-surface" /> 0%
+            <span className="inline-block h-3 w-3 rounded-sm bg-gray-100" /> 0%
             <span className="inline-block h-3 w-3 rounded-sm bg-emerald-100" />
             <span className="inline-block h-3 w-3 rounded-sm bg-emerald-200" />
             <span className="inline-block h-3 w-3 rounded-sm bg-emerald-300" />
@@ -220,9 +223,9 @@ export default function StatsPage() {
 
       {/* データなし */}
       {realtime.total_events === 0 && (
-        <div className="rounded-lg border border-border bg-surface p-8 text-center text-muted">
-          <p className="text-lg">まだ読書データがありません</p>
-          <p className="mt-2 text-sm">
+        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <p className="text-lg text-gray-900">まだ読書データがありません</p>
+          <p className="mt-2 text-sm text-gray-500">
             読者がエピソードを閲覧すると、ここに統計が表示されます。
           </p>
         </div>
@@ -243,11 +246,11 @@ function StatCard({
   negative?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-surface p-4">
-      <p className="text-xs text-muted">{label}</p>
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <p className="text-xs font-medium text-gray-500">{label}</p>
       <p
-        className={`mt-1 text-xl font-bold ${
-          highlight ? "text-emerald-600" : negative ? "text-red-500" : ""
+        className={`mt-1 text-2xl font-bold ${
+          highlight ? "text-emerald-600" : negative ? "text-red-500" : "text-gray-900"
         }`}
       >
         {value}

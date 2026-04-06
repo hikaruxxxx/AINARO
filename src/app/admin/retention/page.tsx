@@ -87,14 +87,17 @@ export default function RetentionAnalysisPage() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">章単位 離脱分析</h2>
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-gray-900">章単位 離脱分析</h2>
+        <p className="text-sm text-gray-500">読者の離脱ポイントを可視化</p>
+      </div>
 
       {/* フィルター */}
       <div className="mb-6 flex gap-4 items-center">
         <select
           value={selectedNovel}
           onChange={(e) => setSelectedNovel(e.target.value)}
-          className="rounded-lg border border-border px-3 py-2 text-sm"
+          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
         >
           {novels.map((n) => (
             <option key={n.id} value={n.id}>{n.title}</option>
@@ -104,7 +107,7 @@ export default function RetentionAnalysisPage() {
         <select
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
-          className="rounded-lg border border-border px-3 py-2 text-sm"
+          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
         >
           <option value={7}>7日間</option>
           <option value={14}>14日間</option>
@@ -114,15 +117,15 @@ export default function RetentionAnalysisPage() {
       </div>
 
       {loading ? (
-        <div className="py-8 text-center text-sm opacity-50">読み込み中...</div>
+        <div className="py-8 text-center text-sm text-gray-500">読み込み中...</div>
       ) : stats.length === 0 ? (
-        <p className="text-sm opacity-50">データがありません</p>
+        <p className="text-sm text-gray-500">データがありません</p>
       ) : (
         <>
           {/* 1. 章→章リテンションファネル */}
-          <div className="mb-8">
-            <h3 className="text-lg font-bold mb-3">リテンションファネル</h3>
-            <p className="text-xs opacity-50 mb-4">
+          <div className="mb-8 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">リテンションファネル</h3>
+            <p className="text-xs text-gray-400 mb-4">
               各話を読み始めた読者数と、次話への遷移率。どこで読者が離脱しているかを可視化。
             </p>
             <div className="space-y-2">
@@ -131,7 +134,7 @@ export default function RetentionAnalysisPage() {
                 const barWidth = maxStarts > 0 ? (ep.starts / maxStarts) * 100 : 0;
                 return (
                   <div key={ep.episode_id} className="flex items-center gap-3">
-                    <div className="w-24 text-right text-xs opacity-60 shrink-0">
+                    <div className="w-24 text-right text-xs text-gray-500 shrink-0">
                       {ep.episode_number !== null ? `第${ep.episode_number}話` : "?"}
                     </div>
                     <div className="flex-1 relative h-8">
@@ -140,12 +143,12 @@ export default function RetentionAnalysisPage() {
                         style={{ width: `${barWidth}%` }}
                       />
                       <div className="absolute inset-0 flex items-center px-2 text-xs">
-                        <span className="font-bold">{ep.starts}人</span>
+                        <span className="font-bold text-gray-900">{ep.starts}人</span>
                         {ep.completion_rate !== null && (
-                          <span className="ml-2 opacity-70">読了{(ep.completion_rate * 100).toFixed(0)}%</span>
+                          <span className="ml-2 text-gray-600">読了{(ep.completion_rate * 100).toFixed(0)}%</span>
                         )}
                         {i < stats.length - 1 && ep.next_episode_rate !== null && (
-                          <span className="ml-2 opacity-70">→次話{(ep.next_episode_rate * 100).toFixed(0)}%</span>
+                          <span className="ml-2 text-gray-600">→次話{(ep.next_episode_rate * 100).toFixed(0)}%</span>
                         )}
                       </div>
                     </div>
@@ -156,18 +159,18 @@ export default function RetentionAnalysisPage() {
           </div>
 
           {/* 2. スクロールヒートマップ */}
-          <div className="mb-8">
-            <h3 className="text-lg font-bold mb-3">スクロール深度ヒートマップ</h3>
-            <p className="text-xs opacity-50 mb-4">
+          <div className="mb-8 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">スクロール深度ヒートマップ</h3>
+            <p className="text-xs text-gray-400 mb-4">
               各話の章内で、読者がどこまでスクロールしたか。赤が濃いほどその位置で多くの読者が停止/離脱。
             </p>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b">
-                    <th className="py-2 text-left">話</th>
+                  <tr className="border-b border-gray-200 bg-gray-50/50">
+                    <th className="py-2 text-left text-xs font-medium text-gray-500">話</th>
                     {Array.from({ length: 10 }, (_, i) => (
-                      <th key={i} className="py-2 text-center w-12">{i * 10}%</th>
+                      <th key={i} className="py-2 text-center w-12 text-xs font-medium text-gray-500">{i * 10}%</th>
                     ))}
                   </tr>
                 </thead>
@@ -175,8 +178,8 @@ export default function RetentionAnalysisPage() {
                   {stats.map((ep) => {
                     const maxBucket = Math.max(...(ep.scroll_buckets || [0]));
                     return (
-                      <tr key={ep.episode_id} className="border-b">
-                        <td className="py-1 pr-2 whitespace-nowrap">
+                      <tr key={ep.episode_id} className="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                        <td className="py-1 pr-2 whitespace-nowrap text-gray-600">
                           {ep.episode_number !== null ? `第${ep.episode_number}話` : "?"}
                         </td>
                         {(ep.scroll_buckets || Array(10).fill(0)).map((count, i) => (
@@ -196,42 +199,42 @@ export default function RetentionAnalysisPage() {
 
           {/* 3. エピソード別詳細 */}
           <div>
-            <h3 className="text-lg font-bold mb-3">エピソード別詳細</h3>
-            <div className="overflow-x-auto">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">エピソード別詳細</h3>
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b text-left opacity-60">
-                    <th className="py-2 pr-2">話</th>
-                    <th className="py-2 pr-2">タイトル</th>
-                    <th className="py-2 pr-2">開始</th>
-                    <th className="py-2 pr-2">読了</th>
-                    <th className="py-2 pr-2">次話</th>
-                    <th className="py-2 pr-2">離脱</th>
-                    <th className="py-2 pr-2">読了率</th>
-                    <th className="py-2 pr-2">次話率</th>
-                    <th className="py-2 pr-2">離脱率</th>
-                    <th className="py-2">平均深度</th>
+                  <tr className="border-b border-gray-200 bg-gray-50/50 text-left text-gray-500">
+                    <th className="py-2 px-3 font-medium">話</th>
+                    <th className="py-2 px-3 font-medium">タイトル</th>
+                    <th className="py-2 px-3 font-medium">開始</th>
+                    <th className="py-2 px-3 font-medium">読了</th>
+                    <th className="py-2 px-3 font-medium">次話</th>
+                    <th className="py-2 px-3 font-medium">離脱</th>
+                    <th className="py-2 px-3 font-medium">読了率</th>
+                    <th className="py-2 px-3 font-medium">次話率</th>
+                    <th className="py-2 px-3 font-medium">離脱率</th>
+                    <th className="py-2 px-3 font-medium">平均深度</th>
                   </tr>
                 </thead>
                 <tbody>
                   {stats.map((ep) => (
-                    <tr key={ep.episode_id} className="border-b hover:bg-gray-50">
-                      <td className="py-1.5 pr-2">{ep.episode_number ?? "-"}</td>
-                      <td className="py-1.5 pr-2 max-w-32 truncate">{ep.episode_title ?? "-"}</td>
-                      <td className="py-1.5 pr-2">{ep.starts}</td>
-                      <td className="py-1.5 pr-2">{ep.completes}</td>
-                      <td className="py-1.5 pr-2">{ep.nexts}</td>
-                      <td className="py-1.5 pr-2">{ep.drops}</td>
-                      <td className="py-1.5 pr-2 font-bold">
+                    <tr key={ep.episode_id} className="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                      <td className="py-2 px-3 text-gray-900">{ep.episode_number ?? "-"}</td>
+                      <td className="py-2 px-3 max-w-32 truncate text-gray-900">{ep.episode_title ?? "-"}</td>
+                      <td className="py-2 px-3 text-gray-600">{ep.starts}</td>
+                      <td className="py-2 px-3 text-gray-600">{ep.completes}</td>
+                      <td className="py-2 px-3 text-gray-600">{ep.nexts}</td>
+                      <td className="py-2 px-3 text-gray-600">{ep.drops}</td>
+                      <td className="py-2 px-3 font-bold text-gray-900">
                         {ep.completion_rate !== null ? `${(ep.completion_rate * 100).toFixed(1)}%` : "-"}
                       </td>
-                      <td className="py-1.5 pr-2">
+                      <td className="py-2 px-3 text-gray-600">
                         {ep.next_episode_rate !== null ? `${(ep.next_episode_rate * 100).toFixed(1)}%` : "-"}
                       </td>
-                      <td className="py-1.5 pr-2">
+                      <td className="py-2 px-3 text-gray-600">
                         {ep.drop_rate !== null ? `${(ep.drop_rate * 100).toFixed(1)}%` : "-"}
                       </td>
-                      <td className="py-1.5">
+                      <td className="py-2 px-3 text-gray-600">
                         {ep.avg_scroll_depth !== null ? `${(ep.avg_scroll_depth * 100).toFixed(0)}%` : "-"}
                       </td>
                     </tr>

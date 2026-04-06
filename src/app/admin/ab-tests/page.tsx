@@ -37,20 +37,23 @@ export default function ABTestsPage() {
   };
 
   if (loading) {
-    return <div className="py-8 text-center text-sm opacity-50">読み込み中...</div>;
+    return <div className="py-8 text-center text-sm text-gray-500">読み込み中...</div>;
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold">A/Bテスト管理</h2>
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">A/Bテスト管理</h2>
+          <p className="text-sm text-gray-500">コンテンツバリアントのテスト結果を管理</p>
+        </div>
         <div className="flex gap-2">
           {["", "draft", "running", "completed"].map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s)}
               className={`rounded-lg px-3 py-1 text-sm transition ${
-                filter === s ? "bg-secondary text-white" : "bg-gray-100 hover:bg-gray-200"
+                filter === s ? "bg-blue-600 text-white" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
               {s === "" ? "すべて" : s === "draft" ? "下書き" : s === "running" ? "実行中" : "完了"}
@@ -60,42 +63,45 @@ export default function ABTestsPage() {
       </div>
 
       {tests.length === 0 ? (
-        <p className="text-sm opacity-50">テストがありません</p>
+        <p className="text-sm text-gray-500">テストがありません</p>
       ) : (
         <div className="space-y-4">
           {tests.map((test) => (
-            <div key={test.id} className="rounded-xl border border-border p-4">
+            <div key={test.id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-bold">{test.name}</h3>
+                  <h3 className="font-bold text-gray-900">{test.name}</h3>
                   {test.description && (
-                    <p className="text-sm opacity-60 mt-1">{test.description}</p>
+                    <p className="text-sm text-gray-500 mt-1">{test.description}</p>
                   )}
-                  <div className="mt-2 flex gap-3 text-xs opacity-60">
+                  <div className="mt-2 flex gap-3 text-xs text-gray-500">
                     <span>作品: {test.novels?.title}</span>
                     <span>第{test.episodes?.episode_number}話</span>
                     <span>判定指標: {test.primary_metric}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                      test.status === "draft"
-                        ? "bg-gray-100 text-gray-600"
-                        : test.status === "running"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-blue-100 text-blue-700"
-                    }`}
-                  >
-                    {test.status === "draft" ? "下書き" : test.status === "running" ? "実行中" : "完了"}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        test.status === "draft"
+                          ? "bg-gray-400"
+                          : test.status === "running"
+                            ? "bg-green-500"
+                            : "bg-blue-500"
+                      }`}
+                    />
+                    <span className="text-xs font-medium text-gray-600">
+                      {test.status === "draft" ? "下書き" : test.status === "running" ? "実行中" : "完了"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* バリアント一覧 */}
               <div className="mt-3 flex gap-2">
                 {test.variants.map((v) => (
-                  <span key={v.id} className="rounded border px-2 py-0.5 text-xs">
+                  <span key={v.id} className="rounded-lg border border-gray-200 px-2 py-0.5 text-xs text-gray-600">
                     {v.id}: {v.name}
                     {test.winner_variant === v.id && " 🏆"}
                   </span>
@@ -104,27 +110,27 @@ export default function ABTestsPage() {
 
               {/* 結果表示 */}
               {test.results && (
-                <div className="mt-3 overflow-x-auto">
+                <div className="mt-3 overflow-x-auto rounded-lg border border-gray-200">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b text-left opacity-60">
-                        <th className="py-1 pr-3">バリアント</th>
-                        <th className="py-1 pr-3">セッション</th>
-                        <th className="py-1 pr-3">読了率</th>
-                        <th className="py-1 pr-3">次話遷移率</th>
-                        <th className="py-1 pr-3">BM率</th>
-                        <th className="py-1">平均滞在</th>
+                      <tr className="border-b border-gray-200 bg-gray-50/50 text-left text-gray-500">
+                        <th className="py-2 px-3 font-medium">バリアント</th>
+                        <th className="py-2 px-3 font-medium">セッション</th>
+                        <th className="py-2 px-3 font-medium">読了率</th>
+                        <th className="py-2 px-3 font-medium">次話遷移率</th>
+                        <th className="py-2 px-3 font-medium">BM率</th>
+                        <th className="py-2 px-3 font-medium">平均滞在</th>
                       </tr>
                     </thead>
                     <tbody>
                       {Object.entries(test.results).map(([vid, metrics]) => (
-                        <tr key={vid} className={`border-b ${test.winner_variant === vid ? "font-bold" : ""}`}>
-                          <td className="py-1 pr-3">{vid}</td>
-                          <td className="py-1 pr-3">{metrics.unique_sessions}</td>
-                          <td className="py-1 pr-3">{(metrics.completion_rate * 100).toFixed(1)}%</td>
-                          <td className="py-1 pr-3">{(metrics.next_episode_rate * 100).toFixed(1)}%</td>
-                          <td className="py-1 pr-3">{(metrics.bookmark_rate * 100).toFixed(1)}%</td>
-                          <td className="py-1">{Math.round(metrics.avg_read_duration)}秒</td>
+                        <tr key={vid} className={`border-b border-gray-100 hover:bg-gray-50/50 ${test.winner_variant === vid ? "font-bold" : ""}`}>
+                          <td className="py-2 px-3 text-gray-900">{vid}</td>
+                          <td className="py-2 px-3 text-gray-600">{metrics.unique_sessions}</td>
+                          <td className="py-2 px-3 text-gray-600">{(metrics.completion_rate * 100).toFixed(1)}%</td>
+                          <td className="py-2 px-3 text-gray-600">{(metrics.next_episode_rate * 100).toFixed(1)}%</td>
+                          <td className="py-2 px-3 text-gray-600">{(metrics.bookmark_rate * 100).toFixed(1)}%</td>
+                          <td className="py-2 px-3 text-gray-600">{Math.round(metrics.avg_read_duration)}秒</td>
                         </tr>
                       ))}
                     </tbody>
@@ -137,7 +143,7 @@ export default function ABTestsPage() {
                 {test.status === "draft" && (
                   <button
                     onClick={() => handleAction(test.id, "start")}
-                    className="rounded bg-green-500 px-3 py-1 text-xs text-white hover:bg-green-600"
+                    className="rounded-lg bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 transition"
                   >
                     テスト開始
                   </button>
@@ -145,7 +151,7 @@ export default function ABTestsPage() {
                 {test.status === "running" && (
                   <button
                     onClick={() => handleAction(test.id, "complete")}
-                    className="rounded bg-blue-500 px-3 py-1 text-xs text-white hover:bg-blue-600"
+                    className="rounded-lg bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 transition"
                   >
                     テスト終了・集計
                   </button>
