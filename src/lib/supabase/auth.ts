@@ -8,11 +8,14 @@ const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
  * 未ログインなら null を返す
  */
 export async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data?.user) return null;
+    return data.user;
+  } catch {
+    return null;
+  }
 }
 
 /**
