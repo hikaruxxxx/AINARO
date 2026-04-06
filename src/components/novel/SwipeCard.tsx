@@ -87,7 +87,7 @@ export default function SwipeCard({
     >
       {/* スクロール可能な内側コンテナ — 横スワイプはhandlersで処理 */}
       <div
-        className="h-full overflow-y-auto overscroll-contain"
+        className="absolute inset-0 overflow-y-auto overscroll-contain"
         {...(stackPosition === 0 ? handlers : {})}
       >
         {/* ヒーローエリア（ビジュアル部分 — カード全体と同じ高さ） */}
