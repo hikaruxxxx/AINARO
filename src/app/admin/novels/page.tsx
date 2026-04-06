@@ -1,7 +1,17 @@
 import Link from "next/link";
 import { fetchNovels } from "@/lib/data";
-import StatusBadge from "@/components/common/StatusBadge";
 import { formatPV, formatDate } from "@/lib/utils/format";
+
+// 管理画面用の簡易ステータス表示（i18nコンテキスト外で動作）
+const STATUS_LABELS: Record<string, { label: string; style: string }> = {
+  serial: { label: "連載中", style: "bg-green-100 text-green-800" },
+  complete: { label: "完結", style: "bg-blue-100 text-blue-800" },
+  hiatus: { label: "休止", style: "bg-gray-100 text-gray-600" },
+};
+function AdminStatusBadge({ status }: { status: string }) {
+  const { label, style } = STATUS_LABELS[status] || STATUS_LABELS.serial;
+  return <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${style}`}>{label}</span>;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +53,7 @@ export default async function AdminNovelsPage() {
                   <td className="py-3">{novel.genre}</td>
                   <td className="py-3">{novel.total_chapters}</td>
                   <td className="py-3">{formatPV(novel.total_pv)}</td>
-                  <td className="py-3"><StatusBadge status={novel.status} /></td>
+                  <td className="py-3"><AdminStatusBadge status={novel.status} /></td>
                   <td className="py-3 text-muted">{formatDate(novel.updated_at)}</td>
                   <td className="py-3">
                     <div className="flex gap-2">
