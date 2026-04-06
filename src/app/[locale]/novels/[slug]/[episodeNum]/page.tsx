@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { fetchNovelBySlug, fetchEpisodeRange, fetchEpisodes } from "@/lib/data";
+import { fetchNovelBySlug, fetchEpisodeRange, fetchEpisodeToc } from "@/lib/data";
 import EpisodeReader from "@/components/novel/EpisodeReader";
 import type { Episode } from "@/types/novel";
 import type { Metadata } from "next";
@@ -38,10 +38,11 @@ export default async function EpisodeReaderPage({ params }: Props) {
   const novel = await fetchNovelBySlug(slug, locale);
   if (!novel) notFound();
 
-  // 現在話 + 次話 + 全エピソード一覧を並行取得
-  const [epRange, allEpisodes] = await Promise.all([
+  // 現在話 + 次話 + 目次用の前後20話を並行取得（全話取得を回避）
+  const tocPage = Math.max(1, Math.ceil(num / 40));
+  const [epRange, { episodes: tocEpisodes }] = await Promise.all([
     fetchEpisodeRange(novel.id, num, num + 1, locale),
-    fetchEpisodes(novel.id, locale),
+    fetchEpisodeToc(novel.id, tocPage, 40, locale),
   ]);
   if (epRange.length === 0) notFound();
 
@@ -49,7 +50,7 @@ export default async function EpisodeReaderPage({ params }: Props) {
   const nextEp = epRange.length > 1 ? (epRange[1] as Episode) : null;
 
   // 目次用に軽量なデータだけ渡す
-  const tocData = allEpisodes.map((ep) => ({
+  const tocData = tocEpisodes.map((ep) => ({
     episode_number: ep.episode_number,
     title: ep.title,
   }));

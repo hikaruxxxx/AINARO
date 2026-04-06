@@ -1,16 +1,22 @@
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { fetchNovelBySlug, fetchEpisodes, fetchRelatedNovels } from "@/lib/data";
+import { fetchNovelBySlug, fetchEpisodeToc, fetchRelatedNovels } from "@/lib/data";
 import GenreBadge from "@/components/common/GenreBadge";
 import StatusBadge from "@/components/common/StatusBadge";
 import ContinueReadingButton from "@/components/novel/ContinueReadingButton";
+import FollowButton from "@/components/novel/FollowButton";
+import BookmarkButton from "@/components/novel/BookmarkButton";
+import ShareButton from "@/components/novel/ShareButton";
+import { ContentWarningBadges } from "@/components/novel/ContentWarning";
+import PushNotificationButton from "@/components/novel/PushNotificationButton";
+import TocPagination from "@/components/novel/TocPagination";
 import { formatCharCount, formatDate } from "@/lib/utils/format";
 import type { Metadata } from "next";
 
 export const revalidate = 3600;
 
-type Props = { params: Promise<{ slug: string; locale: string }> };
+type Props = { params: Promise<{ slug: string; locale: string }>; searchParams: Promise<{ page?: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -29,17 +35,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function NovelDetailPage({ params }: Props) {
+const EPISODES_PER_PAGE = 50;
+
+export default async function NovelDetailPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, Number(pageParam) || 1);
   const locale = await getLocale();
   const t = await getTranslations();
   const novel = await fetchNovelBySlug(slug, locale);
   if (!novel) notFound();
 
-  const [episodes, relatedNovels] = await Promise.all([
-    fetchEpisodes(novel.id, locale),
+  const [{ episodes, total }, relatedNovels] = await Promise.all([
+    fetchEpisodeToc(novel.id, currentPage, EPISODES_PER_PAGE, locale),
     fetchRelatedNovels({ id: novel.id, genre: novel.genre, tags: novel.tags }, 3, locale),
   ]);
+  const totalPages = Math.ceil(total / EPISODES_PER_PAGE);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -66,6 +77,10 @@ export default async function NovelDetailPage({ params }: Props) {
               <Link key={tag} href={`/tag/${encodeURIComponent(tag)}`} className="rounded bg-surface px-2 py-0.5 text-xs text-muted hover:text-text transition">#{tag}</Link>
             ))}
           </div>
+          {/* コンテンツ警告 */}
+          {novel.content_warnings && novel.content_warnings.length > 0 && (
+            <ContentWarningBadges warnings={novel.content_warnings} />
+          )}
           <div className="flex flex-wrap gap-4 text-sm text-muted">
             <span>{t("novel.episodes", { count: novel.total_chapters })}</span>
             <span>{formatCharCount(novel.total_characters, locale)}</span>
@@ -81,6 +96,13 @@ export default async function NovelDetailPage({ params }: Props) {
               <ContinueReadingButton novelId={novel.id} slug={slug} totalChapters={novel.total_chapters} />
             </div>
           )}
+          {/* フォロー・ブックマーク・通知・シェア */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <FollowButton novelId={novel.id} />
+            <PushNotificationButton />
+            <BookmarkButton novelId={novel.id} size="sm" />
+            <ShareButton title={novel.title} text={novel.tagline || undefined} />
+          </div>
         </div>
       </section>
 
@@ -98,26 +120,35 @@ export default async function NovelDetailPage({ params }: Props) {
         {episodes.length === 0 ? (
           <p className="text-sm text-muted">{t("novel.noEpisodes")}</p>
         ) : (
-          <ul className="divide-y divide-border">
-            {episodes.map((ep) => (
-              <li key={ep.id}>
-                <Link
-                  href={`/novels/${slug}/${ep.episode_number}`}
-                  className="flex items-center justify-between gap-4 py-3 transition hover:bg-surface"
-                >
-                  <div className="min-w-0 flex-1">
-                    <span className="text-xs text-muted">{t("episode.epNumber", { num: ep.episode_number })}</span>
-                    <p className="truncate font-medium">{ep.title}</p>
-                  </div>
-                  <div className="flex flex-shrink-0 items-center gap-3 text-xs text-muted">
-                    <span>{t("episode.charCount", { count: ep.character_count.toLocaleString() })}</span>
-                    <span>{formatDate(ep.published_at, locale)}</span>
-                    {!ep.is_free && <span className="text-secondary">🔒</span>}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="divide-y divide-border">
+              {episodes.map((ep) => (
+                <li key={ep.episode_number}>
+                  <Link
+                    href={`/novels/${slug}/${ep.episode_number}`}
+                    className="flex items-center justify-between gap-4 py-3 transition hover:bg-surface"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span className="text-xs text-muted">{t("episode.epNumber", { num: ep.episode_number })}</span>
+                      <p className="truncate font-medium">{ep.title}</p>
+                    </div>
+                    <div className="flex flex-shrink-0 items-center gap-3 text-xs text-muted">
+                      <span>{t("episode.charCount", { count: ep.character_count.toLocaleString() })}</span>
+                      <span>{formatDate(ep.published_at, locale)}</span>
+                      {!ep.is_free && <span className="text-secondary">🔒</span>}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {totalPages > 1 && (
+              <TocPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                slug={slug}
+              />
+            )}
+          </>
         )}
       </section>
 

@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { fetchRankedNovels } from "@/lib/data";
 import GenreBadge from "@/components/common/GenreBadge";
 import StatusBadge from "@/components/common/StatusBadge";
+import PersonalizedSection from "@/components/novel/PersonalizedSection";
 import { formatRelativeTime } from "@/lib/utils/format";
 
 export const revalidate = 3600;
@@ -29,6 +30,9 @@ export default async function HomePage() {
           <PickupCard novel={novels[0]} locale={locale} />
         </section>
       )}
+
+      {/* パーソナライズドレコメンド（読書履歴がある場合のみ表示） */}
+      <PersonalizedSection allNovels={novels} />
 
       {novels.length > 1 && (
         <section>

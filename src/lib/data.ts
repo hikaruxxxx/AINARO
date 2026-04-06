@@ -1,7 +1,7 @@
 // データ取得レイヤー
 // Supabase接続時はSupabaseから、未接続時はモックデータから取得
 // locale引数で英語フィールドにフォールバック対応
-import type { Novel, Episode, NovelScore } from "@/types/novel";
+import type { Novel, Episode, EpisodeTocItem, NovelScore } from "@/types/novel";
 
 // locale対応: 英語フィールドがあればそちらを使い、なければ日本語にフォールバック
 function localizeNovel(novel: Novel, locale: string): Novel {
@@ -102,7 +102,56 @@ export async function fetchEpisodes(novelId: string, locale: string = "ja"): Pro
   return ((data as Episode[]) || []).map((e) => localizeEpisode(e, locale));
 }
 
+// 目次用エピソード一覧（body_mdを含まない軽量版、ページネーション対応）
+export async function fetchEpisodeToc(
+  novelId: string,
+  page: number = 1,
+  perPage: number = 50,
+  locale: string = "ja"
+): Promise<{ episodes: EpisodeTocItem[]; total: number }> {
+  if (!isSupabaseConfigured) {
+    const all = getMockEpisodes(novelId);
+    const start = (page - 1) * perPage;
+    const sliced = all.slice(start, start + perPage).map((e) => ({
+      episode_number: e.episode_number,
+      title: locale === "en" ? (e.title_en || e.title) : e.title,
+      title_en: e.title_en,
+      character_count: e.character_count,
+      is_free: e.is_free,
+      published_at: e.published_at,
+    }));
+    return { episodes: sliced, total: all.length };
+  }
+
+  const supabase = await getSupabase();
+
+  // 総数取得
+  const { count } = await supabase
+    .from("episodes")
+    .select("id", { count: "exact", head: true })
+    .eq("novel_id", novelId);
+
+  // body_mdを除いた軽量カラムのみ取得
+  const { data } = await supabase
+    .from("episodes")
+    .select("episode_number, title, title_en, character_count, is_free, published_at")
+    .eq("novel_id", novelId)
+    .order("episode_number", { ascending: true })
+    .range((page - 1) * perPage, page * perPage - 1);
+
+  const episodes = ((data as EpisodeTocItem[]) || []).map((e) => ({
+    ...e,
+    title: locale === "en" ? (e.title_en || e.title) : e.title,
+  }));
+
+  return { episodes, total: count ?? 0 };
+}
+
 // エピソード（話数指定）
+// episodes_with_body ビューで本文を含む完全なデータを取得
+// ビュー未作成時は episodes テーブルにフォールバック
+const EPISODE_VIEW = "episodes_with_body";
+
 export async function fetchEpisode(
   novelId: string,
   episodeNumber: number
@@ -110,12 +159,24 @@ export async function fetchEpisode(
   if (!isSupabaseConfigured) return getMockEpisode(novelId, episodeNumber);
 
   const supabase = await getSupabase();
-  const { data } = await supabase
-    .from("episodes")
+  // episodes_with_body ビューから取得（body_md分離対応）
+  const { data, error } = await supabase
+    .from(EPISODE_VIEW)
     .select("*")
     .eq("novel_id", novelId)
     .eq("episode_number", episodeNumber)
     .single();
+
+  // ビューが存在しない場合は元テーブルにフォールバック
+  if (error && !data) {
+    const { data: fallback } = await supabase
+      .from("episodes")
+      .select("*")
+      .eq("novel_id", novelId)
+      .eq("episode_number", episodeNumber)
+      .single();
+    return (fallback as Episode) || null;
+  }
   return (data as Episode) || null;
 }
 
@@ -126,11 +187,20 @@ export async function fetchEpisodeById(
   if (!isSupabaseConfigured) return getMockEpisodeById(episodeId);
 
   const supabase = await getSupabase();
-  const { data } = await supabase
-    .from("episodes")
+  const { data, error } = await supabase
+    .from(EPISODE_VIEW)
     .select("*")
     .eq("id", episodeId)
     .single();
+
+  if (error && !data) {
+    const { data: fallback } = await supabase
+      .from("episodes")
+      .select("*")
+      .eq("id", episodeId)
+      .single();
+    return (fallback as Episode) || null;
+  }
   return (data as Episode) || null;
 }
 
@@ -244,6 +314,34 @@ export async function fetchNovelsByTag(tag: string, locale: string = "ja"): Prom
   return ((data as Novel[]) || []).map((n) => localizeNovel(n, locale));
 }
 
+// 検索（タイトル・タグ・あらすじのキーワード検索）
+export async function searchNovels(query: string, locale: string = "ja"): Promise<Novel[]> {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+
+  if (!isSupabaseConfigured) {
+    // モックデータからの検索
+    return getMockNovels()
+      .filter((n) => {
+        const text = [n.title, n.title_en, n.tagline, n.synopsis, ...n.tags].filter(Boolean).join(" ").toLowerCase();
+        return q.split(/\s+/).every((word) => text.includes(word));
+      })
+      .map((n) => localizeNovel(n, locale));
+  }
+
+  const supabase = await getSupabase();
+  // Supabaseのilike検索（各ワードでAND検索）
+  const words = q.split(/\s+/).filter(Boolean);
+  let queryBuilder = supabase.from("novels").select("*");
+  for (const word of words) {
+    queryBuilder = queryBuilder.or(
+      `title.ilike.%${word}%,tagline.ilike.%${word}%,synopsis.ilike.%${word}%,tags.cs.{${word}}`
+    );
+  }
+  const { data } = await queryBuilder.order("total_pv", { ascending: false }).limit(50);
+  return ((data as Novel[]) || []).map((n) => localizeNovel(n, locale));
+}
+
 // エピソード（範囲取得 — 閲覧ページで現在話+次話を取得）
 export async function fetchEpisodeRange(
   novelId: string,
@@ -258,12 +356,25 @@ export async function fetchEpisodeRange(
   }
 
   const supabase = await getSupabase();
-  const { data } = await supabase
-    .from("episodes")
+  // episodes_with_body ビューで本文含む完全データを取得
+  const { data, error } = await supabase
+    .from(EPISODE_VIEW)
     .select("*")
     .eq("novel_id", novelId)
     .gte("episode_number", from)
     .lte("episode_number", to)
     .order("episode_number", { ascending: true });
+
+  // ビュー未作成時は元テーブルにフォールバック
+  if (error && !data) {
+    const { data: fallback } = await supabase
+      .from("episodes")
+      .select("*")
+      .eq("novel_id", novelId)
+      .gte("episode_number", from)
+      .lte("episode_number", to)
+      .order("episode_number", { ascending: true });
+    return ((fallback as Episode[]) || []).map((e) => localizeEpisode(e, locale));
+  }
   return ((data as Episode[]) || []).map((e) => localizeEpisode(e, locale));
 }
