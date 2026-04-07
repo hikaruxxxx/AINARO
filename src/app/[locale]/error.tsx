@@ -13,9 +13,11 @@ export default function LocaleError({
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
       <span className="mb-4 text-4xl">📖</span>
       <h2 className="mb-2 text-lg font-bold text-text">ページの読み込みに失敗しました</h2>
-      <p className="mb-6 text-sm text-muted">
+      <p className="mb-2 text-sm text-muted">
         一時的な問題が発生しています。もう一度お試しください。
       </p>
+      {error.message && <p className="mb-2 font-mono text-xs text-red-400">{error.message}</p>}
+      {error.digest && <p className="mb-6 font-mono text-xs text-muted">digest: {error.digest}</p>}
       <div className="flex gap-3">
         <button
           onClick={reset}
