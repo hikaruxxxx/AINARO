@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 
@@ -19,18 +18,11 @@ export default function BottomNav() {
   const t = useTranslations("bottomNav");
   const locale = useLocale();
   const pathname = usePathname();
-  const [visible, setVisible] = useState(true);
 
-  // 管理画面・エピソード閲覧中は完全非表示
+  // 管理画面・エピソード閲覧中のみ非表示
   if (pathname.startsWith("/admin") || /^\/novels\/[^/]+\/\d+/.test(pathname)) {
     return null;
   }
-
-  // トップページ・没入型ページでは常に表示
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    setVisible(true);
-  }, [pathname]);
 
   const NAV_ITEMS = [
     { href: "/" as const, label: t("home"), icon: NAV_ICONS.home },
@@ -41,14 +33,12 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 z-[60] border-t border-border bg-white/95 backdrop-blur-sm transition-transform duration-300 ${
-      visible ? "translate-y-0" : "translate-y-full"
-    }`}>
+    <nav className="fixed bottom-0 left-0 right-0 z-[60] border-t border-border bg-white/95 backdrop-blur-sm">
       <div className="flex h-14 items-center justify-around">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           const needsFullReload = FULLSCREEN_PAGES.includes(item.href);
-          const className = `flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] transition ${
+          const cls = `flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] transition ${
             isActive ? "text-primary" : "text-muted"
           }`;
 
@@ -57,7 +47,7 @@ export default function BottomNav() {
               <button
                 key={item.href}
                 onClick={() => { window.location.href = `/${locale}${item.href}`; }}
-                className={className}
+                className={cls}
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
@@ -68,11 +58,7 @@ export default function BottomNav() {
           }
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={className}
-            >
+            <Link key={item.href} href={item.href} className={cls}>
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
               </svg>
