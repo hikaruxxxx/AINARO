@@ -12,7 +12,7 @@ const NAV_ICONS = {
   mypage: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
 };
 
-const FULLSCREEN_PAGES = ["/discover", "/recommend", "/swipe"] as const;
+const FULLSCREEN_PAGES: string[] = ["/discover", "/recommend", "/swipe"];
 
 export default function BottomNav() {
   const t = useTranslations("bottomNav");
@@ -47,7 +47,7 @@ export default function BottomNav() {
       <div className="flex h-14 items-center justify-around">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
-          const needsFullReload = FULLSCREEN_PAGES.includes(item.href);
+          const needsFullReload = FULLSCREEN_PAGES.includes(item.href as string);
           const cls = `flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] transition ${
             isActive ? "text-primary" : "text-muted"
           }`;
