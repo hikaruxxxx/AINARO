@@ -133,6 +133,37 @@ exception_review → human_queueに積む（今回はスキップ）
   - 平均4-5が目安。7以上は全体の15%程度（厳しく評価）
 - LLM total < 3.0 → D判定と同等（再生成対象）
 
+#### D-2. v10ヒット予測ゲート（第1話のみ）
+
+LLMスコアリング後、`/predict-hit` を実行してヒット確率を取得:
+
+```bash
+python3 scripts/predict-hit.py \
+  --slug {slug} --episode 1 \
+  --llm-hook {hook} --llm-character {character} --llm-originality {originality} \
+  --llm-prose {prose} --llm-tension {tension} --llm-pull {pull}
+```
+
+Synopsisスコアがあれば同時に渡す（data/synopsis/{slug}.json から取得）。
+
+**公開判定:**
+- ヒット確率 ≥ 20% → 通常承認フロー（proofread結果に従う）
+- ヒット確率 10-20% → `exception_review` にフラグ（公開可能だが注意）
+- ヒット確率 < 10% → **公開保留**。以下のいずれかを実施:
+  1. `/generate-candidates` で候補再生成を提案
+  2. 人間レビュー要請
+  3. 作品自体を `abandoned` 状態に遷移（3話生成して全てヒット確率<10%の場合）
+
+**作品レベルゲート（ep3完了時）:**
+- ep1〜ep3のヒット確率平均が 15% 未満 → 作品全体を `exception_review` に保留
+- 理由: ヒット確率が低い作品に以降の話数リソースを投じても ROI が悪い
+- 対応: 人間が「続けるか打ち切るか」を判断
+
+**品質低下検知（連載中の作品）:**
+- 直近5話のgrade D率 > 20% → 作品全体を `exception_review` に保留
+- 直近5話のヒット確率平均が初期から 30% 以上低下 → 同上
+- `/quality-trends` と連携
+
 #### E. 自動修正（grade_C → auto_fixing）
 - NG表現の自動差し替え
 - 修正後に再校正
