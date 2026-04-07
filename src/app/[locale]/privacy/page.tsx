@@ -45,6 +45,8 @@ export default async function PrivacyPage() {
             <li>{t("s3c")}</li>
             <li>{t("s3d")}</li>
             <li>{t("s3e")}</li>
+            <li>{t("s3f")}</li>
+            <li>{t("s3g")}</li>
           </ul>
         </section>
 
@@ -99,6 +101,22 @@ export default async function PrivacyPage() {
         <section>
           <h2 className="mb-3 text-lg font-bold">{t("s9Title")}</h2>
           <p>{t("s9Body")}</p>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-lg font-bold">{t("s11Title")}</h2>
+          <p className="mb-2">{t("s11Intro")}</p>
+          <ul className="list-disc space-y-1 pl-6">
+            <li>{t("s11a")}</li>
+            <li>{t("s11b")}</li>
+            <li>{t("s11c")}</li>
+            <li>{t("s11d")}</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-lg font-bold">{t("s12Title")}</h2>
+          <p>{t("s12Body")}</p>
         </section>
 
         <section>
