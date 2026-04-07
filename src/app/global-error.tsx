@@ -20,9 +20,11 @@ export default function GlobalError({
           textAlign: "center",
         }}>
           <h2 style={{ marginBottom: "0.5rem", fontSize: "1.25rem" }}>問題が発生しました</h2>
-          <p style={{ marginBottom: "1.5rem", color: "#888", fontSize: "0.875rem" }}>
+          <p style={{ marginBottom: "0.5rem", color: "#888", fontSize: "0.875rem" }}>
             ページの読み込みに失敗しました。再試行してください。
           </p>
+          {error.message && <p style={{ marginBottom: "0.5rem", color: "#e55", fontSize: "0.75rem", fontFamily: "monospace" }}>{error.message}</p>}
+          {error.digest && <p style={{ marginBottom: "1.5rem", color: "#aaa", fontSize: "0.75rem", fontFamily: "monospace" }}>digest: {error.digest}</p>}
           <button
             onClick={reset}
             style={{
