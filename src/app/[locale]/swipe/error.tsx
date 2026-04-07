@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+// error boundaryではnext-intl依存を避ける
 
 export default function SwipeError({
   reset,
@@ -18,12 +18,12 @@ export default function SwipeError({
         >
           再試行
         </button>
-        <Link
-          href="/"
+        <a
+          href="/ja"
           className="rounded-full border border-gray-300 px-6 py-2.5 text-sm text-gray-600 transition hover:bg-gray-100"
         >
           ホームに戻る
-        </Link>
+        </a>
       </div>
     </div>
   );

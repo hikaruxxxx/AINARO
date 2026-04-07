@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+// Linkはnext-intlに依存するため、error boundaryではaタグを使用
 
 export default function LocaleError({
   error,
@@ -25,12 +25,12 @@ export default function LocaleError({
         >
           再試行
         </button>
-        <Link
-          href="/"
+        <a
+          href="/ja"
           className="rounded-full border border-border px-6 py-2.5 text-sm text-muted transition hover:bg-surface"
         >
           ホームに戻る
-        </Link>
+        </a>
       </div>
     </div>
   );
