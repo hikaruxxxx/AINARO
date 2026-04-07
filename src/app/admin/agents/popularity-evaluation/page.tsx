@@ -215,16 +215,16 @@ export default function PopularityEvaluationPage() {
             </div>
           </div>
 
-          {/* PV��測 */}
+          {/* 品質予測 v9 */}
           {result.pvPrediction && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <h3 className="mb-3 text-sm font-bold text-blue-800">PV予測 v7（正規化GP推定）</h3>
+              <h3 className="mb-3 text-sm font-bold text-blue-800">品質予測 {result.pvPrediction.modelVersion}（コホート内パーセンタイル）</h3>
               <div className="flex items-center gap-6">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-700">
-                    {result.pvPrediction.predictedGP.toLocaleString()}
+                    {result.pvPrediction.predictedPercentile}%
                   </div>
-                  <div className="mt-1 text-xs text-blue-500">正規化GP</div>
+                  <div className="mt-1 text-xs text-blue-500">パーセンタイル</div>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -239,16 +239,16 @@ export default function PopularityEvaluationPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-blue-600">
-                    予測範囲: {result.pvPrediction.confidenceRange.low.toLocaleString()} 〜 {result.pvPrediction.confidenceRange.high.toLocaleString()}
+                    {result.pvPrediction.detail}
                   </p>
                   {result.pvPrediction.reliability === "low" && (
                     <p className="mt-1 text-xs font-bold text-amber-600">
-                      ⚠️ 表層+ジャンルのみ（Spearman 0.41）— LLMスコア併用で精度向上
+                      ⚠️ 表層のみ — LLMスコア併用で精度向上
                     </p>
                   )}
                   {result.pvPrediction.reliability === "medium" && (
                     <p className="mt-1 text-xs text-blue-500">
-                      LLM特徴量込み（Spearman 0.60）。1,290作品で検証済み
+                      Synopsis/LLM特徴量込み。3,911作品で訓練済み
                     </p>
                   )}
                 </div>

@@ -41,20 +41,20 @@ export interface PopularityEvaluationResult {
     sensoryDescription: PopularityMetric; // 五感描写
     readability: PopularityMetric; // 読みやすさ
   };
-  pvPrediction: PVPrediction; // PV予測（1,882作品のリッジ回帰モデル v3）
+  pvPrediction: PVPrediction; // 品質予測（v9 GBTモデル、コホート内パーセンタイル）
   strengths: string[]; // 強み（日本語）
   improvements: string[]; // 改善提案（日本語）
   summary: string; // 日本語の総評
 }
 
-// PV予測（globalPoint回帰モデル v3）
+// 品質予測（v9: GBTモデル、コホート内パーセンタイル）
 export interface PVPrediction {
-  predictedGP: number; // 予測globalPoint
-  confidenceRange: { low: number; high: number }; // 予測区間
+  predictedPercentile: number; // コホート内パーセンタイル (0-100)
   tier: "top" | "upper" | "mid" | "lower" | "bottom"; // 予測tier
   detail: string;
   hasLLMScores: boolean; // LLM特徴量込みかどうか
-  reliability: "high" | "medium" | "low"; // 予測信頼度（low=表層のみ/medium=LLM込み/high=将来用）
+  reliability: "high" | "medium" | "low"; // 予測信頼度
+  modelVersion: string; // モデルバージョン
 }
 
 // LLM品質スコア（6軸、各1-10）

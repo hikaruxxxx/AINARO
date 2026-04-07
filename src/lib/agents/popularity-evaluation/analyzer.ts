@@ -4,6 +4,7 @@ import type {
   PopularityGenre,
   LLMQualityScores,
 } from "@/types/agents";
+import { predictQuality } from "./gbt-predictor";
 
 // ─── ユーティリティ ───
 
@@ -791,227 +792,7 @@ function generateSummary(
  */
 
 // フルモデル（表層+ジャンル+LLM）の係数と標準化パラメータ（264作品で訓練）
-const PV_MODEL_FULL = {
-  featureStats: [
-    { mean: 22.906576, std: 5.502595 },  // avgSentenceLen
-    { mean: 0.696750, std: 0.132727 },   // sentenceLenCV
-    { mean: 0.392838, std: 0.126425 },   // shortSentenceRatio
-    { mean: 0.072006, std: 0.065526 },   // longSentenceRatio
-    { mean: 0.535153, std: 0.108621 },   // medSentenceRatio
-    { mean: 0.191167, std: 0.114011 },   // burstRatio
-    { mean: 0.644573, std: 0.144578 },   // paragraphLenCV
-    { mean: 38.636598, std: 12.977314 }, // avgParagraphLen
-    { mean: 0.198307, std: 0.146131 },   // dialogueRatio
-    { mean: 0.020403, std: 0.043341 },   // innerMonologueRatio
-    { mean: 0.781290, std: 0.144906 },   // narrativeRatio
-    { mean: 3.644836, std: 2.434824 },   // emotionDensity
-    { mean: 0.590692, std: 0.246995 },   // uniqueEmotionRatio
-    { mean: 0.075499, std: 0.063303 },   // questionRatio
-    { mean: 0.079437, std: 0.081592 },   // exclamationRatio
-    { mean: 0.668451, std: 0.277175 },   // commaPerSentence
-    { mean: 0.553807, std: 0.083551 },   // bigramTTR
-    { mean: 0.250402, std: 0.033222 },   // kanjiRatio
-    { mean: 0.079243, std: 0.056385 },   // katakanaRatio
-    { mean: 0.512056, std: 0.073521 },   // hiraganaRatio
-    { mean: 3.473029, std: 1.720008 },   // conjDensity
-    { mean: 0.405303, std: 0.490951 },   // genre_fantasy
-    { mean: 0.579545, std: 0.493632 },   // genre_romance
-    { mean: 4.916667, std: 1.758278 },   // llm_hook
-    { mean: 4.507576, std: 1.637608 },   // llm_character
-    { mean: 4.265152, std: 1.650803 },   // llm_originality
-    { mean: 4.837121, std: 1.644546 },   // llm_prose
-    { mean: 4.428030, std: 1.695172 },   // llm_tension
-    { mean: 4.962121, std: 1.880544 },   // llm_pull
-  ],
-  targetMean: 3.778215,
-  targetStd: 1.250410,
-  coefficients: [
-    0.070276, -0.080178, -0.016532, 0.021102, 0.006522,
-    0.002496, 0.045533, -0.003129, -0.038556, 0.052325,
-    0.023231, -0.024959, -0.026835, -0.081377, -0.015257,
-    -0.014190, -0.022988, 0.035441, 0.070135, -0.094908,
-    0.003961,
-    -0.197660, 0.214480, // ジャンル
-    0.071152, 0.021801, -0.043788, 0.110563, 0.060768, 0.088963, // LLM
-  ],
-  rmse: 0.9777,
-};
-
-// 表層+ジャンルのみモデルの係数（1,290作品で訓練）
-const PV_MODEL_SURFACE = {
-  featureStats: [
-    { mean: 26.168789, std: 12.558957 },
-    { mean: 0.686870, std: 0.199606 },
-    { mean: 0.395851, std: 0.143829 },
-    { mean: 0.102341, std: 0.095900 },
-    { mean: 0.501809, std: 0.125044 },
-    { mean: 0.397759, std: 0.276302 },
-    { mean: 0.653900, std: 0.177641 },
-    { mean: 36.828935, std: 15.603591 },
-    { mean: 0.214365, std: 0.153687 },
-    { mean: 0.018456, std: 0.050796 },
-    { mean: 0.767180, std: 0.156807 },
-    { mean: 2.088000, std: 2.396046 },
-    { mean: 0.733004, std: 0.326624 },
-    { mean: 0.080966, std: 0.066117 },
-    { mean: 0.094571, std: 0.116237 },
-    { mean: 0.717585, std: 0.346503 },
-    { mean: 0.499799, std: 0.154250 },
-    { mean: 0.257208, std: 0.045769 },
-    { mean: 0.074155, std: 0.045524 },
-    { mean: 0.514782, std: 0.073585 },
-    { mean: 3.340280, std: 1.789291 },
-    { mean: 0.359690, std: 0.479909 },
-    { mean: 0.217829, std: 0.412771 },
-  ],
-  targetMean: 3.618643,
-  targetStd: 1.293195,
-  coefficients: [
-    0.058159, -0.005455, -0.099349, 0.051887, 0.078510,
-    0.078405, 0.012117, -0.054191, -0.051634, 0.029936,
-    0.040674, -0.017032, -0.082070, 0.006833, -0.042826,
-    -0.091934, -0.161341, 0.008293, 0.051666, -0.015745,
-    -0.010212,
-    0.296764, 0.381672, // ジャンル
-  ],
-  rmse: 1.1953,
-};
-
-/** テキストからPV予測用の特徴量を抽出 */
-function extractPVFeatures(text: string): number[] | null {
-  const sentences = text.split(/(?<=[。！？!?])/).map(s => s.trim()).filter(s => s.length > 0);
-  if (sentences.length < 5) return null;
-
-  const paragraphs = text.split(/\n\s*\n|\n/).map(p => p.trim()).filter(p => p.length > 0);
-  const chars = text.replace(/\s/g, "").length;
-  const sLens = sentences.map(s => s.length);
-  const sAvg = sLens.reduce((a, b) => a + b, 0) / sLens.length;
-  const sStd = Math.sqrt(sLens.reduce((acc, l) => acc + (l - sAvg) ** 2, 0) / sLens.length);
-
-  const pLens = paragraphs.map(p => p.length);
-  const pAvg = pLens.reduce((a, b) => a + b, 0) / pLens.length;
-  const pStd = Math.sqrt(pLens.reduce((acc, l) => acc + (l - pAvg) ** 2, 0) / pLens.length);
-
-  const dialoguesText = (text.match(/「[^」]*」/g) || []).join("");
-  const monologuesText = (text.match(/（[^）]*）/g) || []).join("");
-
-  const diffs: number[] = [];
-  for (let i = 1; i < sLens.length; i++) diffs.push(Math.abs(sLens[i] - sLens[i - 1]));
-  const meanDiff = diffs.length > 0 ? diffs.reduce((a, b) => a + b, 0) / diffs.length : 0;
-
-  const posCount = POSITIVE_EMO.filter(w => text.includes(w)).length;
-  const negCount = NEGATIVE_EMO.filter(w => text.includes(w)).length;
-  const totalEmo = posCount + negCount;
-
-  const kanji = text.match(/[\u4e00-\u9fff]/g) || [];
-  const katakana = text.match(/[\u30a0-\u30ff]/g) || [];
-  const hiragana = text.match(/[\u3040-\u309f]/g) || [];
-  const commas = (text.match(/、/g) || []).length;
-  const questions = sentences.filter(s => s.includes("？") || s.includes("?")).length;
-  const exclamations = sentences.filter(s => s.includes("！") || s.includes("!")).length;
-  const cleanChars = [...text.replace(/[\s\n\r、。！？!?「」『』（）\(\)・…―─ー]/g, "")];
-  const bigrams = new Set<string>();
-  for (let i = 0; i < cleanChars.length - 1; i++) bigrams.add(cleanChars[i] + cleanChars[i + 1]);
-
-  const CONJ = ["しかし", "そして", "また", "さらに", "そのため", "ところが", "けれど", "だが", "それでも", "つまり", "すると", "やがて", "それから", "だから"];
-  const conjUsed = CONJ.reduce((acc, w) => acc + (text.match(new RegExp(w, "g"))?.length || 0), 0);
-
-  return [
-    sAvg,
-    sAvg > 0 ? sStd / sAvg : 0,
-    sLens.filter(l => l <= 20).length / sLens.length,
-    sLens.filter(l => l >= 50).length / sLens.length,
-    sLens.filter(l => l > 20 && l < 50).length / sLens.length,
-    sAvg > 0 ? meanDiff / sAvg : 0,
-    pAvg > 0 ? pStd / pAvg : 0,
-    pAvg,
-    chars > 0 ? dialoguesText.length / chars : 0,
-    chars > 0 ? monologuesText.length / chars : 0,
-    chars > 0 ? (chars - dialoguesText.length - monologuesText.length) / chars : 0,
-    chars > 0 ? totalEmo / (chars / 1000) : 0,
-    totalEmo > 0 ? new Set([...POSITIVE_EMO.filter(w => text.includes(w)), ...NEGATIVE_EMO.filter(w => text.includes(w))]).size / totalEmo : 0,
-    questions / sentences.length,
-    exclamations / sentences.length,
-    commas / sentences.length,
-    cleanChars.length > 1 ? bigrams.size / (cleanChars.length - 1) : 0,
-    chars > 0 ? kanji.length / chars : 0,
-    chars > 0 ? katakana.length / chars : 0,
-    chars > 0 ? hiragana.length / chars : 0,
-    chars > 0 ? conjUsed / (chars / 1000) : 0,
-  ];
-}
-
-// PV予測用の感情語リスト（軽量版）
-const POSITIVE_EMO = ["嬉しい", "嬉し", "喜び", "幸せ", "楽しい", "好き", "愛し", "感動", "ときめ", "安心", "微笑", "笑顔", "笑い", "笑っ"];
-const NEGATIVE_EMO = ["悲しい", "悲し", "泣い", "涙", "辛い", "苦しい", "痛い", "怖い", "恐怖", "不安", "心配", "焦っ", "怒り", "怒っ", "悔し", "絶望", "寂し"];
-
-/** ジャンルをモデル用カテゴリに変換 */
-function genreToCategory(genre?: PopularityGenre): "fantasy" | "romance" | "literary" {
-  if (!genre) return "literary";
-  if (genre === "fantasy" || genre === "horror" || genre === "scifi") return "fantasy";
-  if (genre === "romance") return "romance";
-  return "literary"; // mystery, slice_of_life
-}
-
-/** PV（正規化globalPoint）を予測する。v7モデル: 目的変数=log10(GP/log10(ep+1)) */
-function predictPV(text: string, genre?: PopularityGenre, llmScores?: LLMQualityScores): { predictedGP: number; confidenceRange: { low: number; high: number }; tier: "top" | "upper" | "mid" | "lower" | "bottom"; detail: string; hasLLMScores: boolean; reliability: "high" | "medium" | "low" } {
-  const textFeatures = extractPVFeatures(text);
-  if (!textFeatures) {
-    return { predictedGP: 0, confidenceRange: { low: 0, high: 0 }, tier: "mid" as const, detail: "テキストが短すぎて予測不能", hasLLMScores: false, reliability: "low" as const };
-  }
-
-  // ジャンルone-hot（ファンタジー/恋愛の2変数、文芸がベースライン）
-  const genreCat = genreToCategory(genre);
-  const genreVec = [genreCat === "fantasy" ? 1.0 : 0.0, genreCat === "romance" ? 1.0 : 0.0];
-
-  const hasLLM = !!llmScores;
-
-  // モデル選択: LLMスコアありならフルモデル、なければ表層+ジャンルモデル
-  const model = hasLLM ? PV_MODEL_FULL : PV_MODEL_SURFACE;
-  const features = hasLLM
-    ? [...textFeatures, ...genreVec, llmScores.hook, llmScores.character, llmScores.originality, llmScores.prose, llmScores.tension, llmScores.pull]
-    : [...textFeatures, ...genreVec];
-
-  // 標準化（各モデル固有の統計量を使用）
-  const standardized = features.map((v, i) => {
-    const s = model.featureStats[i];
-    return s.std > 0 ? (v - s.mean) / s.std : 0;
-  });
-
-  // 予測（標準化空間）
-  let predStd = 0;
-  for (let i = 0; i < features.length; i++) {
-    predStd += standardized[i] * model.coefficients[i];
-  }
-
-  // 元のスケールに戻す（正規化GP = GP/log10(ep+1)）
-  const predLog = predStd * model.targetStd + model.targetMean;
-  const predictedNormGP = Math.round(Math.pow(10, predLog));
-
-  // 信頼区間（モデル固有のRMSE）
-  const low = Math.round(Math.pow(10, predLog - model.rmse));
-  const high = Math.round(Math.pow(10, predLog + model.rmse));
-
-  // tier推定（正規化GPのパーセンタイル閾値 — 1,290作品）
-  // P80=61,000 / P60=18,000 / P40=3,500 / P20=172
-  let tier: "top" | "upper" | "mid" | "lower" | "bottom";
-  if (predictedNormGP >= 61000) tier = "top";
-  else if (predictedNormGP >= 18000) tier = "upper";
-  else if (predictedNormGP >= 3500) tier = "mid";
-  else if (predictedNormGP >= 172) tier = "lower";
-  else tier = "bottom";
-
-  // 信頼度判定
-  const reliability: "high" | "medium" | "low" = hasLLM ? "medium" : "low";
-  const ratio = Math.round(Math.pow(10, model.rmse * 2));
-
-  const llmNote = hasLLM
-    ? `（LLM込み・Spearman 0.61・信頼区間${ratio}倍幅）`
-    : `⚠️ 表層のみ（Spearman 0.29・信頼区間${ratio}倍幅）— LLMスコア併用を推奨`;
-  const detail = `予測正規化GP: ${predictedNormGP.toLocaleString()}（${low.toLocaleString()}〜${high.toLocaleString()}）。${tier} tier相当${llmNote}`;
-
-  return { predictedGP: predictedNormGP, confidenceRange: { low, high }, tier, detail, hasLLMScores: hasLLM, reliability };
-}
+// v9: GBT予測器を使用（旧Ridge回帰モデルは削除済み）
 
 // ─── メインの分析関数 ───
 
@@ -1037,8 +818,16 @@ export function analyzePopularity(
     readability: analyzeReadability(text),
   };
 
-  // PV予測（LLMスコアがあれば精度向上: Spearman 0.415→0.733）
-  const pvPrediction = predictPV(text, genre, llmScores);
+  // 品質予測 v9（GBTモデル: コホート内パーセンタイル予測）
+  const gbtResult = predictQuality(text, genre, llmScores);
+  const pvPrediction = {
+    predictedPercentile: gbtResult.predictedPercentile,
+    tier: gbtResult.tier,
+    detail: gbtResult.detail,
+    hasLLMScores: gbtResult.hasLLMScores,
+    reliability: gbtResult.reliability,
+    modelVersion: gbtResult.modelVersion,
+  };
 
   // ジャンル別の重み付けで総合スコアを計算
   const weights = getGenreWeights(genre);
