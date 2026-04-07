@@ -37,7 +37,9 @@ import {
   getMockNovelsByTag,
 } from "./mock-data";
 
+// USE_MOCK_DATA=trueで強制的にモックデータを使用（Supabaseクエリをスキップして高速化）
 const isSupabaseConfigured =
+  process.env.USE_MOCK_DATA !== "true" &&
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
