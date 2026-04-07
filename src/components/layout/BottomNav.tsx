@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 
@@ -11,13 +12,25 @@ const NAV_ICONS = {
   mypage: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
 };
 
-// 没入型ページ — SPA遷移するとRSCフライトが500になるためフルリロード
+// 没入型ページ — フルリロードで遷移
 const FULLSCREEN_PAGES = ["/discover", "/recommend", "/swipe"];
 
 export default function BottomNav() {
   const t = useTranslations("bottomNav");
   const locale = useLocale();
   const pathname = usePathname();
+  const [visible, setVisible] = useState(true);
+
+  // 管理画面・エピソード閲覧中は完全非表示
+  if (pathname.startsWith("/admin") || /^\/novels\/[^/]+\/\d+/.test(pathname)) {
+    return null;
+  }
+
+  // トップページ・没入型ページでは常に表示
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    setVisible(true);
+  }, [pathname]);
 
   const NAV_ITEMS = [
     { href: "/" as const, label: t("home"), icon: NAV_ICONS.home },
@@ -27,12 +40,10 @@ export default function BottomNav() {
     { href: "/mypage" as const, label: t("mypage"), icon: NAV_ICONS.mypage },
   ];
 
-  if (pathname.startsWith("/admin") || pathname.startsWith("/discover") || pathname.startsWith("/recommend") || pathname.startsWith("/swipe") || /^\/novels\/[^/]+\/\d+/.test(pathname)) {
-    return null;
-  }
-
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white md:hidden">
+    <nav className={`fixed bottom-0 left-0 right-0 z-[60] border-t border-border bg-white/95 backdrop-blur-sm transition-transform duration-300 md:hidden ${
+      visible ? "translate-y-0" : "translate-y-full"
+    }`}>
       <div className="flex h-14 items-center justify-around">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
@@ -41,7 +52,6 @@ export default function BottomNav() {
             isActive ? "text-primary" : "text-muted"
           }`;
 
-          // 没入型ページはフルリロードで遷移
           if (needsFullReload) {
             return (
               <button

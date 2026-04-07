@@ -98,7 +98,7 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
       ))}
 
       {/* ボタン — スクロール中はフェードアウト */}
-      <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-8 pb-8 pt-4 transition-opacity duration-300 ${buttonsHidden ? "opacity-20" : "opacity-100"}`}>
+      <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-8 pb-20 pt-4 transition-opacity duration-300 ${buttonsHidden ? "opacity-20" : "opacity-100"}`}>
         <button
           onClick={() => triggerSwipe("left")}
           disabled={isAnimating}
