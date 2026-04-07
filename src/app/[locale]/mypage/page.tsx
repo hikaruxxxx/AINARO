@@ -31,6 +31,7 @@ export default function MyPage() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [userLabel, setUserLabel] = useState<string | null>(null);
+  const [isWriter, setIsWriter] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const points = usePoints();
@@ -38,11 +39,20 @@ export default function MyPage() {
   // ログインユーザー情報取得
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       const u = data.user;
       if (u) {
+        // user_profiles を最優先（作家登録時のペンネーム）、次に user_metadata、最後に email
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("display_name, role, writer_status")
+          .eq("user_id", u.id)
+          .maybeSingle();
         const meta = (u.user_metadata ?? {}) as { display_name?: string; name?: string };
-        setUserLabel(meta.display_name || meta.name || u.email || null);
+        setUserLabel(profile?.display_name || meta.display_name || meta.name || u.email || null);
+        if (profile?.role === "writer" && profile.writer_status === "approved") {
+          setIsWriter(true);
+        }
       }
       setAuthChecked(true);
     });
@@ -202,12 +212,14 @@ export default function MyPage() {
               <span className="text-muted">→</span>
             </Link>
           </li>
-          <li>
-            <Link href="/dashboard" className="flex items-center justify-between px-4 py-3 hover:bg-border/30 transition">
-              <span className="text-text">{t("writerDashboard")}</span>
-              <span className="text-muted">→</span>
-            </Link>
-          </li>
+          {isWriter && (
+            <li>
+              <Link href="/dashboard" className="flex items-center justify-between px-4 py-3 hover:bg-border/30 transition">
+                <span className="text-text">{t("writerDashboard")}</span>
+                <span className="text-muted">→</span>
+              </Link>
+            </li>
+          )}
           {userLabel && (
             <li>
               <button
