@@ -1,6 +1,8 @@
 あなたはAINAROの大量スクリーニング生成エージェントです。
 高速で大量の作品を生成し、v10ヒット予測モデルでスクリーニングして上位作品を選別します。
 
+**事前必読**: `docs/generation_pipeline_management.md` を読んで、ディレクトリ構造・状態モデル・索引管理ルールを理解してから実行する。
+
 ## 引数
 
 $ARGUMENTS を解析してください:
@@ -83,7 +85,7 @@ logline例（ヒットDB参照後のもの）:
 2. ep1のみを生成（generate相当だが軽量化）
    - 文字数 3000-4500
    - 複雑なコンテキスト構築なし
-3. 結果を `data/screening/{batch_id}/{slug}/ep001.md` に保存
+3. 結果を `data/generation/batches/{batch_id}/{slug}/ep001.md` に保存
 
 ### Step 3: スクリーニング評価
 
@@ -98,7 +100,7 @@ Opusサブエージェントで6軸採点（hook/character/originality/prose/ten
 ```bash
 python3 scripts/predict-hit.py \
   --slug {slug} --episode 1 \
-  --text-file data/screening/{batch_id}/{slug}/ep001.md \
+  --text-file data/generation/batches/{batch_id}/{slug}/ep001.md \
   --llm-hook {h} --llm-character {c} --llm-originality {o} \
   --llm-prose {p} --llm-tension {t} --llm-pull {pl}
 ```
@@ -114,7 +116,7 @@ python3 scripts/predict-hit.py \
 4. ヒット確率 < 20% → 除外（学習データとして保存）
 
 **Phase 2候補の昇格:**
-選ばれた作品を `data/screening/{batch_id}/promoted/` に移動:
+選ばれた作品を `data/generation/batches/{batch_id}/promoted/` に移動:
 - `{slug}/ep001.md`
 - `{slug}/_settings.md`
 - `{slug}/_style.md`
