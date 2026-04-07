@@ -1,8 +1,13 @@
 /**
- * GBT（勾配ブースティング木）予測器 v9
+ * GBT（勾配ブースティング木）予測器 v10
  *
- * LightGBMで訓練したモデルのJSON表現をTypeScriptで実行する。
- * 欠損値（null/undefined）対応。ツリー走査のみで外部依存なし。
+ * LightGBMで訓練したヒット予測モデル（binary classification）の
+ * JSON表現をTypeScriptで実行する。
+ *
+ * v10の変更点:
+ * - 目的: コホートpercentile回帰 → top 20% ヒット予測（binary classification）
+ * - 出力: leaf値の和 → sigmoid → 確率 [0, 1]
+ * - 欠損値（null/undefined）対応はそのまま
  */
 
 import { readFileSync } from "fs";
@@ -12,32 +17,33 @@ import type { LLMQualityScores, PopularityGenre } from "@/types/agents";
 // ─── 型定義 ───
 
 interface TreeNode {
-  f?: number; // split_feature index
-  t?: number; // threshold
-  l?: TreeNode; // left child
-  r?: TreeNode; // right child
-  d?: "l" | "r"; // missing_direction (default: "l")
-  cat?: boolean; // カテゴリカル分割
-  v?: number; // leaf value
+  f?: number;
+  t?: number;
+  l?: TreeNode;
+  r?: TreeNode;
+  d?: "l" | "r";
+  cat?: boolean;
+  v?: number;
 }
 
 interface GBTModel {
   version: string;
-  learning_rate: number;
+  type: string;
+  objective?: string;
   trees: TreeNode[];
   feature_names: string[];
-  tier_thresholds: Record<string, number>;
+  hit_threshold_gp_per_ep?: number;
   genre_groups: Record<string, number>;
   performance: Record<string, number>;
 }
 
-// ─── モデル読み込み（サーバーサイドのみ） ───
+// ─── モデル読み込み ───
 
 let _model: GBTModel | null = null;
 
 function getModel(): GBTModel {
   if (!_model) {
-    const modelPath = join(process.cwd(), "data", "models", "quality-prediction-v9.json");
+    const modelPath = join(process.cwd(), "data", "models", "hit-prediction-v10.json");
     const raw = readFileSync(modelPath, "utf-8");
     _model = JSON.parse(raw) as GBTModel;
   }
@@ -73,14 +79,20 @@ function predictTree(node: TreeNode, features: (number | null)[]): number {
     : predictTree(node.r!, features);
 }
 
+/** sigmoid関数: binary classificationのraw score → 確率変換 */
+function sigmoid(x: number): number {
+  return 1 / (1 + Math.exp(-x));
+}
+
 function predictGBT(features: (number | null)[]): number {
   const model = getModel();
-  let score = 0;
+  // v10: leaf値にはlearning_rateが既に反映済み。単純に和を取る
+  let rawScore = 0;
   for (const tree of model.trees) {
-    score += model.learning_rate * predictTree(tree, features);
+    rawScore += predictTree(tree, features);
   }
-  // パーセンタイル [0, 1] にクランプ
-  return Math.max(0, Math.min(1, score));
+  // Binary classification: sigmoid適用でヒット確率を返す
+  return sigmoid(rawScore);
 }
 
 // ─── 特徴量抽出 ───
@@ -214,7 +226,7 @@ function genreToGroupId(genre?: PopularityGenre): number {
 // ─── 公開API ───
 
 export interface GBTPrediction {
-  predictedPercentile: number; // 0-100
+  hitProbability: number; // 0-100 (top 20%に入る確率)
   tier: "top" | "upper" | "mid" | "lower" | "bottom";
   detail: string;
   hasLLMScores: boolean;
@@ -224,7 +236,7 @@ export interface GBTPrediction {
 }
 
 /**
- * テキストからコホート内パーセンタイルを予測する
+ * テキストからヒット確率（top 20%に入る確率）を予測する
  *
  * @param text - 小説テキスト（500文字以上推奨）
  * @param genre - ジャンル（任意）
@@ -245,7 +257,7 @@ export function predictQuality(
   const surfaceFeatures = extractSurfaceFeatures(text);
   if (!surfaceFeatures) {
     return {
-      predictedPercentile: 50,
+      hitProbability: 20,
       tier: "mid",
       detail: "テキストが短すぎて予測不能",
       hasLLMScores: false,
@@ -255,11 +267,11 @@ export function predictQuality(
     };
   }
 
-  // 特徴量ベクトル構築（モデルのfeature_namesの順序に合わせる）
+  // 特徴量ベクトル構築（v10の feature_names 順）
   const features: (number | null)[] = [
     // 表層 21D
     ...surfaceFeatures,
-    // メタ 4D（ランタイムでは不明なのでnull）
+    // メタ 4D（ランタイムでは不明）
     null, // titleLen
     null, // titleHasBracket
     null, // titleHasTemplateKw
@@ -283,15 +295,16 @@ export function predictQuality(
   ];
 
   const m = getModel();
-  const percentile = predictGBT(features);
-  const percentile100 = Math.round(percentile * 100);
+  const probability = predictGBT(features); // 0-1
+  const probability100 = Math.round(probability * 100);
 
-  // Tier判定
+  // Tier判定: ヒット確率に応じて5段階
+  // top: 50%以上, upper: 35-50%, mid: 20-35%, lower: 10-20%, bottom: <10%
   let tier: "top" | "upper" | "mid" | "lower" | "bottom";
-  if (percentile >= m.tier_thresholds.top) tier = "top";
-  else if (percentile >= m.tier_thresholds.upper) tier = "upper";
-  else if (percentile >= m.tier_thresholds.mid) tier = "mid";
-  else if (percentile >= m.tier_thresholds.lower) tier = "lower";
+  if (probability >= 0.5) tier = "top";
+  else if (probability >= 0.35) tier = "upper";
+  else if (probability >= 0.2) tier = "mid";
+  else if (probability >= 0.1) tier = "lower";
   else tier = "bottom";
 
   const hasLLM = !!llmScores;
@@ -303,16 +316,16 @@ export function predictQuality(
   else if (hasLLM || hasSynopsis) reliability = "medium";
   else reliability = "low";
 
-  const spearman = m.performance.cv_spearman;
+  const auc = m.performance.cv_auc;
   const inputNote = hasLLM
     ? "LLM+表層"
     : hasSynopsis
       ? "Synopsis+表層"
       : "表層のみ";
-  const detail = `コホート内パーセンタイル: ${percentile100}%（${tier} tier）。${inputNote}モデル（CV Spearman ${spearman}）`;
+  const detail = `ヒット確率: ${probability100}%（${tier} tier）。${inputNote}モデル（CV AUC ${auc}）`;
 
   return {
-    predictedPercentile: percentile100,
+    hitProbability: probability100,
     tier,
     detail,
     hasLLMScores: hasLLM,

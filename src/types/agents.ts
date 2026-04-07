@@ -47,14 +47,14 @@ export interface PopularityEvaluationResult {
   summary: string; // 日本語の総評
 }
 
-// 品質予測（v9: GBTモデル、コホート内パーセンタイル）
+// ヒット予測（v10: GBT binary classification、top 20%確率）
 export interface PVPrediction {
-  predictedPercentile: number; // コホート内パーセンタイル (0-100)
-  tier: "top" | "upper" | "mid" | "lower" | "bottom"; // 予測tier
+  hitProbability: number; // ヒット（top 20%）に入る確率 (0-100)
+  tier: "top" | "upper" | "mid" | "lower" | "bottom"; // 確率に応じたtier
   detail: string;
-  hasLLMScores: boolean; // LLM特徴量込みかどうか
-  reliability: "high" | "medium" | "low"; // 予測信頼度
-  modelVersion: string; // モデルバージョン
+  hasLLMScores: boolean;
+  reliability: "high" | "medium" | "low";
+  modelVersion: string;
 }
 
 // LLM品質スコア（6軸、各1-10）

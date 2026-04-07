@@ -818,10 +818,10 @@ export function analyzePopularity(
     readability: analyzeReadability(text),
   };
 
-  // 品質予測 v9（GBTモデル: コホート内パーセンタイル予測）
+  // ヒット予測 v10（GBT binary classification: top 20%予測）
   const gbtResult = predictQuality(text, genre, llmScores);
   const pvPrediction = {
-    predictedPercentile: gbtResult.predictedPercentile,
+    hitProbability: gbtResult.hitProbability,
     tier: gbtResult.tier,
     detail: gbtResult.detail,
     hasLLMScores: gbtResult.hasLLMScores,

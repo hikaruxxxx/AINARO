@@ -215,16 +215,16 @@ export default function PopularityEvaluationPage() {
             </div>
           </div>
 
-          {/* 品質予測 v9 */}
+          {/* ヒット予測 v10 */}
           {result.pvPrediction && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <h3 className="mb-3 text-sm font-bold text-blue-800">品質予測 {result.pvPrediction.modelVersion}（コホート内パーセンタイル）</h3>
+              <h3 className="mb-3 text-sm font-bold text-blue-800">ヒット予測 {result.pvPrediction.modelVersion}（top 20%入り確率）</h3>
               <div className="flex items-center gap-6">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-700">
-                    {result.pvPrediction.predictedPercentile}%
+                    {result.pvPrediction.hitProbability}%
                   </div>
-                  <div className="mt-1 text-xs text-blue-500">パーセンタイル</div>
+                  <div className="mt-1 text-xs text-blue-500">ヒット確率</div>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -243,12 +243,12 @@ export default function PopularityEvaluationPage() {
                   </p>
                   {result.pvPrediction.reliability === "low" && (
                     <p className="mt-1 text-xs font-bold text-amber-600">
-                      ⚠️ 表層のみ — LLMスコア併用で精度向上
+                      ⚠️ 表層のみ — Synopsis/LLMスコア併用で精度向上
                     </p>
                   )}
                   {result.pvPrediction.reliability === "medium" && (
                     <p className="mt-1 text-xs text-blue-500">
-                      Synopsis/LLM特徴量込み。3,911作品で訓練済み
+                      Synopsis/LLM特徴量込み。CV ROC-AUC 0.80
                     </p>
                   )}
                 </div>
