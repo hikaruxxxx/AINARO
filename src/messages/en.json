@@ -178,7 +178,17 @@
     "dataManagement": "Data Management",
     "dataManagementDesc": "Your reading history is saved in this browser's local storage.",
     "deleteHistory": "Delete Reading History",
-    "deleteConfirm": "Delete all reading history? This action cannot be undone."
+    "deleteConfirm": "Delete all reading history? This action cannot be undone.",
+    "guestGreeting": "Browsing as guest",
+    "loginPrompt": "Sign in to sync points and reading history across devices",
+    "login": "Sign in",
+    "pointsBalance": "Points Balance",
+    "viewHistory": "View history",
+    "menu": "Menu",
+    "points": "Points",
+    "writerDashboard": "Writer Dashboard",
+    "logout": "Sign out",
+    "loggingOut": "Signing out..."
   },
   "search": {
     "title": "Search",
@@ -348,13 +358,13 @@
     "featureDataDesc": "Free access to dashboards showing completion rates, drop-off points, and retention. See how readers engage with your story.",
     "featureRevenueTitle": "90% Revenue Share",
     "featureRevenueDesc": "Industry-leading revenue share. 90% of all revenue — ads, subscriptions, everything — goes directly to you.",
-    "ctaTitle": "Early Author Registration Open",
-    "ctaSubtitle": "Be the first to know when submissions launch.",
-    "ctaButton": "Register Interest"
+    "ctaTitle": "Start Writing Today",
+    "ctaSubtitle": "Just pick a pen name — you can publish your stories immediately after signup.",
+    "ctaButton": "Start Writing"
   },
   "writerApply": {
     "title": "Register as a Writer",
-    "subtitle": "Set your pen name and start writing right away.",
+    "subtitle": "Set your pen name and start publishing immediately.",
     "penNameLabel": "Pen Name",
     "penNamePlaceholder": "The name readers will see",
     "penNameHint": "Up to 50 characters. You can change it later.",

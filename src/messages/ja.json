@@ -178,7 +178,17 @@
     "dataManagement": "データ管理",
     "dataManagementDesc": "読書履歴はこのブラウザのローカルストレージに保存されています。",
     "deleteHistory": "読書履歴を削除",
-    "deleteConfirm": "読書履歴をすべて削除しますか？この操作は取り消せません。"
+    "deleteConfirm": "読書履歴をすべて削除しますか？この操作は取り消せません。",
+    "guestGreeting": "ゲストとして閲覧中",
+    "loginPrompt": "ログインするとポイントや読書履歴を端末間で同期できます",
+    "login": "ログイン",
+    "pointsBalance": "ポイント残高",
+    "viewHistory": "履歴を見る",
+    "menu": "メニュー",
+    "points": "ポイント",
+    "writerDashboard": "執筆ダッシュボード",
+    "logout": "ログアウト",
+    "loggingOut": "ログアウト中..."
   },
   "search": {
     "title": "検索",
@@ -348,13 +358,13 @@
     "featureDataDesc": "読了率・離脱ポイント・継続率のダッシュボードを無料開放。「面白い」を数字で実感できます。",
     "featureRevenueTitle": "全収益の90%還元",
     "featureRevenueDesc": "業界最高の還元率。広告もサブスクも含めた全収益の90%が、あなたの手元に届きます。",
-    "ctaTitle": "作家先行登録を受付中",
-    "ctaSubtitle": "投稿機能の正式リリース時に、優先的にご案内します。",
-    "ctaButton": "事前登録する"
+    "ctaTitle": "今すぐ執筆を始めよう",
+    "ctaSubtitle": "ペンネームを決めるだけ。登録後すぐに作品を投稿・公開できます。",
+    "ctaButton": "執筆を始める"
   },
   "writerApply": {
     "title": "作家として登録する",
-    "subtitle": "ペンネームを設定して、すぐに執筆を始められます。",
+    "subtitle": "ペンネームを設定すれば、すぐに執筆・公開を始められます。",
     "penNameLabel": "ペンネーム",
     "penNamePlaceholder": "読者に表示される名前",
     "penNameHint": "50文字以内。後から変更できます。",

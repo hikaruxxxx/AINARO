@@ -44,54 +44,53 @@ export default async function WritePage() {
   ];
 
   return (
-    <div className="min-h-screen">
-      {/* ヒーロー */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-gray-900 via-gray-800 to-gray-50 dark:to-gray-950 pb-16 pt-16 text-center md:pb-24 md:pt-24">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.4),transparent_50%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(168,85,247,0.3),transparent_50%)]" />
-        </div>
-        <div className="relative mx-auto max-w-3xl px-6">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-indigo-500/10 px-4 py-1.5 text-sm font-medium text-indigo-300">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-            </svg>
-            {t("badge")}
-          </div>
-          <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-white md:text-5xl">
+    <div className="min-h-screen bg-white">
+      {/* ヒーロー（シンプルな白基調） */}
+      <section className="border-b border-gray-100 bg-white pb-14 pt-16 text-center md:pb-20 md:pt-24">
+        <div className="mx-auto max-w-3xl px-6">
+          <h1 className="mb-5 whitespace-pre-line text-3xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-5xl">
             {t("heroTitle")}
           </h1>
-          <p className="mb-8 text-base text-white/60 md:text-lg">
+          <p className="mb-8 text-base leading-relaxed text-gray-600 md:text-lg">
             {t("heroSubtitle")}
           </p>
+          <Link
+            href="/write/apply"
+            className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-8 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
+          >
+            {t("ctaButton")}
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </Link>
         </div>
       </section>
 
       {/* 特徴3つ */}
       <section className="mx-auto max-w-5xl px-6 py-16 md:py-20">
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {features.map((f, i) => (
-            <div key={i} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-              <div className="mb-4 text-indigo-500">{f.icon}</div>
-              <h3 className="mb-2 text-lg font-bold text-text">{f.title}</h3>
-              <p className="text-sm leading-relaxed text-muted">{f.description}</p>
+            <div key={i} className="rounded-2xl border border-gray-200 bg-white p-6">
+              <div className="mb-4 text-indigo-600">{f.icon}</div>
+              <h3 className="mb-2 text-lg font-bold text-gray-900">{f.title}</h3>
+              <p className="text-sm leading-relaxed text-gray-600">{f.description}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 事前登録CTA */}
+      {/* 最終CTA */}
       <section className="mx-auto max-w-2xl px-6 pb-20 text-center">
-        <div className="rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 p-8 dark:from-indigo-950/30 dark:to-purple-950/30 md:p-12">
-          <h2 className="mb-3 text-2xl font-bold text-text md:text-3xl">
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 md:p-12">
+          <h2 className="mb-3 text-2xl font-bold text-gray-900 md:text-3xl">
             {t("ctaTitle")}
           </h2>
-          <p className="mb-6 text-sm text-muted md:text-base">
+          <p className="mb-6 text-sm text-gray-600 md:text-base">
             {t("ctaSubtitle")}
           </p>
           <Link
             href="/write/apply"
-            className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-8 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-indigo-700 hover:shadow-xl"
+            className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-8 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
           >
             {t("ctaButton")}
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

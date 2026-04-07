@@ -47,12 +47,20 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient();
 
-    // 既存プロフィール確認
-    const { data: existing } = await supabase
+    // 既存プロフィール確認（.single() は 0 件時にエラーを返すので maybeSingle を使う）
+    const { data: existing, error: selectError } = await supabase
       .from("user_profiles")
       .select("role, writer_status")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
+
+    if (selectError) {
+      console.error("[writer/apply] select error", selectError);
+      return NextResponse.json(
+        { error: `プロフィール取得に失敗しました: ${selectError.message}` },
+        { status: 500 }
+      );
+    }
 
     // 既に承認済みならエラー
     if (existing?.role === "writer" && existing.writer_status === "approved") {
@@ -78,37 +86,25 @@ export async function POST(request: NextRequest) {
       writer_approved_at: new Date().toISOString(),
     };
 
-    if (existing) {
-      // 既存レコードを更新
-      const { error } = await supabase
-        .from("user_profiles")
-        .update(profileData)
-        .eq("user_id", user.id);
+    // upsert で新規/既存の分岐を一本化（user_id で衝突解決）
+    const { error: upsertError } = await supabase
+      .from("user_profiles")
+      .upsert(profileData, { onConflict: "user_id" });
 
-      if (error) {
-        return NextResponse.json(
-          { error: "プロフィールの更新に失敗しました" },
-          { status: 500 }
-        );
-      }
-    } else {
-      // 新規作成
-      const { error } = await supabase
-        .from("user_profiles")
-        .insert(profileData);
-
-      if (error) {
-        return NextResponse.json(
-          { error: "プロフィールの作成に失敗しました" },
-          { status: 500 }
-        );
-      }
+    if (upsertError) {
+      console.error("[writer/apply] upsert error", upsertError);
+      return NextResponse.json(
+        { error: `プロフィールの作成に失敗しました: ${upsertError.message}` },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("[writer/apply] unexpected error", error);
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "サーバーエラーが発生しました" },
+      { error: `サーバーエラーが発生しました: ${message}` },
       { status: 500 }
     );
   }
