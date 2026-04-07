@@ -293,3 +293,16 @@ export type EpisodeRetention = {
   continued_to_next: number;
   retention_rate: number | null;
 };
+
+// ユーザープロフィール
+export type UserProfile = {
+  id: string;
+  user_id: string;
+  display_name: string | null;
+  role: "reader" | "writer" | "admin";
+  writer_status: "none" | "approved" | "suspended";
+  bio: string | null;
+  created_at: string;
+  updated_at: string;
+  writer_approved_at?: string | null;
+};
