@@ -41,7 +41,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 z-[60] border-t border-border bg-white/95 backdrop-blur-sm transition-transform duration-300 md:hidden ${
+    <nav className={`fixed bottom-0 left-0 right-0 z-[60] border-t border-border bg-white/95 backdrop-blur-sm transition-transform duration-300 ${
       visible ? "translate-y-0" : "translate-y-full"
     }`}>
       <div className="flex h-14 items-center justify-around">
