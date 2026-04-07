@@ -27,6 +27,9 @@ export type Novel = {
   updated_at: string;
 };
 
+// エピソードのステータス
+export type EpisodeStatus = "draft" | "pending_review" | "revision_requested" | "scheduled" | "published";
+
 // エピソード（話）
 export type Episode = {
   id: string;
@@ -39,9 +42,11 @@ export type Episode = {
   body_html: string | null;
   body_html_en: string | null;
   character_count: number;
+  status?: EpisodeStatus;         // Phase 1で追加。未マイグレーション環境では省略可
   is_free: boolean;
   unlock_at: string | null;     // NULLなら即時解放、値があればその時刻まではロック
   unlock_price: number;          // 先読みに必要なポイント数（0 = 無料）
+  scheduled_at?: string | null;  // 予約公開日時
   pv: number;
   published_at: string;
   created_at: string;

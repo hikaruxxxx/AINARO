@@ -36,6 +36,7 @@ export default async function HomePage() {
   const locale = await getLocale();
   const t = await getTranslations("home");
   const tNovel = await getTranslations("novel");
+  const tGenre = await getTranslations("genre");
 
   const novels = await fetchRankedNovels({ limit: 30, locale });
 
@@ -57,13 +58,29 @@ export default async function HomePage() {
     .filter((n) => (n.avg_completion_rate ?? 0) >= 70)
     .slice(0, 8);
 
+  // ジャンル別に作品を分類
+  const genreGroups = new Map<string, NovelScore[]>();
+  for (const novel of novels) {
+    if (!genreGroups.has(novel.genre)) {
+      genreGroups.set(novel.genre, []);
+    }
+    genreGroups.get(novel.genre)!.push(novel);
+  }
+  // 2作品以上あるジャンルのみ表示
+  const genreSections = [...genreGroups.entries()]
+    .filter(([, items]) => items.length >= 2)
+    .sort((a, b) => b[1].length - a[1].length);
+
+  // セクションインデックス（縞模様の背景切り替え用）
+  let sectionIdx = 0;
+
   return (
     <div>
       <TasteOnboarding />
       <ContinueReadingSection />
 
       {/* ヒーローセクション — 最高スコア作品を大きく */}
-      <section className="mb-10">
+      <section>
         <HeroCard
           novel={novels[0]}
           locale={locale}
@@ -83,16 +100,29 @@ export default async function HomePage() {
 
       {/* 高評価 */}
       {highRated.length > 0 && (
-        <ScrollSection title={t("highlyRated")} novels={highRated} locale={locale} />
+        <ScrollSection title={t("highlyRated")} novels={highRated} locale={locale} stripe={sectionIdx++ % 2 === 1} />
       )}
 
       {/* 全作品 */}
-      <ScrollSection title={t("allNovels")} novels={novels.slice(0, 12)} locale={locale} viewAllHref="/novels" viewAllLabel={t("viewAll")} />
+      <ScrollSection title={t("allNovels")} novels={novels.slice(0, 12)} locale={locale} viewAllHref="/novels" viewAllLabel={t("viewAll")} stripe={sectionIdx++ % 2 === 1} />
 
       {/* 完結済み */}
       {completedNovels.length > 0 && (
-        <ScrollSection title={t("bingeWorthy")} novels={completedNovels} locale={locale} />
+        <ScrollSection title={t("bingeWorthy")} novels={completedNovels} locale={locale} stripe={sectionIdx++ % 2 === 1} />
       )}
+
+      {/* ジャンル別セクション */}
+      {genreSections.map(([genre, items]) => (
+        <ScrollSection
+          key={genre}
+          title={tGenre.has(genre as any) ? tGenre(genre as any) : genre}
+          novels={items.slice(0, 12)}
+          locale={locale}
+          viewAllHref={`/novels/genre/${genre}`}
+          viewAllLabel={t("viewAll")}
+          stripe={sectionIdx++ % 2 === 1}
+        />
+      ))}
     </div>
   );
 }
@@ -184,15 +214,17 @@ function ScrollSection({
   locale,
   viewAllHref,
   viewAllLabel,
+  stripe = false,
 }: {
   title: string;
   novels: NovelScore[];
   locale: string;
   viewAllHref?: string;
   viewAllLabel?: string;
+  stripe?: boolean;
 }) {
   return (
-    <section className="mb-10">
+    <section className={`py-8 ${stripe ? "bg-muted/30" : ""}`}>
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-text">{title}</h2>
@@ -224,6 +256,9 @@ function NovelCard({
   index: number;
   locale: string;
 }) {
+  // スコアを5点満点に変換（scoreは0-100想定）
+  const rating = novel.score > 0 ? Math.min(5.0, Math.round((novel.score / 20) * 10) / 10) : null;
+
   return (
     <Link
       href={`/novels/${novel.slug}`}
@@ -240,6 +275,13 @@ function NovelCard({
         ) : (
           <CoverPlaceholder title={novel.title} index={index} className="h-full w-full" />
         )}
+        {/* ★レーティングバッジ */}
+        {rating !== null && (
+          <div className="absolute top-2 left-2 flex items-center gap-0.5 rounded-md bg-black/70 px-1.5 py-0.5 backdrop-blur-sm">
+            <span className="text-[10px] text-yellow-400">★</span>
+            <span className="text-[11px] font-bold text-white">{rating.toFixed(1)}</span>
+          </div>
+        )}
         {/* ステータスオーバーレイ */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2.5">
           <span className="text-[10px] font-medium text-white/90">
@@ -252,8 +294,18 @@ function NovelCard({
       <h3 className="mb-0.5 text-sm font-medium leading-tight text-text line-clamp-2 group-hover:text-primary transition-colors">
         {novel.title}
       </h3>
-      {/* ジャンル */}
+      {/* 著者名 */}
       <span className="text-xs text-muted">{novel.author_name}</span>
+      {/* タグバッジ */}
+      {novel.tags && novel.tags.length > 0 && (
+        <div className="mt-1 flex flex-wrap gap-1">
+          {novel.tags.slice(0, 2).map((tag) => (
+            <span key={tag} className="rounded bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
     </Link>
   );
 }
