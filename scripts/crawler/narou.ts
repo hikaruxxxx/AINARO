@@ -13,8 +13,8 @@ import { randomDelay, fetchWithRetry } from "./rate-limiter";
 const BASE_URL = "https://ncode.syosetu.com";
 
 const DEFAULT_CONFIG: CrawlerConfig = {
-  minDelay: 3000, // 3秒（robots.txt の3倍）
-  maxDelay: 8000, // 8秒
+  minDelay: 1000, // 1秒（robots.txt Crawl-delay: 1 準拠）
+  maxDelay: 1500, // 1.5秒
   backoffBase: 15000, // バックオフ初期15秒
   maxRetries: 3,
   userAgent:
@@ -79,7 +79,7 @@ export async function fetchNovelMeta(
     allChapters = allChapters.concat(chapters);
 
     // 次ページがあるか確認
-    const nextPage = $(`.c-pager__item a[href*="?p=${page + 1}"]`).length > 0;
+    const nextPage = $(`a.c-pager__item[href*="?p=${page + 1}"]`).length > 0;
     if (!nextPage) break;
 
     page++;
