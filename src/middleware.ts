@@ -49,8 +49,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // API routeとadmin以外はi18n middleware
-  if (!pathname.startsWith("/api") && !pathname.startsWith("/admin")) {
+  // API route / admin / auth コールバック以外はi18n middleware
+  if (!pathname.startsWith("/api") && !pathname.startsWith("/admin") && !pathname.startsWith("/auth")) {
     return intlMiddleware(request);
   }
 

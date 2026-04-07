@@ -66,31 +66,47 @@ export default async function DashboardPage() {
           {myNovels.map((novel) => {
             const status = STATUS_CONFIG[novel.status] || STATUS_CONFIG.serial;
             return (
-              <Link
+              <div
                 key={novel.id}
-                href={`/dashboard/novels/${novel.id}`}
-                className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-indigo-200 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-indigo-800"
+                className="group flex flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-indigo-200 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-indigo-800"
               >
-                {novel.cover_image_url && (
-                  <div className="mb-3 aspect-[3/1] overflow-hidden rounded-lg">
-                    <img src={novel.cover_image_url} alt="" className="h-full w-full object-cover" />
+                <Link href={`/dashboard/novels/${novel.id}`} className="flex-1">
+                  {novel.cover_image_url && (
+                    <div className="mb-3 aspect-[3/1] overflow-hidden rounded-lg">
+                      <img src={novel.cover_image_url} alt="" className="h-full w-full object-cover" />
+                    </div>
+                  )}
+                  <h3 className="mb-1 font-bold text-text group-hover:text-indigo-600 line-clamp-2">
+                    {novel.title}
+                  </h3>
+                  <div className="mb-3 flex items-center gap-2 text-xs text-muted">
+                    <span className="inline-flex items-center gap-1">
+                      <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+                      {status.label}
+                    </span>
+                    <span>{novel.total_chapters}{t("episodes")}</span>
                   </div>
-                )}
-                <h3 className="mb-1 font-bold text-text group-hover:text-indigo-600 line-clamp-2">
-                  {novel.title}
-                </h3>
-                <div className="mb-3 flex items-center gap-2 text-xs text-muted">
-                  <span className="inline-flex items-center gap-1">
-                    <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-                    {status.label}
-                  </span>
-                  <span>{novel.total_chapters}{t("episodes")}</span>
+                  <div className="flex items-center gap-3 text-xs text-muted">
+                    <span>{t("pv")}: {novel.total_pv.toLocaleString()}</span>
+                    <span>{t("bookmarks")}: {novel.total_bookmarks}</span>
+                  </div>
+                </Link>
+                {/* クイックアクション: 通常の執筆者がすぐ次話を書けるように */}
+                <div className="mt-4 flex gap-2 border-t border-gray-100 pt-3 dark:border-gray-800">
+                  <Link
+                    href={`/dashboard/novels/${novel.id}/episodes/new`}
+                    className="flex-1 rounded-lg bg-indigo-600 px-3 py-2 text-center text-xs font-medium text-white transition hover:bg-indigo-700"
+                  >
+                    + 次の話を書く
+                  </Link>
+                  <Link
+                    href={`/dashboard/novels/${novel.id}`}
+                    className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                  >
+                    管理
+                  </Link>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-muted">
-                  <span>{t("pv")}: {novel.total_pv.toLocaleString()}</span>
-                  <span>{t("bookmarks")}: {novel.total_bookmarks}</span>
-                </div>
-              </Link>
+              </div>
             );
           })}
         </div>
