@@ -8,7 +8,8 @@
     "new": "新着",
     "ranking": "ランキング",
     "search": "検索",
-    "menu": "メニュー"
+    "menu": "メニュー",
+    "write": "執筆する"
   },
   "footer": {
     "tagline": "もっと面白い小説を、すべての人に",
@@ -77,7 +78,17 @@
     "onboardingTitle": "どんな小説が好きですか？",
     "onboardingSubtitle": "好きなジャンルを選ぶと、あなたに合った作品をおすすめします",
     "onboardingSkip": "スキップ",
-    "onboardingStart": "はじめる"
+    "onboardingStart": "はじめる",
+    "onboardingWelcomeTitle": "Novelisへようこそ",
+    "onboardingWelcomeLead": "あなたの『次に読む1作』が見つかる場所。",
+    "onboardingWelcomeBody": "毎日新しい物語が更新される、無料の小説プラットフォームです。あなたの好みを少しだけ教えてください。",
+    "onboardingNext": "次へ",
+    "onboardingBack": "戻る",
+    "onboardingGenreHint": "3つ以上選ぶとおすすめ精度が上がります",
+    "onboardingSelectedCount": "{count}個選択中",
+    "onboardingReadyTitle": "準備完了！",
+    "onboardingReadyBody": "あなた向けの作品をホームに表示しました。さっそく読んでみましょう。",
+    "onboardingReadyCta": "おすすめを見る"
   },
   "novel": {
     "episodes": "{count}話",
@@ -109,7 +120,19 @@
     "scrollForNext": "↓ スクロールで次の話へ",
     "prev": "← 前",
     "next": "次 →",
-    "charCount": "{count}字"
+    "charCount": "{count}字",
+    "tourTitle": "読み方ガイド",
+    "tourStep1Title": "画面タップでメニュー",
+    "tourStep1Body": "画面のどこかをタップすると、上下のメニューが表示／非表示できます。",
+    "tourStep2Title": "下までスクロールで次話へ",
+    "tourStep2Body": "最後まで読むと、自動で次の話に進みます。ボタンを押す手間はいりません。",
+    "tourStep3Title": "文字サイズ・テーマ変更",
+    "tourStep3Body": "右上の「Aa」から、お好みの文字サイズや背景色に変更できます。",
+    "tourStep4Title": "準備OK！",
+    "tourStep4Body": "それでは、物語をお楽しみください。",
+    "tourNext": "次へ",
+    "tourSkip": "スキップ",
+    "tourStart": "読みはじめる"
   },
   "pages": {
     "novelsList": "作品一覧",

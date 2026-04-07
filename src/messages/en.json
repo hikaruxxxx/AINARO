@@ -8,7 +8,8 @@
     "new": "New",
     "ranking": "Rankings",
     "search": "Search",
-    "menu": "Menu"
+    "menu": "Menu",
+    "write": "Write"
   },
   "footer": {
     "tagline": "Better Novels for Everyone",
@@ -77,7 +78,17 @@
     "onboardingTitle": "What kind of novels do you like?",
     "onboardingSubtitle": "Pick your favorite genres and we'll recommend stories for you",
     "onboardingSkip": "Skip",
-    "onboardingStart": "Let's Go"
+    "onboardingStart": "Let's Go",
+    "onboardingWelcomeTitle": "Welcome to Novelis",
+    "onboardingWelcomeLead": "The place to find your next read.",
+    "onboardingWelcomeBody": "A free novel platform with new stories every day. Tell us a little about your taste so we can recommend the right ones.",
+    "onboardingNext": "Next",
+    "onboardingBack": "Back",
+    "onboardingGenreHint": "Pick 3 or more for better recommendations",
+    "onboardingSelectedCount": "{count} selected",
+    "onboardingReadyTitle": "All set!",
+    "onboardingReadyBody": "We've personalized your home. Time to dive in.",
+    "onboardingReadyCta": "Show recommendations"
   },
   "novel": {
     "episodes": "{count} eps",
@@ -109,7 +120,19 @@
     "scrollForNext": "↓ Scroll for next episode",
     "prev": "← Prev",
     "next": "Next →",
-    "charCount": "{count} chars"
+    "charCount": "{count} chars",
+    "tourTitle": "Reader Guide",
+    "tourStep1Title": "Tap to toggle menus",
+    "tourStep1Body": "Tap anywhere on the screen to show or hide the top and bottom menus.",
+    "tourStep2Title": "Scroll for the next episode",
+    "tourStep2Body": "When you reach the end, the next episode loads automatically. No button needed.",
+    "tourStep3Title": "Font size & theme",
+    "tourStep3Body": "Tap the \"Aa\" icon at the top right to change the font size or background.",
+    "tourStep4Title": "You're all set!",
+    "tourStep4Body": "Enjoy the story.",
+    "tourNext": "Next",
+    "tourSkip": "Skip",
+    "tourStart": "Start reading"
   },
   "pages": {
     "novelsList": "All Novels",

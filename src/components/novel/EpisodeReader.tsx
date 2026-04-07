@@ -12,6 +12,7 @@ import EpisodeLockOverlay from "./EpisodeLockOverlay";
 import LikeButton from "./LikeButton";
 import ShareButton from "./ShareButton";
 import EpisodeComments from "./EpisodeComments";
+import ReaderTour from "./ReaderTour";
 import {
   getReadingSettings,
   saveReadingSettings,
@@ -156,6 +157,9 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
 
   return (
     <div className={`relative min-h-[100dvh] ${theme.bg} ${theme.text}`} onClick={handleTap}>
+      {/* 初回読者向けの操作ツアー */}
+      <ReaderTour />
+
       {/* フローティングUI */}
       <div
         className={`fixed top-0 left-0 right-0 z-40 ${theme.bg} backdrop-blur border-b border-border/30 transition-all duration-300 ${
