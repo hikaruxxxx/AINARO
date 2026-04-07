@@ -80,7 +80,7 @@ export default async function HomePage() {
       <ContinueReadingSection />
 
       {/* ヒーローセクション — 最高スコア作品を大きく */}
-      <section>
+      <section className="mb-10">
         <HeroCard
           novel={novels[0]}
           locale={locale}
