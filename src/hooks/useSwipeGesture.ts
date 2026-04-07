@@ -119,7 +119,13 @@ export function useSwipeGesture({
   const handlers = {
     ref: (el: HTMLDivElement | null) => { scrollContainerRef.current = el; },
     onTouchStart: (e: React.TouchEvent) => handleStart(e.touches[0].clientX, e.touches[0].clientY),
-    onTouchMove: (e: React.TouchEvent) => handleMove(e.touches[0].clientX, e.touches[0].clientY),
+    onTouchMove: (e: React.TouchEvent) => {
+      handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      // 横スワイプ中はブラウザのデフォルト動作（ページバック等）を抑制
+      if (locked.current === "horizontal") {
+        e.preventDefault();
+      }
+    },
     onTouchEnd: () => handleEnd(),
     onMouseDown: (e: React.MouseEvent) => handleStart(e.clientX, e.clientY),
     onMouseMove: (e: React.MouseEvent) => { if (isDragging.current) handleMove(e.clientX, e.clientY); },

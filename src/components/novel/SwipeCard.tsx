@@ -105,7 +105,12 @@ export default function SwipeCard({
     >
       <div
         className="absolute inset-0 overflow-y-auto overscroll-contain"
-        ref={stackPosition === 0 && handlers ? (handlers as Record<string, unknown>).ref as React.Ref<HTMLDivElement> : undefined}
+        style={{ touchAction: stackPosition === 0 ? "pan-y pinch-zoom" : "auto" }}
+        ref={(el) => {
+          if (stackPosition === 0 && handlers?.ref) {
+            handlers.ref(el);
+          }
+        }}
         onTouchStart={stackPosition === 0 ? handlers?.onTouchStart : undefined}
         onTouchMove={stackPosition === 0 ? handlers?.onTouchMove : undefined}
         onTouchEnd={stackPosition === 0 ? handlers?.onTouchEnd : undefined}
@@ -115,7 +120,7 @@ export default function SwipeCard({
         onMouseLeave={stackPosition === 0 ? (handlers as Record<string, unknown>)?.onMouseLeave as React.MouseEventHandler : undefined}
       >
         {/* ヒーローエリア */}
-        <div className="relative" style={{ height: "calc(100vh - 200px)" }}>
+        <div className="relative" style={{ height: "calc(100dvh - 200px)" }}>
           {novel.cover_image_url ? (
             <img src={novel.cover_image_url} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
           ) : (
