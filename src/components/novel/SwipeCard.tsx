@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import GenreBadge from "@/components/common/GenreBadge";
+// GenreBadgeはuseTranslationsに依存するので、スワイプ画面では簡易表示
+const GENRE_LABELS: Record<string, string> = {
+  fantasy: "ファンタジー", romance: "恋愛", villainess: "悪役令嬢",
+  horror: "ホラー", mystery: "ミステリー", scifi: "SF",
+  drama: "ドラマ", comedy: "コメディ", action: "アクション", other: "その他",
+};
 import type { Novel, Episode } from "@/types/novel";
 
 const COVER_GRADIENTS = [
@@ -40,7 +43,6 @@ export default function SwipeCard({
   stackPosition,
   onReadProgress,
 }: SwipeCardProps) {
-  const t = useTranslations("swipe");
   const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length];
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loadingNext, setLoadingNext] = useState(false);
@@ -132,19 +134,19 @@ export default function SwipeCard({
           {/* スワイプラベル */}
           {direction === "right" && overlayOpacity > 0.1 && (
             <div className="absolute left-6 top-16 z-20 rotate-[-15deg]">
-              <span className="rounded-lg border-3 border-green-400 px-4 py-2 text-2xl font-black text-green-400">{t("interested")}</span>
+              <span className="rounded-lg border-3 border-green-400 px-4 py-2 text-2xl font-black text-green-400">気になる</span>
             </div>
           )}
           {direction === "left" && overlayOpacity > 0.1 && (
             <div className="absolute right-6 top-16 z-20 rotate-[15deg]">
-              <span className="rounded-lg border-3 border-red-400 px-4 py-2 text-2xl font-black text-red-400">{t("skip")}</span>
+              <span className="rounded-lg border-3 border-red-400 px-4 py-2 text-2xl font-black text-red-400">スキップ</span>
             </div>
           )}
 
           {/* 作品情報 */}
           <div className="relative flex min-h-full flex-col justify-end p-6">
             <div className="mb-3 flex flex-wrap items-center gap-2">
-              <GenreBadge genre={novel.genre} />
+              <span className="rounded bg-white/20 px-2 py-0.5 text-xs font-medium text-white">{GENRE_LABELS[novel.genre] || novel.genre}</span>
               {novel.tags.slice(0, 3).map((tag) => (
                 <span key={tag} className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs text-white/80">#{tag}</span>
               ))}
@@ -226,13 +228,12 @@ export default function SwipeCard({
 
               {/* 作品ページへのリンク */}
               <div className="mt-4">
-                <Link
-                  href={`/novels/${novel.slug}`}
+                <a
+                  href={`/ja/novels/${novel.slug}`}
                   className="text-sm font-medium text-blue-600 hover:underline"
-                  onClick={(e) => e.stopPropagation()}
                 >
                   作品ページを見る →
-                </Link>
+                </a>
               </div>
 
               {/* スワイプに戻るヒント */}

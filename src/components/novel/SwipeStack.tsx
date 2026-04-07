@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import SwipeCard from "./SwipeCard";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import type { Novel } from "@/types/novel";
@@ -17,7 +15,6 @@ type SwipeStackProps = {
 
 export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, likedCount }: SwipeStackProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const t = useTranslations("swipe");
 
   const handleSwipe = useCallback(
     (direction: "right" | "left") => {
@@ -44,30 +41,29 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h2 className="mb-2 text-xl font-bold text-gray-900">{t("empty")}</h2>
-        <p className="mb-2 text-sm text-gray-500">{t("emptySubtitle")}</p>
+        <h2 className="mb-2 text-xl font-bold text-gray-900">すべての作品をチェックしました！</h2>
+        <p className="mb-2 text-sm text-gray-500">新しい作品が追加されるのをお楽しみに</p>
         <p className="mb-8 text-lg font-bold text-green-600">
-          {t("likedCount", { count: likedCount })}
+          {likedCount}作品に興味あり
         </p>
         <div className="flex flex-col gap-3">
           <button
             onClick={onReset}
             className="rounded-full bg-gray-900 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
           >
-            {t("resetSwipes")}
+            もう一度スワイプする
           </button>
-          <Link
-            href="/novels"
+          <a
+            href="/ja/novels"
             className="rounded-full border border-gray-300 px-6 py-2.5 text-sm text-gray-600 transition hover:bg-gray-100"
           >
-            {t("goToDiscover")}
-          </Link>
+            作品一覧を見る →
+          </a>
         </div>
       </div>
     );
   }
 
-  // 表示する最大3枚のカードインデックス
   const visibleCards = [];
   for (let i = 0; i < 3 && currentIndex + i < novels.length; i++) {
     visibleCards.push(currentIndex + i);
@@ -75,7 +71,6 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
 
   return (
     <div className="relative h-full">
-      {/* カードエリア（全画面） */}
       {visibleCards.reverse().map((idx) => (
         <SwipeCard
           key={novels[idx].id}
@@ -91,13 +86,12 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
         />
       ))}
 
-      {/* ボタン（カードの上にオーバーレイ） */}
+      {/* ボタン */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-8 pb-8 pt-4">
         <button
           onClick={() => triggerSwipe("left")}
           disabled={isAnimating}
           className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-red-500 shadow-lg backdrop-blur-sm transition hover:bg-white active:scale-90 disabled:opacity-50"
-          aria-label={t("skip")}
         >
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -112,7 +106,6 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
           onClick={() => triggerSwipe("right")}
           disabled={isAnimating}
           className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-green-500 shadow-lg backdrop-blur-sm transition hover:bg-white active:scale-90 disabled:opacity-50"
-          aria-label={t("interested")}
         >
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />

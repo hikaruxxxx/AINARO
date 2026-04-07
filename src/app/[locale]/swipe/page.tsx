@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
 import SwipeStack from "@/components/novel/SwipeStack";
 import { addSwipe, getSwipedNovelIds, clearSwipeHistory } from "@/lib/swipe-history";
 import type { Novel } from "@/types/novel";
 
 export default function SwipePage() {
-  const t = useTranslations("swipe");
   const [novels, setNovels] = useState<Novel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
