@@ -118,10 +118,17 @@ export default function SwipeCard({
         onMouseDown={stackPosition === 0 ? handlers?.onMouseDown : undefined}
         onMouseMove={stackPosition === 0 ? handlers?.onMouseMove : undefined}
         onMouseUp={stackPosition === 0 ? handlers?.onMouseUp : undefined}
-        onScroll={stackPosition === 0 && onScrollChange ? (e) => {
-          const target = e.target as HTMLDivElement;
-          onScrollChange(target.scrollTop > 50);
-        } : undefined}
+        onScroll={stackPosition === 0 && onScrollChange ? (() => {
+          let lastScrollTop = 0;
+          return (e: React.UIEvent<HTMLDivElement>) => {
+            const target = e.target as HTMLDivElement;
+            const currentTop = target.scrollTop;
+            const scrollingDown = currentTop > lastScrollTop;
+            lastScrollTop = currentTop;
+            // 下スクロール中&50px以上 → 薄く / 上スクロール中 or 先頭付近 → 戻す
+            onScrollChange(scrollingDown && currentTop > 50);
+          };
+        })() : undefined}
         onMouseLeave={stackPosition === 0 ? (handlers as Record<string, unknown>)?.onMouseLeave as React.MouseEventHandler : undefined}
       >
         {/* ヒーローエリア */}
