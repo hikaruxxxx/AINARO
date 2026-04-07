@@ -6,7 +6,6 @@ import { notFound } from "next/navigation";
 import { locales } from "@/i18n/config";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import BottomNav from "@/components/layout/BottomNav";
 import "./globals.css";
 
 const notoSansJP = Noto_Sans_JP({
@@ -76,9 +75,8 @@ export default async function LocaleLayout({
       <body className={`min-h-full flex flex-col bg-bg ${fontClass} antialiased`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header />
-          <main className="flex-1 pb-14 md:pb-0">{children}</main>
+          <main className="flex-1">{children}</main>
           <Footer />
-          <BottomNav />
         </NextIntlClientProvider>
       </body>
     </html>

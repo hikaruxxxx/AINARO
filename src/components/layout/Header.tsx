@@ -18,9 +18,10 @@ export default function Header() {
     { href: "/novels" as const, label: t("novels") },
     { href: "/new" as const, label: t("new") },
     { href: "/ranking" as const, label: t("ranking") },
+    { href: "/swipe" as const, label: t("discover") },
   ];
 
-  // 発見・おすすめページでは非表示
+  // 読書ページなど一部ページでは非表示
   if (pathname.startsWith("/discover") || pathname.startsWith("/recommend") || pathname.startsWith("/swipe")) return null;
 
   const isReading = /^\/novels\/[^/]+\/\d+/.test(pathname);
@@ -76,7 +77,22 @@ export default function Header() {
             <SearchBar />
           </div>
           <PointsBadge />
+          <Link
+            href="/mypage"
+            className="ml-1 flex h-9 w-9 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100"
+            aria-label={t("mypage")}
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </Link>
           <LanguageSwitcher />
+          <Link
+            href="/write"
+            className="ml-2 inline-flex items-center rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"
+          >
+            {t("write")}
+          </Link>
         </nav>
 
         {/* モバイルメニュー */}
@@ -118,6 +134,20 @@ export default function Header() {
             onClick={() => setMenuOpen(false)}
           >
             検索
+          </Link>
+          <Link
+            href="/mypage"
+            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+            onClick={() => setMenuOpen(false)}
+          >
+            {t("mypage")}
+          </Link>
+          <Link
+            href="/write"
+            className="mt-2 block rounded-lg bg-indigo-600 px-3 py-2.5 text-center text-sm font-bold text-white transition hover:bg-indigo-700"
+            onClick={() => setMenuOpen(false)}
+          >
+            {t("write")}
           </Link>
           <div className="mt-2 border-t border-gray-100 pt-2">
             <LanguageSwitcher />

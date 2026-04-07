@@ -2,6 +2,7 @@
 
 import { usePoints } from "@/hooks/usePoints";
 import { useEffect, useState } from "react";
+import { Link } from "@/i18n/navigation";
 
 // ヘッダーやマイページに表示するポイント残高バッジ
 export default function PointsBadge() {
@@ -25,10 +26,14 @@ export default function PointsBadge() {
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-1 rounded-full bg-secondary/10 px-3 py-1 text-sm">
+      <Link
+        href="/points"
+        className="flex items-center gap-1 rounded-full bg-secondary/10 px-3 py-1 text-sm transition hover:bg-secondary/20"
+        aria-label="ポイント詳細"
+      >
         <span className="text-secondary font-bold">{balance}</span>
         <span className="text-xs opacity-60">pt</span>
-      </div>
+      </Link>
 
       {/* ログインボーナス通知 */}
       {bonus !== null && (
