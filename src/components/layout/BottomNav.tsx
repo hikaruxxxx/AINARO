@@ -12,7 +12,7 @@ const NAV_ICONS = {
   mypage: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
 };
 
-const FULLSCREEN_PAGES = ["/discover", "/recommend", "/swipe"];
+const FULLSCREEN_PAGES = ["/discover", "/recommend", "/swipe"] as const;
 
 export default function BottomNav() {
   const t = useTranslations("bottomNav");
@@ -35,8 +35,7 @@ export default function BottomNav() {
 
   const NAV_ITEMS = [
     { href: "/" as const, label: t("home"), icon: NAV_ICONS.home },
-    { href: "/recommend" as const, label: t("recommend"), icon: NAV_ICONS.recommend },
-    { href: "/discover" as const, label: t("discover"), icon: NAV_ICONS.discover },
+    { href: "/swipe" as const, label: t("discover"), icon: NAV_ICONS.discover },
     { href: "/novels" as const, label: t("novels"), icon: NAV_ICONS.novels },
     { href: "/mypage" as const, label: t("mypage"), icon: NAV_ICONS.mypage },
   ];
