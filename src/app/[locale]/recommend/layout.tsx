@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "発見 | Novelis",
-  description: "新しい作品と出会おう",
+  title: "おすすめ | Novelis",
+  description: "あなたの好みに合った作品をおすすめします",
 };
 
-export default function DiscoverLayout({
+export default function RecommendLayout({
   children,
 }: {
   children: React.ReactNode;

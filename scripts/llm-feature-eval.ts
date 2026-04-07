@@ -106,7 +106,42 @@ interface EvalTarget {
 function collectTargets(): EvalTarget[] {
   const targets: EvalTarget[] = [];
 
-  // --- なろう ---
+  // full-feature-extraction.json から全作品を対象にする
+  const featFile = path.join(DATA_DIR, "experiments/full-feature-extraction.json");
+  if (fs.existsSync(featFile)) {
+    const featData = JSON.parse(fs.readFileSync(featFile, "utf-8"));
+    for (const r of featData.results) {
+      const ncode = r.ncode;
+      const ep1 = path.join(CRAWLED_DIR, ncode, "ep0001.json");
+      if (!fs.existsSync(ep1)) continue;
+      try {
+        const ep = JSON.parse(fs.readFileSync(ep1, "utf-8"));
+        if (!ep.bodyText || ep.bodyText.length < 300) continue;
+
+        // tier推定（gpベース）
+        const gp = r.gp || 0;
+        let tier = "unknown";
+        if (gp >= 100000) tier = "top";
+        else if (gp >= 10000) tier = "upper";
+        else if (gp >= 1000) tier = "mid";
+        else if (gp >= 100) tier = "lower";
+        else tier = "bottom";
+
+        targets.push({
+          ncode,
+          tier,
+          gp,
+          site: "narou",
+          genre: r.genre || "unknown",
+          textSnippet: ep.bodyText.slice(0, MAX_TEXT_CHARS),
+        });
+      } catch { continue; }
+    }
+    console.log(`  full-feature-extraction.json から ${targets.length}作品を収集`);
+    return targets;
+  }
+
+  // フォールバック: 旧方式（ターゲットリスト＋クロールログ）
   const narouTargets = JSON.parse(fs.readFileSync(path.join(DATA_DIR, "targets/stratified_all.json"), "utf-8"));
   const pairedTargets = JSON.parse(fs.readFileSync(path.join(DATA_DIR, "targets/paired_comparison.json"), "utf-8"));
   const crawlLog = JSON.parse(fs.readFileSync(path.join(CRAWLED_DIR, "_crawl_log.json"), "utf-8"));
@@ -132,8 +167,6 @@ function collectTargets(): EvalTarget[] {
       });
     } catch { continue; }
   }
-
-  // --- アルファポリス・カクヨムは除外（なろう作品のみ） ---
 
   return targets;
 }

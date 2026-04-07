@@ -27,6 +27,9 @@ export type Novel = {
   updated_at: string;
 };
 
+// エピソードのステータス
+export type EpisodeStatus = "draft" | "pending_review" | "revision_requested" | "scheduled" | "published";
+
 // エピソード（話）
 export type Episode = {
   id: string;
@@ -39,9 +42,11 @@ export type Episode = {
   body_html: string | null;
   body_html_en: string | null;
   character_count: number;
+  status: EpisodeStatus;
   is_free: boolean;
   unlock_at: string | null;     // NULLなら即時解放、値があればその時刻まではロック
   unlock_price: number;          // 先読みに必要なポイント数（0 = 無料）
+  scheduled_at: string | null;   // 予約公開日時
   pv: number;
   published_at: string;
   created_at: string;
@@ -292,4 +297,21 @@ export type EpisodeRetention = {
   readers: number;
   continued_to_next: number;
   retention_rate: number | null;
+};
+
+// ===== 作家システム =====
+
+export type UserRole = "reader" | "writer" | "admin";
+export type WriterStatus = "none" | "approved" | "suspended";
+
+export type UserProfile = {
+  user_id: string;
+  display_name: string;
+  bio: string | null;
+  avatar_url: string | null;
+  role: UserRole;
+  writer_status: WriterStatus;
+  writer_approved_at: string | null;
+  created_at: string;
+  updated_at: string;
 };

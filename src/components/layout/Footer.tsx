@@ -1,10 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 
 export default function Footer() {
   const t = useTranslations("footer");
+  const pathname = usePathname();
+
+  // 発見ページ・おすすめページでは非表示
+  if (pathname.startsWith("/discover") || pathname.startsWith("/recommend")) return null;
 
   return (
     <footer className="mt-auto border-t border-border bg-surface">

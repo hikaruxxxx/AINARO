@@ -310,5 +310,21 @@
     "goToDiscover": "Browse all novels →",
     "likedCount": "Interested in {count} stories",
     "hint": "← → Swipe to choose"
+  },
+  "write": {
+    "metaTitle": "Start Writing — Novelis",
+    "metaDescription": "Write novels with AI assistance. Keep 90% of all revenue. Start your story on Novelis.",
+    "badge": "AI-Powered Writing",
+    "heroTitle": "Tell Your Story,\nPowered by AI",
+    "heroSubtitle": "AI assists from plot to prose. No writing experience needed to create great stories. Keep 90% of all revenue.",
+    "featureAITitle": "AI Writing Assistant",
+    "featureAIDesc": "From plot structure to prose generation, AI supports your creative process. Even first-time writers can produce professional-quality work.",
+    "featureDataTitle": "Data-Driven Insights",
+    "featureDataDesc": "Free access to dashboards showing completion rates, drop-off points, and retention. See how readers engage with your story.",
+    "featureRevenueTitle": "90% Revenue Share",
+    "featureRevenueDesc": "Industry-leading revenue share. 90% of all revenue — ads, subscriptions, everything — goes directly to you.",
+    "ctaTitle": "Early Author Registration Open",
+    "ctaSubtitle": "Be the first to know when submissions launch.",
+    "ctaButton": "Register Interest"
   }
 }

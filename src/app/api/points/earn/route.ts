@@ -33,13 +33,17 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ earned: 0, reason: "このエピソードでは既に獲得済みです" });
       }
 
-      const { data: newBalance } = await admin.rpc("grant_points", {
+      const { data: newBalance, error: grantError } = await admin.rpc("grant_points", {
         p_user_id: user.id,
         p_amount: 1,
         p_type: "episode_complete",
         p_reference_id: reference_id,
         p_description: "エピソード読了ボーナス",
       });
+
+      if (grantError) {
+        return NextResponse.json({ error: grantError.message }, { status: 500 });
+      }
 
       return NextResponse.json({ earned: 1, balance: newBalance });
     }
@@ -59,13 +63,17 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ earned: 0, reason: "コメントボーナスは1日1回までです" });
       }
 
-      const { data: newBalance } = await admin.rpc("grant_points", {
+      const { data: newBalance, error: grantError } = await admin.rpc("grant_points", {
         p_user_id: user.id,
         p_amount: 1,
         p_type: "comment",
         p_reference_id: reference_id ?? null,
         p_description: "コメントボーナス",
       });
+
+      if (grantError) {
+        return NextResponse.json({ error: grantError.message }, { status: 500 });
+      }
 
       return NextResponse.json({ earned: 1, balance: newBalance });
     }

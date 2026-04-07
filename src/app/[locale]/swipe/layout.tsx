@@ -6,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function SwipeLayout({ children }: { children: React.ReactNode }) {
-  return <div className="fixed inset-0 z-40 bg-gray-50">{children}</div>;
+  return <>{children}</>;
 }

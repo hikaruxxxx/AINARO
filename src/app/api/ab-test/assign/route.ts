@@ -14,14 +14,14 @@ export async function POST(req: NextRequest) {
   const supabase = createAdminClient();
 
   // このエピソードでrunning中のA/Bテストがあるか
-  const { data: test } = await supabase
+  const { data: test, error: testError } = await supabase
     .from("ab_tests")
     .select("id, variants, traffic_split")
     .eq("episode_id", episode_id)
     .eq("status", "running")
     .single();
 
-  if (!test) {
+  if (testError || !test) {
     return NextResponse.json({ variant: null });
   }
 
@@ -49,17 +49,19 @@ export async function POST(req: NextRequest) {
   }
 
   // バリアント本文を取得
-  const { data: variant } = await supabase
+  const { data: variant, error: variantError } = await supabase
     .from("episode_variants")
     .select("body_md, body_html")
     .eq("ab_test_id", test.id)
     .eq("variant_id", variantId)
     .single();
 
+  if (variantError || !variant) {
+    return NextResponse.json({ variant: null });
+  }
+
   return NextResponse.json({
-    variant: variant
-      ? { variant_id: variantId, body_md: variant.body_md, body_html: variant.body_html }
-      : null,
+    variant: { variant_id: variantId, body_md: variant.body_md, body_html: variant.body_html },
   });
 }
 
