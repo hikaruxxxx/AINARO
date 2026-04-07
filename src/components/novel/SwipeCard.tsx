@@ -28,8 +28,8 @@ type SwipeCardProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handlers?: Record<string, any>;
   stackPosition: number;
-  // 読み進めた時の好み信号コールバック
   onReadProgress?: (novelId: string, episodesRead: number) => void;
+  onScrollChange?: (scrolled: boolean) => void;
 };
 
 export default function SwipeCard({
@@ -42,6 +42,7 @@ export default function SwipeCard({
   handlers,
   stackPosition,
   onReadProgress,
+  onScrollChange,
 }: SwipeCardProps) {
   const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length];
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -117,6 +118,10 @@ export default function SwipeCard({
         onMouseDown={stackPosition === 0 ? handlers?.onMouseDown : undefined}
         onMouseMove={stackPosition === 0 ? handlers?.onMouseMove : undefined}
         onMouseUp={stackPosition === 0 ? handlers?.onMouseUp : undefined}
+        onScroll={stackPosition === 0 && onScrollChange ? (e) => {
+          const target = e.target as HTMLDivElement;
+          onScrollChange(target.scrollTop > 50);
+        } : undefined}
         onMouseLeave={stackPosition === 0 ? (handlers as Record<string, unknown>)?.onMouseLeave as React.MouseEventHandler : undefined}
       >
         {/* ヒーローエリア */}

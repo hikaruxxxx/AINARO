@@ -15,6 +15,7 @@ type SwipeStackProps = {
 
 export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, likedCount }: SwipeStackProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const handleSwipe = useCallback(
     (direction: "right" | "left") => {
@@ -83,11 +84,12 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
           isAnimating={idx === currentIndex ? isAnimating : false}
           handlers={idx === currentIndex ? handlers : undefined}
           onReadProgress={idx === currentIndex ? onReadProgress : undefined}
+          onScrollChange={idx === currentIndex ? setIsScrolled : undefined}
         />
       ))}
 
-      {/* ボタン */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-8 pb-8 pt-4">
+      {/* ボタン — スクロール中はフェードアウト */}
+      <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-8 pb-8 pt-4 transition-opacity duration-300 ${isScrolled ? "opacity-20" : "opacity-100"}`}>
         <button
           onClick={() => triggerSwipe("left")}
           disabled={isAnimating}
