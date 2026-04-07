@@ -310,5 +310,21 @@
     "goToDiscover": "作品一覧を見る →",
     "likedCount": "{count}作品に興味あり",
     "hint": "← → スワイプで選ぼう"
+  },
+  "write": {
+    "metaTitle": "作品を書く — Novelis",
+    "metaDescription": "AI支援で誰でも小説を書ける時代。全収益の90%を作者に還元。Novelisで、あなたの物語を始めよう。",
+    "badge": "AI支援ライティング",
+    "heroTitle": "あなたの物語を、\nAIと一緒に届けよう",
+    "heroSubtitle": "AIがプロットから文章まで支援。文章力がなくても、面白いストーリーが書ける。全収益の90%をあなたに還元。",
+    "featureAITitle": "AI執筆支援",
+    "featureAIDesc": "プロットの構築から文章の生成まで、AIがあなたの創作をサポート。初めての人でも商業レベルの作品が書けます。",
+    "featureDataTitle": "データで証明",
+    "featureDataDesc": "読了率・離脱ポイント・継続率のダッシュボードを無料開放。「面白い」を数字で実感できます。",
+    "featureRevenueTitle": "全収益の90%還元",
+    "featureRevenueDesc": "業界最高の還元率。広告もサブスクも含めた全収益の90%が、あなたの手元に届きます。",
+    "ctaTitle": "作家先行登録を受付中",
+    "ctaSubtitle": "投稿機能の正式リリース時に、優先的にご案内します。",
+    "ctaButton": "事前登録する"
   }
 }

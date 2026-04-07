@@ -10,13 +10,13 @@ export async function GET() {
     return NextResponse.json({ balance: 0, authenticated: false });
   }
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("user_points")
     .select("balance, total_earned, total_spent, last_login_bonus_at")
     .eq("user_id", user.id)
     .single();
 
-  if (!data) {
+  if (error || !data) {
     return NextResponse.json({
       balance: 0,
       total_earned: 0,

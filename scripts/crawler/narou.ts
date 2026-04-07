@@ -1,5 +1,5 @@
 // 小説家になろう スクレイパー
-// robots.txt: Crawl-delay: 1 → 安全マージンで3〜8秒間隔
+// robots.txt: Crawl-delay: 1 → 安全マージンで1.5〜3秒間隔
 
 import * as cheerio from "cheerio";
 import type {
@@ -13,8 +13,8 @@ import { randomDelay, fetchWithRetry } from "./rate-limiter";
 const BASE_URL = "https://ncode.syosetu.com";
 
 const DEFAULT_CONFIG: CrawlerConfig = {
-  minDelay: 3000, // 3秒（robots.txt の3倍）
-  maxDelay: 8000, // 8秒
+  minDelay: 1500, // 1.5秒（robots.txt Crawl-delay: 1 の1.5倍）
+  maxDelay: 3000, // 3秒
   backoffBase: 15000, // バックオフ初期15秒
   maxRetries: 3,
   userAgent:

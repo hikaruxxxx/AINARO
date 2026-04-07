@@ -59,6 +59,43 @@ export default async function HomePage() {
   return (
     <div>
       <TasteOnboarding />
+
+      {/* サイトヒーロー — タグライン + CTA */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-gray-900 via-gray-800 to-gray-50 dark:to-gray-950 pb-16 pt-14 text-center md:pb-20 md:pt-20">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.4),transparent_50%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(168,85,247,0.3),transparent_50%)]" />
+        </div>
+        <div className="relative mx-auto max-w-3xl px-6">
+          <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-white md:text-5xl">
+            {t("heroTitle")}
+          </h1>
+          <p className="mb-8 text-base text-white/60 md:text-lg">
+            {t("heroSubtitle")}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/novels"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-bold text-gray-900 shadow-lg transition hover:bg-white/90 hover:shadow-xl"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
+              {t("heroReadCTA")}
+            </Link>
+            <Link
+              href="/write"
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-7 py-3 text-sm font-bold text-white transition hover:border-white/40 hover:bg-white/10"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+              </svg>
+              {t("heroWriteCTA")}
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <ContinueReadingSection />
 
       {/* ヒーローセクション — 最高スコア作品を大きく */}

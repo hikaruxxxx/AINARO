@@ -12,8 +12,8 @@ import { crawlNovel } from "./narou";
 interface Target {
   ncode: string;
   title: string;
-  episodes: number;
-  status: string;
+  episodes?: number;
+  status?: string;
 }
 
 function parseArgs() {
@@ -53,7 +53,7 @@ async function main() {
 
   const outputDir = path.resolve(process.cwd(), "data/crawled");
   const totalEpisodes = targets.reduce(
-    (sum, t) => sum + Math.min(t.episodes, maxEp || Infinity),
+    (sum, t) => sum + Math.min(t.episodes || 10, maxEp || Infinity),
     0
   );
 
@@ -82,9 +82,16 @@ async function main() {
   let failed = 0;
 
   for (const target of targets) {
-    // 完了済みスキップ
-    if (log[target.ncode]?.status === "done") {
-      console.log(`⏭️ ${target.ncode} "${target.title.slice(0, 30)}" スキップ（クロール済み）`);
+    // 完了済みスキップ（ログ or エピソードファイルが実在）
+    const targetDir = path.join(outputDir, target.ncode);
+    const dirExists = await fs.access(targetDir).then(() => true).catch(() => false);
+    let epCount = 0;
+    if (dirExists) {
+      const files = await fs.readdir(targetDir);
+      epCount = files.filter((f: string) => f.startsWith("ep") && f.endsWith(".json")).length;
+    }
+    if (log[target.ncode]?.status === "done" || epCount > 0) {
+      console.log(`⏭️ ${target.ncode} "${(target.title || "").slice(0, 30)}" スキップ（クロール済み: ${epCount}話）`);
       skipped++;
       continue;
     }
@@ -101,7 +108,7 @@ async function main() {
 
       log[target.ncode] = {
         status: "done",
-        episodes: Math.min(target.episodes, maxEp || Infinity),
+        episodes: Math.min(target.episodes || 10, maxEp || Infinity),
         completedAt: new Date().toISOString(),
       };
       completed++;

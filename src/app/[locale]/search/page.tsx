@@ -6,9 +6,10 @@ import StatusBadge from "@/components/common/StatusBadge";
 import { formatCharCount } from "@/lib/utils/format";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "検索",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("search");
+  return { title: t("title") };
+}
 
 type Props = {
   searchParams: Promise<{ q?: string }>;
@@ -23,7 +24,7 @@ export default async function SearchPage({ searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold">検索</h1>
+      <h1 className="mb-6 text-2xl font-bold">{t("search.title")}</h1>
 
       {/* 検索フォーム */}
       <form action="" method="GET" className="mb-8">
@@ -32,7 +33,7 @@ export default async function SearchPage({ searchParams }: Props) {
             type="search"
             name="q"
             defaultValue={query}
-            placeholder="作品タイトル・タグ・キーワードで検索..."
+            placeholder={t("search.placeholder")}
             className="w-full rounded-xl border border-border bg-surface px-4 py-3 pl-10 text-sm outline-none transition focus:border-secondary"
             autoFocus
           />
@@ -52,13 +53,13 @@ export default async function SearchPage({ searchParams }: Props) {
       {query && (
         <div>
           <p className="mb-4 text-sm text-muted">
-            「{query}」の検索結果: {results.length}件
+            {t("search.resultCount", { query, count: results.length })}
           </p>
 
           {results.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-lg text-muted">該当する作品が見つかりませんでした。</p>
-              <p className="mt-2 text-sm text-muted">キーワードを変えて再検索してみてください。</p>
+              <p className="text-lg text-muted">{t("search.noResults")}</p>
+              <p className="mt-2 text-sm text-muted">{t("search.noResultsHint")}</p>
             </div>
           ) : (
             <ul className="space-y-4">
@@ -101,8 +102,8 @@ export default async function SearchPage({ searchParams }: Props) {
       {/* クエリなし時 */}
       {!query && (
         <div className="py-12 text-center">
-          <p className="text-lg text-muted">キーワードを入力して作品を検索</p>
-          <p className="mt-2 text-sm text-muted">作品タイトル、タグ、あらすじから検索できます。</p>
+          <p className="text-lg text-muted">{t("search.idle")}</p>
+          <p className="mt-2 text-sm text-muted">{t("search.idleHint")}</p>
         </div>
       )}
     </div>

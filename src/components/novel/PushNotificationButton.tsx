@@ -44,7 +44,7 @@ export default function PushNotificationButton() {
       // Push購読
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey).buffer as ArrayBuffer,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
       });
 
       // サーバーに登録（将来的にAPIに送信）

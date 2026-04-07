@@ -14,12 +14,16 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(Number(searchParams.get("limit") || "20"), 100);
   const offset = Number(searchParams.get("offset") || "0");
 
-  const { data, count } = await supabase
+  const { data, count, error } = await supabase
     .from("point_transactions")
     .select("*", { count: "exact" })
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
   return NextResponse.json({
     transactions: data || [],
