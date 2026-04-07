@@ -88,10 +88,13 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
           onScrollChange={idx === currentIndex ? (scrollTop: number) => {
             const goingDown = scrollTop > lastScrollTop.current;
             lastScrollTop.current = scrollTop;
-            if (goingDown && scrollTop > 50) {
+            const shouldHide = goingDown && scrollTop > 50;
+            if (shouldHide) {
               setButtonsHidden(true);
+              document.body.setAttribute("data-reading", "true");
             } else if (!goingDown) {
               setButtonsHidden(false);
+              document.body.removeAttribute("data-reading");
             }
           } : undefined}
         />
