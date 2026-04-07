@@ -97,7 +97,7 @@ export default async function HomePage() {
       )}
 
       {/* スワイプCTA — window.location.hrefでフルリロード遷移 */}
-      {novels.length >= 2 && <SwipeCTA />}
+      {novels.length >= 2 && <SwipeCTA locale={locale} />}
 
       {/* パーソナライズ */}
       <div className="mx-auto max-w-6xl px-4">

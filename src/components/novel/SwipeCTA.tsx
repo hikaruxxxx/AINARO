@@ -1,10 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
-
-export default function SwipeCTA() {
-  const locale = useLocale();
-
+export default function SwipeCTA({ locale }: { locale: string }) {
   return (
     <section className="mx-auto mb-10 max-w-6xl px-4 md:px-8">
       <button
