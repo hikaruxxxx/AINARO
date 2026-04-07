@@ -23,6 +23,9 @@ export default function PointsBadge() {
   }, [authenticated, loading, claimLoginBonus]);
 
   if (!authenticated || loading) return null;
+  // 残高0かつログインボーナス通知もないときは非表示
+  // （初めてポイントを得たタイミングで初登場し、何のための数字か文脈が生まれる）
+  if (balance === 0 && bonus === null) return null;
 
   return (
     <div className="relative">

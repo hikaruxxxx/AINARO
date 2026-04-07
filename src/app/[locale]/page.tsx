@@ -1,12 +1,12 @@
 import { Link } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { fetchRankedNovels } from "@/lib/data";
-import GenreBadge from "@/components/common/GenreBadge";
-import StatusBadge from "@/components/common/StatusBadge";
 import ContinueReadingSection from "@/components/novel/ContinueReadingSection";
 import PersonalizedSection from "@/components/novel/PersonalizedSection";
 import TasteOnboarding from "@/components/novel/TasteOnboarding";
 import SwipeCTA from "@/components/novel/SwipeCTA";
+import ScrollShelf from "@/components/novel/ScrollShelf";
+import HeroSection from "@/components/novel/HeroSection";
 import type { NovelScore } from "@/types/novel";
 
 export const revalidate = 3600;
@@ -79,12 +79,11 @@ export default async function HomePage() {
       <TasteOnboarding />
       <ContinueReadingSection />
 
-      {/* ヒーローセクション — 最高スコア作品を大きく */}
+      {/* ヒーローセクション — 上位5件から既読を除外して表示 */}
       <section className="mb-10">
-        <HeroCard
-          novel={novels[0]}
-          locale={locale}
-          episodesLabel={tNovel("episodes", { count: novels[0].total_chapters })}
+        <HeroSection
+          candidates={novels.slice(0, 5)}
+          episodesLabelTemplate={tNovel("episodes", { count: 0 }).replace("0", "{count}")}
           readLabel={tNovel("readFromEp1")}
           detailLabel={tNovel("viewDetails")}
         />
@@ -127,86 +126,6 @@ export default async function HomePage() {
   );
 }
 
-// ヒーロー — Netflix風の全幅ビジュアルカード
-function HeroCard({
-  novel,
-  locale,
-  episodesLabel,
-  readLabel,
-  detailLabel,
-}: {
-  novel: NovelScore;
-  locale: string;
-  episodesLabel: string;
-  readLabel: string;
-  detailLabel: string;
-}) {
-  return (
-    <Link href={`/novels/${novel.slug}`} className="group relative block">
-      {/* 背景 */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800" style={{ minHeight: "420px" }}>
-        {novel.cover_image_url ? (
-          <img
-            src={novel.cover_image_url}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover opacity-30 transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-900" />
-        )}
-        {/* グラデーションオーバーレイ */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
-
-        {/* コンテンツ */}
-        <div className="relative mx-auto flex max-w-6xl items-end gap-8 px-6 pb-10 pt-20 md:px-8">
-          {/* カバー画像 */}
-          <div className="hidden flex-shrink-0 md:block">
-            <div className="h-56 w-40 overflow-hidden rounded-xl shadow-2xl ring-1 ring-white/10 transition-transform duration-500 group-hover:scale-105">
-              {novel.cover_image_url ? (
-                <img src={novel.cover_image_url} alt={novel.title} className="h-full w-full object-cover" />
-              ) : (
-                <CoverPlaceholder title={novel.title} className="h-full w-full text-lg" />
-              )}
-            </div>
-          </div>
-
-          {/* テキスト */}
-          <div className="flex-1">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <GenreBadge genre={novel.genre} />
-              <StatusBadge status={novel.status} />
-              <span className="text-xs text-white/60">
-                {episodesLabel}
-              </span>
-            </div>
-            <h1 className="mb-2 text-2xl font-bold leading-tight text-white md:text-3xl lg:text-4xl">
-              {novel.title}
-            </h1>
-            {novel.tagline && (
-              <p className="mb-3 text-sm leading-relaxed text-white/70 md:text-base">
-                {novel.tagline}
-              </p>
-            )}
-            {novel.synopsis && (
-              <p className="mb-5 max-w-xl text-sm leading-relaxed text-white/50 line-clamp-2">
-                {novel.synopsis}
-              </p>
-            )}
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-gray-900 shadow-lg transition group-hover:bg-white/90">
-                {readLabel}
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 transition group-hover:border-white/40">
-                {detailLabel}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 // Netflix風 横スクロールセクション
 function ScrollSection({
   title,
@@ -236,11 +155,11 @@ function ScrollSection({
         </div>
       </div>
       <div className="mx-auto max-w-6xl px-4 md:px-8">
-        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+        <ScrollShelf>
           {novels.map((novel, i) => (
             <NovelCard key={novel.id} novel={novel} index={i} locale={locale} />
           ))}
-        </div>
+        </ScrollShelf>
       </div>
     </section>
   );
@@ -256,8 +175,12 @@ function NovelCard({
   index: number;
   locale: string;
 }) {
-  // スコアを5点満点に変換（scoreは0-100想定）
-  const rating = novel.score > 0 ? Math.min(5.0, Math.round((novel.score / 20) * 10) / 10) : null;
+  // 実測値ベースの読了率バッジ（avg_completion_rateは0-100の%）
+  // 予測スコアを★化すると読者が「他人の評価」と誤解するため、実測値のみ表示する
+  const completionRate =
+    novel.avg_completion_rate !== null && novel.avg_completion_rate > 0
+      ? Math.round(novel.avg_completion_rate)
+      : null;
 
   return (
     <Link
@@ -275,11 +198,12 @@ function NovelCard({
         ) : (
           <CoverPlaceholder title={novel.title} index={index} className="h-full w-full" />
         )}
-        {/* ★レーティングバッジ */}
-        {rating !== null && (
-          <div className="absolute top-2 left-2 flex items-center gap-0.5 rounded-md bg-black/70 px-1.5 py-0.5 backdrop-blur-sm">
-            <span className="text-[10px] text-yellow-400">★</span>
-            <span className="text-[11px] font-bold text-white">{rating.toFixed(1)}</span>
+        {/* 読了率バッジ（実測値・データがあるときのみ表示） */}
+        {completionRate !== null && (
+          <div className="absolute top-2 left-2 rounded-md bg-black/70 px-1.5 py-0.5 backdrop-blur-sm">
+            <span className="text-[10px] font-bold text-white">
+              {locale === "en" ? `${completionRate}% read` : `読了率 ${completionRate}%`}
+            </span>
           </div>
         )}
         {/* ステータスオーバーレイ */}
