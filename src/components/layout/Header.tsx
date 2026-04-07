@@ -11,7 +11,6 @@ export default function Header() {
   const t = useTranslations("header");
   const [menuOpen, setMenuOpen] = useState(false);
   const [visible, setVisible] = useState(true);
-  const [scrolled, setScrolled] = useState(false);
   const lastScrollY = useRef(0);
   const pathname = usePathname();
 
@@ -25,12 +24,10 @@ export default function Header() {
   if (pathname.startsWith("/discover") || pathname.startsWith("/recommend") || pathname.startsWith("/swipe")) return null;
 
   const isReading = /^\/novels\/[^/]+\/\d+/.test(pathname);
-  const isHome = pathname === "/" || pathname === "";
 
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
-      setScrolled(currentY > 10);
 
       if (isReading) {
         if (currentY < lastScrollY.current || currentY < 50) {
@@ -50,18 +47,12 @@ export default function Header() {
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         visible ? "translate-y-0" : "-translate-y-full"
-      } ${
-        isHome && !scrolled
-          ? "bg-transparent"
-          : "border-b border-border/50 bg-white/95 backdrop-blur-md shadow-sm"
-      }`}
+      } border-b border-border/50 bg-white/95 backdrop-blur-md shadow-sm`}
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-8">
         {/* ロゴ */}
         <Link href="/" className="flex items-center gap-2">
-          <span className={`text-xl font-bold tracking-tight transition-colors ${
-            isHome && !scrolled ? "text-white" : "text-gray-900"
-          }`}>
+          <span className="text-xl font-bold tracking-tight text-gray-900">
             {process.env.NEXT_PUBLIC_SITE_NAME || "Novelis"}
           </span>
         </Link>
@@ -74,12 +65,8 @@ export default function Header() {
               href={link.href}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 pathname === link.href
-                  ? isHome && !scrolled
-                    ? "bg-white/15 text-white"
-                    : "bg-gray-100 text-gray-900"
-                  : isHome && !scrolled
-                    ? "text-white/80 hover:bg-white/10 hover:text-white"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-gray-100 text-gray-900"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               }`}
             >
               {link.label}
@@ -94,11 +81,7 @@ export default function Header() {
 
         {/* モバイルメニュー */}
         <button
-          className={`flex h-9 w-9 items-center justify-center rounded-lg transition md:hidden ${
-            isHome && !scrolled
-              ? "text-white/80 hover:bg-white/10"
-              : "text-gray-600 hover:bg-gray-100"
-          }`}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100 md:hidden"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={t("menu")}
         >
