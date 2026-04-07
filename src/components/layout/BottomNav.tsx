@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 
 const NAV_ICONS = {
@@ -11,8 +11,12 @@ const NAV_ICONS = {
   mypage: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
 };
 
+// 没入型ページ — SPA遷移するとRSCフライトが500になるためフルリロード
+const FULLSCREEN_PAGES = ["/discover", "/recommend", "/swipe"];
+
 export default function BottomNav() {
   const t = useTranslations("bottomNav");
+  const locale = useLocale();
   const pathname = usePathname();
 
   const NAV_ITEMS = [
@@ -23,7 +27,6 @@ export default function BottomNav() {
     { href: "/mypage" as const, label: t("mypage"), icon: NAV_ICONS.mypage },
   ];
 
-  // 管理画面・エピソード閲覧中・発見ページ・おすすめページでは非表示
   if (pathname.startsWith("/admin") || pathname.startsWith("/discover") || pathname.startsWith("/recommend") || pathname.startsWith("/swipe") || /^\/novels\/[^/]+\/\d+/.test(pathname)) {
     return null;
   }
@@ -33,13 +36,32 @@ export default function BottomNav() {
       <div className="flex h-14 items-center justify-around">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
+          const needsFullReload = FULLSCREEN_PAGES.includes(item.href);
+          const className = `flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] transition ${
+            isActive ? "text-primary" : "text-muted"
+          }`;
+
+          // 没入型ページはフルリロードで遷移
+          if (needsFullReload) {
+            return (
+              <button
+                key={item.href}
+                onClick={() => { window.location.href = `/${locale}${item.href}`; }}
+                className={className}
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                </svg>
+                {item.label}
+              </button>
+            );
+          }
+
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] transition ${
-                isActive ? "text-primary" : "text-muted"
-              }`}
+              className={className}
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
@@ -49,7 +71,6 @@ export default function BottomNav() {
           );
         })}
       </div>
-      {/* Safe area（iPhoneのホームバー対応） */}
       <div className="h-[env(safe-area-inset-bottom)]" />
     </nav>
   );
