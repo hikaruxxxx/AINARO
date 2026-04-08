@@ -38,10 +38,10 @@ LLMスコアまたはSynopsisスコアがない場合:
 
 ### Step 3: モデル予測実行
 
-`scripts/predict-hit.py` を実行:
+`scripts/predict/predict-hit.py` を実行:
 
 ```bash
-python3 scripts/predict-hit.py \
+python3 scripts/predict/predict-hit.py \
   --slug {slug} \
   --episode {num} \
   --llm-hook {hook} --llm-character {character} --llm-originality {originality} \

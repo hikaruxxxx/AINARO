@@ -1,6 +1,6 @@
 /**
  * テキスト構造的特徴量の抽出
- * scripts/self-learning-loop.ts から移植・lib化
+ * scripts/generation/self-learning-loop.ts から移植・lib化
  * パターン抽出エンジンと品質分析で使用
  */
 

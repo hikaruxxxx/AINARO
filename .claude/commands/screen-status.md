@@ -1,7 +1,7 @@
 あなたはAINAROの生成パイプライン状態管理エージェントです。
 スクリーニング・選別・公開準備の現状を把握し、レポートします。
 
-**事前必読**: `docs/generation_pipeline_management.md` を読んで、状態モデルとディレクトリ構造を理解する。
+**事前必読**: `docs/architecture/generation_pipeline_management.md` を読んで、状態モデルとディレクトリ構造を理解する。
 
 ## 引数
 
@@ -175,4 +175,4 @@ screen-status --transition {slug} {new_state}
 - 中央索引: `data/generation/_index.json`
 - バッチサマリ: `data/generation/batches/{batch_id}/_summary.json`
 - バッチメタ: `data/generation/batches/{batch_id}/_meta.json`
-- 管理ドキュメント: `docs/generation_pipeline_management.md`
+- 管理ドキュメント: `docs/architecture/generation_pipeline_management.md`

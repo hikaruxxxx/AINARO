@@ -138,7 +138,7 @@ exception_review → human_queueに積む（今回はスキップ）
 LLMスコアリング後、`/predict-hit` を実行してヒット確率を取得:
 
 ```bash
-python3 scripts/predict-hit.py \
+python3 scripts/predict/predict-hit.py \
   --slug {slug} --episode 1 \
   --llm-hook {hook} --llm-character {character} --llm-originality {originality} \
   --llm-prose {prose} --llm-tension {tension} --llm-pull {pull}
