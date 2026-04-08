@@ -1,0 +1,213 @@
+{
+  "lastUpdated": "2026-04-08T07:24:12Z",
+  "schemaVersion": 1,
+  "description": "content/works/ 配下の作品メタデータ集約。エージェント/オーケストレータはこれを参照して対象作品を特定する。各作品の正本は <slug>/work.json（存在する場合）。legacy 作品は work.json 未生成。",
+  "works": {
+    "apothecary-love": {
+      "path": "content/works/apothecary-love",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 0
+    },
+    "cold-duke-wife": {
+      "path": "content/works/cold-duke-wife",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 0
+    },
+    "commute-dungeon": {
+      "path": "content/works/commute-dungeon",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 0
+    },
+    "dungeon-streamer": {
+      "path": "content/works/dungeon-streamer",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 0
+    },
+    "fake-saint": {
+      "path": "content/works/fake-saint",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 0
+    },
+    "healer-exile": {
+      "path": "content/works/healer-exile",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 0
+    },
+    "index-librarian": {
+      "path": "content/works/index-librarian",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 0
+    },
+    "isekai-pure-blind": {
+      "path": "content/works/isekai-pure-blind",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 40.2,
+      "llmTotal": 48,
+      "episodes": 1,
+      "genre": "異世界_純愛"
+    },
+    "isekai-pure-night": {
+      "path": "content/works/isekai-pure-night",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 50.2,
+      "llmTotal": 41,
+      "episodes": 1,
+      "genre": "異世界_純愛"
+    },
+    "isekai-pure-sky": {
+      "path": "content/works/isekai-pure-sky",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 53,
+      "llmTotal": 37,
+      "episodes": 1,
+      "genre": "異世界_純愛"
+    },
+    "isekai-pure-spy": {
+      "path": "content/works/isekai-pure-spy",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 36.1,
+      "llmTotal": 54,
+      "episodes": 1,
+      "genre": "異世界_純愛"
+    },
+    "loop-villainess": {
+      "path": "content/works/loop-villainess",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 0
+    },
+    "reborn-accountant": {
+      "path": "content/works/reborn-accountant",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 1
+    },
+    "sage-reborn": {
+      "path": "content/works/sage-reborn",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 0
+    },
+    "test-villainess": {
+      "path": "content/works/test-villainess",
+      "state": "legacy",
+      "category": "legacy",
+      "episodes": 10
+    },
+    "vill-fan-mirror-twin": {
+      "path": "content/works/vill-fan-mirror-twin",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 48,
+      "llmTotal": 45,
+      "episodes": 1,
+      "genre": "悪役令嬢_ファンタジー"
+    },
+    "vill-fan-spirit-girl": {
+      "path": "content/works/vill-fan-spirit-girl",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 51.6,
+      "llmTotal": 41,
+      "episodes": 1,
+      "genre": "悪役令嬢_ファンタジー"
+    },
+    "vill-rom-letter-secret": {
+      "path": "content/works/vill-rom-letter-secret",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 52.9,
+      "llmTotal": 45,
+      "episodes": 1,
+      "genre": "悪役令嬢_恋愛"
+    },
+    "vill-rom-mask-ball": {
+      "path": "content/works/vill-rom-mask-ball",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 40.6,
+      "llmTotal": 50,
+      "episodes": 1,
+      "genre": "悪役令嬢_恋愛"
+    },
+    "vill-rom-night-rider": {
+      "path": "content/works/vill-rom-night-rider",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 40.2,
+      "llmTotal": 51,
+      "episodes": 1,
+      "genre": "悪役令嬢_恋愛"
+    },
+    "vill-rom-poet": {
+      "path": "content/works/vill-rom-poet",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 43.1,
+      "llmTotal": 47,
+      "episodes": 1,
+      "genre": "悪役令嬢_恋愛"
+    },
+    "vill-rom-prophet-girl": {
+      "path": "content/works/vill-rom-prophet-girl",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 54.3,
+      "llmTotal": 48,
+      "episodes": 1,
+      "genre": "悪役令嬢_恋愛"
+    },
+    "vill-rom-tea-sage": {
+      "path": "content/works/vill-rom-tea-sage",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 45.6,
+      "llmTotal": 45,
+      "episodes": 1,
+      "genre": "悪役令嬢_恋愛"
+    },
+    "vill-rom-twin-trade": {
+      "path": "content/works/vill-rom-twin-trade",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 52,
+      "llmTotal": 48,
+      "episodes": 1,
+      "genre": "悪役令嬢_恋愛"
+    },
+    "vill-rom-violinist": {
+      "path": "content/works/vill-rom-violinist",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_002",
+      "hitProbability": 52.2,
+      "llmTotal": 46,
+      "episodes": 1,
+      "genre": "悪役令嬢_恋愛"
+    }
+  }
+}
