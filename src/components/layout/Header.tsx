@@ -22,7 +22,7 @@ export default function Header() {
   ];
 
   // 読書ページなど一部ページでは非表示
-  if (pathname.startsWith("/discover") || pathname.startsWith("/recommend") || pathname.startsWith("/swipe")) return null;
+  if (pathname.startsWith("/discover") || pathname.startsWith("/recommend")) return null;
 
   const isReading = /^\/novels\/[^/]+\/\d+/.test(pathname);
 

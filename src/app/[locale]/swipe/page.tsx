@@ -75,7 +75,7 @@ export default function SwipePage() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50">
+      <div className="relative h-[calc(100vh-3.5rem)] w-full flex items-center justify-center bg-gray-50">
         <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-gray-600" />
       </div>
     );
@@ -83,7 +83,7 @@ export default function SwipePage() {
 
   if (error) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-50 px-8 text-center">
+      <div className="relative h-[calc(100vh-3.5rem)] w-full flex flex-col items-center justify-center bg-gray-50 px-8 text-center">
         <p className="mb-4 text-sm text-gray-500">{error}</p>
         <button
           onClick={fetchNovels}
@@ -96,7 +96,7 @@ export default function SwipePage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-gray-50">
+    <div className="relative h-[calc(100vh-3.5rem)] w-full bg-gray-50">
       <SwipeStack
         novels={novels}
         onSwipe={handleSwipe}
