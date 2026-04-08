@@ -329,7 +329,14 @@
     "s11c": "Content submitted to the Service by Registered Users may also be used for purposes including operation and improvement of the Service, recommendation, training and validation of machine learning models, and statistical analysis.",
     "s11d": "We may process information obtained through the Service into a form that does not identify individuals and provide such processed data, analytical results, or trained models to third parties, or use them for the development of our new services.",
     "s12Title": "12. Data Retention Period",
-    "s12Body": "We retain personal information only to the extent necessary to achieve the purposes of use. Even after withdrawal, we may retain registration information, usage logs, submission history, access logs, communication records, IP addresses, device information, and similar data for a reasonable period as necessary for legal compliance, dispute response, prevention of fraudulent use, statistical analysis, training and validation of machine learning models, and similar purposes."
+    "s12Body": "We retain personal information only to the extent necessary to achieve the purposes of use. Even after withdrawal, we may retain registration information, usage logs, submission history, access logs, communication records, IP addresses, device information, and similar data for a reasonable period as necessary for legal compliance, dispute response, prevention of fraudulent use, statistical analysis, training and validation of machine learning models, and similar purposes.",
+    "s13Title": "13. External Transmission (Analytics Tools)",
+    "s13Intro": "To understand and improve how this service is used, we use the following analytics tools, which transmit information from the user's device to third parties.",
+    "s13a": "Recipient: Google LLC (Google Analytics 4)",
+    "s13b": "Information transmitted: access timestamps, URLs of viewed pages, referrers, IP addresses, device and browser information, Cookies and other identifiers, and on-site interaction events",
+    "s13c": "Purpose: measurement and analysis of site usage, improvement of content and user experience",
+    "s13d": "Google Analytics uses Cookies, but IP addresses are handled in an anonymized form and no personally identifying information is collected. See Google's Privacy Policy (https://policies.google.com/privacy) and the Google Analytics Terms of Service (https://marketingplatform.google.com/about/analytics/terms/us/) for details.",
+    "s13e": "To opt out of data collection by Google Analytics, you can install the browser add-on provided by Google (https://tools.google.com/dlpage/gaoptout)."
   },
   "swipe": {
     "title": "Swipe to Discover",
