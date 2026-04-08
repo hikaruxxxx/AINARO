@@ -120,6 +120,18 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
+          <h2 className="mb-3 text-lg font-bold">{t("s13Title")}</h2>
+          <p className="mb-2">{t("s13Intro")}</p>
+          <ul className="list-disc space-y-1 pl-6">
+            <li>{t("s13a")}</li>
+            <li>{t("s13b")}</li>
+            <li>{t("s13c")}</li>
+            <li>{t("s13d")}</li>
+            <li>{t("s13e")}</li>
+          </ul>
+        </section>
+
+        <section>
           <h2 className="mb-3 text-lg font-bold">{t("s10Title")}</h2>
           <p>
             {t.rich("s10Body", {
