@@ -14,8 +14,9 @@
     "backToHome": "ホームに戻る"
   },
   "metadata": {
-    "siteTagline": "もっと面白い小説を、すべての人に",
-    "siteDescription": "面白さで選ばれた小説だけが並ぶ場所。異世界ファンタジー、恋愛、ホラーなど多ジャンル配信中。"
+    "siteTagline": "AI生成小説の専門プラットフォーム",
+    "siteDescription": "Novelisは日本最大級のAI生成コンテンツプラットフォーム。完結保証付きのAI生成小説を、異世界ファンタジー・恋愛・ホラー・ミステリーなど多ジャンルで配信中。",
+    "aiPlatformLabel": "日本最大級のAI生成小説プラットフォーム"
   },
   "header": {
     "novels": "作品一覧",
@@ -121,7 +122,10 @@
     "relatedNovels": "関連作品",
     "update": "更新 {time}",
     "charCount": "{count}字",
-    "recommended": "おすすめ作品"
+    "recommended": "おすすめ作品",
+    "readingTimeHours": "約{hours}時間で読めます",
+    "readingTimeMinutes": "約{minutes}分で読めます",
+    "completedPromise": "完結済み・最後まで読めます"
   },
   "episode": {
     "backToToc": "← 目次",
@@ -205,7 +209,14 @@
     "becomeWriterDesc": "ペンネームを設定するだけで、すぐに作品を投稿・公開できます。",
     "becomeWriterCta": "作家になる",
     "logout": "ログアウト",
-    "loggingOut": "ログアウト中..."
+    "loggingOut": "ログアウト中...",
+    "streakLabel": "{days}日連続",
+    "streakBest": "最長 {days}日",
+    "streakNone": "今日からスタート",
+    "badgesTitle": "獲得バッジ",
+    "badgesProgress": "{earned} / {total} 獲得",
+    "badgesNone": "まだバッジを獲得していません",
+    "badgeNotEarned": "未獲得"
   },
   "search": {
     "title": "検索",

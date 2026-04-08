@@ -20,5 +20,6 @@ export async function POST() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ balance: data, bonus: 1 });
+  // claim_login_bonus は JSONB を返す: { balance, bonus, current_streak, longest_streak, already_claimed }
+  return NextResponse.json(data);
 }

@@ -45,6 +45,48 @@ type StatsData = {
   realtime: RealtimeStats;
 };
 
+// 主KPI: 完走者数 (月次)
+type MonthlyCompletion = {
+  month: string;
+  completed_work_total: number;
+  completed_work_logged_in: number;
+  caught_up_total: number;
+  caught_up_logged_in: number;
+};
+
+type TopCompletedWork = {
+  novel_id: string;
+  novel_title: string;
+  novel_status: string;
+  completion_type: "completed_work" | "caught_up";
+  completion_count: number;
+};
+
+type CompletionsData = {
+  monthly: MonthlyCompletion[];
+  top_works: TopCompletedWork[];
+};
+
+// v2 主KPI: MAU/DAU
+type MauSummary = {
+  mau_users: number;
+  mau_sessions: number;
+  dau_avg_users: number;
+  dau_avg_sessions: number;
+  dau_mau_ratio: number;
+};
+
+type DauDaily = {
+  date: string;
+  dau_users: number;
+  dau_sessions: number;
+};
+
+type MauDauData = {
+  summary: MauSummary | null;
+  daily: DauDaily[];
+};
+
 // パーセント表示
 function pct(val: number | null): string {
   if (val === null) return "—";
@@ -72,6 +114,8 @@ function heatColor(count: number, max: number): string {
 
 export default function StatsPage() {
   const [data, setData] = useState<StatsData | null>(null);
+  const [completions, setCompletions] = useState<CompletionsData | null>(null);
+  const [mauDau, setMauDau] = useState<MauDauData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedNovelId, setSelectedNovelId] = useState<string>("");
   const [days, setDays] = useState(7);
@@ -81,9 +125,19 @@ export default function StatsPage() {
     const params = new URLSearchParams({ days: String(days) });
     if (selectedNovelId) params.set("novel_id", selectedNovelId);
 
-    const res = await fetch(`/api/admin/stats?${params}`);
-    const json = await res.json();
-    setData(json);
+    const [statsRes, compRes, mauRes] = await Promise.all([
+      fetch(`/api/admin/stats?${params}`),
+      fetch(`/api/admin/completions`),
+      fetch(`/api/admin/mau-dau`),
+    ]);
+    const [statsJson, compJson, mauJson] = await Promise.all([
+      statsRes.json(),
+      compRes.json(),
+      mauRes.json(),
+    ]);
+    setData(statsJson);
+    setCompletions(compJson);
+    setMauDau(mauJson);
     setLoading(false);
   }, [selectedNovelId, days]);
 
@@ -105,6 +159,128 @@ export default function StatsPage() {
         <h2 className="text-xl font-bold text-gray-900">読書統計ダッシュボード</h2>
         <p className="text-sm text-gray-500">リアルタイムの読書行動データを分析</p>
       </div>
+
+      {/* v2 主KPI: MAU / DAU / DAU/MAU比 */}
+      {mauDau?.summary && (
+        <div>
+          <h3 className="mb-1 text-lg font-bold text-gray-900">
+            主KPI: MAU / DAU <span className="text-sm font-normal text-gray-500">(過去30日)</span>
+          </h3>
+          <p className="mb-4 text-xs text-gray-500">
+            ログイン読者ベース = v2 主KPI(買い手評価指標) / セッションベース = 補助指標。philosophy v2 §1
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            <StatCard
+              label="MAU(ログイン)"
+              value={String(mauDau.summary.mau_users)}
+              highlight
+            />
+            <StatCard
+              label="MAU(全セッション)"
+              value={String(mauDau.summary.mau_sessions)}
+            />
+            <StatCard
+              label="DAU平均(ログイン)"
+              value={mauDau.summary.dau_avg_users.toFixed(1)}
+              highlight
+            />
+            <StatCard
+              label="DAU平均(全セッション)"
+              value={mauDau.summary.dau_avg_sessions.toFixed(1)}
+            />
+            <StatCard
+              label="DAU/MAU比"
+              value={`${(mauDau.summary.dau_mau_ratio * 100).toFixed(1)}%`}
+              highlight
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 副KPI: 完走者数 (月次) — 品質ガード */}
+      {completions && (
+        <div>
+          <h3 className="mb-1 text-lg font-bold text-gray-900">
+            副KPI: 完走者数 <span className="text-sm font-normal text-gray-500">(月次・品質ガード)</span>
+          </h3>
+          <p className="mb-4 text-xs text-gray-500">
+            完結作品の最終話到達 = 完走 / 連載作品の最新話到達 = 追従。v2 では品質劣化の早期警告として継続計測 (philosophy v2 §3.4)
+          </p>
+          {completions.monthly.length === 0 ? (
+            <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-sm">
+              まだ完走データがありません
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50/50 text-left text-gray-500">
+                    <th className="px-3 py-2 text-xs font-medium">月</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium">完走者数(完結)</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium">うちログイン</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium">追従者数(連載)</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium">うちログイン</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {completions.monthly.map((m) => (
+                    <tr key={m.month} className="border-b border-gray-100">
+                      <td className="px-3 py-2 text-gray-900">{m.month.slice(0, 7)}</td>
+                      <td className="px-3 py-2 text-right text-2xl font-bold text-emerald-600">
+                        {m.completed_work_total}
+                      </td>
+                      <td className="px-3 py-2 text-right text-gray-600">{m.completed_work_logged_in}</td>
+                      <td className="px-3 py-2 text-right text-lg font-semibold text-gray-700">
+                        {m.caught_up_total}
+                      </td>
+                      <td className="px-3 py-2 text-right text-gray-600">{m.caught_up_logged_in}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* 作品別完走数トップ (直近30日) */}
+          {completions.top_works.length > 0 && (
+            <div className="mt-6">
+              <h4 className="mb-2 text-sm font-bold text-gray-900">作品別完走/追従数 (直近30日)</h4>
+              <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50/50 text-left text-gray-500">
+                      <th className="px-3 py-2 text-xs font-medium">作品</th>
+                      <th className="px-3 py-2 text-xs font-medium">種別</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium">人数</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {completions.top_works.map((w) => (
+                      <tr key={`${w.novel_id}-${w.completion_type}`} className="border-b border-gray-100">
+                        <td className="px-3 py-2 text-gray-900">{w.novel_title}</td>
+                        <td className="px-3 py-2">
+                          {w.completion_type === "completed_work" ? (
+                            <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
+                              完走(完結作)
+                            </span>
+                          ) : (
+                            <span className="rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                              追従(連載)
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2 text-right font-semibold text-gray-900">
+                          {w.completion_count}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* フィルター */}
       <div className="flex flex-wrap items-center gap-4">

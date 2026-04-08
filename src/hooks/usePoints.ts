@@ -6,6 +6,16 @@ type PointsState = {
   balance: number;
   authenticated: boolean;
   loading: boolean;
+  currentStreak: number;
+  longestStreak: number;
+};
+
+export type LoginBonusResult = {
+  balance: number;
+  bonus: number;
+  current_streak: number;
+  longest_streak: number;
+  already_claimed: boolean;
 };
 
 // ポイント残高管理フック
@@ -14,6 +24,8 @@ export function usePoints() {
     balance: 0,
     authenticated: false,
     loading: true,
+    currentStreak: 0,
+    longestStreak: 0,
   });
 
   // 残高取得
@@ -26,6 +38,8 @@ export function usePoints() {
           balance: data.balance ?? 0,
           authenticated: data.authenticated ?? false,
           loading: false,
+          currentStreak: data.current_streak ?? 0,
+          longestStreak: data.longest_streak ?? 0,
         });
       }
     } catch {
@@ -38,14 +52,19 @@ export function usePoints() {
   }, [refresh]);
 
   // ログインボーナス受け取り
-  const claimLoginBonus = useCallback(async () => {
+  const claimLoginBonus = useCallback(async (): Promise<LoginBonusResult | null> => {
     const res = await fetch("/api/points/login-bonus", { method: "POST" });
     if (res.ok) {
-      const data = await res.json();
-      setState((prev) => ({ ...prev, balance: data.balance }));
-      return data.bonus as number;
+      const data: LoginBonusResult = await res.json();
+      setState((prev) => ({
+        ...prev,
+        balance: data.balance,
+        currentStreak: data.current_streak,
+        longestStreak: data.longest_streak,
+      }));
+      return data;
     }
-    return 0;
+    return null;
   }, []);
 
   // エピソード読了ポイント獲得

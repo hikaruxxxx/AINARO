@@ -14,8 +14,9 @@
     "backToHome": "Back to home"
   },
   "metadata": {
-    "siteTagline": "Better Novels for Everyone",
-    "siteDescription": "A curated collection of novels selected for quality. Explore fantasy, romance, horror, and more."
+    "siteTagline": "Japan's largest AI-generated novel platform",
+    "siteDescription": "Novelis is Japan's leading platform for AI-generated novels with completion guarantee. Explore fantasy, romance, horror, mystery and more.",
+    "aiPlatformLabel": "Japan's largest AI-generated novel platform"
   },
   "header": {
     "novels": "All Novels",
@@ -121,7 +122,10 @@
     "relatedNovels": "Related Novels",
     "update": "Updated {time}",
     "charCount": "{count} chars",
-    "recommended": "Recommended"
+    "recommended": "Recommended",
+    "readingTimeHours": "About {hours}h to read",
+    "readingTimeMinutes": "About {minutes}min to read",
+    "completedPromise": "Completed · Read to the end"
   },
   "episode": {
     "backToToc": "← Contents",
@@ -205,7 +209,14 @@
     "becomeWriterDesc": "Pick a pen name and start publishing right away.",
     "becomeWriterCta": "Become a writer",
     "logout": "Sign out",
-    "loggingOut": "Signing out..."
+    "loggingOut": "Signing out...",
+    "streakLabel": "{days}-day streak",
+    "streakBest": "Best {days}d",
+    "streakNone": "Start today",
+    "badgesTitle": "Badges",
+    "badgesProgress": "{earned} / {total} earned",
+    "badgesNone": "No badges yet",
+    "badgeNotEarned": "Locked"
   },
   "search": {
     "title": "Search",

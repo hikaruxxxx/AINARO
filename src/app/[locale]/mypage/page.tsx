@@ -24,6 +24,18 @@ type HistoryEntry = {
   hasUnread: boolean;
 };
 
+type BadgeEntry = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string | null;
+  tier: number;
+  threshold: number | null;
+  earned: boolean;
+  earned_at: string | null;
+};
+
 export default function MyPage() {
   const t = useTranslations("mypage");
   const locale = useLocale();
@@ -35,6 +47,18 @@ export default function MyPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const points = usePoints();
+  const [badges, setBadges] = useState<BadgeEntry[] | null>(null);
+
+  // 獲得バッジ取得
+  useEffect(() => {
+    if (!authChecked || !userLabel) return;
+    fetch("/api/badges/me")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.authenticated) setBadges(data.badges ?? []);
+      })
+      .catch(() => {});
+  }, [authChecked, userLabel]);
 
   // ログインユーザー情報取得
   useEffect(() => {
@@ -181,21 +205,88 @@ export default function MyPage() {
         )}
       </section>
 
-      {/* ポイント残高カード */}
+      {/* ポイント残高 + ストリークカード */}
       <section className="mb-4 rounded-lg border border-border bg-surface p-4">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
             <p className="text-xs text-muted">{t("pointsBalance")}</p>
             <p className="mt-1 text-2xl font-bold text-text">
               {points.loading ? "—" : points.balance.toLocaleString()}
               <span className="ml-1 text-sm font-normal text-muted">pt</span>
             </p>
           </div>
+          {/* ストリーク表示 */}
+          {!points.loading && points.authenticated && (
+            <div className="flex flex-col items-end">
+              {points.currentStreak > 0 ? (
+                <>
+                  <div className="flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1">
+                    <span className="text-base">🔥</span>
+                    <span className="text-sm font-bold text-orange-700">
+                      {t("streakLabel", { days: points.currentStreak })}
+                    </span>
+                  </div>
+                  {points.longestStreak > points.currentStreak && (
+                    <p className="mt-1 text-[10px] text-muted">
+                      {t("streakBest", { days: points.longestStreak })}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <span className="rounded-full bg-surface px-3 py-1 text-xs text-muted">
+                  {t("streakNone")}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="mt-3 flex justify-end">
           <Link href="/points" className="text-sm text-secondary hover:underline">
             {t("viewHistory")} →
           </Link>
         </div>
       </section>
+
+      {/* バッジセクション */}
+      {authChecked && userLabel && badges && badges.length > 0 && (
+        <section className="mb-4 rounded-lg border border-border bg-surface p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-text">{t("badgesTitle")}</h2>
+            <span className="text-xs text-muted">
+              {t("badgesProgress", {
+                earned: badges.filter((b) => b.earned).length,
+                total: badges.length,
+              })}
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-3 sm:grid-cols-6">
+            {badges.map((b) => (
+              <div
+                key={b.id}
+                className={`flex flex-col items-center text-center ${
+                  b.earned ? "" : "opacity-30 grayscale"
+                }`}
+                title={`${b.name} — ${b.description}${b.earned ? "" : " (" + t("badgeNotEarned") + ")"}`}
+              >
+                <div
+                  className={`flex h-12 w-12 items-center justify-center rounded-full text-2xl ${
+                    b.tier === 3
+                      ? "bg-yellow-100"
+                      : b.tier === 2
+                      ? "bg-gray-100"
+                      : "bg-orange-50"
+                  }`}
+                >
+                  {b.icon ?? "🏅"}
+                </div>
+                <p className="mt-1 line-clamp-2 text-[10px] leading-tight text-muted">
+                  {b.name}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 作家化CTA: 未登録ユーザーのみ */}
       {authChecked && userLabel && !isWriter && (

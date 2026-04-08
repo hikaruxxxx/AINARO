@@ -12,7 +12,7 @@ export async function GET() {
 
   const { data } = await supabase
     .from("user_points")
-    .select("balance, total_earned, total_spent, last_login_bonus_at")
+    .select("balance, total_earned, total_spent, last_login_bonus_at, current_streak, longest_streak")
     .eq("user_id", user.id)
     .single();
 
@@ -22,6 +22,8 @@ export async function GET() {
       total_earned: 0,
       total_spent: 0,
       last_login_bonus_at: null,
+      current_streak: 0,
+      longest_streak: 0,
       authenticated: true,
     });
   }

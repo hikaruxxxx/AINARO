@@ -41,6 +41,9 @@ export async function POST(req: NextRequest) {
         p_description: "エピソード読了ボーナス",
       });
 
+      // 読了/完走バッジの自動付与 (失敗してもポイント獲得は成功扱い)
+      await admin.rpc("grant_reading_badges", { p_user_id: user.id });
+
       return NextResponse.json({ earned: 1, balance: newBalance });
     }
 
