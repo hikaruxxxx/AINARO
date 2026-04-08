@@ -1,0 +1,22 @@
+{
+  "slug": "modern-dungeon-mom",
+  "episode": 1,
+  "modelVersion": "v10",
+  "hitProbability": 36.3,
+  "tier": "upper",
+  "predictedAt": "2026-04-08T16:26:42.982057",
+  "genre": "その他",
+  "textLength": 3747,
+  "reliability": "medium",
+  "inputScores": {
+    "llm": {
+      "hook": 10.0,
+      "character": 9.0,
+      "originality": 9.0,
+      "prose": 9.0,
+      "tension": 9.0,
+      "pull": 10.0
+    },
+    "synopsis": null
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "slug": "modern-dungeon-salaryman",
+  "episode": 1,
+  "modelVersion": "v10",
+  "hitProbability": 30.5,
+  "tier": "mid",
+  "predictedAt": "2026-04-08T16:24:55.502895",
+  "genre": "その他",
+  "textLength": 3854,
+  "reliability": "medium",
+  "inputScores": {
+    "llm": {
+      "hook": 7.0,
+      "character": 9.0,
+      "originality": 7.0,
+      "prose": 8.0,
+      "tension": 7.0,
+      "pull": 9.0
+    },
+    "synopsis": null
+  }
+}

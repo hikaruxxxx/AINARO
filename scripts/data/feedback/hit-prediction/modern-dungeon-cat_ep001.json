@@ -1,0 +1,22 @@
+{
+  "slug": "modern-dungeon-cat",
+  "episode": 1,
+  "modelVersion": "v10",
+  "hitProbability": 39.3,
+  "tier": "upper",
+  "predictedAt": "2026-04-08T16:24:52.884987",
+  "genre": "その他",
+  "textLength": 3773,
+  "reliability": "medium",
+  "inputScores": {
+    "llm": {
+      "hook": 8.0,
+      "character": 9.0,
+      "originality": 9.0,
+      "prose": 10.0,
+      "tension": 8.0,
+      "pull": 9.0
+    },
+    "synopsis": null
+  }
+}

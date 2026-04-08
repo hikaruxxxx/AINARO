@@ -1,0 +1,22 @@
+{
+  "slug": "slow-ranch-monsters",
+  "episode": 1,
+  "modelVersion": "v10",
+  "hitProbability": 37.5,
+  "tier": "upper",
+  "predictedAt": "2026-04-08T16:26:15.049358",
+  "genre": "その他",
+  "textLength": 3676,
+  "reliability": "medium",
+  "inputScores": {
+    "llm": {
+      "hook": 7.0,
+      "character": 8.0,
+      "originality": 7.0,
+      "prose": 9.0,
+      "tension": 6.0,
+      "pull": 7.0
+    },
+    "synopsis": null
+  }
+}
