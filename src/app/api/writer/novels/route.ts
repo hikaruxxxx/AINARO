@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireWriterApi } from "@/lib/supabase/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { generateCoverInBackground } from "@/lib/cover/generate";
 
 /**
  * GET /api/writer/novels
@@ -109,6 +110,18 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // 表紙画像をfire-and-forgetで自動生成
+    void generateCoverInBackground(
+      {
+        novelId: data.id,
+        title: data.title,
+        tagline: data.tagline,
+        authorName: data.author_name,
+        genre: data.genre,
+      },
+      supabase
+    );
 
     return NextResponse.json({ novel: data }, { status: 201 });
   } catch {
