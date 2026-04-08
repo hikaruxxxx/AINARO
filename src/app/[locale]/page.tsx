@@ -37,6 +37,7 @@ export default async function HomePage() {
   const t = await getTranslations("home");
   const tNovel = await getTranslations("novel");
   const tGenre = await getTranslations("genre");
+  const tMeta = await getTranslations("metadata");
 
   const novels = await fetchRankedNovels({ limit: 30, locale });
 
@@ -78,6 +79,14 @@ export default async function HomePage() {
     <div>
       <TasteOnboarding />
       <ContinueReadingSection />
+
+      {/* AIプラットフォーム明示バッジ — v2 ポジショニング */}
+      <div className="mx-auto max-w-6xl px-4 pt-4">
+        <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-3 py-1.5 ring-1 ring-indigo-500/20">
+          <span className="text-sm">✨</span>
+          <span className="text-xs font-semibold text-indigo-700">{tMeta("aiPlatformLabel")}</span>
+        </div>
+      </div>
 
       {/* ヒーローセクション — 上位5件から既読を除外して表示 */}
       <section className="mb-10">

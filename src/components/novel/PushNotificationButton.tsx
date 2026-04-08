@@ -47,8 +47,19 @@ export default function PushNotificationButton() {
         applicationServerKey: urlBase64ToUint8Array(vapidKey).buffer as ArrayBuffer,
       });
 
-      // サーバーに登録（将来的にAPIに送信）
-      localStorage.setItem("ainaro_push_subscription", JSON.stringify(sub.toJSON()));
+      // サーバーに登録 (push_subscriptions テーブルに永続化)
+      const subJson = sub.toJSON();
+      const res = await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subJson),
+      });
+      if (!res.ok) {
+        console.warn("サーバー登録に失敗しましたが、ローカルでは購読しています");
+      }
+
+      // ローカルにも保存(オフライン時の状態維持用)
+      localStorage.setItem("ainaro_push_subscription", JSON.stringify(subJson));
       setSubscribed(true);
     } catch (err) {
       console.error("Push通知の登録に失敗:", err);
@@ -60,7 +71,14 @@ export default function PushNotificationButton() {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
       if (sub) {
+        const endpoint = sub.endpoint;
         await sub.unsubscribe();
+        // サーバー側からも削除
+        await fetch("/api/push/unsubscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint }),
+        }).catch(() => {});
         localStorage.removeItem("ainaro_push_subscription");
         setSubscribed(false);
       }

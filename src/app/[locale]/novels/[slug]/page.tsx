@@ -97,6 +97,22 @@ export default async function NovelDetailPage({ params, searchParams }: Props) {
             <p className="mb-4 text-sm text-white/50">
               {t("novel.author", { name: novel.author_name })} · {t("novel.episodes", { count: novel.total_chapters })} · {formatCharCount(novel.total_characters, locale)}
             </p>
+            {/* 完結を約束する: 完結作品は推定読書時間と完結ラベルを表示 (philosophy §3.7) */}
+            {novel.status === "complete" && novel.total_characters > 0 && (() => {
+              // 日本語の標準読書速度: 約600字/分
+              const totalMinutes = Math.round(novel.total_characters / 600);
+              const label = totalMinutes >= 60
+                ? t("novel.readingTimeHours", { hours: Math.round(totalMinutes / 60) })
+                : t("novel.readingTimeMinutes", { minutes: Math.max(1, totalMinutes) });
+              return (
+                <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3 py-1 text-xs text-emerald-200 ring-1 ring-emerald-400/30">
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>{t("novel.completedPromise")} · {label}</span>
+                </p>
+              );
+            })()}
             {novel.content_warnings && novel.content_warnings.length > 0 && (
               <div className="mb-4">
                 <ContentWarningBadges warnings={novel.content_warnings} />

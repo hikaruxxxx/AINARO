@@ -6,7 +6,10 @@ import { notFound } from "next/navigation";
 import { locales } from "@/i18n/config";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
+
+const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
@@ -47,6 +50,17 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       statusBarStyle: "default" as const,
       title: siteName,
     },
+    openGraph: {
+      title: `${siteName} — ${t("siteTagline")}`,
+      description: t("siteDescription"),
+      siteName,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${siteName} — ${t("siteTagline")}`,
+      description: t("siteDescription"),
+    },
   };
 }
 
@@ -78,6 +92,7 @@ export default async function LocaleLayout({
           <main className="flex-1">{children}</main>
           <Footer />
         </NextIntlClientProvider>
+        {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );
