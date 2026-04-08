@@ -60,9 +60,9 @@ export default function LoginPage() {
 
         {sent ? (
           <div className="space-y-4">
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800 dark:border-green-900 dark:bg-green-950/30 dark:text-green-300">
-              <p className="font-bold">{t("sentTitle")}</p>
-              <p className="mt-1">{t("sentBody", { email })}</p>
+            <div className="rounded-lg border border-green-300 bg-white p-4 text-sm">
+              <p className="font-bold text-gray-900">{t("sentTitle")}</p>
+              <p className="mt-1 text-gray-700">{t("sentBody", { email })}</p>
             </div>
             <p className="text-xs text-muted">{t("sentHint")}</p>
             <button
