@@ -42,14 +42,15 @@ export default function MyPage() {
     supabase.auth.getUser().then(async ({ data }) => {
       const u = data.user;
       if (u) {
-        // user_profiles を最優先（作家登録時のペンネーム）、次に user_metadata、最後に email
+        // user_profiles を最優先（auth/confirm 時に自動作成済みのはず）
         const { data: profile } = await supabase
           .from("user_profiles")
           .select("display_name, role, writer_status")
           .eq("user_id", u.id)
           .maybeSingle();
-        const meta = (u.user_metadata ?? {}) as { display_name?: string; name?: string };
-        setUserLabel(profile?.display_name || meta.display_name || meta.name || u.email || null);
+        // フォールバック: profile が無ければメールローカル部
+        const fallback = (u.email ?? "").split("@")[0] || null;
+        setUserLabel(profile?.display_name || fallback);
         if (profile?.role === "writer" && profile.writer_status === "approved") {
           setIsWriter(true);
         }
@@ -195,6 +196,24 @@ export default function MyPage() {
           </Link>
         </div>
       </section>
+
+      {/* 作家化CTA: 未登録ユーザーのみ */}
+      {authChecked && userLabel && !isWriter && (
+        <section className="mb-4 rounded-lg border border-indigo-200 bg-indigo-50 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="font-bold text-indigo-900">{t("becomeWriterTitle")}</p>
+              <p className="mt-0.5 text-xs text-indigo-700">{t("becomeWriterDesc")}</p>
+            </div>
+            <Link
+              href="/write/apply"
+              className="shrink-0 rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            >
+              {t("becomeWriterCta")}
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* メニューリスト */}
       <section className="mb-8">

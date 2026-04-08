@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function WriterApplyPage() {
   const t = useTranslations("writerApply");
@@ -12,6 +13,23 @@ export default function WriterApplyPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [accountEmail, setAccountEmail] = useState<string | null>(null);
+
+  // ログイン中のメールと既存 display_name をプリフィル
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data }) => {
+      const u = data.user;
+      if (!u) return;
+      setAccountEmail(u.email ?? null);
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("display_name")
+        .eq("user_id", u.id)
+        .maybeSingle();
+      if (profile?.display_name) setDisplayName(profile.display_name);
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +65,15 @@ export default function WriterApplyPage() {
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-lg px-6 py-16">
         <h1 className="mb-2 text-2xl font-bold text-gray-900">{t("title")}</h1>
-        <p className="mb-8 text-sm text-gray-600">{t("subtitle")}</p>
+        <p className="mb-6 text-sm text-gray-600">{t("subtitle")}</p>
+
+        {/* ログイン中アカウント表示（認証状態を可視化） */}
+        {accountEmail && (
+          <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700">
+            <span className="text-gray-500">{t("loggedInAs")}: </span>
+            <span className="font-medium">{accountEmail}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

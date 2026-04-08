@@ -201,6 +201,9 @@
     "menu": "メニュー",
     "points": "ポイント",
     "writerDashboard": "執筆ダッシュボード",
+    "becomeWriterTitle": "あなたも作家として活動してみませんか",
+    "becomeWriterDesc": "ペンネームを設定するだけで、すぐに作品を投稿・公開できます。",
+    "becomeWriterCta": "作家になる",
     "logout": "ログアウト",
     "loggingOut": "ログアウト中..."
   },
@@ -345,7 +348,9 @@
     "featureRevenueDesc": "業界最高の還元率。広告もサブスクも含めた全収益の90%が、あなたの手元に届きます。",
     "ctaTitle": "今すぐ執筆を始めよう",
     "ctaSubtitle": "ペンネームを決めるだけ。登録後すぐに作品を投稿・公開できます。",
-    "ctaButton": "執筆を始める"
+    "ctaButton": "執筆を始める",
+    "ctaButtonAlreadyLoggedIn": "ペンネームを設定して始める",
+    "ctaButtonGoDashboard": "執筆ダッシュボードへ"
   },
   "writerApply": {
     "title": "作家として登録する",
@@ -358,6 +363,7 @@
     "submit": "作家として登録する",
     "submitting": "登録中...",
     "errorGeneric": "エラーが発生しました。もう一度お試しください。",
+    "loggedInAs": "ログイン中",
     "benefitsTitle": "作家登録すると",
     "benefit1": "作品を投稿してすぐに公開できます",
     "benefit2": "読了率・離脱ポイントなどのデータが見られます",

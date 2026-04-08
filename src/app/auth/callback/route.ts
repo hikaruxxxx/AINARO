@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Magic Link / OAuth コールバックハンドラ
@@ -34,11 +35,36 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
     return NextResponse.redirect(
       `${origin}/ja/login?error=${encodeURIComponent(error.message)}`
     );
+  }
+
+  // 初回ログイン時に user_profiles を自動作成
+  const user = data?.user;
+  if (user) {
+    try {
+      const admin = createAdminClient();
+      const { data: existing } = await admin
+        .from("user_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!existing) {
+        const localPart = (user.email ?? "").split("@")[0] || "reader";
+        await admin.from("user_profiles").insert({
+          user_id: user.id,
+          display_name: localPart.slice(0, 50),
+          role: "reader",
+          writer_status: "none",
+        });
+      }
+    } catch (e) {
+      console.error("[auth/callback] failed to create user_profile", e);
+    }
   }
 
   return response;

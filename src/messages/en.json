@@ -201,6 +201,9 @@
     "menu": "Menu",
     "points": "Points",
     "writerDashboard": "Writer Dashboard",
+    "becomeWriterTitle": "Become a writer on Novelis",
+    "becomeWriterDesc": "Pick a pen name and start publishing right away.",
+    "becomeWriterCta": "Become a writer",
     "logout": "Sign out",
     "loggingOut": "Signing out..."
   },
@@ -345,7 +348,9 @@
     "featureRevenueDesc": "Industry-leading revenue share. 90% of all revenue — ads, subscriptions, everything — goes directly to you.",
     "ctaTitle": "Start Writing Today",
     "ctaSubtitle": "Just pick a pen name — you can publish your stories immediately after signup.",
-    "ctaButton": "Start Writing"
+    "ctaButton": "Start Writing",
+    "ctaButtonAlreadyLoggedIn": "Set pen name & start",
+    "ctaButtonGoDashboard": "Go to writer dashboard"
   },
   "writerApply": {
     "title": "Register as a Writer",
@@ -358,6 +363,7 @@
     "submit": "Register as Writer",
     "submitting": "Registering...",
     "errorGeneric": "An error occurred. Please try again.",
+    "loggedInAs": "Signed in as",
     "benefitsTitle": "As a writer, you get",
     "benefit1": "Publish your stories instantly",
     "benefit2": "Access reader analytics — completion rates, drop-off points, and more",

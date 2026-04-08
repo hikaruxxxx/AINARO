@@ -1,6 +1,8 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
+import { getUser } from "@/lib/supabase/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("write");
@@ -10,8 +12,31 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function WritePage() {
   const t = await getTranslations("write");
+
+  // ログイン状態と作家ステータスを判定して CTA を分岐
+  const user = await getUser();
+  let ctaHref = "/write/apply";
+  let ctaLabel = t("ctaButton");
+
+  if (user) {
+    const supabase = createAdminClient();
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("role, writer_status")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (profile?.role === "writer" && profile.writer_status === "approved") {
+      ctaHref = "/dashboard";
+      ctaLabel = t("ctaButtonGoDashboard");
+    } else {
+      ctaHref = "/write/apply";
+      ctaLabel = t("ctaButtonAlreadyLoggedIn");
+    }
+  }
 
   const features = [
     {
@@ -55,10 +80,10 @@ export default async function WritePage() {
             {t("heroSubtitle")}
           </p>
           <Link
-            href="/write/apply"
+            href={ctaHref}
             className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-8 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
           >
-            {t("ctaButton")}
+            {ctaLabel}
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
@@ -89,10 +114,10 @@ export default async function WritePage() {
             {t("ctaSubtitle")}
           </p>
           <Link
-            href="/write/apply"
+            href={ctaHref}
             className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-8 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
           >
-            {t("ctaButton")}
+            {ctaLabel}
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>

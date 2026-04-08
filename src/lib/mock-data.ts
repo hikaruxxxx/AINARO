@@ -8,1985 +8,1203 @@ export const MOCK_GENRES: Genre[] = [
   { id: "horror", name: "ホラー", sort_order: 4 },
 ];
 
-// --- 小説3作品 ---
+// --- 小説7作品 (batch_20260408_002) ---
 export const MOCK_NOVELS: Novel[] = [
   {
     id: "novel-001",
-    slug: "akuyaku-reijou-tensei",
-    title: "悪役令嬢に転生したので、破滅フラグを全力で回避します",
-    title_en: "Reborn as the Villainess: Dodging Every Death Flag",
-    tagline: "気づいたら乙女ゲームの悪役令嬢だった。でも、破滅エンドは絶対に回避してみせる！",
-    tagline_en: "I woke up as the villainess of an otome game. But I refuse to accept my doom ending!",
-    synopsis:
-      "目覚めたら前世で遊んでいた乙女ゲーム「聖女の花園」の悪役令嬢・カタリナに転生していた。\n\nこのままでは攻略対象の王子に婚約破棄され、国外追放か処刑という破滅エンドが待っている。\n\n前世の記憶を武器に、カタリナは全力で破滅フラグの回避に乗り出す。しかし、フラグを折るたびに新たなフラグが立ち、なぜか攻略対象たち全員から好感度が上がっていく——。\n\n「いや、私はただ破滅を回避したいだけなのに！」",
-    synopsis_en:
-      "I woke up as Katarina, the villainess of the otome game \"Garden of the Saintess\" — a game I played obsessively in my previous life.\n\nIf things follow the script, the prince will break off our engagement, and I'll face exile or execution.\n\nArmed with my memories of the game, I'm going all out to dodge every death flag. But every flag I break spawns a new one, and somehow all the love interests are falling for me instead—\n\n\"Wait, I just want to survive! Why is everyone's affection meter going up?!\"",
+    slug: "vill-rom-prophet-girl",
+    title: "呪いの令嬢は処刑台で予言する",
+    title_en: null,
+    tagline: "未来が見える悪役令嬢が「あなたは必ず私を愛する」と予言した青年が、本当に虜になる。",
+    tagline_en: null,
+    synopsis: "「あなたは、必ずわたくしを愛します」——処刑台の足元で、呪いの令嬢と呼ばれるわたくしは、見知らぬ騎士にそう告げた。星詠みの予言は絶対。外せば魂が狂気に蝕まれる。それでも、夢の中で何度も死んでいく彼を救いたかった。予言を書き換えた代償は、わたくし一人の命で払う覚悟だった。——なのに、なぜあなたは、こんなにも静かな目で、わたくしの傍にいると言うの。",
+    synopsis_en: null,
     cover_image_url: null,
     author_type: "self",
     author_id: null,
-    author_name: "編集部",
+    author_name: "AINARO編集部",
     genre: "villainess",
-    tags: ["悪役令嬢", "転生", "乙女ゲーム", "溺愛"],
+    tags: ["悪役令嬢", "恋愛", "ファンタジー"],
     status: "serial",
     is_r18: false,
     content_warnings: [],
-    total_chapters: 5,
-    total_characters: 25000,
+    total_chapters: 1,
+    total_characters: 3510,
     total_pv: 0,
     total_bookmarks: 0,
-    latest_chapter_at: "2026-04-05T18:00:00Z",
-    published_at: "2026-03-15T09:00:00Z",
-    created_at: "2026-03-15T09:00:00Z",
-    updated_at: "2026-04-05T18:00:00Z",
+    latest_chapter_at: "2026-04-08T10:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
   },
   {
     id: "novel-002",
-    slug: "saikyou-maou-slow-life",
-    title: "最強魔王、辺境でスローライフを始めます",
-    title_en: "The Demon Lord's Quiet Country Life",
-    tagline: "世界を滅ぼせる力を持つ魔王が、辺境の村でのんびり暮らす。でも平穏はなかなか訪れない。",
-    tagline_en: "A demon lord with the power to end the world just wants to farm in peace. But peace has other plans.",
-    synopsis:
-      "千年の眠りから覚めた最強魔王ヴェルザード。\n\nかつての戦いに疲れた彼は、辺境の小さな村で農業をしながら静かに暮らすことを決意する。\n\nしかし、規格外の魔力で畑を耕せば異常な速度で作物が育ち、野良モンスターを追い払えば村人たちから英雄扱い。\n\nさらに勇者の末裔を名乗る少女や、旧知の魔族幹部が次々とやってきて——。\n\n「もう世界征服はいいから、今日の夕飯のことだけ考えさせてくれ」",
-    synopsis_en:
-      "Velzard, the most powerful demon lord in history, awakens from a thousand-year slumber.\n\nWeary of ancient wars, he decides to settle down in a tiny frontier village and take up farming.\n\nBut when his immense magic makes crops grow overnight and he effortlessly annihilates stray monsters, the villagers start calling him a hero.\n\nThen a girl claiming to be the hero's descendant shows up, followed by his old demon generals—\n\n\"Forget world domination. Just let me worry about what's for dinner.\"",
+    slug: "isekai-pure-sky",
+    title: "翼なき妃と双翼の契約",
+    title_en: null,
+    tagline: "空の国の皇子に嫁いだ令嬢が、彼と共に空を駆ける運命の翼を授かる。",
+    tagline_en: null,
+    synopsis: "空の国の皇子に嫁いだ令嬢が、彼と共に空を駆ける運命の翼を授かる。",
+    synopsis_en: null,
     cover_image_url: null,
     author_type: "self",
     author_id: null,
-    author_name: "編集部",
+    author_name: "AINARO編集部",
     genre: "fantasy",
-    tags: ["魔王", "スローライフ", "チート", "ほのぼの"],
+    tags: ["異世界", "恋愛", "純愛"],
     status: "serial",
     is_r18: false,
     content_warnings: [],
-    total_chapters: 3,
-    total_characters: 15000,
+    total_chapters: 1,
+    total_characters: 3711,
     total_pv: 0,
     total_bookmarks: 0,
-    latest_chapter_at: "2026-04-04T12:00:00Z",
-    published_at: "2026-03-20T09:00:00Z",
-    created_at: "2026-03-20T09:00:00Z",
-    updated_at: "2026-04-04T12:00:00Z",
+    latest_chapter_at: "2026-04-08T10:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
   },
   {
     id: "novel-003",
-    slug: "shinigami-cafe",
-    title: "死神が営むカフェには、訳ありの客しか来ない",
-    title_en: "The Reaper's Cafe: For Troubled Souls Only",
-    tagline: "あの世とこの世の境にあるカフェ。死神のマスターが淹れるコーヒーは、忘れた記憶を蘇らせる。",
-    tagline_en: "A cafe on the border between life and death. The reaper's coffee brings forgotten memories back to life.",
-    synopsis:
-      "駅裏の路地の奥に、地図には載っていないカフェがある。\n\nマスターは自称・死神の青年。メニューに載っているのは一杯のコーヒーだけ。\n\nそのコーヒーを飲むと、忘れていた——あるいは忘れたかった——記憶が鮮やかに蘇る。\n\n今夜もまた、訳ありの客がドアを開ける。\n\n連作短編形式で綴る、切なくて温かい物語。",
-    synopsis_en:
-      "Hidden in an alley behind the station, there's a cafe that appears on no map.\n\nThe barista is a young man who claims to be a reaper. The only item on the menu is a single cup of coffee.\n\nOne sip, and memories you've forgotten — or tried to forget — come flooding back in vivid color.\n\nTonight, another troubled soul pushes open the door.\n\nA bittersweet, heartwarming story told in interconnected episodes.",
+    slug: "vill-rom-letter-secret",
+    title: "影の郵便局と秘密の手紙",
+    title_en: null,
+    tagline: "毎週届く差出人不明の手紙に返事を書き続けた悪役令嬢の前に、ある日送り主が現れる。",
+    tagline_en: null,
+    synopsis: "両親を亡くし、叔父の家で「悪役令嬢」と陰口を叩かれながら台所の雑役をこなす子爵家令嬢エメラ。そんな彼女のもとに、ある雨の朝、差出人のない一通の手紙が届く。「あなたの笑い方が、好きです」——たったそれだけの言葉に震える指で返事を書き、王都の「影の郵便局」へ投函したその日から、紙の上でだけ饒舌になれる秘密の文通が始まった。三ヶ月後、途絶えた水曜日の手紙。代わりに勝手口を叩いたのは、文学好きで知られる王立第一騎士団副団長その人だった。紙の上の私と、実物の私。どちらを愛してくれますか——静かな郵便文化の王国で紡がれる、手紙と恋の物語。",
+    synopsis_en: null,
     cover_image_url: null,
     author_type: "self",
     author_id: null,
-    author_name: "編集部",
-    genre: "drama",
-    tags: ["連作短編", "カフェ", "死神", "感動"],
+    author_name: "AINARO編集部",
+    genre: "villainess",
+    tags: ["悪役令嬢", "恋愛", "ファンタジー"],
     status: "serial",
     is_r18: false,
-    content_warnings: ["death"],
-    total_chapters: 4,
-    total_characters: 20000,
+    content_warnings: [],
+    total_chapters: 1,
+    total_characters: 4544,
     total_pv: 0,
     total_bookmarks: 0,
-    latest_chapter_at: "2026-04-03T20:00:00Z",
-    published_at: "2026-03-22T09:00:00Z",
-    created_at: "2026-03-22T09:00:00Z",
-    updated_at: "2026-04-03T20:00:00Z",
+    latest_chapter_at: "2026-04-08T10:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
+  },
+  {
+    id: "novel-004",
+    slug: "vill-rom-violinist",
+    title: "暁の弓は王太子を射抜く",
+    title_en: null,
+    tagline: "ヴァイオリンを弾く悪役令嬢の音色に魅せられた音楽家の貴公子が「君の音だけが俺を救う」と告白する。",
+    tagline_en: null,
+    synopsis: "ヴァイオリンを弾く悪役令嬢の音色に魅せられた音楽家の貴公子が「君の音だけが俺を救う」と告白する。",
+    synopsis_en: null,
+    cover_image_url: null,
+    author_type: "self",
+    author_id: null,
+    author_name: "AINARO編集部",
+    genre: "villainess",
+    tags: ["悪役令嬢", "恋愛", "ファンタジー"],
+    status: "serial",
+    is_r18: false,
+    content_warnings: [],
+    total_chapters: 1,
+    total_characters: 3732,
+    total_pv: 0,
+    total_bookmarks: 0,
+    latest_chapter_at: "2026-04-08T10:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
+  },
+  {
+    id: "novel-005",
+    slug: "vill-rom-twin-trade",
+    title: "顔のない令嬢、双子の代役",
+    title_en: null,
+    tagline: "病弱な妹の身代わりに婚約者と会った悪役令嬢が、本物より愛されてしまう。",
+    tagline_en: null,
+    synopsis: "私には、自分の顔がなかった――。十九年間、鏡に映るのはいつも妹ソフィーと同じ顔。明るい妹は社交界の華、私はその影。そんな私が、発作で倒れた妹の懇願で、妹の婚約者との初顔合わせに身代わりとして送り込まれた。どうせ上手く笑えない。どうせバレる。そう覚悟していたのに、アレクシ様は中途半端な微笑みの私を見て、静かに言った。『肖像画より、今のあなたの方が、ずっと心に刺さります』――身代わりのはずの茶会が、影だった私の人生の、最初の反乱になる。",
+    synopsis_en: null,
+    cover_image_url: null,
+    author_type: "self",
+    author_id: null,
+    author_name: "AINARO編集部",
+    genre: "villainess",
+    tags: ["悪役令嬢", "恋愛", "ファンタジー"],
+    status: "serial",
+    is_r18: false,
+    content_warnings: [],
+    total_chapters: 1,
+    total_characters: 4288,
+    total_pv: 0,
+    total_bookmarks: 0,
+    latest_chapter_at: "2026-04-08T10:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
+  },
+  {
+    id: "novel-006",
+    slug: "vill-fan-spirit-girl",
+    title: "十年ぶりの涙が精霊王を起こす",
+    title_en: null,
+    tagline: "精霊が見える悪役令嬢が婚約破棄後に契約した精霊王の力で、神聖国家の女王に上り詰める。",
+    tagline_en: null,
+    synopsis: "十年ぶりの涙、ひと粒。それが千年眠っていた精霊王の封印を解いた。 「気味の悪い令嬢」と蔑まれ婚約破棄された精霊視の令嬢リーゼロッテは、月下の庭園で星と夜をまとう精霊王エルセオンと契約する。授かったのは膨大な魔力と未来視、そして――玉座に座る自分の姿。 嘲笑う王太子の隣に立つ男爵令嬢の内側には、人ならざる「何か」が潜んでいた。迫害された令嬢が神聖国家の女王へ至る、逆襲と覚醒の物語。",
+    synopsis_en: null,
+    cover_image_url: null,
+    author_type: "self",
+    author_id: null,
+    author_name: "AINARO編集部",
+    genre: "villainess",
+    tags: ["悪役令嬢", "ファンタジー", "魔法"],
+    status: "serial",
+    is_r18: false,
+    content_warnings: [],
+    total_chapters: 1,
+    total_characters: 3895,
+    total_pv: 0,
+    total_bookmarks: 0,
+    latest_chapter_at: "2026-04-08T10:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
+  },
+  {
+    id: "novel-007",
+    slug: "isekai-pure-night",
+    title: "夜にしか会えない皇子",
+    title_en: null,
+    tagline: "夜にしか会えない皇子と結婚した令嬢が、彼が昼間は呪いで獣になることを知る。",
+    tagline_en: null,
+    synopsis: "## 採用版（候補A: フック重視型 / 31点）",
+    synopsis_en: null,
+    cover_image_url: null,
+    author_type: "self",
+    author_id: null,
+    author_name: "AINARO編集部",
+    genre: "fantasy",
+    tags: ["異世界", "恋愛", "純愛"],
+    status: "serial",
+    is_r18: false,
+    content_warnings: [],
+    total_chapters: 1,
+    total_characters: 3476,
+    total_pv: 0,
+    total_bookmarks: 0,
+    latest_chapter_at: "2026-04-08T10:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
   },
 ];
 
 // --- エピソード ---
 export const MOCK_EPISODES: Episode[] = [
-  // 悪役令嬢 5話
   {
     id: "ep-001-01",
     novel_id: "novel-001",
     episode_number: 1,
-    title: "目覚めたら破滅フラグだらけだった",
-    title_en: "I Woke Up Surrounded by Death Flags",
-    body_md: `朝の光が瞼を刺す。
+    title: "予言の代償",
+    title_en: null,
+    body_md: `「あなたは、必ずわたくしを愛します」
 
-頭がぼんやりする。昨夜は遅くまでゲームをしていたせいだろうか。
+王宮前の広場、処刑台の足元で、わたくしはその言葉を口にした。
 
-目を開けると、見慣れない天蓋付きのベッドの中にいた。
+処刑台の上にいたのは、縄を打たれた若い騎士。罪状は「公爵令嬢暗殺未遂の嫌疑」。名を、リオン・ヴェステル。北部ヴェステル子爵家の次男、十九歳。——ただし、彼はまだ、誰も殺していない。三日後に起こるはずの事件の、前倒しの処罰だった。
 
-「……え？」
+星詠みの令嬢が「この者が三日後、わたくしに刃を向ける」と予言した。それだけで、この国では人ひとり首を落とせる。わたくし、アイリーン・ファルネーゼの祖母が、そういう法を作ってしまった。
 
-豪華な刺繍が施されたシルクのシーツ。窓の外には手入れの行き届いた薔薇園。部屋の隅には等身大の鏡があり、そこに映っているのは——金髪碧眼の、見覚えのある少女。
+「——お取り消しください、アイリーンさま」
 
-「嘘でしょ」
+処刑人がわたくしを振り返る。わたくしは、ドレスの裾を摘まみ、一段、また一段と処刑台の階段をのぼった。観衆のざわめきが、潮のように引いていく。呪いの令嬢が、何を言い出すのか。みなが息を殺している。
 
-鏡に駆け寄って自分の顔を確認する。間違いない。この顔は、前世で何百時間もプレイした乙女ゲーム「聖女の花園」に登場する悪役令嬢——カタリナ・フォン・クラウゼヴィッツ。
+わたくしは、縄を打たれた青年の正面に立った。赤毛、夏の湖のような碧眼。左の手の甲に、古い火傷の跡。三歳のときに暖炉で負ったと、わたくしの夢は告げていた。
 
-ゲームの中でカタリナは、主人公である聖女に嫉妬し、数々の嫌がらせを行い、最終的には婚約者である第一王子から婚約破棄を突きつけられる。
+「リオン・ヴェステル。あなたの罪状を、わたくしは取り下げます」
 
-そして待っているのは、ルートによって「国外追放」か「処刑」。
+「……なぜ」
 
-どちらに転んでもバッドエンド。
+「あなたは、必ずわたくしを愛します。三日後のあなたが、わたくしに刃を向けるのは事実です。けれど、あなたはその刃で、別の刺客を斬る。わたくしを庇うために」
 
-「いやいやいやいや、待って待って」
+ざわめきが、波となって戻ってきた。「予言の書き換えだ」「星詠みの掟に触れる」と、誰かが叫んだ。わたくしは構わなかった。構っていたら、この青年は死ぬ。
 
-前世の記憶が怒涛のように蘇ってくる。私は日本の普通の大学生で、乙女ゲームが趣味で、昨夜も夜更かしして「聖女の花園」の三周目をクリアしたところで——。
+「わたくしは、三日前、あなたの死の夢を見ました。何十回も、くり返し見ました。その夢の中のあなたは、息を引き取る直前に笑うのです。『あなたを守れてよかった』と。——その笑顔を、わたくしは、もうこれ以上見たくない」
 
-「つまり私、転生したってこと？」
+リオンの瞳が、はっきりと揺れた。怒りでも、恐怖でもない。ただ、見知らぬ道をいきなり示された旅人のような、そういう揺らぎだった。
 
-転生。テンセイ。小説やゲームではよくある設定だ。でもまさか自分がその当事者になるとは。
+「……おからかいを」
 
-しかも転生先が、よりによって悪役令嬢。
+「からかいませんわ。星詠みは、自分の命を懸けてしか、予言を書き換えられないのです」
 
-「落ち着け、私。まず状況を整理しよう」
+わたくしは、処刑人に向き直った。
 
-ベッドに腰掛けて、深呼吸を三回。
+「この者の罪は、わたくしが肩代わりします。——三日後、わたくしの身に何も起こらなければ、わたくしは掟破りの星詠みとして、自らこの台に立ちます」
 
-ゲームの時系列を思い出す。カタリナの破滅フラグが本格的に立ち始めるのは、王立学園に入学してからだ。聖女——主人公のリリアーナが学園に転入してきて、攻略対象たちの心を次々と掴んでいく。
+処刑人の手が、縄を解くために動いた。けれど、その手は、途中で止まった。なぜなら、広場の奥から、低く、澄んだ声が響いたからだ。
 
-それに嫉妬したカタリナが暴走し始めるのが、ゲーム本編のスタート。
+「——取り消しを認める」
 
-「今の私は……何歳だろう」
+第三王子ディラン殿下の声だった。わたくしの、半年前から手紙を寄越さなくなった婚約者。群衆が割れ、白い馬上の王子が、処刑台を見上げていた。その瞳は、相変わらずわたくしを直視してはくれない。けれど、声だけは、毅然としていた。
 
-部屋を見回す。机の上にカレンダーがあった。
+「星詠みが自らの予言を訂正するのは、三代に一度の異例だ。ファルネーゼ公爵令嬢の申し出を受け入れる。——ただし、三日後、予言が外れた場合、王家は掟に従う」
 
-「学園入学まであと二年。ということは、まだフラグは立っていない！」
+それは、赦しであり、同時に、わたくしへの死刑宣告だった。わたくしは、深く礼をして、処刑台を降りた。降りる階段の一段目で、ようやく、膝が笑っているのに気づいた。
 
-つまり、今から行動すれば間に合う。
+---
 
-破滅フラグを回避するための作戦を練ろう。
+離宮の自室に戻っても、指先の震えが止まらなかった。
 
-まず第一に、聖女リリアーナに嫌がらせをしない。これは最重要。ゲーム中のカタリナの行動を全て逆にすればいい。
+わたくし、アイリーン・ファルネーゼは、ファルネーゼ公爵家の長女として生まれた。星詠みの血筋——未来の断片を夢に見る一族。八歳のとき、父の愛馬の死を的中させた。十歳のとき、叔母の流産を予知した。十二歳のとき、従兄の戦死を見た。予言は、はじめ畏れられ、次に疎まれ、やがて呪われた。社交界では「呪いの令嬢」と呼ばれる。婚約者の第三王子ディランは、半年前から手紙の一通も寄越さない。「あの瞳に見られると、自分の死期を告げられる気がする」と、誰かに漏らしたと聞いた。
 
-第二に、攻略対象たちとの関係を悪化させない。特に婚約者の第一王子レオンハルトとは、良好な関係を維持する——いや、むしろ向こうから婚約解消してもらうのがベストかもしれない。穏便に。
+けれど、わたくしが本当に怖いのは、噂ではない。——予言を外すこと。
 
-第三に、いざという時に逃げられるよう、スキルを身につける。ゲーム中のカタリナはお嬢様すぎて何もできないのが弱点だった。
+星詠みに課された掟はひとつ。「予言は、必ず成就させよ」。外した者は、魂の深い部分が欠け、やがて狂気となる。祖母は、最後の三年、ただ星を指差して笑う人になった。わたくしは、その祖母の最期を、自分の未来として見たことが、ある。
 
-「よし。破滅フラグ回避計画、始動！」
+そしていま、わたくしは、自分の予言を書き換えようとしている。
 
-拳を握りしめて宣言した瞬間、部屋のドアがノックされた。
+（それでも、いい)
 
-「カタリナお嬢様、朝食のお時間です」
+銀の盤を磨きながら、わたくしは自分に言い聞かせた。たった一人でいい。わたくしの予言で救われる人が、この世にひとりでもいれば、狂気の中で笑う晩年にも、意味が生まれる気がした。
 
-メイドの声。
+扉が、小さくノックされた。
 
-「は、はい！今行きます！」
+「アイリーンさま。ヴェステル家のリオンさまが、面会を求めておいでです」
 
-まずは朝食から。前世ではコンビニおにぎりだったけど、今日からは令嬢の朝食だ。
+侍女のルルが、困惑した顔で告げた。わたくしは、磨きかけの銀盤を取り落としそうになった。——処刑台から、まだ二刻と経っていない。
 
-鏡の中の自分に向かって、小さくガッツポーズを送る。
+「……お通しして」
 
-大丈夫。前世の知識があるんだから。全てのフラグを知っているんだから。
+リオンは、背筋を伸ばして入ってきた。手には、白い薔薇が一輪。処刑台の足元に咲いていたものだと、わたくしは一目で分かった。
 
-絶対に、破滅エンドは回避してみせる。`,
-    body_md_en: `Morning light stung my eyelids.
+「公爵令嬢さま。助けていただいた礼を、まだ申し上げていません」
 
-My head was foggy. Probably because I'd stayed up so late gaming last night.
+「礼は要りません。わたくしは、自分の夢のために、あなたを生かしたのです」
 
-I opened my eyes — and found myself in an unfamiliar canopy bed.
+「——では、ひとつだけ、教えてください」
 
-"...Huh?"
+彼は、白薔薇を机の上にそっと置いた。花弁の縁が、まだ土で汚れていた。
 
-Silk sheets embroidered with elaborate patterns. A perfectly manicured rose garden visible through the window. In the corner of the room stood a full-length mirror, and the girl reflected in it had golden hair and blue eyes — a face I recognized all too well.
+「あなたは、ご自分の命を代わりに差し出すと、あの場でおっしゃった。あれは、本気ですか」
 
-"No way."
+わたくしは、咄嗟に視線を伏せた。伏せなければ、この青年の眼に、わたくしの本心まで読み取られてしまう気がした。
 
-I rushed to the mirror to get a closer look. There was no mistake. This face belonged to the villainess from the otome game I'd spent hundreds of hours playing in my previous life — Katarina von Clausewitz, from "Garden of the Saintess."
+「……本気です。予言を外した星詠みは、生きていても、生きているとは言えませんから」
 
-In the game, Katarina grew jealous of the heroine — the Saintess — and tormented her relentlessly, until her fiancé, the First Prince, broke off their engagement.
+リオンは、長い間、黙っていた。やがて、低く、けれどはっきりと言った。
 
-What awaited her after that depended on the route: exile or execution.
+「では、三日後、私はあなたの傍にいます。命令がなくとも、上官に申請します。予言通りの刺客が現れたら、私が斬ります。——そして、あなたの命も、絶対に、あなた自身の中に残させます」
 
-A bad ending either way.
+わたくしは、ゆっくりと顔を上げた。彼の碧眼には、先ほどの困惑はもう無かった。代わりに、驚くほど静かな、覚悟のようなものが、そこに宿っていた。
 
-"No no no no, wait wait wait—"
+「……怖くはありませんの。わたくしに関わることが」
 
-Memories of my previous life came rushing back like a flood. I was a perfectly ordinary college student in Japan, an otome game addict who'd stayed up late last night completing my third playthrough of "Garden of the Saintess" when—
+「怖いです。けれど、あなたが処刑台の階段をのぼってくるときの顔の方が、私には、もっと怖かった。——あれは未来を見下ろす者の顔ではなく、未来に縋る少女の顔でした」
 
-"So... I've been reincarnated?"
+頬が、かっと熱くなった。わたくしは、祖母の書物の頁をめくるふりをして、その熱を隠した。
 
-Reincarnated. It's a common trope in novels and games. But I never imagined I'd be the one it happened to.
+リオンが去った後、わたくしは、白薔薇を手に取って、長い間、ただ見つめていた。花弁の縁の土を、指先で、ひとつひとつ払った。——予言は、外さない。必ず、この人を生かす。けれど、代償は、わたくし一人で背負う。
 
-And of all the characters to be reborn as — the villainess.
+そう星に祈ったのは、生まれて初めてのことだった。祈りは、予言とは違う。祈りには、未来を選ぶ余白がある。わたくしは、その余白が欲しかった。
 
-"Calm down, me. Let's take stock of the situation."
+---
 
-I sat on the edge of the bed and took three deep breaths.
+三日後の朝が、もう目前に迫っている。
 
-I thought back to the game's timeline. Katarina's death flags really start piling up after she enrolls at the Royal Academy. That's when Liliana, the heroine and Saintess, transfers in and starts winning over all the love interests one by one.
+その夜、夢の中の結末が、少しだけ変わった。——リオンは血を流さず、代わりに、わたくしの肩を強く抱きしめていた。そして、抱きしめたまま、小さな声で呟いたのだ。
 
-Katarina's jealous rampage in response is what kicks off the main story.
+「あなたも、一緒に生きてください」
 
-"How old am I right now...?"
+目覚めた枕は、涙で濡れていた。予言の夢で泣いたのは、生まれて初めてのことだった。星詠みは、夢の中では泣かない。夢の中のわたくしはいつも、世界の外から運命を見下ろす観測者だったからだ。泣くということは、わたくしが、初めて夢の中で「観測者ではなく、登場人物になった」ということを意味していた。
 
-I looked around the room. There was a calendar on the desk.
+（予言が、揺らいでいる)
 
-"Two years until Academy enrollment. That means no flags have been triggered yet!"
+揺らいだ予言は、必ず別のどこかで辻褄を合わせてくる。リオンが無事なら、別の誰かが傷つく。それが星詠みの理だった。予言を口にするという行為は、星の川に小さな石を投げ込むのに似ている。投げた水面には必ず波紋が広がり、遠いどこかの岸辺で、誰かの靴を濡らす。
 
-In other words, if I act now, there's still time.
+わたくしは、銀盤を強く握りしめた。手のひらに、予言の星紋が、じわりと浮かび上がった。
 
-Time to formulate my plan for dodging every death flag.
+「……それでも、わたくしは、この予言を成就させる」
 
-First and foremost: do not bully the Saintess Liliana. This is non-negotiable. I just need to do the exact opposite of everything game-Katarina did.
+口にして、初めて気づいた。わたくしは、彼に生きてほしいのと同じ強さで、自分自身の未来を、初めて欲しいと願っている。星詠みは、自らの運命を願ってはいけない。けれど、この夜だけは、掟を破ってもいい気がした。
 
-Second: don't ruin my relationships with the love interests. With my fiancé, First Prince Leonhardt in particular, I need to maintain a good relationship — or better yet, get him to dissolve the engagement amicably on his own.
-
-Third: acquire real skills so I can survive on my own if things go south. Game-Katarina's fatal weakness was being a sheltered noble girl who couldn't do anything for herself.
-
-"All right. Operation: Dodge the Death Flags — commence!"
-
-The moment I declared this with my fist raised in the air, there was a knock at the door.
-
-"Lady Katarina, breakfast is served."
-
-A maid's voice.
-
-"Y-Yes! I'll be right there!"
-
-First things first — breakfast. In my previous life it was a convenience store rice ball, but from today on, it's a noblewoman's morning meal.
-
-I flashed a small fist-pump at my reflection in the mirror.
-
-I've got this. I have all my knowledge from my previous life. I know every single flag.
-
-I will absolutely, positively dodge the doom ending.`,
+——しかし、わたくしはまだ知らない。処刑台で書き換えた予言の代償を、三日後の薔薇園で、「もう一人の星詠み」が、にやりと笑って待ち受けていることを。`,
+    body_md_en: null,
     body_html: null,
     body_html_en: null,
-    character_count: 5200,
+    character_count: 3510,
     is_free: true,
     unlock_at: null,
     unlock_price: 0,
     pv: 0,
-    published_at: "2026-03-15T09:00:00Z",
-    created_at: "2026-03-15T09:00:00Z",
-    updated_at: "2026-03-15T09:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
   },
-  {
-    id: "ep-001-02",
-    novel_id: "novel-001",
-    episode_number: 2,
-    title: "令嬢教育と剣術修行",
-    title_en: "A Lady's Education and Sword Training",
-    body_md: `転生から三日が経った。
-
-この三日間で分かったことがある。カタリナ・フォン・クラウゼヴィッツの生活は、想像以上に忙しい。
-
-朝は六時に起床。メイドのアンナに身支度を整えてもらい、家族と朝食。その後は午前中いっぱい家庭教師による授業——歴史、礼法、魔法理論、音楽。
-
-午後は刺繍や絵画などの嗜みの時間。夕方にはティータイムがあり、夜は読書か楽器の練習。
-
-「ゲームでは『何もできないお嬢様』って設定だったけど、これだけ教育を受けていて何もできないわけがない」
-
-問題は、ゲームのカタリナがこれらの授業を全てサボっていたことだ。
-
-前世の記憶では、カタリナの回想シーンで「幼少期からワガママで、教師を何人も辞めさせた」という描写があった。
-
-「つまり、ここで真面目に勉強すれば、原作のカタリナとは違う道を歩ける」
-
-今朝の授業は魔法理論。この世界には魔法が存在し、貴族は基本的な魔法を使えるらしい。ゲームでは戦闘シーンがあったが、カタリナは魔法も剣術も使えない設定だった。
-
-「先生、質問があります」
-
-「はい、カタリナ様。何でしょう」
-
-「基礎的な攻撃魔法と防御魔法について、もう少し詳しく教えていただけますか」
-
-家庭教師のベルトラン先生が目を丸くする。
-
-「……カタリナ様が魔法にご興味を？」
-
-どうやら原作のカタリナは魔法の授業を毛嫌いしていたらしい。
-
-「ええ。自分の身は自分で守れるようになりたいんです」
-
-我ながら良いことを言った。破滅エンドで国外追放された場合、魔法が使えれば生きていける確率が格段に上がる。
-
-ベルトラン先生は嬉しそうに微笑んだ。
-
-「素晴らしい心がけです。では、まず基礎属性の判定から始めましょう」
-
-こうして、原作では決して起きなかった「カタリナの真面目な魔法修行」が始まった。
-
-さらに私は、父クラウゼヴィッツ公爵に頼んで、剣術の稽古もつけてもらうことにした。
-
-「カタリナが剣を？」
-
-父も驚いていたが、「護身のためです」と言うと、渋々ながら承諾してくれた。
-
-騎士団の副団長であるガルシアさんが教官として来てくれることになった。
-
-「公爵令嬢に剣を教えるとは……まあ、護身術程度なら」
-
-ガルシアさんは懐疑的だったが、私は前世で中学まで剣道をやっていた。竹刀と剣は違うが、体の使い方の基礎はある。
-
-「構えはこうです。足を肩幅に開いて——お嬢様、筋が良いですな」
-
-「ありがとうございます！」
-
-よし。魔法と剣術を覚えれば、どんなルートに進んでも生き残れる。
-
-破滅フラグ回避計画、順調に進行中。`,
-    body_md_en: `Three days had passed since my reincarnation.
-
-In those three days, I'd learned one thing: Katarina von Clausewitz's life was far busier than I'd imagined.
-
-Wake up at six in the morning. Get dressed with the help of my maid Anna, then breakfast with the family. After that, an entire morning of private tutoring — history, etiquette, magical theory, music.
-
-Afternoons were devoted to refined pursuits like embroidery and painting. Tea time in the early evening, then reading or instrument practice before bed.
-
-"The game described her as 'a helpless noblewoman,' but with this much education, there's no way she'd be useless."
-
-The problem was that game-Katarina had skipped every single one of these lessons.
-
-In my previous-life memories, there was a flashback scene describing how "she'd been spoiled since childhood and had driven away tutor after tutor."
-
-"So if I actually buckle down and study here, I can walk a completely different path from the original Katarina."
-
-This morning's lesson was magical theory. In this world, magic exists, and nobles can use basic spells. The game had combat scenes, but Katarina was written as being unable to use either magic or swordsmanship.
-
-"Professor, I have a question."
-
-"Yes, Lady Katarina? What is it?"
-
-"Could you teach me a bit more about basic offensive and defensive magic?"
-
-My tutor, Professor Bertrand, stared at me with wide eyes.
-
-"...Lady Katarina is interested in magic?"
-
-Apparently, the original Katarina had despised magic lessons.
-
-"Yes. I want to be able to protect myself."
-
-Pretty good line, if I do say so myself. If the doom ending leads to exile, being able to use magic would dramatically improve my survival odds.
-
-Professor Bertrand smiled warmly.
-
-"What a wonderful attitude. Let us begin with an elemental affinity assessment, then."
-
-And so began "Katarina's Serious Magic Training" — something that never happened in the original story.
-
-On top of that, I asked my father, Duke Clausewitz, to arrange sword lessons for me.
-
-"Katarina wants to learn swordsmanship?"
-
-Father was surprised too, but when I said "It's for self-defense," he reluctantly agreed.
-
-Sir Garcia, the vice-captain of the knights' order, was assigned as my instructor.
-
-"Teaching swordplay to a duke's daughter... Well, basic self-defense should be fine."
-
-Garcia was skeptical, but in my previous life, I'd practiced kendo through middle school. A bamboo sword and a real blade are different, but the fundamentals of body movement carry over.
-
-"Hold your stance like this. Feet shoulder-width apart — my lady, you have real talent."
-
-"Thank you!"
-
-Good. If I master both magic and swordsmanship, I can survive no matter which route unfolds.
-
-Operation: Dodge the Death Flags — progressing smoothly.`,
-    body_html: null,
-    body_html_en: null,
-    character_count: 4800,
-    is_free: true,
-    unlock_at: null,
-    unlock_price: 0,
-    pv: 0,
-    published_at: "2026-03-18T09:00:00Z",
-    created_at: "2026-03-18T09:00:00Z",
-    updated_at: "2026-03-18T09:00:00Z",
-  },
-  {
-    id: "ep-001-03",
-    novel_id: "novel-001",
-    episode_number: 3,
-    title: "王子との初対面で、早速フラグが立つ",
-    title_en: "My First Meeting with the Prince — and a New Flag Appears",
-    body_md: `転生から一ヶ月。
-
-魔法修行と剣術稽古のおかげで、体力も少しついてきた。ベルトラン先生によると、私の基礎属性は「風」。攻撃力は低いが、身体強化と移動速度の強化に向いているらしい。
-
-逃げ足に最適じゃないか。破滅回避にぴったりだ。
-
-そんな順調な日々に、突然の来客があった。
-
-「カタリナ、身支度を整えなさい。王宮からお客様がお見えになります」
-
-母の言葉に、胃がキリキリと痛む。
-
-王宮からのお客様。つまり——。
-
-「第一王子レオンハルト殿下と、そのお母上である王妃様が午後にいらっしゃいます」
-
-来た。
-
-ゲームの設定では、カタリナとレオンハルトの婚約は幼少期に交わされたもの。二人が初めて会うのは八歳の時。
-
-今の私は八歳。
-
-「これが最初のフラグか……」
-
-ゲームでは、この初対面でカタリナがレオンハルトに対して横柄な態度を取り、レオンハルトが「なんて嫌な女だ」と心の中で思うのが、後の婚約破棄への伏線になっている。
-
-つまり、ここで好印象を与えればフラグを折れる。
-
-「よし。完璧な令嬢ムーブをかます」
-
-午後。応接間。
-
-王妃様に続いて入ってきたのは、金髪に紫の瞳を持つ少年だった。
-
-レオンハルト・ヴァン・アストリア第一王子。ゲームでは「冷酷な美形王子」として人気の攻略対象だが、八歳の今はまだ幼さが残る顔立ちだ。
-
-「カタリナ・フォン・クラウゼヴィッツです。殿下にお目にかかれて光栄です」
-
-完璧なカーテシー。この一ヶ月、礼法の授業を真面目に受けた成果だ。
-
-レオンハルトが少し驚いた顔をする。
-
-「……レオンハルトだ。よろしく」
-
-ぶっきらぼうだが、これはゲームの設定通り。レオンハルトは人見知りで、特に政略的な婚約に反感を持っている。
-
-ここでゲームのカタリナは「王子なのに態度が悪いわ」と噛みつくのだが、私は違う。
-
-「殿下はお庭にご興味はありますか？ 薔薇がちょうど見頃なんです」
-
-穏やかに微笑んで、庭への散歩を提案する。室内で大人たちに囲まれているより、外の方がリラックスできるだろう。
-
-レオンハルトの目が少し輝いた。
-
-「……行ってもいいのか？」
-
-「もちろんです」
-
-庭に出ると、レオンハルトの表情が明らかに柔らかくなった。
-
-「この薔薇、珍しい品種だな」
-
-「父が各地から集めたものです。殿下は植物がお好きなんですか？」
-
-「……母上の庭にも薔薇がある。でも、こんなに種類が多いのは初めて見た」
-
-会話が弾む。ゲームでは描かれなかったが、レオンハルトは植物に詳しいようだ。
-
-三十分ほど庭を歩いた後、レオンハルトが小さな声で言った。
-
-「カタリナ、と呼んでもいいか」
-
-「はい。私もレオン様とお呼びしてよろしいですか？」
-
-「……ああ」
-
-レオンハルトの頬が少し赤くなっている。
-
-あれ。
-
-ちょっと待って。
-
-これ、もしかして——好感度が上がってない？
-
-フラグを折るつもりが、新しいフラグが立った気がする。
-
-「いや待って、これは予定外……」
-
-「何か言ったか？」
-
-「いえ、何でもありません！」
-
-破滅フラグ回避計画、予定外の方向に進行中。`,
-    body_md_en: `One month since my reincarnation.
-
-Thanks to magic training and sword practice, I was finally building some stamina. According to Professor Bertrand, my elemental affinity was Wind. Low on offensive power, but excellent for physical enhancement and speed boosts.
-
-Perfect for running away. Ideal for dodging doom.
-
-Into this streak of smooth progress came an unexpected visitor.
-
-"Katarina, get yourself presentable. We have guests coming from the royal palace."
-
-My mother's words sent a sharp pain through my stomach.
-
-Guests from the royal palace. Meaning—
-
-"His Highness First Prince Leonhardt and Her Majesty the Queen will be arriving this afternoon."
-
-Here we go.
-
-In the game's lore, Katarina and Leonhardt's engagement was arranged in childhood. Their first meeting takes place when they're eight years old.
-
-I'm eight years old right now.
-
-"So this is the first flag..."
-
-In the game, Katarina acts arrogantly toward Leonhardt at this first meeting, and Leonhardt thinks, "What a dreadful girl" — foreshadowing the eventual broken engagement.
-
-Which means if I make a good impression here, I can snap this flag in half.
-
-"Right. Time for the perfect lady act."
-
-That afternoon. The reception room.
-
-Following the Queen through the door was a boy with golden hair and violet eyes.
-
-Leonhardt van Astoria, the First Prince. In the game, he's a popular love interest known as the "coldly handsome prince," but at eight, his features still carried the softness of youth.
-
-"I am Katarina von Clausewitz. It is an honor to meet Your Highness."
-
-A flawless curtsy. The fruit of a month's worth of diligent etiquette lessons.
-
-Leonhardt looked slightly surprised.
-
-"...I'm Leonhardt. Nice to meet you."
-
-Blunt, but that was exactly how he was written. Leonhardt was shy and particularly resentful of politically arranged engagements.
-
-This is where game-Katarina would snap, "What rude manners for a prince!" But not me.
-
-"Does Your Highness have any interest in gardens? Our roses are in full bloom right now."
-
-I offered a gentle smile and suggested a walk in the garden. He'd be far more relaxed outside than cooped up indoors surrounded by adults.
-
-Leonhardt's eyes brightened slightly.
-
-"...Is that all right?"
-
-"Of course."
-
-Once we were in the garden, his expression visibly softened.
-
-"These roses — they're rare varieties."
-
-"My father collected them from all over. Do you like plants, Your Highness?"
-
-"...My mother's garden has roses too. But I've never seen so many different kinds."
-
-The conversation flowed easily. The game never showed this, but it seemed Leonhardt knew quite a lot about plants.
-
-After about thirty minutes of walking through the garden, Leonhardt said in a small voice:
-
-"May I... call you Katarina?"
-
-"Of course. May I call you Leon?"
-
-"...Yeah."
-
-Leonhardt's cheeks had turned faintly pink.
-
-Wait.
-
-Hold on a second.
-
-Was his affection meter... going up?
-
-I was trying to break a flag, but I think I just triggered a new one instead.
-
-"Wait, this wasn't part of the plan..."
-
-"Did you say something?"
-
-"No, nothing at all!"
-
-Operation: Dodge the Death Flags — veering in an unexpected direction.`,
-    body_html: null,
-    body_html_en: null,
-    character_count: 5100,
-    is_free: true,
-    unlock_at: null,
-    unlock_price: 0,
-    pv: 0,
-    published_at: "2026-03-22T09:00:00Z",
-    created_at: "2026-03-22T09:00:00Z",
-    updated_at: "2026-03-22T09:00:00Z",
-  },
-  {
-    id: "ep-001-04",
-    novel_id: "novel-001",
-    episode_number: 4,
-    title: "第二王子と図書館での遭遇",
-    title_en: "An Encounter with the Second Prince at the Library",
-    body_md: `初対面から半年が経ち、レオンとは月に一度のペースで会うようになった。
-
-会うたびに彼の表情は柔らかくなり、最近では手紙のやり取りまで始まった。手紙の内容は庭の薔薇の話ばかりだが。
-
-「フラグを折るどころか、ゴリゴリに好感度を上げてしまっている気がする」
-
-まあいい。婚約者との関係が良好なのは悪いことではない。問題は、ゲーム本編で聖女が現れた時にレオンが心変わりするかどうかだ。
-
-それより今日は、王都の大図書館に来ている。
-
-魔法の参考書を探すため、父に頼んで馬車を出してもらった。クラウゼヴィッツ公爵家は王都に邸宅を持っているので、月に数日は王都で過ごす。
-
-「風属性の上級魔法……ここにはないかな」
-
-書架の間を歩いていると、奥のテーブルで本を読んでいる少年と目が合った。
-
-銀髪に青い目。整った顔立ちだが、どこか儚い印象を受ける。
-
-……この容姿、見覚えがある。
-
-第二王子、アルベルト・ヴァン・アストリア。
-
-ゲームの攻略対象の一人。正妃の子であるレオンに対して、側妃の子であるアルベルトは王位継承権が低く、宮廷では冷遇されている。
-
-ゲーム中では「影のある知性派王子」として人気があった。
-
-「お隣、よろしいですか？」
-
-アルベルトが驚いた顔をする。
-
-「……私に話しかけるのか？」
-
-「はい。同じ本を探しているようでしたので」
-
-彼が読んでいるのは風属性の魔法書。私と同じ属性だ。
-
-「カタリナ・フォン・クラウゼヴィッツです。レオン様の婚約者をしております」
-
-「知っている。兄上の婚約者殿」
-
-声のトーンが少し冷たい。レオンの婚約者＝敵対勢力、という警戒心だろうか。
-
-「アルベルト殿下も風属性なんですね。私も風で、今ちょうど上級の参考書を探していたんです」
-
-「……君が風属性？ 公爵令嬢が魔法を学んでいるのか」
-
-「護身のためです。何が起きるか分かりませんから」
-
-本音だった。破滅エンドに備えて、あらゆるスキルを身につけておきたい。
-
-アルベルトが少しだけ口元を緩めた。
-
-「変わった令嬢だな。この本なら参考になるかもしれない」
-
-彼が差し出したのは、かなり古い本だった。『風の理——応用と実践』。
-
-「ありがとうございます！」
-
-それから一時間ほど、二人で魔法書を読みながら意見を交わした。アルベルトは口数は少ないが、魔法理論に関する知識は深い。
-
-帰り際、アルベルトが珍しく自分から声をかけてきた。
-
-「また……来るのか、この図書館に」
-
-「ええ、月に二回くらいは」
-
-「そうか」
-
-それだけ言って、彼は足早に去っていった。
-
-……ちょっと待って。
-
-これもフラグでは？
-
-ゲームでは、カタリナとアルベルトの間にイベントはなかった。カタリナはアルベルトを「陰気な王子」と呼んで無視していた設定だ。
-
-それを覆したことで、原作にない新規イベントが発生している。
-
-「破滅フラグを折っているはずなのに、なんでどんどんフラグが増えるの……」
-
-困惑しつつも、いい本を紹介してもらえたので良しとする。
-
-帰りの馬車の中で、アルベルトからもらった本を開く。
-
-ページの間に、銀色の栞が挟まれていた。
-
-「……これ、わざと？」
-
-栞には小さく、「また来い」と書かれていた。
-
-破滅フラグ回避計画。フラグは折れないが、味方は増えている。多分。`,
-    body_md_en: `Half a year had passed since our first meeting, and Leon and I were now seeing each other about once a month.
-
-His expression grew warmer with every visit, and recently we'd even started exchanging letters. They were mostly about the roses in his garden, but still.
-
-"I was supposed to be breaking flags, not cranking his affection through the roof..."
-
-Oh well. A good relationship with my fiancé isn't a bad thing. The real question is whether Leon will have a change of heart when the Saintess appears in the main storyline.
-
-But that wasn't today's concern. Today, I was at the Royal Capital's Grand Library.
-
-I'd asked Father to send the carriage so I could look for advanced magic textbooks. Since the Clausewitz family kept a residence in the capital, we spent a few days there each month.
-
-"Advanced Wind magic... I wonder if they have anything here."
-
-As I walked between the bookshelves, I locked eyes with a boy reading at a table in the back.
-
-Silver hair, blue eyes. Handsome features, but something fragile about his presence.
-
-...I recognized that appearance.
-
-The Second Prince, Albert van Astoria.
-
-One of the game's love interests. Unlike Leon, who was born to the Queen, Albert was the son of a consort, which meant lower standing in the line of succession and a cold reception at court.
-
-In the game, he was popular as the "brooding intellectual prince."
-
-"May I sit next to you?"
-
-Albert looked surprised.
-
-"...You're speaking to me?"
-
-"Yes. It seems we're looking for the same kind of book."
-
-He was reading a Wind-attribute magic tome. The same element as mine.
-
-"I'm Katarina von Clausewitz. I'm Lord Leon's fiancée."
-
-"I know. My brother's betrothed."
-
-His tone was slightly cold. Perhaps he saw Leon's fiancée as part of a rival faction.
-
-"So you're also Wind-attuned, Your Highness. I'm Wind as well — I was just looking for an advanced reference text."
-
-"...You're Wind-attuned? A duke's daughter is studying magic?"
-
-"For self-defense. You never know what might happen."
-
-I meant every word. With a doom ending looming, I wanted every skill I could get.
-
-Albert's lips curved into the faintest smile.
-
-"What a peculiar noblewoman. This book might be useful to you."
-
-He held out a rather old volume. "Principles of Wind — Application and Practice."
-
-"Thank you so much!"
-
-We spent about an hour reading magic texts together, exchanging observations. Albert was a man of few words, but his knowledge of magical theory ran deep.
-
-As I was leaving, Albert — unusually — spoke up on his own.
-
-"Will you... be coming back to this library?"
-
-"Yes, about twice a month."
-
-"I see."
-
-That was all he said before walking briskly away.
-
-...Wait a moment.
-
-Was that a flag too?
-
-In the game, there were no events between Katarina and Albert at all. Katarina's character had called him "that gloomy prince" and ignored him entirely.
-
-By changing that, I'd apparently triggered a brand-new event that didn't exist in the original story.
-
-"I'm supposed to be breaking death flags, so why do they keep multiplying...?"
-
-Bewildered though I was, I'd gotten a good book recommendation out of it, so I'd count it as a win.
-
-In the carriage ride home, I opened the book Albert had given me.
-
-Tucked between the pages was a silver bookmark.
-
-"...Did he leave this on purpose?"
-
-Written on it in small, precise letters: "Come again."
-
-Operation: Dodge the Death Flags. The flags refuse to break, but my allies are growing. Probably.`,
-    body_html: null,
-    body_html_en: null,
-    character_count: 5000,
-    is_free: true,
-    unlock_at: null,
-    unlock_price: 0,
-    pv: 0,
-    published_at: "2026-03-28T09:00:00Z",
-    created_at: "2026-03-28T09:00:00Z",
-    updated_at: "2026-03-28T09:00:00Z",
-  },
-  {
-    id: "ep-001-05",
-    novel_id: "novel-001",
-    episode_number: 5,
-    title: "従者キースと、領地改革の第一歩",
-    title_en: "My Retainer Keith, and the First Step Toward Reform",
-    body_md: `九歳の誕生日を迎えた。
-
-転生してから一年。この一年で、私は原作のカタリナとは全く違う人間になりつつある。
-
-魔法は風属性の中級に到達。剣術は初心者を脱し、基本の型を一通り覚えた。礼法も完璧。領地経営の授業も追加で受けている。
-
-「お嬢様、お誕生日おめでとうございます」
-
-従者のキース・クラウゼヴィッツが祝いの言葉を述べる。
-
-キース。原作では「カタリナの義弟にして従者」という設定だが、ゲーム中では影が薄いキャラクターだった。カタリナに冷遇され、存在感のない日々を送っていた——はずだ。
-
-「キース、ありがとう。今日は一緒にお茶にしましょう」
-
-「え……私もですか？」
-
-「もちろん。家族なんだから」
-
-キースの目が大きく見開かれる。原作のカタリナは義弟を「血のつながらない余所者」として扱っていたらしい。
-
-お茶の席で、私は思い切って提案をした。
-
-「キース、領地の農業について調べてくれない？」
-
-「農業、ですか？」
-
-「ええ。クラウゼヴィッツ領の農作物の収穫量が、ここ数年横ばいだって聞いたの。何か改善できることがあるかもしれない」
-
-これは破滅フラグ対策の一環だ。もし国外追放されても、農業の知識があれば食いっぱぐれない。さらに、領地の農業を改善すれば領民の支持を得られる。
-
-キースは真面目な性格なので、一週間後にはしっかりとした調査報告を持ってきた。
-
-「お嬢様、調べました。領地の農地の三割が非効率な輪作をしています。また、灌漑設備が老朽化して水の供給が不安定です」
-
-「さすがキース、完璧な報告ね。改善案は考えた？」
-
-「はい。まず輪作のパターンを見直し、次に灌漑水路の補修を——」
-
-キースが生き生きと語り始める。この子、こういう実務的な仕事が得意なんだ。
-
-「素晴らしいわ。父上に提案書を出しましょう。キースが書いて、私が父上に渡す」
-
-「本当に……私が？」
-
-「あなたの調査と分析があってこその提案よ。自信を持って」
-
-キースの表情が、今まで見たことのないほど明るくなった。
-
-一ヶ月後。
-
-提案は父に受け入れられ、領地の農業改革が小規模ながら始まった。キースは改革の実務責任者に任命され、毎日のように領地を走り回っている。
-
-「お嬢様のおかげで、毎日が充実しています」
-
-「キースが頑張っているからよ」
-
-「いえ、お嬢様が私を信じてくださったから……」
-
-キースの目が潤んでいる。ちょっと泣かないで。
-
-ところで、最近キースの私に対する態度が、明らかに「従者」のそれを超えてきている気がする。
-
-手紙は毎日来るし、花を摘んできてくれるし、他の使用人が近づくと不機嫌になるし。
-
-「これも……フラグ？」
-
-レオン（婚約者）、アルベルト（図書館友達）に加えて、キース（義弟）まで。
-
-私はただ普通に接しているだけなのに。原作のカタリナが周囲をどれだけ冷遇していたかが逆に分かる。
-
-「破滅フラグは減っている。でもそれ以上に、恋愛フラグが増えているのはなぜ……」
-
-九歳の誕生日。破滅回避の道は明るいが、想定外の方角に明るい。`,
-    body_md_en: `I turned nine years old today.
-
-One year since my reincarnation. In that year, I had become an entirely different person from the original Katarina.
-
-My magic had reached intermediate level in the Wind element. I'd moved past beginner swordsmanship and learned all the basic forms. My etiquette was flawless. I'd even added estate management classes to my curriculum.
-
-"Happy birthday, my lady."
-
-My retainer Keith Clausewitz offered his congratulations.
-
-Keith. In the original story, his role was "Katarina's adoptive brother and retainer," but he was practically invisible in the game. Mistreated by Katarina, living out his days with no presence whatsoever — or so it should have been.
-
-"Keith, thank you. Let's have tea together today."
-
-"Huh... me too?"
-
-"Of course. You're family."
-
-Keith's eyes went wide. The original Katarina had apparently treated her adoptive brother as "an outsider with no blood ties."
-
-Over tea, I made a bold proposal.
-
-"Keith, could you look into the agriculture on our territory?"
-
-"Agriculture, my lady?"
-
-"Yes. I've heard that crop yields on the Clausewitz lands have been flat for the past several years. There might be something we can improve."
-
-This was part of my death flag countermeasures. Even if I was exiled, agricultural knowledge would keep me fed. Better yet, improving the territory's agriculture would earn the support of our people.
-
-Keith was a diligent soul, so one week later he came back with a thorough investigation report.
-
-"My lady, I've completed my research. Thirty percent of the territory's farmland uses inefficient crop rotation patterns. Additionally, the irrigation infrastructure has deteriorated, making the water supply unreliable."
-
-"Impressive, Keith. A flawless report. Have you thought about improvement plans?"
-
-"Yes. First, we should revise the crop rotation patterns. Then repair the irrigation channels—"
-
-Keith came alive as he spoke. This boy had a real talent for practical work.
-
-"Wonderful. Let's submit a proposal to Father. You write it up, and I'll present it to him."
-
-"You really mean... me?"
-
-"Your research and analysis made this proposal possible. Have confidence in yourself."
-
-Keith's face brightened like I'd never seen before.
-
-One month later.
-
-The proposal was accepted by Father, and agricultural reform on the territory began, modest in scale but real. Keith was appointed as the hands-on manager of the reforms and spent every day running across the territory.
-
-"My lady, thanks to you, every day feels so fulfilling."
-
-"It's because you've been working so hard, Keith."
-
-"No, it's because you believed in me..."
-
-Keith's eyes were glistening. Please don't cry.
-
-By the way, Keith's attitude toward me lately seemed to be clearly exceeding the boundaries of a "retainer."
-
-A letter every day. Fresh-picked flowers brought to my room. Getting visibly irritated whenever other servants came near me.
-
-"Is this... another flag?"
-
-Leon (my fiancé), Albert (my library friend), and now Keith (my adoptive brother).
-
-All I've been doing is treating them normally. It really puts into perspective just how terribly the original Katarina treated everyone around her.
-
-"The death flags are going down. But the romance flags are going up even faster... why?"
-
-My ninth birthday. The path away from doom was bright — just bright in a very unexpected direction.`,
-    body_html: null,
-    body_html_en: null,
-    character_count: 4900,
-    is_free: true,
-    unlock_at: null,
-    unlock_price: 0,
-    pv: 0,
-    published_at: "2026-04-05T18:00:00Z",
-    created_at: "2026-04-05T18:00:00Z",
-    updated_at: "2026-04-05T18:00:00Z",
-  },
-
-  // 最強魔王 3話
   {
     id: "ep-002-01",
     novel_id: "novel-002",
     episode_number: 1,
-    title: "千年の眠りから覚めたら、世界が平和になっていた",
-    title_en: "I Woke from a Thousand-Year Sleep to Find the World at Peace",
-    body_md: `目が覚めた。
+    title: "背中に羽が生えた夜、わたしは彼と空を駆けた",
+    title_en: null,
+    body_md: `「翼のない妃、だそうね」
 
-暗い。冷たい。石の棺の中だ。
+雲梯の広間の片隅で、そう囁く声がした。わたしは聞こえないふりをして、顔だけは、まっすぐ前に向けた。
 
-千年ぶりの目覚め。記憶が徐々に戻ってくる。
+「ねえ。翼がない娘が、空の国で、いったい何ができるのかしら」
 
-私はヴェルザード。かつて「終焉の魔王」と呼ばれ、世界を恐怖に陥れた——とされている——存在だ。
+「しっ。聞こえてしまうわ」
 
-実際のところ、恐怖に陥れたつもりはなかった。ただ魔族の王として領土を守っていただけだ。それを人間たちが勝手に恐怖し、勝手に勇者を送り込んできて、勝手に戦争を始めた。
+「聞こえていいのよ。事実なのだから」
 
-最終的に勇者との戦いで相打ちになり、深い眠りについた。それが千年前のこと。
+わたし、セリア・ヴェントは十八歳。谷間の小国ヴェント家の末娘。今日、空中都市アルシエルに、第二皇子エリオット・アル・アルシエルの妃として、嫁いできた。
 
-「さて」
+そして、雲梯から降りて最初に耳にしたのが、この、他国から来ていた貴婦人たちの囁きだった。
 
-石の棺を内側から叩くと、あっさりと砕けた。千年経っても魔力は健在らしい。
+悔しくは、なかった。むしろ、妙に冷静だった。わたしは故郷の崖の上で、鷹と風を相手に育った娘だ。人の悪口くらいで、足元がぐらつくほど、柔らかくは育てられていない。
 
-外に出る。洞窟の出口から差し込む光が眩しい。
+ただ――それを全部聞いていた人が、一人、すぐ隣にいた。
 
-洞窟を出ると、そこは山の中腹だった。眼下に広がるのは——。
+それが、問題だった。
 
-「なんだ、あの平和そうな風景は」
+◇
 
-緑の平野に、ぽつぽつと煙の上がる集落。畑には作物が実り、遠くの川では子供たちが水遊びをしている。
+「……聞かせてしまって、すまない」
 
-千年前は荒野だったこの一帯が、のどかな農村地帯になっていた。
+雲梯の広間を出た回廊で、エリオット様は、小さく、そう言った。
 
-「ふむ」
+銀色がかった金の髪、澄んだ空色の瞳、そして背中に折りたたまれた、淡い銀色の翼。噂で聞いていた通りの、美しい皇子だった。ただ、彼の眉間には、今、微かな皺が寄っていた。
 
-魔力で周囲を探る。魔族の気配はほとんどない。強大な魔物もいない。人間の集落がいくつかあるだけだ。
+「謝らないでください、殿下。あの方々は、事実を仰っただけです。わたしに翼はありません。それは、このアルシエルに来るまでも、そしてこれからも、変わらない事実です」
 
-「戦争は終わったのか」
+「……セリア嬢」
 
-当然だろう。千年も経てば。
+「ただ」
 
-山を降りながら考える。さて、これからどうするか。
+わたしは、少し悪戯っぽい声音で続けた。
 
-世界征服？ 興味がない。もうやった。面倒だった。
+「事実は事実として、『翼がないわたしに、この国で何ができるか』は、これから、わたしが自分で証明していくことだと思うのです。ですから、殿下が代わりに怒ってくださる必要はありません。あれは、わたしの宿題ですから」
 
-復讐？ 誰に対して。千年前の関係者は全員死んでいる。
+エリオット様は、しばらく黙ってわたしを見つめていた。それから、ふっと力が抜けたように、笑った。
 
-「……農業でもするか」
+「――君は、思っていたよりずっと、手強い人のようだ」
 
-ふと浮かんだ考えだが、悪くない。千年前にも畑いじりは好きだった。魔王城の屋上で薬草を育てていたのは秘密だ。
+「褒め言葉と受け取ってもよろしいですか、殿下」
 
-辺境の村の近くに、放棄された空き地を見つけた。
+「もちろん。最大級のね」
 
-「ここにしよう」
+回廊の窓から、雲海の光が差し込んでいた。わたしたちの影は、並んで、白い石の床に長く伸びていた。その二つの影のうち、一つだけに翼がなかったけれど――わたしはもう、それを恥ずかしいとは思わなかった。
 
-魔力で土を耕す。千年分の力が込められた一振りで、畑は完璧に整地された。
+◇
 
-……やりすぎた。ちょっとした地震が起きてしまった。
+空中都市アルシエルは、残酷なまでに、美しかった。
 
-「これからは力を抑えないとな」
+銀色の塔が雲海に聳え、白亜の回廊が浮遊橋で繋がれ、市場の人々は翼をたたんだまま歩き、急ぐときだけふわりと浮いて移動した。子どもたちは笑いながら、石畳の上を半歩ずつ浮遊して走っていた。重力が、この国の人々にだけ、少しだけ手加減しているように見えた。
 
-こうして、最強魔王の辺境スローライフが始まった。
+わたしはその中を、一歩一歩、自分の足で歩いた。エリオット様は、わたしに歩調を合わせて、ずっと隣にいてくれた。
 
-翌朝。
+「殿下。ずっと歩いていて、お疲れではありませんか。翼でお飛びくださっても、よろしいのですよ」
 
-畑に蒔いた種が、もう芽を出していた。
+「君が飛べないうちは、私も飛ばない」
 
-普通なら一週間はかかるはずだが、魔力を帯びた土壌のせいで成長速度が尋常ではない。
+エリオット様は、あっさりと、そう答えた。
 
-「これは……食べきれないかもしれんな」
+「殿下」
 
-近くの村に分けてやるか、と考えていると、村の方から悲鳴が聞こえた。
+「二人で一緒でなければ、この国の本当の美しさは、半分しか意味がない。――これは、私の我儘だ。付き合ってくれるかい、セリア」
 
-「魔物だ！ 逃げろ！」
+その言葉を、真顔で、まっすぐ言えるのが、ずるかった。わたしのような翼を持たない娘に、そんなふうに言える人が、この国にいるとは思っていなかった。
 
-見ると、体長三メートルほどのオークが五匹、村に向かって突進してくる。
+わたしがこの人に恋をしたのは、たぶん、その瞬間だった。
 
-千年前の基準では雑魚中の雑魚だが、この平和な村の住人には脅威だろう。
+◇
 
-「仕方ない」
+それからの二十日ほど、わたしはアルシエルでの日々を、夢中で過ごした。
 
-指を鳴らす。
+朝は雲海の上の朝陽を仰ぎ、昼は浮遊庭園で花を摘み、夜は銀色の月明かりに染まる雲海を眺めた。侍女たちは最初こそ遠慮がちだったけれど、わたしが堂々と歩き回るのを見て、少しずつ打ち解けてくれた。宮廷の貴族たちの視線は、相変わらず冷たかった。けれど、その冷たさも、わたしにとっては、故郷の山風と同じくらい、慣れたものになっていった。
 
-五匹のオークが同時に消し飛んだ。
+エリオット様は、公務の合間に、必ずわたしのそばにいた。思慮深く、穏やかで、そしてやっぱり、ずるい人だった。
 
-跡形もなく。
+「セリア嬢は、なぜそんなに、背筋を伸ばして歩けるのですか」
 
-「……やりすぎた」
+ある朝、年若い侍女のひとりが、思い切ったように、そう訊ねてきた。
 
-村人たちが呆然とこちらを見ている。
+「故郷では、崖を駆けていたからです」
 
-「あ、あの……あなたは？」
+「崖を、駆ける……」
 
-「通りすがりの農家だ。気にするな」
+侍女は目を丸くした。この国の人々にとって、「崖を駆ける」という言葉そのものが、遠い異国の呪文のように響いたらしい。飛べるのだから、崖を駆ける必要がない。そういう国なのだ、ここは。
 
-「農家があんな魔法を——」
+わたしは少しだけ、誇らしい気持ちになった。わたしには、この国の人々が知らない、「地面を蹴る」という喜びがある。そう思うと、翼のない自分のことが、不意に、愛しくなった。
 
-「気にするな」
+「セリア」
 
-その日から、村人たちが畑を見に来るようになった。
+「はい、殿下」
 
-静かに暮らしたかったんだが。`,
-    body_md_en: `I woke up.
+「君の名前を呼ぶたびに、翼の付け根が、微かに疼くんだ」
 
-Dark. Cold. Inside a stone coffin.
+「……それは、どういう、意味ですか」
 
-My first awakening in a thousand years. Memories trickled back slowly.
+エリオット様は、その問いにはすぐに答えず、ただ、遠い目で雲海を見ていた。
 
-I am Velzard. Once called "The Demon Lord of Ruin," the being said to have plunged the world into terror.
+◇
 
-In truth, I never intended to terrify anyone. I was simply protecting my territory as king of the demons. It was the humans who panicked on their own, sent a hero after me on their own, and started a war on their own.
+嫁いで二十日ほど経った、雲海が桃色に染まった夕方のこと。
 
-In the end, the hero and I struck each other down in mutual defeat, and I fell into a deep sleep. That was a thousand years ago.
+宮殿の最上階のバルコニーで、エリオット様は、ようやく、その問いに答えてくれた。
 
-"Well then."
+「セリア。私の国には、古い魔術がひとつだけある。『双翼の契約』という」
 
-I struck the coffin lid from the inside, and it shattered with no resistance at all. A millennium later and my magic was still going strong, apparently.
+「双翼の、契約」
 
-I stepped outside. The light streaming through the cave mouth was blinding.
+「空の国の皇族が、運命の伴侶を見出したとき――その伴侶の背に、皇族と同じ色の翼が、一対、生えてくる。百年以上発動しないこともある、古代の魔術だ」
 
-Beyond the cave, I found myself on a mountainside. Spread out below me was—
+「……まさか、それが、わたしに」
 
-"What's with that absurdly peaceful scenery?"
+「確信はない。ただの思い込みかもしれない。けれど、君の名を呼ぶたびに疼くこの感覚は、子どもの頃に伝承で読んだ、あの兆しに、よく似ているんだ」
 
-Green plains dotted with villages trailing wisps of smoke. Crops ripening in the fields. Children splashing in a distant river.
+エリオット様は、わたしの正面に立った。その空色の瞳が、珍しく、揺れていた。
 
-This entire region had been a wasteland a thousand years ago. Now it was idyllic farmland.
+「セリア。確かめさせてほしい。――もし、何も起こらなかったら、笑ってくれ」
 
-"Hmm."
+「殿下が恥をかかれるなら、わたしも一緒に恥をかきます。平気です、どうぞ」
 
-I probed the surroundings with my magic. Almost no demonic presence. No powerful monsters. Just a handful of human settlements.
+エリオット様は、ふっと笑って、それから、そっとわたしの背中に手を添えた。古い呪文のようなものを、小さく唱えた。
 
-"So the war ended."
+◇
 
-Naturally. A thousand years was more than enough time.
+瞬間、背中に、ほのかな熱が広がった。
 
-I thought things over as I descended the mountain. So — what now?
+痛みではない。むしろ、ずっと欲しかった何かが、やっと戻ってきたような、奇妙な温かさ。次の瞬間、ドレスの絹地を内側から押し上げるように、わたしの背中で、淡い銀色の翼が、ふわりと広がった。
 
-World domination? No interest. Been there, done that. Too much hassle.
+エリオット様の翼と、まったく同じ色だった。
 
-Revenge? Against whom? Everyone involved was dead a millennium ago.
+「……えっ」
 
-"...Maybe I'll try farming."
+「セリア」
 
-The thought came out of nowhere, but it wasn't half bad. Even a thousand years ago, I'd enjoyed tending gardens. Growing medicinal herbs on the roof of the Demon Lord's castle had been my secret hobby.
+エリオット様の声は、震えていた。
 
-I found an abandoned plot of land near a frontier village.
+「双翼の契約が、発動した。君は、政略の妃じゃない。古代の魔術に認められた、私の本当の伴侶だ」
 
-"This will do."
+わたしは、振り返って自分の背中をそっと覗いた。淡い銀色の羽根が、夕陽を受けてきらきらと瞬いていた。軽い。けれど、確かな重みがある。ヴェントの女は涙を落とさない――そう教えられて育ったけれど、この瞬間だけは、一滴だけ、落としてしまった。空の上なら、きっと、許されるだろう。
 
-I tilled the soil with magic. A single sweep charged with a thousand years of accumulated power, and the field was perfectly leveled.
+「殿下。わたしは、どうすればいいのでしょう」
 
-...I overdid it. There was a minor earthquake.
+「一緒に、飛ぼう」
 
-"I'll need to hold back from now on."
+エリオット様は、涙声で笑った。
 
-And so began the most powerful demon lord's quiet country life.
+「君の最初の飛翔を、私に手伝わせてくれ」
 
-The next morning.
+◇
 
-The seeds I'd sown had already sprouted.
+わたしたちは、バルコニーの手すりを蹴って、同時に雲海の上へと飛び立った。
 
-Normally it would take at least a week, but the magic-infused soil had pushed the growth rate far beyond anything natural.
+風が、二対の銀色の翼を下から優しく押し上げた。ぎこちなく動かすたびに、羽根がきらめいた。空気の匂いが、地面の上で嗅ぐそれとは、まるで違った。夕陽に焼かれた雲の、甘いような、懐かしいような匂い。
 
-"This might be... more than I can eat."
+「気持ちいいですか、セリア」
 
-I was considering sharing with the nearby village when a scream rang out from that direction.
+「はい、殿下。――ただ、ひとつだけ、言わせてください」
 
-"Monsters! Run!"
+「何だい」
 
-I looked and saw five orcs, each about three meters tall, charging toward the village.
+「今日、雲梯の広間で、わたしを『翼のない妃』と囁いた方々に、少しだけ、お伝えしたいのです」
 
-By the standards of a thousand years ago, these were the lowest of the low — but to the people of this peaceful little village, they were a real threat.
+わたしは、風に逆らって、きっぱりと言った。
 
-"Can't be helped."
+「『翼は、生えました』と」
 
-I snapped my fingers.
+エリオット様は、一瞬きょとんとして、それから、声を立てて笑った。
 
-All five orcs vanished simultaneously.
+「――君は、本当に、手強い人だ」
 
-Without a trace.
+◇
 
-"...I overdid it."
+桃色の雲海の向こうで、最初の星が瞬いた。その星を目印に、わたしたちはもう一度、大きく羽ばたいた。
 
-The villagers stared at me, dumbstruck.
+わたしには、まだ分からないことがたくさんあった。百年ぶりに発動した古代魔術の本当の意味。宮廷と他国の貴族たちが、これから「翼を授かった異国の娘」を、どう扱うのか。今日の囁きは、きっと、始まりに過ぎない。
 
-"Uh, um... who are you?"
+けれど、ひとつだけ、決めていた。
 
-"Just a farmer passing through. Don't worry about it."
+この翼は、古代魔術の力ではなく、わたし自身がこの人の隣に立つと決めた、その意志の形だ。だから、誰にも折らせない。
 
-"A farmer who can do magic like that—"
+風がひときわ強く、二人の翼を押し上げた。眼下の雲海が、桃色から紫へと染まっていく。わたしはエリオット様の手をぎゅっと握り、もう片方の手で、自分の背中の翼に、そっと指先で触れた。本物だった。疑いようのない、本物の重みが、そこにあった。その重みは、恐怖ではなく――自由の、重みだった。
 
-"Don't worry about it."
-
-From that day on, villagers started showing up to watch me tend my field.
-
-So much for a quiet life.`,
+空の一番高いところで、星が、また一つ、増えた。わたしの新しい日々は、雲の上の、この風の高さから、始まろうとしていた。`,
+    body_md_en: null,
     body_html: null,
     body_html_en: null,
-    character_count: 5000,
+    character_count: 3711,
     is_free: true,
     unlock_at: null,
     unlock_price: 0,
     pv: 0,
-    published_at: "2026-03-20T09:00:00Z",
-    created_at: "2026-03-20T09:00:00Z",
-    updated_at: "2026-03-20T09:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
   },
-  {
-    id: "ep-002-02",
-    novel_id: "novel-002",
-    episode_number: 2,
-    title: "勇者の末裔がやってきた",
-    title_en: "The Hero's Descendant Arrives",
-    body_md: `辺境の村に居を構えて一ヶ月。
-
-畑は順調すぎるほど順調だ。キャベツが人の頭ほどの大きさに育ち、トマトは信じられないほど甘い。村人たちに分けても余るので、隣の町に出荷を始めた。「辺境のやたらうまい野菜」として、じわじわと評判になっているらしい。
-
-「平穏だな」
-
-今日も畑を眺めながらお茶を飲む。この生活が永遠に続けばいいのだが。
-
-「あの！」
-
-声がした方を見ると、赤髪の少女が立っていた。年は十五、六歳だろうか。腰に剣を帯び、背中に大きなリュックを背負っている。
-
-冒険者か。こんな辺境に珍しい。
-
-「何か用か」
-
-「あなたがヴェルザードさんですか？ 村人に聞いたんですけど、この辺りの魔物を素手で倒す凄い人がいるって」
-
-「素手ではない。指は鳴らした」
-
-「……それ、もっと凄いんですけど」
-
-少女は改まって自己紹介した。
-
-「私はリーゼ。勇者ハインリヒの末裔です」
-
-勇者ハインリヒ。千年前に私と相打ちになった張本人だ。
-
-「ほう」
-
-「代々伝わる言い伝えがあるんです。『いつか魔王が目覚める。その時は末裔が再び立ち向かえ』って」
-
-「それで、立ち向かいに来たのか」
-
-「はい！ ……いえ、正確には、本当に魔王が復活したのか確かめに来ました。最近、各地で異常な魔力反応が検知されているんです」
-
-異常な魔力反応。
-
-心当たりがある。
-
-畑を耕した時の地震。オークを消し飛ばした衝撃波。料理の火加減を間違えた時の爆発。
-
-全部、私だ。
-
-「魔王は復活していない。安心しろ」
-
-「でもこの魔力反応は——」
-
-「言ったな。安心しろ」
-
-リーゼは疑わしげにこちらを見ていたが、やがて表情を変えた。
-
-「すみません、失礼なことを聞いてもいいですか」
-
-「何だ」
-
-「この野菜、売ってもらえませんか？ めちゃくちゃいい匂いがして……」
-
-結局、リーゼは夕飯を食べていくことになった。
-
-「おいしい！ なんでこんなにおいしいんですか！」
-
-「土がいいんだ」
-
-魔力をたっぷり含んだ土。一般的な農地とは比較にならない栄養素。千年分の魔力が凝縮された土壌から育つ野菜がまずいわけがない。
-
-「ヴェルザードさんは、ずっとここで農業を？」
-
-「そのつもりだ」
-
-「もったいない……この戦闘力で農業って……」
-
-「農業は良いぞ。種を蒔いて、水をやって、日の光を浴びせれば、確実に結果が出る。戦争とは違う」
-
-リーゼがしばらく黙った後、小さく言った。
-
-「私、しばらくこの村にいてもいいですか」
-
-「好きにしろ」
-
-翌日から、リーゼは村に滞在し始めた。
-
-勇者の末裔が魔王の隣で暮らしている。
-
-千年前の私たちが見たら、何と言うだろうか。`,
-    body_md_en: `One month since I settled in the frontier village.
-
-The farm was going almost too well. Cabbages had grown to the size of human heads, and the tomatoes were impossibly sweet. Even after sharing with the villagers, I had surplus, so I'd started shipping to the neighboring town. "Those ridiculously good vegetables from the frontier" were apparently building a quiet reputation.
-
-"Peaceful."
-
-Another day sipping tea while gazing at the field. If only this could last forever.
-
-"Excuse me!"
-
-I looked toward the voice and saw a red-haired girl. Fifteen, sixteen years old, perhaps. A sword at her hip and an oversized backpack on her shoulders.
-
-An adventurer. Unusual for a place this remote.
-
-"Can I help you?"
-
-"Are you Velzard? The villagers told me there's someone incredible out here who fights monsters barehanded."
-
-"Not barehanded. I snapped my fingers."
-
-"...That's even more incredible."
-
-The girl introduced herself formally.
-
-"My name is Liese. I'm a descendant of the Hero Heinrich."
-
-The Hero Heinrich. The very man who had struck me down a thousand years ago — at the cost of his own life.
-
-"Is that so."
-
-"There's a legend passed down through our family: 'When the Demon Lord awakens, the descendants must stand against him once more.'"
-
-"So you've come to stand against me, then."
-
-"Yes! ...Well, actually, I came to confirm whether the Demon Lord has really returned. Lately there have been abnormal magic readings detected across the region."
-
-Abnormal magic readings.
-
-I had an idea about that.
-
-The earthquake when I tilled the field. The shockwave when I obliterated the orcs. The explosion when I misjudged the heat while cooking.
-
-All me.
-
-"The Demon Lord has not returned. Rest easy."
-
-"But these magic readings—"
-
-"I said rest easy."
-
-Liese eyed me suspiciously for a while, then her expression shifted.
-
-"I'm sorry, but may I ask something rude?"
-
-"What?"
-
-"Could you sell me some of those vegetables? They smell incredible..."
-
-In the end, Liese stayed for dinner.
-
-"This is amazing! How is everything so good?!"
-
-"The soil is exceptional."
-
-Soil saturated with magic. Nutrients that ordinary farmland couldn't dream of matching. Vegetables grown in earth infused with a thousand years of concentrated magical power had no business tasting anything less than extraordinary.
-
-"Velzard, are you planning to farm here forever?"
-
-"That's the plan."
-
-"What a waste... with combat power like yours, and you're farming..."
-
-"Farming is good. Plant the seeds, water them, give them sunlight, and you're guaranteed results. War is nothing like that."
-
-Liese was quiet for a long moment before saying, softly:
-
-"Would it be all right if I stayed in this village for a while?"
-
-"Suit yourself."
-
-The next day, Liese took up residence in the village.
-
-A hero's descendant, living next door to the demon lord.
-
-I wonder what the versions of us from a thousand years ago would say.`,
-    body_html: null,
-    body_html_en: null,
-    character_count: 5000,
-    is_free: true,
-    unlock_at: null,
-    unlock_price: 0,
-    pv: 0,
-    published_at: "2026-03-28T09:00:00Z",
-    created_at: "2026-03-28T09:00:00Z",
-    updated_at: "2026-03-28T09:00:00Z",
-  },
-  {
-    id: "ep-002-03",
-    novel_id: "novel-002",
-    episode_number: 3,
-    title: "村祭りと、意外な来客",
-    title_en: "The Village Festival and an Unexpected Visitor",
-    body_md: `リーゼが村に来て二週間。
-
-彼女はすっかり村に馴染み、冒険者としてのスキルを活かして村の雑務を手伝っている。魔物退治、狩り、薪割り。「勇者の末裔」の身体能力は伊達ではなく、村人たちにも頼りにされている。
-
-私はと言えば、相変わらず畑仕事の毎日だ。
-
-今日は村の収穫祭。年に一度の祭りで、村人総出で広場に集まる。
-
-「ヴェルザードさんの野菜、今年の目玉ですよ！」
-
-村長のグスタフが嬉しそうに言う。私の畑で採れたカボチャが、人の胴体ほどの大きさに育ったのだ。
-
-「食べきれるのか、あの量」
-
-「三日かけて食べます！」
-
-祭りは賑やかだった。子供たちが走り回り、村の女性たちが料理を並べ、男たちが自家製の酒を酌み交わす。
-
-「ヴェルザードさん、踊りませんか？」
-
-「踊らない」
-
-「えー」
-
-リーゼに誘われたが断った。千年前から踊りは苦手だ。
-
-穏やかな時間が流れる。こういう日々のために、千年の眠りから覚めた甲斐があった。
-
-しかし、平穏は長くは続かなかった。
-
-祭りの最中、空が突然暗くなった。
-
-雲ではない。巨大な翼を持つ何かが、上空を旋回している。
-
-「竜……？」
-
-村人たちが悲鳴を上げる中、その存在は広場の端に降り立った。
-
-竜ではなかった。竜に似た翼を持つ、人型の存在。紫色の肌に金色の目。
-
-魔族だ。
-
-しかも、見覚えがある。
-
-「お久しぶりです、魔王様」
-
-その魔族は膝をついて、深々と頭を下げた。
-
-「ベリアルか」
-
-「覚えていてくださいましたか。光栄です」
-
-ベリアル。千年前の魔王軍四天王の一人。知略を司る参謀だった。
-
-「千年経ってもまだ生きていたのか」
-
-「上位魔族ですので。それより魔王様、お探ししておりました」
-
-「何故だ」
-
-「魔族の国が……存続の危機にございます」
-
-ベリアルの話によると、千年の間に魔族は衰退し、北方の山脈の奥に小さな集落を作って細々と暮らしているという。最近、人間の帝国が領土拡大のために魔族の地に侵攻を始めた。
-
-「お力をお貸しいただけませんか」
-
-「断る」
-
-即答した。
-
-「もう戦争はしない。千年前に十分やった」
-
-「しかし——」
-
-「それより、腹が減っていないか。収穫祭の料理が余っている」
-
-ベリアルは困惑した顔をしていたが、村人たちが恐る恐る差し出したカボチャのスープを一口飲んで、目を見開いた。
-
-「……何ですか、この味は」
-
-「私の畑で採れたカボチャだ」
-
-「魔王様の畑……」
-
-ベリアルが複雑な表情をしている。
-
-その夜、ベリアルはスープを三杯おかわりした。
-
-とりあえず、今日のところは祭りを楽しんでもらおう。
-
-魔族の問題は、明日考えればいい。`,
-    body_md_en: `Two weeks since Liese came to the village.
-
-She had settled in completely, putting her adventurer skills to work helping with village chores. Monster extermination, hunting, chopping firewood. The physical abilities of a "hero's descendant" were no joke, and the villagers had come to rely on her.
-
-As for me, it was the same routine of farmwork, day after day.
-
-Today was the village harvest festival. A once-a-year celebration where every villager gathered in the square.
-
-"Your vegetables are the star of the show this year, Velzard!"
-
-Village chief Gustav said it with a beaming grin. The pumpkins from my field had grown to the size of a human torso.
-
-"Can you actually eat all that?"
-
-"We'll take three days to get through it!"
-
-The festival was lively. Children running everywhere, the village women laying out dishes, the men sharing homemade spirits.
-
-"Velzard, won't you dance?"
-
-"I don't dance."
-
-"Aww."
-
-Liese had asked, but I declined. I'd been bad at dancing for a thousand years.
-
-A gentle stretch of time. Days like these made it worth waking from a thousand-year sleep.
-
-But peace never lasts long.
-
-In the middle of the festivities, the sky went suddenly dark.
-
-Not clouds. Something with enormous wings was circling overhead.
-
-"A dragon...?"
-
-As the villagers screamed, the figure descended to the edge of the square.
-
-Not a dragon. A humanoid being with dragon-like wings. Purple skin and golden eyes.
-
-A demon.
-
-One I recognized.
-
-"It has been a long time, my lord."
-
-The demon dropped to one knee and bowed deeply.
-
-"Belial."
-
-"You remember me. I am honored."
-
-Belial. One of the four generals of the Demon Lord's army, a thousand years ago. The strategist among them.
-
-"You're still alive after a thousand years?"
-
-"I am a high-ranking demon, after all. But more importantly, my lord — I have been searching for you."
-
-"Why?"
-
-"The demon nation... faces an existential crisis."
-
-According to Belial, over the past millennium the demons had declined, retreating to a small settlement deep in the northern mountains where they scraped by in obscurity. Recently, a human empire had begun invading demon territory to expand its borders.
-
-"Will you lend us your power?"
-
-"No."
-
-I answered immediately.
-
-"I'm done with war. A thousand years ago was more than enough."
-
-"But—"
-
-"More importantly, are you hungry? There's leftover food from the harvest festival."
-
-Belial wore a bewildered expression, but when the villagers nervously offered a bowl of pumpkin soup and he took a sip, his eyes went wide.
-
-"...What is this flavor?"
-
-"Pumpkin from my field."
-
-"The Demon Lord's field..."
-
-Belial's face was a complicated mix of emotions.
-
-That night, he went back for three more helpings of soup.
-
-For now, let him enjoy the festival.
-
-The demon situation could wait until tomorrow.`,
-    body_html: null,
-    body_html_en: null,
-    character_count: 5000,
-    is_free: true,
-    unlock_at: null,
-    unlock_price: 0,
-    pv: 0,
-    published_at: "2026-04-04T12:00:00Z",
-    created_at: "2026-04-04T12:00:00Z",
-    updated_at: "2026-04-04T12:00:00Z",
-  },
-
-  // 死神カフェ 2話分
   {
     id: "ep-003-01",
     novel_id: "novel-003",
     episode_number: 1,
-    title: "最初の客——忘れた約束",
-    title_en: "The First Customer — A Forgotten Promise",
-    body_md: `駅裏の路地を三回曲がると、そこにある。
-
-「カフェ・リメンバー」。
-
-看板は木製で、文字はかすれている。扉は重い木のドアで、開けると古びたベルが鳴る。
-
-カウンター五席だけの小さな店。壁には古い時計が一つ。窓はない。
-
-マスターは二十代半ばに見える青年。黒い髪に黒い目。白いシャツの上に黒いエプロン。
-
-「いらっしゃい」
-
-穏やかな声だが、どこか温度がない。
-
-今夜の客は、五十代の男性だった。スーツ姿。ネクタイは緩めてあり、疲れた表情をしている。
-
-「コーヒーを」
-
-「メニューはコーヒーしかありません」
-
-「じゃあそれを」
-
-男はカウンターに座り、店内を見回した。
-
-「変わった店だな。Googleマップに載ってないんだが」
-
-「ええ。載せていないので」
-
-マスターがコーヒーを淹れる。ハンドドリップ。豆を挽く音、湯を注ぐ音。静かな店内にそれだけが響く。
-
-一杯のコーヒーが差し出された。
-
-「どうぞ」
-
-男は一口飲んだ。
-
-「……うまいな」
-
-そして、目の焦点が遠くなった。
-
-「あ……」
-
-男の瞳に、涙が滲む。
-
-「思い出した」
-
-「何をですか」
-
-「娘と……約束したんだ。二十年前に。『お父さんが退職したら、二人で北海道に行こう』って」
-
-男は震える声で続けた。
-
-「仕事が忙しくて。昇進して、もっと忙しくなって。気づいたら娘は結婚して家を出て。孫もできたのに、約束のことをすっかり忘れていた」
-
-マスターは黙って聞いている。
-
-「今日、娘から電話があったんだ。『お父さん、来月で定年でしょう。何か予定ある？』って」
-
-男はコーヒーカップを両手で包んだ。
-
-「このコーヒーを飲んだら、なぜか突然思い出した。娘が小学生の時に、北海道の写真を見せて、目をキラキラさせながら言ったんだ。『ねえお父さん、ここに行きたい』って」
-
-「いい記憶ですね」
-
-「ああ……明日、娘に電話する。北海道、行こうって」
-
-男は涙を拭いて、コーヒーを飲み干した。
-
-「いくらだ」
-
-「お代は結構です」
-
-「え？」
-
-「当店は、お代をいただいていません」
-
-男は不思議そうな顔をしたが、それ以上は聞かなかった。
-
-「ありがとう。美味いコーヒーだった」
-
-ドアのベルが鳴り、男が去る。
-
-マスターはカップを洗いながら、独り言のように呟いた。
-
-「まだ間に合う人は、いいな」
-
-時計の針が、ゆっくりと動いている。
-
-このカフェには、訳ありの客しか来ない。
-
-そして、マスターは——自称、死神だ。`,
-    body_md_en: `Take three turns down the alley behind the station, and there it is.
-
-"Cafe Remember."
-
-The sign is wooden, the letters faded. The door is heavy oak, and when you open it, an old bell chimes.
-
-A tiny place with just five seats at the counter. A single antique clock on the wall. No windows.
-
-The barista looks to be in his mid-twenties. Black hair, black eyes. A white shirt under a black apron.
-
-"Welcome."
-
-A gentle voice, but somehow lacking warmth.
-
-Tonight's customer was a man in his fifties. Suit and tie — the tie loosened, a weary look on his face.
-
-"Coffee, please."
-
-"Coffee is the only thing on the menu."
-
-"Then I'll have that."
-
-The man sat at the counter and looked around.
-
-"Unusual place. Can't find it on Google Maps."
-
-"No. We're not listed."
-
-The barista began to brew. Hand drip. The sound of grinding beans, the sound of water being poured. In the quiet shop, nothing else could be heard.
-
-A single cup of coffee was placed before him.
-
-"Here you are."
-
-The man took a sip.
-
-"...This is good."
-
-Then his gaze drifted far away.
-
-"Ah..."
-
-Tears welled in his eyes.
-
-"I remember now."
-
-"What do you remember?"
-
-"I made a promise... to my daughter. Twenty years ago. 'When you retire, Dad, let's go to Hokkaido together.'"
-
-He continued in a trembling voice.
-
-"Work got busy. I got promoted, and it got busier. Before I knew it, my daughter had gotten married and moved out. I even have grandchildren now, but I'd completely forgotten that promise."
-
-The barista listened in silence.
-
-"She called me today. 'Dad, you're retiring next month, right? Do you have any plans?'"
-
-The man wrapped both hands around his coffee cup.
-
-"When I drank this coffee, I suddenly remembered. When she was in elementary school, she showed me photos of Hokkaido, her eyes sparkling, and said, 'Hey Dad, I want to go here.'"
-
-"That's a beautiful memory."
-
-"Yeah... I'm going to call her tomorrow. Tell her let's go to Hokkaido."
-
-The man wiped his tears and drained his cup.
-
-"How much do I owe you?"
-
-"No charge."
-
-"What?"
-
-"We don't take payment here."
-
-The man looked puzzled but didn't press the matter.
-
-"Thank you. That was excellent coffee."
-
-The bell on the door chimed as he left.
-
-The barista murmured while washing the cup, as if speaking to no one.
-
-"It's nice when they're the kind who still have time."
-
-The clock hands moved slowly onward.
-
-Only troubled souls find their way to this cafe.
-
-And the barista — he claims to be a reaper.`,
+    title: "差出人のない手紙",
+    title_en: null,
+    body_md: `　手紙というものは、不思議な生き物だ。
+　書き手の指の熱を羊皮紙に写し取り、蝋印で封じられ、他人の手を転々としながら、それでも体温を失わずに受け取り手の胸に届く。紙の端には、書いた人の迷いや、溜息の湿り気さえ、かすかに残っている気がする。
+　──そんなことを考えるようになったのは、三ヶ月前の雨の朝、差出人のない一通目を受け取ってからだ。
+　それまで、私は手紙を書いたことも受け取ったこともなかった。エメラ・リルティング、十八歳。両親が二年前の流行病で相次いで亡くなり、叔父の家に引き取られてからは、誰かに便りを送る相手も、送ってくる相手も、一人もいない日々を過ごしていた。
+
+　最初の一通は、王立郵便ではなく、勝手口の石段に、雨に濡れないように古い籠を伏せた下に置かれていた。
+　上質な羊皮紙の封筒。差出人の欄は空白。私の名前「エメラ・リルティング様」だけが、美しい男性的な筆跡で書かれていた。蝋印は無地の銀色で、どこの家の紋も刻まれていない。使用人が怪訝そうに差し出してきたのを、私は洗濯籠の陰で受け取った。
+　薄汚れた使用人用階段の踊り場で、私はその封を切った。中にはたった一枚の紙。
+『拝啓、エメラ様。あなたの笑い方が、好きです。もし雨の多い朝のご機嫌が悪くないようでしたら、返事をいただけるでしょうか。──名乗らぬ差出人より』
+　私は、その三行を、ゆっくり三度読み返した。
+　リルティング子爵家の長女、などという肩書きは、この家に来てからは何の意味も持たなかった。叔父の娘二人は華やかな社交令嬢で、私は名目上は従姉妹、実態は台所の雑役女。舞踏会にも茶会にも呼ばれず、お下がりのドレスを繕って過ごす日々。社交界では「貧乏子爵家の末裔の悪役令嬢」と、姿も見ずに陰口を叩かれているらしい。
+　私の笑い方が好き、と言ってくれる人など、この世に一人もいないはずだった。そもそも私は、この家に来てから、ちゃんと笑ったことがなかった。
+　けれど、不思議と、この手紙を嘘だとは思えなかった。筆跡の静けさが、嘘をつく人のものではなかったからかもしれない。
+　その夜、私は蝋燭の灯の下で、震える手で返事を書いた。
+『差出人のない方へ。私は、自分が笑っているのを、もう随分見たことがありません。あなたが私の笑い方を知っているとは、少し不思議に思います。もしかしたら、あなたは幽霊か、夢の中の人かもしれません。それでも、お返事を書いてみます。最近の私の小さな喜びは、厨房の窓辺で育てている香草が、三枚だけ新しい葉を出してくれたことです。雨の日に、雨滴がその葉を震わせるのを見ると、心の中の重たい空気が、少しだけ軽くなります。──名乗らぬ受取人より』
+　翌朝、私はこっそり王都の『影の郵便局』に出かけた。身元不明の手紙を匿名で受け付ける、古くから続く奇妙な郵便局だ。差出人も受取人も秘密のまま届けてくれる。
+　投函口に封筒を滑り込ませた瞬間、薄暗い店内の奥から、老いた郵便夫の声がした。
+「娘さん。影の郵便は、返事を出したらもう後戻りはできんよ。言葉が言葉を呼んで、いつか、顔の知らない誰かがあんたの前に現れる。それを覚悟の上で、出すかい」
+　私は、少しだけ迷って、それから頷いた。
+「ええ。覚悟の上で」
+　老人は、何も言わずに、封筒を棚の奥へ運んでいった。
+
+　それから、毎週水曜日の朝に、差出人のない手紙が届くようになった。
+　筆跡は同じ。内容は他愛もない。昨日の風向きの感想、夢に出てきた葦毛の馬の話、古い詩集から引いた一節、書物のある一行についての、やけに細やかな感想。私と、その人の間には、一度も名前も身分も交わされなかった。代わりに、言葉と感情だけが、毎週少しずつ積み上がっていった。
+　不思議だった。手紙の中でだけ、私は饒舌になれた。
+　叔父の家では、一日にほとんど口をきかない。食事の席では従姉妹たちの華やかな会話の端で、うなずくことしかしない。声の出し方を忘れそうになる日さえあった。けれど、紙の上では別人だった。言葉遊びを仕掛け、詩を引用し、皮肉を飛ばし、冗談を言い、時には自分の寂しさを、輪郭をなぞるように書いた。
+　差出人のない方は、それに全部、静かに応えてくれた。
+『エメラ様の皮肉は、薔薇の棘のようです。刺さるけれど、匂いが残ります』
+　ある手紙の一文を読んで、私はこの家に来て初めて、声を出して笑った。
+　廊下の向こうで叔母が「何を笑っているの、気味が悪い」と言ったが、私は止められなかった。笑いは、肋骨の奥の錆びついた扉をこじ開けて出てきたのだ。
+　その夜、私は鏡の前に立って、自分の顔を見た。痩せた頬、乾いた唇、疲れた目。それでも、口の端に、まだ笑いの余韻が残っていた。この顔を、誰かが好きだと言ってくれる。信じられなかった。けれど、信じたかった。
+　私は鏡に向かって、声に出さずに呟いた。
+　──あなたに、早く会いたい。
+
+　けれど、同時に、会いたくないとも思った。
+　手紙の中の私は、現実の私よりずっと聡明で、ずっと饒舌で、ずっと綺麗だった。紙の上の私に恋をしているだけなのだとしたら、実物を見た瞬間、全部が崩れるのではないか。その恐怖が、胸の底にずっと沈んでいた。
+　だから私は、老郵便夫の言葉を、毎晩枕の上で反芻した。
+　──いつか、顔の知らない誰かが、あんたの前に現れる。
+
+　やり取りが始まって三ヶ月。
+　その週の水曜日、手紙は届かなかった。
+　私は動揺した。何かあったのではないか。差出人の方が病気に、事故に、それとも飽きたのではないか。一日中、心がざわついて、厨房の仕事も手につかなかった。
+　その日の夕方、勝手口の扉が叩かれた。
+　私は、配達の商人か何かだろうと思って、何気なく扉を開けた。
+　──そこに立っていたのは、見知らぬ青年だった。
+　二十三、四歳くらい。黒い制服。胸元に、王立第一騎士団の徽章。銀髪を後ろに撫でつけ、灰青色の瞳は、少し疲れたような、けれど真っ直ぐな光を帯びていた。背は高く、肩幅は広い。騎士の身体だった。
+　私は息を呑んだ。こんな立派な騎士が、なぜ使用人用の勝手口に。
+「……どちら様ですか」
+「失礼します。王立第一騎士団副団長、ユリアン・フェルネと申します」
+　王立第一騎士団の副団長。王国の軍事を担う、若き貴公子として知られている人物。文学好きで、宮廷の詩会にも時折顔を出すと噂される。名前だけは、叔父の家の新聞で何度も目にしていた。
+　そんな方が、なぜ私に──と考えた瞬間、彼の手元を見て、私は言葉を失った。
+　ユリアン様の手には、いつもと同じ、上質な羊皮紙の封筒が握られていた。蝋印は銀色。私の名前、見慣れた男性的な筆跡。
+「今週は、郵便局に預けるのが間に合いませんでした。それに──」
+　彼は、少し困ったように微笑んだ。
+「それに、今週だけは、直接お届けしたかったのです」
+　老郵便夫の声が、耳の奥で蘇った。いつか、顔の知らない誰かが、あんたの前に現れる。私は勝手口の薄暗さの中で、呆然と彼を見上げていた。
+「あ、あなたが、今までの」
+「はい。差出人を名乗らずにいたのは、私の都合です。騎士団副団長という立場で、身寄りの少ない令嬢にいきなり手紙を出すのは、どんなに言葉を選んでも、あなたの立場を悪くしかねない行為でしたから」
+「でも、なぜ、私に」
+「半年前、王都の広場で、ある少女が香草の鉢を抱えて歩いていました。鉢の香草が雨に濡れていて、少女はそれを両手で覆って、必死に守っていた。通りすがりに、その少女の顔が、ほんの一瞬だけ、香草の葉を見て柔らかく微笑んだのです。私はその微笑みを、ずっと忘れられませんでした」
+　思い出した。半年前の雨の日、私は確かに厨房のための香草の鉢を市場で買い、それを抱えて叔父の家まで歩いた。雨が降り出して、私は香草が潰れないように両手で覆って、濡れた葉の匂いが嬉しくて、誰にも見られていないと思って、頬を緩めた。
+「その後、調べました。あなたがリルティング子爵家の長女で、今はどこの家で、どんな暮らしをしているのか。そして、手紙を書くことを決めました。顔を出さず、名乗らずに。少なくとも、あなたの生活の中に、週に一度くらい、声を出して笑える瞬間を差し入れたかったのです」
+　私は、廊下の柱に手をついて、体を支えた。涙が、勝手に溢れていた。
+　叔父の家で一滴も涙を流さないと決めていた。弱さを見せたら、ますます軽んじられると知っていたから。けれど今、この勝手口の前では、そんな決意はもう、何の意味も持たなかった。
+「……今週の返事は、まだ書いていません」
+「構いません。口で、直接、いただけますか」
+「はい」
+　私は、涙を拭わずに、顔を上げた。
+「ユリアン様。紙の上の私のほうが、本当の私より聡明で、綺麗に見えたかもしれません。実物は、こんな顔です。がっかりされる覚悟はしています」
+　ユリアン様は、少し首を傾げ、それから静かに微笑んだ。
+「エメラ嬢。紙の上の言葉を書くのも、あなたです。雨の日に香草を庇って微笑むのも、あなたです。私は、どちらのあなたにも、同じように会いたかったのです」
+　そして、静かに片膝を落とした。騎士の、最上級の敬礼の形だった。
+「今日からは、どうか、直接お会いできる日を少しずつ増やしてください。手紙も続けます。けれど、あなたの笑い方を、紙の上ではなく、この目で見られる日を、一日でも多く、いただきたい」
+　勝手口の外で、遅い春の雨が、また降り始めていた。窓辺の香草が、その音に、静かに葉を揺らしていた。差出人のない手紙の物語は、今日、差出人の名前を持った新しい物語に、静かに書き換えられ始めていた。
+
+「ユリアン様、一つだけお願いがあります」
+「何なりと」
+「……手紙は、どうか、これからも続けてください。顔を合わせてお話するのも嬉しいのですけれど、私は、紙の上の言葉を読むときだけ、本当の自分でいられるような気がしているのです」
+「もちろんです。週に一通では足りないかもしれません。必要なら、二通でも三通でも」
+　私たちは、少しだけ笑い合った。勝手口の石段の冷たさも、従姉妹たちの笑い声も、もうしばらく気にならなかった。
+　ユリアン様は去り際に、胸のポケットから小さな包みを取り出した。
+「これを。先週の市場で見つけた、新しい香草の種です。あなたの窓辺の鉢が、もう一種類、家族を増やしてくれると、私も嬉しい」
+　私は震える手でその包みを受け取った。黒い小さな粒が、紙の中で静かに眠っていた。
+　その夜、私は机に向かい、久しぶりに声を出して「お返事を書きます」と呟いた。声を出すだけで、世界の重さが、わずかに軽くなった気がした。
+　手紙というものは、不思議な生き物だ。書き手の指の熱を、受け取り手の胸にまで運んでくる。そして時に、書き手自身の体温まで、目の前に連れてくる。
+　厄介者扱いされてきたこの家の片隅に、今夜、初めて、私だけの小さな王国ができた。差出人と、受取人と、鉢植えの香草と、そして、誰にも奪われない手紙の束。それだけで、私はもう十分だった。`,
+    body_md_en: null,
     body_html: null,
     body_html_en: null,
-    character_count: 5000,
+    character_count: 4544,
     is_free: true,
     unlock_at: null,
     unlock_price: 0,
     pv: 0,
-    published_at: "2026-03-22T09:00:00Z",
-    created_at: "2026-03-22T09:00:00Z",
-    updated_at: "2026-03-22T09:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
   },
   {
-    id: "ep-003-02",
-    novel_id: "novel-003",
-    episode_number: 2,
-    title: "二人目の客——消えた夏の日",
-    title_en: "The Second Customer — A Lost Summer Day",
-    body_md: `雨の夜だった。
-
-カフェ・リメンバーに、若い女性が飛び込んできた。二十代後半。ずぶ濡れで、傘を持っていない。
-
-「すみません、雨宿りさせてください……って、ここカフェですか？」
-
-「ええ。コーヒーをお出ししています」
-
-「じゃあ、お願いします。温かいのを」
-
-女性はカウンターに座り、髪から雫を垂らしながら店内を見た。
-
-「不思議な雰囲気のお店ですね」
-
-「よく言われます」
-
-マスターがコーヒーを淹れる。いつもと同じハンドドリップ。ただし、湯の温度を少しだけ高くした。冷えた体を温めるために。
-
-「どうぞ」
-
-女性が一口飲んだ瞬間、手が止まった。
-
-「……海の匂いがする」
-
-「コーヒーからですか？」
-
-「いえ……記憶から」
-
-女性の目が潤む。
-
-「高校の時の、夏休みのことを思い出しました」
-
-それは十年前の話だという。
-
-高校二年の夏。彼女は親友のマナと、海辺の町に旅行した。二人きりの、初めての旅行だった。
-
-「バスに乗って、海に行って、スイカ割りして、花火を見て。たった二泊三日だったのに、人生で一番楽しかった」
-
-「いい思い出ですね」
-
-「でも、その後すぐにマナと喧嘩したんです。くだらないことで。彼氏がどうとか、進路がどうとか。それきり、連絡を取らなくなって」
-
-女性はカップを見つめた。
-
-「十年間、一度もマナに連絡していない。SNSも見ないようにしていた。見たら、楽しそうにしているのが辛いから」
-
-「なぜ辛いんですか」
-
-「……私が悪かったから。喧嘩の原因は、私の嫉妬だった。マナは可愛くて、明るくて、彼氏もいて。私は地味で、何もなくて。マナの幸せが眩しくて、八つ当たりした」
-
-長い沈黙。
-
-「でも今、あの夏の海を思い出して……マナの笑顔を思い出して。あの笑顔は本物だった。私に向けてくれた笑顔は、本物だったんだ」
-
-マスターが小さく頷く。
-
-「十年前の記憶は、嘘をつきません」
-
-女性が顔を上げた。
-
-「連絡してみようかな」
-
-「いいと思います」
-
-「でも、今さら何て言えば……」
-
-「十年前に言えなかった言葉を、そのまま」
-
-女性はスマートフォンを取り出し、しばらく画面を見つめていた。
-
-そしてゆっくりと、メッセージを打ち始めた。
-
-五分後。
-
-「……返事が来た」
-
-女性の声が震えている。
-
-「マナ、返事くれた。『ずっと待ってたよ』って……」
-
-涙がこぼれた。
-
-「ありがとうございます。このコーヒー……不思議ですね」
-
-「当店のコーヒーは、忘れた記憶を思い出させる効果があります」
-
-「魔法みたい」
-
-「魔法のようなものです」
-
-雨が上がった。
-
-女性は笑顔で店を出て行った。傘は、もう要らないようだ。
-
-マスターがカップを片付ける。
-
-「また一人、間に合った」
-
-壁の時計の横に、小さなノートがある。マスターはそこに、短く記す。
-
-「四月六日。雨。二人目の客。友人との再会」
-
-このカフェに来る人間は、全員が「思い出すべき記憶」を持っている。
-
-マスターの仕事は、それを取り戻す手伝いをすること。
-
-死神の仕事は、魂を連れて行くことだけではない。`,
-    body_md_en: `It was a rainy night.
-
-A young woman burst into Cafe Remember. Late twenties. Soaking wet, no umbrella.
-
-"I'm sorry, could I take shelter from the rain... wait, is this a cafe?"
-
-"It is. We serve coffee."
-
-"Then yes please. Something hot."
-
-She sat at the counter, water dripping from her hair, and took in the space.
-
-"This place has a curious atmosphere."
-
-"So I'm told."
-
-The barista brewed coffee. The same hand drip as always. Except he raised the water temperature just slightly — to warm a chilled body.
-
-"Here you are."
-
-The moment she took her first sip, her hand froze.
-
-"...I can smell the ocean."
-
-"From the coffee?"
-
-"No... from the memory."
-
-Her eyes glistened.
-
-"I just remembered summer vacation in high school."
-
-It was a story from ten years ago, she said.
-
-Summer of her sophomore year. She and her best friend Mana had traveled to a seaside town. Their first trip, just the two of them.
-
-"We rode the bus, went to the beach, played watermelon splitting, watched fireworks. It was only two nights and three days, but it was the happiest time of my life."
-
-"That sounds like a wonderful memory."
-
-"But right after that, Mana and I had a fight. Over something stupid. Boyfriends, college plans, that kind of thing. And after that... we just stopped talking."
-
-She stared into her cup.
-
-"I haven't contacted Mana once in ten years. I stopped checking her social media too. It hurt to see her looking happy."
-
-"Why did it hurt?"
-
-"...Because I was the one in the wrong. The fight was caused by my jealousy. Mana was cute, outgoing, had a boyfriend. I was plain, had nothing. Her happiness was too bright, and I lashed out."
-
-A long silence.
-
-"But just now, remembering that summer ocean... remembering Mana's smile. That smile was real. The smile she gave me was real."
-
-The barista nodded slightly.
-
-"Memories from ten years ago don't lie."
-
-She looked up.
-
-"Maybe I should reach out to her."
-
-"I think you should."
-
-"But what would I even say after all this time..."
-
-"The words you couldn't say ten years ago. Just as they are."
-
-She took out her smartphone and stared at the screen for a while.
-
-Then slowly, she began typing a message.
-
-Five minutes later.
-
-"...She wrote back."
-
-Her voice was shaking.
-
-"Mana wrote back. She said, 'I've been waiting for you all this time'..."
-
-The tears spilled over.
-
-"Thank you. This coffee... it's mysterious, isn't it?"
-
-"Our coffee has the effect of bringing back forgotten memories."
-
-"Like magic."
-
-"Something like magic."
-
-The rain had stopped.
-
-She left the shop with a smile. She didn't seem to need an umbrella anymore.
-
-The barista cleared away the cup.
-
-"Another one who made it in time."
-
-Beside the clock on the wall, there was a small notebook. The barista wrote in it briefly.
-
-"April 6th. Rain. Second customer. Reunion with a friend."
-
-Every person who finds their way to this cafe carries a memory that needs to be remembered.
-
-The barista's job is to help them reclaim it.
-
-A reaper's work isn't only about collecting souls.`,
+    id: "ep-004-01",
+    novel_id: "novel-004",
+    episode_number: 1,
+    title: "屋根裏の一弦と、耳の遠い首席",
+    title_en: null,
+    body_md: `　弓が、弦に触れた瞬間だった。
+　屋根裏の空気が、すっと一段、暗くなる。私はその暗がりに吸い込まれるように、最初の一音を押し出した。
+　低い、擦れたラの音。母の古いヴァイオリンは、今夜も少しだけ声を震わせて応えてくれる。木肌は飴色。表板の端に走る古傷。高音域は掠れ、低音は時々呻く。けれど、この楽器でしか鳴らない音が、確かにこの世界のどこかに存在する。
+　私は、それを七年、探し続けている。
+
+　ロザリー・デュヴァル。十七歳。デュヴァル伯爵家の次女。
+　社交界では「音楽狂いの悪役令嬢」と呼ばれている。姉のイザベルは華やかな夜会の華で、甘い恋歌を歌って喝采を浴びる。私は舞踏会の隅で、誰とも話さずに壁紙の花と同化している娘だ。
+　人前で笑うと、頬の筋肉が痛くなる。会話は三往復目で詰まる。気の利いた返しは、三日後の真夜中に屋根裏で思いつく。
+　それでも、ヴァイオリンの前でだけは、息が楽だった。
+　弓を弦に当てる瞬間、私の中の言葉は全部、音の粒になる。話せなかった気持ち、飲み込んだ涙、亡き母への未練、姉への複雑な嫉妬と愛情。その全部が、屋根裏の暗がりに、静かに舞い落ちていく。
+　屋根裏で弾くのには、理由がある。母が亡くなってから、父はヴァイオリンの音を聞くだけで顔を曇らせるようになった。だから私は、家の誰にも届かない屋根裏まで楽器を運び、夜毎、一人で弾くようになった。
+
+　──その夜、私は水晶歌劇場にいた。
+　王都セレニタの貴族文化の中心。天井からは水晶の枝葉を模したシャンデリアが垂れ、宮廷楽団の定期演奏会が開かれる度、ドレスと宝石で埋め尽くされる劇場だ。私は月に一度、父の社交の付き添いでここへ連れてこられる。舞台よりも、客席で目を閉じて、音だけを浴びるのが好きだった。
+　今夜の定期演奏会の主役は、宮廷楽団の若き首席、アルマン・ラヴィエール様。二十四歳で首席の座を射止めた天才だと、プログラムは謳っていた。
+　第二楽章の、最後の小節。
+　彼の弓が弦から離れる前の、ほんの一瞬の静寂。私はそこで、息を止めた。──今のは、音を延ばすための間じゃない。音を聞くための間だ。弾き手が、自分の出した音の行方を、必死で耳で追いかけている間だ。
+　私は、胸の奥が小さく痛んだ。その痛みの正体を、その時の私は、まだ知らなかった。
+
+　演奏が終わり、拍手の波が引いた後。
+　私は父に「化粧室へ」と断って、楽屋裏の小さな廊下に迷い込んだ。本当は、さっきの静寂の余韻を、もう少しだけ一人で抱きしめていたかった。
+　廊下の角で、私は一人の青年と鉢合わせた。
+　細身の黒い燕尾服。茶色の髪を後ろに流した、二十代前半の青年。手に提げた黒いヴァイオリン鞄。私は咄嗟に壁際に退いた。
+「──失礼、お嬢さん。ぶつかっていませんね?」
+　低く、柔らかい声。けれど、その声にはわずかな不自然さがあった。自分の発した声の位置を、自分で確かめるような、少しだけ大きな発音。
+「……ええ、大丈夫ですわ」
+　小さく返した。ところが青年は、その返事を聞き取れなかったらしく、身を屈めて耳を寄せた。
+「申し訳ない、もう一度?」
+「大丈夫、と申し上げました」
+　今度は少し、声を張った。彼はようやく頷き、疲れた微笑みを浮かべた。舞台の直後、歓声を浴びて輝いていいはずの人の目の奥に、乾いた砂のような疲労の色があった。
+　燕尾服。ヴァイオリンの鞄。楽屋裏。
+　──アルマン・ラヴィエール様だ。
+　最近、社交界で密かに囁かれていた噂が、私の頭の中でゆっくりと輪郭を結んだ。『ラヴィエール様、実は難聴を隠して舞台に立っている』。
+　さっきの聞き返し方、第二楽章の最後の小節の、あの不自然な間。全部が、一本の線で繋がった。
+
+　けれど、私は何も言わなかった。
+　見知らぬ令嬢に指摘されるのは、きっと彼にとって一番惨い場面だ。音楽を愛する者同士の礼儀として、それだけは、絶対にしてはいけない。
+　私は深く腰を折った。
+「本日の演奏、第二楽章の最後の小節の、間の取り方が、息を呑むほど見事でした。聞けて、幸せでした」
+　アルマン様の目が、一瞬だけ大きく見開かれた。
+　それから、瞳の奥の疲れの色が、ほんの少しだけ揺らいだ。
+「……第二楽章の、最後の小節の、間の取り方、ですか」
+「はい」
+「気づいて、くださったのですか」
+「はい。他の方は、たぶん、ほとんどお気づきにならなかったと思いますけれど」
+　声が震えた。あの間は、音楽ファンには聞き取れない。けれど、屋根裏で同じ小節を何千回と自分で弾いた私には、あの静寂の重みが痛いほど分かった。あの静寂の中で、彼は自分の出した音を必死に探していた。
+　アルマン様は、廊下の壁に手を当てて、小さく息を吐いた。
+「……嬉しいです。あの小節だけは、最近、自分でも聞こえ方が不安で。今日の演奏は、自分では、失敗したかもしれないと思っていました」
+「失敗などとんでもない。あの静寂の中に、数百の音が眠っていました。──私には、そう聞こえましたわ」
+　彼は、目を閉じた。長く乾いていた喉に、冷たい水を注がれた人の顔だった。
+
+「お名前を、伺っても?」
+「ロザリー・デュヴァルと申します」
+「デュヴァル嬢。……不躾な頼みを、させてください」
+　彼はゆっくりと目を開けた。
+「私に、一曲、弾いてくださいませんか。楽器は楽屋のものをお貸しします。人目は、ありません」
+「え──」
+「私は最近、他人の演奏を聞いても、細部が聞こえないのです。ほとんどの音が、膜の向こうのように遠い。けれど、先ほどあなたが第二楽章の話をしてくださった時、その膜の向こうから、久しぶりに、一つだけ、音が届いた気がしました。だから、あなたの演奏を聞いてみたい」
+　私は声を失った。
+　当代随一の首席奏者が、屋根裏弾きの令嬢に、演奏を頼んでいる。断るべき場面だった。恥ずかしい。失礼だ。私の拙い音で、彼の耳を汚すかもしれない。
+　──けれど、私の右手は既に、膝の上のヴァイオリン鞄に伸びていた。
+　自分の楽器を、私は舞踏会の夜には必ず、護身のように持ち歩いていた。誰に弾く予定もないのに、なぜか離したくなかった。母の遺した、古い一挺。
+
+　楽屋の小部屋を借りて、私は弓を構えた。
+　椅子に座ったアルマン様は、目を閉じて待っていた。その横顔は、終油の秘蹟を待つ信徒のようにも、これから洗礼を受ける少年のようにも見えた。
+　私は息を吸って、弾き始めた。
+　曲は即興だった。屋根裏で毎晩探していた、あの低いラの一音から。母がまだこの楽器で遊んでいた頃の、古い子守歌のかけら。それを軸に、今夜のアルマン様の第二楽章の間への、私なりの返答を編んでいった。
+　上手く弾けたわけではない。指は震え、音程は二度揺らいだ。
+　けれど、弾き終えた瞬間。
+　アルマン様の閉じた瞼から、一筋の涙がこぼれるのを、私は見た。
+
+「──ロザリー嬢」
+　彼は震える声で私の名を呼んだ。
+「聞こえた。全部、聞こえました。久しぶりに、音楽というものが、私の耳の奥に、ちゃんと届いた」
+「……よかった。本当に、よかった」
+「不躾を、承知で申し上げます」
+　彼は、ゆっくりと椅子から立ち上がった。
+「君の音だけが、俺を救う。──これからも、俺の側で、弾いてくれないか。舞台でも、練習室でも、屋根裏でも、どこでもいい。君の音が聞こえるなら、俺はまだ、音楽家でいられる気がする」
+　廊下の向こうから、劇場の拍手の残響が、まだ微かに届いていた。
+　私は弓を握りしめたまま、動けなかった。
+　屋根裏でたった一人、誰に届くあてもなく弾き続けた七年間が、今夜、たった一人の耳に、確かに届いた。
+　その一人が、王国一の首席奏者だった。
+
+「アルマン様。……お返事をする前に、一つだけ、伺わせてくださいませ」
+「何なりと」
+「あなたが難聴を抱えておられることは、宮廷楽団でも、秘密なのでしょう?」
+　彼は一瞬驚いた顔をして、それから、ゆっくり頷いた。
+「……はい。知っているのは、恩師と、私自身だけです。今日で、三人目ということになります」
+「その三人目に、私を、選んでくださったのですね」
+「選んだというより、あなたの音が、勝手に私の耳の奥の膜を破ってしまったのです」
+　私たちは、少しだけ笑い合った。楽屋の小さな窓から、夜の風が入ってきた。葡萄酒のような、夜の匂い。
+　帰り道の馬車の中で、私はずっとヴァイオリンの鞄を膝に抱えていた。母の楽器の木肌を指先で撫でながら、七年分の屋根裏の夜を、一つ一つ思い出した。
+　お母様、この楽器は、今夜、初めて誰か一人の耳を救いました。
+　屋根裏で弾き続けてきたことに、意味があったのかもしれない。意味はなくてもよかったけれど、意味があったのだとしたら、それはなお、よかった。
+　家に着く頃には、決心は固まっていた。
+　明日の朝、父に言おう。社交界で「音楽狂いの悪役令嬢」と呼ばれてきた私は、これからもっと、狂ったように弾き続ける。その音を、ただ一人の首席奏者の耳のために、磨き続ける。
+　それが、今夜私が受け取った運命の、名前だ。`,
+    body_md_en: null,
     body_html: null,
     body_html_en: null,
-    character_count: 5000,
+    character_count: 3732,
     is_free: true,
     unlock_at: null,
     unlock_price: 0,
     pv: 0,
-    published_at: "2026-03-29T09:00:00Z",
-    created_at: "2026-03-29T09:00:00Z",
-    updated_at: "2026-03-29T09:00:00Z",
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
+  },
+  {
+    id: "ep-005-01",
+    novel_id: "novel-005",
+    episode_number: 1,
+    title: "身代わりの茶会",
+    title_en: null,
+    body_md: `　私には、自分の顔がなかった。
+　十九年間、鏡を覗くたびに映っていたのは、妹のソフィーの顔だった。同じ輪郭、同じ唇、同じ灰青の瞳。違うのは、内側から滲み出るものだけだった。妹が鏡を見れば社交界の華が微笑み、私が鏡を見れば「ソフィーの影」が俯いていた。
+　だから、今朝、妹の寝台のそばで「私の代わりに行って」と頼まれたとき、私は、抵抗する言葉を最後まで見つけられなかった。
+　どうせ私の顔は、最初から、私のものではなかったのだから。
+　カトリーヌ・デュラン。十九歳。デュラン侯爵家の長女。一歳下の妹と、瓜二つの姉。ブランシュ王国には「双子風」という古い審美観がある。姉妹が同じ顔を持つことを美徳とする、少し歪んだ美意識だ。私と妹はその代表例として、貴族の間で知られていた。──けれど、世間の扱いは、まるで違った。
+　明るく笑うソフィーは、王都の華。
+　人前でろくに口もきけない私は、いつも、華の足元の影。
+　同じ顔を持ちながら、明暗はくっきり分かれていた。私は早くから、自分の幸せを諦めていた。この家で愛されるのはソフィーで、輝くのはソフィーで、嫁ぐのもソフィーなのだと、幼い頃から、自分に言い聞かせてきた。
+　だから、今日のソフィーの婚約者──隣県の伯爵家の嫡男アレクシ様との初顔合わせも、私は本来、物陰から見守る側の人間のはずだった。
+　それが、まさか、身代わりに出ろと言われるなんて。
+
+　妹の部屋は、薬草の匂いで満ちていた。
+　ソフィーは枕に埋もれるようにして横たわり、細い手を私に伸ばしていた。頬は熱で赤く、唇はひび割れ、呼吸は浅い。いつもの持病の発作だった。よりによって、初顔合わせの朝に。
+「お姉様のことを、アレクシ様が『ソフィー』と呼んでも、気を悪くしないで」
+　妹は、掠れた声でそう言った。
+「私のふりをして。初顔合わせの印象は、一生の婚姻を決めるのよ。私が寝込んでいると知られたら、きっと破談になる。お父様は──お父様は、それを許さないわ」
+　父の顔が、ちらりと浮かんだ。
+　家を継ぐ男子のいないデュラン侯爵家にとって、ソフィーの伯爵家への輿入れは、家の命運を決める賭けだった。もし破談になれば、父の怒りは家中を焼き尽くすだろう。その火の粉は、病身の妹にも、無能と呼ばれ続けてきた私にも、容赦なく降りかかる。
+「──わかったわ、ソフィー。安心して、眠りなさい」
+　私は妹の額の汗を拭い、薄絹のカーテンを引いて、部屋を出た。
+　廊下の窓に映った自分の顔を、一度だけ見た。ソフィーと同じ顔。けれど表情だけが、今日もいつもと同じで、妹のようには笑えていなかった。
+
+　茶会は、王都の旧園亭で開かれる予定だった。
+　馬車に揺られながら、私は何度も、妹の笑い方を頭の中で反芻した。頭を少し傾け、唇の端を柔らかく上げ、目元を細めて、鈴のような声で笑う。それが、社交界の愛したソフィーの笑顔だった。私は幼い頃、姿見の前でこっそり真似をしたことがある。一度もうまくできなかった。
+　今日も、きっと上手くはできない。
+　それでも、妹のためにやるしかなかった。
+　旧園亭の奥の温室に通されると、先客が一人、奥の席に座っていた。
+　黒髪に、落ち着いた灰緑色の瞳。年の頃は二十三。上品な紺のコートを纏い、細身の手は膝の上に静かに組まれていた。肖像画で見たことのある顔だった。けれど実物は、肖像画よりずっと静かな印象で、目元に、どこか、うっすらとした悲しみの色が沈んでいた。
+　ああ、この人も、誰かに何かを諦めさせられてきた人なのかもしれない。
+　そんな直感が、一瞬、私の胸を通り抜けた。
+「ソフィー・デュラン嬢ですね。アレクシ・ボマルシェと申します」
+「──はい。お会いできて、光栄ですわ、アレクシ様」
+　練習した妹の笑顔を作ろうとした。けれど、半歩遅れた。緊張で声が掠れ、頬の筋肉がうまく動かない。結果、作りかけの微笑みが、中途半端な、どうしようもなく私自身の微笑みになった。
+　しまった、と思った。
+　アレクシ様の視線が、一瞬、私の顔の上で止まった。何かを見極めるような、静かな視線だった。
+「……どうぞ、お座りください」
+　私は震える膝を叱咤して、向かいの席に腰を下ろした。紅茶が運ばれてきた。湯気が、二人の間にうっすらとした霞を作った。
+
+　最初のうち、会話は定型文ばかりだった。
+　最近の王都の気候。共通の知人の噂。流行の茶葉。私はソフィーのふりをして、できるだけ明るく受け答えをしようと努めた。けれど、会話は噛み合わなかった。妹の台詞を真似ようとするほど、言葉の端が空回りしていく。私の口から出る言葉は、どれも、誰のものでもないように、宙を漂って消えた。
+　アレクシ様は、途中から、少し困った顔をしていた。
+「ソフィー嬢」
+「はい」
+「大変不躾なことを伺ってもよろしいですか」
+「……はい」
+「あなたは、何のお茶がお好きですか」
+　予想外の問いだった。
+　ソフィーの答えは、知っている。妹は決まって「薔薇茶」と答える。華やかで、可憐な印象を残せる答えだ。だから私は、反射的にそう答えようとした。
+　──けれど、口から出たのは、別の言葉だった。
+「……マロニエの蜂蜜を落とした、濃い目の紅茶が、好きですわ」
+　言ってしまってから、血の気が引いた。
+　それは私の好みだった。妹の好みではなかった。身代わりとして、致命的な失言だった。慌てて取り繕おうとした瞬間、アレクシ様の目元が、ふっと、わずかに緩んだ。
+「──奇遇ですね。私も、同じです」
+　彼は、静かにそう言った。
+「宮廷の茶会では薔薇茶ばかり出されて、実は、少しうんざりしておりました。──誰もが『その方が華やかでよろしい』と仰るので、私も、長いこと、薔薇茶の方が好きだという顔をしておりました」
+　その言葉の奥に、ひどく親しみのある響きがあった。
+　私も、長いこと、好きでもない顔の下で、好きでもない声を出してきたのだから。
+　胸が、どくん、と鳴った。私は慌てて視線を下げた。
+「お嬢さん」
+「はい」
+「もう一つ、不躾ですが。先ほどあなたの顔を見た瞬間から、ずっと気になっていたのです。肖像画で拝見した『ソフィー嬢』は、もっと華やかに笑う方でした。今日のあなたは、少し違う。──何か、ご事情がおありですか」
+　見抜かれている。
+　全部ではないかもしれない。けれど、違和感はしっかり捉えられている。私は、長い沈黙のあと、顔を上げて、アレクシ様の瞳を見た。
+　嘘を重ねることに、もう、疲れてしまった。妹のふりを、たった数十分しかしていないのに、心の奥で、今朝からずっと何かが、音を立てて軋んでいた。
+
+「……アレクシ様」
+「はい」
+「恐れながら、申し上げます。今日、ここにいるのは、ソフィーではありません。──私は、姉のカトリーヌです」
+　アレクシ様の目が、はっきりと見開かれた。
+「妹は、今朝、持病の発作で寝込んでしまいました。この茶会を破談にしたくないと泣く妹のために、私が身代わりとして参りました。貴族として、そして人として、最低の振る舞いだと、自分でも承知しております。どうぞ、この場で席をお立ちください。お詫びの仕方は、父が後日、必ず──」
+「カトリーヌ嬢」
+　アレクシ様の声が、私の言葉を静かに遮った。
+　顔を上げると、彼の瞳は、怒っていなかった。代わりに、何か、ずっと探していたものをようやく見つけたような、そんな奇妙な光を帯びていた。
+「私は、姉君がいらしたこと、怒ってはおりません。むしろ、お礼を申し上げたい」
+「え……？」
+「最初に温室の戸口であなたを見た瞬間から、私は、目の前の方に不思議と惹かれておりました。肖像画を何度も見ていたはずなのに、本物の方が来て、なぜこんなに胸が落ち着くのか、自分でも理由がわからなかった。──今、わかりました」
+　彼はテーブル越しに身を乗り出した。
+「あなたの中途半端な微笑み。濃い紅茶の好み。嘘を重ねられない正直さ。そのどれもが、肖像画の華やかな笑顔より、ずっと、私の心に深く刺さりました」
+　私は、言葉を失った。
+　身代わりとして失敗した私を、この人は咎めるどころか、惹かれているとまで言っている。信じられなかった。同時に、胸の奥で、長年閉じ込めていた何かが、音を立てて震え始めていた。
+「私は──私は、ソフィーの代わりです。影です。愛されるのは、妹の方で──」
+「それは、あなたが決めることではない」
+　アレクシ様は、きっぱりとそう言った。
+「誰を愛するかは、愛する側が決めることです。そしてどうやら、私は今日、その相手を、当初の予定とは別の方で見つけてしまったようです」
+　温室の硝子越しに、春の日差しが差し込んでいた。
+　白い蘭の花びらの縁が、光を受けて、薄く透けていた。
+　私は震える指で紅茶のカップを握りしめた。冷めかけた紅茶の香りが、不意に、世界で最も贅沢なものに感じられた。
+　──妹のために犠牲になるはずだった、たった一回の午後。
+　それが、十九年間ずっと影でいるはずだった私の人生の、最初の反乱の日になるなんて、このとき私は、まだ半分しか信じられていなかった。
+
+　茶会が終わり、旧園亭を出る頃には、陽が傾きかけていた。
+　アレクシ様は別れ際、私の手の甲に軽く唇を当てた。ソフィーにではなく、カトリーヌに。この違いが、私の体の奥深くで、静かに地鳴りのような音を立てた。
+「カトリーヌ嬢。また、お目にかかりたい」
+「……それは、ソフィーの代わりとして、ですか」
+「いいえ。あなたご自身として、です」
+　馬車に戻ると、御者が不思議そうな顔で私を見た。今日の私は、出発前とは別人のような顔をしていたのだろう。私は窓の外を見つめたまま、屋敷に帰るまでの道中、ずっと考えていた。
+　ソフィーに、どう伝えればいいのだろう。
+　妹を裏切るつもりは、一ミリもない。けれど、アレクシ様の言葉は、もう、私の中から消えない。妹の婚約者になるはずだった男の心を、身代わりで行った姉が奪ってしまうなんて、物語にしても悪趣味すぎる展開だ。
+　けれど、生まれて初めて、私は、自分のために何かを選びたいと思ってしまった。
+　屋敷の門が見えたとき、私は深く息を吸った。今夜、ソフィーの部屋に行って、全てを話さなければならない。それがどんなに残酷な話し合いになるとしても。
+　──身代わりの茶会は、終わった。
+　けれど本当の戦いは、妹の寝台の枕元から、これから始まろうとしていた。`,
+    body_md_en: null,
+    body_html: null,
+    body_html_en: null,
+    character_count: 4288,
+    is_free: true,
+    unlock_at: null,
+    unlock_price: 0,
+    pv: 0,
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
+  },
+  {
+    id: "ep-006-01",
+    novel_id: "novel-006",
+    episode_number: 1,
+    title: "精霊王の手",
+    title_en: null,
+    body_md: `「リーゼ。今夜はやめておいたほうがいい」
+
+鏡台の上で、風の精霊が小さな声で言った。
+
+舞踏会用のドレスを着せられたばかりの私は、鏡越しに彼の方を見た。手のひらほどの大きさの、透き通った翼を持つ風の精霊だ。名前はない。精霊に名前はない。でも彼らは私の唯一の「お友達」で、私が七歳の時からずっと私の周りにいた。
+
+「今夜って、舞踏会?」
+
+「うん。変な匂いがする。王宮の方角から、まだ少し遠いんだけど、嫌な匂いが流れてきてる。フィルベルト殿下の周りに、悪意のかたちをした何かが巻きついてる感じ」
+
+「悪意のかたち?」
+
+「ミミ男爵令嬢に近い。最近、殿下の周りに、あの子の気配ばかりが濃くなってる。風の道がずっと歪んでるんだ」
+
+私はため息をついた。今さら驚くことでもなかった。この一ヶ月、フィルベルトが私の顔を見るたびに顔をしかめる頻度は露骨に増えていた。卒業舞踏会の前に、何かが起こることは、私もなんとなく予感していた。
+
+「大丈夫。行くよ。欠席したら、それこそ何を言われるか分からない」
+
+「……リーゼ」
+
+「ね、ありがとう。心配してくれて」
+
+私は指先で風の精霊の小さな頭をそっと撫でた。彼はほんの少し安心したように翼を震わせ、それから私の髪の中へと飛び込んだ。そのまま舞踏会場まで付いて来る気らしい。
+
+父が馬車の扉を開けてくれた。父の手のひらは、今夜もほんの少し冷たかった。七歳の冬の夜から、十年間ずっと冷たいままだ。「リーゼ、その話は、絶対に、誰にもしてはいけないよ」と震える声で言ったあの夜の、あの冷たさが、父の手のひらに染み付いてしまっている。
+
+「いってらっしゃい」
+
+父の声は、今夜もまた震えていた。
+
+---
+
+「リーゼロッテ・エスフィーア! ここに前へ出てきなさい!」
+
+大広間の天井に、王太子フィルベルトの声が跳ね返った。
+
+私の髪の中に潜んでいた風の精霊が、びくりと身を縮めた。「やっぱり」と彼の小さな声が聞こえた。「やっぱり、今夜だった」
+
+私は静かにグラスを置いた。赤い果実水の水面が揺れ、隣に浮いていた水の精霊が小さな波紋を作った。大丈夫、と私は唇の形だけで彼らに告げた。大丈夫、あなたたちを巻き込ませないから。
+
+ドレスの裾をひと掬いして、大広間の中央へ歩き出した。貴族たちが左右に道を空けた。その動作にあるのは、汚物を避ける類の嫌悪だった。中央のシャンデリアの下に、フィルベルトが立っていた。彼の腕に、男爵令嬢ミミがしがみついている。私と目が合うと、ミミは口の端だけで笑った。
+
+その瞬間、私の髪の中で風の精霊が息を呑んだ。
+
+「……リーゼ」小さな声で彼が囁いた。「あの子、普通じゃない。人の皮をかぶった何かが、中に入ってる」
+
+私は表情を変えなかった。変えられなかった、というほうが正しい。
+
+「私はお前との婚約を、本日この場で破棄する!」
+
+フィルベルトの声が会場に響いた。どよめき。視線。囁き。
+
+「お前は長年、学園の中庭で誰もいない空中に向かって話しかけていた! 気味の悪い独り言を、皆が何度も見ている! 挙げ句の果てに、ここにいるミミを呪詛で呪った疑いまである!」
+
+私は心の中で小さく苦笑した。
+
+中庭で私が話していたのは、いつも風の精霊だった。彼らは私の靴の上で転げ、スカートの裾で鬼ごっこをし、学園の噂話を聞かせてくれた。それを「気味の悪い独り言」と呼ばれるのは、もう慣れた。十年間ずっとそうだったから。
+
+ただ、ミミを呪ったというのは――違う。呪ってなどいない。むしろ、今この瞬間、呪いに近い「何か」が、ミミの側から立ち昇っているのを、私の髪の中の風の精霊が感じ取っている。
+
+この場でそれを告発することは、できない。
+
+言ったところで、誰にも信じられない。いや、信じられる前に、私は「気味の悪い令嬢」として火刑台に送られる可能性さえある。七歳の冬に父が震えながら言ったのは、たぶん、そういう世界を父が知っていたからだ。
+
+「申し開きは?」
+
+フィルベルトの声には、私への興味が一欠片もなかった。
+
+「――ございません」
+
+私は静かに答えた。
+
+会場の空気が一瞬で冷えた。フィルベルトの眉がほんの少し不快そうに寄った。期待した場面と違う。それが分かった。
+
+「婚約は破棄してくださって結構です。本日付けでエスフィーア家を出ます。辺境の祖母の屋敷へ、一人で参ります」
+
+「ふん。賢明だな」
+
+フィルベルトの返事は早すぎた。私を早くここから消したいのだ。
+
+私は背を向けた。
+
+背中に囁きの刃が無数に突き刺さった。「気味の悪い令嬢」「妄言を吐いて」「やっと解放された」――。けれど私は振り返らなかった。振り返ったら、私の髪の中の風の精霊が、私の代わりに泣いているのが見えてしまう。
+
+大広間の重い扉を、私は自分の手で押し開けた。
+
+---
+
+王宮の庭園に出ると、月が中天にかかっていた。
+
+石畳はしんと静まり返り、噴水の水音だけが微かに響いていた。私は噴水のふちに腰を下ろした。
+
+「……ごめんね」
+
+髪の中の風の精霊に、私は小さく言った。
+
+「君たちを巻き込めない。辺境の屋敷に着いたら、もう少し、普通に話せる場所を作るから」
+
+「リーゼ」
+
+風の精霊が、そっと髪から出てきた。彼の小さな瞳に、困惑と心配と、それから――今まで見たことのない種類の緊張が滲んでいた。
+
+「リーゼ。さっきから、庭園の気配が変なんだ。月の光の密度が、今夜だけ、おかしい」
+
+「え?」
+
+「何か、ずっと古いものが、目を覚まそうとしてる」
+
+私が空を見上げた瞬間、ぽろりと、たったひと粒、涙が頬を伝った。
+
+自分でも予期していなかった一粒だった。十年ぶりの涙だった。月の光を吸って、石畳にぽつりと落ちた。
+
+――風が、止まった。
+
+庭園の空気が、時間を抱いて眠るように凍った。月の光がいつもより青く、石畳のすべてが薄く銀色に輝き始めた。髪の中から出ていた風の精霊が、ふるりと震え、そして――深々と、空の方角に向かって頭を垂れた。
+
+私の前に、誰かが立っていた。
+
+---
+
+人型だった。けれど輪郭は風に揺らぎ、髪は星の光でできていて、瞳の中には深い夜の宇宙が広がっていた。背の高い若い男の姿。ただしその「若さ」は、千年擦り切れなかった種類のものだった。
+
+「泣くな、我が主、リーゼロッテよ」
+
+声が、直接頭の中に届いた。
+
+「あなたは――」
+
+「私はエルセオン。古い言葉で精霊王と呼ばれる者だ」
+
+精霊王。神話の中にだけ存在する名前。家庭教師が一度だけ、古い書物の行間で口にした名前。「自分にふさわしい主が現れた時にだけ目覚める」と書かれていた名前。
+
+私の肩で、風の精霊がかすれた声で囁いた。「本物だ、リーゼ。本当に、千年ぶりに目覚めた方だ」
+
+「お前の眼差しが千年の封印に細い亀裂を入れていた。そして今夜、お前の涙の一滴が、最後の封印を解いた」
+
+「私の、ひと粒の涙が……?」
+
+「精霊を視る者は数多くいる。だが、精霊の悲しみを自分の悲しみとして涙する者は、千年に一人もいなかった。お前こそが、私が待ち続けた主だ」
+
+エルセオンは星の光でできた手を、ゆっくりと差し出した。
+
+「契約してくれるか、リーゼロッテ・エスフィーア。お前が我が主となるなら、私は眠ってきた精霊王の力のすべてを、ためらいなく差し出そう」
+
+私は震える指をその手に重ねた。
+
+触れた瞬間、世界が一変した。頭の中に膨大な知識が流れ込んできた。風、水、土、火、そして――未来を視る方法。私は膝をつきそうになり、エルセオンの手が私を静かに支えた。
+
+「これからは、お前こそが、私の唯一の主だ」
+
+私は恐る恐る、未来視を少しだけ使ってみた。
+
+見えた。
+
+数年後、神聖国家アルティスの王宮の玉座に、私自身が座っている光景。頭には金色の冠。肩には白い精霊の羽衣。足元には、膝をついて頭を垂れるフィルベルトと――ミミの姿。ミミの輪郭の奥に、人ではない何かの影が、うっすらと透けて見えた。
+
+私は、息を呑んだ。
+
+「エルセオン。一つ訊いていい?」
+
+「なんなりと、我が主よ」
+
+「ミミ・男爵令嬢の中に、何か、別のものが入っていませんか」
+
+エルセオンの瞳の奥で、夜の宇宙が、ほんの一瞬、鋭く光った。
+
+「――視えたのか。初夜の主にしては、恐ろしく鋭いな」
+
+風の精霊が、私の髪の中でぎゅっと小さくなった。
+
+「ではやはり」
+
+「その話は、辺境の屋敷へ向かう道すがら、ゆっくりとしよう。今はまず、この場から離れる方がいい。呪いのかたちをしたものは、主を取り戻した精霊王の気配に、すぐ勘づく」
+
+私はゆっくりと微笑んだ。誰にも見せたことのない、本物の微笑みだった。
+
+婚約破棄の夜の幕が開いたばかりで、もう次の謎の幕が上がっていた。それでも不思議と、私の足は震えていなかった。
+
+「エルセオン。参りましょう。辺境の祖母の屋敷へ」
+
+「承知した、我が主よ」
+
+精霊王は深く頷き、私の手を取った。
+
+歩き出した私の背後で、舞踏会場の音楽はもう別の世界のもののように遠かった。フィルベルトもミミも――いや、ミミの中にいる「何か」も、まだ私を「気味の悪い令嬢」だと信じているのだろう。その嘲笑が、いずれ静かな後悔に変わる日が来ることを、私はもう未来視の力で知っていた。
+
+神聖国家アルティスの長い夜が、ここから始まる。
+
+十年ぶりの涙と、千年ぶりの王と、人の皮をかぶった何か。三つの秘密を抱えたまま、私の夜が始まる。`,
+    body_md_en: null,
+    body_html: null,
+    body_html_en: null,
+    character_count: 3895,
+    is_free: true,
+    unlock_at: null,
+    unlock_price: 0,
+    pv: 0,
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
+  },
+  {
+    id: "ep-007-01",
+    novel_id: "novel-007",
+    episode_number: 1,
+    title: "昼に会えないあなたは、獣の姿で眠っていた",
+    title_en: null,
+    body_md: `扉を押した瞬間、わたしの喉の奥で、声にならない声がつかえた。
+
+広い寝台の中央で、銀灰色の毛並みをした大きな獣が、静かに眠っていた。狼ではない。熊でもない。もっと大きく、もっと静かで、月光をそのまま練り固めたような、そんな気高い輪郭。獣の前脚の下には、昨夜シルヴァン様が纏っておられた濃紺の上着が、畳まれてそっと敷かれていた。
+
+わたしは、扉の縁を強く握った。
+握っていなければ、きっと崩れ落ちていた。
+
+獣の、長いまつ毛が、わずかに震えた。そしてゆっくりと、緑色の瞳が開いた。昨夜、窓辺であの人がわたしに向けてくれた、あの色と、何ひとつ違わない瞳だった。
+
+瞳は、わたしを見た。
+まっすぐに、迷うことなく。
+そして——とても、とても、静かに、悲しんだ。
+
+誰かが「見てしまった」瞬間に見せる、あの色。取り返しのつかないことが起きてしまった、と、もう諦めに近い形で受けとめている、そんな色。わたしの胸の奥で、何かが熱く、きゅっと縮んだ。この瞳をこんなふうに悲しませたのは、わたしだ、と思った。
+
+わたしは、扉の縁から、そっと手を離した。
+
+◇
+
+ここまで来たのは、ほんの半時前のことだ。
+
+十八歳の初夏、わたしヴィヴィエン・ダリカールは、南の伯爵家を出て、ブロワンヌ公国の湖畔の離宮に嫁いできた。縁談は三ヶ月前、突然もたらされた。使者はただ一つの条件を告げた。「決して、昼間に殿下のお姿をご覧になってはなりません」。父は戸惑い、母は泣いた。姉は眉をひそめて、まるで童話のようねと言った。それでもわたしは、その条件の奥にある理由が知りたかった。条件が奇妙であればあるほど、人は、守りたいものを隠している。わたしは、そう信じていた。
+
+離宮に着いたのは十一日前。白壁の古い館は、湖と深い森に抱かれていた。迎えてくれた老執事ロランと三人の侍女たちは、誰もが静かで親切だった。ただ、彼らの微笑みには、薄い紗のような影がかかっていた。何かを知っていて、けれどそれを告げない者たちの、あの特有の、息を殺した優しさ。
+
+初めてシルヴァン様にお会いしたのは、その日の夜だった。扉が叩かれ、低い声が名乗った。入ってきたのは長身の青年で、濡れたような黒髪と、深い緑の瞳を持っていた。その空気はすこし疲れていたけれど、優しさがまっすぐに滲んでいた。わたしたちはその夜、他愛もない話をした。旅路のこと、南の果物のこと、庭の白薔薇のこと。殿下の声には、何年も人と話す機会を待っていた人の温度があった。
+
+それから十夜、わたしたちは毎晩、同じ椅子に座って話した。殿下は静かで、思慮深く、意外と冗談が上手で、わたしが動物好きだと知ると、離宮の庭の片隅に巣を作った小鳥の話を、ほんとうに楽しそうにしてくれた。わたしの心の奥で、淡い好意が、静かに育ち始めていた。
+
+いちど、五日目の夜だったか、わたしは何気なく尋ねたことがある。「殿下は、日中は、どのようにお過ごしですか」。その瞬間、シルヴァン様の微笑みが、ほんの一瞬、凍った。いや、凍ったというよりは、時計の針が、いちどだけ、止まったような、そんな間だった。「……眠って、いる」。シルヴァン様はそう答え、それから、すぐに別の話に話題を移した。わたしは、それ以上、踏み込まなかった。けれど、あの一瞬の沈黙の重さを、その日以来、わたしはずっと、胸の奥で量りつづけていた。軽い嘘には、軽い沈黙しか伴わない。けれど、あの沈黙は、とても、重かった。
+
+だからこそ、耐えきれなかったのだ。
+昼間のあの人を、見たかった。知りたかった。病なら看たかったし、傷なら触れたかった。夜に、あんなに優しく、わたしの他愛もない話に頷いてくれる人が、昼のあいだ、どんな顔でひとりで過ごしているのか。——それを、知らないまま、夜だけを受け取るのは、わたしには、ずるい気がしたのだ。
+
+昼食を終えてすぐ、わたしは庭に出る振りをして、北の翼に回った。廊下は、不自然なほど人気がなかった。侍女たちが、この時間帯に、この翼に近づかないよう、誰かから言い含められているのだ、と、わたしはすぐに気づいた。足音を忍ばせて歩くわたしの心臓が、やけに大きく鳴った。——それが、今、この扉の向こうの光景である。
+
+◇
+
+獣は、わたしを見つめたまま、身動きしなかった。
+喋ることはできないようだった。けれどその緑の瞳には、恥じらいと、痛みと、そして——どこかに、小さな、安堵の色があった。
+
+秘密を抱え続ける日々は、きっと、わたしが想像するよりも、ずっと孤独だったのだろう。
+
+「……シルヴァン様」
+
+わたしは、震える声で呼んだ。
+
+獣は、答えのかわりに、長い前脚をわずかに動かし、上着の端を自分のほうへ引き寄せた。まるで、その布の匂いで、人の姿だった自分を思い出そうとしているかのように。その仕草が、わたしの胸の底を、静かに揺さぶった。昨夜まで、わたしにあんなに穏やかな声で話してくれた人が、昼のあいだ、ひとりきりで、自分の上着の匂いに縋って、自分が「人だったこと」を忘れまいとしている。そのことの孤独を、想像すると、涙が、ひと筋、勝手にわたしの頬を伝った。
+
+月輝獣、と、わたしの中で、古い記憶の扉が開いた。
+
+子どもの頃、乳母が寝物語に話してくれた。公国の王族の一部は、遠い祖先が月の女神と交わした契約のせいで、昼間だけ神聖な獣の姿を取る。月光の下でのみ、人の姿に戻れる。呪いではなく、女神からの役目。けれど、身を削る——と。
+
+笑いながら聞いた物語が、いま、目の前で、静かに呼吸していた。
+
+わたしは、ゆっくりと部屋に入り、扉を閉めた。そして、寝台のそばに膝をつき、獣の前脚の、柔らかい毛並みに、そっと手を伸ばした。
+
+獣は、びくりと身を震わせた。
+けれど、逃げなかった。逃げる代わりに、ほんのわずか、こちらへ首を傾げた。許しを請うような、あるいは、逆に、許しを与えようとするような、そんな仕草だった。
+
+「ごめんなさい。条件を破ってしまって」
+
+毛並みは、温かかった。夜、殿下がわたしの手を取ってくださったときと、同じ温度だった。
+
+「でも——わたし、怖くないんです。むしろ、嬉しいくらい」
+
+獣の大きな瞳が、驚いたように見開かれた。
+
+「だって、昨夜までのあなたの優しさが、昼間のあなたにも、ちゃんと繋がっている、って、今、わかったから」
+
+わたしは、自分でも驚くほど、落ち着いた声で語っていた。獣は何も言わなかった。ただ、前脚を、わたしの手の上に、そっと重ねてきた。その重みは、夜のあの人のものと、同じだった。
+
+◇
+
+日が沈み、最初の月光が、窓から差し込んできた。
+
+獣の輪郭が、淡く揺らいだ。ひと滴の光に包まれた次の瞬間、寝台の上には、人の姿のシルヴァン様が、少し疲れた顔で横たわっていた。
+
+「……見てしまったのだな、ヴィヴィエン」
+
+「はい。ごめんなさい」
+
+「謝ることはない。私は、むしろ、安堵している。あなたが、逃げなかったことに」
+
+シルヴァン様は、ゆっくりと身を起こした。緑の瞳の奥で、昼の獣のまなざしと、夜の人のまなざしが、ひとつに溶けあっていた。
+
+「ヴィヴィエン。この契約は、私の代では、おそらく解けない。昼のあなたの隣に、私はいてあげられない。それでも、私の妃でいてくれるだろうか」
+
+わたしは、少しだけ微笑んだ。
+
+「夜だけでも、充分でございます。そして、昼のあなたがお眠りの傍で、わたしは花を替え、本を読みます。それでは、いけませんか」
+
+シルヴァン様の瞳が、小さく揺れた。涙だったのかもしれない。
+
+獣の前脚と、人の手のひらを、続けて握った娘は、この広い世界でも、きっと、わたしだけだろう。湖の向こうの森の奥から、銀色の月が細い光の道を湖面に敷いていた。その道は、獣と人の狭間に生きるシルヴァン様のもとへ、まっすぐに伸びていた。
+
+わたしの新しい日々は、ふたつの顔を持つ夫との物語として、静かに、けれど確かに、始まろうとしていた。昼のあなたの傍で、わたしは、花を替えよう。本を読もう。あなたの銀の毛並みを、そっと梳いてさしあげよう。そして夜になれば、また、窓辺の椅子で向かい合って、南の果物や、庭の小鳥の話をしよう。昼と夜の、ふたつの時間の端をつないで縫いあわせるのが、これからのわたしの役目だ。——ふと、わたしはそう思った。離宮の窓の外で、湖の水鳥が、もう一度、ぱさりと羽を打った。月の道は、湖面の上を、まっすぐに、この部屋へと伸びていた。`,
+    body_md_en: null,
+    body_html: null,
+    body_html_en: null,
+    character_count: 3476,
+    is_free: true,
+    unlock_at: null,
+    unlock_price: 0,
+    pv: 0,
+    published_at: "2026-04-08T10:00:00Z",
+    created_at: "2026-04-08T10:00:00Z",
+    updated_at: "2026-04-08T10:00:00Z",
   },
 ];
 
@@ -2024,9 +1242,13 @@ export function getMockEpisodeById(episodeId: string) {
 // 面白さスコア付きの小説一覧（モック版: PV順にフォールバック）
 // モック品質データ（作品IDごとのダミー読者行動指標）
 const MOCK_QUALITY: Record<string, { completion: number; next: number; bookmark: number }> = {
-  "novel-001": { completion: 88, next: 82, bookmark: 15 },
-  "novel-002": { completion: 75, next: 71, bookmark: 10 },
-  "novel-003": { completion: 92, next: 85, bookmark: 22 },
+  "novel-001": { completion: 80, next: 75, bookmark: 12 },
+  "novel-002": { completion: 80, next: 75, bookmark: 12 },
+  "novel-003": { completion: 80, next: 75, bookmark: 12 },
+  "novel-004": { completion: 80, next: 75, bookmark: 12 },
+  "novel-005": { completion: 80, next: 75, bookmark: 12 },
+  "novel-006": { completion: 80, next: 75, bookmark: 12 },
+  "novel-007": { completion: 80, next: 75, bookmark: 12 },
 };
 
 export function getMockRankedNovels(genre?: string, limit: number = 50) {

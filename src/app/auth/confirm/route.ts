@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * メール認証（Confirm signup / Magic Link / Recovery）共通ハンドラ
@@ -36,11 +37,39 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  const { error } = await supabase.auth.verifyOtp({ token_hash, type });
+  const { data, error } = await supabase.auth.verifyOtp({ token_hash, type });
   if (error) {
     return NextResponse.redirect(
       `${origin}/ja/login?error=${encodeURIComponent(error.message)}`
     );
+  }
+
+  // 初回ログイン時に user_profiles を自動作成（存在しなければ）
+  // display_name は メールアドレスのローカル部から生成（後でユーザーが変更可能）
+  const user = data.user;
+  if (user) {
+    try {
+      const admin = createAdminClient();
+      const { data: existing } = await admin
+        .from("user_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!existing) {
+        const localPart = (user.email ?? "").split("@")[0] || "reader";
+        const initialName = localPart.slice(0, 50);
+        await admin.from("user_profiles").insert({
+          user_id: user.id,
+          display_name: initialName,
+          role: "reader",
+          writer_status: "none",
+        });
+      }
+    } catch (e) {
+      console.error("[auth/confirm] failed to create user_profile", e);
+      // プロフィール作成失敗でもログイン自体は成功させる
+    }
   }
 
   return response;
