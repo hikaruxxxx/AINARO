@@ -8,6 +8,7 @@ import { useReadingTracker } from "@/hooks/useReadingTracker";
 import { useABTest } from "@/hooks/useABTest";
 import { usePoints } from "@/hooks/usePoints";
 import { markEpisodeRead } from "@/lib/reading-history";
+import CompletionModal from "./CompletionModal";
 import EpisodeLockOverlay from "./EpisodeLockOverlay";
 import LikeButton from "./LikeButton";
 import ShareButton from "./ShareButton";
@@ -76,7 +77,11 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
     setSettings(getReadingSettings());
   }, []);
 
-  // 読了時にポイント獲得（1回だけ）
+  // 完走モーダル(最終話読了時に表示)
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const isLastEpisode = currentNum >= novel.total_chapters;
+
+  // 読了時にポイント獲得（1回だけ）+ 最終話なら完走モーダル表示
   const hasEarnedRef = useRef(false);
   useEffect(() => {
     if (!unlocked) return;
@@ -87,11 +92,15 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
       if (docHeight > 0 && scrollTop / docHeight >= 0.95) {
         hasEarnedRef.current = true;
         earnFromComplete(currentEpisode.id);
+        // 最終話なら完走モーダルを表示
+        if (isLastEpisode) {
+          setTimeout(() => setShowCompletionModal(true), 800);
+        }
       }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [unlocked, currentEpisode.id, earnFromComplete]);
+  }, [unlocked, currentEpisode.id, earnFromComplete, isLastEpisode]);
 
   const hasPrev = currentNum > 1;
   const hasNext = currentNum < novel.total_chapters;
@@ -414,6 +423,14 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
         </div>
         <div className="h-[env(safe-area-inset-bottom)]" />
       </div>
+
+      {showCompletionModal && (
+        <CompletionModal
+          novel={{ slug: novel.slug, title: novel.title }}
+          totalChapters={novel.total_chapters}
+          onClose={() => setShowCompletionModal(false)}
+        />
+      )}
     </div>
   );
 }
