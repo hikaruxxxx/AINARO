@@ -79,7 +79,6 @@ export default function NewEpisodePage() {
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <label className="text-sm font-medium text-text">{t("body")}</label>
-            <span className="text-xs text-muted">{characterCount.toLocaleString()}{t("characters")}</span>
           </div>
           <textarea
             value={bodyMd}

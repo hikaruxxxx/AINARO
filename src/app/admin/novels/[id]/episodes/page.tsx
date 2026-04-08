@@ -68,7 +68,6 @@ export default async function EpisodesListPage({
               <tr className="border-b border-gray-200 bg-gray-50/50 text-left text-gray-500">
                 <th className="px-3 py-2 text-xs font-medium">話数</th>
                 <th className="px-3 py-2 text-xs font-medium">タイトル</th>
-                <th className="px-3 py-2 text-xs font-medium">文字数</th>
                 <th className="px-3 py-2 text-xs font-medium">PV</th>
                 <th className="px-3 py-2 text-xs font-medium">公開日</th>
                 <th className="px-3 py-2 text-xs font-medium"></th>
@@ -79,7 +78,6 @@ export default async function EpisodesListPage({
                 <tr key={ep.id} className="border-b border-gray-100 hover:bg-gray-50/50 transition">
                   <td className="px-3 py-3 text-gray-900">{ep.episode_number}</td>
                   <td className="px-3 py-3 font-medium text-gray-900">{ep.title}</td>
-                  <td className="px-3 py-3 text-gray-600">{ep.character_count.toLocaleString()}</td>
                   <td className="px-3 py-3 text-gray-600">{ep.pv.toLocaleString()}</td>
                   <td className="px-3 py-3 text-gray-500">{formatDate(ep.published_at)}</td>
                   <td className="px-3 py-3">

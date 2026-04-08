@@ -127,9 +127,6 @@ export default function EpisodeEditForm({
             required
             className="border border-border rounded px-3 py-2 w-full font-mono text-sm"
           />
-          <p className="mt-1 text-sm text-muted">
-            文字数: {characterCount.toLocaleString()}
-          </p>
         </div>
 
         {/* 無料公開 */}

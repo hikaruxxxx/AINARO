@@ -397,10 +397,6 @@ export default function EpisodeReader({ novel, currentEpisode, nextEpisode, curr
             <div />
           )}
 
-          <span className="text-xs opacity-50">
-            {t("charCount", { count: currentEpisode.character_count.toLocaleString() })}
-          </span>
-
           {hasNext ? (
             <Link
               href={`/novels/${novel.slug}/${currentNum + 1}`}

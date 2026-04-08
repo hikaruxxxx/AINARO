@@ -164,7 +164,6 @@ export default async function NovelDetailPage({ params, searchParams }: Props) {
                           </div>
                         </div>
                         <div className="flex flex-shrink-0 items-center gap-3 text-xs text-muted">
-                          <span>{t("episode.charCount", { count: ep.character_count.toLocaleString() })}</span>
                           <span className="hidden sm:inline">{formatDate(ep.published_at, locale)}</span>
                           {!ep.is_free && <span className="text-secondary">🔒</span>}
                         </div>

@@ -161,7 +161,6 @@ export default function EditEpisodePage() {
               {lastSaved && (
                 <span className="text-xs text-muted">{t("savedAt", { time: lastSaved })}</span>
               )}
-              <span className="text-xs text-muted">{characterCount.toLocaleString()}{t("characters")}</span>
             </div>
           </div>
           <textarea

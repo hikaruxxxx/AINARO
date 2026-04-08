@@ -82,7 +82,6 @@ export default async function NovelDetailPage({
                     <span className="w-8 text-center text-sm font-bold text-muted">{ep.episode_number}</span>
                     <div>
                       <p className="text-sm font-medium text-text">{ep.title}</p>
-                      <p className="mt-0.5 text-xs text-muted">{(ep.character_count || 0).toLocaleString()}{t("characters")}</p>
                     </div>
                   </div>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}`}>{badge.label}</span>

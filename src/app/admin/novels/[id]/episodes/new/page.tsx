@@ -102,9 +102,6 @@ export default function NewEpisodePage() {
             required
             className="border border-gray-200 rounded-lg px-3 py-2 w-full font-mono text-sm bg-white"
           />
-          <p className="mt-1 text-sm text-gray-500">
-            文字数: {characterCount.toLocaleString()}
-          </p>
         </div>
 
         {/* 無料公開 */}

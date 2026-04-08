@@ -39,7 +39,6 @@ export default async function NewEpisodesPage() {
                       {t("episode.epTitle", { num: ep.episode_number, title: ep.title })}
                     </h2>
                     <div className="mt-1 flex gap-3 text-xs text-muted">
-                      <span>{t("episode.charCount", { count: ep.character_count.toLocaleString() })}</span>
                       <span>{formatRelativeTime(ep.published_at, locale)}</span>
                     </div>
                   </div>
