@@ -35,10 +35,10 @@ export default async function ContactPage() {
           <h2 className="mb-4 text-lg font-bold">{t("emailTitle")}</h2>
           <p className="mb-3">{t("emailBody")}</p>
           <a
-            href="mailto:contact@ainaro.jp"
+            href="mailto:contact@novelis.tokyo"
             className="inline-block rounded-full bg-primary px-6 py-2 text-sm font-medium text-white transition hover:opacity-90"
           >
-            contact@ainaro.jp
+            contact@novelis.tokyo
           </a>
         </section>
 
