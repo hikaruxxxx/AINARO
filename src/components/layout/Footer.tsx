@@ -1,10 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
+
+// 没入系ページではFooterを非表示にして読書体験を優先（locale抜きのパスで判定）
+const IMMERSIVE_PATHS = [/^\/discover$/, /^\/swipe$/, /^\/novels\/[^/]+\/[^/]+$/];
 
 export default function Footer() {
   const t = useTranslations("footer");
+  const pathname = usePathname();
+  if (IMMERSIVE_PATHS.some((re) => re.test(pathname))) return null;
 
   return (
     <footer className="mt-auto border-t border-border bg-surface">

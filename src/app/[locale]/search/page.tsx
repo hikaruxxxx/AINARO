@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { searchNovels } from "@/lib/data";
+import { searchNovels, fetchRankedNovels } from "@/lib/data";
 import GenreBadge from "@/components/common/GenreBadge";
 import StatusBadge from "@/components/common/StatusBadge";
 import { formatCharCount } from "@/lib/utils/format";
@@ -20,6 +20,11 @@ export default async function SearchPage({ searchParams }: Props) {
   const t = await getTranslations();
   const query = q?.trim() || "";
   const results = query ? await searchNovels(query, locale) : [];
+  // 空状態用: 人気作品トップ5と頻出タグ
+  const popularNovels = !query ? (await fetchRankedNovels({ locale })).slice(0, 5) : [];
+  const popularTags = !query
+    ? Array.from(new Set(popularNovels.flatMap((n) => n.tags ?? []))).slice(0, 12)
+    : [];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -98,11 +103,49 @@ export default async function SearchPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* クエリなし時 */}
+      {/* クエリなし時: 人気タグと人気作品でユーザーに何を打てばいいか示す */}
       {!query && (
-        <div className="py-12 text-center">
-          <p className="text-lg text-muted">キーワードを入力して作品を検索</p>
-          <p className="mt-2 text-sm text-muted">作品タイトル、タグ、あらすじから検索できます。</p>
+        <div className="space-y-8">
+          {popularTags.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-sm font-bold text-text">人気のタグ</h2>
+              <div className="flex flex-wrap gap-2">
+                {popularTags.map((tag) => (
+                  <Link
+                    key={tag}
+                    href={`/search?q=${encodeURIComponent(tag)}`}
+                    className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-text transition hover:border-secondary hover:text-secondary"
+                  >
+                    #{tag}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {popularNovels.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-sm font-bold text-text">いま読まれている作品</h2>
+              <ul className="space-y-2">
+                {popularNovels.map((novel, idx) => (
+                  <li key={novel.id}>
+                    <Link
+                      href={`/novels/${novel.slug}`}
+                      className="flex items-center gap-3 rounded-lg border border-border p-3 transition hover:bg-surface"
+                    >
+                      <span className="w-5 text-center text-sm font-bold text-muted">{idx + 1}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-text">{novel.title}</p>
+                        {novel.tagline && (
+                          <p className="truncate text-xs text-muted">{novel.tagline}</p>
+                        )}
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       )}
     </div>

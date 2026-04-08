@@ -13,7 +13,7 @@ export default async function AboutPage() {
     <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="mb-8 text-2xl font-bold text-text">{t("heading")}</h1>
 
-      <div className="space-y-8 text-sm leading-relaxed text-text">
+      <div className="space-y-10 text-base leading-loose text-text">
         <section>
           <h2 className="mb-3 text-lg font-bold">{t("missionTitle")}</h2>
           <p>{t("missionBody")}</p>
