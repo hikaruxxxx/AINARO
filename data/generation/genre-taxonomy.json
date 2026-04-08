@@ -1,0 +1,211 @@
+{
+  "version": "v2",
+  "createdAt": "2026-04-08",
+  "description": "AINARO Phase 1 階層ジャンル定義。大5×サブ4=20。Phase Aクラスタリング(668件)+ なろう全カテゴリ調査(300件)から構築。Amazonデータはノイズ過多のため除外。リサーチレポート: docs/research/genre_research_report.md",
+  "majorGenres": [
+    {
+      "id": "isekai",
+      "name": "異世界・転生系",
+      "description": "異世界転生/転移を起点とする物語群。Web小説の最大ボリューム",
+      "subGenres": [
+        {
+          "id": "isekai_tensei_cheat",
+          "name": "転生・転移チート",
+          "keywords": ["異世界転生", "異世界転移", "チート", "スキル", "勇者", "ステータス"],
+          "readerDesires": ["dominate", "grow", "escape"],
+          "narouMapping": ["ハイファンタジー", "ローファンタジー"],
+          "phaseAMapping": ["転生_ファンタジー", "チート_ファンタジー", "ハイファンタジー_純粋"]
+        },
+        {
+          "id": "isekai_tsuiho_zamaa",
+          "name": "追放・ざまぁ復讐",
+          "keywords": ["追放", "ざまぁ", "復讐", "Sランク", "実は最強", "旧パーティ"],
+          "readerDesires": ["rewarded", "revenge"],
+          "narouMapping": ["ハイファンタジー"],
+          "phaseAMapping": ["追放", "追放_ファンタジー", "ざまぁ", "ざまぁ_ファンタジー"]
+        },
+        {
+          "id": "isekai_slowlife",
+          "name": "スローライフ・経営内政",
+          "keywords": ["スローライフ", "辺境", "領地経営", "内政", "生産", "薬師", "錬金術", "料理"],
+          "readerDesires": ["escape", "connect", "discover"],
+          "narouMapping": ["ハイファンタジー"],
+          "phaseAMapping": ["スローライフ", "スローライフ_ファンタジー"]
+        },
+        {
+          "id": "isekai_high_fantasy",
+          "name": "ハイファンタジー王道",
+          "keywords": ["剣と魔法", "冒険", "ダンジョン", "王道ファンタジー", "成り上がり", "魔王"],
+          "readerDesires": ["grow", "discover", "dominate"],
+          "narouMapping": ["ハイファンタジー"],
+          "phaseAMapping": ["ハイファンタジー", "ローファンタジー", "ローファンタジー_純粋"]
+        }
+      ]
+    },
+    {
+      "id": "otome",
+      "name": "悪役令嬢・乙女系",
+      "description": "女性主人公の恋愛・貴族・宮廷ドラマ。なろう恋愛カテゴリの中心",
+      "subGenres": [
+        {
+          "id": "otome_akuyaku_zamaa",
+          "name": "悪役令嬢ざまぁ",
+          "keywords": ["悪役令嬢", "ループ", "前世記憶", "乙女ゲー", "破滅フラグ", "聖女"],
+          "readerDesires": ["revenge", "rewarded", "loved"],
+          "narouMapping": ["異世界恋愛"],
+          "phaseAMapping": ["悪役令嬢", "悪役令嬢_恋愛", "悪役令嬢_ファンタジー"]
+        },
+        {
+          "id": "otome_konyaku_haki",
+          "name": "婚約破棄からの溺愛",
+          "keywords": ["婚約破棄", "溺愛", "冷徹皇帝", "復縁", "捨てられた令嬢", "新たな出会い"],
+          "readerDesires": ["loved", "rewarded", "protected"],
+          "narouMapping": ["異世界恋愛"],
+          "phaseAMapping": ["婚約破棄", "婚約破棄_恋愛"]
+        },
+        {
+          "id": "otome_isekai_pure",
+          "name": "異世界純愛",
+          "keywords": ["異世界恋愛", "聖女", "騎士", "貴族", "純愛", "身分差", "年の差"],
+          "readerDesires": ["loved", "protected", "connect"],
+          "narouMapping": ["異世界恋愛"],
+          "phaseAMapping": ["異世界恋愛_純粋", "異世界恋愛"]
+        },
+        {
+          "id": "otome_villain_fantasy",
+          "name": "悪役令嬢ファンタジー",
+          "keywords": ["悪役令嬢", "魔法", "戦闘", "聖女と悪役", "辺境追放", "領地経営"],
+          "readerDesires": ["grow", "revenge", "discover"],
+          "narouMapping": ["異世界恋愛", "ハイファンタジー"],
+          "phaseAMapping": ["悪役令嬢_ファンタジー"]
+        }
+      ]
+    },
+    {
+      "id": "battle",
+      "name": "バトル・ゲーム系",
+      "description": "戦闘・能力者・ゲーム要素を中心とする男性向け中心の物語群",
+      "subGenres": [
+        {
+          "id": "battle_vrmmo",
+          "name": "VRMMO・ゲーム転生",
+          "keywords": ["VRMMO", "ゲーム", "デスゲーム", "ステータス", "ガチエンジョイ", "縛りプレイ"],
+          "readerDesires": ["dominate", "grow", "escape"],
+          "narouMapping": ["SF"],
+          "phaseAMapping": ["VRゲーム"]
+        },
+        {
+          "id": "battle_modern_power",
+          "name": "現代異能・能力者",
+          "keywords": ["現代異能", "超能力", "学園バトル", "陰陽師", "退魔", "ダンジョン出現"],
+          "readerDesires": ["dominate", "grow", "discover"],
+          "narouMapping": ["ファンタジー", "SF"],
+          "phaseAMapping": []
+        },
+        {
+          "id": "battle_war_chronicle",
+          "name": "戦記・群像",
+          "keywords": ["戦記", "群像", "戦争", "国家", "将軍", "戦略", "歴史改変"],
+          "readerDesires": ["observe", "grow", "discover"],
+          "narouMapping": ["ファンタジー", "文芸"],
+          "phaseAMapping": ["アクション"]
+        },
+        {
+          "id": "battle_dungeon",
+          "name": "ダンジョン探索",
+          "keywords": ["ダンジョン", "探索", "迷宮", "ハンター", "テイマー", "魔物", "Sランク"],
+          "readerDesires": ["discover", "grow", "dominate"],
+          "narouMapping": ["ハイファンタジー"],
+          "phaseAMapping": []
+        }
+      ]
+    },
+    {
+      "id": "modern",
+      "name": "現代・文芸系",
+      "description": "現代日本を舞台とする恋愛・学園・ヒューマンドラマ・歴史",
+      "subGenres": [
+        {
+          "id": "modern_romance",
+          "name": "現代恋愛・ラブコメ",
+          "keywords": ["現代", "恋愛", "ラブコメ", "OL", "サラリーマン", "幼なじみ", "再会"],
+          "readerDesires": ["loved", "connect", "rewarded"],
+          "narouMapping": ["恋愛"],
+          "phaseAMapping": ["現実世界恋愛"]
+        },
+        {
+          "id": "modern_school",
+          "name": "学園・青春",
+          "keywords": ["学園", "高校生", "青春", "部活", "文化祭", "幼なじみ", "三角関係"],
+          "readerDesires": ["connect", "loved", "grow"],
+          "narouMapping": ["恋愛", "文芸"],
+          "phaseAMapping": []
+        },
+        {
+          "id": "modern_human_drama",
+          "name": "ヒューマンドラマ",
+          "keywords": ["ヒューマンドラマ", "家族", "再生", "喪失", "癒し", "人生", "純文学"],
+          "readerDesires": ["observe", "connect", "discover"],
+          "narouMapping": ["文芸"],
+          "phaseAMapping": ["ヒューマンドラマ", "ヒューマンドラマ_純粋", "純文学"]
+        },
+        {
+          "id": "modern_history",
+          "name": "歴史・時代",
+          "keywords": ["歴史", "戦国", "幕末", "時代小説", "タイムスリップ", "歴史改変", "技術改革"],
+          "readerDesires": ["observe", "discover", "grow"],
+          "narouMapping": ["文芸"],
+          "phaseAMapping": ["歴史"]
+        }
+      ]
+    },
+    {
+      "id": "mystery",
+      "name": "ミステリ・サスペンス系",
+      "description": "謎解き・恐怖・SF的世界観・スリラー要素を中心とする物語群",
+      "subGenres": [
+        {
+          "id": "mystery_detective",
+          "name": "推理・ミステリ",
+          "keywords": ["推理", "ミステリ", "探偵", "事件", "謎解き", "後宮ミステリ", "薬師"],
+          "readerDesires": ["discover", "observe"],
+          "narouMapping": ["文芸"],
+          "phaseAMapping": ["推理", "推理_純粋"]
+        },
+        {
+          "id": "mystery_horror",
+          "name": "ホラー・パニック",
+          "keywords": ["ホラー", "怪談", "パニック", "サバイバル", "ゾンビ", "恐怖", "都市伝説"],
+          "readerDesires": ["discover", "observe"],
+          "narouMapping": ["文芸", "その他"],
+          "phaseAMapping": ["ホラー", "ホラー_純粋", "パニック"]
+        },
+        {
+          "id": "mystery_sf",
+          "name": "SF・サイバーパンク",
+          "keywords": ["SF", "サイバーパンク", "宇宙", "スペースオペラ", "近未来", "アンドロイド", "AI"],
+          "readerDesires": ["discover", "dominate", "observe"],
+          "narouMapping": ["SF"],
+          "phaseAMapping": ["宇宙", "空想科学"]
+        },
+        {
+          "id": "mystery_action",
+          "name": "アクション・サスペンス",
+          "keywords": ["アクション", "サスペンス", "復讐", "犯罪", "警察", "スパイ", "ハードボイルド"],
+          "readerDesires": ["revenge", "observe", "dominate"],
+          "narouMapping": ["文芸", "ノンジャンル"],
+          "phaseAMapping": ["アクション"]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "readerDesires は data/generation/reader-desires.json の id を参照",
+    "narouMapping は API のbig genre名、phaseAMapping は data/research/genre_phaseA_clusters.json のサブ名",
+    "現状の実装プレースホルダ7ジャンルは isekai/otome 配下にすべて吸収される",
+    "battle と mystery は既存ヒットDBで薄かった領域、Phase 1Aの探索枠でデータ拡充が必要",
+    "modern_school と battle_modern_power は phaseA で発見されなかった抜け軸。Web小説市場で確実に存在するため追加",
+    "Step 4(カクヨム/アルファポリス/エブリスタ)未取得のため、BL/TL/縦読み・韓国系の軸は欠落。将来追加",
+    "Phase 2 で各サブジャンル200件以上のデータが溜まったらヒット予測モデルをジャンル別にフォーク"
+  ]
+}
