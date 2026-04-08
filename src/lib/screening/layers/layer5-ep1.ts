@@ -21,7 +21,7 @@ export interface Layer5Result {
 }
 
 const STYLE_TEMPLATE_DIR = "data/generation/style-templates";
-const MIN_CHARS = 3500;
+const MIN_CHARS = 3200;
 const MAX_CHARS = 4500;
 const MAX_APPEND_LOOPS = 2;
 
@@ -62,6 +62,7 @@ function loadStyleTemplate(subgenre: string): string {
 function buildEp1Prompt(meta: WorkMetaFile, logline: string, plot: string, synopsis: string, arcPlot: string): string {
   const style = loadStyleTemplate(meta.seed.genre);
   const styleBlock = style ? `\n# 文体ガイド(必ず従う)\n${style}\n` : "";
+  const target = Math.floor((MIN_CHARS + MAX_CHARS) / 2);
   return `あなたはWeb小説家です。以下の素材から ep1 の本文を執筆してください。
 他の作品の文体・構成・固有名詞を一切参照しないでください。各作品は独立した執筆者として書きます。
 ${styleBlock}
@@ -79,7 +80,8 @@ ${plot}
 ${arcPlot}
 
 # 文字数(厳守)
-- ${MIN_CHARS}〜${MAX_CHARS}字(日本語実文字数)
+- ${MIN_CHARS}〜${MAX_CHARS}字(日本語実文字数、空白・改行を除いてカウント)
+- 目標は${target}字前後。${MIN_CHARS}字を絶対に下回らないこと
 - 短すぎる場合はシーンを膨らませる(描写・心情・五感)
 - 上限を超えそうなら引きシーンで切る
 
@@ -106,12 +108,15 @@ ${arcPlot}
 }
 
 function buildAppendPrompt(currentBody: string, shortageChars: number): string {
-  return `以下のep1本文は文字数が${shortageChars}字不足しています。【展開シーン】または【転機シーン】を膨らませて、不足分を補ってください。
+  const currentChars = currentBody.replace(/\s/g, "").length;
+  const targetChars = currentChars + shortageChars + 200;
+  return `以下のep1本文は文字数が${shortageChars}字不足しています(現在 約${currentChars}字、目標 約${targetChars}字以上)。【展開シーン】または【転機シーン】を膨らませて、不足分を補ってください。
 
-# 制約
-- 既存の本文の流れを壊さない
-- 新しいシーンを足すのではなく、既存シーンの描写を厚くする
-- 五感描写・心情描写・対話のいずれかを増やす
+# 絶対制約
+- 出力は必ず現在より長くすること(短くなったら失敗扱い)
+- 目標は${targetChars}字以上(空白・改行除く)
+- 既存の本文の文・段落を削らない。原文の文章はすべて含めること
+- 既存シーンの描写を厚くする(新シーンの追加ではなく、五感・心情・対話の追記)
 
 # 既存本文
 ${currentBody}
@@ -149,24 +154,33 @@ export async function runLayer5(slug: string, worksDir = "data/generation/works"
     return { ok: false, reason: `claude_call_failed: ${(e as Error).message}` };
   }
 
-  let charCount = countChars(body);
+  // best-of: append で短く返ってくることがあるため、過去最長を保持する
+  let bestBody = body;
+  let bestCount = countChars(body);
   let appendCount = 0;
 
-  while (charCount < MIN_CHARS && appendCount < MAX_APPEND_LOOPS) {
+  while (bestCount < MIN_CHARS && appendCount < MAX_APPEND_LOOPS) {
     appendCount++;
-    const shortage = MIN_CHARS - charCount;
-    const appendPrompt = buildAppendPrompt(body, shortage);
+    const shortage = MIN_CHARS - bestCount;
+    const appendPrompt = buildAppendPrompt(bestBody, shortage);
+    let next: string;
     try {
-      body = (await callClaudeCli(appendPrompt, { layer: "layer5_append", slug })).trim();
+      next = (await callClaudeCli(appendPrompt, { layer: "layer5_append", slug })).trim();
     } catch (e) {
       return { ok: false, reason: `append_call_failed: ${(e as Error).message}`, appendCount };
     }
-    charCount = countChars(body);
+    const nextCount = countChars(next);
+    if (nextCount > bestCount) {
+      bestBody = next;
+      bestCount = nextCount;
+    }
   }
 
-  if (charCount < MIN_CHARS) {
-    return { ok: false, reason: `too_short(${charCount})`, charCount, appendCount };
+  if (bestCount < MIN_CHARS) {
+    return { ok: false, reason: `too_short(${bestCount})`, charCount: bestCount, appendCount };
   }
+  body = bestBody;
+  const charCount = bestCount;
   // 上限超過は警告のみで通す(ペアワイズで評価)
   const outPath = join(workDir, "layer5_ep001.md");
   writeFileSync(outPath, body + "\n");
