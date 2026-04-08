@@ -61,17 +61,17 @@ export default function AnalyticsPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-text">{t("title")}</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t("title")}</h1>
         {/* 期間フィルタ */}
-        <div className="flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+        <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
           {[7, 30, 90].map((d) => (
             <button
               key={d}
               onClick={() => setDays(d)}
               className={`rounded-md px-3 py-1 text-xs font-medium transition ${
                 days === d
-                  ? "bg-white text-text shadow-sm dark:bg-gray-700"
-                  : "text-muted hover:text-text"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-500 hover:text-gray-900"
               }`}
             >
               {d}{t("days")}
@@ -101,8 +101,8 @@ export default function AnalyticsPage() {
 
           {/* PV推移グラフ（シンプルなバーチャート） */}
           {daily.length > 0 && (
-            <div className="mb-8 rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-              <h2 className="mb-4 text-sm font-bold text-text">{t("pvTrend")}</h2>
+            <div className="mb-8 rounded-xl border border-gray-200 bg-white p-5">
+              <h2 className="mb-4 text-sm font-bold text-gray-900">{t("pvTrend")}</h2>
               <div className="flex items-end gap-0.5" style={{ height: 120 }}>
                 {daily.map((d) => (
                   <div
@@ -113,7 +113,7 @@ export default function AnalyticsPage() {
                   />
                 ))}
               </div>
-              <div className="mt-1 flex justify-between text-[10px] text-muted">
+              <div className="mt-1 flex justify-between text-[10px] text-gray-500">
                 <span>{daily[0]?.date}</span>
                 <span>{daily[daily.length - 1]?.date}</span>
               </div>
@@ -122,26 +122,26 @@ export default function AnalyticsPage() {
 
           {/* 作品別 */}
           {byNovel.length > 0 && (
-            <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-              <h2 className="border-b border-gray-100 px-5 py-3 text-sm font-bold text-text dark:border-gray-800">
+            <div className="rounded-xl border border-gray-200 bg-white">
+              <h2 className="border-b border-gray-100 px-5 py-3 text-sm font-bold text-gray-900">
                 {t("byNovel")}
               </h2>
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+              <div className="divide-y divide-gray-100">
                 {byNovel.map((n) => (
                   <Link
                     key={n.novel_id}
                     href={`/dashboard/novels/${n.novel_id}`}
-                    className="flex items-center justify-between px-5 py-4 transition hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    className="flex items-center justify-between px-5 py-4 transition hover:bg-gray-50"
                   >
                     <div>
-                      <p className="text-sm font-medium text-text">{n.title}</p>
-                      <p className="mt-0.5 text-xs text-muted">
+                      <p className="text-sm font-medium text-gray-900">{n.title}</p>
+                      <p className="mt-0.5 text-xs text-gray-500">
                         {t("totalPv")}: {n.total_pv.toLocaleString()} · {t("bookmarks")}: {n.total_bookmarks}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-bold text-indigo-600">{formatRate(n.avg_completion_rate)}</p>
-                      <p className="text-[10px] text-muted">{t("completionRate")}</p>
+                      <p className="text-[10px] text-gray-500">{t("completionRate")}</p>
                     </div>
                   </Link>
                 ))}
@@ -150,7 +150,7 @@ export default function AnalyticsPage() {
           )}
         </>
       ) : (
-        <p className="py-16 text-center text-muted">{t("noData")}</p>
+        <p className="py-16 text-center text-gray-500">{t("noData")}</p>
       )}
     </div>
   );
@@ -158,9 +158,9 @@ export default function AnalyticsPage() {
 
 function StatCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`rounded-xl border p-4 ${highlight ? "border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/30" : "border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"}`}>
-      <p className="text-xs text-muted">{label}</p>
-      <p className={`mt-1 text-xl font-bold ${highlight ? "text-indigo-600" : "text-text"}`}>{value}</p>
+    <div className={`rounded-xl border p-4 ${highlight ? "border-indigo-200 bg-indigo-50" : "border-gray-200 bg-white"}`}>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className={`mt-1 text-xl font-bold ${highlight ? "text-indigo-600" : "text-gray-900"}`}>{value}</p>
     </div>
   );
 }

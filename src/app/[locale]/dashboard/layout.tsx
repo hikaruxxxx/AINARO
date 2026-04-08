@@ -11,9 +11,9 @@ export default async function DashboardLayout({
   const t = await getTranslations("dashboard");
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50 text-gray-900" data-theme="light">
       {/* ダッシュボードヘッダー */}
-      <header className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+      <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-8">
           <div className="flex items-center gap-6">
             <Link href="/" className="text-lg font-bold text-indigo-600">
@@ -22,13 +22,13 @@ export default async function DashboardLayout({
             <nav className="hidden items-center gap-1 md:flex">
               <Link
                 href="/dashboard"
-                className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
               >
                 {t("navNovels")}
               </Link>
               <Link
                 href="/dashboard/analytics"
-                className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
               >
                 {t("navAnalytics")}
               </Link>
@@ -36,7 +36,7 @@ export default async function DashboardLayout({
           </div>
           <Link
             href="/"
-            className="text-sm text-gray-500 transition hover:text-gray-700 dark:text-gray-400"
+            className="text-sm text-gray-500 transition hover:text-gray-700"
           >
             {t("backToSite")}
           </Link>
