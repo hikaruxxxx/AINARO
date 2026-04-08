@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-08T07:24:12Z",
+  "lastUpdated": "2026-04-08T10:34:22Z",
   "schemaVersion": 1,
   "description": "content/works/ 配下の作品メタデータ集約。エージェント/オーケストレータはこれを参照して対象作品を特定する。各作品の正本は <slug>/work.json（存在する場合）。legacy 作品は work.json 未生成。",
   "works": {
@@ -91,10 +91,52 @@
       "category": "legacy",
       "episodes": 0
     },
+    "modern-dungeon-cat": {
+      "path": "content/works/modern-dungeon-cat",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_003",
+      "episodes": 1
+    },
+    "modern-dungeon-mom": {
+      "path": "content/works/modern-dungeon-mom",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_003",
+      "episodes": 1
+    },
+    "modern-dungeon-salaryman": {
+      "path": "content/works/modern-dungeon-salaryman",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_003",
+      "episodes": 1
+    },
     "reborn-accountant": {
       "path": "content/works/reborn-accountant",
       "state": "legacy",
       "category": "legacy",
+      "episodes": 1
+    },
+    "reborn-game-knowledge": {
+      "path": "content/works/reborn-game-knowledge",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_003",
+      "episodes": 1
+    },
+    "reborn-tamer-rise": {
+      "path": "content/works/reborn-tamer-rise",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_003",
+      "episodes": 1
+    },
+    "reborn-trash-job": {
+      "path": "content/works/reborn-trash-job",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_003",
       "episodes": 1
     },
     "sage-reborn": {
@@ -102,6 +144,27 @@
       "state": "legacy",
       "category": "legacy",
       "episodes": 0
+    },
+    "slow-bookshop-witch": {
+      "path": "content/works/slow-bookshop-witch",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_003",
+      "episodes": 1
+    },
+    "slow-craft-blacksmith": {
+      "path": "content/works/slow-craft-blacksmith",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_003",
+      "episodes": 1
+    },
+    "slow-ranch-monsters": {
+      "path": "content/works/slow-ranch-monsters",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "sourceBatch": "batch_20260408_003",
+      "episodes": 1
     },
     "test-villainess": {
       "path": "content/works/test-villainess",
