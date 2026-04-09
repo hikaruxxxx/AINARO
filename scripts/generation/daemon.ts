@@ -48,7 +48,7 @@ const TICK_INTERVAL_MS = 5_000;
 const MAX_WORKS_PER_TICK = 1;
 
 // シード生成: pending が一定数以下なら新規シード投入
-const MIN_LAYER1_PENDING = 5;
+const MIN_LAYER1_PENDING = 3;
 
 let shuttingDown = false;
 process.on("SIGTERM", () => {
@@ -86,8 +86,8 @@ async function tick(): Promise<void> {
   // Layer1 pending が少なければシード投入
   await maybeInjectSeeds();
 
-  // 各層を上から処理(Layer1から)
-  for (const layer of [1, 2, 3, 4, 5, 6] as LayerId[]) {
+  // 上位層(下流)を優先処理 — Layer1だけ回り続けるスタベーションを防ぐ
+  for (const layer of [6, 5, 4, 3, 2, 1] as LayerId[]) {
     if (shuttingDown) break;
     const next = dequeueNextPending(layer);
     if (!next) continue;
