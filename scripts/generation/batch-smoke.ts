@@ -19,6 +19,7 @@ import { runLayer6 } from "../../src/lib/screening/layers/layer6-ep23";
 
 const N = parseInt(process.argv[2] ?? "10", 10);
 const WORKS_DIR = process.argv[3] ?? "data/generation/works-test";
+const CONCURRENCY = parseInt(process.env.BATCH_CONCURRENCY ?? "1", 10);
 const RESULT_LOG = "data/generation/batch-smoke-result.jsonl";
 
 interface WorkResult {
@@ -101,20 +102,27 @@ async function main(): Promise<void> {
   console.log(`worksDir: ${WORKS_DIR}`);
   console.log(`result log: ${RESULT_LOG}\n`);
 
+  console.log(`concurrency: ${CONCURRENCY}`);
   const results: WorkResult[] = [];
-  for (let i = 1; i <= N; i++) {
-    console.log(`\n--- 作品 ${i}/${N} 開始 ---`);
-    try {
-      const r = await runOneWork(i);
-      results.push(r);
-      appendFileSync(RESULT_LOG, JSON.stringify(r) + "\n");
-      console.log(
-        `--- 作品 ${i} 完了: finalOk=${r.finalOk} ${(r.totalMs / 1000).toFixed(0)}s ${r.genre} ---`,
-      );
-    } catch (e) {
-      console.error(`--- 作品 ${i} 例外: ${(e as Error).message} ---`);
+  let nextIdx = 1;
+  async function worker(workerId: number): Promise<void> {
+    while (true) {
+      const i = nextIdx++;
+      if (i > N) return;
+      console.log(`\n--- [w${workerId}] 作品 ${i}/${N} 開始 ---`);
+      try {
+        const r = await runOneWork(i);
+        results.push(r);
+        appendFileSync(RESULT_LOG, JSON.stringify(r) + "\n");
+        console.log(
+          `--- [w${workerId}] 作品 ${i} 完了: finalOk=${r.finalOk} ${(r.totalMs / 1000).toFixed(0)}s ${r.genre} ---`,
+        );
+      } catch (e) {
+        console.error(`--- [w${workerId}] 作品 ${i} 例外: ${(e as Error).message} ---`);
+      }
     }
   }
+  await Promise.all(Array.from({ length: CONCURRENCY }, (_, k) => worker(k + 1)));
 
   // サマリ
   console.log("\n=== Phase C サマリ ===");
