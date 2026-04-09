@@ -10,8 +10,33 @@
 // - 入力プロンプトは stdin 経由(エスケープ問題回避)
 // - 推定トークン数を throttle に記録
 
-import { spawn } from "child_process";
+import { spawn, spawnSync } from "child_process";
 import { recordUsage, estimateTokens } from "./throttle";
+
+/**
+ * claude CLI が消失した場合に1回だけ自動再インストールする。
+ * Phase C2 で /opt/homebrew/lib/node_modules/@anthropic-ai/ が
+ * 空になる事故が観測されたため。
+ * 成功時 true を返す。
+ */
+let recoveryAttempted = false;
+function tryRecoverClaudeCli(): boolean {
+  if (recoveryAttempted) return false;
+  recoveryAttempted = true;
+  console.error("[claude-cli] CLI not found. attempting auto-recovery: npm i -g @anthropic-ai/claude-code");
+  const r = spawnSync("npm", ["i", "-g", "@anthropic-ai/claude-code"], {
+    stdio: "inherit",
+  });
+  if (r.status === 0) {
+    const check = spawnSync("claude", ["-p", "ping"], { encoding: "utf-8" });
+    if (check.status === 0) {
+      console.error("[claude-cli] recovery succeeded");
+      return true;
+    }
+  }
+  console.error("[claude-cli] recovery failed");
+  return false;
+}
 
 export interface ClaudeCallOptions {
   /** ms。デフォルト10分 */
@@ -42,7 +67,23 @@ const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000;
  * claude -p をsubprocessで起動し、prompt を stdin から渡して stdout を返す。
  * 失敗時は ClaudeCallError を throw。
  */
-export function callClaudeCli(
+export async function callClaudeCli(
+  prompt: string,
+  opts: ClaudeCallOptions = {},
+): Promise<string> {
+  try {
+    return await callClaudeCliOnce(prompt, opts);
+  } catch (e) {
+    if (e instanceof ClaudeCallError && e.code === "spawn_failed" && /ENOENT/.test(e.message)) {
+      if (tryRecoverClaudeCli()) {
+        return await callClaudeCliOnce(prompt, opts);
+      }
+    }
+    throw e;
+  }
+}
+
+function callClaudeCliOnce(
   prompt: string,
   opts: ClaudeCallOptions = {},
 ): Promise<string> {
