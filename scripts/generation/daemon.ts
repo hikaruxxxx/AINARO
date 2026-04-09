@@ -26,6 +26,7 @@ import { runLayer4 } from "../../src/lib/screening/layers/layer4-arc-plot";
 import { runLayer5 } from "../../src/lib/screening/layers/layer5-ep1";
 import { runLayer6 } from "../../src/lib/screening/layers/layer6-ep23";
 import { evaluateLayer } from "../../src/lib/screening/layer-eval";
+import { recordAppliedPatterns } from "../../src/lib/screening/patterns";
 
 // ε値(階層的バランス)
 const LAYER_EPSILON: Record<LayerId, number> = {
@@ -162,15 +163,19 @@ async function processLayer(
     reason = r.reason;
     if (ok) console.log(`[daemon] layer4 ok slug=${slug}`);
   } else if (layer === 5) {
-    const r = await runLayer5(slug);
+    const r = await runLayer5(slug, undefined, isExploration);
     ok = r.ok;
     reason = r.reason;
-    if (ok) console.log(`[daemon] layer5 ok slug=${slug} chars=${r.charCount} appends=${r.appendCount}`);
+    if (ok) {
+      console.log(`[daemon] layer5 ok slug=${slug} chars=${r.charCount} appends=${r.appendCount} exploration=${isExploration}`);
+      // 適用したパターンを _meta.json に記録(公開時に episode_generation_meta へ転記)
+      recordAppliedPatterns("data/generation/works", slug, isExploration);
+    }
   } else if (layer === 6) {
-    const r = await runLayer6(slug);
+    const r = await runLayer6(slug, undefined, isExploration);
     ok = r.ok;
     reason = r.reason;
-    if (ok) console.log(`[daemon] layer6 ok slug=${slug} ep2=${r.ep2CharCount} ep3=${r.ep3CharCount}`);
+    if (ok) console.log(`[daemon] layer6 ok slug=${slug} ep2=${r.ep2CharCount} ep3=${r.ep3CharCount} exploration=${isExploration}`);
   } else {
     console.log(`[daemon] 未知のlayer ${layer} slug=${slug}`);
     ok = false;

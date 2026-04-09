@@ -10,6 +10,7 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { callClaudeCli } from "../claude-cli";
+import { buildPatternBlock } from "../patterns";
 import type { WorkMetaFile } from "./layer1-logline";
 
 export interface Layer5Result {
@@ -59,13 +60,14 @@ function loadStyleTemplate(subgenre: string): string {
   return "";
 }
 
-function buildEp1Prompt(meta: WorkMetaFile, logline: string, plot: string, synopsis: string, arcPlot: string): string {
+function buildEp1Prompt(meta: WorkMetaFile, logline: string, plot: string, synopsis: string, arcPlot: string, isExploration = false): string {
   const style = loadStyleTemplate(meta.seed.genre);
   const styleBlock = style ? `\n# 文体ガイド(必ず従う)\n${style}\n` : "";
+  const patternBlock = buildPatternBlock(isExploration);
   const target = Math.floor((MIN_CHARS + MAX_CHARS) / 2);
   return `あなたはWeb小説家です。以下の素材から ep1 の本文を執筆してください。
 他の作品の文体・構成・固有名詞を一切参照しないでください。各作品は独立した執筆者として書きます。
-${styleBlock}
+${styleBlock}${patternBlock}
 # 素材
 - ジャンル: ${meta.seed.genre}
 - ログライン: ${logline}
@@ -130,7 +132,7 @@ function countChars(text: string): number {
   return text.replace(/\s/g, "").length;
 }
 
-export async function runLayer5(slug: string, worksDir = "data/generation/works"): Promise<Layer5Result> {
+export async function runLayer5(slug: string, worksDir = "data/generation/works", isExploration = false): Promise<Layer5Result> {
   const workDir = join(worksDir, slug);
   const metaPath = join(workDir, "_meta.json");
   const loglinePath = join(workDir, "layer1_logline.md");
@@ -146,7 +148,7 @@ export async function runLayer5(slug: string, worksDir = "data/generation/works"
   const synopsis = readFileSync(synopsisPath, "utf-8").replace(/^#[^\n]*\n+/, "").trim();
   const arcPlot = readFileSync(arcPath, "utf-8");
 
-  const prompt = buildEp1Prompt(meta, logline, plot, synopsis, arcPlot);
+  const prompt = buildEp1Prompt(meta, logline, plot, synopsis, arcPlot, isExploration);
   let body: string;
   try {
     body = (await callClaudeCli(prompt, { layer: "layer5", slug })).trim();

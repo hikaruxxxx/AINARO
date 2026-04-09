@@ -9,6 +9,7 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { callClaudeCli } from "../claude-cli";
+import { buildPatternBlock } from "../patterns";
 import type { WorkMetaFile } from "./layer1-logline";
 
 export interface Layer6Result {
@@ -66,14 +67,16 @@ function buildEpPrompt(
   arcPlot: string,
   prevEpisodes: { ep: number; body: string }[],
   targetEp: number,
+  isExploration = false,
 ): string {
   const style = loadStyleTemplate(meta.seed.genre);
   const styleBlock = style ? `\n# 文体ガイド(必ず従う)\n${style}\n` : "";
+  const patternBlock = buildPatternBlock(isExploration);
   const prevBlock = prevEpisodes
     .map((e) => `## ep${String(e.ep).padStart(3, "0")}\n${e.body}`)
     .join("\n\n");
   return `あなたはWeb小説家です。前話の流れを引き継いで ep${targetEp} の本文を執筆してください。
-${styleBlock}
+${styleBlock}${patternBlock}
 # ジャンル
 ${meta.seed.genre}
 
@@ -124,8 +127,9 @@ async function generateOneEpisode(
   prevEpisodes: { ep: number; body: string }[],
   targetEp: number,
   slug: string,
+  isExploration = false,
 ): Promise<{ ok: boolean; body?: string; charCount?: number; reason?: string }> {
-  const prompt = buildEpPrompt(meta, arcPlot, prevEpisodes, targetEp);
+  const prompt = buildEpPrompt(meta, arcPlot, prevEpisodes, targetEp, isExploration);
   let body: string;
   try {
     body = (await callClaudeCli(prompt, { layer: `layer6_ep${targetEp}`, slug })).trim();
@@ -160,7 +164,7 @@ async function generateOneEpisode(
   return { ok: true, body: bestBody, charCount: bestCount };
 }
 
-export async function runLayer6(slug: string, worksDir = "data/generation/works"): Promise<Layer6Result> {
+export async function runLayer6(slug: string, worksDir = "data/generation/works", isExploration = false): Promise<Layer6Result> {
   const workDir = join(worksDir, slug);
   const metaPath = join(workDir, "_meta.json");
   const arcPath = join(workDir, "layer4_arc1_plot.md");
@@ -173,7 +177,7 @@ export async function runLayer6(slug: string, worksDir = "data/generation/works"
   const ep1 = readFileSync(ep1Path, "utf-8");
 
   // ep2
-  const ep2Result = await generateOneEpisode(meta, arcPlot, [{ ep: 1, body: ep1 }], 2, slug);
+  const ep2Result = await generateOneEpisode(meta, arcPlot, [{ ep: 1, body: ep1 }], 2, slug, isExploration);
   if (!ep2Result.ok) {
     return { ok: false, reason: `ep2_failed: ${ep2Result.reason}` };
   }
@@ -189,6 +193,7 @@ export async function runLayer6(slug: string, worksDir = "data/generation/works"
     ],
     3,
     slug,
+    isExploration,
   );
   if (!ep3Result.ok) {
     return {
