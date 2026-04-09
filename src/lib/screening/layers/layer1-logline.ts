@@ -44,9 +44,16 @@ export async function runLayer1(slug: string, worksDir = "data/generation/works"
   }
 
   const parsed = extractJsonBlock(raw) as { logline?: string } | null;
-  const logline = parsed?.logline?.trim();
+  let logline = parsed?.logline?.trim();
+  // JSON解析失敗時のフォールバック: 生テキストから1文を抽出
   if (!logline) {
-    return { ok: false, reason: "logline_parse_failed" };
+    const cleaned = raw.replace(/```[\s\S]*?```/g, "").replace(/[{}"]/g, "").trim();
+    const firstLine = cleaned.split("\n").map(l => l.trim()).filter(l => l.length > 10 && l.length <= 100)[0];
+    if (firstLine) {
+      logline = firstLine;
+    } else {
+      return { ok: false, reason: "logline_parse_failed" };
+    }
   }
   // 80字制限の事後チェック(緩めに100字までは許容)
   if (logline.length > 100) {
