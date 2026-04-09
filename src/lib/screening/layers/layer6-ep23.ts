@@ -19,7 +19,8 @@ export interface Layer6Result {
 }
 
 const STYLE_TEMPLATE_DIR = "data/generation/style-templates";
-const MIN_CHARS = 3500;
+const MIN_CHARS = 3200;
+const MAX_CHARS = 4500;
 const MAX_APPEND_LOOPS = 2;
 
 const SUBGENRE_TO_FALLBACK: Record<string, string> = {
@@ -82,8 +83,9 @@ ${arcPlot}
 # 既存話
 ${prevBlock}
 
-# 制約
-- ${MIN_CHARS}〜4500字(日本語実文字数)
+# 文字数(厳守)
+- ${MIN_CHARS}〜${MAX_CHARS}字(日本語実文字数、空白・改行を除いてカウント)
+- 目標は${Math.floor((MIN_CHARS + MAX_CHARS) / 2)}字前後。${MIN_CHARS}字を絶対に下回らないこと
 - 前話の引きを必ず受ける
 - 詳細プロットの ep${targetEp} の中心となる出来事を描く
 - 末尾は次話への引きで終える
@@ -99,12 +101,15 @@ ${prevBlock}
 }
 
 function buildAppendPrompt(currentBody: string, shortageChars: number): string {
-  return `以下の本文は文字数が${shortageChars}字不足しています。【展開】または【転機】を膨らませてください。
+  const currentChars = currentBody.replace(/\s/g, "").length;
+  const targetChars = currentChars + shortageChars + 200;
+  return `以下の本文は文字数が${shortageChars}字不足しています(現在 約${currentChars}字、目標 約${targetChars}字以上)。【展開】または【転機】を膨らませてください。
 
-# 制約
-- 既存の流れを壊さない
-- 既存シーンの描写を厚くする(五感・心情・対話)
-- 新しいシーンを足さない
+# 絶対制約
+- 出力は必ず現在より長くすること(短くなったら失敗扱い)
+- 目標は${targetChars}字以上(空白・改行除く)
+- 既存の本文の文・段落を削らない。原文の文章はすべて含めること
+- 既存シーンの描写を厚くする(新シーンの追加ではなく、五感・心情・対話の追記)
 
 # 既存本文
 ${currentBody}
@@ -127,25 +132,32 @@ async function generateOneEpisode(
   } catch (e) {
     return { ok: false, reason: `claude_call_failed: ${(e as Error).message}` };
   }
-  let charCount = countChars(body);
+  // best-of: append で短く返ってくることがあるため、過去最長を保持
+  let bestBody = body;
+  let bestCount = countChars(body);
   let appendCount = 0;
-  while (charCount < MIN_CHARS && appendCount < MAX_APPEND_LOOPS) {
+  while (bestCount < MIN_CHARS && appendCount < MAX_APPEND_LOOPS) {
     appendCount++;
-    const shortage = MIN_CHARS - charCount;
+    const shortage = MIN_CHARS - bestCount;
+    let next: string;
     try {
-      body = (await callClaudeCli(buildAppendPrompt(body, shortage), {
+      next = (await callClaudeCli(buildAppendPrompt(bestBody, shortage), {
         layer: `layer6_ep${targetEp}_append`,
         slug,
       })).trim();
     } catch (e) {
       return { ok: false, reason: `append_failed: ${(e as Error).message}` };
     }
-    charCount = countChars(body);
+    const nextCount = countChars(next);
+    if (nextCount > bestCount) {
+      bestBody = next;
+      bestCount = nextCount;
+    }
   }
-  if (charCount < MIN_CHARS) {
-    return { ok: false, reason: `too_short(${charCount})`, charCount };
+  if (bestCount < MIN_CHARS) {
+    return { ok: false, reason: `too_short(${bestCount})`, charCount: bestCount };
   }
-  return { ok: true, body, charCount };
+  return { ok: true, body: bestBody, charCount: bestCount };
 }
 
 export async function runLayer6(slug: string, worksDir = "data/generation/works"): Promise<Layer6Result> {
