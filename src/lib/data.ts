@@ -49,21 +49,26 @@ async function getSupabase() {
   return createClient();
 }
 
-// 小説一覧
-export async function fetchNovels(locale: string = "ja"): Promise<Novel[]> {
-  const mockFallback = () => getMockNovels().map((n) => localizeNovel(n, locale));
+// 小説一覧（ページネーション対応）
+export async function fetchNovels(locale: string = "ja", page: number = 1, perPage: number = 30): Promise<{ novels: Novel[]; total: number }> {
+  const mockFallback = () => {
+    const all = getMockNovels().map((n) => localizeNovel(n, locale));
+    return { novels: all.slice((page - 1) * perPage, page * perPage), total: all.length };
+  };
   if (!isSupabaseConfigured) return mockFallback();
 
   try {
     const supabase = await getSupabase();
-    const { data } = await supabase
+    const from = (page - 1) * perPage;
+    const to = from + perPage - 1;
+    const { data, count } = await supabase
       .from("novels")
-      .select("*")
+      .select("*", { count: "exact" })
       .order("latest_chapter_at", { ascending: false, nullsFirst: false })
-      .limit(20);
+      .range(from, to);
     const novels = (data as Novel[]) || [];
-    if (novels.length === 0) return mockFallback();
-    return novels.map((n) => localizeNovel(n, locale));
+    if (novels.length === 0 && page === 1) return mockFallback();
+    return { novels: novels.map((n) => localizeNovel(n, locale)), total: count ?? novels.length };
   } catch {
     return mockFallback();
   }

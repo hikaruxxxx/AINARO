@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-08T10:34:22Z",
+  "lastUpdated": "2026-04-11T01:32:52Z",
   "schemaVersion": 1,
   "description": "content/works/ 配下の作品メタデータ集約。エージェント/オーケストレータはこれを参照して対象作品を特定する。各作品の正本は <slug>/work.json（存在する場合）。legacy 作品は work.json 未生成。",
   "works": {
@@ -8,6 +8,300 @@
       "state": "legacy",
       "category": "legacy",
       "episodes": 0
+    },
+    "batch-mnq00etw-4": {
+      "path": "content/works/batch-mnq00etw-4",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnq0eyvp-5": {
+      "path": "content/works/batch-mnq0eyvp-5",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnq1t8ms-9": {
+      "path": "content/works/batch-mnq1t8ms-9",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnq2u60s-2": {
+      "path": "content/works/batch-mnq2u60s-2",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnq35vxr-1": {
+      "path": "content/works/batch-mnq35vxr-1",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnq4a19s-4": {
+      "path": "content/works/batch-mnq4a19s-4",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnq52szi-6": {
+      "path": "content/works/batch-mnq52szi-6",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqsrd2d-7": {
+      "path": "content/works/batch-mnqsrd2d-7",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqt6mf6-9": {
+      "path": "content/works/batch-mnqt6mf6-9",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqt7kxj-10": {
+      "path": "content/works/batch-mnqt7kxj-10",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqth577-11": {
+      "path": "content/works/batch-mnqth577-11",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqtm22s-12": {
+      "path": "content/works/batch-mnqtm22s-12",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqtx7za-14": {
+      "path": "content/works/batch-mnqtx7za-14",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqu6uhc-15": {
+      "path": "content/works/batch-mnqu6uhc-15",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqud0ur-16": {
+      "path": "content/works/batch-mnqud0ur-16",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqv6rrs-21": {
+      "path": "content/works/batch-mnqv6rrs-21",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqv8vr5-22": {
+      "path": "content/works/batch-mnqv8vr5-22",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqvimpt-23": {
+      "path": "content/works/batch-mnqvimpt-23",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqvkic5-24": {
+      "path": "content/works/batch-mnqvkic5-24",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqvuzvs-25": {
+      "path": "content/works/batch-mnqvuzvs-25",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqw44v8-27": {
+      "path": "content/works/batch-mnqw44v8-27",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqw9swk-28": {
+      "path": "content/works/batch-mnqw9swk-28",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqwfd05-29": {
+      "path": "content/works/batch-mnqwfd05-29",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqwml4h-30": {
+      "path": "content/works/batch-mnqwml4h-30",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqwvy8p-31": {
+      "path": "content/works/batch-mnqwvy8p-31",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnqxllkn-35": {
+      "path": "content/works/batch-mnqxllkn-35",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnr2rbyu-16": {
+      "path": "content/works/batch-mnr2rbyu-16",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrdvzv4-1": {
+      "path": "content/works/batch-mnrdvzv4-1",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrejrvt-6": {
+      "path": "content/works/batch-mnrejrvt-6",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrf8ij4-10": {
+      "path": "content/works/batch-mnrf8ij4-10",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrfqd3f-13": {
+      "path": "content/works/batch-mnrfqd3f-13",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrg19tj-15": {
+      "path": "content/works/batch-mnrg19tj-15",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrg6rc4-16": {
+      "path": "content/works/batch-mnrg6rc4-16",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrgcpgx-17": {
+      "path": "content/works/batch-mnrgcpgx-17",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrh27t0-21": {
+      "path": "content/works/batch-mnrh27t0-21",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrh5bp8-22": {
+      "path": "content/works/batch-mnrh5bp8-22",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrimgy4-31": {
+      "path": "content/works/batch-mnrimgy4-31",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnriy83e-34": {
+      "path": "content/works/batch-mnriy83e-34",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrj9xht-35": {
+      "path": "content/works/batch-mnrj9xht-35",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrjadtt-36": {
+      "path": "content/works/batch-mnrjadtt-36",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrjlt0l-37": {
+      "path": "content/works/batch-mnrjlt0l-37",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrjmo3k-38": {
+      "path": "content/works/batch-mnrjmo3k-38",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrjxswj-39": {
+      "path": "content/works/batch-mnrjxswj-39",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrjy5n5-40": {
+      "path": "content/works/batch-mnrjy5n5-40",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrk8n45-41": {
+      "path": "content/works/batch-mnrk8n45-41",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrkavjj-42": {
+      "path": "content/works/batch-mnrkavjj-42",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrko7lg-44": {
+      "path": "content/works/batch-mnrko7lg-44",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrkzt11-46": {
+      "path": "content/works/batch-mnrkzt11-46",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batch-mnrl7tq2-47": {
+      "path": "content/works/batch-mnrl7tq2-47",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
     },
     "cold-duke-wife": {
       "path": "content/works/cold-duke-wife",
@@ -165,6 +459,12 @@
       "category": "screened",
       "sourceBatch": "batch_20260408_003",
       "episodes": 1
+    },
+    "smoke-mnpy8ed8": {
+      "path": "content/works/smoke-mnpy8ed8",
+      "state": "ready_to_publish",
+      "category": "screened",
+      "episodes": 3
     },
     "test-villainess": {
       "path": "content/works/test-villainess",

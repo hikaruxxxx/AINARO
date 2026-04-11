@@ -24,15 +24,25 @@ export async function generateMetadata() {
   };
 }
 
-export default async function NovelsPage() {
+export default async function NovelsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const locale = await getLocale();
   const t = await getTranslations();
-  const novels = await fetchNovels(locale);
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
+  const perPage = 30;
+  const { novels, total } = await fetchNovels(locale, page, perPage);
+  const totalPages = Math.ceil(total / perPage);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
       <h1 className="mb-2 text-2xl font-bold text-text">{t("pages.novelsList")}</h1>
-      <p className="mb-8 text-sm text-muted">{t("pages.novelsDescription")}</p>
+      <p className="mb-8 text-sm text-muted">
+        {t("pages.novelsDescription")} ({total}作品)
+      </p>
 
       {novels.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20">
@@ -88,6 +98,31 @@ export default async function NovelsPage() {
               )}
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* ページネーション */}
+      {totalPages > 1 && (
+        <div className="mt-10 flex items-center justify-center gap-2">
+          {page > 1 && (
+            <Link
+              href={`/novels?page=${page - 1}`}
+              className="rounded-lg border border-border px-4 py-2 text-sm text-muted hover:bg-surface transition-colors"
+            >
+              ← 前へ
+            </Link>
+          )}
+          <span className="px-4 py-2 text-sm text-muted">
+            {page} / {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link
+              href={`/novels?page=${page + 1}`}
+              className="rounded-lg border border-border px-4 py-2 text-sm text-muted hover:bg-surface transition-colors"
+            >
+              次へ →
+            </Link>
+          )}
         </div>
       )}
     </div>

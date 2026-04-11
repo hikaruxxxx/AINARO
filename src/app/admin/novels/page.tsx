@@ -24,7 +24,7 @@ const GENRE_LABELS: Record<string, string> = {
 };
 
 export default async function AdminNovelsPage() {
-  const novels = await fetchNovels();
+  const { novels, total } = await fetchNovels("ja", 1, 200);
 
   return (
     <div>
@@ -32,7 +32,7 @@ export default async function AdminNovelsPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">作品管理</h1>
-          <p className="mt-1 text-sm text-gray-500">{novels.length}作品</p>
+          <p className="mt-1 text-sm text-gray-500">{total}作品</p>
         </div>
         <Link
           href="/admin/novels/new"
