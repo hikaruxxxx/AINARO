@@ -5,6 +5,8 @@ import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { getAllReadingHistory, type ReadingHistoryEntry } from "@/lib/reading-history";
+import { getFollowedNovelIds } from "@/lib/follows";
+import { getBookmarkedNovelIds } from "@/lib/bookmarks";
 import { formatRelativeTime } from "@/lib/utils/format";
 import { createClient } from "@/lib/supabase/client";
 import { usePoints } from "@/hooks/usePoints";
@@ -41,6 +43,8 @@ export default function MyPage() {
   const locale = useLocale();
   const router = useRouter();
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [followedNovels, setFollowedNovels] = useState<NovelInfo[]>([]);
+  const [bookmarkedNovels, setBookmarkedNovels] = useState<NovelInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [userLabel, setUserLabel] = useState<string | null>(null);
   const [isWriter, setIsWriter] = useState(false);
@@ -92,55 +96,80 @@ export default function MyPage() {
     router.refresh();
   };
 
-  useEffect(() => {
-    async function loadHistory() {
-      const readHistory = getAllReadingHistory();
+  // novel IDリストからNovelInfo[]をバッチ取得するヘルパー
+  async function fetchNovelsByIds(ids: string[]): Promise<NovelInfo[]> {
+    if (ids.length === 0) return [];
+    try {
+      const res = await fetch("/api/novels/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      const { novels } = await res.json() as { novels: NovelInfo[] };
+      return novels;
+    } catch {
+      return [];
+    }
+  }
 
-      if (readHistory.length === 0) {
-        setLoading(false);
-        return;
+  useEffect(() => {
+    async function loadData() {
+      const readHistory = getAllReadingHistory();
+      const followIds = getFollowedNovelIds();
+      const bookmarkIds = getBookmarkedNovelIds();
+
+      // 全IDを一括取得（重複排除）
+      const historyPoorEntries = readHistory.filter((e) => !e.slug);
+      const allIdsToFetch = [...new Set([
+        ...historyPoorEntries.map((e) => e.novelId),
+        ...followIds,
+        ...bookmarkIds,
+      ])];
+
+      const fetchedNovelsMap = new Map<string, NovelInfo>();
+      if (allIdsToFetch.length > 0) {
+        const novels = await fetchNovelsByIds(allIdsToFetch);
+        for (const n of novels) fetchedNovelsMap.set(n.id, n);
       }
 
-      // リッチデータ（slug付き）がある場合はAPIコール不要
-      const richEntries = readHistory.filter((e) => e.slug);
-      const poorEntries = readHistory.filter((e) => !e.slug);
+      // フォロー中の作品
+      const followed = followIds
+        .map((id) => fetchedNovelsMap.get(id))
+        .filter((n): n is NovelInfo => !!n);
+      setFollowedNovels(followed);
 
-      const entries: HistoryEntry[] = richEntries.map((e) => ({
-        novel: {
-          id: e.novelId,
-          slug: e.slug,
-          title: e.title,
-          cover_image_url: e.coverImageUrl,
-          total_chapters: e.totalChapters,
-          latest_chapter_at: null,
-        },
-        lastReadEpisode: e.lastEpisode,
-        hasUnread: e.lastEpisode < e.totalChapters,
-      }));
+      // お気に入り作品
+      const bookmarked = bookmarkIds
+        .map((id) => fetchedNovelsMap.get(id))
+        .filter((n): n is NovelInfo => !!n);
+      setBookmarkedNovels(bookmarked);
 
-      // メタデータがない旧形式エントリはAPIで補完
-      if (poorEntries.length > 0) {
-        try {
-          const res = await fetch("/api/novels/batch", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ids: poorEntries.map((e) => e.novelId) }),
-          });
-          const { novels } = await res.json() as { novels: NovelInfo[] };
+      // 読書履歴
+      if (readHistory.length > 0) {
+        const richEntries = readHistory.filter((e) => e.slug);
+        const entries: HistoryEntry[] = richEntries.map((e) => ({
+          novel: {
+            id: e.novelId,
+            slug: e.slug,
+            title: e.title,
+            cover_image_url: e.coverImageUrl,
+            total_chapters: e.totalChapters,
+            latest_chapter_at: null,
+          },
+          lastReadEpisode: e.lastEpisode,
+          hasUnread: e.lastEpisode < e.totalChapters,
+        }));
 
-          for (const novel of novels) {
-            const entry = poorEntries.find((e) => e.novelId === novel.id);
-            if (entry) {
-              entries.push({
-                novel,
-                lastReadEpisode: entry.lastEpisode,
-                hasUnread: entry.lastEpisode < novel.total_chapters,
-              });
-            }
-          }
-        } catch {
-          // APIエラー時は旧データもそのまま表示
-          for (const e of poorEntries) {
+        // メタデータがない旧形式エントリはバッチ取得結果で補完
+        for (const e of historyPoorEntries) {
+          const novel = fetchedNovelsMap.get(e.novelId);
+          if (novel) {
+            entries.push({
+              novel,
+              lastReadEpisode: e.lastEpisode,
+              hasUnread: e.lastEpisode < novel.total_chapters,
+            });
+          } else {
             entries.push({
               novel: {
                 id: e.novelId,
@@ -155,19 +184,20 @@ export default function MyPage() {
             });
           }
         }
+
+        // 未読ありを優先
+        entries.sort((a, b) => {
+          if (a.hasUnread !== b.hasUnread) return a.hasUnread ? -1 : 1;
+          return 0;
+        });
+
+        setHistory(entries);
       }
 
-      // 未読ありを優先
-      entries.sort((a, b) => {
-        if (a.hasUnread !== b.hasUnread) return a.hasUnread ? -1 : 1;
-        return 0;
-      });
-
-      setHistory(entries);
       setLoading(false);
     }
 
-    loadHistory();
+    loadData();
   }, []);
 
   return (
@@ -345,6 +375,48 @@ export default function MyPage() {
           )}
         </ul>
       </section>
+
+      {/* フォロー中の作品 */}
+      {!loading && followedNovels.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-4 text-lg font-bold">{t("followedNovels")}</h2>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+            {followedNovels.map((novel) => (
+              <Link key={novel.id} href={`/novels/${novel.slug}`} className="group">
+                <div className="aspect-[2/3] overflow-hidden rounded-md bg-surface">
+                  {novel.cover_image_url ? (
+                    <img src={novel.cover_image_url} alt={novel.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-2xl text-muted">📖</div>
+                  )}
+                </div>
+                <p className="mt-1 line-clamp-2 text-xs font-medium text-text group-hover:text-secondary transition">{novel.title}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* お気に入り */}
+      {!loading && bookmarkedNovels.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-4 text-lg font-bold">{t("bookmarkedNovels")}</h2>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+            {bookmarkedNovels.map((novel) => (
+              <Link key={novel.id} href={`/novels/${novel.slug}`} className="group">
+                <div className="aspect-[2/3] overflow-hidden rounded-md bg-surface">
+                  {novel.cover_image_url ? (
+                    <img src={novel.cover_image_url} alt={novel.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-2xl text-muted">📖</div>
+                  )}
+                </div>
+                <p className="mt-1 line-clamp-2 text-xs font-medium text-text group-hover:text-secondary transition">{novel.title}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section>
         <h2 className="mb-4 text-lg font-bold">{t("readingHistory")}</h2>

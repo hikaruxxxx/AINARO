@@ -216,7 +216,11 @@
     "badgesTitle": "獲得バッジ",
     "badgesProgress": "{earned} / {total} 獲得",
     "badgesNone": "まだバッジを獲得していません",
-    "badgeNotEarned": "未獲得"
+    "badgeNotEarned": "未獲得",
+    "followedNovels": "フォロー中の作品",
+    "noFollows": "フォロー中の作品はありません",
+    "bookmarkedNovels": "お気に入り",
+    "noBookmarks": "お気に入りの作品はありません"
   },
   "search": {
     "title": "検索",

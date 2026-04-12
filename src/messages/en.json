@@ -216,7 +216,11 @@
     "badgesTitle": "Badges",
     "badgesProgress": "{earned} / {total} earned",
     "badgesNone": "No badges yet",
-    "badgeNotEarned": "Locked"
+    "badgeNotEarned": "Locked",
+    "followedNovels": "Following",
+    "noFollows": "No followed novels yet",
+    "bookmarkedNovels": "Favorites",
+    "noBookmarks": "No favorite novels yet"
   },
   "search": {
     "title": "Search",
