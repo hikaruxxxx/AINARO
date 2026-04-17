@@ -52,7 +52,7 @@ export interface ClaudeCallOptions {
 export class ClaudeCallError extends Error {
   constructor(
     message: string,
-    public code: "timeout" | "exit_nonzero" | "spawn_failed",
+    public code: "timeout" | "exit_nonzero" | "spawn_failed" | "rate_limited",
     public stderr?: string,
     public exitCode?: number,
   ) {
@@ -79,8 +79,33 @@ export async function callClaudeCli(
         return await callClaudeCliOnce(prompt, opts);
       }
     }
+    // レート制限検出: stderrに "rate limit" や "429" が含まれる場合
+    if (e instanceof ClaudeCallError && e.stderr && /rate.limit|429|too.many/i.test(e.stderr)) {
+      // 現在の5h窓消費量をログに記録（実上限の手がかり）
+      const { getUsageIn5h } = await import("./throttle");
+      const usage = getUsageIn5h();
+      console.error(`[claude-cli] レート制限検出。5h窓消費: ${(usage.total / 1_000_000).toFixed(2)}M tok (${usage.recordCount}回) — この値が実上限の目安`);
+      // rate_limited コードで再throw（呼び出し元で待機判断できるように）
+      throw new ClaudeCallError(
+        `rate limited (5h usage: ${(usage.total / 1_000_000).toFixed(2)}M tok)`,
+        "rate_limited",
+        e.stderr,
+        e.exitCode,
+      );
+    }
     throw e;
   }
+}
+
+/** --output-format json のレスポンス型 */
+interface ClaudeJsonResponse {
+  result?: string;
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+    cache_read_input_tokens?: number;
+    cache_creation_input_tokens?: number;
+  };
 }
 
 function callClaudeCliOnce(
@@ -88,7 +113,7 @@ function callClaudeCliOnce(
   opts: ClaudeCallOptions = {},
 ): Promise<string> {
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-  const args: string[] = ["-p"];
+  const args: string[] = ["-p", "--output-format", "json"];
   if (opts.model) {
     args.push("--model", opts.model);
   }
@@ -150,19 +175,40 @@ function callClaudeCliOnce(
         );
         return;
       }
-      // 使用量記録(推定値)
+
+      // JSON出力をパースして実トークン数を取得
+      let resultText = stdout;
+      let inputTokens = estimateTokens(prompt);   // フォールバック
+      let outputTokens = estimateTokens(stdout);   // フォールバック
+      try {
+        const json = JSON.parse(stdout) as ClaudeJsonResponse;
+        if (json.result != null) {
+          resultText = json.result;
+        }
+        if (json.usage) {
+          // 実トークン数（cache含む全入力トークン）
+          inputTokens = (json.usage.input_tokens ?? 0)
+            + (json.usage.cache_read_input_tokens ?? 0)
+            + (json.usage.cache_creation_input_tokens ?? 0);
+          outputTokens = json.usage.output_tokens ?? 0;
+        }
+      } catch {
+        // JSONパース失敗時はstdoutをそのまま使う（旧互換）
+      }
+
+      // 使用量記録（実測値）
       try {
         recordUsage({
           timestamp: Date.now(),
-          inputTokens: estimateTokens(prompt),
-          outputTokens: estimateTokens(stdout),
+          inputTokens,
+          outputTokens,
           layer: opts.layer ?? "unknown",
           slug: opts.slug,
         });
       } catch {
         // 記録失敗は呼び出しを失敗させない
       }
-      resolve(stdout);
+      resolve(resultText);
     });
 
     // プロンプトを stdin に流し込む

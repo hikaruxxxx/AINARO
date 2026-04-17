@@ -12,7 +12,7 @@ import { dirname, join } from "path";
 import type { Winner } from "./llm-compare";
 
 export const MATCH_THRESHOLD = 10; // 累積比較数がこれ以上で確定
-export const NEAREST_K = 3; // 近傍何件と比較するか
+export const NEAREST_K = 2; // 近傍何件と比較するか（3→2に削減: トークン33%節約）
 export const INITIAL_RATING = 1500; // Elo初期値風
 
 export interface RatingEntry {

@@ -24,10 +24,15 @@ import {
 } from "./league";
 import {
   compareSymmetric,
+  compareOnce,
   type LlmCallFn,
   type CompareInput,
   type Winner,
 } from "./llm-compare";
+
+// Layer5以上のみPosition-Symmetric（2回比較）を行う。
+// Layer2-4はプロット・あらすじレベルなので片方向（1回）で十分。
+const SYMMETRIC_MIN_LAYER = 5;
 
 // --- ペアワイズ比較キャッシュ ---
 // 同じ(slugA, slugB, layer)のペアが matches.jsonl に既に存在する場合、
@@ -147,7 +152,11 @@ export async function runPairwiseRound(
       genre: input.genre,
       layer: input.layer,
     };
-    const result = await compareSymmetric(cmpInput, input.llm);
+    // Layer5以上: Position-Symmetric（2回比較でバイアス対策）
+    // Layer2-4: 片方向比較（1回、トークン節約）
+    const result = input.layer >= SYMMETRIC_MIN_LAYER
+      ? await compareSymmetric(cmpInput, input.llm)
+      : await compareOnce(cmpInput, input.llm, Math.random() < 0.5);
     recordMatch(input.genre, input.slug, opp.slug, input.layer, result.winner, result.reason, baseDir);
     // キャッシュに追加
     const key = getCacheKey(input.slug, opp.slug, input.layer);

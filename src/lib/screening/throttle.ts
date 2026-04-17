@@ -10,8 +10,34 @@
 // - 上限値は env で設定(SCREEN_MASS_TOKEN_LIMIT_5H)
 // - トークン推定は claude -p の出力から取れない場合は文字数 ÷ 4 で近似
 
-import { appendFileSync, existsSync, readFileSync, mkdirSync } from "fs";
+import { appendFileSync, existsSync, readFileSync, writeFileSync, mkdirSync, openSync, closeSync, flockSync } from "fs";
 import { dirname } from "path";
+
+// ファイルロック: 複数プロセス間の排他制御
+function withFileLock<T>(lockPath: string, fn: () => T): T {
+  const lockFile = lockPath + ".lock";
+  const dir = dirname(lockFile);
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  // 簡易スピンロック（ファイルの存在でロック判定）
+  const maxWait = 5000;
+  const start = Date.now();
+  while (existsSync(lockFile)) {
+    if (Date.now() - start > maxWait) {
+      // タイムアウト: staleロックを除去
+      try { require("fs").unlinkSync(lockFile); } catch {}
+      break;
+    }
+    // 10ms待機
+    const end = Date.now() + 10;
+    while (Date.now() < end) { /* busy wait */ }
+  }
+  try {
+    writeFileSync(lockFile, String(process.pid));
+    return fn();
+  } finally {
+    try { require("fs").unlinkSync(lockFile); } catch {}
+  }
+}
 
 export interface UsageRecord {
   timestamp: number; // ms
@@ -37,7 +63,10 @@ export interface ThrottleConfig {
 }
 
 export const DEFAULT_THROTTLE_CONFIG: ThrottleConfig = {
-  tokenLimit5h: Number(process.env.SCREEN_MASS_TOKEN_LIMIT_5H ?? 1_000_000),
+  // 実測データ収集後に正確な値に調整する。
+  // claude -p --output-format json で実トークン数を記録するようにしたので、
+  // 数日分のデータが溜まったら getUsageIn5h() のピーク値から逆算する。
+  tokenLimit5h: Number(process.env.SCREEN_MASS_TOKEN_LIMIT_5H ?? 15_000_000),
   warnRatio: 0.8,
   pauseRatio: 0.95,
   warnSleepMs: 1_000,
@@ -47,41 +76,45 @@ export const DEFAULT_THROTTLE_CONFIG: ThrottleConfig = {
 
 const FIVE_HOURS_MS = 5 * 60 * 60 * 1000;
 
-/** 使用量を1件記録 */
+/** 使用量を1件記録（ファイルロック付き） */
 export function recordUsage(rec: UsageRecord, cfg: ThrottleConfig = DEFAULT_THROTTLE_CONFIG): void {
-  const dir = dirname(cfg.logPath);
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-  appendFileSync(cfg.logPath, JSON.stringify(rec) + "\n");
+  withFileLock(cfg.logPath, () => {
+    const dir = dirname(cfg.logPath);
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    appendFileSync(cfg.logPath, JSON.stringify(rec) + "\n");
+  });
 }
 
-/** 直近5h窓の合計トークン数を集計 */
+/** 直近5h窓の合計トークン数を集計（ファイルロック付き） */
 export function getUsageIn5h(cfg: ThrottleConfig = DEFAULT_THROTTLE_CONFIG): {
   total: number;
   input: number;
   output: number;
   recordCount: number;
 } {
-  if (!existsSync(cfg.logPath)) {
-    return { total: 0, input: 0, output: 0, recordCount: 0 };
-  }
-  const cutoff = Date.now() - FIVE_HOURS_MS;
-  const lines = readFileSync(cfg.logPath, "utf-8").split("\n").filter(Boolean);
-  let input = 0;
-  let output = 0;
-  let recordCount = 0;
-  for (const line of lines) {
-    try {
-      const rec = JSON.parse(line) as UsageRecord;
-      if (rec.timestamp >= cutoff) {
-        input += rec.inputTokens;
-        output += rec.outputTokens;
-        recordCount++;
-      }
-    } catch {
-      // 壊れた行はスキップ
+  return withFileLock(cfg.logPath, () => {
+    if (!existsSync(cfg.logPath)) {
+      return { total: 0, input: 0, output: 0, recordCount: 0 };
     }
-  }
-  return { total: input + output, input, output, recordCount };
+    const cutoff = Date.now() - FIVE_HOURS_MS;
+    const lines = readFileSync(cfg.logPath, "utf-8").split("\n").filter(Boolean);
+    let input = 0;
+    let output = 0;
+    let recordCount = 0;
+    for (const line of lines) {
+      try {
+        const rec = JSON.parse(line) as UsageRecord;
+        if (rec.timestamp >= cutoff) {
+          input += rec.inputTokens;
+          output += rec.outputTokens;
+          recordCount++;
+        }
+      } catch {
+        // 壊れた行はスキップ
+      }
+    }
+    return { total: input + output, input, output, recordCount };
+  });
 }
 
 /** 必要に応じて sleep する。次の呼び出し前に await すること */

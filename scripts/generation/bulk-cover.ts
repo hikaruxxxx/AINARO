@@ -84,8 +84,8 @@ async function main(): Promise<void> {
         { force: true },
       );
       success++;
-      // Pollinations.aiのレート制限対策: 2秒間隔
-      await new Promise((r) => setTimeout(r, 2000));
+      // Pollinations.aiのレート制限対策: 5秒間隔
+      await new Promise((r) => setTimeout(r, 5000));
     } catch (e) {
       log(`  失敗: ${e}`);
       failed++;

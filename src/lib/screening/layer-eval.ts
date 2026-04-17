@@ -86,8 +86,11 @@ export async function evaluateLayer(
   }
 
   // 対戦相手のテキストを読み込む関数
+  // Layer5以上: 対戦相手は冒頭2000字に制限（自作品は全文で比較される）
+  const OPPONENT_TEXT_LIMIT = 2000;
   const loadOpponentText = async (oppSlug: string): Promise<string> => {
-    return loadLayerText(oppSlug, layer, worksDir);
+    const full = loadLayerText(oppSlug, layer, worksDir);
+    return layer >= 5 ? full.slice(0, OPPONENT_TEXT_LIMIT) : full;
   };
 
   const llm = makeClaudeLlm(slug, layer);
