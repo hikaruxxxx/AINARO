@@ -1,10 +1,11 @@
 {
   "slug": "isekai-pure-sky",
-  "title": "isekai-pure-sky",
+  "title": "翼のない妃と雲上の恋",
   "sourceBatch": "batch_20260408_002",
-  "state": "ready_to_publish",
-  "episodes": 1,
-  "hitProbability": 53.0,
+  "genre": "otome_isekai_pure",
+  "state": "published",
+  "episodes": 30,
+  "hitProbability": 53,
   "llmTotal": 37,
   "createdAt": "2026-04-08T05:44:43.319967"
 }

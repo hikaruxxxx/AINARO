@@ -1,9 +1,10 @@
 {
   "slug": "vill-rom-letter-secret",
-  "title": "vill-rom-letter-secret",
+  "title": "差出人のない手紙と悪役令嬢",
   "sourceBatch": "batch_20260408_002",
-  "state": "ready_to_publish",
-  "episodes": 1,
+  "genre": "otome_akuyaku_zamaa",
+  "state": "published",
+  "episodes": 30,
   "hitProbability": 52.9,
   "llmTotal": 45,
   "createdAt": "2026-04-08T05:44:43.319967"
