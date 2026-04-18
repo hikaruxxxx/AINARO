@@ -7,14 +7,16 @@ import type { Novel } from "@/types/novel";
 
 type SwipeStackProps = {
   novels: Novel[];
+  initialIndex?: number;
   onSwipe: (novelId: string, direction: "right" | "left", novel: Novel) => void;
+  onIndexChange?: (newIndex: number) => void;
   onReadProgress?: (novelId: string, episodesRead: number) => void;
   onReset: () => void;
   likedCount: number;
 };
 
-export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, likedCount }: SwipeStackProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+export default function SwipeStack({ novels, initialIndex = 0, onSwipe, onIndexChange, onReadProgress, onReset, likedCount }: SwipeStackProps) {
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [buttonsHidden, setButtonsHidden] = useState(false);
   const lastScrollTop = useRef(0);
 
@@ -23,9 +25,11 @@ export default function SwipeStack({ novels, onSwipe, onReadProgress, onReset, l
       const novel = novels[currentIndex];
       if (!novel) return;
       onSwipe(novel.id, direction, novel);
-      setCurrentIndex((prev) => prev + 1);
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      onIndexChange?.(nextIndex);
     },
-    [currentIndex, novels, onSwipe]
+    [currentIndex, novels, onSwipe, onIndexChange]
   );
 
   const { offsetX, rotation, overlayOpacity, isAnimating, handlers, triggerSwipe } =
