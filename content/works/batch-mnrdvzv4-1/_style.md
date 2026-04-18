@@ -1,0 +1,20 @@
+# 文体プロファイル：考察勢、断罪の場で攻略開始
+
+## パラメータ
+
+```yaml
+pov: first_person
+tempo: slow
+sentence_length_avg: 28
+dialogue_ratio: 0.10
+inner_monologue_ratio: 0.30
+description_density: high
+humor_level: low
+tension_curve: wave
+vocabulary_level: standard
+line_break_frequency: frequent
+```
+
+## 文体の特徴
+
+一人称で内面描写が濃密。五感描写（蝋燭の匂い、大理石の冷たさ、汗の感触）を丁寧に積み重ね、緊迫感を演出する。前世のオタク語彙とファンタジー世界の荘厳な描写が交互に切り替わるコントラストが特徴的。地の文が長く、心理分析と状況整理を兼ねた独白が物語を牽引する。
