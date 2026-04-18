@@ -32,6 +32,10 @@ $ARGUMENTS を解析してください:
 - 単一作品: `content/works/{slug}/` の存在確認
 - all: `content/works/` 内の全作品ディレクトリをスキャン
 - 設定が不完全な作品（_settings.md がない）はスキップ
+- **隔離リストの除外**: `data/generation/_pipeline_quarantine.json` が存在する場合、そこに記載された slug は対象から除外する
+  - 隔離理由（伏線監査D判定 / S重要度オーバーデュー等）をログに出力
+  - 単一作品指定で隔離対象が指定された場合は、警告を出して終了（強制実行は禁止）
+  - 隔離は伏線が修正され `/validate-foreshadowing` で healthGrade が C 以上になれば手動で解除（quarantine.json から該当行を削除）
 
 ### 1-2. _pipeline_state.md の読み込み
 

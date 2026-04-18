@@ -59,6 +59,26 @@ Step 3が完了した作品全員に対して:
 
 content/works/ に昇格。_index.json更新。
 
+### Step 5b: validate-foreshadowing (必須ゲート)
+
+昇格した全作品に対して伏線健全性監査を実行する。**このゲートは必須**で、スキップ不可。
+
+```
+/validate-foreshadowing {slug}  (5並列 × n)
+```
+
+各監査結果は `data/feedback/foreshadowing_audit/{slug}_audit.json` に保存される。
+
+**ゲート判定**: 監査結果の `healthGrade` で公開可否を決める:
+- `S` / `A` / `B` → 通過（daily に進む）
+- `C` → 警告ログを出して通過
+- `D` 以下、または `overdueItems` に S 重要度を含む → **公開除外**
+  - 該当 slug を `data/generation/_pipeline_quarantine.json` に追記
+  - daily の対象から外す
+  - エラーログに修正提案（伏線監査の suggestion フィールド）を記録
+
+伏線台帳が存在しない作品（短編・初期話数）は監査をスキップして通過させる。
+
 ### Step 6: daily (オプション)
 
 `--no-publish` でなければ:
@@ -87,6 +107,7 @@ content/works/ に昇格。_index.json更新。
 - Phase 2磨き込み: 30作 (うち成功28、失敗2)
 - あらすじ: 28作
 - 昇格: 28作 → content/works/
+- 伏線監査: 28作 (S:5 A:12 B:8 C:2 D:1 → 隔離1作)
 - 公開: 5作 (daily)
 
 ### 実行時間: 4時間12分
