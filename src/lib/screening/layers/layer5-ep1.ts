@@ -63,7 +63,7 @@ function loadStyleTemplate(subgenre: string): string {
 function buildEp1Prompt(meta: WorkMetaFile, logline: string, plot: string, synopsis: string, arcPlot: string, isExploration = false): string {
   const style = loadStyleTemplate(meta.seed.genre);
   const styleBlock = style ? `\n# 文体ガイド(必ず従う)\n${style}\n` : "";
-  const patternBlock = buildPatternBlock(isExploration);
+  const patternBlock = buildPatternBlock(isExploration, meta.seed.genre);
   const target = Math.floor((MIN_CHARS + MAX_CHARS) / 2);
   return `あなたはWeb小説家です。以下の素材から ep1 の本文を執筆してください。
 他の作品の文体・構成・固有名詞を一切参照しないでください。各作品は独立した執筆者として書きます。

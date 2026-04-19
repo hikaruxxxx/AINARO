@@ -71,7 +71,7 @@ function buildEpPrompt(
 ): string {
   const style = loadStyleTemplate(meta.seed.genre);
   const styleBlock = style ? `\n# 文体ガイド(必ず従う)\n${style}\n` : "";
-  const patternBlock = buildPatternBlock(isExploration);
+  const patternBlock = buildPatternBlock(isExploration, meta.seed.genre);
   const prevBlock = prevEpisodes
     .map((e) => `## ep${String(e.ep).padStart(3, "0")}\n${e.body}`)
     .join("\n\n");
