@@ -101,6 +101,15 @@ function checkPositive(text: string): PatternFlags {
   return flags;
 }
 
+function readGenre(slug: string): string | null {
+  const mp = join(WORKS_DIR, slug, "_meta.json");
+  if (!existsSync(mp)) return null;
+  try {
+    const m = JSON.parse(readFileSync(mp, "utf-8"));
+    return m.seed?.genre ?? null;
+  } catch { return null; }
+}
+
 function main() {
   const cutoff = statSync(PATTERN_FILE).mtimeMs;
   console.log(`=== パターン効果検証 ===`);
@@ -114,6 +123,10 @@ function main() {
   const antiPre: Record<string, number> = {}, antiPost: Record<string, number> = {};
   const posPre: Record<string, number> = {}, posPost: Record<string, number> = {};
   let nPre = 0, nPost = 0;
+
+  // ジャンル別バケット
+  const genrePre = new Map<string, Bucket>();
+  const genrePost = new Map<string, Bucket>();
 
   for (const d of readdirSync(WORKS_DIR)) {
     const ep1 = join(WORKS_DIR, d, "layer5_ep001.md");
@@ -135,6 +148,14 @@ function main() {
     (isPost ? post : pre) && addToBucket(isPost ? post : pre, d, r);
     if (r.matches >= 3 && r.matches <= 7) addToBucket(isPost ? postMid : preMid, d, r);
     if (r.finalized) addToBucket(isPost ? postFin : preFin, d, r);
+
+    // ジャンル別集計
+    const genre = readGenre(d);
+    if (genre) {
+      const map = isPost ? genrePost : genrePre;
+      if (!map.has(genre)) map.set(genre, makeBucket());
+      addToBucket(map.get(genre)!, d, r);
+    }
   }
 
   console.log(`=== BT勝率 (マッチ≥3) ===`);
@@ -148,6 +169,25 @@ function main() {
   console.log(`=== BT勝率 (finalized のみ) ===`);
   reportBucket("PRE ", preFin);
   reportBucket("POST", postFin);
+  console.log();
+
+  // ジャンル別サマリ
+  console.log(`=== ジャンル別勝率 (マッチ≥3、PRE≥5件 AND POST≥3件のみ) ===`);
+  console.log(`${"genre".padEnd(28)} ${"PRE_n".padStart(6)} ${"POST_n".padStart(7)} ${"PRE勝率".padStart(8)} ${"POST勝率".padStart(9)} ${"Δ勝率".padStart(7)} ${"POST負率".padStart(9)}`);
+  const allGenres = new Set([...genrePre.keys(), ...genrePost.keys()]);
+  const rows: Array<[string, number, number, number, number, number, number]> = [];
+  for (const g of allGenres) {
+    const p = genrePre.get(g), q = genrePost.get(g);
+    if (!p || !q || p.slugs.length < 5 || q.slugs.length < 3) continue;
+    const pw = p.wins / (p.wins + p.losses + p.ties) * 100;
+    const qw = q.wins / (q.wins + q.losses + q.ties) * 100;
+    const ql = q.losses / (q.wins + q.losses + q.ties) * 100;
+    rows.push([g, p.slugs.length, q.slugs.length, pw, qw, qw - pw, ql]);
+  }
+  rows.sort((a, b) => b[5] - a[5]);
+  for (const [g, np, nq, pw, qw, dw, ql] of rows) {
+    console.log(`  ${g.padEnd(26)} ${String(np).padStart(6)} ${String(nq).padStart(7)} ${pw.toFixed(1).padStart(6)}% ${qw.toFixed(1).padStart(7)}% ${dw.toFixed(1).padStart(+dw>=0?5:6)}pt ${ql.toFixed(1).padStart(7)}%`);
+  }
   console.log();
 
   console.log(`=== アンチパターン検出率 (PRE n=${nPre} / POST n=${nPost}) ===`);
