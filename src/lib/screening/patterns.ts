@@ -26,6 +26,9 @@ const GENRE_LABEL_MAP: Record<string, string[]> = {
   otome_konyaku_haki: ["婚約破棄"],
   otome_isekai_pure: ["悪役令嬢"],
   mystery_sf: ["SF", "宇宙"],
+  mystery_horror: ["ホラー"],
+  mystery_detective: ["推理"],
+  mystery_action: ["推理", "アクション"],
 };
 
 // パターン一覧セクションからルールを抽出
