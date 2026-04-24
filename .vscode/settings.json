@@ -1,0 +1,27 @@
+{
+  // 大きいディレクトリをファイル監視から除外（VSCodeの応答低下を防ぐ）
+  "files.watcherExclude": {
+    "**/content/**": true,
+    "**/data/**": true,
+    "**/.next/**": true,
+    "**/node_modules/**": true,
+    "**/.vercel/**": true
+  },
+  // 検索からも除外（Cmd+P / Cmd+Shift+F の高速化）
+  "search.exclude": {
+    "**/content/**": true,
+    "**/data/**": true,
+    "**/.next/**": true,
+    "**/.vercel/**": true
+  },
+  // formatOnSave対象を絞る（巨大JSON/MDで固まるのを防ぐ）
+  "[json]": {
+    "editor.formatOnSave": false
+  },
+  "[jsonc]": {
+    "editor.formatOnSave": false
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false
+  }
+}
