@@ -14,7 +14,7 @@ import { getRanking } from "./league";
 import { callClaudeCli } from "./claude-cli";
 import type { LlmCallFn } from "./llm-compare";
 import type { LayerId } from "./work-queue";
-import { runHitPredictorV12, V12_PASS_THRESHOLD, HitPredictorError, type HitPredictionResult } from "./hit-predictor-v12";
+import { runHitPredictorV12, getV12Threshold, HitPredictorError, type HitPredictionResult } from "./hit-predictor-v12";
 
 /**
  * 各層の通過率(階層的バランス: 上流多様性、下流品質)。
@@ -158,8 +158,9 @@ export async function evaluateLayer(
       const result = runHitPredictorV12(slug, ep1Path, { episode: 1, genre });
       hitProbability = result.hitProbability;
       hitTier = result.tier;
-      v12Passed = hitProbability >= V12_PASS_THRESHOLD;
-      if (!v12Passed) v12Reason = `v12_below_${V12_PASS_THRESHOLD}`;
+      const threshold = getV12Threshold(genre);
+      v12Passed = hitProbability >= threshold;
+      if (!v12Passed) v12Reason = `v12_below_${threshold}(${genre})`;
       writeScreeningResult(slug, worksDir, {
         ...result,
         pairwiseRating: round.rating,

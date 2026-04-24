@@ -107,6 +107,41 @@ export function runHitPredictorV12(
 }
 
 /** Layer 5 通過判定: v12 アンサンブル閾値（%単位）
- * 04-24: 導入初日80件でv12>=25%が0件だったため15に暫定引き下げ。
- * 過去1083件の一括推論後にジャンル別分位点で再校正予定。 */
-export const V12_PASS_THRESHOLD = 15;
+ *
+ * 04-24: 過去1003件の一括推論結果から各ジャンルp80(Top20%)を算出。
+ * ジャンル別に閾値を設定し、ジャンル間のスコア分布差を吸収する。
+ * backfillデータ: data/experiments/v12-backfill-20260424.json
+ */
+export const V12_PASS_THRESHOLD_BY_GENRE: Record<string, number> = {
+  battle_dungeon: 20.6,
+  battle_modern_power: 20.0,
+  battle_vrmmo: 18.7,
+  battle_war_chronicle: 20.1,
+  isekai_high_fantasy: 20.4,
+  isekai_slowlife: 20.7,
+  isekai_tensei_cheat: 18.4,
+  isekai_tsuiho_zamaa: 18.3,
+  modern_history: 20.5,
+  modern_human_drama: 19.2,
+  modern_romance: 19.3,
+  modern_school: 19.5,
+  mystery_action: 20.3,
+  mystery_detective: 19.6,
+  mystery_horror: 19.3,
+  mystery_sf: 19.8,
+  otome_akuyaku_zamaa: 21.0,
+  otome_isekai_pure: 20.7,
+  otome_konyaku_haki: 20.7,
+  otome_villain_fantasy: 19.3,
+};
+
+/** 未知ジャンル用フォールバック(全体p80) */
+export const V12_PASS_THRESHOLD_DEFAULT = 20.0;
+
+/** ジャンル別閾値を引く。未定義ジャンルはデフォルトにフォールバック。 */
+export function getV12Threshold(genre: string): number {
+  return V12_PASS_THRESHOLD_BY_GENRE[genre] ?? V12_PASS_THRESHOLD_DEFAULT;
+}
+
+/** @deprecated ジャンル別閾値に移行済み。getV12Threshold() を使う。 */
+export const V12_PASS_THRESHOLD = V12_PASS_THRESHOLD_DEFAULT;
