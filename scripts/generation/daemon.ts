@@ -48,7 +48,7 @@ const TICK_INTERVAL_MS = 5_000;
 const MAX_WORKS_PER_TICK = 1;
 
 // シード生成: pending が一定数以下なら新規シード投入
-const MIN_LAYER1_PENDING = 3;
+const MIN_LAYER1_PENDING = 20;
 
 let shuttingDown = false;
 process.on("SIGTERM", () => {
@@ -190,12 +190,16 @@ async function processLayer(
   updateState(slug, layer, "done");
 
   // ペアワイズ評価(Layer 2-6)。Layer 1 は内部で素通し
+  // Layer 5 は v12 アンサンブル予測も実行してAND判定する
   let passed = true;
   try {
     const evalResult = await evaluateLayer(slug, layer, genre, isExploration);
     passed = evalResult.passed;
+    const v12Part = evalResult.hitProbability != null
+      ? ` v12=${evalResult.hitProbability.toFixed(1)}%(${evalResult.hitTier})`
+      : "";
     console.log(
-      `[daemon] layer${layer} eval slug=${slug} passed=${passed} rating=${evalResult.rating.toFixed(0)} matches=${evalResult.matchCount} rank=${evalResult.rank}/${evalResult.totalInLayer}${evalResult.reason ? ` (${evalResult.reason})` : ""}`,
+      `[daemon] layer${layer} eval slug=${slug} passed=${passed} rating=${evalResult.rating.toFixed(0)} matches=${evalResult.matchCount} rank=${evalResult.rank}/${evalResult.totalInLayer}${v12Part}${evalResult.reason ? ` (${evalResult.reason})` : ""}`,
     );
   } catch (e) {
     console.error(`[daemon] layer${layer} eval失敗 slug=${slug}:`, e);
