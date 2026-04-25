@@ -49,3 +49,7 @@ supabase/.temp/
 __pycache__/
 *.pyc
 *.pyo
+
+# claude code runtime
+.claude/scheduled_tasks.lock
+.claude/worktrees/
