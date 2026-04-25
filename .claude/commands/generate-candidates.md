@@ -68,21 +68,15 @@ N個のサブエージェントを並列起動する。各エージェントへ�
 
 出力: 各候補の grade (S/A/B/C/D) と 5軸スコア
 
-#### 3-B. Hit予測
+#### 3-B. Hit予測（v11-ep1）
 
-各候補について、predict-hit相当を実行:
+各候補について v11-ep1 で予測。LLM スコア不要:
 
 ```bash
-python3 scripts/predict/predict-hit.py \
+python3 scripts/predict/predict-hit-v11.py \
   --slug {slug} --episode {num} \
-  --text-file data/candidates/{slug}_ep{num:03d}_c{i}.md \
-  --llm-hook {hook} --llm-character {character} \
-  --llm-originality {originality} --llm-prose {prose} \
-  --llm-tension {tension} --llm-pull {pull}
+  --text-file data/candidates/{slug}_ep{num:03d}_c{i}.md
 ```
-
-LLMスコアは、各候補のテキストを読んで採点する（1-10の6軸）。
-候補間で公平な基準で採点すること。
 
 出力: 各候補の hitProbability (%)
 

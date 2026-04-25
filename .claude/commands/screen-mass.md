@@ -1,5 +1,5 @@
 あなたはAINAROの大量スクリーニング生成エージェントです。
-高速で大量の作品を生成し、v10ヒット予測モデルでスクリーニングして上位作品を選別します。
+高速で大量の作品を生成し、v12 ヒット予測アンサンブル（ep1 × longform）でスクリーニングして上位作品を選別します。
 
 **事前必読**: `docs/architecture/generation_pipeline_management.md` を読んで、ディレクトリ構造・状態モデル・索引管理ルールを理解してから実行する。
 
@@ -30,7 +30,7 @@ $ARGUMENTS を解析してください:
 「最高の作品を生成AIで生み出す」目的のためのPhase 1スクリーニング:
 
 1. **量を稼ぐ**: 単発生成（候補生成なし）でep1のみ作る
-2. **速攻評価**: v10ヒット予測 + 軽い校正で即座にスコアリング
+2. **速攻評価**: v12 ヒット予測アンサンブル（LLM不要・本文+タイトルのみ）で即座にスコアリング。ep1モデル (GP/ep top20%) と longform モデル (≥50話継続) の幾何平均
 3. **上位選別**: ヒット確率上位K件を「Phase 2候補」として抽出
 4. **下位破棄**: ヒット確率10%未満は学習データとして保存し除外
 
@@ -212,34 +212,57 @@ LLM評価を呼ぶ前に、決定論的な特徴量で**明らかに評価対象
 
 Opusサブエージェントで6軸採点（hook/character/originality/prose/tension/pull）
 
-#### 3-B. v10ヒット予測
+#### 3-B. v12 アンサンブル ヒット予測
+
+v12 は2つのモデルの幾何平均でスコア化する:
+- **v12-ep1** (AUC 0.746): GP/ep top20% を予測。短期人気・読者初速に強い
+- **v12-longform** (Top5% Precision 69.5%): ≥50話の長編化を予測。物語の継続力
+
+両方高い作品が真のヒット候補。いずれも LLM スコア不要・本文+タイトルのみで自己完結:
 
 ```bash
-python3 scripts/predict/predict-hit.py \
+python3 scripts/predict/predict-hit-v12.py \
   --slug {slug} --episode 1 \
-  --text-file data/generation/batches/{batch_id}/{slug}/ep001.md \
-  --llm-hook {h} --llm-character {c} --llm-originality {o} \
-  --llm-prose {p} --llm-tension {t} --llm-pull {pl}
+  --text-file data/generation/batches/{batch_id}/{slug}/ep001.md
 ```
+
+モデル:
+- `data/models/hit-prediction-v12-ep1.json`
+- `data/models/hit-prediction-v12-longform.json`
+
+出力: `data/feedback/hit-prediction/{slug}_ep001.json` に以下を記録:
+- `hitProbability`: アンサンブルスコア (幾何平均) — ソート・選別の主キー
+- `hitProbabilityEp1` / `hitProbabilityLongform`: 個別スコア
+- `tier` / `tierEp1` / `tierLongform`: 各スコアの tier
+
+**Tier 定義 (アンサンブルスコア基準):**
+- top (≥45%): 両モデル高スコア＝真のヒット候補
+- upper (35-45%): 有望候補
+- mid (25-35%): 標準
+- lower (15-25%)
+- bottom (<15%)
 
 ### Step 4: 選別と保存
 
-ヒット確率でソートして上位K件を選別:
+アンサンブル `hitProbability` で降順ソートして上位K件を選別:
 
-**選別ルール:**
-1. ヒット確率 ≥ 50% (top tier) → 自動的に「Phase 2候補」
-2. ヒット確率 35-50% (upper tier) → top-K の枠が余れば追加 + **ボーダー再評価枠5件**を確保
-3. ヒット確率 20-35% (mid tier) → top-K の枠が余れば追加
-4. ヒット確率 < 20% → 除外（学習データとして保存、後述）
+**選別ルール (アンサンブル閾値):**
+1. アンサンブル ≥ 45% (top) → 自動的に「Phase 2候補」
+2. アンサンブル 35-45% (upper) → top-K の枠が余れば追加 + **ボーダー再評価枠5件**を確保
+3. アンサンブル 25-35% (mid) → top-K の枠が余れば追加
+4. アンサンブル < 15% (bottom) → 除外（学習データとして保存、後述）
+
+**片肺スコアの救済:**
+- `hitProbabilityEp1 ≥ 40%` かつ `hitProbabilityLongform < 15%`: 初速ヒット型。ep2 で長編モデル再評価
+- `hitProbabilityLongform ≥ 40%` かつ `hitProbabilityEp1 < 15%`: 遅咲き型。あらすじで初速を補強できるか検討
 
 **ボーダー帯の再評価（救済枠）:**
-- 35-50% 帯から最大5件を選び、**ep2まで追加生成**して再度 v10 で評価
-- ep1+ep2 の評価でhit確率が ≥45% に上がった作品は Phase 2候補に救済昇格
+- アンサンブル 35-45% 帯から最大5件を選び、**ep2まで追加生成**して再度 v12 で評価
+- ep1+ep2 の評価でアンサンブルが ≥40% に上がった作品は Phase 2候補に救済昇格
 - 上がらなければ通常通り破棄
-- ep2追加生成のコストは小さく、ep1だけでは判断できない作品を救える
 
 **下位の学習データ化（必ず実行）:**
-- ヒット確率 < 20% の作品は `data/training/negative/{batch_id}/{slug}/` に **必ず移動**
+- ヒット確率 < 15% の作品は `data/training/negative/{batch_id}/{slug}/` に **必ず移動**
 - ep001.md + screening_result.json をセットで保存
 - 後段のv11以降のモデル学習データとして利用
 - 「保存し忘れ」を防ぐため、Step 4 の最後で件数を `summary.json` の `negativeSavedCount` に記録し、`tierDistribution.bottom + lower` と一致するか assert

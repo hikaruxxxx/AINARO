@@ -78,16 +78,15 @@ Web小説プラットフォームで「一覧→クリック」を生むあら�
 
 ### Step 5: ヒット予測への反映
 
-採用したあらすじのSynopsisスコアを使って、v10モデルでヒット確率を再予測:
+v11-ep1 モデルで ep1 のヒット確率を取得（Synopsis スコアは v11 では使わないが、
+あらすじ採用の判断材料として記録）:
 
 ```bash
-python3 scripts/predict/predict-hit.py \
-  --slug {slug} --episode 1 \
-  --synopsis-concept {concept} --synopsis-hook {hook} \
-  --synopsis-differentiation {diff} --synopsis-appeal {appeal}
+python3 scripts/predict/predict-hit-v11.py \
+  --slug {slug} --episode 1
 ```
 
-結果を報告に含める。
+結果を報告に含める。Synopsis スコアはあらすじの質の指標として別途記録する。
 
 ### Step 6: 保存
 
