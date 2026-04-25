@@ -109,34 +109,37 @@ export function runHitPredictorV12(
 /** Layer 5 通過判定: v12 アンサンブル閾値（%単位）
  *
  * 04-24: 過去1003件の一括推論結果から各ジャンルp80(Top20%)を算出。
+ * 04-25: p80だとLayer5実測分布(median=18.1)に対し合格率2%まで低下。
+ *        パイプラインが詰まるため、p70(Top30%)に緩和。
+ *        L6に進む作品の絶対数を確保しつつ、Top tier識別の方向性は維持。
  * ジャンル別に閾値を設定し、ジャンル間のスコア分布差を吸収する。
  * backfillデータ: data/experiments/v12-backfill-20260424.json
  */
 export const V12_PASS_THRESHOLD_BY_GENRE: Record<string, number> = {
-  battle_dungeon: 20.6,
-  battle_modern_power: 20.0,
-  battle_vrmmo: 18.7,
-  battle_war_chronicle: 20.1,
-  isekai_high_fantasy: 20.4,
-  isekai_slowlife: 20.7,
-  isekai_tensei_cheat: 18.4,
-  isekai_tsuiho_zamaa: 18.3,
-  modern_history: 20.5,
-  modern_human_drama: 19.2,
-  modern_romance: 19.3,
-  modern_school: 19.5,
-  mystery_action: 20.3,
-  mystery_detective: 19.6,
-  mystery_horror: 19.3,
-  mystery_sf: 19.8,
-  otome_akuyaku_zamaa: 21.0,
-  otome_isekai_pure: 20.7,
-  otome_konyaku_haki: 20.7,
-  otome_villain_fantasy: 19.3,
+  battle_dungeon: 20.0,
+  battle_modern_power: 19.6,
+  battle_vrmmo: 18.3,
+  battle_war_chronicle: 19.3,
+  isekai_high_fantasy: 20.0,
+  isekai_slowlife: 20.2,
+  isekai_tensei_cheat: 17.8,
+  isekai_tsuiho_zamaa: 17.9,
+  modern_history: 20.0,
+  modern_human_drama: 18.4,
+  modern_romance: 18.5,
+  modern_school: 19.2,
+  mystery_action: 19.1,
+  mystery_detective: 19.2,
+  mystery_horror: 18.7,
+  mystery_sf: 19.4,
+  otome_akuyaku_zamaa: 20.0,
+  otome_isekai_pure: 19.8,
+  otome_konyaku_haki: 20.2,
+  otome_villain_fantasy: 18.9,
 };
 
-/** 未知ジャンル用フォールバック(全体p80) */
-export const V12_PASS_THRESHOLD_DEFAULT = 20.0;
+/** 未知ジャンル用フォールバック(全体p70) */
+export const V12_PASS_THRESHOLD_DEFAULT = 19.3;
 
 /** ジャンル別閾値を引く。未定義ジャンルはデフォルトにフォールバック。 */
 export function getV12Threshold(genre: string): number {
