@@ -115,7 +115,7 @@ export function makeFingerprint(
   genre: string,
   tags: ElementTags,
 ): string {
-  return `${primaryDesire}|${genre}|${tags.境遇}|${tags.転機}`;
+  return `${primaryDesire}|${genre}|${tags.境遇}|${tags.転機}|${tags.方向}|${tags.フック}`;
 }
 
 /** 重み付き抽選 */
