@@ -137,10 +137,17 @@ export async function evaluateLayer(
 
   // 通過判定: 上位 PASS_RATIO 以内
   // 同層内に対戦相手がほぼいない初期状態(N<5)では「未確定なら通過」を採用(コールドスタート)
+  // 04-27: matches<3 は統計的判断材料不足のため暫定pass。リーグ蓄積後の新規が
+  //        matches=1〜2で即脱落して L3 通過率が22%まで低下していた問題への対処。
   const passRatio = LAYER_PASS_RATIO[layer];
   let pairwisePassed = false;
+  let coldStartReason: string | undefined;
   if (total < 5) {
-    pairwisePassed = true; // コールドスタート
+    pairwisePassed = true;
+    coldStartReason = "cold_start_pass";
+  } else if (round.matchCount < 3) {
+    pairwisePassed = true;
+    coldStartReason = "low_match_pass";
   } else {
     const cutoffRank = Math.max(1, Math.ceil(total * passRatio));
     pairwisePassed = rank <= cutoffRank;
@@ -177,7 +184,7 @@ export async function evaluateLayer(
 
   const passed = pairwisePassed && v12Passed;
   const reason =
-    total < 5 ? "cold_start_pass"
+    coldStartReason ? coldStartReason
     : v12Reason ? v12Reason
     : undefined;
 
