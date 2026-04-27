@@ -27,6 +27,7 @@ import { runLayer5 } from "../../src/lib/screening/layers/layer5-ep1";
 import { runLayer6 } from "../../src/lib/screening/layers/layer6-ep23";
 import { evaluateLayer } from "../../src/lib/screening/layer-eval";
 import { recordAppliedPatterns } from "../../src/lib/screening/patterns";
+import { saveRejectedTrainingSample } from "../../src/lib/screening/training-data";
 
 // ε値(階層的バランス)
 const LAYER_EPSILON: Record<LayerId, number> = {
@@ -143,27 +144,27 @@ async function processLayer(
   let reason: string | undefined;
 
   if (layer === 1) {
-    const r = await runLayer1(slug);
+    const r = await runGenerationWithRetry(() => runLayer1(slug));
     ok = r.ok;
     reason = r.reason;
     if (ok) console.log(`[daemon] layer1 ok slug=${slug} logline="${r.logline}"`);
   } else if (layer === 2) {
-    const r = await runLayer2(slug);
+    const r = await runGenerationWithRetry(() => runLayer2(slug));
     ok = r.ok;
     reason = r.reason;
     if (ok) console.log(`[daemon] layer2 ok slug=${slug}`);
   } else if (layer === 3) {
-    const r = await runLayer3(slug);
+    const r = await runGenerationWithRetry(() => runLayer3(slug));
     ok = r.ok;
     reason = r.reason;
     if (ok) console.log(`[daemon] layer3 ok slug=${slug}`);
   } else if (layer === 4) {
-    const r = await runLayer4(slug);
+    const r = await runGenerationWithRetry(() => runLayer4(slug));
     ok = r.ok;
     reason = r.reason;
     if (ok) console.log(`[daemon] layer4 ok slug=${slug}`);
   } else if (layer === 5) {
-    const r = await runLayer5(slug, undefined, isExploration);
+    const r = await runGenerationWithRetry(() => runLayer5(slug, undefined, isExploration));
     ok = r.ok;
     reason = r.reason;
     if (ok) {
@@ -172,7 +173,7 @@ async function processLayer(
       recordAppliedPatterns("data/generation/works", slug, isExploration);
     }
   } else if (layer === 6) {
-    const r = await runLayer6(slug, undefined, isExploration);
+    const r = await runGenerationWithRetry(() => runLayer6(slug, undefined, isExploration));
     ok = r.ok;
     reason = r.reason;
     if (ok) console.log(`[daemon] layer6 ok slug=${slug} ep2=${r.ep2CharCount} ep3=${r.ep3CharCount} exploration=${isExploration}`);
@@ -192,9 +193,11 @@ async function processLayer(
   // ペアワイズ評価(Layer 2-6)。Layer 1 は内部で素通し
   // Layer 5 は v12 アンサンブル予測も実行してAND判定する
   let passed = true;
+  let evalReason: string | undefined;
   try {
     const evalResult = await evaluateLayer(slug, layer, genre, isExploration);
     passed = evalResult.passed;
+    evalReason = evalResult.reason;
     const v12Part = evalResult.hitProbability != null
       ? ` v12=${evalResult.hitProbability.toFixed(1)}%(${evalResult.hitTier})`
       : "";
@@ -203,20 +206,59 @@ async function processLayer(
     );
   } catch (e) {
     console.error(`[daemon] layer${layer} eval失敗 slug=${slug}:`, e);
-    // 評価失敗は通過扱い(下流で再判定の機会あり)
-    passed = true;
+    // 評価失敗は証拠不足として保留する。positive evidence なしでは通さない。
+    passed = false;
+    evalReason = `evaluation_unavailable:${String(e).slice(0, 80)}`;
   }
 
-  if (layer < 6 && passed) {
-    enqueue({
-      slug,
-      layer: (layer + 1) as LayerId,
-      genre,
-      isExploration,
-    });
-  } else if (layer < 6) {
+  if (passed) {
+    // Layer 6 が pass した場合は line 191 の updateState(slug, layer, "done") のままで終了。
+    // promotion は別経路 (promote-to-works.ts) で行う。
+    if (layer < 6) {
+      enqueue({
+        slug,
+        layer: (layer + 1) as LayerId,
+        genre,
+        isExploration,
+      });
+    }
+  } else {
+    if (isEvidenceHoldReason(evalReason)) {
+      updateState(slug, layer, "waiting_evidence", { meta: { reason: evalReason } });
+      return;
+    }
+    // Layer 2 以降の reject は層別訓練データとして保存する (設計書 §10)。
+    const saved = saveRejectedTrainingSample(slug, layer, genre, evalReason ?? "absolute_quality_threshold_failed");
+    if (saved) console.log(`[daemon] training sample saved slug=${slug} layer=${layer}`);
     updateState(slug, layer, "rejected");
   }
+}
+
+function isEvidenceHoldReason(reason: string | undefined): boolean {
+  return (
+    reason === "insufficient_evidence" ||
+    reason?.startsWith("hit_probability_unavailable") === true ||
+    reason?.startsWith("evaluation_unavailable") === true
+  );
+}
+
+async function runGenerationWithRetry<T extends { ok: boolean; reason?: string }>(
+  fn: () => Promise<T>,
+): Promise<T> {
+  const first = await fn();
+  if (first.ok || !shouldRetryGeneration(first.reason)) return first;
+  return fn();
+}
+
+function shouldRetryGeneration(reason: string | undefined): boolean {
+  if (!reason) return false;
+  return (
+    reason.startsWith("claude_call_failed") ||
+    reason.includes("parse_failed") ||
+    reason.includes("missing_section") ||
+    reason.includes("too_few_episodes") ||
+    reason.includes("too_many_episodes")
+  );
 }
 
 function generateSlug(genre: string): string {

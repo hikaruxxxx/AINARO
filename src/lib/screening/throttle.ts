@@ -10,7 +10,7 @@
 // - 上限値は env で設定(SCREEN_MASS_TOKEN_LIMIT_5H)
 // - トークン推定は claude -p の出力から取れない場合は文字数 ÷ 4 で近似
 
-import { appendFileSync, existsSync, readFileSync, writeFileSync, mkdirSync, openSync, closeSync, flockSync } from "fs";
+import { appendFileSync, existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from "fs";
 import { dirname } from "path";
 
 // ファイルロック: 複数プロセス間の排他制御
@@ -24,7 +24,7 @@ function withFileLock<T>(lockPath: string, fn: () => T): T {
   while (existsSync(lockFile)) {
     if (Date.now() - start > maxWait) {
       // タイムアウト: staleロックを除去
-      try { require("fs").unlinkSync(lockFile); } catch {}
+      try { unlinkSync(lockFile); } catch {}
       break;
     }
     // 10ms待機
@@ -35,7 +35,7 @@ function withFileLock<T>(lockPath: string, fn: () => T): T {
     writeFileSync(lockFile, String(process.pid));
     return fn();
   } finally {
-    try { require("fs").unlinkSync(lockFile); } catch {}
+    try { unlinkSync(lockFile); } catch {}
   }
 }
 
@@ -63,13 +63,13 @@ export interface ThrottleConfig {
 }
 
 export const DEFAULT_THROTTLE_CONFIG: ThrottleConfig = {
-  // 実測データ収集後に正確な値に調整する。
-  // claude -p --output-format json で実トークン数を記録するようにしたので、
-  // 数日分のデータが溜まったら getUsageIn5h() のピーク値から逆算する。
-  tokenLimit5h: Number(process.env.SCREEN_MASS_TOKEN_LIMIT_5H ?? 15_000_000),
-  warnRatio: 0.8,
-  pauseRatio: 0.95,
-  warnSleepMs: 1_000,
+  // 2026-04-28 実測: 28M トークンで claude CLI がレート制限エラー (exit 1) を返した。
+  // 実際の Max 上限は 25-30M の範囲なので、安全マージンを取って 23M 上限とする。
+  // env で上書き可能。
+  tokenLimit5h: Number(process.env.SCREEN_MASS_TOKEN_LIMIT_5H ?? 23_000_000),
+  warnRatio: 0.7,
+  pauseRatio: 0.85,
+  warnSleepMs: 2_000,
   pauseSleepMs: 60_000,
   logPath: "data/generation/_usage.jsonl",
 };

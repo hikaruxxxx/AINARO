@@ -1,5 +1,7 @@
 # AI小説パイプライン全体設計書
 
+> **Phase 1 生成パイプラインとの関係**: 本文書は配信・計測・改善まで含む全体運用設計です。Phase 1 の生成スクリーニング詳細は `docs/architecture/phase1_pipeline_design_v2.md` を正典とします。本文中の `/generate` 単話生成、従来の人気予測エージェント、校正中心の品質ゲートは Phase 1 Layer 1〜6 の常時稼働パイプラインより下位の補助・後段運用として扱います。
+
 ## 本文書の位置づけ
 
 ai_generation_architecture.md（ツール構成・コスト）の上位に位置する**運用設計書**。

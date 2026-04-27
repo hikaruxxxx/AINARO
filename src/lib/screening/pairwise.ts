@@ -36,16 +36,10 @@ const SYMMETRIC_MIN_LAYER = 5;
 
 // --- ペアワイズ比較キャッシュ ---
 // 同じ(slugA, slugB, layer)のペアが matches.jsonl に既に存在する場合、
-// LLM比較をスキップして既存結果を使う。
-// Layer5以降のテキストはimmutableなので安全。
+// LLM比較と再記録をスキップする。既存結果を再記録するとmatchCountが水増しされる。
 
-interface CachedMatch {
-  winner: Winner;
-  reason: string;
-}
-
-const matchCache = new Map<string, CachedMatch>();
-let cacheLoadedForGenre: string | null = null;
+const matchCache = new Set<string>();
+let cacheLoadedForKey: string | null = null;
 
 function getCacheKey(slugA: string, slugB: string, layer: number): string {
   // 順序非依存(A vs B と B vs A は同じ比較)
@@ -54,11 +48,12 @@ function getCacheKey(slugA: string, slugB: string, layer: number): string {
 }
 
 function ensureMatchCacheLoaded(genre: string, baseDir: string): void {
-  if (cacheLoadedForGenre === genre) return;
+  const cacheScope = `${baseDir}|${genre}`;
+  if (cacheLoadedForKey === cacheScope) return;
   matchCache.clear();
   const matchesPath = join(baseDir, genre, "matches.jsonl");
   if (!existsSync(matchesPath)) {
-    cacheLoadedForGenre = genre;
+    cacheLoadedForKey = cacheScope;
     return;
   }
   const lines = readFileSync(matchesPath, "utf-8").split("\n").filter(Boolean);
@@ -66,17 +61,16 @@ function ensureMatchCacheLoaded(genre: string, baseDir: string): void {
     try {
       const m = JSON.parse(line) as MatchRecord;
       const key = getCacheKey(m.slugA, m.slugB, m.layer);
-      // 最新の結果で上書き(複数回比較されている場合)
-      matchCache.set(key, { winner: m.winner, reason: m.reason });
+      matchCache.add(key);
     } catch { /* skip */ }
   }
-  cacheLoadedForGenre = genre;
+  cacheLoadedForKey = cacheScope;
 }
 
-function getCachedResult(slugA: string, slugB: string, layer: number, genre: string, baseDir: string): CachedMatch | null {
+function hasCachedMatch(slugA: string, slugB: string, layer: number, genre: string, baseDir: string): boolean {
   ensureMatchCacheLoaded(genre, baseDir);
   const key = getCacheKey(slugA, slugB, layer);
-  return matchCache.get(key) ?? null;
+  return matchCache.has(key);
 }
 
 export interface PairwiseRoundInput {
@@ -134,12 +128,9 @@ export async function runPairwiseRound(
   let matchesPlayed = 0;
 
   for (const opp of opponents) {
-    // キャッシュチェック: 同じペアの比較済み結果があればLLM呼び出しをスキップ
-    const cached = getCachedResult(input.slug, opp.slug, input.layer, input.genre, baseDir);
-    if (cached) {
-      recordMatch(input.genre, input.slug, opp.slug, input.layer, cached.winner, `cached:${cached.reason}`, baseDir);
+    // 同一ペアの再記録は matchCount を水増しするため、比較済みならスキップする。
+    if (hasCachedMatch(input.slug, opp.slug, input.layer, input.genre, baseDir)) {
       opponentsTried.push(opp.slug);
-      matchesPlayed++;
       continue;
     }
 
@@ -160,7 +151,7 @@ export async function runPairwiseRound(
     recordMatch(input.genre, input.slug, opp.slug, input.layer, result.winner, result.reason, baseDir);
     // キャッシュに追加
     const key = getCacheKey(input.slug, opp.slug, input.layer);
-    matchCache.set(key, { winner: result.winner, reason: result.reason });
+    matchCache.add(key);
     opponentsTried.push(opp.slug);
     matchesPlayed++;
   }

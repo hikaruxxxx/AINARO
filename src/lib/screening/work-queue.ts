@@ -15,6 +15,7 @@ export type LayerId = 1 | 2 | 3 | 4 | 5 | 6;
 export type WorkState =
   | "pending" // キュー待機中
   | "processing" // 生成中(子プロセス起動済み)
+  | "waiting_evidence" // 評価証拠不足で保留中
   | "done" // 当該層完了、次層へ
   | "rejected" // 評価で没
   | "failed"; // エラーで失敗
@@ -142,9 +143,9 @@ export function compactQueue(layer: LayerId, cfg: QueueConfig = DEFAULT_QUEUE_CO
   const latest = getLatestEntries(layer, cfg);
   const before = latest.size;
 
-  // pending と processing だけ残す
+  // pending / processing / waiting_evidence だけ残す
   const active = Array.from(latest.values()).filter(
-    (e) => e.state === "pending" || e.state === "processing",
+    (e) => e.state === "pending" || e.state === "processing" || e.state === "waiting_evidence",
   );
 
   // アーカイブに完了済みを退避
@@ -176,6 +177,7 @@ export function queueStats(cfg: QueueConfig = DEFAULT_QUEUE_CONFIG): Record<
     const counts: Record<WorkState, number> = {
       pending: 0,
       processing: 0,
+      waiting_evidence: 0,
       done: 0,
       rejected: 0,
       failed: 0,

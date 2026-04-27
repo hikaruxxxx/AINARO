@@ -106,48 +106,21 @@ export function runHitPredictorV12(
   }
 }
 
-/** Layer 5 通過判定: v12 アンサンブル閾値（%単位）
+/** Layer 5 通過判定: v12 アンサンブルの絶対確率閾値（%単位）
  *
- * 04-24: 過去1003件の一括推論結果から各ジャンルp80(Top20%)を算出。
- * 04-25: p80→p70に緩和(合格率2%→8%)。L6到達は確保したが Top30% 想定より低い。
- * 04-26: 16時間定常運用の合格率8.3%確認。さらにp60(Top40%)に追加緩和し
- *        合格率15-20%帯を狙うが効果限定的。
- * 04-27: 真因はL3 cold_start脱落と判明(matches<3 暫定pass導入で L3=22%→100%、
- *        L5=8%→52%に改善)。p60は実質Top40%を通過させ過ぎなのでp70に復帰。
- *        Top30%水準で品質を保ちつつ、cold_start緩和でL6到達数を維持する。
- * ジャンル別に閾値を設定し、ジャンル間のスコア分布差を吸収する。
- * backfillデータ: data/experiments/v12-backfill-20260424.json
+ * Phase 1 は候補集合内の相対順位ではなく、anchor reference pool に対して
+ * 校正された絶対 hit probability で判定する。
+ * 初期値は anchor 校正前の保守値。anchor 作成後は
+ * data/generation/anchors/calibration.json の値に移す。
  */
-export const V12_PASS_THRESHOLD_BY_GENRE: Record<string, number> = {
-  battle_dungeon: 20.0,
-  battle_modern_power: 19.6,
-  battle_vrmmo: 18.3,
-  battle_war_chronicle: 19.3,
-  isekai_high_fantasy: 20.0,
-  isekai_slowlife: 20.2,
-  isekai_tensei_cheat: 17.8,
-  isekai_tsuiho_zamaa: 17.9,
-  modern_history: 20.0,
-  modern_human_drama: 18.4,
-  modern_romance: 18.5,
-  modern_school: 19.2,
-  mystery_action: 19.1,
-  mystery_detective: 19.2,
-  mystery_horror: 18.7,
-  mystery_sf: 19.4,
-  otome_akuyaku_zamaa: 20.0,
-  otome_isekai_pure: 19.8,
-  otome_konyaku_haki: 20.2,
-  otome_villain_fantasy: 18.9,
-};
+export const V12_ABSOLUTE_PASS_THRESHOLD = 55.0;
+export const V12_ABSOLUTE_REJECT_THRESHOLD = 35.0;
 
-/** 未知ジャンル用フォールバック(全体p70) */
-export const V12_PASS_THRESHOLD_DEFAULT = 19.3;
-
-/** ジャンル別閾値を引く。未定義ジャンルはデフォルトにフォールバック。 */
+/** 絶対閾値を返す。genre 引数は将来の anchor 校正ファイル連携用に残す。 */
 export function getV12Threshold(genre: string): number {
-  return V12_PASS_THRESHOLD_BY_GENRE[genre] ?? V12_PASS_THRESHOLD_DEFAULT;
+  void genre;
+  return V12_ABSOLUTE_PASS_THRESHOLD;
 }
 
-/** @deprecated ジャンル別閾値に移行済み。getV12Threshold() を使う。 */
-export const V12_PASS_THRESHOLD = V12_PASS_THRESHOLD_DEFAULT;
+/** @deprecated 絶対確率閾値に移行済み。getV12Threshold() を使う。 */
+export const V12_PASS_THRESHOLD = V12_ABSOLUTE_PASS_THRESHOLD;

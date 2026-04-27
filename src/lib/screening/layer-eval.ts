@@ -5,7 +5,7 @@
 // - 同ジャンル・同層の対戦相手を引く
 // - claude -p で比較プロンプトを実行
 // - レーティング更新
-// - 通過判定: 「上位 PASS_RATIO 以内に入っているか」で次層への進行を決める
+// - 通過判定: anchor校正済みの絶対Elo閾値で次層への進行を決める
 
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
@@ -14,20 +14,29 @@ import { getRanking } from "./league";
 import { callClaudeCli } from "./claude-cli";
 import type { LlmCallFn } from "./llm-compare";
 import type { LayerId } from "./work-queue";
-import { runHitPredictorV12, getV12Threshold, HitPredictorError, type HitPredictionResult } from "./hit-predictor-v12";
+import { runHitPredictorV12, HitPredictorError, type HitPredictionResult } from "./hit-predictor-v12";
+import { getCalibratedPassElo, getCalibratedMiddleMedianElo, getCalibratedHitProbabilityThresholds, isCalibrated } from "./calibration-loader";
+import { evaluateCandidateAgainstAnchors, hasAnchorRatings } from "./anchor-eval";
+
+// 候補が anchor と対戦する数 (各帯から ceil(K/3) ずつ)
+const ANCHOR_MATCHES_PER_CANDIDATE = 6;
 
 /**
- * 各層の通過率(階層的バランス: 上流多様性、下流品質)。
- * Layer 5 はペアワイズの基準を上位50%に緩め、v12 スコア≥25% との AND 判定で通す。
+ * 各層の絶対Elo閾値 (anchor 未校正ジャンルへのフォールバック)。
+ * 校正済みジャンルは data/generation/anchors/calibration.json から passElo を読む。
  */
-export const LAYER_PASS_RATIO: Record<LayerId, number> = {
-  1: 0.8,
-  2: 0.5,
-  3: 0.5,
-  4: 0.4,
-  5: 0.5,
-  6: 1.0,
+export const LAYER_ELO_THRESHOLD_FALLBACK: Record<LayerId, number> = {
+  1: 0,
+  2: 1510,
+  3: 1520,
+  4: 1535,
+  5: 1550,
+  6: 0,
 };
+
+function getLayerEloThreshold(genre: string, layer: LayerId): number {
+  return getCalibratedPassElo(genre, layer, LAYER_ELO_THRESHOLD_FALLBACK[layer]);
+}
 
 /** 各層の本文ファイル名 */
 const LAYER_FILES: Record<LayerId, string> = {
@@ -77,8 +86,8 @@ export interface EvalResult {
  *
  * 評価ロジック:
  * - レーティングが未確定(matchCount < MATCH_THRESHOLD)なら、ラウンドを回して比較を進める
- * - 確定後、同層内のレーティング順位を計算
- * - 上位 LAYER_PASS_RATIO[layer] に入っていれば passed=true
+ * - 証拠不足なら passed=false / reason=insufficient_evidence で保留扱いにする
+ * - 確定後、絶対Elo閾値を満たしていれば passed=true
  *
  * 注: Layer 1 はテキスト量が少なく比較の意味が薄いので、評価せず常に passed=true で返す。
  */
@@ -94,63 +103,98 @@ export async function evaluateLayer(
     return { passed: true, rating: 1500, matchCount: 0, finalized: false, reason: "layer1_skip" };
   }
 
-  // Layer 2 も素通し(04-24 試験: L3/L4が既にcold_start_passで実質素通しなので、
-  // L2も評価せずL5でまとめて絞る設計に変更。layer2_compareのLLM呼び出しを削減)
-  if (layer === 2) {
-    return { passed: true, rating: 1500, matchCount: 0, finalized: false, reason: "layer2_skip_trial" };
-  }
-
   const text = loadLayerText(slug, layer, worksDir);
   if (!text) {
     return { passed: false, rating: 1500, matchCount: 0, finalized: false, reason: "text_missing" };
   }
 
-  // 対戦相手のテキストを読み込む関数
-  // Layer2以上: 対戦相手は冒頭2000字に制限（自作品は全文で比較される）
-  // 04-24: layer2-4にも拡張。比較入力サイズを抑えてOpus枠を温存
-  const OPPONENT_TEXT_LIMIT = 2000;
-  const loadOpponentText = async (oppSlug: string): Promise<string> => {
-    const full = loadLayerText(oppSlug, layer, worksDir);
-    return layer >= 2 ? full.slice(0, OPPONENT_TEXT_LIMIT) : full;
-  };
+  // 評価ルート選択:
+  // - anchor pool に当該ジャンル × 層の calibration + ratings が揃っている場合は anchor 主根拠評価
+  // - 揃っていない場合は従来の候補プールペアワイズ (legacy fallback)
+  const useAnchorEval = isCalibrated(genre, layer) && hasAnchorRatings(genre, layer);
 
-  const llm = makeClaudeLlm(slug, layer);
+  let rating: number;
+  let matchCount: number;
+  let finalized: boolean;
+  let rank: number | undefined;
+  let total: number | undefined;
 
-  const round = await runPairwiseRound({
-    slug,
-    genre,
-    layer,
-    text,
-    loadOpponentText,
-    llm,
-    isExploration,
-  });
-
-  // 確定までは進めず、1ラウンド分の比較で current rating を取る
-  // (常時稼働なので確定は時間とともに自然に進む)
-
-  // 同層のランキングで自分の順位を確認
-  const ranking = getRanking(genre, layer);
-  const total = ranking.length;
-  const myIndex = ranking.findIndex((e) => e.slug === slug);
-  const rank = myIndex >= 0 ? myIndex + 1 : total;
-
-  // 通過判定: 上位 PASS_RATIO 以内
-  // 同層内に対戦相手がほぼいない初期状態(N<5)では「未確定なら通過」を採用(コールドスタート)
-  // 04-27: matches<3 は統計的判断材料不足のため暫定pass。リーグ蓄積後の新規が
-  //        matches=1〜2で即脱落して L3 通過率が22%まで低下していた問題への対処。
-  const passRatio = LAYER_PASS_RATIO[layer];
-  let pairwisePassed = false;
-  let coldStartReason: string | undefined;
-  if (total < 5) {
-    pairwisePassed = true;
-    coldStartReason = "cold_start_pass";
-  } else if (round.matchCount < 3) {
-    pairwisePassed = true;
-    coldStartReason = "low_match_pass";
+  if (useAnchorEval) {
+    // anchor pool 評価
+    const result = await evaluateCandidateAgainstAnchors(slug, layer, genre, text, {
+      matchesPerCandidate: ANCHOR_MATCHES_PER_CANDIDATE,
+    });
+    rating = result.candidateElo;
+    matchCount = result.matchCount;
+    // anchor 比較は 6試合で確定 (固定 anchor なので試合数が安定すれば finalized 扱い)
+    finalized = matchCount >= ANCHOR_MATCHES_PER_CANDIDATE;
+    if (matchCount < ANCHOR_MATCHES_PER_CANDIDATE) {
+      return {
+        passed: false,
+        rating,
+        matchCount,
+        finalized,
+        reason: result.reason ?? "insufficient_anchor_evidence",
+      };
+    }
   } else {
-    const cutoffRank = Math.max(1, Math.ceil(total * passRatio));
-    pairwisePassed = rank <= cutoffRank;
+    // 旧 candidate pool ペアワイズ (anchor 未校正ジャンル)
+    const OPPONENT_TEXT_LIMIT = 2000;
+    const loadOpponentText = async (oppSlug: string): Promise<string> => {
+      const full = loadLayerText(oppSlug, layer, worksDir);
+      return layer >= 2 ? full.slice(0, OPPONENT_TEXT_LIMIT) : full;
+    };
+
+    const llm = makeClaudeLlm(slug, layer);
+    const round = await runPairwiseRound({
+      slug,
+      genre,
+      layer,
+      text,
+      loadOpponentText,
+      llm,
+      isExploration,
+    });
+
+    rating = round.rating;
+    matchCount = round.matchCount;
+    finalized = round.finalized;
+
+    // 同層ランキングで順位を取る (legacy 経路のみ)
+    const ranking = getRanking(genre, layer);
+    total = ranking.length;
+    const myIndex = ranking.findIndex((e) => e.slug === slug);
+    rank = myIndex >= 0 ? myIndex + 1 : total;
+
+    if (round.matchCount < MATCH_THRESHOLD) {
+      return {
+        passed: false,
+        rating,
+        matchCount,
+        finalized,
+        rank,
+        totalInLayer: total,
+        reason: "insufficient_evidence",
+      };
+    }
+  }
+
+  const passElo = getLayerEloThreshold(genre, layer);
+  const pairwisePassed = rating >= passElo;
+
+  // 設計書 §5: candidate_elo < middle_median_elo は reject 即決
+  // anchor 未校正ジャンルでは middle_median が無いのでこの即決はスキップ
+  const middleMedian = getCalibratedMiddleMedianElo(genre, layer);
+  if (middleMedian != null && rating < middleMedian) {
+    return {
+      passed: false,
+      rating,
+      matchCount,
+      finalized,
+      rank,
+      totalInLayer: total,
+      reason: `elo_below_middle_median:${middleMedian.toFixed(0)}`,
+    };
   }
 
   // Layer 5 のみ: v12 アンサンブルのヒット予測を追加実行し、ペアワイズとのAND判定にする
@@ -165,34 +209,44 @@ export async function evaluateLayer(
       const result = runHitPredictorV12(slug, ep1Path, { episode: 1, genre });
       hitProbability = result.hitProbability;
       hitTier = result.tier;
-      const threshold = getV12Threshold(genre);
+      // anchor 校正済み閾値を優先、未校正ならハードコードされた絶対値
+      const calThresholds = getCalibratedHitProbabilityThresholds();
+      const threshold = calThresholds.pass;
       v12Passed = hitProbability >= threshold;
       if (!v12Passed) v12Reason = `v12_below_${threshold}(${genre})`;
       writeScreeningResult(slug, worksDir, {
         ...result,
-        pairwiseRating: round.rating,
-        pairwiseRank: rank,
-        pairwiseTotalInLayer: total,
+        pairwiseRating: rating,
+        pairwiseRank: rank ?? 0,
+        pairwiseTotalInLayer: total ?? 0,
         pairwisePassed,
       });
     } catch (e) {
-      // 予測失敗は「評価エラー」として扱い、ペアワイズ結果のみで判定（v12 は pass 扱い）
+      // 予測失敗は証拠不足として保留する。positive evidence なしでは通さない。
       const err = e as HitPredictorError | Error;
-      v12Reason = `v12_error:${err.message.slice(0, 80)}`;
+      return {
+        passed: false,
+        rating,
+        matchCount,
+        finalized,
+        rank,
+        totalInLayer: total,
+        reason: `hit_probability_unavailable:${err.message.slice(0, 80)}`,
+      };
     }
   }
 
   const passed = pairwisePassed && v12Passed;
   const reason =
-    coldStartReason ? coldStartReason
-    : v12Reason ? v12Reason
+    v12Reason ? v12Reason
+    : !pairwisePassed ? `elo_below_${passElo.toFixed(0)}`
     : undefined;
 
   return {
     passed,
-    rating: round.rating,
-    matchCount: round.matchCount,
-    finalized: round.finalized,
+    rating,
+    matchCount,
+    finalized,
     rank,
     totalInLayer: total,
     reason,

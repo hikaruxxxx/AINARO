@@ -3,7 +3,7 @@
 // 設計: docs/architecture/phase1_pipeline_design_v2.md の「探索成功の測り方」参照
 //
 // 4軸:
-// - Surprise: 探索作品の予測スコア percentile vs リーグレーティング percentile の乖離
+// - Surprise: 探索作品の予測絶対値と anchor Elo 絶対値の乖離
 // - Diversity: 既存作品との埋め込み距離(ここではbigramベースの代理)
 // - Emergence: 探索作品の組合せが通常パイプラインで再採用された頻度
 // - Model contribution: モデル再訓練前後の精度差分(本ファイルでは枠だけ提供)
@@ -21,9 +21,9 @@ export interface ExplorationMetrics {
   windowEnd: number;
   /** 軸1: Surprise */
   surprise: {
-    /** 探索作品で「予測 < 30% かつ リーグ percentile >= 70%」となった件数 */
+    /** 探索作品で「予測は弱いが anchor Elo はヒット基準を超える」となった件数 */
     breakthroughCount: number;
-    /** 探索作品全体の (リーグrank - 予測rank) の平均 */
+    /** 探索作品全体の anchor Elo とヒット基準の平均との差 */
     avgRankDelta: number;
     examples: Array<{ slug: string; genre: string; rankDelta: number }>;
   };
@@ -74,7 +74,7 @@ interface WorkSnapshot {
   isExploration: boolean;
   rating: number;
   matchCount: number;
-  /** ヒット予測スコア(現状: 暫定的にレーティングを percentile 化したもので代替) */
+  /** ヒット予測スコア(0-100、screening_result.json があれば使用) */
   predictedHit?: number;
   bigrams?: Set<string>;
   fingerprint?: string; // (primaryDesire|genre|境遇|転機)
@@ -105,12 +105,24 @@ function loadWorks(worksDir: string, layer: number, windowStart: number, windowE
       bigrams = bigramSetFromText(readFileSync(bodyPath, "utf-8"));
     }
 
+    let predictedHit: number | undefined;
+    const screeningPath = join(worksDir, slug, "screening_result.json");
+    if (existsSync(screeningPath)) {
+      try {
+        const screening = JSON.parse(readFileSync(screeningPath, "utf-8")) as { hitProbability?: number };
+        predictedHit = screening.hitProbability;
+      } catch {
+        // 壊れた評価ログは無視する
+      }
+    }
+
     snapshots.push({
       slug,
       genre: meta.seed.genre,
       isExploration: meta.seed.isExploration,
       rating: 1500,
       matchCount: 0,
+      predictedHit,
       bigrams,
       fingerprint: meta.seed.fingerprint,
       createdAt,
@@ -136,16 +148,6 @@ function attachLeagueData(snapshots: WorkSnapshot[], leagueDir: string, layer: n
   }
 }
 
-function percentile(values: number[], target: number): number {
-  if (values.length === 0) return 0.5;
-  const sorted = [...values].sort((a, b) => a - b);
-  let count = 0;
-  for (const v of sorted) {
-    if (v <= target) count++;
-  }
-  return count / sorted.length;
-}
-
 function jaccardOf(a: Set<string>, b: Set<string>): number {
   let inter = 0;
   for (const x of a) if (b.has(x)) inter++;
@@ -154,26 +156,21 @@ function jaccardOf(a: Set<string>, b: Set<string>): number {
 }
 
 function computeSurprise(snapshots: WorkSnapshot[]): ExplorationMetrics["surprise"] {
-  // 同層の予測スコア(暫定: rating 自体)とリーグレーティングを比較
-  // 現状ヒット予測モデルとの統合がないため、rating からの percentile で近似
   const exp = snapshots.filter((s) => s.isExploration);
   if (exp.length === 0) {
     return { breakthroughCount: 0, avgRankDelta: 0, examples: [] };
   }
-  const allRatings = snapshots.map((s) => s.rating);
 
-  // 現時点では予測モデル統合がないため、Surprise は「探索作品のレーティング順位 vs 全体平均」で近似する
-  // 将来 v11 ヒット予測スコアが入ったら本来の定義(predicted_pct vs league_pct)に置き換える
+  // TODO: anchor calibration.json から genre/layer 別の hitMedianElo を読む。
+  const HIT_ANCHOR_MEDIAN_ELO = 1550;
+  const WEAK_PREDICTION_THRESHOLD = 55;
   const examples: Array<{ slug: string; genre: string; rankDelta: number }> = [];
   let breakthrough = 0;
   let totalDelta = 0;
   for (const e of exp) {
-    const leaguePct = percentile(allRatings, e.rating);
-    // 暫定: 探索作品の平均レーティングは低めと仮定し、leaguePct >= 0.7 を breakthrough とする
-    const expectedPct = 0.4; // 探索作品の予想 percentile(暫定)
-    const delta = leaguePct - expectedPct;
+    const delta = e.rating - HIT_ANCHOR_MEDIAN_ELO;
     totalDelta += delta;
-    if (leaguePct >= 0.7) {
+    if ((e.predictedHit ?? 0) < WEAK_PREDICTION_THRESHOLD && e.rating >= HIT_ANCHOR_MEDIAN_ELO) {
       breakthrough++;
       examples.push({ slug: e.slug, genre: e.genre, rankDelta: delta });
     }

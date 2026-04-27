@@ -12,7 +12,7 @@ import { dirname, join } from "path";
 import type { Winner } from "./llm-compare";
 
 export const MATCH_THRESHOLD = 10; // 累積比較数がこれ以上で確定
-export const NEAREST_K = 1; // 近傍何件と比較するか（04-24: 2→1でOpus枠-25%、ratingは累積試合数で補う）
+export const NEAREST_K = 3; // 設計通り、現在のレーティングが近い既存作品3件と比較する
 export const INITIAL_RATING = 1500; // Elo初期値風
 
 export interface RatingEntry {

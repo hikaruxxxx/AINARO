@@ -115,7 +115,16 @@ export function makeFingerprint(
   genre: string,
   tags: ElementTags,
 ): string {
-  return `${primaryDesire}|${genre}|${tags.境遇}|${tags.転機}|${tags.方向}|${tags.フック}`;
+  return `${primaryDesire}|${genre}|${tags.境遇}|${tags.転機}`;
+}
+
+function isUsedSeed(seed: SeedV2, fingerprint: string): boolean {
+  if (seed.fingerprint === fingerprint) return true;
+  return makeFingerprint(seed.primaryDesire, seed.genre, seed.tags) === fingerprint;
+}
+
+function hasUsedFingerprint(used: UsedSeedsFile, fingerprint: string): boolean {
+  return used.fingerprints.includes(fingerprint) || used.seeds.some((seed) => isUsedSeed(seed, fingerprint));
 }
 
 /** 重み付き抽選 */
@@ -232,7 +241,7 @@ export function sampleSeedV2(opts: SampleSeedOptions = {}): SeedV2 | null {
     const tags = pickTags(grid, genre, stats, epsilon);
     const fingerprint = makeFingerprint(primary.id, genre, tags);
 
-    if (used.fingerprints.includes(fingerprint)) continue;
+    if (hasUsedFingerprint(used, fingerprint)) continue;
 
     const seed: SeedV2 = {
       fingerprint,
@@ -251,9 +260,13 @@ export function sampleSeedV2(opts: SampleSeedOptions = {}): SeedV2 | null {
 /** シードを使用済みとして記録 */
 export function commitSeed(seed: SeedV2, path = "data/generation/_used_seeds.json"): void {
   const used = loadUsedSeeds(path);
-  if (used.fingerprints.includes(seed.fingerprint)) return;
-  used.fingerprints.push(seed.fingerprint);
-  used.seeds.push(seed);
+  const normalizedSeed: SeedV2 = {
+    ...seed,
+    fingerprint: makeFingerprint(seed.primaryDesire, seed.genre, seed.tags),
+  };
+  if (hasUsedFingerprint(used, normalizedSeed.fingerprint)) return;
+  used.fingerprints.push(normalizedSeed.fingerprint);
+  used.seeds.push(normalizedSeed);
   saveUsedSeeds(used, path);
 }
 

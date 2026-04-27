@@ -11,7 +11,7 @@
 // - 推定トークン数を throttle に記録
 
 import { spawn, spawnSync } from "child_process";
-import { recordUsage, estimateTokens } from "./throttle";
+import { recordUsage, estimateTokens, throttleBeforeCall } from "./throttle";
 
 /**
  * claude CLI が消失した場合に1回だけ自動再インストールする。
@@ -71,6 +71,13 @@ export async function callClaudeCli(
   prompt: string,
   opts: ClaudeCallOptions = {},
 ): Promise<string> {
+  // 5h 窓のトークン消費に応じて事前スリープ。
+  // warnRatio (デフォルト 0.8) 超で 1秒、 pauseRatio (0.95) 超で長時間待機。
+  // これによりレート制限を踏む前にペースを落とす。
+  const throttleResult = await throttleBeforeCall();
+  if (throttleResult.slept > 0) {
+    console.error(`[claude-cli] throttle sleep ${throttleResult.slept}ms reason=${throttleResult.reason}`);
+  }
   try {
     return await callClaudeCliOnce(prompt, opts);
   } catch (e) {
