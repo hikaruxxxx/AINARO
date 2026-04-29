@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-25T03:53:57Z",
+  "lastUpdated": "2026-04-29T09:52:18Z",
   "schemaVersion": 1,
   "description": "content/works/ 配下の作品メタデータ集約。エージェント/オーケストレータはこれを参照して対象作品を特定する。各作品の正本は <slug>/work.json（存在する場合）。legacy 作品は work.json 未生成。",
   "works": {
@@ -1587,6 +1587,90 @@
       "category": "screened",
       "episodes": 3
     },
+    "batt-modv184y-tkf9": {
+      "path": "content/works/batt-modv184y-tkf9",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-moefcpjy-twps": {
+      "path": "content/works/batt-moefcpjy-twps",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-moepxhix-71xq": {
+      "path": "content/works/batt-moepxhix-71xq",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-mof8b9hy-jsbb": {
+      "path": "content/works/batt-mof8b9hy-jsbb",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-mof8ozc8-8rkj": {
+      "path": "content/works/batt-mof8ozc8-8rkj",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-mofkayhn-16pq": {
+      "path": "content/works/batt-mofkayhn-16pq",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-mog0p48w-pria": {
+      "path": "content/works/batt-mog0p48w-pria",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-mog6d0g9-ho04": {
+      "path": "content/works/batt-mog6d0g9-ho04",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-moga32zn-2bt9": {
+      "path": "content/works/batt-moga32zn-2bt9",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-mogf8oji-8ytc": {
+      "path": "content/works/batt-mogf8oji-8ytc",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-moggd7c4-wxzd": {
+      "path": "content/works/batt-moggd7c4-wxzd",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-mogqfxef-j4cv": {
+      "path": "content/works/batt-mogqfxef-j4cv",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-moh21fhb-9e6b": {
+      "path": "content/works/batt-moh21fhb-9e6b",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "batt-moh8z40d-wjks": {
+      "path": "content/works/batt-moh8z40d-wjks",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
     "cold-duke-wife": {
       "path": "content/works/cold-duke-wife",
       "state": "legacy",
@@ -2027,6 +2111,198 @@
     },
     "isek-mocp4qov-kwji": {
       "path": "content/works/isek-mocp4qov-kwji",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-modnr2zk-xk6y": {
+      "path": "content/works/isek-modnr2zk-xk6y",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog110jl-my6z": {
+      "path": "content/works/isek-mog110jl-my6z",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog1k5vp-0kc7": {
+      "path": "content/works/isek-mog1k5vp-0kc7",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog1wl6q-e9l6": {
+      "path": "content/works/isek-mog1wl6q-e9l6",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog2ca4o-f3vd": {
+      "path": "content/works/isek-mog2ca4o-f3vd",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog31s66-0xx6": {
+      "path": "content/works/isek-mog31s66-0xx6",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog468vg-oeg0": {
+      "path": "content/works/isek-mog468vg-oeg0",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog4zj76-4nzs": {
+      "path": "content/works/isek-mog4zj76-4nzs",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog5i1hj-gtsn": {
+      "path": "content/works/isek-mog5i1hj-gtsn",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog5s0md-af7w": {
+      "path": "content/works/isek-mog5s0md-af7w",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog98f49-pexb": {
+      "path": "content/works/isek-mog98f49-pexb",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mog9hs2x-a9uj": {
+      "path": "content/works/isek-mog9hs2x-a9uj",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mogangoy-4njr": {
+      "path": "content/works/isek-mogangoy-4njr",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moglntyt-fbo1": {
+      "path": "content/works/isek-moglntyt-fbo1",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mognxxiw-prpv": {
+      "path": "content/works/isek-mognxxiw-prpv",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mogpgpzi-7ls3": {
+      "path": "content/works/isek-mogpgpzi-7ls3",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mogr3b8d-dis5": {
+      "path": "content/works/isek-mogr3b8d-dis5",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mogvvgsp-0gln": {
+      "path": "content/works/isek-mogvvgsp-0gln",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mogxgw8u-s5ar": {
+      "path": "content/works/isek-mogxgw8u-s5ar",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mogxrz73-0dkh": {
+      "path": "content/works/isek-mogxrz73-0dkh",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moh0ak3t-qlj6": {
+      "path": "content/works/isek-moh0ak3t-qlj6",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moh0xomb-fwk9": {
+      "path": "content/works/isek-moh0xomb-fwk9",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moh1a95c-kl4u": {
+      "path": "content/works/isek-moh1a95c-kl4u",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moh1iwdl-jdi2": {
+      "path": "content/works/isek-moh1iwdl-jdi2",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moh2xab9-d54a": {
+      "path": "content/works/isek-moh2xab9-d54a",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moh3iemf-c3d1": {
+      "path": "content/works/isek-moh3iemf-c3d1",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moh4l50a-ru7m": {
+      "path": "content/works/isek-moh4l50a-ru7m",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moh51391-efc6": {
+      "path": "content/works/isek-moh51391-efc6",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moh70mp3-gd7a": {
+      "path": "content/works/isek-moh70mp3-gd7a",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-moh7j2ga-t1nx": {
+      "path": "content/works/isek-moh7j2ga-t1nx",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mohazin8-bc30": {
+      "path": "content/works/isek-mohazin8-bc30",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "isek-mohbrahy-h6op": {
+      "path": "content/works/isek-mohbrahy-h6op",
       "state": "published",
       "category": "screened",
       "episodes": 3
@@ -2541,6 +2817,102 @@
     },
     "mode-mob55p8o-mon8": {
       "path": "content/works/mode-mob55p8o-mon8",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-modum8hf-sbc5": {
+      "path": "content/works/mode-modum8hf-sbc5",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-moecgpal-u9uc": {
+      "path": "content/works/mode-moecgpal-u9uc",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-moeeg6l2-edjq": {
+      "path": "content/works/mode-moeeg6l2-edjq",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-moeg219j-o3p8": {
+      "path": "content/works/mode-moeg219j-o3p8",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-moeon5jo-fz0x": {
+      "path": "content/works/mode-moeon5jo-fz0x",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-mof5nsme-t8mx": {
+      "path": "content/works/mode-mof5nsme-t8mx",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-mofi6dtl-o1l2": {
+      "path": "content/works/mode-mofi6dtl-o1l2",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-mog2mood-8c0z": {
+      "path": "content/works/mode-mog2mood-8c0z",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-mogb731c-t420": {
+      "path": "content/works/mode-mogb731c-t420",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-mogn5u4r-8byl": {
+      "path": "content/works/mode-mogn5u4r-8byl",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-mogobrik-gk4n": {
+      "path": "content/works/mode-mogobrik-gk4n",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-mogpywch-brlp": {
+      "path": "content/works/mode-mogpywch-brlp",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-mogyblym-a7b8": {
+      "path": "content/works/mode-mogyblym-a7b8",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-moh2cy4r-rnbe": {
+      "path": "content/works/mode-moh2cy4r-rnbe",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-moh7uhmg-nizv": {
+      "path": "content/works/mode-moh7uhmg-nizv",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "mode-mohlv0uh-ygiz": {
+      "path": "content/works/mode-mohlv0uh-ygiz",
       "state": "published",
       "category": "screened",
       "episodes": 3
@@ -3262,6 +3634,84 @@
       "category": "screened",
       "episodes": 3
     },
+    "myst-modt9dqo-uf9n": {
+      "path": "content/works/myst-modt9dqo-uf9n",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-modvhtv4-0dkl": {
+      "path": "content/works/myst-modvhtv4-0dkl",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-moe9up5u-nggk": {
+      "path": "content/works/myst-moe9up5u-nggk",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-moedy0de-d1hd": {
+      "path": "content/works/myst-moedy0de-d1hd",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-moes6xnd-ohyv": {
+      "path": "content/works/myst-moes6xnd-ohyv",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-mof38hy8-uutm": {
+      "path": "content/works/myst-mof38hy8-uutm",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-mofbyilq-lpjd": {
+      "path": "content/works/myst-mofbyilq-lpjd",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-mofuyrih-8i99": {
+      "path": "content/works/myst-mofuyrih-8i99",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-mog0b0wv-3dyl": {
+      "path": "content/works/myst-mog0b0wv-3dyl",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-mog5jilq-payu": {
+      "path": "content/works/myst-mog5jilq-payu",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-mohc05vk-p584": {
+      "path": "content/works/myst-mohc05vk-p584",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-mohd4b98-x0qu": {
+      "path": "content/works/myst-mohd4b98-x0qu",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "myst-mohhprte-qv46": {
+      "path": "content/works/myst-mohhprte-qv46",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
     "otom-mnrm21wk-1zq1": {
       "path": "content/works/otom-mnrm21wk-1zq1",
       "state": "published",
@@ -3540,6 +3990,84 @@
     },
     "otom-mobg2au5-00vi": {
       "path": "content/works/otom-mobg2au5-00vi",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-mog1z1l8-m4d4": {
+      "path": "content/works/otom-mog1z1l8-m4d4",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-mog7mxuk-nu32": {
+      "path": "content/works/otom-mog7mxuk-nu32",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-mog8x4az-ls6g": {
+      "path": "content/works/otom-mog8x4az-ls6g",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-mogbpioa-qocx": {
+      "path": "content/works/otom-mogbpioa-qocx",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-mogdc5xn-klnx": {
+      "path": "content/works/otom-mogdc5xn-klnx",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-moggoe36-dblb": {
+      "path": "content/works/otom-moggoe36-dblb",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-mogk64cc-ww19": {
+      "path": "content/works/otom-mogk64cc-ww19",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-mogmvw9f-pxll": {
+      "path": "content/works/otom-mogmvw9f-pxll",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-mogq7mz4-snms": {
+      "path": "content/works/otom-mogq7mz4-snms",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-moh63hq7-b7my": {
+      "path": "content/works/otom-moh63hq7-b7my",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-moh6ogvv-vlpg": {
+      "path": "content/works/otom-moh6ogvv-vlpg",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-mohct7lo-odok": {
+      "path": "content/works/otom-mohct7lo-odok",
+      "state": "published",
+      "category": "screened",
+      "episodes": 3
+    },
+    "otom-mohiq327-5e68": {
+      "path": "content/works/otom-mohiq327-5e68",
       "state": "published",
       "category": "screened",
       "episodes": 3
