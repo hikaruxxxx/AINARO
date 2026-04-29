@@ -11,17 +11,17 @@ import {
 } from "./seed-v2";
 
 describe("makeFingerprint", () => {
-  it("4要素を|で結合", () => {
+  it("5要素を|で結合 (primaryDesire|genre|境遇|転機|方向)", () => {
     const fp = makeFingerprint("rewarded", "isekai_tsuiho_zamaa", {
       境遇: "追放された",
       転機: "スキル覚醒",
       方向: "成り上がり",
       フック: "ざまぁ",
     });
-    expect(fp).toBe("rewarded|isekai_tsuiho_zamaa|追放された|スキル覚醒");
+    expect(fp).toBe("rewarded|isekai_tsuiho_zamaa|追放された|スキル覚醒|成り上がり");
   });
 
-  it("方向/フックは fingerprint に含まれない(4-tuple除外の方針)", () => {
+  it("方向は fingerprint に含まれる (シード枯渇緩和のため keyspace 拡大)", () => {
     const fp1 = makeFingerprint("rewarded", "g", {
       境遇: "x",
       転機: "y",
@@ -34,6 +34,12 @@ describe("makeFingerprint", () => {
       方向: "C",
       フック: "D",
     });
+    expect(fp1).not.toBe(fp2);
+  });
+
+  it("フックは fingerprint に含まれない (生成時の表面表現はバリエーション豊富)", () => {
+    const fp1 = makeFingerprint("rewarded", "g", { 境遇: "x", 転機: "y", 方向: "A", フック: "B" });
+    const fp2 = makeFingerprint("rewarded", "g", { 境遇: "x", 転機: "y", 方向: "A", フック: "Z" });
     expect(fp1).toBe(fp2);
   });
 });
@@ -52,7 +58,7 @@ describe("loadUsedSeeds / saveUsedSeeds", () => {
 
   it("save → load round trip", () => {
     const seed: SeedV2 = {
-      fingerprint: "test|g|x|y",
+      fingerprint: "test|g|x|y|z",
       primaryDesire: "rewarded",
       secondaryDesire: "revenge",
       genre: "isekai_tsuiho_zamaa",
@@ -62,7 +68,7 @@ describe("loadUsedSeeds / saveUsedSeeds", () => {
     };
     saveUsedSeeds({ version: "v1", fingerprints: [seed.fingerprint], seeds: [seed] }, path);
     const loaded = loadUsedSeeds(path);
-    expect(loaded.fingerprints).toEqual(["test|g|x|y"]);
+    expect(loaded.fingerprints).toEqual(["test|g|x|y|z"]);
     expect(loaded.seeds[0].primaryDesire).toBe("rewarded");
   });
 });
@@ -75,7 +81,7 @@ describe("buildLoglinePrompt", () => {
       return; // skip
     }
     const seed: SeedV2 = {
-      fingerprint: "rewarded|isekai_tsuiho_zamaa|追放された|スキル覚醒",
+      fingerprint: "rewarded|isekai_tsuiho_zamaa|追放された|スキル覚醒|成り上がり",
       primaryDesire: "rewarded",
       secondaryDesire: "revenge",
       genre: "isekai_tsuiho_zamaa",

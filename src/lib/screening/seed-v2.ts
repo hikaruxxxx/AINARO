@@ -41,7 +41,7 @@ export interface SeedV2 {
 
 export interface UsedSeedsFile {
   version: string;
-  fingerprints: string[]; // (primaryDesire|genre|境遇|転機)
+  fingerprints: string[]; // (primaryDesire|genre|境遇|転機|方向)
   seeds: SeedV2[];
 }
 
@@ -109,8 +109,27 @@ export function saveUsedSeeds(file: UsedSeedsFile, path = "data/generation/_used
   writeFileSync(path, JSON.stringify(file, null, 2));
 }
 
-/** 4-tuple指紋を生成: (primaryDesire|genre|境遇|転機) */
+/** 5-tuple指紋を生成: (primaryDesire|genre|境遇|転機|方向)
+ *
+ * 方向を含めることで keyspace を ~5x 拡大 (16k → 80k)。
+ * フックは含めない (生成時の表面的な hook 表現はバリエーション豊富で重複排除に向かない)。
+ *
+ * 旧 4-tuple は (primaryDesire|genre|境遇|転機) で、5-tuple のプレフィックスとして
+ * 互換性をもたせる。旧 fingerprint は migration スクリプトで再計算する。
+ */
 export function makeFingerprint(
+  primaryDesire: string,
+  genre: string,
+  tags: ElementTags,
+): string {
+  return `${primaryDesire}|${genre}|${tags.境遇}|${tags.転機}|${tags.方向}`;
+}
+
+/**
+ * 旧 4-tuple fingerprint を生成 (互換チェック用)。
+ * migration 完了後は不要だが、未 migrate な used_seeds.json との整合のため残す。
+ */
+function makeLegacy4TupleFingerprint(
   primaryDesire: string,
   genre: string,
   tags: ElementTags,
@@ -126,6 +145,8 @@ function isUsedSeed(seed: SeedV2, fingerprint: string): boolean {
 function hasUsedFingerprint(used: UsedSeedsFile, fingerprint: string): boolean {
   return used.fingerprints.includes(fingerprint) || used.seeds.some((seed) => isUsedSeed(seed, fingerprint));
 }
+
+export { makeLegacy4TupleFingerprint };
 
 /** 重み付き抽選 */
 function weightedSample<T>(items: T[], weights: number[]): T {
