@@ -189,6 +189,32 @@ export async function generateMangaImage(
       };
     } catch (err) {
       lastError = err as Error;
+
+      // ファイル救済: タイムアウト時など codex CLI が exit しなくても
+      // image_gen 自体は完了して PNG が保存されているケースがある。
+      // 出力ファイルが存在し最低サイズを満たしていれば成功扱いにする。
+      if (existsSync(absOutput)) {
+        try {
+          const stat = statSync(absOutput);
+          if (stat.size >= minFileSize) {
+            console.warn(
+              `[manga-codex-image] 試行 ${attempt} が "${lastError.message}" で失敗したが、` +
+                `出力ファイルは保存済 (${(stat.size / 1024).toFixed(0)}KB)。成功扱いで返却。`
+            );
+            return {
+              outputPath: absOutput,
+              sizeBytes: stat.size,
+              width: options.size.width,
+              height: options.size.height,
+              attempts: attempt,
+              totalDurationMs: Date.now() - startedAt,
+            };
+          }
+        } catch {
+          // statSync 失敗は無視 → 通常のリトライへ
+        }
+      }
+
       if (attempt > maxRetries) break;
       console.warn(
         `[manga-codex-image] 試行 ${attempt} 失敗: ${lastError.message}\n  リトライ中...`

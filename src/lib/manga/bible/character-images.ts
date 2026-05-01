@@ -25,7 +25,7 @@ import {
   updateCharacterRefsStatus,
 } from "../db/dao";
 import type { ArtStyle, CharacterBibleRow } from "../types";
-import type { CharacterReferenceImages } from "../schemas";
+import type { CharacterReferenceImages, CharacterSpec } from "../schemas";
 
 export type CharacterRefVariant =
   | "front"
@@ -42,8 +42,18 @@ const ALL_VARIANTS: CharacterRefVariant[] = [
   "expr_sad",
 ];
 
-function buildCharacterRefPrompt(args: {
-  c: CharacterBibleRow;
+/**
+ * 参照画像プロンプト構築の最小入力。
+ * DB 行 (CharacterBibleRow) でも snapshot エントリ (BibleCharacterEntry) でも
+ * この形に揃えれば共通プロンプトが組める。
+ */
+export type CharacterRefPromptInput = {
+  character_name: string;
+  spec: CharacterSpec;
+};
+
+export function buildCharacterRefPrompt(args: {
+  c: CharacterRefPromptInput;
   variant: CharacterRefVariant;
   artStyle: ArtStyle;
   styleSheetCdnUrl: string | null;
@@ -232,4 +242,76 @@ export async function generateCharacterReferences(args: {
   );
 
   return { refs: merged, assetIds };
+}
+
+// ============================================================
+// Snapshot 起点 (DB なし) ローカル画像生成
+// ============================================================
+
+export type LocalCharacterRefResult = {
+  variant: CharacterRefVariant;
+  localPath: string;
+  prompt: string;
+};
+
+/**
+ * BibleSnapshot 由来のキャラ情報からローカル PNG を 5 枚生成する。
+ * DB 書き込みなし。出力先ディレクトリに variant 別 PNG を並べる。
+ *
+ * 用途: 手書き snapshot.json の試走、Pilot 検証、
+ * DB にレコードを作る前のドライラン
+ */
+export async function generateCharacterReferencesLocal(args: {
+  characterName: string;
+  spec: CharacterSpec;
+  artStyle: ArtStyle;
+  outputDir: string;
+  styleSheetLocalPath?: string;
+  styleSheetCdnUrl?: string | null;
+  variants?: CharacterRefVariant[];
+  imageTimeoutMs?: number;
+  maxRetries?: number;
+}): Promise<LocalCharacterRefResult[]> {
+  const variants = args.variants ?? ALL_VARIANTS;
+  const results: LocalCharacterRefResult[] = [];
+
+  for (const variant of variants) {
+    const localPng = path.join(args.outputDir, `${variant}.png`);
+    const prompt = buildCharacterRefPrompt({
+      c: { character_name: args.characterName, spec: args.spec },
+      variant,
+      artStyle: args.artStyle,
+      styleSheetCdnUrl: args.styleSheetCdnUrl ?? null,
+    });
+
+    const refImagePaths: string[] = [];
+    if (args.styleSheetLocalPath) refImagePaths.push(args.styleSheetLocalPath);
+
+    const sizePreset =
+      variant === "expr_joy" || variant === "expr_anger" || variant === "expr_sad"
+        ? MANGA_SIZE_PRESETS.square
+        : MANGA_SIZE_PRESETS.character_ref;
+
+    try {
+      const generated = await generateMangaImage({
+        prompt,
+        outputPath: localPng,
+        size: sizePreset,
+        referenceImagePaths: refImagePaths,
+        timeoutMs: args.imageTimeoutMs ?? 5 * 60 * 1000,
+        maxRetries: args.maxRetries ?? 1,
+      });
+      results.push({
+        variant,
+        localPath: generated.outputPath,
+        prompt,
+      });
+    } catch (e) {
+      console.warn(
+        `[character-images-local] ${args.characterName}/${variant} 失敗: ${(e as Error).message}`
+      );
+    }
+  }
+
+  return results;
 }
