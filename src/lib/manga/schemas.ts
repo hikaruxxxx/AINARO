@@ -160,8 +160,61 @@ export type AttributeClassifierLabels = {
 };
 
 // ============================================================
-// ショットリスト
+// ショットリスト（ネーム層: storyboard_v2）
 // ============================================================
+
+/** ネーム層が記述する「コマの物語的役割」 */
+export type NarrativeFunction =
+  | "inform"        // 情報提示
+  | "emote"         // 感情を見せる
+  | "pause"         // 間・タメ（無音 or ほぼ無音）
+  | "contrast"      // 直前コマとの対比
+  | "reveal"        // 隠されていたものの露出（翻し）
+  | "silence"       // 完全無音、余韻
+  | "establishing"  // 場・状況の確立
+  | "beat_button"   // ビート締めの一発（決め台詞 or 決め画）
+  | "reaction"      // キャラのリアクションショット
+  | "cutaway";      // 別所への切り返し
+
+/** ページ単位の役割（L1.2 で各ページに付与） */
+export type StoryboardPageRole =
+  | "establishing"  // 場の確立 / シーン頭
+  | "dialogue"      // 会話・関係性
+  | "action"        // アクション・戦闘
+  | "reveal"        // 翻し・新情報
+  | "aftermath"     // 余韻・小休止
+  | "cliffhanger";  // ページ末・話末の引き
+
+/** ページめくり候補（L1.4 が最終決定するためのヒント） */
+export type TurnCandidate =
+  | "none"
+  | "page_open"     // ページ頭側の引き受け
+  | "page_end"      // ページ末（次ページで答えが出る）
+  | "episode_end";  // 話末の cliffhanger
+
+/** 1コマあたりの吹き出し予算（SVG重ね前提の文字量制御） */
+export type BubbleBudget = {
+  /** 吹き出し数 (0=silent) */
+  count: number;
+  /** 1コマ合計の最大文字数 */
+  max_chars: number;
+  /** 主たる種別 */
+  type?:
+    | "narration_box"
+    | "dialogue"
+    | "thought"
+    | "shout"
+    | "whisper"
+    | "mixed";
+};
+
+/** 原文への対応参照（trace 用） */
+export type SourceRef = {
+  /** scene-splitter 由来 */
+  scene_id: string;
+  /** 本文中の文字オフセット [start, end]（任意） */
+  body_offset?: [number, number];
+};
 
 export type ShotlistPanelEntry = {
   /** ショットリスト内ID（panel_idx と一致させる） */
@@ -170,6 +223,8 @@ export type ShotlistPanelEntry = {
   aspect: import("./types").PanelAspect;
   /** 自由テキストID（同一エピソード内でユニーク） */
   scene_id: string;
+  /** どのプロットビート (EpisodePlotData.beats[*].beat_idx) に属するか */
+  beat_idx?: number;
   camera: import("./types").PanelCamera;
   /** スクロール上のテンポ */
   tempo: "fast" | "slow" | "stop";
@@ -190,12 +245,77 @@ export type ShotlistPanelEntry = {
   scroll_pause_intent?: number;
   /** Codex指摘: 1コマ最大2人推奨、3人以上は遠景・シルエット */
   multi_character_treatment?: "normal" | "distant" | "silhouette" | "split_panel";
+
+  // === ネーム層フィールド (Phase 1 redesign 2026-04-30) ===
+  /** このコマの物語的役割 */
+  narrative_function?: NarrativeFunction;
+  /** このコマで読者に伝えたいこと（1文） */
+  purpose?: string;
+  /** 直前コマからの変化（"何が新しく見えるか") */
+  change_from_prev?: string;
+  /** 次コマへの繋ぎ・期待を作る要素 */
+  link_to_next?: string;
+  /** 期待する読者反応 */
+  reader_reaction_intended?: string;
+  /** 絵の中で読者の目を引かせるべき要素（フォーカル） */
+  visual_focus?: string;
+  /** 直前コマからのカット繋ぎタイプ（漫画用語の言い換え） */
+  cut_type?:
+    | "match_action"     // 動作の続き
+    | "shot_reverse"     // 切り返し（話者A→Bの顔）
+    | "scale_jump"       // 引き→寄り、寄り→引き
+    | "graphic_match"    // 形・構図の類似で繋ぐ
+    | "smash_cut"        // 場面強制切替
+    | "reveal_pull"      // 引きで何かが見える
+    | "time_skip";       // 時間ジャンプ
+
+  // === ネーム層フィールド (Phase A 1巻管理向け 2026-05-01) ===
+  /** どのページに属するか（L1.2 が page階層を出すための紐付け、1-indexed） */
+  page_idx?: number;
+  /** ネーム作家が意図したコマ重要度 1-5（L1.4 のテンプレ slot 大小に直結） */
+  importance?: 1 | 2 | 3 | 4 | 5;
+  /** 1コマあたりの吹き出し予算（SVG重ね前提） */
+  bubble_budget?: BubbleBudget;
+  /** ページめくり候補種別（L1.4 への強制ではないヒント） */
+  turn_candidate?: TurnCandidate;
+  /** ページめくり強度 0-5（cliffhanger=4-5、reveal前=3-4） */
+  turn_strength?: 0 | 1 | 2 | 3 | 4 | 5;
+  /** 原文への対応参照（どの本文範囲を絵にしたかの trace） */
+  source_ref?: SourceRef;
+  /** ネガティブスペースのヒント（生成prompt と SVG吹き出し配置の両方が参照） */
+  negative_space_hint?: string;
+  /** 描画リスクの自己申告（複雑な手・接触瞬間など、F-2/F-1 戦略選択の入力） */
+  render_risk?: "low" | "medium" | "high";
+};
+
+/** ページ階層エントリ（L1.2 の出力、L1.4 が消費） */
+export type StoryboardPageEntry = {
+  /** ページ番号 1-indexed */
+  page_idx: number;
+  /** RTL 横読みでの開始ページ側（右開きが基本） */
+  page_side?: "right" | "left";
+  /** ページの主機能 */
+  page_role: StoryboardPageRole;
+  /** 目標コマ数（L1.4 が最終調整、目安として使用） */
+  target_panels: number;
+  /** ページ頭の引き受け（前ページ末からの繋ぎ） */
+  page_open_hook?: string;
+  /** ページ末の引き（次ページで答えが出る or めくらせる動機） */
+  page_end_hook?: string;
+  /** ページ末の引き強度 0-5（cliffhanger=4-5） */
+  turn_strength?: 0 | 1 | 2 | 3 | 4 | 5;
+  /** このページに属する panel idx の参照配列（ShotlistPanelEntry.idx） */
+  panel_idxs: number[];
 };
 
 export type ShotlistData = {
   /** エピソード全体のリズム曲線。各シーンの強度 0-1 */
   rhythm_curve: number[];
   panels: ShotlistPanelEntry[];
+  /** ページ階層（L1.2 storyboard-builder が出力、L1.4 page-director が消費） */
+  pages?: StoryboardPageEntry[];
+  /** 目標ページ数（plot.episode_target_pages のスナップショット） */
+  episode_target_pages?: number;
   /** 生成時のメタ */
   meta?: {
     total_panels: number;
@@ -203,6 +323,73 @@ export type ShotlistData = {
     generated_by: string;  // モデル名
     generation_version: string;
   };
+};
+
+// ============================================================
+// エピソードプロット (L0)
+// ============================================================
+
+export type PlotBeatLabel =
+  | "hook"               // 冒頭の引き
+  | "inciting_incident"  // 出来事の発生
+  | "rising"             // 緊張上昇
+  | "turn"               // 転（裏切り・意外性）
+  | "climax"             // 山場
+  | "resolution"         // 決着
+  | "cliffhanger";       // 末尾の引き
+
+export type PlotBeat = {
+  /** 1-indexed の順序 */
+  beat_idx: number;
+  label: PlotBeatLabel;
+  /** ビートの要約（1-2 文） */
+  summary: string;
+  /** 0-1 の感情強度 */
+  emotional_intensity: number;
+  /** このビートで「絵で覚えてほしい一場面」の言語化 */
+  key_visual: string;
+  /** 関連シーンの scene_id（scene-splitter 出力との対応） */
+  scene_ids: string[];
+  /** このビートに紐づくキャラ名（character_bibles.character_name） */
+  characters: string[];
+  /** 後の話への伏線種まき（任意） */
+  foreshadow_seed?: string;
+  /** この話で回収する伏線（任意） */
+  foreshadow_payoff?: string;
+  /** ページ予算（横読み Phase A、Codex レビュー反映: 1|2|3 では足りないので min/max/target） */
+  page_budget?: {
+    target_pages: number;
+    min_pages: number;
+    max_pages: number;
+    target_panels?: number;
+  };
+};
+
+export type EpisodePlotData = {
+  /** 1話の主題（読者にとっての面白さの中核） */
+  theme: string;
+  /** 主人公の感情曲線 */
+  protagonist_arc: {
+    start: string;   // 開始時の状態・感情
+    turn: string;    // 中盤の転換
+    end: string;     // 終盤の状態・感情
+  };
+  /** 起承転結のビート配列 */
+  beats: PlotBeat[];
+  /** エピソード末尾の引き（次話遷移率の主要因） */
+  cliffhanger_hook: string;
+  /** 視覚モチーフ（繰り返し使う記号・小物・色） */
+  motifs: string[];
+  /** このエピソードで読者に与えたい体験（読了時の余韻） */
+  intended_reading_experience: string;
+  /** 目標パネル数（panel_count 主導の旧入力。横読みでは episode_target_pages が主） */
+  episode_target_panels: number;
+  /** 目標ページ数（KDP 横読み Phase A の主入力。各 beat に page_budget が付与される） */
+  episode_target_pages?: number;
+  /** 1巻スケジュールから受け取る必須イベント（Volume Planner 連携、self-judge 入力） */
+  must_include_events?: string[];
+  /** 目標 ep_num */
+  ep_num: number;
 };
 
 // ============================================================
