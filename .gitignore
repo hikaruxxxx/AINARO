@@ -53,3 +53,8 @@ __pycache__/
 # claude code runtime
 .claude/scheduled_tasks.lock
 .claude/worktrees/
+
+# 漫画素材（大型バイナリ・ローカル参照のみ）
+/data/manga/raw/kindle-references/
+/data/manga/raw/manual/
+/data/manga/_archive/

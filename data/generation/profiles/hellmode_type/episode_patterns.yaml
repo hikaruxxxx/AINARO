@@ -1,0 +1,198 @@
+# エピソードパターン辞書（ヘルモード型・5パターン）
+#
+# Layer 5 (build-episode-patterns) で参照
+# Layer 6 (generate-longform-episode) で各話に1パターン割り当てる
+#
+# S1=3点（戦闘システム）、C8=3点（成長）を支える循環構造
+# ヘルモードの全話を抽象化すると下記の5パターンが反復される
+
+patterns:
+  # ─────────────────────────────────────────
+  - id: P1_skill_detect
+    name: 新スキル発見と検証
+    distribution: 0.30  # 全話の30%（30話なら9話）
+    description: |
+      新しいスキル/敵/状況に遭遇し、ステータス画面で観察→仕様の仮説立て→検証→
+      スキル経験値の増加確認、までを1話で完結させるパターン。
+      主人公の「最適化思考＋検証思考」を最も色濃く出す。
+
+    structure:
+      - phase: 遭遇
+        what: 異常な状況/新スキル/未知の魔物/特殊ダンジョン区画
+        words: 500-800
+      - phase: 観察
+        what: ステータス画面で数値確認、固定フォーマットを使用
+        words: 300-500
+        required:
+          - ステータス画面の固定フォーマットを完全一致で表示
+          - 主人公の口癖を1回以上使用
+      - phase: 仮説
+        what: 仕様の仮説立て、「もし◯◯なら、◯◯のはず」型
+        words: 300-500
+      - phase: 検証
+        what: 仮説を試す、戦闘または実験
+        words: 800-1200
+      - phase: 結果
+        what: スキル経験値の増加・新発見の確認、次への課題
+        words: 400-600
+        required:
+          - スキル経験値の数値変化を明示
+          - 次話への伏線を1つ置く
+
+    state_changes:
+      - status_increase: required  # ステータス値の上昇
+      - skill_acquisition: 0.5     # 50%の確率で新スキル取得
+      - relationship_change: 0     # この回は関係性は変わらない
+      - location_change: 0         # 場所も変わらない
+
+  # ─────────────────────────────────────────
+  - id: P2_combat_optimize
+    name: 戦闘の組み合わせ最適化
+    distribution: 0.25  # 全話の25%
+    description: |
+      既知のスキル/敵を相手に、組み合わせを最適化して勝利するパターン。
+      数値計算による戦闘描写の中心。
+
+    structure:
+      - phase: 敵の登場
+        what: 既知の魔物/敵キャラ/対人戦
+        words: 400-600
+        required:
+          - 敵のステータス（推定）を明示
+      - phase: 手札の確認
+        what: 主人公が手持ちスキルを内的に列挙
+        words: 300-500
+        required:
+          - 内的独白で計算する
+      - phase: 組み合わせ選択
+        what: ◯◯と◯◯の組み合わせを選ぶ理由を独白
+        words: 400-600
+      - phase: 戦闘実行
+        what: スキル名を明示しながら戦う、ダメージ数値も
+        words: 1000-1500
+        required:
+          - スキル名は ability_system.json と表記完全一致
+      - phase: 反省
+        what: 想定通りor想定外、次戦への計画
+        words: 300-500
+
+    state_changes:
+      - status_increase: required  # 経験値による上昇
+      - skill_acquisition: 0.2     # 20%の確率
+      - relationship_change: 0
+      - location_change: 0
+
+  # ─────────────────────────────────────────
+  - id: P3_relationship_advance
+    name: 関係性の進展
+    distribution: 0.20  # 全話の20%
+    description: |
+      既知のキャラとの会話/事件を通じて、主人公の社会的立場が小さく上昇する。
+      C7関係性網を維持・拡大する役割。
+
+    structure:
+      - phase: 日常の場面
+        what: 食事/休憩/移動などの日常描写
+        words: 400-600
+      - phase: キャラとの会話
+        what: 既知キャラ（家族/雇用主/仲間）とのやり取り
+        words: 1000-1500
+        required:
+          - 主人公の口癖を1回以上使う
+          - 関係性の小さな上昇（信頼/依頼/評価）
+      - phase: 新情報の獲得
+        what: 世界・敵・任務についての情報
+        words: 400-600
+      - phase: 次への意思決定
+        what: 次話以降の行動方針を決める
+        words: 300-500
+
+    state_changes:
+      - status_increase: 0          # 戦闘がないので変化なし
+      - skill_acquisition: 0
+      - relationship_change: required  # 関係性の網が変化
+      - location_change: 0.3        # 30%で場所が変わる
+
+  # ─────────────────────────────────────────
+  - id: P4_world_unfold
+    name: 世界の謎の開示
+    distribution: 0.15  # 全話の15%
+    description: |
+      既知の事実と矛盾する観察→仮説立て→新しいルールの発見。
+      ワールドバイブルの「世界の謎」3個を段階的に開示する。
+
+    structure:
+      - phase: 違和感
+        what: これまでの理解と矛盾する事象
+        words: 500-700
+      - phase: 仮説立て
+        what: 主人公が複数の可能性を並べて検討
+        words: 500-700
+        required:
+          - 主人公の計算思考/検証思考を強く出す
+      - phase: 検証または情報収集
+        what: 古い書物/NPC からの情報/実験
+        words: 800-1200
+      - phase: 部分的解明
+        what: 完全には分からないが、一段階前進
+        words: 500-700
+        required:
+          - 「世界の謎」のうち1つを部分開示
+          - 残りの謎への伏線を残す
+
+    state_changes:
+      - status_increase: 0.3        # 30%でステータス上昇
+      - skill_acquisition: 0.3
+      - relationship_change: 0.2
+      - location_change: 0.5         # 50%で別の場所へ
+
+  # ─────────────────────────────────────────
+  - id: P5_chapter_climax
+    name: 章替えクライマックス
+    distribution: 0.10  # 全話の10%（30話なら3話）
+    description: |
+      章末のクライマックス。主人公の階層上昇を必ず描き、次章への引きを置く。
+      C8=3点の最重要話。
+
+    structure:
+      - phase: 大規模戦闘 or 大事件
+        what: 章で最大スケールの戦闘または事件
+        words: 1500-2000
+        required:
+          - 主人公が章で最大の活躍をする
+          - 既知のスキル/装備の総動員
+      - phase: 結果と評価
+        what: 周囲からの承認、社会階層の上昇イベント
+        words: 500-800
+        required:
+          - 上位者からの承認・任命・スカウト
+      - phase: 階層上昇
+        what: 具体的な階層上昇イベント
+        words: 400-600
+        required:
+          - 章タイトルにある社会階層への移行が完了
+      - phase: 次章への引き
+        what: 新しい敵組織/場所/謎の予告
+        words: 400-600
+        required:
+          - 「世界の謎」のうち1つに進展がある
+          - 新章のタイトルを暗示
+
+    state_changes:
+      - status_increase: required   # 章末で必ず大きく上昇
+      - skill_acquisition: 0.7      # 70%の確率
+      - relationship_change: required  # 必ず変化（新しい雇用主など）
+      - location_change: required   # 階層上昇に伴い必ず変わる
+
+# ─────────────────────────────────────────
+# 配分ルール（30話の場合の例）
+# P1 × 9話 / P2 × 7-8話 / P3 × 6話 / P4 × 4-5話 / P5 × 3話
+# 各章で P5 が必ず1話含まれる
+# ─────────────────────────────────────────
+
+allocation_rules:
+  - rule: 各章にP5が必ず1話含まれる
+  - rule: 章序盤（章内最初の3話）にP5は配置しない
+  - rule: P4は章中盤に集中させる（章ストーリーの厚みを出す）
+  - rule: P1とP2は連続させない（読者の飽きを防ぐ）
+  - rule: ep1は必ずP1（プロローグ + ステータス画面の初登場）

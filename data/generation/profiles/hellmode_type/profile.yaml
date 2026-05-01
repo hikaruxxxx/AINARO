@@ -1,0 +1,125 @@
+# ヘルモード型プロファイル (型C: 魔法/能力理論特化型)
+#
+# なろうダンジョン系Top30の28軸分析（data/research/narou_dungeon_top30_full_depth.md）に基づく
+# 参照作品: ヘルモード (n3669fw, 総計43点)
+# - W6魔法理論=3 / W10ゲーム化=3 / C1主人公=3 / S1戦闘=3 / C8成長=3 が突出
+# - W2/W3/W4/W8/W11/W12/C5/C6/S3/S4/S6/S7/S8 は1点で済ませる「軽量化軸」
+
+profile:
+  id: hellmode_type
+  name: ヘルモード型 (型C: 魔法/能力理論特化)
+  reference_works:
+    - ncode: n3669fw
+      title: ヘルモード
+      total_score: 43
+    - ncode: n7798go
+      title: 超難関ダンジョンで10万年修行した結果
+      total_score: 31
+    - ncode: n9902bn
+      title: デスマーチからはじまる異世界狂想曲
+      total_score: 42
+
+# 28軸の目標スコア（0-3）
+# 重点軸（2-3点を狙う）と軽量化軸（1点で済ませる）を明示
+target_scores:
+  # === 世界設定 W軸 ===
+  W1_geography: 1        # 中世西欧風どこか、で済ませる
+  W2_history: 1          # 「魔王の昔の戦争」程度
+  W3_race: 1             # エルフ/ドワーフが「いるだけ」
+  W4_politics: 1         # 王様/領主の名前が出る程度
+  W5_economy: 1          # 金貨/銀貨/銅貨レベル
+  W6_magic_theory: 3     # ★ 重点軸: 職業ツリー＋スキル合成体系を最深部まで
+  W7_dungeon_theory: 2   # ダンジョンの起源と機能は明示
+  W8_religion: 1         # 教会と神官が出る程度
+  W9_language: 0         # 「神の翻訳」で全スキップ
+  W10_gamification: 3    # ★ 重点軸: ステータス画面の物理化（魔導書フォーマット）
+  W11_society: 1         # 制度言及最小
+  W12_meta: 1            # メタ構造は採用しない
+
+  # === キャラ設定 C軸 ===
+  C1_protagonist: 3      # ★ 重点軸: 廃ゲーマー人格＋強い執着
+  C2_heroine: 2          # 標準
+  C3_party: 2            # 4-6人グループ、各2-3人
+  C4_antagonist: 2       # 中ボス2-3人
+  C5_mob: 1              # 街の住人は風景
+  C6_past_trauma: 2      # 主人公の前世のみ作り込む
+  C7_relationship: 1     # 簡易な家族＋師弟＋雇用主程度
+  C8_growth: 3           # ★ 重点軸: 階層上昇による章替え
+
+  # === 周辺設定 S軸 ===
+  S1_combat: 3           # ★ 重点軸: スキル組み合わせ＋数値検証
+  S2_equipment: 2        # 武器/防具/魔導具の種類
+  S3_food: 1             # 簡素
+  S4_fashion: 1          # 簡素
+  S5_currency: 2         # 金貨/銀貨の物価感覚
+  S6_movement: 1         # 徒歩・馬車レベル
+  S7_architecture: 1     # 簡素
+  S8_creatures: 1        # 簡素
+
+# 期待される総計スコア
+expected_total: 40
+# シャングリラ65点・ヘルモード43点・お気楽領主48点を参照
+
+# 連載構造の目安
+target_episodes: 100        # 第一章で完結or第二章入口
+target_chapters: 2-3        # 階層上昇による章替え
+words_per_episode: 3000-4000  # ヘルモード平均値
+
+# エピソードパターン (S1=3 を支える循環構造)
+# Layer 5 で詳細を yaml 化する。ここでは比率のみ
+episode_pattern_distribution:
+  P1_skill_detect: 0.30      # 新スキル発見と検証
+  P2_combat_optimize: 0.25   # 戦闘の組み合わせ最適化
+  P3_relationship_advance: 0.20  # 関係性の進展
+  P4_world_unfold: 0.15      # 世界の謎の開示
+  P5_chapter_climax: 0.10    # 章替えクライマックス
+
+# 主人公プロファイルの必須項目
+protagonist_required_fields:
+  - 前世の職業/年齢
+  - 前世の趣味（執着の根源）
+  - 前世の不満/憎悪
+  - 現世の名前/種族/出生環境
+  - 思考パターン（計算思考/最適化思考のいずれか必須）
+  - 座右の銘（5-10個）
+  - 内的独白の頻度（1話あたり3-5回の短い独白）
+
+# 整合性監査の合格条件
+audit_pass_criteria:
+  protagonist_catchphrase_density_min: 2.0   # 1話あたり主人公の口癖2回以上
+  status_monotonicity_violations_max: 0      # ステータス値の単調性違反0件
+  skill_naming_inconsistencies_max: 0        # スキル名の表記揺れ0件
+  chapter_transition_planned: true            # 章替えが事前計画と一致
+
+# 既存資産との接続
+related_anchors:
+  subgenre: battle_dungeon
+  anchors_path: data/generation/anchors/battle_dungeon/anchors.json
+  plot_template: data/generation/plot-templates/battle_dungeon.md
+
+# パイプライン実行順序
+pipeline_steps:
+  - layer: 0
+    command: /longform-init {slug} hellmode_type
+    output: data/generation/works/{slug}/longform/_meta.json
+  - layer: 1
+    command: /build-world-bible {slug}
+    output: data/generation/works/{slug}/longform/world_bible/
+  - layer: 2
+    command: /build-protagonist {slug}
+    output: data/generation/works/{slug}/longform/protagonist.md
+  - layer: 3
+    command: /build-relationship-graph {slug}
+    output: data/generation/works/{slug}/longform/relationship_graph.json
+  - layer: 4
+    command: /build-story-arcs {slug}
+    output: data/generation/works/{slug}/longform/story_arcs.md
+  - layer: 5
+    command: /build-episode-patterns {slug}
+    output: data/generation/works/{slug}/longform/episode_patterns.yaml
+  - layer: 6
+    command: /generate-longform-episode {slug} {ep_number}
+    output: data/generation/works/{slug}/longform/episodes/ep####.md
+  - layer: 7
+    command: /audit-coherence {slug} {ep_number}
+    output: data/generation/works/{slug}/longform/episodes/ep####_audit.md

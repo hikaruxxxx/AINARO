@@ -1,0 +1,4820 @@
+{
+  "plot": {
+    "theme": "通勤と家計に縛られた平凡な営業係長が、ダンジョンを『冒険』ではなく『見積もれる副業』として捉えた瞬間、日常の数字が未知のリスクへ反転する面白さ。",
+    "protagonist_arc": {
+      "start": "久志は変化を嫌い、仕事・家計・通勤ルートを小さな数字で管理することで日常を保っている。",
+      "turn": "初めて倒したゴブリンの査定額が見積もりより二十円安かったことに反応し、恐怖よりも営業としての計算精度を優先してダンジョン通いを習慣化する。",
+      "end": "二万円相当の青い魔石を手に入れたことで、久志の数字で制御できる日常が管理事務所からの着信によって崩れ始める。"
+    },
+    "beats": [
+      {
+        "beat_idx": 1,
+        "label": "hook",
+        "summary": "地下駐車場型ダンジョンで、久志が青い犬型魔物と交戦している現在時制から始める。役員打ち合わせの議題と敵HP・ドロップ相場が同じ頭の中に並び、読者に『この男は冒険者ではなく営業として戦っている』と一目で理解させる。",
+        "emotional_intensity": 0.78,
+        "key_visual": "蛍光灯の硬い光が落ちる地下駐車場で、警棒を振り下ろす久志の横顔と、床を削って滑る青い犬型魔物をローアングルで並べる。",
+        "scene_ids": [
+          "ep1-s1"
+        ],
+        "characters": [
+          "鴨下 久志"
+        ],
+        "foreshadow_seed": "青い魔物のドロップ相場『二万円前後』と生活感のある洗濯機の頭金を結びつける。",
+        "page_budget": {
+          "target_pages": 2,
+          "min_pages": 1,
+          "max_pages": 2,
+          "target_panels": 12
+        }
+      },
+      {
+        "beat_idx": 2,
+        "label": "inciting_incident",
+        "summary": "時間を巻き戻し、久志の人物像と都内ダンジョンの社会インフラ化を提示する。通勤経路に八潮リフトが現れても驚かず、のぼりやバリケードを仕事帰りの風景として処理することで、非日常が日常に食い込んだ世界観を固める。",
+        "emotional_intensity": 0.34,
+        "key_visual": "品川の通勤客の流れを俯瞰し、その端にオレンジ色のバリケードとのぼりだけが浮くように立っている構図。",
+        "scene_ids": [
+          "ep1-s2"
+        ],
+        "characters": [
+          "鴨下 久志",
+          "西園寺"
+        ],
+        "foreshadow_seed": "ダンジョンが電力・建材・保険に組み込まれている説明で、魔石が単なる宝ではなく市場価値を持つことを示す。",
+        "page_budget": {
+          "target_pages": 4,
+          "min_pages": 3,
+          "max_pages": 5,
+          "target_panels": 24
+        }
+      },
+      {
+        "beat_idx": 3,
+        "label": "rising",
+        "summary": "久志が五百円でEランク登録を済ませ、神楽坂の軽い説明に押されて一階層へ入る。受付の事務的な空気と『見学だけ』という自己弁明を置くことで、彼が危険に踏み込む心理的ハードルの低さを描く。",
+        "emotional_intensity": 0.46,
+        "key_visual": "銀行窓口のような受付カウンター越しに、神楽坂がカードを差し出し、久志の手元だけが迷いながらそれを受け取る。",
+        "scene_ids": [
+          "ep1-s3"
+        ],
+        "characters": [
+          "鴨下 久志",
+          "神楽坂"
+        ],
+        "foreshadow_seed": "Eランクは一階層までというルールを明示し、後半でD級相当の魔物と遭遇したときの違和感につなげる。",
+        "page_budget": {
+          "target_pages": 3,
+          "min_pages": 2,
+          "max_pages": 4,
+          "target_panels": 18
+        }
+      },
+      {
+        "beat_idx": 4,
+        "label": "turn",
+        "summary": "一階層で久志が初めてゴブリンを倒し、魔石の査定額に反応する。恐怖や達成感ではなく、見積もりとの差額二十円への不満を強調し、彼がダンジョンを『毎朝検証できる収益案件』として見る人物だと確定させる。",
+        "emotional_intensity": 0.58,
+        "key_visual": "折り畳み傘を持ったスーツ姿の久志の足元に灰色の小石が転がり、スマホ画面の『四百三十円』だけが白く光る。",
+        "scene_ids": [
+          "ep1-s4"
+        ],
+        "characters": [
+          "鴨下 久志"
+        ],
+        "foreshadow_seed": "頭上に浮かぶ推定HPと報酬相場を、久志だけが読める見積もり表示として定着させる。",
+        "foreshadow_payoff": "冒頭の青い犬型魔物への二万円見積もりが、偶然ではなく三ヶ月の積算から来ていると分かる。",
+        "page_budget": {
+          "target_pages": 4,
+          "min_pages": 3,
+          "max_pages": 5,
+          "target_panels": 24
+        }
+      },
+      {
+        "beat_idx": 5,
+        "label": "rising",
+        "summary": "三ヶ月後、久志の朝ダンジョン通いが完全にルーティン化していることを描く。ゴブリン収益、コーヒー代、月換算の昼飯代、神楽坂のマグカップまで反復させたうえで、見たことのない青い魔物と美香の洗濯機相談を重ね、彼が戦う理由を家計の数字に落とし込む。",
+        "emotional_intensity": 0.67,
+        "key_visual": "柱の足元に畳まれたスーツ上着、置かれた缶コーヒー、スマホの家計簿スクショ、その奥にうずくまる青い犬型魔物を縦に重ねる。",
+        "scene_ids": [
+          "ep1-s5"
+        ],
+        "characters": [
+          "鴨下 久志",
+          "鴨下 美香",
+          "神楽坂"
+        ],
+        "foreshadow_seed": "『一階層で出会った魔物を狩ることは禁止されていないはず』という曖昧な解釈で、後の管理事務所からの電話に不穏さを持たせる。",
+        "page_budget": {
+          "target_pages": 4,
+          "min_pages": 3,
+          "max_pages": 5,
+          "target_panels": 24
+        }
+      },
+      {
+        "beat_idx": 6,
+        "label": "climax",
+        "summary": "久志が青い魔物と正面から戦い、一撃目で見積もりが当たったことに震え、二撃目で倒す。戦闘そのものより、彼が三ヶ月間ずっと『数えていた』ことを自覚する瞬間を見せ場にし、日常の延長だった副業が才能の発露に変わる。",
+        "emotional_intensity": 0.88,
+        "key_visual": "床を踏み込む革靴を大きく手前に置き、奥で青い魔物の首筋へ警棒が落ちる瞬間を強い斜光で切り取る。",
+        "scene_ids": [
+          "ep1-s1",
+          "ep1-s6"
+        ],
+        "characters": [
+          "鴨下 久志"
+        ],
+        "foreshadow_payoff": "冒頭で止まった役員議題とHP表示が、二撃で魔物を倒す計算精度として回収される。",
+        "page_budget": {
+          "target_pages": 3,
+          "min_pages": 2,
+          "max_pages": 4,
+          "target_panels": 18
+        }
+      },
+      {
+        "beat_idx": 7,
+        "label": "cliffhanger",
+        "summary": "床に残った青い希少魔石は通常と違って査定中になり、管理事務所の神楽坂から初めて電話がかかってくる。久志は電話に出ないまま、足元の光る石、午後の打ち合わせ、美香の洗濯機、昨日までの小さな数字を見比べ、読者に『これは普通の副業では済まない』という余韻を残す。",
+        "emotional_intensity": 0.93,
+        "key_visual": "暗い床に落ちた青い魔石を極端なローアングルで大きく映し、背景でスマホの着信名『八潮リフト管理事務所　神楽坂』がぼやけて光る。",
+        "scene_ids": [
+          "ep1-s6"
+        ],
+        "characters": [
+          "鴨下 久志",
+          "神楽坂",
+          "鴨下 美香"
+        ],
+        "foreshadow_payoff": "Eランクの一階層ルールと希少D級魔石の異常査定が、管理側からの即時連絡として表面化する。",
+        "page_budget": {
+          "target_pages": 2,
+          "min_pages": 2,
+          "max_pages": 4,
+          "target_panels": 12
+        }
+      }
+    ],
+    "cliffhanger_hook": "なぜ一階層にD級相当の青い魔物が現れ、神楽坂は査定中の直後に久志へ電話してきたのか。",
+    "motifs": [
+      "スマホ画面に表示される査定額・家計簿・着信名",
+      "灰色の安い魔石と青く光る希少魔石の対比",
+      "畳んだスーツ上着とまくったワイシャツ袖",
+      "オレンジ色のバリケードとのぼり",
+      "地下駐車場の蛍光灯とコンクリート床"
+    ],
+    "intended_reading_experience": "読者には、生活費を数えるだけの地味な男が、実はダンジョンを別の尺度で攻略し始めている高揚を感じてほしい。最後は『電話に出たら日常が壊れる』という不安と期待を残す。",
+    "episode_target_panels": 132,
+    "episode_target_pages": 22,
+    "ep_num": 1
+  },
+  "shotlist": {
+    "rhythm_curve": [
+      0.4,
+      0.28,
+      0.36,
+      0.48,
+      0.66,
+      0.92
+    ],
+    "panels": [
+      {
+        "idx": 1,
+        "role": "opening",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "wide",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "樹脂製の警棒を振り下ろした瞬間、俺の頭では午後二時の議題が流れていた。",
+        "emotion": "緊張と職業的な冷静さが同時に走る",
+        "narrative_function": "establishing",
+        "purpose": "地下駐車場の蛍光灯、コンクリート床、警棒を構えるスーツ姿の久志、青い犬型魔物を同時に見せ、現代ダンジョンの異物感と主人公の異常な冷静さを冒頭で掴ませる。",
+        "change_from_prev": "本beat最初のコマとして、読者を説明抜きで戦闘中の現在時制へ投げ込む。",
+        "link_to_next": "警棒の振り下ろし動作を次コマの打撃音へつなぐ。",
+        "reader_reaction_intended": "サラリーマンがなぜ地下で魔物と戦っているのか、即座に疑問と期待を持たせる。",
+        "visual_focus": "蛍光灯の硬い白光の下、ワイシャツ姿の久志が警棒を振り下ろし、青い甲殻の犬型魔物が床を削りながら低く滑り込むローアングルの決め画",
+        "page_idx": 1,
+        "importance": 5,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 45,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            0,
+            68
+          ]
+        },
+        "negative_space_hint": "上部の蛍光灯と天井梁の空きにナレーション枠を配置。戦闘軌道と被らせない。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 2,
+        "role": "action",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "hands",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "一つ、既存顧客の基盤刷新案件の進捗。",
+        "emotion": "手だけは必死だが、思考は会議資料を追っている",
+        "narrative_function": "inform",
+        "purpose": "久志の手元と警棒の軌道に寄り、戦闘動作と会社員の内勤思考がずれている違和感を強める。",
+        "change_from_prev": "大きな状況提示から、打撃の瞬間の手元へスケールジャンプして緊迫を細く絞る。",
+        "link_to_next": "議題カウントを続け、読者に戦闘より会議が先に来る脳内リズムを飲み込ませる。",
+        "reader_reaction_intended": "命の危険より業務議題を数える主人公のズレに引っかかりを持たせる。",
+        "visual_focus": "まくったワイシャツ袖、ネクタイを乱した胸元、両手で握られた樹脂製警棒の先端が画面外へ振り抜かれる",
+        "cut_type": "scale_jump",
+        "page_idx": 1,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            69,
+            92
+          ]
+        },
+        "negative_space_hint": "警棒の軌道と逆側、左下に小さなナレーション枠用の余白。",
+        "render_risk": "high"
+      },
+      {
+        "idx": 3,
+        "role": "action",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "side",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "background"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "二つ、競合ベンダーの相見積もり対応。",
+        "emotion": "外した一瞬にも数字だけが整列している",
+        "narrative_function": "contrast",
+        "purpose": "青い犬型魔物が久志のいた場所を薙ぎ払い、床に爪痕を残すことで、頭の中の事務的な言葉と現実の危険を衝突させる。",
+        "change_from_prev": "手元の打撃から横長のアクションへ展開し、久志の攻撃と魔物の反撃が交差したことを見せる。",
+        "link_to_next": "床を削る音を止め、打撃が入った手応えのコマへ移る。",
+        "reader_reaction_intended": "思ったより危険な相手だと理解させ、久志の冷静さが異常に見えるようにする。",
+        "visual_focus": "青い甲殻の犬型魔物がコンクリートに似た床へ爪を立てて横滑りし、久志の革靴のすぐ横に白い削れ跡が走る",
+        "cut_type": "match_action",
+        "page_idx": 1,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            93,
+            133
+          ]
+        },
+        "negative_space_hint": "床面の削れ跡の上には文字を置かず、奥の柱影にナレーション枠を逃がす。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 4,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "ごり、と嫌な音がした。",
+        "emotion": "手応えの重さで思考が一拍止まる",
+        "narrative_function": "pause",
+        "purpose": "警棒の先が甲殻の継ぎ目へ入った感触だけに集中し、読者に打撃の痛さと音を脳内補完させる間を作る。",
+        "change_from_prev": "横滑りの速度を止め、接触部位だけの静かな小コマに圧縮する。",
+        "link_to_next": "この手応えをきっかけに、会議の議題ではなく敵HPの数字が浮かぶ。",
+        "reader_reaction_intended": "痛そうな音で一瞬息を止めさせる。",
+        "visual_focus": "警棒の先端が青い甲殻の首裏の継ぎ目にめり込み、久志の指が白くなるほど握り込まれている",
+        "cut_type": "scale_jump",
+        "page_idx": 1,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 12,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            134,
+            156
+          ]
+        },
+        "negative_space_hint": "ほぼ白い床面を広めに残し、短い擬音またはナレーションを小さく置ける余白。",
+        "render_risk": "high"
+      },
+      {
+        "idx": 5,
+        "role": "emotion",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "face_close",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "頭の中の議題は、四つ目に進まなかった。",
+        "emotion": "仕事の顔が剥がれ、計算する目だけが残る",
+        "narrative_function": "emote",
+        "purpose": "久志の表情を寄りで見せ、恐怖ではなく計算が前面に出る瞬間を読者に理解させる。",
+        "change_from_prev": "手応えから顔へ切り替え、身体感覚が思考の切替スイッチになったことを示す。",
+        "link_to_next": "顔の横に無機質なステータス風UIが浮かぶ次コマへ接続する。",
+        "reader_reaction_intended": "この男は怖がるより先に値踏みする、と気づかせる。",
+        "visual_focus": "汗を一筋だけ流す久志の横顔。眼鏡の奥の目が魔物ではなく、見えない表計算セルを見ているように細くなる",
+        "cut_type": "graphic_match",
+        "page_idx": 1,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 22,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            157,
+            180
+          ]
+        },
+        "negative_space_hint": "顔の右側に細い白余白。次コマのUI表現と視線方向がつながるよう空ける。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 6,
+        "role": "cliffhanger",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "over_shoulder",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "代わりに、別のものが浮かんだ。",
+        "emotion": "危険が金額へ変換され、欲が胃に落ちる直前",
+        "narrative_function": "reveal",
+        "purpose": "敵HPとドロップ相場が営業見積もりのような矩形UIで浮かぶことを見せ、冒険ではなく査定として戦っている主人公像を確定させる。",
+        "change_from_prev": "久志の顔の内面から、彼の視界そのものへ引いて、数字が現実に重なって見える異能めいた演出へ移る。",
+        "link_to_next": "二万円という金額を次ページ頭で生活費の欲へ落とし込む。",
+        "reader_reaction_intended": "戦闘の勝敗より『二万円』の意味が気になってページをめくらせる。",
+        "visual_focus": "久志の肩越しに、青い犬型魔物の上へ無機質な矩形UIが重なる。HP六十前後、次の一撃、ドロップ相場二万円前後の枠だけを画像内では空白として確保",
+        "cut_type": "reveal_pull",
+        "page_idx": 1,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 2,
+          "max_chars": 55,
+          "type": "mixed"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            181,
+            240
+          ]
+        },
+        "negative_space_hint": "魔物の頭上から右上に、SVGでステータスUIを重ねるための大きな矩形空白。画像内に文字は描かない。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 7,
+        "role": "information",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "background"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "二万円。",
+        "emotion": "生々しい生活費が戦闘の中心に入り込む",
+        "narrative_function": "page_open",
+        "purpose": "前ページのドロップ相場を、久志にとっては冒険報酬ではなく家計の一項目であると受け直す。",
+        "change_from_prev": "敵の情報UIから、久志の足元に置かれた日常品へ視点を落とし、数字の意味を生活に接続する。",
+        "link_to_next": "洗濯機の頭金という具体物を示すため、スマホの家計スクショ想起へつなげる。",
+        "reader_reaction_intended": "高額ドロップの興奮より先に生活臭が来る面白さを感じさせる。",
+        "visual_focus": "地下駐車場の床に置かれたコンビニのブラックコーヒー缶、畳んだスーツ上着、革靴。奥で青い魔物が低く身構える",
+        "cut_type": "graphic_match",
+        "page_idx": 2,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 8,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            241,
+            248
+          ]
+        },
+        "negative_space_hint": "床の白い照り返し部分に短いナレーションを孤立させる。コーヒー缶と上着は文字で隠さない。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 8,
+        "role": "information",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "ドラム式洗濯機の、頭金になる金額だ。",
+        "emotion": "欲望が派手ではなく、家計簿の欄として立ち上がる",
+        "narrative_function": "inform",
+        "purpose": "二万円の意味を生活用品へ落とし、読者に久志の動機が英雄願望ではなく家計の不足であると理解させる。",
+        "change_from_prev": "足元の日常品から、スマホ画面を想起させる矩形空白へ移り、生活の数字をより具体化する。",
+        "link_to_next": "生活の数字を確認した久志が、恐怖より計算精度へ意識を戻す。",
+        "reader_reaction_intended": "命がけの戦闘理由が洗濯機の頭金という落差に、苦笑と納得を起こさせる。",
+        "visual_focus": "久志の左手がポケットのスマホに触れかけ、画面には家計簿アプリや洗濯機積立を重ねられる空の矩形だけが白く残る",
+        "cut_type": "scale_jump",
+        "page_idx": 2,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            249,
+            270
+          ]
+        },
+        "negative_space_hint": "スマホ画面は完全に無地で描き、SVGで家計簿スクショ風UIを後載せできるようにする。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 9,
+        "role": "emotion",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "wide",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "恐怖と欲のあいだに、営業の計算だけが静かに残る",
+        "narrative_function": "silence",
+        "purpose": "文字を消し、久志が一拍だけ床を見つめる無音を置くことで、二万円が彼の判断を変える重さを読者に感じさせる。",
+        "change_from_prev": "スマホと家計の具体情報から、無言の全身ショットへ引き、判断前の空白を作る。",
+        "link_to_next": "無音のあと、久志が戦闘姿勢へ戻る動きでテンポを再加速する。",
+        "reader_reaction_intended": "ここで逃げるか続けるかを読者に一瞬考えさせる。",
+        "visual_focus": "広い地下駐車場にぽつんと立つ久志。白く飛んだ蛍光灯の帯が画面の半分以上を占め、青い魔物だけが低い影で動かない",
+        "cut_type": "scale_jump",
+        "page_idx": 2,
+        "importance": 1,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            271,
+            271
+          ]
+        },
+        "negative_space_hint": "50%以上を白い蛍光灯の反射と空床にし、完全無音の余白として使う。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 10,
+        "role": "action",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "full_body",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "right"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "左足で床を掴んだ。",
+        "emotion": "生活費のために逃げない覚悟へ切り替わる",
+        "narrative_function": "beat_button",
+        "purpose": "久志が受け身ではなく自分の判断で踏み込む瞬間を見せ、営業係長の計算が戦闘行動へ変わったことを示す。",
+        "change_from_prev": "無音の停止から、足元の踏み込みで一気に運動へ戻す。",
+        "link_to_next": "踏み込みの勢いを一撃目の結果へつなぐ。",
+        "reader_reaction_intended": "地味な男が腹を決めた高揚を感じさせる。",
+        "visual_focus": "革靴の左足が床を掴むように沈み、まくった袖と乱れたネクタイの久志が警棒を構え直す",
+        "cut_type": "match_action",
+        "page_idx": 2,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 12,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            271,
+            295
+          ]
+        },
+        "negative_space_hint": "踏み込みの軌跡上は空け、下端または柱影に短いナレーションのみ。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 11,
+        "role": "action",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "side",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "一撃目で、犬は横にもんどりうった。",
+        "emotion": "見積もりが現実に当たった驚きが腕に返る",
+        "narrative_function": "inform",
+        "purpose": "久志の攻撃が有効だったことを明確にし、彼の計算が単なる思い込みではないと読者に納得させる。",
+        "change_from_prev": "踏み込みから打撃結果へ動作を継続し、ページ内の戦闘リズムを保つ。",
+        "link_to_next": "敵の残HP表示により、見積もりが当たっていると久志が気づく。",
+        "reader_reaction_intended": "本当に戦えるのかという疑問を、半分当たったという手応えへ変える。",
+        "visual_focus": "警棒を振り抜いた久志の横で、青い犬型魔物が床を転がり、コンクリートに似た面へ爪痕と粉塵を残す",
+        "cut_type": "match_action",
+        "page_idx": 2,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            296,
+            315
+          ]
+        },
+        "negative_space_hint": "粉塵のない上部にナレーション枠。魔物の軌道線と重ねない。",
+        "render_risk": "high"
+      },
+      {
+        "idx": 12,
+        "role": "cliffhanger",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s1",
+        "beat_idx": 1,
+        "camera": "over_shoulder",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "半分。俺の見積もりが当たっていた。",
+        "emotion": "恐怖ではなく、計算精度が合ったことへの震え",
+        "narrative_function": "reveal",
+        "purpose": "残HPが六十前後と出ることで、久志の見積もり能力と営業的な執着を強く印象づけ、次beatの時間巻き戻しへ入る理由を作る。",
+        "change_from_prev": "打撃の物理結果から、再び現代風UIと久志の内面へ戻り、戦闘の本質が数字合わせであると締める。",
+        "link_to_next": "次beatで『なぜこの男が毎朝ダンジョンに来るようになったのか』を説明する回想へ移れる。",
+        "reader_reaction_intended": "冒険者ではなく営業として覚醒している男の異様さに引かれ、次のページを読みたくなる。",
+        "visual_focus": "久志の肩越しに半身を起こす青い犬型魔物。頭上に残HP用の空矩形UIが浮かび、久志の手元は次の二撃目へ静かに上がり始めている",
+        "cut_type": "reveal_pull",
+        "page_idx": 2,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 2,
+          "max_chars": 34,
+          "type": "mixed"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s1",
+          "body_offset": [
+            316,
+            360
+          ]
+        },
+        "negative_space_hint": "魔物の頭上にSVGステータスUI用の横長矩形余白。画面下の久志の肩周りに短いナレーション枠。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 13,
+        "role": "transition",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "ここで少し、時間を巻き戻させてほしい。",
+        "emotion": "振り下ろす寸前の集中が、急に生活の説明へ引き戻される奇妙な冷静さ。",
+        "narrative_function": "pause",
+        "purpose": "前beatの戦闘の熱を止め、読者に『なぜこの会社員がここにいるのか』という問いを残したまま回想へ入る。",
+        "change_from_prev": "動作のクライマックスから完全停止へ落とし、時間の向きを反転させる。",
+        "link_to_next": "警棒の斜線を電車のレールや階段の流れに graphic_match させ、通勤風景へ接続する。",
+        "reader_reaction_intended": "戦闘の答えを保留されたまま、久志の普通さに興味を移す。",
+        "visual_focus": "宙で止まった警棒、まくったワイシャツ袖、コンクリート床に伸びる硬い影。",
+        "cut_type": "match_action",
+        "page_idx": 3,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 14,
+        "role": "opening",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "birds_eye",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "background"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "火曜日だった。いつもどおり品川に着いて、いつもどおり港南口の階段を下りた。",
+        "emotion": "久志は人波の一部に溶け込み、変化のない朝に安心している。",
+        "multi_character_treatment": "distant",
+        "narrative_function": "establishing",
+        "purpose": "現代日本の日常密度を提示し、以後のダンジョン異物感を受け止める基準を作る。",
+        "change_from_prev": "地下駐車場の無音から、駅前の通勤客と都市ノイズへ大きく転換する。",
+        "link_to_next": "人流の向かう先に小さくオレンジ色を置き、視線を誘導する。",
+        "reader_reaction_intended": "これは冒険譚ではなく通勤の延長なのだと理解する。",
+        "visual_focus": "品川の高層ビル、駅階段、スーツ姿の人流、その端にまだ目立たないオレンジ色。",
+        "cut_type": "time_skip",
+        "page_idx": 3,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 42,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 15,
+        "role": "emotion",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "full_body",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "俺は鴨下久志、三十四歳。都内の中堅SIerで営業係長をやっている。",
+        "emotion": "久志は眠気よりも予定表の秩序に支えられ、いつものコンビニ袋を持ち直す。",
+        "narrative_function": "emote",
+        "purpose": "主人公を『数字とルーティンで安心する会社員』として読者に定着させる。",
+        "change_from_prev": "群衆の俯瞰から久志個人へ寄り、世界より人物像へ焦点を移す。",
+        "link_to_next": "手元のコンビニ袋から、道端の仮設設備へ視線を流す。",
+        "reader_reaction_intended": "地味で現実的な人物だからこそ、後の異常な判断が面白くなると感じる。",
+        "visual_focus": "七三寄りのビジネスショート、くたびれた革靴、同じ棚のパンが透けるコンビニ袋。",
+        "cut_type": "scale_jump",
+        "page_idx": 3,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 36,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 16,
+        "role": "cliffhanger",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "wide",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "その日だけ、八潮橋の手前に、オレンジ色のバリケードとのぼりが一本立っていた。",
+        "emotion": "久志だけが足を止めず、異物を異物として扱わない鈍さがにじむ。",
+        "multi_character_treatment": "distant",
+        "narrative_function": "reveal",
+        "purpose": "beatのkey_visualとして、日常の端に現れたダンジョン入口を初提示する。",
+        "change_from_prev": "人物紹介から、人物の生活圏に食い込む非日常の物体へ焦点を移す。",
+        "link_to_next": "のぼりの空白を次ページで標識情報として読ませる。",
+        "reader_reaction_intended": "こんなものが通勤路にあるのに平然としている世界だと驚かせる。",
+        "visual_focus": "都市背景の灰色に対して浮くオレンジ色のバリケード、文字なしののぼり、雑居ビル入口の暗い口。",
+        "cut_type": "reveal_pull",
+        "page_idx": 3,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 38,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "negative_space_hint": "のぼりとバリケード掲示面にSVG用の縦長空白を確保。画像内文字は描かない。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 17,
+        "role": "information",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "over_shoulder",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "難易度EからD。新規冒険者歓迎。",
+        "emotion": "久志は危険表示を、駅前のテナント募集看板と同じ温度で読む。",
+        "narrative_function": "inform",
+        "purpose": "八潮リフトが公的に管理されたダンジョンであることを、看板UIの空枠で示す。",
+        "change_from_prev": "遠景の異物から、久志が読み取る行政・募集情報へ寄る。",
+        "link_to_next": "久志の反応の薄さを次の小さな独白で受ける。",
+        "reader_reaction_intended": "ダンジョンが制度化されていることを自然に飲み込ませる。",
+        "visual_focus": "のぼり、仮設掲示、オレンジの脚立バリケード、奥に続く雑居ビルの入口。",
+        "cut_type": "scale_jump",
+        "page_idx": 4,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "negative_space_hint": "のぼり中央と掲示紙にSVGテキスト用の空白。危険警告風の小枠も確保。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 18,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "face_close",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "ああ、また増えたのか、と思っただけだった。",
+        "emotion": "驚きではなく、コンビニの新商品棚を見る程度の無関心。",
+        "narrative_function": "contrast",
+        "purpose": "読者の『異常だ』という感覚と久志の『日常だ』という感覚をぶつける。",
+        "change_from_prev": "公的な看板情報から、久志の温度の低い内面へ切り返す。",
+        "link_to_next": "久志の無関心を社会全体の慣れへ広げる。",
+        "reader_reaction_intended": "主人公が鈍いのではなく、世界そのものが慣れてしまったと察する。",
+        "visual_focus": "眠そうな目、整った七三、反応の薄い口元、背後にぼけたオレンジバリケード。",
+        "cut_type": "shot_reverse",
+        "page_idx": 4,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 20,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 19,
+        "role": "information",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [],
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "都内でダンジョンが出現するようになって三年。入口は、地下鉄の工事現場と見分けがつかなくなっていた。",
+        "emotion": "街そのものが異常を受け入れ、看板と柵だけが事務的に増えていく乾いた空気。",
+        "multi_character_treatment": "distant",
+        "narrative_function": "inform",
+        "purpose": "現代都市とダンジョンが重なった世界観を、説明過多にせず街の風景で定着させる。",
+        "change_from_prev": "久志個人の反応から、都市全体の慣れへ視野を広げる。",
+        "link_to_next": "その慣れに対する西園寺の過去発言へ切り替える。",
+        "reader_reaction_intended": "ダンジョンがイベントではなく都市機能になっていると理解する。",
+        "visual_focus": "工事現場風の仮囲い、通勤バス、ビル谷間、規制線、警備灯。",
+        "cut_type": "scale_jump",
+        "page_idx": 4,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 46,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "negative_space_hint": "ニュース速報や行政告知風の小さな掲示枠を背景に複数確保。文字はSVG重ね。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 20,
+        "role": "cliffhanger",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "side",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56",
+          "79c9d04a-1a34-4a3e-bfbd-40bd9325862d"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left",
+          "79c9d04a-1a34-4a3e-bfbd-40bd9325862d": "right"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "同期の西園寺は、そう断じていた。",
+        "dialogue": [
+          {
+            "speaker_id": "79c9d04a-1a34-4a3e-bfbd-40bd9325862d",
+            "text": "一過性のバブルだろ",
+            "intent": "ダンジョン経済を軽く見て、久志の記憶に残る判断材料を投げる。",
+            "bubble_type": "normal"
+          }
+        ],
+        "emotion": "西園寺の自信と、久志の保留するような無表情が温度差を作る。",
+        "multi_character_treatment": "split_panel",
+        "narrative_function": "contrast",
+        "purpose": "西園寺の価値判断を提示し、次ページで市場価値として反証される前振りを作る。",
+        "change_from_prev": "街の説明から、人間関係と価値観の対立へ切り替える。",
+        "link_to_next": "『バブル』の言葉を、電力・建材・保険の実務描写で崩す。",
+        "reader_reaction_intended": "この世界のダンジョン価値を、単なる流行か生活基盤かで考え始める。",
+        "visual_focus": "オールバック寄りショートの西園寺の横顔、久志の反応の薄い横顔、間に入る通勤客の流れ。",
+        "cut_type": "smash_cut",
+        "page_idx": 4,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 2,
+          "max_chars": 34,
+          "type": "mixed"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 21,
+        "role": "information",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "wide",
+        "tempo": "fast",
+        "characters": [],
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "だが、電力会社が魔石を買い取り、建材メーカーが甲殻素材を仕入れ始めた。",
+        "emotion": "非日常が物流と伝票の姿を取り、都市の裏側で淡々と回っている。",
+        "multi_character_treatment": "distant",
+        "narrative_function": "inform",
+        "purpose": "魔石が宝物ではなく市場価値を持つ伏線を、現代産業の絵で示す。",
+        "change_from_prev": "西園寺の主観的な断定から、社会実装された客観的な実例へ反転する。",
+        "link_to_next": "金銭と契約の話を、保険商品とスマホ画面へ接続する。",
+        "reader_reaction_intended": "ダンジョン素材が普通に売買される社会だと納得する。",
+        "visual_focus": "トラックの荷台に積まれるコンテナ、魔石用の無地ケース、建材サンプル風の甲殻板。",
+        "cut_type": "contrast",
+        "page_idx": 5,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 42,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "negative_space_hint": "コンテナ側面と納品票にSVG用の空欄。会社名や数値は画像内に描かない。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 22,
+        "role": "information",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "損保会社がダンジョン特約を売り出した時点で、少なくとも俺の生きている間は消えそうにない。",
+        "emotion": "久志は社会の変化を夢ではなく契約欄と料金表で理解している。",
+        "narrative_function": "inform",
+        "purpose": "ダンジョンが制度とリスク計算に組み込まれたことを、保険パンフとスマホUIで見せる。",
+        "change_from_prev": "産業物流の外側から、久志が手元で確認できる生活情報へ寄る。",
+        "link_to_next": "手元の数字感覚を、金曜日に立ち寄る具体的な動機へつなげる。",
+        "reader_reaction_intended": "久志が冒険心ではなく制度と費用で動く人物だと理解する。",
+        "visual_focus": "スマホ画面、保険パンフ、革靴のつま先、駅前の舗装。",
+        "cut_type": "scale_jump",
+        "page_idx": 5,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 50,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "negative_space_hint": "スマホ画面とパンフ見出しにSVG用矩形枠を確保。画面内文字は描かない。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 23,
+        "role": "transition",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "right"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "俺がそのビルに立ち寄ったのは、出現から三日後の金曜日だ。",
+        "emotion": "胃の重さを抱えた久志が、いつもの直進ルートからわずかに逸れる。",
+        "narrative_function": "pause",
+        "purpose": "火曜の発見から金曜の行動へ時間を進め、久志が入口へ近づく心理的段差を作る。",
+        "change_from_prev": "社会説明から、久志自身が初めてルートを変える行動へ移る。",
+        "link_to_next": "のぼり横の小さな紙へ視線を落とし、五百円の現実感を強調する。",
+        "reader_reaction_intended": "大きな冒険ではなく、ほんの寄り道が始まりになると感じる。",
+        "visual_focus": "雑居ビル入口前で足を止める久志、通勤路から一歩外れた革靴、朝の硬い光。",
+        "cut_type": "time_skip",
+        "page_idx": 5,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 30,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 24,
+        "role": "cliffhanger",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "Eランク登録者募集中。当日発行可。手数料、五百円。",
+        "emotion": "危険度よりも五百円という金額だけが、久志の頭の中で妙にくっきり残る。",
+        "narrative_function": "beat_button",
+        "purpose": "久志の価値判断が『恐怖』ではなく『見積もれる金額』へ向く瞬間を作る。",
+        "change_from_prev": "入口前の迷いから、具体的な金額に意識が吸い寄せられる停止へ変える。",
+        "link_to_next": "次ページで、五百円をきっかけに足が地下へ向く。",
+        "reader_reaction_intended": "この男はダンジョンを冒険ではなく手続きとして見るのだと掴ませる。",
+        "visual_focus": "のぼり横の小さな貼り紙、久志の指先、くたびれた財布の端。",
+        "cut_type": "scale_jump",
+        "page_idx": 5,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 28,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "negative_space_hint": "貼り紙全面をSVGテキスト用に白く空ける。五百円表示は後乗せ。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 25,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "face_close",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "その五百円が、やけにリアルだった。",
+        "emotion": "久志は危険の輪郭より、硬貨一枚で済む手続きの安さに心をつかまれる。",
+        "narrative_function": "emote",
+        "purpose": "久志の異常な合理性を感情として見せ、ダンジョンへ入る動機を生活費の尺度に落とす。",
+        "change_from_prev": "貼り紙の金額から、久志の内面の引っかかりへ寄る。",
+        "link_to_next": "表情を隠すように視線を下げ、足元の地下入口へつなぐ。",
+        "reader_reaction_intended": "そこに反応するのか、というズレの面白さを感じる。",
+        "visual_focus": "久志の無表情に近い目元、眼鏡に映る白い貼り紙、額の薄い疲労。",
+        "cut_type": "shot_reverse",
+        "page_idx": 6,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "thought"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 26,
+        "role": "emotion",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "五百円でできる手続きが、この世にまだあるのか。",
+        "emotion": "財布を開く指が、役員報告の重さから一瞬だけ逃げ道を見つける。",
+        "narrative_function": "pause",
+        "purpose": "顔ではなく手元で、久志の生活感と金銭感覚を間接的に見せる。",
+        "change_from_prev": "顔の反応から、財布と硬貨という具体物へ視点を落とす。",
+        "link_to_next": "硬貨の丸さを地下へ降りる丸い誘導灯や階段の暗がりへ graphic_match させる。",
+        "reader_reaction_intended": "ダンジョンの入口が、役所の窓口のように身近になっていく不気味さを覚える。",
+        "visual_focus": "五百円玉、レシートの束、会社員らしい革財布、貼り紙の端。",
+        "cut_type": "scale_jump",
+        "page_idx": 6,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 22,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 27,
+        "role": "transition",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "朝から胃が痛かった。月曜の役員報告を控えた見積もりは、まだペンディングのままだった。",
+        "emotion": "久志は地下入口を見るふりをしながら、本当は会社へ戻る重さから目をそらしている。",
+        "narrative_function": "contrast",
+        "purpose": "会社の見積もりストレスと、五百円で始まるダンジョン手続きを対比させる。",
+        "change_from_prev": "硬貨の小さな現実から、仕事の圧迫感を背負った身体全体へ戻す。",
+        "link_to_next": "久志がカードを受け取る未来の予感へつなげ、次beatの受付描写を準備する。",
+        "reader_reaction_intended": "冒険心よりも逃避と計算が久志を動かしていると察する。",
+        "visual_focus": "地下へ下りる階段の暗がり、背後の高層ビル、久志の丸めた肩。",
+        "cut_type": "graphic_match",
+        "page_idx": 6,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 48,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 28,
+        "role": "cliffhanger",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s2",
+        "beat_idx": 2,
+        "camera": "over_shoulder",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "80a95c82-db74-46f8-a7c7-f9dcc2d829ba",
+        "narration": "見学するだけのつもりだった。ほんとうに、それだけのつもりだった。",
+        "emotion": "久志は自分の小さな逸脱に名前をつけず、地下の白い蛍光灯を見下ろす。",
+        "narrative_function": "beat_button",
+        "purpose": "このbeatを『通勤路にある入口』から『久志が入る入口』へ変化させ、次beatの受付・登録へ引きを作る。",
+        "change_from_prev": "仕事から逃げたい外的圧力が、実際に地下へ向く一歩に変わる。",
+        "link_to_next": "次beatで八潮リフト受付・管理カウンターに入り、Eランク登録手続きへ進む。",
+        "reader_reaction_intended": "『見学だけ』が嘘になる予感と、日常が少し壊れる期待を持ってめくらせる。",
+        "visual_focus": "久志の背中、地下へ続く階段、蛍光灯の白、オレンジバリケードの影。",
+        "cut_type": "reveal_pull",
+        "page_idx": 6,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 34,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s2"
+        },
+        "negative_space_hint": "階段上部にナレーション枠用の白い余白。地下側は文字なしで不穏に残す。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 29,
+        "role": "opening",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0": "background"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "narration": "地下に下りると、そこは銀行窓口みたいな場所だった。",
+        "emotion": "久志は拍子抜けし、危険より先に手続きの匂いを感じている。",
+        "multi_character_treatment": "distant",
+        "narrative_function": "establishing",
+        "purpose": "ダンジョン入口なのに区役所的な受付であることを示し、現代日常と異世界リスクの落差を作る。",
+        "change_from_prev": "入口を見下ろす不安から、実際には生活感のある受付へ移り、危険の輪郭が薄まる。",
+        "link_to_next": "神楽坂の事務的な案内に視線を寄せる。",
+        "reader_reaction_intended": "思ったより普通だ、という油断を共有させる。",
+        "visual_focus": "番号札、料金表、蛍光灯、銀行窓口風のカウンター越しに座る神楽坂",
+        "cut_type": "reveal_pull",
+        "page_idx": 7,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 28,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "上部に小さなナレーション枠用の白場。料金表や掲示物の文字はSVGで後置き。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 30,
+        "role": "information",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0": "right"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "dialogue": [
+          {
+            "speaker_id": "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0",
+            "text": "免許証、お願いします",
+            "intent": "普通の行政手続きとして登録を進める",
+            "bubble_type": "normal"
+          }
+        ],
+        "emotion": "久志の指先は警戒よりも財布の中身を気にしている。",
+        "multi_character_treatment": "normal",
+        "narrative_function": "inform",
+        "purpose": "登録が特別な儀式ではなく、免許証提出で済む軽い手続きだと見せる。",
+        "change_from_prev": "場の全体像から、久志の手元の迷いへ焦点が絞られる。",
+        "link_to_next": "タブレット署名へ事務処理が進む。",
+        "reader_reaction_intended": "危険なはずなのに手続きが軽すぎる違和感を持たせる。",
+        "visual_focus": "免許証を差し出す久志の手、カウンター上のタブレット、五百円硬貨",
+        "cut_type": "scale_jump",
+        "page_idx": 7,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 14,
+          "type": "dialogue"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "タブレット画面は無地の矩形で残し、署名欄や登録UIはSVG重ね。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 31,
+        "role": "emotion",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "face_close",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "narration": "五百円でできる手続きが、この世にまだあるのか。",
+        "emotion": "久志は危険度ではなく金額の安さに引っかかり、判断基準が生活費へ寄っていく。",
+        "narrative_function": "emote",
+        "purpose": "久志の価値判断が冒険心ではなく家計感覚で動いていることを明確にする。",
+        "change_from_prev": "事務処理の外側から、久志の内面の計算へ入る。",
+        "link_to_next": "安さに納得してしまった久志が署名へ進む。",
+        "reader_reaction_intended": "そこに反応するのか、という地味な可笑しさを出す。",
+        "visual_focus": "久志の眼鏡奥の目、頬の汗、背景にぼける五百円表示",
+        "cut_type": "scale_jump",
+        "page_idx": 7,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "顔の横に小さな独白用の白場。背景掲示の文字は描き込まない。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 32,
+        "role": "information",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "over_shoulder",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0": "right"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "dialogue": [
+          {
+            "speaker_id": "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0",
+            "text": "ここに署名を",
+            "intent": "迷う暇を与えず登録を進める",
+            "bubble_type": "normal"
+          }
+        ],
+        "emotion": "神楽坂は淡々としており、久志の迷いを日常業務の範囲に収めてしまう。",
+        "multi_character_treatment": "normal",
+        "narrative_function": "inform",
+        "purpose": "署名によって久志が引き返せる境界を越える瞬間を描く。",
+        "change_from_prev": "内面の逡巡から、具体的な署名行為へ戻る。",
+        "link_to_next": "署名後、登録カードが発行される。",
+        "reader_reaction_intended": "軽い一筆が大きな踏み込みになる予感を持たせる。",
+        "visual_focus": "タブレットに触れる久志の人差し指、横に置かれた五百円硬貨",
+        "cut_type": "match_action",
+        "page_idx": 7,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 8,
+          "type": "dialogue"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "タブレット画面は矩形枠のみ。署名線や注意文はSVG重ね。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 33,
+        "role": "transition",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0": "right"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "narration": "発行まで、十五分。",
+        "emotion": "久志は短すぎる所要時間に、もう断る理由を失っている。",
+        "multi_character_treatment": "normal",
+        "narrative_function": "beat_button",
+        "purpose": "登録の軽さを締め、危険への心理的ハードルが下がったことを示す。",
+        "change_from_prev": "署名という能動的行為から、カードを受け取る受動的な結果へ変わる。",
+        "link_to_next": "カードを受け取った久志に、神楽坂が一階層のルールを説明する。",
+        "reader_reaction_intended": "あまりに簡単に進んだことへの不穏さを残す。",
+        "visual_focus": "神楽坂が差し出す小さなEランクカードと、受け取る直前で止まる久志の手",
+        "cut_type": "graphic_match",
+        "page_idx": 7,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 10,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "カード表面のランク表示は空欄で残し、SVGでEランク表記を重ねる。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 34,
+        "role": "information",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "over_shoulder",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0": "center"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "dialogue": [
+          {
+            "speaker_id": "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0",
+            "text": "鴨下さん、Eランクは一階層までです",
+            "intent": "ルールを軽く確認する",
+            "bubble_type": "normal"
+          }
+        ],
+        "emotion": "神楽坂は重要な制限を、窓口説明の一項目として流している。",
+        "multi_character_treatment": "normal",
+        "narrative_function": "inform",
+        "purpose": "Eランクは一階層までという伏線を明示し、後のD級相当出現への違和感を仕込む。",
+        "change_from_prev": "登録完了の結果から、入場制限というルール説明へ移る。",
+        "link_to_next": "久志の反応で制限の重みが薄まる。",
+        "reader_reaction_intended": "ルール自体は覚えつつ、神楽坂の軽さで警戒を下げさせる。",
+        "visual_focus": "神楽坂の手元の説明資料、カウンターに置かれたEランクカード",
+        "cut_type": "match_action",
+        "page_idx": 8,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 22,
+          "type": "dialogue"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "説明資料とカードの文字要素は空白矩形で、SVGにてランク制限を後置き。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 35,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "narration": "一階層まで。見学だけなら、問題ない。",
+        "emotion": "久志は制限を危険の警告ではなく、自分に都合のいい安全確認として処理する。",
+        "narrative_function": "pause",
+        "purpose": "久志の自己弁明を置き、危険に踏み込む心理的ハードルの低さを作る。",
+        "change_from_prev": "神楽坂の外部説明から、久志の内心の言い訳へ沈む。",
+        "link_to_next": "神楽坂の軽い例示がさらに背中を押す。",
+        "reader_reaction_intended": "自分で言い聞かせている危うさに気付かせる。",
+        "visual_focus": "カードを握る手と、その下で小さく曲がるスーツの裾",
+        "cut_type": "scale_jump",
+        "page_idx": 8,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 22,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "手元周辺に独白用の白場。カードの文字はSVG後置き。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 36,
+        "role": "information",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "side",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0"
+        ],
+        "character_positions": {
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0": "right",
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "dialogue": [
+          {
+            "speaker_id": "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0",
+            "text": "一階層は弱いです。軍手と懐中電灯で大丈夫ですよ",
+            "intent": "危険を日用品レベルに言い換える",
+            "bubble_type": "normal"
+          }
+        ],
+        "emotion": "神楽坂の口調は定食屋で日替わりを勧めるように軽い。",
+        "multi_character_treatment": "normal",
+        "narrative_function": "contrast",
+        "purpose": "ダンジョン攻略を軍手と懐中電灯という生活用品へ落とし込み、現代ダンジョンの異物感を強める。",
+        "change_from_prev": "久志の静かな自己弁明に対し、神楽坂の軽い説明が危険をさらに小さく見せる。",
+        "link_to_next": "久志の視線が受付奥の入口へ動く。",
+        "reader_reaction_intended": "軽すぎる説明に、笑いと不安を同時に感じさせる。",
+        "visual_focus": "神楽坂の柔らかい営業スマイル、カウンター脇の軍手と懐中電灯の実物見本",
+        "cut_type": "shot_reverse",
+        "page_idx": 8,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 30,
+          "type": "dialogue"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "掲示物と注意書きは文字なしの枠のみ。吹き出しは上部に配置。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 37,
+        "role": "transition",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "narration": "俺はその日、本当に見学だけのつもりだった。",
+        "emotion": "久志は自分の足が入口へ向いていることに、まだ責任を持っていない。",
+        "narrative_function": "beat_button",
+        "purpose": "『見学だけ』という言い訳をページ末に置き、次ページの一階層突入への引きを作る。",
+        "change_from_prev": "会話の軽さから、受付奥に口を開ける入口の存在感へ切り替わる。",
+        "link_to_next": "次ページでカードを尻ポケットに入れてゲートへ進む。",
+        "reader_reaction_intended": "その言葉が破られる予感を持ってページをめくらせる。",
+        "visual_focus": "受付奥の無機質なゲート、足元へ伸びる蛍光灯の影、久志の背中",
+        "cut_type": "reveal_pull",
+        "page_idx": 8,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "ゲート上の警告表示は空枠。SVGで注意表示を重ねるため中央上部を空ける。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 38,
+        "role": "transition",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "narration": "カードを尻ポケットに入れた。",
+        "emotion": "久志は手続きが終わった安心感のまま、危険物ではなく定期券のようにカードを扱う。",
+        "narrative_function": "pause",
+        "purpose": "日常動作で入場直前の間を作り、危険への境界越えを小さく見せる。",
+        "change_from_prev": "入口を見つめる背中から、カードをしまう手元の生活感へ寄る。",
+        "link_to_next": "足元が受付の床から一階層へ向かう通路へ進む。",
+        "reader_reaction_intended": "定期券感覚で危険に入る不安を感じさせる。",
+        "visual_focus": "尻ポケットへ滑り込むEランクカード、スーツの生地、革靴のつま先",
+        "cut_type": "scale_jump",
+        "page_idx": 9,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 14,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "カード表面の文字はSVG後置き。手元周辺は白場多め。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 39,
+        "role": "action",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "full_body",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "dialogue": [
+          {
+            "speaker_id": "99128ecb-d840-436e-951d-c68e8f0eab56",
+            "text": "見学だけなら",
+            "intent": "自分に許可を出す",
+            "bubble_type": "whisper"
+          }
+        ],
+        "emotion": "久志は口に出すことで、踏み込む理由を形にしてしまう。",
+        "narrative_function": "emote",
+        "purpose": "自己弁明を台詞化し、久志が能動的に入口へ進む転換点を作る。",
+        "change_from_prev": "カードをしまう無言の動作から、足を進める小さな決断へ変わる。",
+        "link_to_next": "入口の暗さと受付の明るさの対比へ繋ぐ。",
+        "reader_reaction_intended": "言い訳が行動に変わる瞬間を見せる。",
+        "visual_focus": "受付の明るい床から暗い通路へ一歩踏み出す久志の全身",
+        "cut_type": "match_action",
+        "page_idx": 9,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 8,
+          "type": "whisper"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "足元と通路奥を広く残し、効果音や小声吹き出しを後置き可能にする。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 40,
+        "role": "transition",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "wide",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "久志は受付の生活音が背後で消え、初めて空間の広さに飲まれかける。",
+        "narrative_function": "silence",
+        "purpose": "場所転換の最初のコマとして一階層の全体像を確立し、日常パートとの視覚コントラストを作る。",
+        "change_from_prev": "受付の明るい事務空間から、音が反響する広大な地下駐車場型エリアへ場面が切り替わる。",
+        "link_to_next": "久志の視線が遠くの柱陰へ吸い寄せられる。",
+        "reader_reaction_intended": "普通の地下駐車場に似ているのに異様、という違和感で立ち止まらせる。",
+        "visual_focus": "だだっ広いコンクリート床、蛍光灯、柱列、受付光を背負う小さな久志",
+        "cut_type": "smash_cut",
+        "page_idx": 9,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0,
+          "type": "dialogue"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "50%以上を白と薄トーンの床面にし、無音の余白として使う。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 41,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "side",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "想像していた洞窟では、なかった。",
+        "emotion": "久志は恐怖より先に、想定とのズレを確認している。",
+        "narrative_function": "contrast",
+        "purpose": "現代建築と異空間の混在を久志の認識として提示し、ジャンルの視覚軸を定着させる。",
+        "change_from_prev": "無音の全景から、久志の観察と思考へ戻る。",
+        "link_to_next": "観察の先に、柱陰の異物が入ってくる。",
+        "reader_reaction_intended": "洞窟ファンタジーではない現代ダンジョンの質感を掴ませる。",
+        "visual_focus": "久志の横顔、蛍光灯に照らされたコンクリート床、奥だけ微妙に歪む壁面",
+        "cut_type": "scale_jump",
+        "page_idx": 9,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "壁面の案内表示は文字なし。ナレーション枠を上部に小さく配置。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 42,
+        "role": "cliffhanger",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s3",
+        "beat_idx": 3,
+        "camera": "wide",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "遠くの柱の陰に、緑色の影が座り込んでいた。",
+        "emotion": "久志はまだ危険とは認めず、ただ見積もる前の対象を見つけてしまう。",
+        "multi_character_treatment": "silhouette",
+        "narrative_function": "reveal",
+        "purpose": "一階層突入の到達点として初遭遇の影を見せ、次beatの接近と戦闘へ引き渡す。",
+        "change_from_prev": "空間観察から、明確な異物の発見へ物語が進む。",
+        "link_to_next": "次beatで久志が影へ向かって歩き出す。",
+        "reader_reaction_intended": "見学だけでは終わらないと確信してページをめくらせる。",
+        "visual_focus": "柱陰に小さく座る緑色のシルエット、手前で止まる久志の革靴、長く伸びる蛍光灯の影",
+        "cut_type": "reveal_pull",
+        "page_idx": 9,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s3"
+        },
+        "negative_space_hint": "柱陰の影は詳細を描かず、次beat用に正体を隠す。ナレーション枠は床面の白場へ配置。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 43,
+        "role": "opening",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "一階層は、洞窟ではなかった。",
+        "emotion": "警戒よりも、場違いな事務所感に意識が向いている",
+        "multi_character_treatment": "distant",
+        "narrative_function": "establishing",
+        "purpose": "地下駐車場のような異空間を提示し、前beatの影へ久志が踏み込む距離感を作る。",
+        "change_from_prev": "柱陰の不穏な影から、久志がその正体を確かめに行く行動へ移る。",
+        "link_to_next": "広い空間の奥にいる小さな異物へ視線を誘導する。",
+        "reader_reaction_intended": "現代的な空間なのに何かがおかしい、という違和感を持たせる。",
+        "visual_focus": "蛍光灯が等間隔に並ぶコンクリート床、柱の影、スーツ姿で折り畳み傘を握る久志の背中",
+        "cut_type": "reveal_pull",
+        "page_idx": 10,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 44,
+        "role": "information",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "side",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "近づくと、そいつはちゃんと嫌な顔で俺を見上げた。",
+        "emotion": "拍子抜けと不快感が同時に来る",
+        "multi_character_treatment": "normal",
+        "narrative_function": "inform",
+        "purpose": "初遭遇の相手が強大な怪物ではなく、座り込んだ小型の敵だと示して期待を外す。",
+        "change_from_prev": "遠景の影が、久志の足元の小さな敵として具体化する。",
+        "link_to_next": "敵の頭上に久志だけが読む数字を出す準備をする。",
+        "reader_reaction_intended": "怖い場面のはずなのに妙に地味だと感じさせる。",
+        "visual_focus": "久志の革靴、床に座る小さな緑の影、傘の先端",
+        "cut_type": "scale_jump",
+        "page_idx": 10,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 45,
+        "role": "emotion",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "尻ポケットの傘を抜いた。",
+        "emotion": "怖がる前に、手持ちの道具で足りるかを測っている",
+        "narrative_function": "pause",
+        "purpose": "久志の感情を顔ではなく手元で見せ、戦闘前の間を置く。",
+        "change_from_prev": "敵を見る受け身から、久志が自分の道具を選ぶ能動へ変わる。",
+        "link_to_next": "傘を武器として構え、頭上の見積もり表示へ繋げる。",
+        "reader_reaction_intended": "本当に折り畳み傘で行くのか、という生活感のある緊張を作る。",
+        "visual_focus": "スラックスの尻ポケットから抜かれる折り畳み傘、少し汗ばんだ指",
+        "cut_type": "match_action",
+        "page_idx": 10,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 12,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 46,
+        "role": "information",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "over_shoulder",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "頭の上に、数字が浮かんだ気がした。",
+        "emotion": "恐怖よりも、見積もり表を見た時の集中に近い",
+        "multi_character_treatment": "normal",
+        "narrative_function": "reveal",
+        "purpose": "久志だけが読める推定HPと報酬相場の表示を、このbeatの核となる能力として定着させる。",
+        "change_from_prev": "物理的な傘の準備から、久志の認識内に現れる現代風UIへ飛ぶ。",
+        "link_to_next": "表示された安い相場が、実際の戦闘を小さな検証に変える。",
+        "reader_reaction_intended": "この男は敵を怪物ではなく案件として見ている、と気づかせる。",
+        "visual_focus": "敵の頭上に重ねる矩形UI用の余白、久志の肩越し、薄暗い柱列",
+        "cut_type": "graphic_match",
+        "page_idx": 10,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 30,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "negative_space_hint": "敵の頭上にSVGで《推定HP 十二前後／報酬相場 四百五十円》を置くための白い矩形UI領域を確保。画像内には文字を描かない。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 47,
+        "role": "action",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "side",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "right"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "一回目。",
+        "emotion": "自分でも半信半疑のまま、まず数字を確かめにいく",
+        "multi_character_treatment": "normal",
+        "narrative_function": "inform",
+        "purpose": "初撃を派手な英雄的攻撃ではなく、試し打ちのように見せる。",
+        "change_from_prev": "見積もりを読む静止から、傘を振り下ろす行動へ移る。",
+        "link_to_next": "当たりの軽さが、次の反応の間を生む。",
+        "reader_reaction_intended": "戦闘というより検証作業に見える違和感を持たせる。",
+        "visual_focus": "折り畳み傘の軌道、床に伸びる久志の影、地下駐車場の白線",
+        "cut_type": "match_action",
+        "page_idx": 11,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 5,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "high"
+      },
+      {
+        "idx": 48,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "full_body",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "自分の動作の地味さに少し遅れて気づくが、やめる理由も見つからない",
+        "multi_character_treatment": "normal",
+        "narrative_function": "silence",
+        "purpose": "初撃後の無音を置き、恐怖でも高揚でもない久志の空白を読ませる。",
+        "change_from_prev": "動きの線から、音の消えた硬い床と久志の姿勢へ落とす。",
+        "link_to_next": "間を挟んだことで二撃目が作業の反復に見える。",
+        "reader_reaction_intended": "この戦闘が妙に現実的で間抜けに見える。",
+        "visual_focus": "傘を持ったまま固まる久志、広すぎる空間、白く抜けた床面",
+        "cut_type": "contrast",
+        "page_idx": 11,
+        "importance": 1,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "negative_space_hint": "50%以上を床の白い余白にして、完全無音の間を作る。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 49,
+        "role": "action",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "birds_eye",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "二回目で、距離が分かった。",
+        "emotion": "怯えが薄れ、営業資料の誤差を詰める時の顔つきになる",
+        "multi_character_treatment": "normal",
+        "narrative_function": "contrast",
+        "purpose": "久志が戦闘を身体で覚えるより、距離と回数の計算として処理していることを見せる。",
+        "change_from_prev": "無音の硬直から、上から見た作業的な反復へ切り替わる。",
+        "link_to_next": "三回目に向けて、検証が完了する予感を作る。",
+        "reader_reaction_intended": "久志の異常な落ち着きに少し笑いと不気味さを感じさせる。",
+        "visual_focus": "白線をまたぐ革靴、傘の届く範囲、床に落ちる二つの影",
+        "cut_type": "scale_jump",
+        "page_idx": 11,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 14,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "high"
+      },
+      {
+        "idx": 50,
+        "role": "action",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "hands",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "三回目で、軽い音がした。",
+        "emotion": "成功の実感より、結果が出たという事務的な納得が先に来る",
+        "multi_character_treatment": "normal",
+        "narrative_function": "beat_button",
+        "purpose": "初討伐の瞬間を、爆発ではなく『ぽん』という小さな結果音で締める。",
+        "change_from_prev": "距離を測る反復から、検証結果が出る瞬間へ進む。",
+        "link_to_next": "敵が消えた後に残る小石へ視線を落とす。",
+        "reader_reaction_intended": "初勝利なのに軽すぎる音で肩透かしを感じさせる。",
+        "visual_focus": "傘の先、消えかける小さな影、床に落ちようとする灰色の粒",
+        "cut_type": "match_action",
+        "page_idx": 11,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 15,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "high"
+      },
+      {
+        "idx": 51,
+        "role": "information",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "background"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "床に、親指の先くらいの灰色の石が転がった。",
+        "emotion": "勝利の余韻より、拾うべき証憑を見つけた感覚",
+        "narrative_function": "reveal",
+        "purpose": "初ドロップを地味な灰色の石として見せ、後の青い魔石との対比を準備する。",
+        "change_from_prev": "消える敵の動きから、床に残った小さな物体へ焦点が落ちる。",
+        "link_to_next": "久志が戦利品ではなく査定対象としてスマホへ意識を移す。",
+        "reader_reaction_intended": "思ったより地味な報酬に、生活感のあるリアリティを感じさせる。",
+        "visual_focus": "コンクリート床に転がる灰色の小石、久志の革靴のつま先",
+        "cut_type": "scale_jump",
+        "page_idx": 12,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 52,
+        "role": "transition",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "石よりも通知を待つ、経理処理前のような緊張",
+        "narrative_function": "pause",
+        "purpose": "スマホを出すまでの小さな間で、久志にとって重要なのは討伐ではなく査定だと示す。",
+        "change_from_prev": "床の石を見る視線から、尻ポケットのスマホへ手が動く。",
+        "link_to_next": "通知画面の白い光へカットを繋ぐ。",
+        "reader_reaction_intended": "この人は本当に金額を確認したいのだと理解させる。",
+        "visual_focus": "片手の折り畳み傘、もう片手で取り出すスマホ、灰色の石は足元に小さく残る",
+        "cut_type": "match_action",
+        "page_idx": 12,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 53,
+        "role": "information",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "通知が来た。",
+        "emotion": "査定額を見る直前だけ、集中が一段深くなる",
+        "narrative_function": "reveal",
+        "purpose": "スマホ通知で魔石の査定額を提示し、現代UIとダンジョン報酬を融合させる。",
+        "change_from_prev": "スマホを取り出す動作から、画面の情報そのものへ寄る。",
+        "link_to_next": "表示額と頭の中の見積もりの差を、久志の反応で回収する。",
+        "reader_reaction_intended": "冒険の報酬がアプリ通知で来る世界観を直感させる。",
+        "visual_focus": "暗い地下空間の中で白く光るスマホ画面、足元の灰色の小石",
+        "cut_type": "scale_jump",
+        "page_idx": 12,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 8,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "negative_space_hint": "スマホ画面にSVGで《魔石（E級・一般）／四百三十円》を配置。画面内文字は生成しない。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 54,
+        "role": "emotion",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "face_close",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "四百五十円で見積もったのに、二十円安い。",
+        "emotion": "恐怖でも達成感でもなく、見積もり誤差への不満",
+        "narrative_function": "beat_button",
+        "purpose": "このbeatの核心として、久志の最初の感想が『二十円のズレ』だったと確定させる。",
+        "change_from_prev": "スマホ画面の客観情報から、久志の異様に生活的な内面へ移る。",
+        "link_to_next": "ダンジョンを毎朝検証できる収益案件として見る思考へ繋げる。",
+        "reader_reaction_intended": "この主人公のズレ方を面白がり、同時に強みとして認識させる。",
+        "visual_focus": "スマホの白い光を受けた久志の無表情に近い顔、眉間だけがわずかに寄る",
+        "cut_type": "shot_reverse",
+        "page_idx": 12,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 22,
+          "type": "thought"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 55,
+        "role": "emotion",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "ダンジョンが怖いとも、俺が強いとも思わなかった。",
+        "emotion": "初勝利の熱が自分の中にないことを、遅れて確認している",
+        "narrative_function": "emote",
+        "purpose": "久志の感情の不在を広い空間で見せ、一般的な覚醒譚から外す。",
+        "change_from_prev": "顔の小さな不満から、地下駐車場全体にぽつんと立つ孤独な姿へ引く。",
+        "link_to_next": "彼の感情の代わりに数字が残ることを示す。",
+        "reader_reaction_intended": "初討伐の余韻がないことに、久志らしさを感じさせる。",
+        "visual_focus": "広大な床に一人立つ久志、足元の小石、遠くで反響する蛍光灯",
+        "cut_type": "scale_jump",
+        "page_idx": 13,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 28,
+          "type": "thought"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 56,
+        "role": "information",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "誤差は、二十円。",
+        "emotion": "小さな数字ほど無視できない営業職の習性が前に出る",
+        "narrative_function": "contrast",
+        "purpose": "魔物を倒した現実より、査定差額だけが久志の中で拡大していることを視覚化する。",
+        "change_from_prev": "広い空間の余韻から、スマホと灰色の石という小さな数字の世界へ戻る。",
+        "link_to_next": "この誤差を詰めたいという動機が、継続の理由に変わる。",
+        "reader_reaction_intended": "二十円にこだわる地味さが、逆に攻略者としての資質に見える。",
+        "visual_focus": "スマホ、灰色の魔石、久志の親指、白く空けたUI用余白",
+        "cut_type": "graphic_match",
+        "page_idx": 13,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 10,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "negative_space_hint": "スマホ画面と周囲にSVGで査定額と差額メモを重ねられる余白を確保。画像内文字は描かない。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 57,
+        "role": "emotion",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "side",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "営業として、気に入らなかった。",
+        "emotion": "恐怖を処理し損ねたまま、仕事の癖で納得しようとしている",
+        "narrative_function": "beat_button",
+        "purpose": "久志がダンジョン攻略へ向かう理由を、冒険心ではなく営業的な精度への執着として定義する。",
+        "change_from_prev": "差額という情報から、久志の行動原理そのものへ踏み込む。",
+        "link_to_next": "翌週からの習慣化を自然に受け入れさせる。",
+        "reader_reaction_intended": "地味な男が別の尺度で危険を攻略し始める高揚を感じさせる。",
+        "visual_focus": "傘を畳み直す久志の横顔、まくれていないワイシャツ袖、床の灰色の魔石",
+        "cut_type": "shot_reverse",
+        "page_idx": 13,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 14,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 58,
+        "role": "transition",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s4",
+        "beat_idx": 4,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "background"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "翌週の月曜から、俺は八潮リフトに毎朝寄るようになった。",
+        "emotion": "一度だけの異常体験が、通勤前の予定表へ静かに組み込まれる",
+        "narrative_function": "cutaway",
+        "purpose": "初討伐を単発イベントで終わらせず、毎朝の副業ルーティンへ反転させて次beatへ渡す。",
+        "change_from_prev": "個人の納得から、時間が進んで習慣化する未来の絵へ移る。",
+        "link_to_next": "次beatの三ヶ月後、完全にルーティン化した朝へ繋ぐ。",
+        "reader_reaction_intended": "危険な場所が通勤経路の一部になってしまう不穏さと面白さを残す。",
+        "visual_focus": "地下駐車場型エリアの出口方向へ歩く久志の小さな背中、片手のスマホ、片手の折り畳み傘",
+        "cut_type": "time_skip",
+        "page_idx": 13,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 30,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s4"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 59,
+        "role": "opening",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "background"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "三ヶ月後。俺の朝は、完全にルーティン化した。",
+        "emotion": "淡々とした安心。異常な場所を日常として処理している。",
+        "narrative_function": "establishing",
+        "purpose": "地下駐車場型ダンジョンが、久志にとって通勤前の固定ルートになったことを一目で示す。",
+        "change_from_prev": "前beatの習慣化予告から時間を飛ばし、実際に反復された朝の風景へ着地する。",
+        "link_to_next": "久志の身支度へ寄って、日常化の具体物を積み上げる。",
+        "reader_reaction_intended": "ダンジョンなのに朝の駅通路のように扱われている違和感を覚える。",
+        "visual_focus": "蛍光灯が並ぶ広いコンクリート空間、柱番号、遠くを歩く久志の小さな背中。",
+        "cut_type": "time_skip",
+        "page_idx": 14,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 60,
+        "role": "information",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "袖をまくる。ネクタイをしまう。警棒を伸ばす。",
+        "emotion": "作業手順に落とし込まれた落ち着き。",
+        "narrative_function": "inform",
+        "purpose": "久志が冒険者ではなく出勤前の作業員のように準備していることを見せる。",
+        "change_from_prev": "引きの空間から手元へ寄り、ルーティンの身体化を具体化する。",
+        "link_to_next": "準備物と収支計算をつなげる。",
+        "reader_reaction_intended": "剣ではなく警棒という現代的な安さに、生活感を感じる。",
+        "visual_focus": "まくったワイシャツ袖、第二ボタンに押し込まれたネクタイ、樹脂製伸縮警棒。",
+        "cut_type": "scale_jump",
+        "page_idx": 14,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 22,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 61,
+        "role": "action",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "side",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "ゴブリン二匹で八百二十円。",
+        "emotion": "恐怖より先に収益が走っている。",
+        "narrative_function": "contrast",
+        "purpose": "戦闘を派手な冒険ではなく、朝の小遣い稼ぎとして処理している笑いを出す。",
+        "change_from_prev": "静かな準備から、慣れた一撃の動作へテンポを上げる。",
+        "link_to_next": "倒した結果をスマホの数字へ接続する。",
+        "reader_reaction_intended": "戦闘の軽さと金額の細かさにギャップを感じる。",
+        "visual_focus": "久志の警棒が画面外の小型影を弾き、床に小さな灰色魔石が転がる瞬間。",
+        "cut_type": "match_action",
+        "page_idx": 14,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 16,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 62,
+        "role": "emotion",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "コーヒー代を引くと、純益六百二十円。",
+        "emotion": "小さな数字が噛み合うことへの満足。",
+        "narrative_function": "emote",
+        "purpose": "久志の感情が勝利ではなく収支の整合性に向いていることを示す。",
+        "change_from_prev": "動きのある戦闘から、スマホ画面と指先の静止へ落とす。",
+        "link_to_next": "日額から月額へ、生活費の尺度に変換する。",
+        "reader_reaction_intended": "主人公の価値観が数字でできていると理解する。",
+        "visual_focus": "スマホの家計簿風画面、灰色魔石、缶コーヒーのレシート。",
+        "cut_type": "scale_jump",
+        "page_idx": 14,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "negative_space_hint": "スマホ画面部分は白い矩形余白を確保し、金額表示はSVGで重ねる。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 63,
+        "role": "transition",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0"
+        ],
+        "character_positions": {
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0": "center"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "narration": "神楽坂さんは、毎朝同じマグカップにほうじ茶を注いでいる。",
+        "emotion": "受付側にも変化がないことへの安心。",
+        "narrative_function": "cutaway",
+        "purpose": "神楽坂と管理カウンターを反復モチーフとして置き、後の着信の重みを仕込む。",
+        "change_from_prev": "スマホの数字から受付の生活感へ切り返し、ダンジョンが制度化されている空気を補強する。",
+        "link_to_next": "同じ時間帯の利用者という反復へ広げる。",
+        "reader_reaction_intended": "後でこの人物から連絡が来る違和感の土台を持つ。",
+        "visual_focus": "銀行窓口風カウンター、低いシニヨンの神楽坂、湯気の立つ同じマグカップ。",
+        "cut_type": "smash_cut",
+        "page_idx": 14,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 28,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 64,
+        "role": "information",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "birds_eye",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "月換算、一万二千円。昼飯代だ。",
+        "emotion": "数字で日常が閉じている安心感。",
+        "narrative_function": "beat_button",
+        "purpose": "三ヶ月のルーティンを『昼飯代』という生活スケールに落としてページを締める。",
+        "change_from_prev": "受付の反復から久志の収支表へ戻し、整った日常の完成形を提示する。",
+        "link_to_next": "完璧に整った数字が、次ページで狂う。",
+        "reader_reaction_intended": "この安定が崩れる予感を持ってページをめくる。",
+        "visual_focus": "柱の足元に置かれた缶コーヒー、スマホの月次計算、整然と並ぶ灰色魔石。",
+        "cut_type": "graphic_match",
+        "page_idx": 14,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "negative_space_hint": "スマホ画面は空の矩形で確保し、月換算の数字はSVGで重ねる。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 65,
+        "role": "opening",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "wide",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "その数字の積み重ねが、今朝、狂った。",
+        "emotion": "いつもの空間に一箇所だけ異常が混じる不穏。",
+        "narrative_function": "reveal",
+        "purpose": "ルーティンの破綻を宣言し、奥の壁際に未知の影を置く。",
+        "change_from_prev": "整った収支の締めから、同じ場所に生じた異物へ反転する。",
+        "link_to_next": "影の正体へ段階的に寄る。",
+        "reader_reaction_intended": "いつもの狩場に何がいるのか確認したくなる。",
+        "visual_focus": "広い駐車場空間の奥、柱の陰でうずくまる青黒い影。",
+        "cut_type": "reveal_pull",
+        "page_idx": 15,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 66,
+        "role": "information",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "side",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "青みがかった甲殻。犬のような頭。ゴブリンの倍はある。",
+        "emotion": "理解が遅れて、観察だけが先に進む。",
+        "narrative_function": "inform",
+        "purpose": "未知の魔物を具体化し、E級の反復と違うサイズ感を示す。",
+        "change_from_prev": "遠い影から形状が読める距離まで寄る。",
+        "link_to_next": "久志の見積もり能力が起動する。",
+        "reader_reaction_intended": "これはいつもの相手ではないと感じる。",
+        "visual_focus": "青い犬型魔物の甲殻、コンクリート床に食い込む爪、久志の足元との距離。",
+        "cut_type": "scale_jump",
+        "page_idx": 15,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 28,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 67,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "face_close",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "警棒では足りない。",
+        "emotion": "恐怖ではなく、必要装備の見積もりが先に浮かぶ。",
+        "narrative_function": "emote",
+        "purpose": "危険を感情ではなく不足項目として認識する久志の特異性を見せる。",
+        "change_from_prev": "魔物の外見から久志の内的計算へ切り替える。",
+        "link_to_next": "スマホの通知記憶と家計の不足へ接続する。",
+        "reader_reaction_intended": "逃げるべき場面で計算している異様さを感じる。",
+        "visual_focus": "久志の目に薄く映る矩形UI風の数値枠、汗のない表情。",
+        "cut_type": "shot_reverse",
+        "page_idx": 15,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 10,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "negative_space_hint": "久志の視界上に半透明の矩形UI枠を空け、数値はSVGで重ねる。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 68,
+        "role": "transition",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "87ab0d66-46b1-41e8-899d-1007e0b5f78d"
+        ],
+        "character_positions": {
+          "87ab0d66-46b1-41e8-899d-1007e0b5f78d": "foreground"
+        },
+        "location": null,
+        "dialogue": [
+          {
+            "speaker_id": "87ab0d66-46b1-41e8-899d-1007e0b5f78d",
+            "text": "洗濯機、そろそろ考えたい",
+            "intent": "家計相談を現実の圧として差し込む。",
+            "bubble_type": "normal"
+          }
+        ],
+        "emotion": "日常のお願いが、戦う理由へ変わり始める。",
+        "narrative_function": "cutaway",
+        "purpose": "昨日夜のLINEと家計簿スクショを挿入し、二万円の意味を生活費へ結びつける。",
+        "change_from_prev": "危険な魔物の前から、スマホ上の日常会話へスマッシュカットする。",
+        "link_to_next": "不足額の赤丸を久志の判断材料にする。",
+        "reader_reaction_intended": "魔物の価値が家族の出費と直結することを理解する。",
+        "visual_focus": "スマホ画面、家計簿アプリのスクショ枠、赤丸だけが見える余白。",
+        "cut_type": "smash_cut",
+        "page_idx": 15,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "dialogue"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "negative_space_hint": "LINE風画面と家計簿スクショは白枠で予約し、本文・赤字注記はSVG重ね。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 69,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "一番安いドラム式で十八万。今の副業収入では、一年半。",
+        "emotion": "生活の不足が、目の前の危険に重なる。",
+        "narrative_function": "pause",
+        "purpose": "アクション前に生活費の重みで間を作り、久志の判断を読者に待たせる。",
+        "change_from_prev": "スマホ上の相談から、久志の指が警棒を握り直す現場へ戻る。",
+        "link_to_next": "二万円という見積もりの衝撃を開示する。",
+        "reader_reaction_intended": "なぜ逃げずに迷うのか納得する。",
+        "visual_focus": "警棒を握る手、スマホ画面の暗転、遠くの青い影のぼけ。",
+        "cut_type": "graphic_match",
+        "page_idx": 15,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 30,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 70,
+        "role": "cliffhanger",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "over_shoulder",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "推定ドロップ相場、二万円前後。",
+        "emotion": "危険と金額が同じ重さで胃に落ちる。",
+        "narrative_function": "reveal",
+        "purpose": "青い魔物を狩る理由となる二万円をページ末で提示する。",
+        "change_from_prev": "生活費の不足から、目の前の魔物の査定額へ数字を接続する。",
+        "link_to_next": "ルールの曖昧さを確認し、戦う判断へ進む。",
+        "reader_reaction_intended": "この金額なら手を出してしまうかもしれないと思わせる。",
+        "visual_focus": "久志越しに青い犬型魔物、視界に浮かぶ現代風UIの査定枠。",
+        "cut_type": "reveal_pull",
+        "page_idx": 15,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "thought"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 4,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "negative_space_hint": "魔物の上部に矩形UI用の余白を確保し、推定HP・相場表示はSVG重ね。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 71,
+        "role": "information",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "face_close",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "Eランクは一階層までしか入れない。",
+        "emotion": "規約の文面を頭の中でなぞる慎重さ。",
+        "narrative_function": "inform",
+        "purpose": "久志が戦闘本能ではなく、ルール確認から判断していることを示す。",
+        "change_from_prev": "二万円の誘惑から、資格と階層制限の現実へ引き戻す。",
+        "link_to_next": "禁止されていないはず、という危うい解釈へ進む。",
+        "reader_reaction_intended": "この判断が後で問題化しそうだと感じる。",
+        "visual_focus": "久志の横顔、脳裏に浮く登録カードと一階層表示の矩形枠。",
+        "cut_type": "scale_jump",
+        "page_idx": 16,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "negative_space_hint": "登録カード風の小さな矩形UI枠を空け、階層制限文はSVG重ね。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 72,
+        "role": "emotion",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "wide",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "right"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "でも、一階層で出会った魔物を狩ることまでは、禁止されていない。はずだ。",
+        "emotion": "自分で作った逃げ道の薄さに気づいている。",
+        "narrative_function": "pause",
+        "purpose": "後の管理事務所からの電話につながる曖昧な解釈を明確に仕込む。",
+        "change_from_prev": "規約の確定事項から、久志の都合のいい解釈へずらす。",
+        "link_to_next": "神楽坂の過去の説明を思い出し、判断材料を補強する。",
+        "reader_reaction_intended": "『はずだ』の危うさに不安を持つ。",
+        "visual_focus": "久志と青い魔物の間に広い白い床、距離だけが静かに詰まっていない構図。",
+        "cut_type": "scale_jump",
+        "page_idx": 16,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 34,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 73,
+        "role": "transition",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "side",
+        "tempo": "slow",
+        "characters": [
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0",
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0": "left",
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "right"
+        },
+        "location": "3506b361-0a44-4b44-8649-86d3b513e776",
+        "dialogue": [
+          {
+            "speaker_id": "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0",
+            "text": "剣は免許がいるけど、護身具ならセーフです",
+            "intent": "久志の現在装備が制度の隙間にあることを回想で示す。",
+            "bubble_type": "normal"
+          }
+        ],
+        "emotion": "役所的な軽さが、今は危険な根拠に変わる。",
+        "multi_character_treatment": "normal",
+        "narrative_function": "cutaway",
+        "purpose": "神楽坂の説明を回想として差し込み、現代制度とダンジョン戦闘のズレを見せる。",
+        "change_from_prev": "久志の内心から、受付で交わされた生活感ある会話へ切り替える。",
+        "link_to_next": "回想の軽さと現場の危険を対比する。",
+        "reader_reaction_intended": "受付の何気ない説明が、今の危険判断に使われている怖さを感じる。",
+        "visual_focus": "管理カウンター、書類、神楽坂のマグカップ、久志の登録カード。",
+        "cut_type": "smash_cut",
+        "page_idx": 16,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "dialogue"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 74,
+        "role": "emotion",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "",
+        "emotion": "決める直前の無音。生活音が消える。",
+        "narrative_function": "silence",
+        "purpose": "戦う判断の前に完全な間を置き、読者に久志の迷いを補完させる。",
+        "change_from_prev": "回想の会話音から、現場の無音へ落とす。",
+        "link_to_next": "缶コーヒーを置く小さな動作が、決断として読めるようにする。",
+        "reader_reaction_intended": "ここで引き返せる最後の瞬間だと感じる。",
+        "visual_focus": "久志の手、少しへこんだ缶コーヒー、白く広い床面。",
+        "cut_type": "smash_cut",
+        "page_idx": 16,
+        "importance": 1,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 75,
+        "role": "cliffhanger",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "俺はコーヒーの缶を床に置き、スーツの上着を柱の足元に畳んだ。",
+        "emotion": "逃げる選択肢をきれいに畳んでいる。",
+        "narrative_function": "beat_button",
+        "purpose": "戦闘開始前の決断を、生活用品を置く動作で静かに確定させる。",
+        "change_from_prev": "無音の迷いから、具体的な準備動作で戦う側へ進む。",
+        "link_to_next": "警棒を握り直し、魔物の突進へつなげる。",
+        "reader_reaction_intended": "派手な決め台詞なしに腹を括ったことを感じる。",
+        "visual_focus": "柱の足元に畳まれたスーツ上着、缶コーヒー、奥の青い犬型魔物。",
+        "cut_type": "match_action",
+        "page_idx": 16,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 34,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 76,
+        "role": "opening",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "ネクタイは、もう外してある。",
+        "emotion": "会社員の秩序から少しだけ外れる覚悟。",
+        "narrative_function": "inform",
+        "purpose": "通勤者の記号を外し、戦闘の身体へ切り替わる入口を作る。",
+        "change_from_prev": "畳んだ上着から、警棒を握る手元へ続ける。",
+        "link_to_next": "両手で握り直す動作へ連続させる。",
+        "reader_reaction_intended": "久志が戻れない方へ一歩進んだと感じる。",
+        "visual_focus": "床に置かれたネクタイ、まくった袖、警棒を持つ両手。",
+        "cut_type": "match_action",
+        "page_idx": 17,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 14,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 77,
+        "role": "action",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "full_body",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "警棒を両手で握り直した。",
+        "emotion": "数字で決めたことを身体が追いかける緊張。",
+        "narrative_function": "beat_button",
+        "purpose": "戦闘開始の姿勢を久志単独の決め画として置く。",
+        "change_from_prev": "小物の準備から全身の構えへ広げる。",
+        "link_to_next": "魔物側の反応へ切り返す。",
+        "reader_reaction_intended": "地味な男が初めて大きな危険に向き合う高揚を感じる。",
+        "visual_focus": "ワイシャツ姿の久志、両手の警棒、背後の柱と畳んだ上着。",
+        "cut_type": "scale_jump",
+        "page_idx": 17,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 14,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 78,
+        "role": "action",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "side",
+        "tempo": "fast",
+        "characters": [],
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "犬が、喉の奥で低く唸った。",
+        "emotion": "静止していた危険が動き出す。",
+        "narrative_function": "contrast",
+        "purpose": "久志の静かな決断に対して、魔物の生物的な威圧をぶつける。",
+        "change_from_prev": "人間の構えから魔物側の低い視点へ切り替える。",
+        "link_to_next": "突進の二秒間に久志の思考を圧縮する。",
+        "reader_reaction_intended": "次の瞬間に来る衝突を予感する。",
+        "visual_focus": "青い甲殻の犬型魔物の低い姿勢、床に立つ爪痕、濃い影。",
+        "cut_type": "shot_reverse",
+        "page_idx": 17,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 14,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 79,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "face_close",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "その二秒で、午後二時の役員打ち合わせを思い出した。",
+        "emotion": "死角から仕事の予定が割り込む、久志らしい動揺。",
+        "narrative_function": "emote",
+        "purpose": "恐怖の瞬間にも会社の予定が浮かぶことで、日常と戦闘を衝突させる。",
+        "change_from_prev": "魔物の外的な動きから、久志の内側の時間圧縮へ入る。",
+        "link_to_next": "美香の言葉も同時に重なり、戦う理由を締める。",
+        "reader_reaction_intended": "命の危機と会議予定の並列に、現代ダンジョンらしい可笑しさと緊張を感じる。",
+        "visual_focus": "久志の目、薄く重なる会議資料風の矩形、背景で流れる青い影。",
+        "cut_type": "scale_jump",
+        "page_idx": 17,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 26,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "negative_space_hint": "会議メモ風の矩形枠を薄く確保し、議題文はSVG重ね。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 80,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "over_shoulder",
+        "tempo": "stop",
+        "characters": [
+          "87ab0d66-46b1-41e8-899d-1007e0b5f78d",
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "87ab0d66-46b1-41e8-899d-1007e0b5f78d": "background",
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": null,
+        "dialogue": [
+          {
+            "speaker_id": "87ab0d66-46b1-41e8-899d-1007e0b5f78d",
+            "text": "早く帰ってきてね",
+            "intent": "家計だけでなく帰る場所があることを思い出させる。",
+            "bubble_type": "normal"
+          }
+        ],
+        "emotion": "戦う理由が金額から家庭へ一瞬広がる。",
+        "multi_character_treatment": "silhouette",
+        "narrative_function": "cutaway",
+        "purpose": "美香の言葉を記憶として挟み、久志の戦う理由を単なる欲ではなく生活維持にする。",
+        "change_from_prev": "会議の記憶から家庭の記憶へ、同じ二秒内で思考を跳ばす。",
+        "link_to_next": "現場の足元へ戻し、身体の反応でページを締める。",
+        "reader_reaction_intended": "久志が無謀でも帰る前提で動いていると感じる。",
+        "visual_focus": "玄関灯のような白い余白、美香の肩までのボブのシルエット、手前に久志の背中。",
+        "cut_type": "graphic_match",
+        "page_idx": 17,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 10,
+          "type": "dialogue"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 81,
+        "role": "cliffhanger",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s5",
+        "beat_idx": 5,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "俺は、左足で床を掴んだ。",
+        "emotion": "計算が覚悟に変わる一瞬。",
+        "narrative_function": "beat_button",
+        "purpose": "初撃直前の身体反応でbeatを締め、次beatの戦闘へ強く渡す。",
+        "change_from_prev": "記憶の中の声から、現場の足元と重心へ戻る。",
+        "link_to_next": "次beatで青い魔物との初撃が始まる。",
+        "reader_reaction_intended": "次ページでぶつかる瞬間を見たいと思わせる。",
+        "visual_focus": "革靴の左足がコンクリートに似た床を踏み込み、奥から青い影が突進してくる。",
+        "cut_type": "smash_cut",
+        "page_idx": 17,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 14,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 4,
+        "source_ref": {
+          "scene_id": "ep1-s5"
+        },
+        "render_risk": "high"
+      },
+      {
+        "idx": 82,
+        "role": "action",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s1",
+        "beat_idx": 6,
+        "camera": "hands",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "左足で、床を掴む。",
+        "emotion": "日常の計算を握りしめたまま、身体だけが先に戦闘へ入る。",
+        "narrative_function": "establishing",
+        "purpose": "前beatの踏み込みを受け、革靴・コンクリート床・蛍光灯の地下駐車場感で現代ダンジョンの戦闘空間を再確立する。",
+        "change_from_prev": "駆け出す魔物を見ていた状態から、久志の足元の反応へ寄り、読者に攻防の始点を体感させる。",
+        "link_to_next": "踏み込みの力が警棒の振り下ろしへ流れる。",
+        "reader_reaction_intended": "冒険者ではなく通勤者の革靴で戦っている異様さを感じる。",
+        "visual_focus": "床を噛む革靴、まくったワイシャツ袖の端、奥に流れる青い影",
+        "cut_type": "match_action",
+        "page_idx": 18,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 14,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s1"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 83,
+        "role": "action",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s1",
+        "beat_idx": 6,
+        "camera": "side",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "left"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "午後二時の議題は、三つ目で止まった。",
+        "emotion": "業務の段取りが断ち切られ、久志の注意が初めて獲物の首筋へ絞られる。",
+        "narrative_function": "contrast",
+        "purpose": "役員会議の内的ナレーションと警棒の物理的な落下を重ね、日常の数字が戦闘に変換される瞬間を見せる。",
+        "change_from_prev": "足元の始動から全身の振り下ろしへスケールを広げ、攻撃の速度を上げる。",
+        "link_to_next": "警棒が甲殻の継ぎ目に入った感触へ寄る。",
+        "reader_reaction_intended": "仕事の思考が消えないまま戦う久志のおかしさと怖さを同時に受け取る。",
+        "visual_focus": "蛍光灯の斜光を横切る警棒、青い甲殻の首筋、久志の畳まれたスーツ上着が遠くに小さく見える",
+        "cut_type": "scale_jump",
+        "page_idx": 18,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s1"
+        },
+        "render_risk": "high"
+      },
+      {
+        "idx": 84,
+        "role": "action",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s1",
+        "beat_idx": 6,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "打撃の手応えが、痛みや嫌悪より先に数字の確信として久志の手に残る。",
+        "narrative_function": "pause",
+        "purpose": "接触そのものを描き込みすぎず、警棒の先端と甲殻の隙間だけで『入った』感触を作る。",
+        "change_from_prev": "大きな振りから小さな接触点へ急に絞り、読者の体感を一瞬止める。",
+        "link_to_next": "魔物が横へ崩れる動きに移る。",
+        "reader_reaction_intended": "嫌な手応えを想像して、次の結果を待つ。",
+        "visual_focus": "警棒の先端が青い甲殻の継ぎ目に沈む一点、周囲は白く抜いた無音の余白",
+        "cut_type": "scale_jump",
+        "page_idx": 18,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s1"
+        },
+        "negative_space_hint": "接触点の周囲を広く白く抜き、効果音を置かない余白を確保",
+        "render_risk": "high"
+      },
+      {
+        "idx": 85,
+        "role": "action",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s1",
+        "beat_idx": 6,
+        "camera": "wide",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "right"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "久志は追撃より先に、敵の崩れ方が想定値に収まったことへ意識を奪われる。",
+        "narrative_function": "inform",
+        "purpose": "青い魔物が横にもんどりうつ結果を見せ、初撃が有効だったことを視覚的に確定する。",
+        "change_from_prev": "接触の静止から魔物の横転へ動きを解放し、空間の広さと反響を戻す。",
+        "link_to_next": "起き上がる魔物の上に残HPのUIが浮かぶ。",
+        "reader_reaction_intended": "本当に効いた、という驚きを久志より少し先に感じる。",
+        "visual_focus": "地下駐車場風の床を滑る青い影、柱の蛍光灯、距離を取る久志の革靴",
+        "cut_type": "match_action",
+        "page_idx": 18,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s1"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 86,
+        "role": "emotion",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s1",
+        "beat_idx": 6,
+        "camera": "over_shoulder",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "半分。俺の見積もりが、当たっていた。",
+        "emotion": "久志の震えが恐怖からではなく、三ヶ月の積算が証明された興奮へ変わる。",
+        "narrative_function": "reveal",
+        "purpose": "《残り六十前後》の現代UI風表示で、冒頭のHP表示伏線を戦闘能力として回収する。",
+        "change_from_prev": "魔物の転倒結果から、久志だけが見ている数字の意味へ焦点を移す。",
+        "link_to_next": "数字の確信が、久志自身の震えの理由へ掘り下げられる。",
+        "reader_reaction_intended": "彼が強いのではなく、見積もっていたのだと気づく。",
+        "visual_focus": "起き上がる青い魔物の頭上に重ねる矩形UI用の空間、手前で震える警棒の柄",
+        "cut_type": "reveal_pull",
+        "page_idx": 18,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "thought"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s1"
+        },
+        "negative_space_hint": "魔物頭上にSVGで《残り六十前後》を置く矩形UI空枠を確保",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 87,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s1",
+        "beat_idx": 6,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "怖いからじゃない。",
+        "emotion": "久志は震える手を見て、自分が怯えていないことに先に気づく。",
+        "narrative_function": "emote",
+        "purpose": "顔ではなく手元で感情を描き、恐怖ではない震えを読者に考えさせる。",
+        "change_from_prev": "敵と数字の情報から、久志の身体反応へ寄って内面の問いに切り替える。",
+        "link_to_next": "震えの理由が三ヶ月の習慣へ接続する。",
+        "reader_reaction_intended": "この男は今、何に震えているのかと立ち止まる。",
+        "visual_focus": "警棒を握る指の震え、袖口の汗、床に落ちた蛍光灯の白い反射",
+        "cut_type": "scale_jump",
+        "page_idx": 19,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 10,
+          "type": "thought"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s1"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 88,
+        "role": "information",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s1",
+        "beat_idx": 6,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "right"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "三ヶ月間、俺はずっと数えていた。",
+        "emotion": "日課だと思っていた朝の副業が、訓練の履歴として久志の中で組み替わる。",
+        "narrative_function": "reveal",
+        "purpose": "ゴブリン、灰色の魔石、スマホ査定額の記憶を背景の小さなフレームとして重ね、才能の発露を説明でなく構図で示す。",
+        "change_from_prev": "手の震えから、三ヶ月分の反復イメージへ時間感覚を広げる。",
+        "link_to_next": "積算された数字が現在の魔物へ戻り、二撃目の判断になる。",
+        "reader_reaction_intended": "地味な通勤ルーティンが攻略ログだったと理解する。",
+        "visual_focus": "地下駐車場の奥へ続く柱列に、灰色の魔石とスマホ査定画面の小さな回想フレームが浮かぶ",
+        "cut_type": "graphic_match",
+        "page_idx": 19,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s1"
+        },
+        "negative_space_hint": "回想フレーム内のスマホ画面は空白にし、査定額UIはSVGで後載せ",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 89,
+        "role": "action",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s1",
+        "beat_idx": 6,
+        "camera": "full_body",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "久志は恐怖を処理せず、残り六十という数字だけを信じて次の動作へ移る。",
+        "narrative_function": "contrast",
+        "purpose": "内面の気づきからすぐ戦闘へ戻し、営業の計算が身体動作へ直結する快感を作る。",
+        "change_from_prev": "回想的な横長の静けさから、縦方向の踏み込みで現在時制へ戻る。",
+        "link_to_next": "警棒の軌道を大ゴマの決め画へ渡す。",
+        "reader_reaction_intended": "迷わず二撃目へ行く判断に高揚する。",
+        "visual_focus": "袖をまくった久志が体重を乗せ直す全身、床に残る一撃目の滑走痕",
+        "cut_type": "smash_cut",
+        "page_idx": 19,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s1"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 90,
+        "role": "action",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s1",
+        "beat_idx": 6,
+        "camera": "side",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "二撃目を、振り下ろした。",
+        "emotion": "久志は冒険者の気合ではなく、見積もりどおりに工程を完了する顔で振り抜く。",
+        "narrative_function": "beat_button",
+        "purpose": "key_visualとして、革靴を手前に大きく置き、奥の青い首筋へ警棒が落ちる瞬間を見せ場にする。",
+        "change_from_prev": "踏み込み準備から決定的な打撃瞬間へ進み、ページの主コマとして山場を作る。",
+        "link_to_next": "打撃音ではなく場違いな消滅音へ落差を作る。",
+        "reader_reaction_intended": "地味な会社員の動作が必殺技に見える高揚を感じる。",
+        "visual_focus": "手前の革靴、奥へ伸びる警棒の斜線、青い甲殻の首筋を切る強い斜光",
+        "cut_type": "match_action",
+        "page_idx": 19,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 14,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s1"
+        },
+        "render_risk": "high"
+      },
+      {
+        "idx": 91,
+        "role": "transition",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s6",
+        "beat_idx": 6,
+        "camera": "wide",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "background"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "今度は、ぽん、と鳴った。",
+        "emotion": "命がけのはずの戦闘が、あまりに軽い音で終わり、久志の中の現実感が少し遅れる。",
+        "narrative_function": "silence",
+        "purpose": "決め打撃の直後を白く抜き、消滅の軽さと地下空間の静けさで余韻を作る。",
+        "change_from_prev": "高密度の打撃画から、魔物が消えた後の空白へ急転し、勝利の実感を遅らせる。",
+        "link_to_next": "空いた床に青い魔石だけが残る。",
+        "reader_reaction_intended": "倒した実感より先に、何が残ったのかを探す。",
+        "visual_focus": "広い白い床、消えかける青い粒子、遠くに小さく立つ久志",
+        "cut_type": "contrast",
+        "page_idx": 19,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 10,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "negative_space_hint": "画面の半分以上を白い床と余白にして、消滅後の無音を優先",
+        "render_risk": "low"
+      },
+      {
+        "idx": 92,
+        "role": "information",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s6",
+        "beat_idx": 6,
+        "camera": "birds_eye",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "background"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "久志は勝利より先に、いつもの灰色ではない色を見て計算を止める。",
+        "narrative_function": "reveal",
+        "purpose": "親指大の灰色魔石との対比で、五百円玉ほどの青い魔石が異常値であることを示す。",
+        "change_from_prev": "消滅後の空白から、床に残った具体物へ視線を落とし、戦闘の報酬へ移る。",
+        "link_to_next": "青い光の異質さがスマホ通知へつながる。",
+        "reader_reaction_intended": "いつもの副業収入ではないものを拾ってしまったと感じる。",
+        "visual_focus": "コンクリートに似た床の中央で光る五百円玉大の青い石、比較対象として遠くに落ちた缶コーヒー",
+        "cut_type": "reveal_pull",
+        "page_idx": 20,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 93,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s6",
+        "beat_idx": 6,
+        "camera": "face_close",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "二万円。",
+        "emotion": "久志の顔には勝利の笑みではなく、家計簿の穴が埋まるかもしれない生活感のある欲が差す。",
+        "narrative_function": "emote",
+        "purpose": "青い石の価値が冒険の成果ではなく洗濯機の頭金として刺さる久志の人間味を出す。",
+        "change_from_prev": "魔石の物理的な輝きから、久志の頭の中の金額へ寄る。",
+        "link_to_next": "期待した査定通知が、通常とは違う挙動で裏切られる。",
+        "reader_reaction_intended": "派手な戦利品が家庭の買い物に直結するギャップで笑いと共感を持つ。",
+        "visual_focus": "汗の残る久志の横顔、瞳に小さく映る青い光、背景に畳んだスーツ上着",
+        "cut_type": "scale_jump",
+        "page_idx": 20,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 6,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s1"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 94,
+        "role": "information",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s6",
+        "beat_idx": 6,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "査定中。三ヶ月で、一度も見たことがない。",
+        "emotion": "久志の期待が、金額確定ではなく未知の保留表示によって不安へ反転する。",
+        "narrative_function": "inform",
+        "purpose": "スマホ査定画面をSVG用の空枠として見せ、通常通知と違う『査定中』を事件化する。",
+        "change_from_prev": "内面の金額期待から、スマホ画面の無機質な保留へ落とし込む。",
+        "link_to_next": "アプリ通知ではない別の震動が入る。",
+        "reader_reaction_intended": "いつもの換金ルーティンが壊れたことに気づく。",
+        "visual_focus": "久志の手の中のスマホ、画面上部に査定アプリの矩形UI用余白、背後で青い石がぼけて光る",
+        "cut_type": "graphic_match",
+        "page_idx": 20,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 28,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "negative_space_hint": "スマホ画面内は白い矩形のまま残し、《魔石（D級・希少）／査定中》はSVGで配置",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 95,
+        "role": "transition",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s6",
+        "beat_idx": 6,
+        "camera": "hands",
+        "tempo": "fast",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "久志は通知だと思っていた震えが、管理側からの着信だと気づきかける。",
+        "narrative_function": "contrast",
+        "purpose": "査定アプリの静止した画面から、ポケット内の電話着信という別レイヤーの異常へ切り替える。",
+        "change_from_prev": "スマホ画面の停止から、身体に伝わる震動へ感覚を移す。",
+        "link_to_next": "画面に神楽坂の発信者名が出て、日常が崩れる引きになる。",
+        "reader_reaction_intended": "査定以上にまずい連絡が来たと察する。",
+        "visual_focus": "久志のズボンポケットで震えるスマホ、床の青い石、横に置かれた缶コーヒーと畳んだスーツ",
+        "cut_type": "smash_cut",
+        "page_idx": 20,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0
+        },
+        "turn_candidate": "none",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 96,
+        "role": "cliffhanger",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s6",
+        "beat_idx": 6,
+        "camera": "over_shoulder",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "俺は、まだ電話に出ていない。",
+        "emotion": "久志は青い石と着信名の間で固まり、電話に出れば昨日までの朝へ戻れないと直感する。",
+        "narrative_function": "beat_button",
+        "purpose": "神楽坂から初めての着信を見せ、青いD級希少魔石の異常と管理事務所の介入を結びつけて次beatへ引く。",
+        "change_from_prev": "ポケット内の震動からスマホ画面の発信者名へ明示し、危険の正体を個人名にする。",
+        "link_to_next": "次beatで電話に出るか、管理事務所側の事情へ切り返せる。",
+        "reader_reaction_intended": "電話に出た瞬間に日常が壊れるという不安と期待を残す。",
+        "visual_focus": "スマホ画面の着信UI用余白、発信者名を置く上部、足元で光る青い石、背景に地下駐車場の空白",
+        "cut_type": "reveal_pull",
+        "page_idx": 20,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 4,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "negative_space_hint": "スマホ画面は無地の明るい矩形で確保し、『八潮リフト管理事務所 神楽坂』の着信名はSVGで後載せ",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 97,
+        "role": "opening",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "background"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "倒した直後の息の乱れより、床に残った青い光への違和感が勝ち始めている。",
+        "narrative_function": "establishing",
+        "purpose": "青い魔物の戦闘後から査定異常へ移る場を確立し、地下駐車場型ダンジョンの冷たい空気を再提示する。",
+        "change_from_prev": "戦闘の動きから、広い床に音だけが残る静止へ落とす。",
+        "link_to_next": "視線を床の青い魔石へ絞っていく。",
+        "reader_reaction_intended": "勝利の余韻よりも、何か手順外のことが起きた不安を感じさせる。",
+        "visual_focus": "蛍光灯が並ぶ無人のコンクリート空間、床に落ちた青い魔石、遠くで肩を上下させる久志。",
+        "cut_type": "reveal_pull",
+        "page_idx": 21,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 98,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "親指大では、ない。",
+        "emotion": "久志は報酬の喜びではなく、規格外のサイズを見積もり直そうとして指を止める。",
+        "narrative_function": "pause",
+        "purpose": "通常の灰色魔石と違うサイズ・色を、手元の間で読者に認識させる。",
+        "change_from_prev": "引きの空間から、手と石だけの小さな違和感へ寄る。",
+        "link_to_next": "スマホ査定画面へ視線を移す。",
+        "reader_reaction_intended": "触っていいのか分からない緊張を持たせる。",
+        "visual_focus": "久志の汚れた指先が、五百円玉ほどの青い魔石の手前で止まっている。",
+        "cut_type": "scale_jump",
+        "page_idx": 21,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 10,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "render_risk": "medium"
+      },
+      {
+        "idx": 99,
+        "role": "information",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "over_shoulder",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "三ヶ月で、一度も見たことのない表示だった。",
+        "emotion": "久志は金額が出ないことに、戦闘中よりも明確な危険信号を感じる。",
+        "narrative_function": "reveal",
+        "purpose": "通常なら即時査定されるはずの魔石が『査定中』になる異常を提示する。",
+        "change_from_prev": "物理的な石の違和感から、スマホUI上の手続き異常へ反転する。",
+        "link_to_next": "金額不明が、久志の生活上の数字へ波及していく。",
+        "reader_reaction_intended": "二万円の期待が、管理不能な未確定リスクに変わる感覚を持たせる。",
+        "visual_focus": "スマホ画面の査定アプリ枠、背後で青く光る床、久志の肩越しの硬い視線。",
+        "cut_type": "graphic_match",
+        "page_idx": 21,
+        "importance": 4,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "negative_space_hint": "スマホ画面内に査定結果用の白い矩形UI領域を広く空ける。文字はSVGで『魔石（D級・希少）／査定中……』を重ねる想定。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 100,
+        "role": "emotion",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "side",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "久志は勝った直後なのに、営業会議で数字が合わない時の顔になっている。",
+        "narrative_function": "emote",
+        "purpose": "主人公の恐怖が冒険者的なものではなく、数字が確定しない不安であることを表情と姿勢で見せる。",
+        "change_from_prev": "スマホ画面の情報から、情報を受けた久志の内面へ切り返す。",
+        "link_to_next": "彼の頭の中に、午後の予定と家計の数字が流れ込む。",
+        "reader_reaction_intended": "この男が危険より見積もり誤差に支配されている面白さを再確認させる。",
+        "visual_focus": "まくったワイシャツ袖、緩んだネクタイ、スマホを持つ手の微かな震え。",
+        "cut_type": "shot_reverse",
+        "page_idx": 21,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 0,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 101,
+        "role": "transition",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "hands",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56",
+          "87ab0d66-46b1-41e8-899d-1007e0b5f78d"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground",
+          "87ab0d66-46b1-41e8-899d-1007e0b5f78d": "background"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "午後二時。洗濯機。役員報告。",
+        "emotion": "久志の現実の予定が、青い石の未確定額に引っ張られて一列に並び替わる。",
+        "multi_character_treatment": "split_panel",
+        "narrative_function": "cutaway",
+        "purpose": "美香の洗濯機と会社の打ち合わせを、久志の頭内の小さな数字として差し込み、日常との落差を作る。",
+        "change_from_prev": "久志の顔から、スマホ内の家計・予定の断片へ切り替えて内面を可視化する。",
+        "link_to_next": "現実のスマホが再び震え、回想ではない異常へ戻る。",
+        "reader_reaction_intended": "生活費の現実感があるからこそ、青い石の異常が重く見える。",
+        "visual_focus": "スマホ画面に重ねる家計簿アプリ枠とLINE風の空欄、端に置かれた缶コーヒー。",
+        "cut_type": "smash_cut",
+        "page_idx": 21,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 18,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "negative_space_hint": "スマホ内に家計簿・メッセージ風UIの空白枠を確保。美香本人は写真やアイコン風の小さな無文字枠で処理し、文字はSVG重ね。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 102,
+        "role": "cliffhanger",
+        "aspect": "panel_tall",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "今度は、通知ではない。",
+        "emotion": "久志は画面を見る前に、震動の種類が違うことを理解してしまう。",
+        "narrative_function": "beat_button",
+        "purpose": "査定異常の次に、管理側からの直接接触が始まる予兆をページ末で作る。",
+        "change_from_prev": "頭内の数字から、ポケットの現実的な震動へ一気に戻す。",
+        "link_to_next": "次ページ頭で着信名を明かす。",
+        "reader_reaction_intended": "誰からの電話かを知るためにページをめくらせる。",
+        "visual_focus": "ズボンのポケット内で光るスマホの輪郭、床に反射する青い魔石の光。",
+        "cut_type": "graphic_match",
+        "page_idx": 21,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 12,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_end",
+        "turn_strength": 3,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "negative_space_hint": "スマホ画面はまだ見せず、発光だけ。着信名の文字領域は次ページに温存する。",
+        "render_risk": "low"
+      },
+      {
+        "idx": 103,
+        "role": "information",
+        "aspect": "panel_portrait",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "over_shoulder",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "foreground",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0": "background"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "向こうから掛かってきたことは、一度もない。",
+        "emotion": "久志は神楽坂の名前を見て、査定が単なる遅延ではないと理解する。",
+        "multi_character_treatment": "normal",
+        "narrative_function": "reveal",
+        "purpose": "管理事務所の神楽坂から初めて電話が来た事実を明かし、異常が制度側にも検知されたことを示す。",
+        "change_from_prev": "正体不明の震動から、具体的な発信者名の表示へ答えを出す。",
+        "link_to_next": "久志が出るか出ないかの判断停止へ移る。",
+        "reader_reaction_intended": "一階層の出来事が管理側に即時補足された怖さを感じさせる。",
+        "visual_focus": "スマホの着信画面、発信者名用の大きな空白、画面端に映る久志の固まった親指。",
+        "cut_type": "reveal_pull",
+        "page_idx": 22,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 24,
+          "type": "narration_box"
+        },
+        "turn_candidate": "page_open",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "negative_space_hint": "スマホ画面中央に着信名『八潮リフト管理事務所　神楽坂』をSVGで重ねるための無文字領域を確保。",
+        "render_risk": "medium"
+      },
+      {
+        "idx": 104,
+        "role": "emotion",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "face_close",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "久志は電話に出る動作だけを止め、返答した瞬間に日常の管理表が破れる予感を飲み込む。",
+        "narrative_function": "emote",
+        "purpose": "電話に出ない一瞬を感情の山にし、主人公が未知のリスクを初めて『数字で処理できない』ものとして見ていることを示す。",
+        "change_from_prev": "着信名の情報から、情報を受けた久志の停止へ寄る。",
+        "link_to_next": "彼の足元の現物、青い魔石へ視線を下ろす。",
+        "reader_reaction_intended": "出れば物語が壊れる、出なければ逃げられないという緊張を持たせる。",
+        "visual_focus": "汗の残る久志の横顔、目だけがスマホから床へ落ちていく。",
+        "cut_type": "shot_reverse",
+        "page_idx": 22,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0,
+          "type": "thought"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 105,
+        "role": "transition",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "wide",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "right"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "昨日までの朝は、小さな数字でできていた。",
+        "emotion": "久志は床の缶コーヒーと畳んだ上着を見て、普段の通勤ルートがまだそこにあることを確認しようとする。",
+        "narrative_function": "contrast",
+        "purpose": "缶コーヒー、スーツ上着、地下駐車場の現代性を置き直し、青い魔石の非日常と対比させる。",
+        "change_from_prev": "顔の硬直から、日常の小物が残る足元の引き画へ広げる。",
+        "link_to_next": "小物の地味さから、青い魔石の内部の動きへ反転する。",
+        "reader_reaction_intended": "副業のつもりだった朝の生活感が、もう戻らないものに見え始める。",
+        "visual_focus": "畳んだスーツ上着、缶コーヒー、警棒、青い魔石が同じ床面に並ぶ構図。",
+        "cut_type": "scale_jump",
+        "page_idx": 22,
+        "importance": 3,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 20,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 106,
+        "role": "information",
+        "aspect": "panel_square",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "hands",
+        "tempo": "stop",
+        "characters": [],
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "石だけが、久志の計算を待たずに内部で動いている。",
+        "narrative_function": "silence",
+        "purpose": "青い魔石が通常の灰色魔石と違い、ただの換金物ではないと無音で示す。",
+        "change_from_prev": "生活感のある床の並びから、青い光だけの異質さへ絞り込む。",
+        "link_to_next": "スマホの着信音と青い光を同時に重ねる最終画へ準備する。",
+        "reader_reaction_intended": "石の中に何かがいる、または何かが始まっているような不気味さを持たせる。",
+        "visual_focus": "暗い床に置かれた青い魔石の内部を、光点が右から左へ移動する。",
+        "cut_type": "scale_jump",
+        "page_idx": 22,
+        "importance": 1,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 1,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 107,
+        "role": "emotion",
+        "aspect": "panel_landscape",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "side",
+        "tempo": "slow",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "center"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "narration": "俺は、まだ出ていない。",
+        "emotion": "久志は着信を切る勇気も出る勇気もなく、営業係長のまま境界線に立ち尽くす。",
+        "narrative_function": "pause",
+        "purpose": "最終コマ前に行動しない選択を置き、電話に出る一歩の重さを最大化する。",
+        "change_from_prev": "無人の石から、動けない久志の全身へ戻して判断停止を見せる。",
+        "link_to_next": "青い魔石と着信名を一枚に重ね、話末の引きにする。",
+        "reader_reaction_intended": "出ないことで余計に事態が大きく見える焦れを作る。",
+        "visual_focus": "片手にスマホ、足元に青い魔石、背景に蛍光灯の反復が伸びる久志の立ち姿。",
+        "cut_type": "match_action",
+        "page_idx": 22,
+        "importance": 2,
+        "bubble_budget": {
+          "count": 1,
+          "max_chars": 12,
+          "type": "narration_box"
+        },
+        "turn_candidate": "none",
+        "turn_strength": 2,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "render_risk": "low"
+      },
+      {
+        "idx": 108,
+        "role": "cliffhanger",
+        "aspect": "page",
+        "scene_id": "ep1-s6",
+        "beat_idx": 7,
+        "camera": "side",
+        "tempo": "stop",
+        "characters": [
+          "99128ecb-d840-436e-951d-c68e8f0eab56",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0"
+        ],
+        "character_positions": {
+          "99128ecb-d840-436e-951d-c68e8f0eab56": "background",
+          "b4353ff4-3c16-4c02-9a20-ffb7c572a2e0": "foreground"
+        },
+        "location": "f044365f-6ea9-4af1-a31d-f89539523826",
+        "emotion": "久志の日常を支えていた小さな数字が、青い光と神楽坂の着信によって一気に別の管理下へ移る。",
+        "multi_character_treatment": "normal",
+        "narrative_function": "beat_button",
+        "purpose": "D級相当の青い魔石が一階層に現れ、査定直後に管理事務所から電話が来た謎を一枚で回収し、次話への強い不安と期待を残す。",
+        "change_from_prev": "久志単独の迷いから、青い魔石と着信名を同一画面に置いて『普通の副業ではない』事態へ確定させる。",
+        "reader_reaction_intended": "電話に出た瞬間、日常が壊れると感じたまま次話へ進ませる。",
+        "visual_focus": "極端な低い視点で大きく映る青い魔石、奥でぼやけて光るスマホの着信画面、さらに奥に立ち尽くす久志のシルエット。",
+        "cut_type": "reveal_pull",
+        "page_idx": 22,
+        "importance": 5,
+        "bubble_budget": {
+          "count": 0,
+          "max_chars": 0,
+          "type": "narration_box"
+        },
+        "turn_candidate": "episode_end",
+        "turn_strength": 5,
+        "source_ref": {
+          "scene_id": "ep1-s6"
+        },
+        "negative_space_hint": "スマホ画面の発信者名領域を背景ボケ内に確保し、SVGで『八潮リフト管理事務所　神楽坂』を重ねる。画像内文字は描かない。",
+        "render_risk": "medium"
+      }
+    ],
+    "pages": [
+      {
+        "page_idx": 1,
+        "page_side": "right",
+        "page_role": "establishing",
+        "target_panels": 6,
+        "page_open_hook": "第1話冒頭の即時フック。地下駐車場型ダンジョンで、営業係長が冒険者ではなく見積担当の目で魔物を捉えていることを一撃で示す。",
+        "page_end_hook": "敵の価値が二万円前後だと視覚化され、読者に『なぜ生活費の数字で戦っているのか』をめくらせる。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      {
+        "page_idx": 2,
+        "page_side": "left",
+        "page_role": "action",
+        "target_panels": 6,
+        "page_open_hook": "前ページ末の二万円UIを、洗濯機の頭金という生活感へ即座に接続する。",
+        "page_end_hook": "二撃目を振り下ろす直前で止め、次beatの時間巻き戻しへつなぐ余韻と疑問を残す。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ]
+      },
+      {
+        "page_idx": 3,
+        "page_side": "right",
+        "page_role": "establishing",
+        "target_panels": 4,
+        "page_open_hook": "前ページ末の『二撃目を振り下ろす直前』の動きを、警棒の軌道だけ残して時間が止まり、その線が通勤電車のレールへ変わる形で三ヶ月前へ巻き戻す。",
+        "page_end_hook": "通勤客の流れの端に、八潮リフトの仮設設備だけが異物として浮かび、久志がそれを日常の一部として処理してしまう。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          13,
+          14,
+          15,
+          16
+        ]
+      },
+      {
+        "page_idx": 4,
+        "page_side": "left",
+        "page_role": "dialogue",
+        "target_panels": 4,
+        "page_open_hook": "前ページ末で見えたのぼりの文字情報を、ページ頭で久志の視線が事務的に読み取る。",
+        "page_end_hook": "西園寺の『バブル』という切り捨てが、社会インフラ化の実例であっさり否定される。",
+        "turn_strength": 2,
+        "panel_idxs": [
+          17,
+          18,
+          19,
+          20
+        ]
+      },
+      {
+        "page_idx": 5,
+        "page_side": "right",
+        "page_role": "reveal",
+        "target_panels": 4,
+        "page_open_hook": "西園寺の『バブル』発言を受け、実際には魔石・素材・保険が生活インフラに組み込まれていることを連続カットで見せる。",
+        "page_end_hook": "のぼり横の『手数料五百円』が、久志にとって危険よりも具体的な数字として刺さる。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          21,
+          22,
+          23,
+          24
+        ]
+      },
+      {
+        "page_idx": 6,
+        "page_side": "left",
+        "page_role": "aftermath",
+        "target_panels": 4,
+        "page_open_hook": "前ページ末の『五百円』を受け、久志の中で危険な非日常が安い行政手続きの顔に変わる。",
+        "page_end_hook": "久志は見学だけのつもりでカードを尻ポケットに入れ、地下へ続く入口を見下ろす。次beatの受付・一階層突入へつなぐ。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          25,
+          26,
+          27,
+          28
+        ]
+      },
+      {
+        "page_idx": 7,
+        "page_side": "right",
+        "page_role": "establishing",
+        "target_panels": 5,
+        "page_open_hook": "前ページ末で久志が地下へ続く入口を見下ろした流れを受け、視線の先が生活感のある受付カウンターへ着地する。",
+        "page_end_hook": "五百円という日常的な金額が、危険な登録手続きの軽さを際立たせて次ページへ送る。",
+        "turn_strength": 2,
+        "panel_idxs": [
+          29,
+          30,
+          31,
+          32,
+          33
+        ]
+      },
+      {
+        "page_idx": 8,
+        "page_side": "left",
+        "page_role": "dialogue",
+        "target_panels": 4,
+        "page_open_hook": "前ページ末で差し出されたカードを受け取り、神楽坂の説明が事務的な軽さのまま危険領域へ踏み込ませる。",
+        "page_end_hook": "『一階層まで』というルールを示した直後に、地下へ続くゲートを見せて次ページの侵入へ繋ぐ。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          34,
+          35,
+          36,
+          37
+        ]
+      },
+      {
+        "page_idx": 9,
+        "page_side": "right",
+        "page_role": "reveal",
+        "target_panels": 5,
+        "page_open_hook": "前ページ末の『見学だけ』を受け、久志がカードをしまう日常動作から実際の入場へ進む。",
+        "page_end_hook": "一階層が洞窟ではなく地下駐車場型空間だと明かし、遠い柱陰の影で次beatの初遭遇へ繋ぐ。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          38,
+          39,
+          40,
+          41,
+          42
+        ]
+      },
+      {
+        "page_idx": 10,
+        "page_side": "left",
+        "page_role": "establishing",
+        "target_panels": 4,
+        "page_open_hook": "前ページ末の『遠い柱陰の影』を受け、柱の陰にいた緑色の小さな魔物へ久志が近づく。地下駐車場型の一階層だと改めて見せる。",
+        "page_end_hook": "久志だけに見える見積もり表示が浮かび、恐怖より計算が先に立つ。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          43,
+          44,
+          45,
+          46
+        ]
+      },
+      {
+        "page_idx": 11,
+        "page_side": "right",
+        "page_role": "action",
+        "target_panels": 4,
+        "page_open_hook": "前ページ末の見積もり表示を受け、久志は『倒せるか』ではなく『四百五十円になるか』の検証として動き出す。",
+        "page_end_hook": "三撃目で敵が消え、床に何かが転がる直前でめくらせる。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          47,
+          48,
+          49,
+          50
+        ]
+      },
+      {
+        "page_idx": 12,
+        "page_side": "left",
+        "page_role": "reveal",
+        "target_panels": 4,
+        "page_open_hook": "前ページ末の軽い討伐音に対し、派手な戦利品ではなく親指の先ほどの灰色の石が現れる。",
+        "page_end_hook": "通知額が見積もりより二十円安いと分かり、久志の感想が恐怖からずれる。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          51,
+          52,
+          53,
+          54
+        ]
+      },
+      {
+        "page_idx": 13,
+        "page_side": "right",
+        "page_role": "aftermath",
+        "target_panels": 4,
+        "page_open_hook": "前ページ末の『二十円安い』という感想を受け、久志の中で恐怖や達成感が後景へ退く。",
+        "page_end_hook": "翌週月曜から毎朝寄る習慣へ転じ、次beatの三ヶ月後のルーティンに繋ぐ。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          55,
+          56,
+          57,
+          58
+        ]
+      },
+      {
+        "page_idx": 14,
+        "page_side": "left",
+        "page_role": "establishing",
+        "target_panels": 6,
+        "page_open_hook": "前beat末の『翌週月曜から毎朝寄る習慣』を受け、三ヶ月後の同じ朝・同じ地下駐車場型エリアへ時間を飛ばす。",
+        "page_end_hook": "ルーティンの収益計算が整いすぎているほど、次ページの異常が際立つ。",
+        "turn_strength": 2,
+        "panel_idxs": [
+          59,
+          60,
+          61,
+          62,
+          63,
+          64
+        ]
+      },
+      {
+        "page_idx": 15,
+        "page_side": "right",
+        "page_role": "reveal",
+        "target_panels": 6,
+        "page_open_hook": "前ページ末の整った月次収支を受け、その数字の積み重ねが今朝だけ崩れる。",
+        "page_end_hook": "見たことのない青い魔物と二万円の相場を露出し、久志の判断を次ページへ引っ張る。",
+        "turn_strength": 4,
+        "panel_idxs": [
+          65,
+          66,
+          67,
+          68,
+          69,
+          70
+        ]
+      },
+      {
+        "page_idx": 16,
+        "page_side": "left",
+        "page_role": "dialogue",
+        "target_panels": 5,
+        "page_open_hook": "前ページ末の二万円を受け、久志は危険性ではなく規約の穴を確認し始める。",
+        "page_end_hook": "逃げるか戦うかの迷いが、缶コーヒーを置く動作で決断へ傾く。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          71,
+          72,
+          73,
+          74,
+          75
+        ]
+      },
+      {
+        "page_idx": 17,
+        "page_side": "right",
+        "page_role": "action",
+        "target_panels": 6,
+        "page_open_hook": "前ページ末の畳まれたスーツ上着を受け、久志は会社員の外皮を置いたまま警棒を握る。",
+        "page_end_hook": "青い魔物が駆け出し、久志が床を掴むところで次beatの初撃へ渡す。",
+        "turn_strength": 4,
+        "panel_idxs": [
+          76,
+          77,
+          78,
+          79,
+          80,
+          81
+        ]
+      },
+      {
+        "page_idx": 18,
+        "page_side": "left",
+        "page_role": "action",
+        "target_panels": 5,
+        "page_open_hook": "前ページ末の『青い魔物が駆け出し、久志が床を掴む』動作をそのまま受け、踏み込みの反動から初撃へつなぐ。",
+        "page_end_hook": "一撃で半分削れた数字が、恐怖ではなく計算精度への震えを呼び起こす。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          82,
+          83,
+          84,
+          85,
+          86
+        ]
+      },
+      {
+        "page_idx": 19,
+        "page_side": "right",
+        "page_role": "reveal",
+        "target_panels": 5,
+        "page_open_hook": "前ページ末の《残り六十前後》を受け、数字を見た久志の震えの正体へ入る。",
+        "page_end_hook": "二撃目の直後、『ぽん』という場違いに軽い結果音で戦闘が終わる。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          87,
+          88,
+          89,
+          90,
+          91
+        ]
+      },
+      {
+        "page_idx": 20,
+        "page_side": "left",
+        "page_role": "cliffhanger",
+        "target_panels": 5,
+        "page_open_hook": "前ページ末の空白を受け、何も残らないはずの床に青い希少魔石が現れる。",
+        "page_end_hook": "青い石と鳴り続ける着信が並び、電話に出る前で話を止める。",
+        "turn_strength": 4,
+        "panel_idxs": [
+          92,
+          93,
+          94,
+          95,
+          96
+        ]
+      },
+      {
+        "page_idx": 21,
+        "page_side": "right",
+        "page_role": "reveal",
+        "target_panels": 6,
+        "page_open_hook": "前ページ末の『青い石と鳴り続ける着信』を受け、まず着信音ではなく足元の青い魔石の異常な光から入る。",
+        "page_end_hook": "査定アプリの通知ではない震動が来て、電話の着信だと分かる直前でめくらせる。",
+        "turn_strength": 3,
+        "panel_idxs": [
+          97,
+          98,
+          99,
+          100,
+          101,
+          102
+        ]
+      },
+      {
+        "page_idx": 22,
+        "page_side": "left",
+        "page_role": "cliffhanger",
+        "target_panels": 6,
+        "page_open_hook": "前ページ末の『通知ではない震動』への答えとして、電話の着信名をページ頭で明かす。",
+        "page_end_hook": "久志が電話に出ないまま、青い魔石と神楽坂からの着信が同じ画面内で鳴り続ける。",
+        "turn_strength": 5,
+        "panel_idxs": [
+          103,
+          104,
+          105,
+          106,
+          107,
+          108
+        ]
+      }
+    ],
+    "episode_target_pages": 22,
+    "meta": {
+      "total_panels": 108,
+      "total_height_px_estimate": 95180,
+      "generated_by": "codex-cli/gpt-5",
+      "generation_version": "phase-a-storyboard-v2"
+    }
+  },
+  "warnings": []
+}

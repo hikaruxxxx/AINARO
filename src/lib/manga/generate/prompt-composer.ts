@@ -332,7 +332,7 @@ const ANTI_AI_NEGATIVES = [
 /**
  * 「描き込み過剰」抑制ディレクティブ (2026-05-01 minimalism-pilot で効果実証)
  *
- * Pilot 8 (modern-dungeon-pilot) で AIっぽさが「全コマ均一に細密描き込み」「群衆顔の過剰描写」
+ * Week 0 Pilot で AIっぽさが「全コマ均一に細密描き込み」「群衆顔の過剰描写」
  * 「背景の意味なき詳細化」に起因することが判明。本ディレクティブで抑制する。
  *
  * 効果: 標準プロンプト B- → minimalism-pilot で A- 相当に改善。

@@ -248,6 +248,7 @@ async function main() {
     targetPages: args.targetPages,
     targetPanels: args.targetPanels,
     genreId: args.genreId,
+    onProgress: (msg) => console.log(`  ${msg}`),
   });
   const totalPanelsRaw = sbPages.reduce(
     (sum, p) => sum + (p.panels?.length ?? 0),

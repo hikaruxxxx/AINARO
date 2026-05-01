@@ -172,6 +172,14 @@ type Storyboard = {
 /**
  * 1 エピソード分のネーム（pages[] > panels[]）を構築する
  *
+ * 実装方針 (2026-05-01 実機検証で判明したタイムアウト + page_count_drift への対応):
+ *   - 1呼び出しで全 pages を生成すると 132 panels 超の構造化 JSON となり、
+ *     Codex が 10 分タイムアウトに当たる + 出力長制限で勝手に圧縮する問題が発生。
+ *   - 対策として **beat 単位ループ** で生成。各 beat の page_budget.target_pages
+ *     ぶんだけ生成し、最後にページ番号をグローバルに振り直す。
+ *   - 1呼び出しあたり 1-4 pages × 6 panels ≒ 6-24 panels で済むためタイムアウトせず、
+ *     ページ予算遵守も自然に達成される。
+ *
  * @param args.targetPages - 横読み Phase A の主入力。1話 16-26p が標準
  * @param args.targetPanels - panel 総数の目安（target_pages × avg_panels_per_page で算出）
  * @param args.genreId - 異世界なろう系3ジャンル特化プリセット (optional)
@@ -189,6 +197,94 @@ export async function buildStoryboard(args: {
   targetPanels: number;
   /** 異世界なろう系3ジャンルプリセット (Phase A 検証作品向け) */
   genreId?: MangaGenreId;
+  /** 進捗コールバック (CLI に逐次出力する) */
+  onProgress?: (msg: string) => void;
+  cwd?: string;
+}): Promise<StoryboardPage[]> {
+  const allPages: StoryboardPage[] = [];
+  let nextPageIdx = 1;
+  let prevTailHook: string | undefined;
+
+  const beats = args.plot.beats;
+  for (const beat of beats) {
+    const budget = beat.page_budget;
+    const targetPagesForBeat = budget?.target_pages ?? 2;
+    const minPages = budget?.min_pages ?? Math.max(1, targetPagesForBeat - 1);
+    const maxPages = budget?.max_pages ?? targetPagesForBeat + 1;
+
+    // 該当 beat の scenes だけに絞る (LLM の文脈を小さく)
+    const beatScenes = args.scenes.filter((s) =>
+      beat.scene_ids.includes(s.scene_id)
+    );
+
+    args.onProgress?.(
+      `[beat ${beat.beat_idx}/${beats.length}] ${beat.label} (intensity=${beat.emotional_intensity.toFixed(2)}) target=${targetPagesForBeat}p (${minPages}-${maxPages}) → page ${nextPageIdx} 開始`
+    );
+
+    let beatPages: StoryboardPage[];
+    try {
+      beatPages = await buildBeatPages({
+        episodeNum: args.episodeNum,
+        episodeBody: args.episodeBody,
+        plot: args.plot,
+        beat,
+        scenesForBeat: beatScenes,
+        characters: args.characters,
+        locations: args.locations,
+        targetPagesForBeat,
+        minPages,
+        maxPages,
+        startPageIdx: nextPageIdx,
+        prevTailHook,
+        isFirstBeat: beat.beat_idx === 1,
+        isLastBeat: beat.beat_idx === beats.length,
+        genreId: args.genreId,
+        cwd: args.cwd,
+      });
+    } catch (err) {
+      args.onProgress?.(
+        `[beat ${beat.beat_idx}] 生成失敗: ${(err as Error).message} — スキップ`
+      );
+      continue;
+    }
+
+    args.onProgress?.(
+      `[beat ${beat.beat_idx}] ${beatPages.length} pages / ${beatPages.reduce((s, p) => s + (p.panels?.length ?? 0), 0)} panels`
+    );
+
+    // ページ番号をグローバルに連番化
+    for (const page of beatPages) {
+      page.page_idx = nextPageIdx;
+      page.page_side = nextPageIdx % 2 === 1 ? "right" : "left";
+      nextPageIdx += 1;
+    }
+    allPages.push(...beatPages);
+    prevTailHook =
+      beatPages[beatPages.length - 1]?.page_end_hook ?? prevTailHook;
+  }
+
+  return allPages;
+}
+
+/**
+ * 単一 beat 分の pages を生成する内部関数
+ */
+async function buildBeatPages(args: {
+  episodeNum: number;
+  episodeBody: string;
+  plot: EpisodePlotData;
+  beat: EpisodePlotData["beats"][number];
+  scenesForBeat: SceneEntry[];
+  characters: CharacterBibleRow[];
+  locations: LocationBibleRow[];
+  targetPagesForBeat: number;
+  minPages: number;
+  maxPages: number;
+  startPageIdx: number;
+  prevTailHook?: string;
+  isFirstBeat: boolean;
+  isLastBeat: boolean;
+  genreId?: MangaGenreId;
   cwd?: string;
 }): Promise<StoryboardPage[]> {
   const characterCards = args.characters
@@ -205,7 +301,7 @@ export async function buildStoryboard(args: {
     .map((l) => `- ${l.location_name} (${l.location_type ?? "other"}): ${l.spec?.atmosphere ?? "?"}`)
     .join("\n");
 
-  const sceneCards = args.scenes
+  const sceneCards = args.scenesForBeat
     .map((s) =>
       [
         `### ${s.scene_id} [${s.dramatic_intent}, target_panels≈${s.suggested_panel_count}]`,
@@ -217,26 +313,8 @@ export async function buildStoryboard(args: {
     )
     .join("\n\n");
 
-  const beatCards = args.plot.beats
-    .map((b) =>
-      [
-        `### beat ${b.beat_idx} [${b.label}, intensity=${b.emotional_intensity.toFixed(2)}]`,
-        `- 要約: ${b.summary}`,
-        `- key_visual: ${b.key_visual}`,
-        `- scenes: ${b.scene_ids.join(", ")}`,
-        `- chars: ${b.characters.join(", ") || "?"}`,
-        b.page_budget
-          ? `- page_budget: target=${b.page_budget.target_pages}p (min=${b.page_budget.min_pages}, max=${b.page_budget.max_pages})`
-          : "",
-        b.foreshadow_seed ? `- 伏線(種): ${b.foreshadow_seed}` : "",
-        b.foreshadow_payoff ? `- 伏線(回収): ${b.foreshadow_payoff}` : "",
-      ]
-        .filter(Boolean)
-        .join("\n")
-    )
-    .join("\n\n");
-
   // ジャンルプリセットがあれば systemContext 末尾に追加
+  // (元: const beatCards = args.plot.beats.map(...) — beat単位ループでは個別 beat のみ送る)
   const genrePreset = args.genreId ? getGenrePreset(args.genreId) : undefined;
   const genreAddition = genrePreset
     ? [
@@ -361,42 +439,55 @@ export async function buildStoryboard(args: {
       plot_summary: [
         `theme: ${args.plot.theme}`,
         `arc: ${args.plot.protagonist_arc.start} → ${args.plot.protagonist_arc.turn} → ${args.plot.protagonist_arc.end}`,
-        `cliffhanger: ${args.plot.cliffhanger_hook}`,
+        `episode_cliffhanger_hook: ${args.plot.cliffhanger_hook}`,
         `motifs: ${args.plot.motifs.join(", ")}`,
         `intended_experience: ${args.plot.intended_reading_experience}`,
         mustEventsLine,
       ].join("\n"),
-      beats: beatCards,
-      scenes: sceneCards,
+      this_beat: [
+        `### beat ${args.beat.beat_idx} [${args.beat.label}, intensity=${args.beat.emotional_intensity.toFixed(2)}]`,
+        `- 要約: ${args.beat.summary}`,
+        `- key_visual: ${args.beat.key_visual}`,
+        `- chars: ${args.beat.characters.join(", ") || "?"}`,
+        `- target_pages: ${args.targetPagesForBeat}p (min=${args.minPages}, max=${args.maxPages})`,
+        args.beat.foreshadow_seed ? `- 伏線(種): ${args.beat.foreshadow_seed}` : "",
+        args.beat.foreshadow_payoff ? `- 伏線(回収): ${args.beat.foreshadow_payoff}` : "",
+      ].filter(Boolean).join("\n"),
+      scenes_for_this_beat: sceneCards || "(該当 scene なし)",
       character_bibles: characterCards || "(キャラ聖書未登録)",
       location_bibles: locationCards || "(ロケ聖書未登録)",
-      target_pages: String(args.targetPages),
-      target_panels: String(args.targetPanels),
+      prev_beat_tail_hook:
+        args.prevTailHook ?? "(本 beat が最初。前ページ末からの引き受けなし)",
+      start_page_idx: String(args.startPageIdx),
+      target_pages_for_beat: String(args.targetPagesForBeat),
       episode_body_excerpt: args.episodeBody.slice(0, 4000),
     },
     instruction: [
-      `第${args.episodeNum}話のネームを構築してください。`,
-      `総 ${args.targetPages}±2 ページ、総 ${args.targetPanels}±10 コマ。`,
+      `第${args.episodeNum}話の **beat ${args.beat.beat_idx} (${args.beat.label})** のネームを構築してください。`,
+      `この beat に割り当てられたページ数は **${args.targetPagesForBeat}p (min=${args.minPages}, max=${args.maxPages})** です。`,
       "",
       "厳守ルール:",
-      "1. 出力は pages[] > panels[] のネスト構造。pages.length は target_pages±2 を厳守する。",
-      "2. page_idx は 1-indexed の連番。page_side は 1=right, 2=left, 3=right ... と RTL 横読みで交互。",
-      "3. 各 beat に対して、その beat の scene_ids に属するコマを連続して並べる。beat 間にコマを混ぜない。",
-      "4. 各 beat の page_budget が指定されていれば、合計ページ数を厳守する（target_pages の合計と一致）。",
-      "5. すべてのコマで `purpose` `change_from_prev` `narrative_function` `visual_focus` `importance` `bubble_budget` `turn_candidate` `turn_strength` `render_risk` を必ず埋める。",
-      "6. 各 beat に少なくとも 1 つの silence / pause / emote コマを置く。",
-      "7. face_close を 3 コマ以上連続させない（連続2コマまで）。",
-      "8. role=information の連続も2コマまで。",
-      "9. dialogue.speaker_name は characters に含まれるキャラのみ。独白は narration を使う。",
-      "10. 最後のページの最後のコマは role=cliffhanger / aspect=page or spread / narrative_function=beat_button / turn_candidate=episode_end / turn_strength=4-5。",
-      "11. 各ページ末 panel は turn_strength≥2、reveal の直前のページ末は turn_strength≥3。",
-      "12. importance 4-5 は 1ページに 0-1 個まで。",
-      "13. 不明なキャラ名・ロケ名は提示リストから選び直す（新規生成禁止）。",
-      "14. 必須イベント (must_include_events) が指定されている場合、本話のいずれかの panel で消化する。",
-      "15. cut_type は『直前コマからの繋ぎ』として、できる限り埋める（特にカット切替・対比・引き⇄寄りの場面）。",
+      `1. 出力する pages.length は **${args.targetPagesForBeat}** を厳守 (許容: ${args.minPages}-${args.maxPages})。1ページも増減させないこと。`,
+      `2. page_idx は **${args.startPageIdx}** から始まる連番にすること。page_side は奇数=right, 偶数=left。`,
+      "3. 各 page に target_panels を 4-8 で設定 (見開き/扉ページは 1-2)。",
+      "4. すべての panel で `purpose` `change_from_prev` `narrative_function` `visual_focus` `importance` `bubble_budget` `turn_candidate` `turn_strength` `render_risk` を必ず埋める。",
+      "5. この beat 内に最低 1 つの silence / pause / emote コマを置く。",
+      "6. face_close を 3 コマ以上連続させない (連続2コマまで)。role=information の連続も2コマまで。",
+      "7. dialogue.speaker_name は characters に含まれるキャラのみ。独白は narration を使う。",
+      "8. 各 page 末の panel は turn_strength≥2、reveal の直前のページ末は turn_strength≥3。",
+      args.isFirstBeat
+        ? "9. 第1 beat なので、最初の panel は episode の hook として visual_focus を強く設計する。"
+        : "9. prev_beat_tail_hook を踏まえて、最初のページの page_open_hook で前ページ末からの繋ぎを明記すること。",
+      args.isLastBeat
+        ? `10. **最終 beat** のため、最終 page の最終 panel は role=cliffhanger / aspect=page or spread / narrative_function=beat_button / turn_candidate=episode_end / turn_strength=4-5、episode_cliffhanger_hook を回収する画にすること。`
+        : "10. 最終 panel は次 beat への引き受けとして turn_candidate=page_end / turn_strength≥3 を推奨。",
+      "11. importance 4-5 は 1ページに 0-1 個まで。この beat 全体で最低 1 個の importance≥4 panel を置く。",
+      "12. 不明なキャラ名・ロケ名は提示リストから選び直す (新規生成禁止)。",
+      "13. 必須イベント (must_include_events) が指定されている場合、対応するイベントは本 beat の panel で扱う。",
+      "14. cut_type は直前コマからの繋ぎとして、できる限り埋める (カット切替・対比・引き⇄寄りの場面で必須)。",
     ].join("\n"),
     outputSchema: SCHEMA,
-    timeoutMs: 10 * 60 * 1000,
+    timeoutMs: 8 * 60 * 1000,
     maxRetries: 2,
     cwd: args.cwd,
   });

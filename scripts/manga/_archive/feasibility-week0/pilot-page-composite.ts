@@ -28,6 +28,7 @@
 
 import "../_env";
 import path from "path";
+import { existsSync, statSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
 
 import { generateMangaImage, MANGA_SIZE_PRESETS } from "@/lib/manga/generate/codex-image";
@@ -310,6 +311,24 @@ async function main(): Promise<void> {
           `panel-${String(def.panel_idx).padStart(2, "0")}-${def.slot_id}.png`
         );
         const size = MANGA_SIZE_PRESETS[def.size_preset_key];
+
+        // 既存ファイルがあって最低サイズを満たしていればスキップ
+        const MIN_VALID_SIZE = 50 * 1024;
+        if (existsSync(outputPath)) {
+          const stat = statSync(outputPath);
+          if (stat.size >= MIN_VALID_SIZE) {
+            console.log(
+              `[page-composite]   [${def.panel_idx}/${PANELS.length}] SKIP (既存) slot=${def.slot_id} (${(stat.size / 1024).toFixed(0)}KB)`
+            );
+            return {
+              panel_idx: def.panel_idx,
+              slot_id: def.slot_id,
+              ok: true,
+              outputPath,
+              durationMs: 0,
+            };
+          }
+        }
 
         console.log(
           `[page-composite]   [${def.panel_idx}/${PANELS.length}] START slot=${def.slot_id} role=${def.panel_role} size=${size.width}×${size.height}`
