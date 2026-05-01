@@ -27,7 +27,13 @@ import type {
   ComplianceChecklist,
   RelationHistoryEntry,
   PropOwnershipEntry,
+  EpisodePlotData,
+  NarrativeFunction,
 } from "./schemas";
+
+export type { NarrativeFunction } from "./schemas";
+
+export type RefsStatus = "pending" | "generating" | "ready" | "failed";
 
 // ============================================================
 // 列挙型
@@ -79,8 +85,29 @@ export type PanelRole =
   | "transition"
   | "cliffhanger";
 
-/** パネルのアスペクト */
-export type PanelAspect = "vertical" | "square" | "big" | "splash";
+/**
+ * パネルのアスペクト
+ * 横読み (2026-04-30 ピボット後):
+ *   - page: ページ単位一発生成 (gpt-image-2 で full manga page を出す場合)
+ *   - spread: 見開き (扉絵・クライマックス用)
+ *   - panel_landscape: 横長コマ (3段組の上段など)
+ *   - panel_portrait: 縦長コマ (T字割りの縦軸)
+ *   - panel_square: 正方形コマ (情報・タメ)
+ *   - panel_tall: 縦長大ゴマ (見せ場)
+ * 縦読み (旧、互換のため残置):
+ *   - vertical / square / big / splash
+ */
+export type PanelAspect =
+  | "page"
+  | "spread"
+  | "panel_landscape"
+  | "panel_portrait"
+  | "panel_square"
+  | "panel_tall"
+  | "vertical"
+  | "square"
+  | "big"
+  | "splash";
 
 export type PanelCamera =
   | "face_close"
@@ -163,7 +190,22 @@ export type PublishStatus =
   | "rejected"
   | "archived";
 
-export type ArtStyle = "shounen" | "shoujo" | "webtoon" | "realistic" | "chibi";
+/**
+ * 漫画スタイル
+ * - manga_bw_shounen / manga_bw_seinen: 2026-04-30 横読み白黒ピボット後の主流（gpt-image-2でmonochrome強制）
+ * - shounen / shoujo / webtoon / realistic / chibi: 旧スタイル。webtoonは縦読み撤回済み、互換のため残置
+ */
+export type ArtStyle =
+  | "manga_bw_shounen"
+  | "manga_bw_seinen"
+  | "manga_bw_seinen_dark"      // ダンジョン探索向け: 劇画寄り・暗所多用・濃いベタ・モンスター描写
+  | "manga_bw_shoujo_classic"   // 転生貴族・領地経営向け: 細線・大きい瞳・トーン多用・貴族画風
+  | "manga_bw_seinen_urban"     // 現代ダンジョン向け: 写実寄り・現代都市描写・テンポ速い
+  | "shounen"
+  | "shoujo"
+  | "webtoon"
+  | "realistic"
+  | "chibi";
 
 // ============================================================
 // テーブル行型
@@ -181,6 +223,7 @@ export type MangaWorkRow = {
   manga_aptitude_score: number | null;
   rights_status: RightsStatus;
   metadata: Record<string, unknown>;
+  style_sheet_asset_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -212,6 +255,7 @@ export type CharacterBibleRow = {
   embedding_arcface: Buffer | null;
   attribute_classifier: AttributeClassifierLabels;
   master_seed: number | null;
+  refs_status: RefsStatus;
   created_at: string;
   updated_at: string;
 };
@@ -237,6 +281,7 @@ export type LocationBibleRow = {
   reference_images: LocationReferenceImages;
   master_seed: number | null;
   three_d_model_path: string | null;
+  refs_status: RefsStatus;
   created_at: string;
 };
 
@@ -269,6 +314,14 @@ export type ShotlistRow = {
   episode_id: string;
   data: ShotlistData;
   generated_at: string;
+};
+
+export type EpisodePlotRow = {
+  id: string;
+  episode_id: string;
+  data: EpisodePlotData;
+  generated_at: string;
+  generation_version: string | null;
 };
 
 export type AssetRow = {
@@ -311,6 +364,8 @@ export type MangaPanelRow = {
   qa_reason: string | null;
   generation_attempts: number;
   consistency_score: number | null;
+  narrative_function: NarrativeFunction | null;
+  panel_purpose: string | null;
   created_at: string;
   updated_at: string;
 };

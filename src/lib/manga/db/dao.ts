@@ -24,6 +24,7 @@ import type {
   MangaKpiRow,
   QaLogRow,
   PublishPackageRow,
+  EpisodePlotRow,
   MangaWorkStatus,
   MangaEpisodeStatus,
   PrimaryModel,
@@ -44,6 +45,8 @@ import type {
   PublishStatus,
   PanelSpatialPosition,
   BubbleType,
+  RefsStatus,
+  NarrativeFunction,
 } from "../types";
 import type {
   CharacterSpec,
@@ -64,6 +67,7 @@ import type {
   ComplianceChecklist,
   CvInspectionResult,
   BubblePosition,
+  EpisodePlotData,
 } from "../schemas";
 
 const sb = () => createAdminClient();
@@ -235,6 +239,40 @@ export async function updateCharacterBibleReferences(
     .eq("id", id);
   if (error)
     throw new Error(`updateCharacterBibleReferences failed: ${error.message}`);
+}
+
+export async function updateCharacterRefsStatus(
+  id: string,
+  status: RefsStatus
+): Promise<void> {
+  const { error } = await sb()
+    .from("character_bibles")
+    .update({ refs_status: status })
+    .eq("id", id);
+  if (error)
+    throw new Error(`updateCharacterRefsStatus failed: ${error.message}`);
+}
+
+export async function updateLocationRefsStatus(
+  id: string,
+  status: RefsStatus
+): Promise<void> {
+  const { error } = await sb()
+    .from("location_bibles")
+    .update({ refs_status: status })
+    .eq("id", id);
+  if (error) throw new Error(`updateLocationRefsStatus failed: ${error.message}`);
+}
+
+export async function updateMangaWorkStyleSheet(
+  id: string,
+  asset_id: string
+): Promise<void> {
+  const { error } = await sb()
+    .from("manga_works")
+    .update({ style_sheet_asset_id: asset_id })
+    .eq("id", id);
+  if (error) throw new Error(`updateMangaWorkStyleSheet failed: ${error.message}`);
 }
 
 // ============================================================
@@ -413,6 +451,44 @@ export async function listCharacterRelations(
 }
 
 // ============================================================
+// episode_plots (L0)
+// ============================================================
+
+export async function upsertEpisodePlot(input: {
+  episode_id: string;
+  data: EpisodePlotData;
+  generation_version?: string;
+}): Promise<EpisodePlotRow> {
+  const { data, error } = await sb()
+    .from("episode_plots")
+    .upsert(
+      {
+        episode_id: input.episode_id,
+        data: input.data,
+        generation_version: input.generation_version ?? null,
+        generated_at: new Date().toISOString(),
+      },
+      { onConflict: "episode_id" }
+    )
+    .select("*")
+    .single();
+  if (error) throw new Error(`upsertEpisodePlot failed: ${error.message}`);
+  return data as EpisodePlotRow;
+}
+
+export async function getEpisodePlot(
+  episode_id: string
+): Promise<EpisodePlotRow | null> {
+  const { data, error } = await sb()
+    .from("episode_plots")
+    .select("*")
+    .eq("episode_id", episode_id)
+    .maybeSingle();
+  if (error) throw new Error(`getEpisodePlot failed: ${error.message}`);
+  return data as EpisodePlotRow | null;
+}
+
+// ============================================================
 // shotlists
 // ============================================================
 
@@ -541,6 +617,8 @@ export async function createMangaPanel(input: {
   location_id?: string;
   camera?: PanelCamera;
   emotion_tag?: string;
+  narrative_function?: NarrativeFunction;
+  panel_purpose?: string;
 }): Promise<MangaPanelRow> {
   const { data, error } = await sb()
     .from("manga_panels")
@@ -555,6 +633,8 @@ export async function createMangaPanel(input: {
       location_id: input.location_id ?? null,
       camera: input.camera ?? null,
       emotion_tag: input.emotion_tag ?? null,
+      narrative_function: input.narrative_function ?? null,
+      panel_purpose: input.panel_purpose ?? null,
     })
     .select("*")
     .single();

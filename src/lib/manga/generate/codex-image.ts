@@ -202,17 +202,36 @@ export async function generateMangaImage(
 }
 
 /**
- * 推奨サイズプリセット（プラットフォーム別）
+ * 推奨サイズプリセット
+ * 横読み (2026-04-30 ピボット後): page_b5 / spread / panel_*
+ * 縦読み (旧): vertical_* / splash / square (互換のため残置)
  */
 export const MANGA_SIZE_PRESETS = {
-  /** 縦読み標準パネル（1080×1920） */
+  // === 横読み (現行) ===
+  /** B5縦ページ単位（gpt-image-2 で full manga page を出す場合） */
+  page_b5: { width: 1024, height: 1536 } as MangaImageSize,
+  /** 見開き横長（扉絵・クライマックス） */
+  spread: { width: 1536, height: 1024 } as MangaImageSize,
+  /** 横長コマ（3段組の上段、establishing） */
+  panel_landscape: { width: 1536, height: 1024 } as MangaImageSize,
+  /** 縦長コマ（T字割りの縦軸、感情ショット） */
+  panel_portrait: { width: 1024, height: 1536 } as MangaImageSize,
+  /** 正方形コマ（情報・タメ・リアクション） */
+  panel_square: { width: 1024, height: 1024 } as MangaImageSize,
+  /** 縦長大ゴマ（見せ場、扉絵） */
+  panel_tall: { width: 1024, height: 1536 } as MangaImageSize,
+
+  // === 縦読み (旧、互換のため残置) ===
+  /** 縦読み標準パネル */
   vertical_standard: { width: 1024, height: 1536 } as MangaImageSize,
   /** 縦長大ゴマ（クライマックス用） */
   vertical_big: { width: 1024, height: 1536 } as MangaImageSize,
-  /** スプラッシュ（見開き相当、縦読みでは超大ゴマ） */
+  /** スプラッシュ（縦読みでは超大ゴマ） */
   splash: { width: 1024, height: 1536 } as MangaImageSize,
-  /** 正方形コマ（タメ・情報パネル） */
+  /** 正方形コマ */
   square: { width: 1024, height: 1024 } as MangaImageSize,
+
+  // === 共通 ===
   /** キャラ参照立ち絵（縦長） */
   character_ref: { width: 1024, height: 1536 } as MangaImageSize,
   /** ロケ参照（横長） */

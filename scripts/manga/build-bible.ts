@@ -18,6 +18,7 @@
  * 参照画像生成は scripts/manga/build-bible-images.ts (Phase 1 後段) で行う。
  */
 
+import "./_env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadWorkSource } from "@/lib/manga/bible/source-loader";
 import {
