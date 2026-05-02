@@ -45,6 +45,13 @@ import {
 } from "@/lib/manga/db/dao";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ShotlistData } from "@/lib/manga/schemas";
+import { loadBibleSnapshot } from "./load-bible-snapshot";
+import { snapshotToBibleRows } from "@/lib/manga/bible/snapshot-adapter";
+import type {
+  CharacterBibleRow,
+  LocationBibleRow,
+} from "@/lib/manga/types";
+import { readFile } from "node:fs/promises";
 
 type CliArgs = {
   slug: string;
@@ -53,6 +60,10 @@ type CliArgs = {
   targetPanels: number;
   dryRun: boolean;
   genreId?: MangaGenreId;
+  /** snapshot 経由実行 (DB 不要、必ず dry-run 相当の出力のみ) */
+  snapshotPath?: string;
+  /** snapshot 経由時の本文ファイル直指定 (省略時は content/manga/<slug>/ep001/body.md or content/works/<slug>/ep001.md) */
+  episodeBodyPath?: string;
 };
 
 function parseArgs(): CliArgs {
@@ -85,20 +96,32 @@ function parseArgs(): CliArgs {
         }
         args.genreId = value as MangaGenreId;
         break;
+      case "snapshot":
+        args.snapshotPath = value;
+        break;
+      case "episode-body":
+        args.episodeBodyPath = value;
+        break;
     }
   }
-  if (!args.slug) throw new Error("--slug=<slug> が必要です");
+  // --snapshot が無ければ slug 必須。--snapshot 経由なら slug は snapshot 内から取得
+  if (!args.snapshotPath && !args.slug) {
+    throw new Error("--slug=<slug> または --snapshot=<path> が必要です");
+  }
   if (!args.ep) throw new Error("--ep=<n> が必要です");
   // 横読み Phase A の主入力は target_pages。panel数は派生値として算出
   const targetPages = args.targetPages ?? 22;
   const targetPanels = args.targetPanels ?? Math.round(targetPages * 6); // 平均6コマ/p
   return {
-    slug: args.slug,
+    slug: args.slug ?? "",
     ep: args.ep,
     targetPages,
     targetPanels,
-    dryRun: args.dryRun ?? false,
+    // snapshot 経由は強制 dry-run (DB 書き込みなし)
+    dryRun: args.snapshotPath ? true : (args.dryRun ?? false),
     genreId: args.genreId,
+    snapshotPath: args.snapshotPath,
+    episodeBodyPath: args.episodeBodyPath,
   };
 }
 
@@ -128,68 +151,163 @@ function summarizeWarnings(warnings: StoryboardWarning[]): string {
   return lines.join("\n");
 }
 
+/** snapshot 経由でワーク情報・bibles・本文を構築 */
+async function loadFromSnapshot(args: CliArgs): Promise<{
+  slug: string;
+  workId: string;
+  workTitle: string;
+  episodeId: string;
+  episodeBody: string;
+  characters: CharacterBibleRow[];
+  locations: LocationBibleRow[];
+  prevHook?: string;
+}> {
+  const { snapshot, todos } = loadBibleSnapshot(args.snapshotPath!);
+  console.log(
+    `[generate-storyboard] snapshot: slug=${snapshot.meta.slug} title=${snapshot.meta.title}`
+  );
+  if (todos.length > 0) {
+    console.log(`  ⚠️ TODO 残: ${todos.length} 件`);
+  }
+
+  const { workId, characters, locations } = snapshotToBibleRows(snapshot);
+
+  // 本文の探索順: --episode-body > content/manga/<slug>/ep001/body.md > content/works/<slug>/ep001.md
+  const epPad = String(args.ep).padStart(3, "0");
+  const candidates = [
+    args.episodeBodyPath,
+    path.resolve("content", "manga", snapshot.meta.slug, `ep${epPad}`, "body.md"),
+    path.resolve("content", "works", snapshot.meta.slug, `ep${epPad}.md`),
+  ].filter((p): p is string => Boolean(p));
+
+  let episodeBody: string | null = null;
+  let foundPath: string | null = null;
+  for (const cand of candidates) {
+    try {
+      episodeBody = await readFile(cand, "utf-8");
+      foundPath = cand;
+      break;
+    } catch {
+      // 次候補
+    }
+  }
+  if (!episodeBody || !foundPath) {
+    throw new Error(
+      `本文が見つかりません。試行: ${candidates.join(" | ")}\n` +
+        `--episode-body=<path> で直接指定するか、content/manga/<slug>/ep${epPad}/body.md を用意してください`
+    );
+  }
+  console.log(`  episode body: ${foundPath} (${episodeBody.length} chars)`);
+
+  const episodeId = `snap-ep-${args.ep}-${snapshot.meta.slug}`;
+
+  return {
+    slug: snapshot.meta.slug,
+    workId,
+    workTitle: snapshot.meta.title,
+    episodeId,
+    episodeBody,
+    characters,
+    locations,
+    prevHook: undefined,
+  };
+}
+
 async function main() {
   const args = parseArgs();
   console.log(
-    `[generate-storyboard] slug=${args.slug} ep=${args.ep} target_pages=${args.targetPages} target_panels=${args.targetPanels} dry_run=${args.dryRun}`
+    `[generate-storyboard] slug=${args.slug} ep=${args.ep} target_pages=${args.targetPages} target_panels=${args.targetPanels} dry_run=${args.dryRun}` +
+      (args.snapshotPath ? ` (snapshot=${args.snapshotPath})` : "")
   );
 
-  // 1. 素材
-  const src = await loadWorkSource(args.slug, args.ep);
-  const epSrc = src.episodes.find((e) => e.ep_num === args.ep);
-  if (!epSrc) {
-    throw new Error(
-      `本文が content/works/${args.slug}/ep${String(args.ep).padStart(3, "0")}.md に見つかりません`
+  // 共通変数
+  let slug: string;
+  let workId: string;
+  let workTitle: string;
+  let episodeId: string;
+  let episodeBody: string;
+  let characters: CharacterBibleRow[];
+  let locations: LocationBibleRow[];
+  let prevHook: string | undefined;
+
+  if (args.snapshotPath) {
+    // ============ snapshot 経路 (DB 不要) ============
+    const ld = await loadFromSnapshot(args);
+    slug = ld.slug;
+    workId = ld.workId;
+    workTitle = ld.workTitle;
+    episodeId = ld.episodeId;
+    episodeBody = ld.episodeBody;
+    characters = ld.characters;
+    locations = ld.locations;
+    prevHook = ld.prevHook;
+  } else {
+    // ============ DB 経路 (従来) ============
+    const src = await loadWorkSource(args.slug, args.ep);
+    const epSrc = src.episodes.find((e) => e.ep_num === args.ep);
+    if (!epSrc) {
+      throw new Error(
+        `本文が content/works/${args.slug}/ep${String(args.ep).padStart(3, "0")}.md に見つかりません`
+      );
+    }
+
+    const novel = await findNovelBySlug(args.slug);
+    if (!novel) throw new Error(`novels に slug='${args.slug}' が見つかりません`);
+    const work = await getMangaWorkByNovelId(novel.id);
+    if (!work)
+      throw new Error(
+        `manga_works が無い。先に build-bible.ts を完了してください`
+      );
+    console.log(
+      `[generate-storyboard] manga_work id=${work.id} title=${work.title}`
     );
+
+    const dbChars = await listCharacterBibles(work.id);
+    const dbLocs = await listLocationBibles(work.id);
+    if (dbChars.length === 0)
+      throw new Error("character_bibles が空。build-bible.ts を完了してください");
+    console.log(
+      `[generate-storyboard] bibles: characters=${dbChars.length} locations=${dbLocs.length}`
+    );
+
+    const episodes = await listMangaEpisodes(work.id);
+    const ep = episodes.find((e) => e.ep_num === args.ep);
+    if (!ep) throw new Error(`Episode ep_num=${args.ep} が見つかりません`);
+
+    // 直前話の cliffhanger 引き継ぎ
+    let _prevHook: string | undefined;
+    if (args.ep > 1) {
+      const prevEp = episodes.find((e) => e.ep_num === args.ep - 1);
+      if (prevEp) {
+        const prevPlot = await getEpisodePlot(prevEp.id);
+        _prevHook = prevPlot?.data.cliffhanger_hook;
+      }
+    }
+
+    slug = args.slug;
+    workId = work.id;
+    workTitle = work.title;
+    episodeId = ep.id;
+    episodeBody = epSrc.body;
+    characters = dbChars;
+    locations = dbLocs;
+    prevHook = _prevHook;
   }
-
-  const novel = await findNovelBySlug(args.slug);
-  if (!novel) throw new Error(`novels に slug='${args.slug}' が見つかりません`);
-  const work = await getMangaWorkByNovelId(novel.id);
-  if (!work)
-    throw new Error(
-      `manga_works が無い。先に build-bible.ts を完了してください`
-    );
-  console.log(
-    `[generate-storyboard] manga_work id=${work.id} title=${work.title}`
-  );
-
-  const characters = await listCharacterBibles(work.id);
-  const locations = await listLocationBibles(work.id);
-  if (characters.length === 0)
-    throw new Error("character_bibles が空。build-bible.ts を完了してください");
-  console.log(
-    `[generate-storyboard] bibles: characters=${characters.length} locations=${locations.length}`
-  );
 
   const characterNameToId = new Map(
     characters.map((c) => [c.character_name, c.id])
   );
   const locationNameToId = new Map(locations.map((l) => [l.location_name, l.id]));
 
-  const episodes = await listMangaEpisodes(work.id);
-  const ep = episodes.find((e) => e.ep_num === args.ep);
-  if (!ep) throw new Error(`Episode ep_num=${args.ep} が見つかりません`);
-
-  // 直前話の cliffhanger 引き継ぎ（episode_plots がある前提、無ければスキップ）
-  let prevHook: string | undefined;
-  if (args.ep > 1) {
-    const prevEp = episodes.find((e) => e.ep_num === args.ep - 1);
-    if (prevEp) {
-      const prevPlot = await getEpisodePlot(prevEp.id);
-      prevHook = prevPlot?.data.cliffhanger_hook;
-    }
-  }
-
   console.log("");
-  console.log(`========== Episode ${args.ep} (id=${ep.id}) ==========`);
-  console.log(`  body length: ${epSrc.body.length} chars`);
+  console.log(`========== Episode ${args.ep} (id=${episodeId}) ==========`);
+  console.log(`  body length: ${episodeBody.length} chars`);
 
   // 2. シーン分割
   console.log(`[generate-storyboard] step1 scene-splitter 実行中...`);
   const scenes = await splitScenes({
     episodeNum: args.ep,
-    episodeBody: epSrc.body,
+    episodeBody: episodeBody,
     knownCharacterNames: characters.map((c) => c.character_name),
     knownLocationNames: locations.map((l) => l.location_name),
     targetPanelCount: args.targetPanels,
@@ -200,7 +318,7 @@ async function main() {
   console.log(`[generate-storyboard] step2 plot-extractor 実行中...`);
   const plot = await extractEpisodePlot({
     episodeNum: args.ep,
-    episodeBody: epSrc.body,
+    episodeBody: episodeBody,
     scenes,
     knownCharacterNames: characters.map((c) => c.character_name),
     targetPages: args.targetPages,
@@ -240,7 +358,7 @@ async function main() {
   }
   const sbPages = await buildStoryboard({
     episodeNum: args.ep,
-    episodeBody: epSrc.body,
+    episodeBody: episodeBody,
     plot,
     scenes,
     characters,
@@ -362,8 +480,8 @@ async function main() {
     options: {
       characterIdToName,
       locationIdToName,
-      workSlug: args.slug,
-      workTitle: work.title ?? args.slug,
+      workSlug: slug,
+      workTitle: workTitle,
     },
   });
 
@@ -372,27 +490,44 @@ async function main() {
     repoRoot,
     "content",
     "manga",
-    args.slug,
+    slug,
     `ep${String(args.ep).padStart(3, "0")}`
   );
   const mdPath = path.join(mdDir, "storyboard.md");
   const jsonPath = path.join(mdDir, "storyboard.json");
 
   if (args.dryRun) {
-    console.log(`  [dry-run] would upsert plot + shotlist`);
-    console.log(`  [dry-run] would write Markdown to ${mdPath}`);
-    console.log("  --- plot snapshot (first 1200) ---");
-    console.log(JSON.stringify(plot, null, 2).slice(0, 1200));
-    console.log("  --- markdown first 80 lines ---");
-    console.log(markdown.split("\n").slice(0, 80).join("\n"));
+    // snapshot 経由は dry-run 強制だが、markdown/json はローカル書き出す価値があるので出す
+    if (args.snapshotPath) {
+      await mkdir(mdDir, { recursive: true });
+      await writeFile(mdPath, markdown, "utf-8");
+      await writeFile(
+        jsonPath,
+        JSON.stringify(
+          { plot, shotlist: shotlistData, warnings: allWarnings },
+          null,
+          2
+        ),
+        "utf-8"
+      );
+      console.log(`  [snapshot dry-run] markdown: ${mdPath}`);
+      console.log(`  [snapshot dry-run] json:     ${jsonPath}`);
+    } else {
+      console.log(`  [dry-run] would upsert plot + shotlist`);
+      console.log(`  [dry-run] would write Markdown to ${mdPath}`);
+      console.log("  --- plot snapshot (first 1200) ---");
+      console.log(JSON.stringify(plot, null, 2).slice(0, 1200));
+      console.log("  --- markdown first 80 lines ---");
+      console.log(markdown.split("\n").slice(0, 80).join("\n"));
+    }
   } else {
     await upsertEpisodePlot({
-      episode_id: ep.id,
+      episode_id: episodeId,
       data: plot,
       generation_version: "phase-a-plot-v2",
     });
-    await upsertShotlist({ episode_id: ep.id, data: shotlistData });
-    await updateMangaEpisodeStatus(ep.id, "shotlisting");
+    await upsertShotlist({ episode_id: episodeId, data: shotlistData });
+    await updateMangaEpisodeStatus(episodeId, "shotlisting");
     await mkdir(mdDir, { recursive: true });
     await writeFile(mdPath, markdown, "utf-8");
     await writeFile(
@@ -419,9 +554,14 @@ async function main() {
   console.log("次のステップ:");
   console.log(`  1. 1次レビュー: ${mdPath} を開いて構成を確認`);
   console.log(`     - 必須イベント消化 / importance≥4 密度 / 話末 turn_strength≥4 をチェック`);
-  console.log(`  2. 修正があれば --ep を再実行 or pages 単位で部分再生成`);
-  console.log(`  3. 参照画像生成: scripts/manga/build-bible-images.ts`);
-  console.log(`  4. パネル生成: scripts/manga/generate-panels.ts --slug=${args.slug} --ep=${args.ep}`);
+  if (args.snapshotPath) {
+    console.log(`  2. 修正があれば --ep を再実行 (snapshot 入力)`);
+    console.log(`  3. 参照画像生成: scripts/manga/build-bible-images-from-snapshot.ts --snapshot=${args.snapshotPath}`);
+  } else {
+    console.log(`  2. 修正があれば --ep を再実行 or pages 単位で部分再生成`);
+    console.log(`  3. 参照画像生成: scripts/manga/build-bible-images.ts`);
+    console.log(`  4. パネル生成: scripts/manga/generate-panels.ts --slug=${slug} --ep=${args.ep}`);
+  }
 }
 
 main().catch((err) => {

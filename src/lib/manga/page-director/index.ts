@@ -34,3 +34,14 @@ export type {
   PageMapperOptions,
   PageMapperWarning,
 } from "./page-mapper";
+export { resolveContinuityGroupIds } from "./continuity-resolver";
+export type { ContinuityResolverArgs } from "./continuity-resolver";
+export {
+  buildGroupRefRegistry,
+  resolveRefsForGroupIds,
+  buildCharacterRefPathsFromRegistry,
+} from "./continuity-refs";
+export type {
+  GroupRefRegistry,
+  BuildGroupRefRegistryArgs,
+} from "./continuity-refs";

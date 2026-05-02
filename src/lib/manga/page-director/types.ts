@@ -96,6 +96,17 @@ export type PagePanel = {
   balloon_zones: string[];
   /** 視覚的フォーカル領域 */
   focal_region?: FocalRegion;
+  /**
+   * このコマで保つべき連続性 (continuity) の参照ID集合。
+   * BibleSnapshot.continuity_seeds[].group_id を 0..N 個列挙し、画像生成側 (L2) で
+   * 該当 group の参照画像を refs として注入することで face/outfit/location/prop の
+   * 巻またぎ一貫性を担保する。
+   *
+   * 例: ["char_kanade_face_v1", "char_kanade_outfit_v1", "loc_guild_hall_v1"]
+   *
+   * Month 2 Continuity Packet 設計の中核フィールド。空配列 = 連続性制約なし。
+   */
+  continuity_group_ids?: string[];
 };
 
 // ============================================================
@@ -149,6 +160,13 @@ export type MangaPagePlan = {
   panels: PagePanel[];
   /** F-2 ページ一発生成用 (render_strategy が "page_one_shot" or "hybrid" のとき必須) */
   page_prompt_blueprint?: PagePromptBlueprint;
+  /**
+   * ページ全体で保つべき連続性参照ID集合。
+   * panels[].continuity_group_ids の和集合 + ページ全体に効く global 参照
+   * (例: 巻共通の style_sheet) を含む。
+   * F-2 (page_one_shot) でページ参照画像を組む際の入力として使う。
+   */
+  page_continuity_group_ids?: string[];
 };
 
 // ============================================================
