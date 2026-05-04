@@ -58,3 +58,13 @@ __pycache__/
 /data/manga/raw/kindle-references/
 /data/manga/raw/manual/
 /data/manga/_archive/
+# 漫画パイプライン v2 生成物 (PNG/PDF は git に乗せない、JSON は乗せる)
+/data/manga/style-plates/*.png
+/data/manga/works/*/bible/refs/characters/
+/data/manga/works/*/bible/refs/locations/
+/data/manga/works/*/bible/refs/props/
+/data/manga/works/*/episodes/*/renders/
+/data/manga/works/*/episodes/*/bubbles/
+/data/manga/works/*/episodes/*/_incremental_refs/
+/data/manga/works/*/volumes/*/kdp/*.pdf
+/data/manga/works/*/volumes/*/kdp/_colophon.png

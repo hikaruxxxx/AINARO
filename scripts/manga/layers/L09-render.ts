@@ -1,0 +1,153 @@
+/**
+ * L9 Render
+ *
+ * page_plan.json + storyboard.json + resolved_refs.json + bible →
+ *   episodes/epNN/renders/p{NN}.png
+ *
+ * page_one_shot: 1ページ = 1 codex 呼び出し
+ * panel_composite: 1パネル = 1 codex 呼び出し → ページ単位で合成は L9.5 (本実装は MVP のため省略、page_one_shot のみ)
+ *
+ * Phase A 検証段階では page_one_shot を全ページに適用し、panel_composite は後段で追加。
+ */
+import "../_env";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import sharp from "sharp";
+import {
+  bibleSnapshotPath,
+  storyboardPath,
+  pagePlanPath,
+  resolvedRefsPath,
+  rendersDir,
+} from "./_paths";
+import { generateMangaImage } from "../../../src/lib/manga/generate/codex-image";
+import { composePagePrompt, composePanelPrompt } from "../../../src/lib/manga/render-v2/prompt-composer-v2";
+import type {
+  BibleSnapshotV2,
+  EpisodeStoryboardV2,
+  PagePlanV2,
+  ResolvedRefs,
+} from "../../../src/lib/manga/schemas-v2";
+
+type Args = { slug: string; episode: number; pages?: number[]; concurrency: number };
+
+function parseArgs(): Args {
+  const a: Partial<Args> = { concurrency: 2 };
+  const argv = process.argv.slice(2);
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    let key: string | null = null; let val: string | null = null;
+    const eq = arg.match(/^--([^=]+)=(.*)$/);
+    if (eq) [, key, val] = eq;
+    else { const flag = arg.match(/^--(.+)$/); if (flag && i + 1 < argv.length) { key = flag[1]; val = argv[++i]; } }
+    if (!key || val === null) continue;
+    if (key === "slug") a.slug = val;
+    else if (key === "episode") a.episode = Number(val);
+    else if (key === "pages") a.pages = val.split(",").map((s) => Number(s));
+    else if (key === "concurrency") a.concurrency = Number(val);
+  }
+  if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
+  return a as Args;
+}
+
+async function existsAndNonEmpty(p: string, minBytes = 50_000): Promise<boolean> {
+  try { const st = await fs.stat(p); return st.size >= minBytes; } catch { return false; }
+}
+
+async function runWithConcurrency<T>(items: T[], n: number, worker: (it: T) => Promise<void>) {
+  let cursor = 0;
+  await Promise.all(Array.from({ length: Math.max(1, n) }, async () => {
+    while (true) {
+      const idx = cursor++;
+      if (idx >= items.length) return;
+      await worker(items[idx]);
+    }
+  }));
+}
+
+async function main() {
+  const args = parseArgs();
+  const bible = JSON.parse(await fs.readFile(bibleSnapshotPath(args.slug), "utf-8")) as BibleSnapshotV2;
+  const storyboard = JSON.parse(await fs.readFile(storyboardPath(args.slug, args.episode), "utf-8")) as EpisodeStoryboardV2;
+  const pagePlan = JSON.parse(await fs.readFile(pagePlanPath(args.slug, args.episode), "utf-8")) as PagePlanV2;
+  const resolved = JSON.parse(await fs.readFile(resolvedRefsPath(args.slug, args.episode), "utf-8")) as ResolvedRefs;
+
+  await fs.mkdir(rendersDir(args.slug, args.episode), { recursive: true });
+
+  const targetPages = args.pages ? new Set(args.pages) : null;
+  const pagesToRender = pagePlan.pages.filter((p) => !targetPages || targetPages.has(p.page_no));
+  console.log(`[L09] slug=${args.slug} ep=${args.episode} pages=${pagesToRender.length}/${pagePlan.pages.length}`);
+
+  const sbPagesByNo = new Map(storyboard.pages.map((p) => [p.page_no, p]));
+
+  let done = 0; let failed = 0; let skipped = 0;
+
+  await runWithConcurrency(pagesToRender, args.concurrency, async (page) => {
+    const sbPage = sbPagesByNo.get(page.page_no);
+    if (!sbPage) { failed++; return; }
+
+    const outPath = path.join(rendersDir(args.slug, args.episode), `p${String(page.page_no).padStart(2, "0")}.png`);
+    if (await existsAndNonEmpty(outPath)) { console.log(`[L09] SKIP p${page.page_no}`); skipped++; return; }
+
+    if (page.render_strategy === "page_one_shot") {
+      const packet = resolved.packets[`page_${page.page_no}`];
+      if (!packet) { console.warn(`[L09] missing packet for page_${page.page_no}`); failed++; return; }
+      const { prompt, refImagePaths } = composePagePrompt({
+        page: sbPage, packet, bible, pageDimensions: { width: 1748, height: 2480 },
+      });
+      try {
+        console.log(`[L09] gen p${page.page_no} (page_one_shot, refs=${refImagePaths.length})`);
+        // gpt-image-2 は 1748x2480 を受け付けず fall back するため、
+        // 1024x1536 (標準 portrait) で生成 → sharp で B6 1748x2480 にアップスケール
+        const tmpPath = outPath + ".raw.png";
+        await generateMangaImage({
+          prompt, outputPath: tmpPath,
+          size: { width: 1024, height: 1536 },
+          referenceImagePaths: refImagePaths,
+          timeoutMs: 8 * 60 * 1000,
+          maxRetries: 1,
+        });
+        await sharp(tmpPath)
+          .resize({ width: 1748, height: 2480, fit: "fill" })
+          .png()
+          .toFile(outPath);
+        try { await fs.unlink(tmpPath); } catch {}
+        done++;
+        console.log(`[L09] DONE p${page.page_no}`);
+      } catch (e) {
+        console.warn(`[L09] FAIL p${page.page_no}: ${(e as Error).message}`);
+        failed++;
+      }
+    } else {
+      // panel_composite: 各パネルを生成 → 後で合成 (本 MVP では先に panels 生成だけ実施、合成は別 layer 想定)
+      console.warn(`[L09] panel_composite scope: page ${page.page_no} – panels generated separately, composition not yet implemented in v2 MVP`);
+      // 各 panel を生成 (scope=panel)
+      for (const pp of page.panels) {
+        const panelOut = path.join(rendersDir(args.slug, args.episode), `p${String(page.page_no).padStart(2, "0")}_panel_${String(pp.reading_order).padStart(2, "0")}.png`);
+        if (await existsAndNonEmpty(panelOut)) { skipped++; continue; }
+        const sbPanel = sbPage.panels.find((x) => x.panel_id === pp.panel_id);
+        if (!sbPanel) { failed++; continue; }
+        const packet = resolved.packets[pp.panel_id];
+        if (!packet) { failed++; continue; }
+        const { prompt, refImagePaths } = composePanelPrompt({
+          panel: sbPanel, packet, bible, pageDimensions: { width: pp.rect.w, height: pp.rect.h },
+        });
+        try {
+          console.log(`[L09] gen p${page.page_no}/panel#${pp.reading_order}`);
+          await generateMangaImage({
+            prompt, outputPath: panelOut,
+            size: { width: 1024, height: 1536 },
+            referenceImagePaths: refImagePaths,
+            timeoutMs: 6 * 60 * 1000, maxRetries: 1,
+          });
+          done++;
+        } catch (e) { console.warn(`[L09] FAIL panel ${pp.panel_id}: ${(e as Error).message}`); failed++; }
+      }
+    }
+  });
+
+  console.log(`[L09] DONE: gen=${done} skip=${skipped} fail=${failed}`);
+  if (failed > 0) process.exit(2);
+}
+
+main().catch((e) => { console.error("[L09] FAILED:", e); process.exit(1); });

@@ -1,53 +1,79 @@
-# scripts/manga/ 構造
+# scripts/manga/ 構造 (v2)
 
-横読み白黒漫画パイプラインのスクリプト群。
-SSoT: `~/.claude/plans/codex-swift-kettle.md`
+横読み白黒漫画パイプライン v2 のスクリプト群。
+SSoT: `~/.claude/plans/manga-pipeline-v2.md`
 
-## 本流スクリプト（5層パイプライン）
+## 12-Layer パイプライン
 
-| 層 | スクリプト | 役割 |
-|---|---|---|
-| L1.1 | `generate-shotlist.ts` | 原作テキスト → ショットリスト |
-| L1.2 | `build-bible.ts` | キャラ/世界観バイブル構築 |
-| L1.3 | `build-bible-images.ts` | バイブル参照画像生成 |
-| L1.4 | `page-director-smoketest.ts` | ページ割り（page-director, project_manga_l14_page_direction.md） |
-| L2 | `generate-storyboard.ts` | ストーリーボード生成 |
-| L3 | `generate-panels.ts` | パネル画像生成 |
-| L4 | `normalize-pages.ts` | ページ正規化 |
-| L5 | `stitch-manual.ts` | ページ合成 |
+```
+═══ PHASE 1: WORK SETUP (once / 作品) ═══
+L01 bible-snapshot       layers/L01-bible.ts        ← V2企画書 → bible/snapshot.json
+L02 bible-images         layers/L02-bible-images.ts ← snapshot → bible/refs/
 
-## 取り込み系
+═══ PHASE 2: EPISODE PLANNING (per ep) ═══
+L03 shotlist             layers/L03-shotlist.ts          ← bible + brief → shotlist
+L04 storyboard           layers/L04-storyboard.ts        ← shotlist + bible → storyboard (entity_id 強制)
+L05 page-director        layers/L05-page-director.ts     ← storyboard + capability → page_plan
+L06 continuity-resolve   layers/L06-continuity-resolve.ts← page_plan + bible → +continuity_group_ids
+L07 refs-resolution      layers/L07-refs-resolution.ts   ← page_plan + bible/refs → resolved_refs
+L08 incremental-refs     layers/L08-incremental-refs.ts  ← resolved_refs.unresolved → bible/refs/_ep{N}/
+
+═══ PHASE 3: RENDER (per ep) ═══
+L09 render               layers/L09-render.ts            ← page_plan + resolved_refs → renders/p{NN}.png
+L10 bubble               layers/L10-bubble.ts            ← renders + storyboard.dialogue → bubbles/p{NN}.png
+L11 audit                layers/L11-audit.ts             ← bubbles + bible → audit.json
+L12 repair               layers/L12-repair.ts            ← audit.failed → re-run L9-L10
+
+═══ PHASE 4: PUBLISH (per volume) ═══
+L13 kdp                  layers/L13-kdp.ts               ← volumes/v{NN}/episodes 全部 → kdp/{manuscript,cover}.pdf
+```
+
+## オーケストレーター
+
+```bash
+# end-to-end (L01 → L12)
+npx tsx scripts/manga/pipeline.ts \
+  --slug a07-modern-dungeon --episode 1 \
+  --concept data/manga/_archive/.../A07_v2.json \
+  --brief-file data/manga/works/a07-modern-dungeon/episodes/ep01/_brief.md
+
+# 単一 layer 再実行
+npx tsx scripts/manga/pipeline.ts --slug a07-modern-dungeon --episode 1 --layer L09 --force
+
+# Volume 仕上げ (KDP)
+npx tsx scripts/manga/pipeline.ts \
+  --slug a07-modern-dungeon \
+  --volume 1 --episodes 1 \
+  --layer L13 \
+  --author "AINARO" \
+  --publication-date 2026-06-01
+```
+
+## 既存スクリプト (v1)
+
+v1 build-bible.ts / generate-shotlist.ts / generate-storyboard.ts / page-director-smoketest.ts / generate-panels.ts は
+v2 化のため layers/L0N-*.ts に置き換えられた。v1 は scripts/manga/ ルートに残置するが、Phase A 検証では使わない。
+
+## 取り込み系 (継続利用)
 
 - `ingest-kindle.ts` — Kindle 素材取り込み
 - `ingest-manual.ts` — 手動素材取り込み
 - `extract-from-video.ts` — 動画素材抽出
 
-## モデル評価ベンチ
+## 評価ベンチ (継続利用)
 
-- `eval-bench/run-phase-a.ts` — Phase A 評価実行
-- `eval-bench/runner-fal.ts` — fal.ai ランナー
-- `eval-bench/runner-replicate.ts` — Replicate ランナー
-
-## ユーティリティ
-
-- `_env.ts` — 環境変数ヘルパー
+- `eval-bench/run-phase-a.ts`
+- `eval-bench/runner-fal.ts`
+- `eval-bench/runner-replicate.ts`
 
 ## アーカイブ
 
-- `_archive/feasibility-week0/` — Week 0 Pilot 完了済（2026-05-01）
-  - 21ファイル、Pilot 14本 + README + util
-  - 完了報告: `project_pilot_complete_2026-05-01.md`
-- `_archive/scripts-deprecated/`
-  - `ingest-piccoma.ts` — 縦読み時代の試行（feedback_manga_image_ingest.md で撤回済）
-
-## ライブラリ参照
-
-ロジックは `src/lib/manga/` にある:
-- `bible/`, `storyboard/`, `page-director/`, `shotlist/`, `render/`, `bubble/`, `generate/`, `llm/`
+- `_archive/feasibility-week0/` — Week 0 Pilot 完了済 (2026-05-01)
 
 ## 関連
 
-- 設計: `docs/architecture/manga_pipeline.md`
+- 設計 (SSoT): `~/.claude/plans/manga-pipeline-v2.md`
+- 旧設計 (アーカイブ): `~/.claude/plans/_archive-2026-05-02-codex-swift-kettle.md`
+- ライブラリ: `src/lib/manga/`
 - 作法: `docs/strategy/manga_craft_guide.md`
-- データ: `data/manga/README.md`
-- 成果物: `content/manga/{slug}/`
+- データ: `data/manga/`

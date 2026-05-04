@@ -1,0 +1,458 @@
+/**
+ * 漫画パイプライン v2 スキーマ集約 (manga-pipeline-v2.md 準拠)
+ *
+ * v1 schemas.ts の primitive 型 (CharacterSpec/LocationSpec/PropSpec/CostumeSpec)
+ * を流用しつつ、v2 で確定した layer 出力型 (BibleSnapshotV2/EpisodeStoryboardV2/
+ * ResolvedRefs/RefsProvenance/PagePlanV2) を新規定義する。
+ *
+ * 既存 BibleSnapshot v1 とは別系統。schema_version で区別。
+ */
+import type {
+  ArtStyle,
+  CharacterRole,
+  LocationType,
+} from "./types";
+import type {
+  CharacterSpec,
+  LocationSpec,
+  PropSpec,
+  CostumeSpec,
+  AttributeClassifierLabels,
+} from "./schemas";
+
+// ============================================================
+// L1 出力: BibleSnapshotV2
+// ============================================================
+
+export type WorldFaction = {
+  name: string;
+  summary: string;
+};
+
+export type WorldSpec = {
+  premise: string;
+  rules: string[];
+  system: string;
+  timeline: string;
+  factions: WorldFaction[];
+};
+
+export type CharacterEntryV2 = {
+  /** "char_ren_v1" 形式、bible 内ユニーク */
+  id: string;
+  name: string;
+  name_romaji?: string;
+  role: CharacterRole;
+  age_visual?: string;
+  spec: CharacterSpec;
+  attribute_classifier: AttributeClassifierLabels;
+  /** "always_black_hood" のような不変記述 ID 配列 */
+  continuity_anchors: string[];
+  appears_in_volumes: number[];
+  /** 任意の脚本ノート (storyboard-builder への自由ヒント) */
+  appearance_notes?: string;
+};
+
+export type LocationEntryV2 = {
+  /** "loc_lawson_interior_v1" 形式 */
+  id: string;
+  name: string;
+  location_type: LocationType;
+  spec: LocationSpec;
+  continuity_anchors: string[];
+  appears_in_episodes: number[];
+};
+
+export type PropEntryV2 = {
+  /** "prop_smartphone_cracked_v1" 形式 */
+  id: string;
+  name: string;
+  owner_character_id?: string;
+  spec: PropSpec;
+  continuity_anchors: string[];
+};
+
+export type CostumeEntryV2 = {
+  id: string;
+  character_id: string;
+  /** どの話から有効か (1-indexed) */
+  valid_from_episode: number;
+  /** どの話まで有効か (null = 最終巻まで) */
+  valid_until_episode: number | null;
+  spec: CostumeSpec;
+};
+
+export type CharacterRelationV2 = {
+  from_character_id: string;
+  to_character_id: string;
+  relation_type: string;
+  description: string;
+};
+
+export type StyleDirectivesV2 = {
+  /** 全話通底の画風 1-2文 */
+  global: string;
+  /** "daily" | "dungeon" | "battle" | "flashback" | "news_broadcast" 等 */
+  scene_overrides: Record<string, string>;
+  /** UI/オーバーレイ要素の禁則 */
+  overlay_rules: string[];
+};
+
+export type VisualMotifV2 = {
+  name: string;
+  meaning: string;
+  draw_directive: string;
+};
+
+export type ContinuitySeedKind =
+  | "character_face"
+  | "character_outfit"
+  | "character_back"
+  | "location_layout"
+  | "prop"
+  | "tv_variant";
+
+export type ContinuitySeedV2 = {
+  /** "char_ren_face_v1" 形式 */
+  group_id: string;
+  kind: ContinuitySeedKind;
+  /** character.id / location.id / prop.id への参照 */
+  target_id: string;
+  invariant_description: string;
+};
+
+export type BibleSnapshotV2 = {
+  schema_version: 2;
+  generated_at: string;
+  generated_from: {
+    /** "v2_concept_json" | "design_doc_md" */
+    source_type: string;
+    source_path: string;
+  };
+  meta: {
+    slug: string;
+    title: string;
+    title_short?: string;
+    title_en?: string;
+    art_style: ArtStyle;
+    genre: string;
+    target_pages_per_volume: number;
+    target_episodes_per_volume: number;
+    target_pages_per_episode: number;
+    target_audience?: string;
+    estimated_volumes?: number;
+  };
+  world: WorldSpec;
+  characters: CharacterEntryV2[];
+  locations: LocationEntryV2[];
+  props: PropEntryV2[];
+  costumes: CostumeEntryV2[];
+  relations: CharacterRelationV2[];
+  style_directives: StyleDirectivesV2;
+  visual_motifs: VisualMotifV2[];
+  continuity_seeds: ContinuitySeedV2[];
+  volume_synopsis: {
+    theme: string;
+    summary: string;
+    cliffhanger?: string;
+  };
+};
+
+export function isBibleSnapshotV2(v: unknown): v is BibleSnapshotV2 {
+  if (typeof v !== "object" || v === null) return false;
+  const x = v as Partial<BibleSnapshotV2>;
+  return (
+    x.schema_version === 2 &&
+    typeof x.meta === "object" &&
+    Array.isArray(x.characters) &&
+    Array.isArray(x.locations) &&
+    typeof x.world === "object"
+  );
+}
+
+// ============================================================
+// L2 出力: RefsProvenance
+// ============================================================
+
+export type RefSourceType =
+  | "bible_generated"
+  | "manual_upload"
+  | "kindle_archive"
+  | "external_purchased";
+
+export type RefRightsStatus = "ai_use_allowed" | "internal_only" | "blocked";
+
+export type RefProvenanceEntry = {
+  asset_id: string;
+  path: string;
+  source_type: RefSourceType;
+  rights_status: RefRightsStatus;
+  created_by: string;
+  created_at: string;
+  derived_from: string[];
+  license_note: string;
+  qa_score?: number;
+  training_candidate: boolean;
+  /** 紐付け対象 (character.id / location.id / prop.id / "global_style") */
+  target_entity_id: string;
+  target_entity_type: "character" | "location" | "prop" | "style";
+  /** "front" | "side" | "diagonal" | "expr_joy" | "outfit_battle" 等 */
+  variant: string;
+};
+
+export type RefsProvenance = {
+  schema_version: 1;
+  refs: RefProvenanceEntry[];
+};
+
+/** kindle_archive 由来は L7 で reject。export用 helper */
+export function isAllowedForProduction(entry: RefProvenanceEntry): boolean {
+  return (
+    entry.source_type !== "kindle_archive" &&
+    entry.rights_status === "ai_use_allowed"
+  );
+}
+
+// ============================================================
+// L4 出力: EpisodeStoryboardV2 (entity_id binding 強制)
+// ============================================================
+
+export type ShotType = "close_up" | "medium" | "wide" | "establishing";
+export type CameraType =
+  | "eye_level"
+  | "low_angle"
+  | "high_angle"
+  | "over_shoulder"
+  | "birds_eye";
+
+export type CharacterPanelRole =
+  | "speaker"
+  | "listener"
+  | "background"
+  | "silhouette";
+
+export type OnScreenVia = "in_person" | "tv" | "photo" | "phone" | "voice_off";
+
+export type PanelEntities = {
+  characters: Array<{
+    /** bible.characters[].id への hard ref */
+    character_id: string;
+    role: CharacterPanelRole;
+    on_screen_via: OnScreenVia;
+    expression: string;
+  }>;
+  /** bible.locations[].id への hard ref */
+  location_id: string;
+  props: Array<{
+    prop_id: string;
+    held_by_character_id?: string;
+  }>;
+  /** この panel の主役 (character.id / location.id / prop.id) */
+  focus_entity_id: string;
+};
+
+export type PageRoleV2 =
+  | "opening_hook"
+  | "buildup"
+  | "reveal"
+  | "cliffhanger"
+  | "aftermath"
+  | "establishing"
+  | "dialogue"
+  | "action";
+
+export type PanelV2 = {
+  panel_id: string;
+  panel_no: number;
+  reading_order: number;
+  shot_type: ShotType;
+  camera: CameraType;
+  bleed: boolean;
+  silence: boolean;
+  importance: 1 | 2 | 3 | 4 | 5;
+  entities: PanelEntities;
+  action: string;
+  key_visual: string;
+  dialogue: Array<{ character_id: string; text: string }>;
+  monologue: Array<{ character_id: string; text: string }>;
+  narration: string[];
+  sfx: string[];
+  /** L6 Continuity Resolve で注入される */
+  continuity_group_ids?: string[];
+};
+
+export type StoryboardPageV2 = {
+  page_no: number;
+  page_role: PageRoleV2;
+  panels: PanelV2[];
+};
+
+export type EpisodeStoryboardV2 = {
+  schema_version: 2;
+  episode_id: string;
+  total_pages: number;
+  pages: StoryboardPageV2[];
+};
+
+// ============================================================
+// L5 出力: PagePlanV2
+// ============================================================
+
+export type RenderStrategy = "panel_composite" | "page_one_shot" | "hybrid";
+
+export type PagePlanPanel = {
+  panel_id: string;
+  slot_id: string;
+  rect: { x: number; y: number; w: number; h: number };
+  reading_order: number;
+  importance: 1 | 2 | 3 | 4 | 5;
+  /** L6 で注入 */
+  continuity_group_ids?: string[];
+};
+
+export type PagePlanPage = {
+  page_no: number;
+  layout_template_id: string;
+  page_role: PageRoleV2;
+  render_strategy: RenderStrategy;
+  panels: PagePlanPanel[];
+  /** F-2 page_one_shot 用 */
+  page_continuity_group_ids?: string[];
+};
+
+export type PagePlanV2 = {
+  schema_version: 2;
+  episode_id: string;
+  capability_profile_id: string;
+  pages: PagePlanPage[];
+};
+
+// ============================================================
+// L7 出力: ResolvedRefs
+// ============================================================
+
+export type RefRole =
+  | "style"
+  | "character_face"
+  | "character_full"
+  | "character_back"
+  | "character_outfit"
+  | "character_3view"
+  | "location"
+  | "prop"
+  | "continuity_anchor"
+  | "previous_panel"
+  | "negative";
+
+export type RefSource =
+  | "deterministic"
+  | "continuity_forced"
+  | "llm_judged"
+  | "repair_forced";
+
+export type ResolvedRef = {
+  asset_id: string;
+  path: string;
+  weight: number; // 0.0-1.0 (capability で weighting 不可なら 1.0 固定)
+  role: RefRole;
+  target_entity_id?: string;
+  source: RefSource;
+  rationale: string;
+};
+
+export type ResolvedRefPacket = {
+  scope: "panel" | "page";
+  refs: ResolvedRef[];
+  budget: { max: number; optimal: number; used: number };
+  truncated: boolean;
+  unresolved_entities: string[];
+  warnings: string[];
+};
+
+export type ResolvedRefs = {
+  schema_version: 1;
+  episode_id: string;
+  capability_profile_id: string;
+  render_strategy: RenderStrategy;
+  /** key = panel_id (or page_id when scope=page) */
+  packets: Record<string, ResolvedRefPacket>;
+};
+
+// ============================================================
+// L11 出力: AuditReport
+// ============================================================
+
+export type AuditCheckResult = {
+  panel_id: string;
+  check_kind:
+    | "face_consistency"
+    | "bubble_overlap"
+    | "continuity_anchor"
+    | "background_invariant"
+    | "regulation_violation";
+  passed: boolean;
+  score?: number;
+  threshold?: number;
+  detail?: string;
+};
+
+export type AuditReport = {
+  schema_version: 1;
+  episode_id: string;
+  audited_at: string;
+  panels_total: number;
+  panels_passed: number;
+  panels_failed: number;
+  checks: AuditCheckResult[];
+  failed_panel_ids: string[];
+};
+
+// ============================================================
+// L12 出力: RepairLog
+// ============================================================
+
+export type RepairAction =
+  | "regenerate_with_stronger_refs"
+  | "switch_render_strategy"
+  | "swap_to_silhouette"
+  | "rebuild_layout_slot"
+  | "manual_review_required";
+
+export type RepairAttempt = {
+  panel_id: string;
+  attempt_no: number;
+  triggered_by_check: string;
+  action: RepairAction;
+  rationale: string;
+  before_score?: number;
+  after_score?: number;
+  succeeded: boolean;
+};
+
+export type RepairLog = {
+  schema_version: 1;
+  episode_id: string;
+  attempts: RepairAttempt[];
+};
+
+// ============================================================
+// L13 出力: KdpMetadata
+// ============================================================
+
+export type KdpMetadata = {
+  schema_version: 1;
+  slug: string;
+  volume_no: number;
+  title: string;
+  subtitle?: string;
+  author_pen_name: string;
+  isbn?: string;
+  asin?: string;
+  bisac_categories: string[];
+  ai_disclosure_text: string;
+  page_count: number;
+  spine_width_mm: number;
+  publication_date: string;
+  manuscript_pdf_path: string;
+  cover_pdf_path: string;
+};
