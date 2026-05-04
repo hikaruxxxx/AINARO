@@ -7,8 +7,11 @@ SSoT: `~/.claude/plans/manga-pipeline-v2.md`
 
 ```
 ═══ PHASE 1: WORK SETUP (once / 作品) ═══
-L01 bible-snapshot       layers/L01-bible.ts        ← V2企画書 → bible/snapshot.json
-L02 bible-images         layers/L02-bible-images.ts ← snapshot → bible/refs/
+L01  bible-snapshot       layers/L01-bible.ts          ← V2企画書 → bible/snapshot.json
+L01b bible-lint           layers/L01b-bible-lint.ts    ← snapshot を 怠惰チェック (static + LLM judge) → lint_report.json
+L01c bible-deepen         layers/L01c-bible-deepen.ts  ← lint findings + 画風参考 → snapshot v2.1 (浅さ自動補完)
+L02  bible-images         layers/L02-bible-images.ts   ← snapshot → bible/refs/
+L02b volume-plot          layers/L02b-volume-plot.ts   ← bible + V2企画書 → volumes/v{NN}/plot.json + 各ep _brief.md 自動展開
 
 ═══ PHASE 2: EPISODE PLANNING (per ep) ═══
 L03 shotlist             layers/L03-shotlist.ts          ← bible + brief → shotlist
@@ -19,8 +22,9 @@ L07 refs-resolution      layers/L07-refs-resolution.ts   ← page_plan + bible/r
 L08 incremental-refs     layers/L08-incremental-refs.ts  ← resolved_refs.unresolved → bible/refs/_ep{N}/
 
 ═══ PHASE 3: RENDER (per ep) ═══
-L09 render               layers/L09-render.ts            ← page_plan + resolved_refs → renders/p{NN}.png
-L10 bubble               layers/L10-bubble.ts            ← renders + storyboard.dialogue → bubbles/p{NN}.png
+L09  render              layers/L09-render.ts            ← page_plan + resolved_refs → renders/p{NN}.png (panels + page_one_shot)
+L09b page-compose        layers/L09b-page-compose.ts     ← panel PNGs + page_plan rect → renders/p{NN}.png (panel_composite用)
+L10  bubble              layers/L10-bubble.ts            ← renders + storyboard.dialogue → bubbles/p{NN}.png
 L11 audit                layers/L11-audit.ts             ← bubbles + bible → audit.json
 L12 repair               layers/L12-repair.ts            ← audit.failed → re-run L9-L10
 

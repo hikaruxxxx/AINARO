@@ -59,12 +59,19 @@ function parseArgs(): Args {
   return a as Args;
 }
 
-const ALL_LAYERS = ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13"] as const;
+const ALL_LAYERS = [
+  "L01", "L01b", "L01c", "L02", "L02b",
+  "L03", "L04", "L05", "L06", "L07", "L08",
+  "L09", "L09b", "L10", "L11", "L12", "L13",
+] as const;
 type LayerId = (typeof ALL_LAYERS)[number];
 
 const LAYER_SCRIPT: Record<LayerId, string> = {
   L01: "scripts/manga/layers/L01-bible.ts",
+  L01b: "scripts/manga/layers/L01b-bible-lint.ts",
+  L01c: "scripts/manga/layers/L01c-bible-deepen.ts",
   L02: "scripts/manga/layers/L02-bible-images.ts",
+  L02b: "scripts/manga/layers/L02b-volume-plot.ts",
   L03: "scripts/manga/layers/L03-shotlist.ts",
   L04: "scripts/manga/layers/L04-storyboard.ts",
   L05: "scripts/manga/layers/L05-page-director.ts",
@@ -72,6 +79,7 @@ const LAYER_SCRIPT: Record<LayerId, string> = {
   L07: "scripts/manga/layers/L07-refs-resolution.ts",
   L08: "scripts/manga/layers/L08-incremental-refs.ts",
   L09: "scripts/manga/layers/L09-render.ts",
+  L09b: "scripts/manga/layers/L09b-page-compose.ts",
   L10: "scripts/manga/layers/L10-bubble.ts",
   L11: "scripts/manga/layers/L11-audit.ts",
   L12: "scripts/manga/layers/L12-repair.ts",
@@ -79,8 +87,8 @@ const LAYER_SCRIPT: Record<LayerId, string> = {
 };
 
 function workScopeForLayer(l: LayerId): "work" | "episode" | "volume" {
-  if (l === "L01" || l === "L02") return "work";
-  if (l === "L13") return "volume";
+  if (l === "L01" || l === "L01b" || l === "L01c" || l === "L02") return "work";
+  if (l === "L02b" || l === "L13") return "volume";
   return "episode";
 }
 
@@ -93,14 +101,24 @@ function buildLayerArgs(layer: LayerId, args: Args): string[] {
   }
   if (scope === "volume") {
     if (!args.volume) throw new Error(`${layer}: --volume required`);
-    if (!args.episodes) throw new Error(`${layer}: --episodes required`);
     base.push("--volume", String(args.volume));
-    base.push("--episodes", args.episodes.join(","));
-    if (args.authorPenName) base.push("--author", args.authorPenName);
-    if (args.publicationDate) base.push("--publication-date", args.publicationDate);
+    if (layer === "L13") {
+      if (!args.episodes) throw new Error("L13: --episodes required");
+      base.push("--episodes", args.episodes.join(","));
+      if (args.authorPenName) base.push("--author", args.authorPenName);
+      if (args.publicationDate) base.push("--publication-date", args.publicationDate);
+    }
+    if (layer === "L02b") {
+      if (!args.conceptPath) throw new Error("L02b: --concept required");
+      base.push("--concept", args.conceptPath);
+    }
   }
   if (layer === "L01") {
     if (!args.conceptPath) throw new Error("L01: --concept required");
+    base.push("--concept", args.conceptPath);
+  }
+  if (layer === "L01c") {
+    if (!args.conceptPath) throw new Error("L01c: --concept required");
     base.push("--concept", args.conceptPath);
   }
   if (layer === "L03") {
@@ -127,10 +145,13 @@ function selectLayers(args: Args): LayerId[] {
   if (fromIdx < 0 || toIdx < 0) throw new Error("invalid --from or --to layer id");
   // L13 は volume scope なので明示指定がない限り含めない
   const layers = ALL_LAYERS.slice(fromIdx, toIdx + 1).filter((l) => {
-    if (l === "L13" && !args.volume) return false;
+    if (l === "L13" && (!args.volume || !args.episodes)) return false;
+    if (l === "L02b" && (!args.volume || !args.conceptPath)) return false;
     if (l === "L01" && !args.conceptPath && !args.layer && args.from !== "L01") return false;
+    if (l === "L01c" && !args.conceptPath && !args.layer && args.from !== "L01c") return false;
     if (l === "L03" && !args.briefFile && !args.layer && args.from !== "L03") return false;
     if (l === "L08") return false; // L08 は L07 で unresolved があれば手動で
+    if (l === "L09b") return false; // L09b は L09 から自動連鎖、orchestrator では明示指定時のみ
     return true;
   });
   return layers;
