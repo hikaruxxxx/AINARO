@@ -382,7 +382,12 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
     }
 
     function renderCompare() {
-      // Phase D で実装。Phase A 時点では「Grid に戻ってください」表示
+      // L13 は bubble overlay 済みの画像を入稿 manuscript に使うので、
+      // 比較・採用は bubbles レイヤでのみ可能。renders タブで採用ボタンを隠す。
+      if (state.layer !== 'bubbles') {
+        main.innerHTML = '<div class="empty">採用は Bubbles レイヤでのみ可能です。<br>上部 nav の <strong>Bubbles</strong> ボタンに切り替えてください。</div>';
+        return;
+      }
       const versions = buildVersionMap(state.layer);
       const items = [];
       for (const [panelId, vs] of versions.entries()) {
