@@ -57,15 +57,18 @@ function buildTask(args: {
     args.referenceImagePaths && args.referenceImagePaths.length > 0
       ? [
           "",
-          "## 参照画像（一貫性のため必ず内容と画風を踏襲）",
-          ...args.referenceImagePaths.map((p, i) => `${i + 1}. \`${p}\``),
+          "## 参照画像（このプロンプトに添付済み = `-i` でマルチモーダル入力されている）",
+          `添付された ${args.referenceImagePaths.length} 枚の画像を **必ず** \`image_gen\` ツールの reference として使い、`,
+          "キャラの顔・髪型・衣装・ロケのレイアウト・プロップのデザイン・画風(線/トーン)を一致させること。",
+          "添付順とロール対応:",
+          ...args.referenceImagePaths.map((p, i) => `  ${i + 1}. \`${p}\``),
         ].join("\n")
       : "";
 
   return [
     "次のタスクを実行してください。報告は最小限で構いません。",
     "",
-    "1. `image_gen` ツールを使って下記の英語プロンプトで画像を1枚生成する。",
+    "1. `image_gen` ツールを使って下記の英語プロンプトで画像を1枚生成する。**添付画像を reference として image_gen に必ず渡すこと**。",
     `2. サイズは ${args.size.width}x${args.size.height} ピクセル。`,
     `3. 生成した画像を必ず次の絶対パスに保存する: \`${args.outputPath}\``,
     "4. 保存後、ファイルが実際に存在しサイズが 50KB 以上あることを `ls -la` で確認する。",
@@ -85,16 +88,26 @@ async function runCodexOnce(opts: {
   task: string;
   cwd: string;
   timeoutMs: number;
+  referenceImagePaths?: string[];
 }): Promise<{ stdout: string; stderr: string; exitCode: number | null }> {
   return new Promise((resolve, reject) => {
-    const args = [
+    // codex CLI 0.125+ では cwd が git repo であっても session 経由で
+    // "Not inside a trusted directory" を返すケースがあるため、
+    // 明示的に --skip-git-repo-check を渡す (Pro 定額枠で課金ゼロ、安全)。
+    const args: string[] = [
       "exec",
       "--sandbox",
       "workspace-write",
+      "--skip-git-repo-check",
       "--cd",
       opts.cwd,
-      "-",
     ];
+    // -i FILE で参照画像をマルチモーダル添付。codex agent (gpt-5.5) が
+    // image_gen ツールに reference として渡すよう prompt 内で明示。
+    for (const p of opts.referenceImagePaths ?? []) {
+      args.push("-i", p);
+    }
+    args.push("-");
 
     const child = spawn("codex", args, {
       cwd: opts.cwd,
@@ -158,6 +171,7 @@ export async function generateMangaImage(
         task,
         cwd,
         timeoutMs,
+        referenceImagePaths: options.referenceImagePaths,
       });
 
       if (exitCode !== 0) {
