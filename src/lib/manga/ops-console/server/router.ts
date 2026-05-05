@@ -25,6 +25,7 @@ import {
   handleAdoptedGet,
   handleAdoptedPost,
 } from "./handlers/adopted-versions";
+import { handleBootstrap } from "./handlers/bootstrap";
 import { handleWorkEpisodes, handleWorksList } from "./handlers/works";
 
 export type RouterDefaults = {
@@ -99,6 +100,11 @@ export async function handleApi(
   defaults: RouterDefaults
 ): Promise<void> {
   const p = url.pathname;
+
+  if (p === "/api/bootstrap") {
+    if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+    return handleBootstrap(defaults, res);
+  }
 
   // ===== works enumerate (Phase 1 で新規追加、scope check 不要) =====
   if (p === "/api/works") {

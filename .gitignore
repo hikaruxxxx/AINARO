@@ -19,6 +19,7 @@
 
 # production
 /build
+/dist/ops-console/
 
 # misc
 .DS_Store

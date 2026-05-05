@@ -22,6 +22,12 @@ import { isValidSlug } from "../lib/path-guards";
 
 const EXCLUDED_TOP = new Set(["archive", "node_modules"]);
 
+export type WorkInfo = {
+  slug: string;
+  title: string | null;
+  episodes: number[];
+};
+
 async function readDirEntriesSafe(
   dir: string
 ): Promise<Array<{ name: string; isDirectory: boolean }>> {
@@ -75,14 +81,18 @@ async function readTitle(slug: string): Promise<string | null> {
   return null;
 }
 
-export async function handleWorksList(res: http.ServerResponse): Promise<void> {
+export async function listWorksInfo(): Promise<WorkInfo[]> {
   const slugs = await listSlugs();
-  const works = await Promise.all(
+  return Promise.all(
     slugs.map(async (slug) => {
       const [title, episodes] = await Promise.all([readTitle(slug), listEpisodesForSlug(slug)]);
       return { slug, title, episodes };
     })
   );
+}
+
+export async function handleWorksList(res: http.ServerResponse): Promise<void> {
+  const works = await listWorksInfo();
   res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify({ works }));
 }

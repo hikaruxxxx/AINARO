@@ -6,8 +6,8 @@
  *
  * Phase 1 の互換ポリシー:
  *   - 旧 URL `/episodes/epNN/name/index.html` は引き続き 200
- *   - 旧 root `/` は revision UI HTML (serve-revision の挙動) を返す
- *   - 新 URL `/works/{slug}/episodes/epNN/...` は同じ root に redirect (Phase 2 で SPA 化)
+ *   - root `/` は Phase 2A の ops console shell を返す
+ *   - 新 URL `/works/{slug}/episodes/epNN/` は SPA shell を返す
  *   - 新 API `/api/works`, `/api/works/{slug}/episodes` を追加 (UI 用 enumerate)
  *   - scope は起動引数 --slug --episode で固定 (Phase 2 で複数 slug 横断を解禁予定)
  *
@@ -27,6 +27,8 @@ import {
 } from "./layers/_paths";
 import { handleApi } from "../../src/lib/manga/ops-console/server/router";
 import { serveStatic } from "../../src/lib/manga/ops-console/server/static";
+import { renderOpsConsoleShellHtml } from "../../src/lib/manga/ops-console/index-html";
+import { buildOpsConsoleClient } from "../../src/lib/manga/ops-console/web/build";
 import { renderRevisionUiHtml } from "../../src/lib/manga/revision-ui/index-html";
 import { isValidEpisode, isValidSlug } from "../../src/lib/manga/ops-console/server/lib/path-guards";
 import type { EpisodeStoryboardV2 } from "../../src/lib/manga/schemas-v2";
@@ -86,6 +88,13 @@ function maybeOpenBrowser(url: string): void {
 
 async function main() {
   const args = parseArgs();
+  let clientBuild: { outFile: string };
+  try {
+    clientBuild = await buildOpsConsoleClient({ outDir: "dist/ops-console" });
+  } catch (e) {
+    console.error("[serve-ops] client build failed:", e);
+    process.exit(1);
+  }
   if (!isValidSlug(args.slug)) {
     throw new Error(`invalid slug "${args.slug}": must match /^[a-z0-9][a-z0-9_-]*$/`);
   }
@@ -103,10 +112,12 @@ async function main() {
     );
   }
 
-  // 旧 serve-revision の root index (revision UI HTML) を準備
+  // 旧 serve-revision の HTML は Phase 2A では逃げ道として残す。
   const sb = await loadJsonOpt<EpisodeStoryboardV2>(storyboardPath(args.slug, args.episode));
   const episodeId = sb?.episode_id ?? `${args.slug}-ep${String(args.episode).padStart(2, "0")}`;
   const revisionIndexHtml = renderRevisionUiHtml(args.slug, args.episode, episodeId);
+  const opsShellHtml = renderOpsConsoleShellHtml();
+  const opsDistRoot = path.resolve(process.cwd(), "dist/ops-console");
 
   const server = http.createServer(async (req, res) => {
     if (!req.url) {
@@ -130,17 +141,23 @@ async function main() {
       return;
     }
 
-    // 静的配信: 二系統の root を提供
-    //   - `/` → revision UI HTML (旧 serve-revision 互換)
+    // 静的配信: 三系統の root を提供
+    //   - `/`, `/works/{slug}/episodes/epNN/` → ops console shell
+    //   - `/_ops/*` → esbuild bundle
+    //   - `/legacy-revision` → revision UI HTML (Phase 2B までの逃げ道)
     //   - `/episodes/...`, その他 → workDir(slug) 配下 (旧 serve-name 互換)
-    //   - `/works/{slug}/episodes/.../path` → Phase 1 では default scope のみ受けて
-    //     workDir(slug) の相対 path に redirect (Phase 2 で SPA 化)
+    //   - `/works/{slug}/episodes/.../path` → default scope のみ legacy static に解決
     await serveStatic(req, res, url, {
       rootIndex: (p) => {
-        if (p === "/" || p === "") return revisionIndexHtml;
+        if (p === "/" || p === "") return opsShellHtml;
+        if (p === "/legacy-revision") return revisionIndexHtml;
+        if (p.match(/^\/works\/[^/]+\/episodes\/ep\d+\/?$/)) return opsShellHtml;
         return null;
       },
       resolveRoot: (p) => {
+        if (p.startsWith("/_ops/")) {
+          return { root: opsDistRoot, subPath: p.slice("/_ops".length) };
+        }
         // Phase 1: /works/{slug}/episodes/epNN/path をサポート、default scope のみ通す
         const m = p.match(/^\/works\/([^/]+)\/episodes\/(ep\d+)(\/.*)?$/);
         if (m) {
@@ -176,10 +193,15 @@ async function main() {
 
   server.listen(args.port, () => {
     const nameUrl = `http://localhost:${args.port}/episodes/ep${String(args.episode).padStart(2, "0")}/name/index.html`;
+    const consoleUrl = `http://localhost:${args.port}/`;
+    const scopedUrl = `http://localhost:${args.port}/works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/`;
     console.log(`[serve-ops] root=${root} slug=${args.slug} ep=${args.episode}`);
+    console.log(`[serve-ops] client bundle: ${clientBuild.outFile}`);
+    console.log(`[serve-ops] console: ${consoleUrl}`);
+    console.log(`[serve-ops] console scope: ${scopedUrl}`);
     console.log(`[serve-ops] name preview: ${nameUrl}`);
-    console.log(`[serve-ops] revision UI:  http://localhost:${args.port}/`);
-    if (args.openBrowser) maybeOpenBrowser(nameUrl);
+    console.log(`[serve-ops] revision UI:  http://localhost:${args.port}/legacy-revision`);
+    if (args.openBrowser) maybeOpenBrowser(consoleUrl);
   });
 
   process.on("SIGINT", () => {
