@@ -20,6 +20,7 @@ import {
   resolvedRefsPath,
   rendersDir,
   nameApprovalPath,
+  revisionQueuePath,
 } from "./_paths";
 import { generateMangaImage } from "../../../src/lib/manga/generate/codex-image";
 import { composePagePrompt, composePanelPrompt } from "../../../src/lib/manga/render-v2/prompt-composer-v2";
@@ -30,7 +31,8 @@ import type {
   ResolvedRefs,
 } from "../../../src/lib/manga/schemas-v2";
 import type { NameApproval } from "../../../src/lib/manga/name-preview/types";
-import { appendRenderManifest } from "../../../src/lib/manga/revision-ui/manifest";
+import { appendRenderManifest, readJsonl } from "../../../src/lib/manga/revision-ui/manifest";
+import type { RevisionEntry } from "../../../src/lib/manga/revision-ui/types";
 
 /**
  * workdir 起点の相対パスを返す (manifest に格納する用)。
@@ -43,10 +45,25 @@ function workdirRelative(slug: string, absPath: string): string {
   return abs;
 }
 
-type Args = { slug: string; episode: number; pages?: number[]; concurrency: number; skipNameGate: boolean };
+type Args = {
+  slug: string;
+  episode: number;
+  pages?: number[];
+  concurrency: number;
+  skipNameGate: boolean;
+  /** Phase C: 出力 version。"v1" は既存命名 (p{NN}.png)、v2+ は p{NN}_vN.png */
+  version: string;
+  /**
+   * Phase C: revision queue から userInstructions を引くための panel_id (or page_${N})。
+   * 単一 panel 再走モード。--revision-id とどちらか一方を使う。
+   */
+  panelId?: string;
+  /** Phase C: revision_queue.jsonl から id 一致 entry の userInstructions を使う */
+  revisionId?: string;
+};
 
 function parseArgs(): Args {
-  const a: Partial<Args> = { concurrency: 2, skipNameGate: false };
+  const a: Partial<Args> = { concurrency: 2, skipNameGate: false, version: "v1" };
   const argv = process.argv.slice(2);
   const BOOLEAN_FLAGS = new Set(["skip-name-gate"]);
   for (let i = 0; i < argv.length; i++) {
@@ -64,7 +81,6 @@ function parseArgs(): Args {
         if (key === "skip-name-gate") a.skipNameGate = true;
         continue;
       }
-      // 次 token が `--` で始まるなら値ではなくフラグ
       const nextToken = argv[i + 1];
       if (i + 1 >= argv.length || (nextToken && nextToken.startsWith("--"))) continue;
       val = nextToken;
@@ -75,9 +91,33 @@ function parseArgs(): Args {
     else if (key === "episode") a.episode = Number(val);
     else if (key === "pages") a.pages = val.split(",").map((s) => Number(s));
     else if (key === "concurrency") a.concurrency = Number(val);
+    else if (key === "version") a.version = val;
+    else if (key === "panel-id") a.panelId = val;
+    else if (key === "revision-id") a.revisionId = val;
   }
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
+  if (a.version && !/^v\d+$/.test(a.version)) throw new Error(`--version must be vN (got ${a.version})`);
   return a as Args;
+}
+
+/** v1 → p{NN}.png、v2+ → p{NN}_vN.png */
+function renderOutPath(slug: string, episode: number, pageNo: number, version: string): string {
+  const pn = String(pageNo).padStart(2, "0");
+  if (version === "v1") return path.join(rendersDir(slug, episode), `p${pn}.png`);
+  return path.join(rendersDir(slug, episode), `p${pn}_${version}.png`);
+}
+
+function panelOutPath(slug: string, episode: number, pageNo: number, readingOrder: number, version: string): string {
+  const pn = String(pageNo).padStart(2, "0");
+  const ro = String(readingOrder).padStart(2, "0");
+  if (version === "v1") return path.join(rendersDir(slug, episode), `p${pn}_panel_${ro}.png`);
+  return path.join(rendersDir(slug, episode), `p${pn}_panel_${ro}_${version}.png`);
+}
+
+/** revision_queue から指示文を組み立てる (tag を文字列化して prepend) */
+function buildUserInstructions(entry: RevisionEntry): string {
+  const tagStr = entry.checked_tags.length > 0 ? `[tags: ${entry.checked_tags.join(", ")}] ` : "";
+  return `${tagStr}${entry.instruction}`.trim();
 }
 
 /**
@@ -143,9 +183,23 @@ async function main() {
 
   await fs.mkdir(rendersDir(args.slug, args.episode), { recursive: true });
 
+  // Phase C: revision-id 指定時は queue から userInstructions を取得して single-panel 経路へ
+  let revisionEntry: RevisionEntry | null = null;
+  if (args.revisionId) {
+    const queue = await readJsonl<RevisionEntry>(revisionQueuePath(args.slug, args.episode));
+    revisionEntry = queue.find((e) => e.id === args.revisionId) ?? null;
+    if (!revisionEntry) {
+      console.error(`[L09] --revision-id ${args.revisionId} not found in queue`);
+      process.exit(5);
+    }
+    console.log(`[L09] revision ${args.revisionId.slice(0, 8)}: panel=${revisionEntry.panel_id} version=${args.version}`);
+  }
+
   // Name gate: name_approval.json を読み、approved 以外は除外
+  // ただし revisionId 指定時は人間判定済みの再走なので gate skip 扱い (UI 側の judgement を信頼)
+  const skipGate = args.skipNameGate || !!revisionEntry;
   const approval = await loadNameApproval(args.slug, args.episode);
-  if (!approval && !args.skipNameGate) {
+  if (!approval && !skipGate) {
     console.error(`[L09] name_approval.json not found at ${nameApprovalPath(args.slug, args.episode)}`);
     console.error(`[L09] Run L8.5 + serve-name to approve, or pass --skip-name-gate to bypass.`);
     process.exit(3);
@@ -156,7 +210,7 @@ async function main() {
   const { renderable, gatedOut } = applyNameGate(
     candidatePages.map((p) => p.page_no),
     approval,
-    args.skipNameGate
+    skipGate
   );
   if (args.skipNameGate) {
     console.warn(`[L09] WARNING: --skip-name-gate active, name_approval.json bypassed`);
@@ -180,14 +234,21 @@ async function main() {
     const sbPage = sbPagesByNo.get(page.page_no);
     if (!sbPage) { failed++; return; }
 
-    const outPath = path.join(rendersDir(args.slug, args.episode), `p${String(page.page_no).padStart(2, "0")}.png`);
-    if (await existsAndNonEmpty(outPath)) { console.log(`[L09] SKIP p${page.page_no}`); skipped++; return; }
+    const outPath = renderOutPath(args.slug, args.episode, page.page_no, args.version);
+    if (await existsAndNonEmpty(outPath)) { console.log(`[L09] SKIP p${page.page_no} (${args.version})`); skipped++; return; }
+
+    // 修正指示 UI から渡された userInstructions (panel/page スコープ問わず prompt に inject)
+    const userInstructions = revisionEntry ? buildUserInstructions(revisionEntry) : undefined;
+    // revisionEntry が page_one_shot 単位 (panel_id="page_N") か panel 単位かでスコープを分岐
+    const revisionTargetsThisPage = !revisionEntry || revisionEntry.page_no === page.page_no;
+    if (!revisionTargetsThisPage) { skipped++; return; }
 
     if (page.render_strategy === "page_one_shot") {
       const packet = resolved.packets[`page_${page.page_no}`];
       if (!packet) { console.warn(`[L09] missing packet for page_${page.page_no}`); failed++; return; }
       const { prompt, refImagePaths } = composePagePrompt({
         page: sbPage, packet, bible, pageDimensions: { width: 1748, height: 2480 },
+        userInstructions,
       });
       try {
         console.log(`[L09] gen p${page.page_no} (page_one_shot, refs=${refImagePaths.length})`);
@@ -198,7 +259,7 @@ async function main() {
           prompt, outputPath: tmpPath,
           size: { width: 1024, height: 1536 },
           referenceImagePaths: refImagePaths,
-          timeoutMs: 8 * 60 * 1000,
+          timeoutMs: 15 * 60 * 1000,
           maxRetries: 1,
         });
         await sharp(tmpPath)
@@ -206,7 +267,6 @@ async function main() {
           .png()
           .toFile(outPath);
         try { await fs.unlink(tmpPath); } catch {}
-        // 修正指示 UI 用の generation manifest 追記 (page_one_shot は panel_id を `page_${N}` で記録)
         await appendRenderManifest({
           schema_version: 1,
           ts: new Date().toISOString(),
@@ -214,14 +274,15 @@ async function main() {
           episode: args.episode,
           page_no: page.page_no,
           panel_id: `page_${page.page_no}`,
-          version: "v1",
+          version: args.version,
           layer: "render",
           image_path: workdirRelative(args.slug, outPath),
           render_strategy: "page_one_shot",
-          origin: "initial",
+          origin: revisionEntry ? "revision_queue" : "initial",
+          triggered_by_revision_id: revisionEntry?.id,
         });
         done++;
-        console.log(`[L09] DONE p${page.page_no}`);
+        console.log(`[L09] DONE p${page.page_no} (${args.version})`);
       } catch (e) {
         console.warn(`[L09] FAIL p${page.page_no}: ${(e as Error).message}`);
         failed++;
@@ -229,9 +290,12 @@ async function main() {
     } else {
       // panel_composite: 各パネルを生成 → 後で合成 (本 MVP では先に panels 生成だけ実施、合成は別 layer 想定)
       console.warn(`[L09] panel_composite scope: page ${page.page_no} – panels generated separately, composition not yet implemented in v2 MVP`);
-      // 各 panel を生成 (scope=panel)
-      for (const pp of page.panels) {
-        const panelOut = path.join(rendersDir(args.slug, args.episode), `p${String(page.page_no).padStart(2, "0")}_panel_${String(pp.reading_order).padStart(2, "0")}.png`);
+      // revisionEntry が特定 panel を狙う場合、その panel のみ生成
+      const targetPanels = revisionEntry && revisionEntry.panel_id !== `page_${page.page_no}`
+        ? page.panels.filter((pp) => pp.panel_id === revisionEntry!.panel_id)
+        : page.panels;
+      for (const pp of targetPanels) {
+        const panelOut = panelOutPath(args.slug, args.episode, page.page_no, pp.reading_order, args.version);
         if (await existsAndNonEmpty(panelOut)) { skipped++; continue; }
         const sbPanel = sbPage.panels.find((x) => x.panel_id === pp.panel_id);
         if (!sbPanel) { failed++; continue; }
@@ -239,14 +303,15 @@ async function main() {
         if (!packet) { failed++; continue; }
         const { prompt, refImagePaths } = composePanelPrompt({
           panel: sbPanel, packet, bible, pageDimensions: { width: pp.rect.w, height: pp.rect.h },
+          userInstructions,
         });
         try {
-          console.log(`[L09] gen p${page.page_no}/panel#${pp.reading_order}`);
+          console.log(`[L09] gen p${page.page_no}/panel#${pp.reading_order} (${args.version})`);
           await generateMangaImage({
             prompt, outputPath: panelOut,
             size: { width: 1024, height: 1536 },
             referenceImagePaths: refImagePaths,
-            timeoutMs: 6 * 60 * 1000, maxRetries: 1,
+            timeoutMs: 15 * 60 * 1000, maxRetries: 1,
           });
           await appendRenderManifest({
             schema_version: 1,
@@ -255,11 +320,12 @@ async function main() {
             episode: args.episode,
             page_no: page.page_no,
             panel_id: pp.panel_id,
-            version: "v1",
+            version: args.version,
             layer: "render",
             image_path: workdirRelative(args.slug, panelOut),
             render_strategy: "panel_composite",
-            origin: "initial",
+            origin: revisionEntry ? "revision_queue" : "initial",
+            triggered_by_revision_id: revisionEntry?.id,
           });
           done++;
         } catch (e) { console.warn(`[L09] FAIL panel ${pp.panel_id}: ${(e as Error).message}`); failed++; }

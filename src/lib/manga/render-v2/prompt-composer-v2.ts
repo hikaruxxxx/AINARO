@@ -22,7 +22,21 @@ type ComposeArgs = {
   packet: ResolvedRefPacket;
   bible: BibleSnapshotV2;
   pageDimensions: { width: number; height: number };
+  /**
+   * Phase C: 修正指示 UI から渡されるユーザー追加指示。
+   * 指定時は negatives 直前に "ADDITIONAL DIRECTIVE FROM EDITOR" として注入。
+   * 既存 prompt 構造には影響しないので、未指定時は v2 出力と完全一致。
+   */
+  userInstructions?: string;
 };
+
+function userInstructionsBlock(s: string | undefined): string | null {
+  if (!s || !s.trim()) return null;
+  return [
+    "## ADDITIONAL DIRECTIVE FROM EDITOR (override conflicting defaults above):",
+    s.trim(),
+  ].join("\n");
+}
 
 function characterRefDescription(panel: PanelV2, bible: BibleSnapshotV2): string {
   const lines: string[] = [];
@@ -89,6 +103,7 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     "",
     "MUST PRESERVE invariants from continuity refs (face geometry, outfit details, location layout). Match line weight and screentone density of refs.",
     "",
+    userInstructionsBlock(args.userInstructions),
     negativesBlock(),
   ];
 
@@ -135,6 +150,7 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     "",
     "MUST PRESERVE invariants from continuity refs across all panels of this page (same character face/outfit, same location layout).",
     "",
+    userInstructionsBlock(args.userInstructions),
     negativesBlock(),
   ];
 

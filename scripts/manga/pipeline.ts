@@ -22,6 +22,8 @@ type Args = {
   force?: boolean;
   /** L09 の name gate を bypass する。L09 layer 実行時のみ forward される */
   skipNameGate?: boolean;
+  /** L12 の revision-queue モード。L12 起動時のみ forward */
+  revisionQueue?: boolean;
   conceptPath?: string;
   briefFile?: string;
   episodes?: number[];
@@ -30,7 +32,7 @@ type Args = {
 };
 
 /** boolean flags: 値を取らない */
-const BOOLEAN_FLAGS = new Set(["force", "skip-name-gate"]);
+const BOOLEAN_FLAGS = new Set(["force", "skip-name-gate", "revision-queue"]);
 
 function parseArgs(): Args {
   const a: Partial<Args> = {};
@@ -50,6 +52,7 @@ function parseArgs(): Args {
       if (BOOLEAN_FLAGS.has(key)) {
         if (key === "force") a.force = true;
         else if (key === "skip-name-gate") a.skipNameGate = true;
+        else if (key === "revision-queue") a.revisionQueue = true;
         continue;
       }
       // 次 token が `--` で始まるなら値ではなくフラグ → スキップ
@@ -147,6 +150,10 @@ function buildLayerArgs(layer: LayerId, args: Args): string[] {
   // L09 のみ name gate bypass フラグを forward
   if (layer === "L09" && args.skipNameGate) {
     base.push("--skip-name-gate");
+  }
+  // L12 のみ revision-queue モードを forward
+  if (layer === "L12" && args.revisionQueue) {
+    base.push("--revision-queue");
   }
   return base;
 }
