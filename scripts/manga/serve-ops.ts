@@ -155,6 +155,25 @@ async function main() {
     });
   });
 
+  // listen 失敗 (主に EADDRINUSE) を意味のあるメッセージに置換する。
+  // shim 経由 (serve-name.ts / serve-revision.ts) でも同じパスを通るため、
+  // ここで一度補足しておけば全 entry で挙動が揃う。
+  server.on("error", (err) => {
+    const e = err as NodeJS.ErrnoException;
+    if (e.code === "EADDRINUSE") {
+      console.error(
+        `[serve-ops] port ${args.port} は既に使用されています。` +
+          `別の serve-ops / serve-name / serve-revision インスタンスが起動していないか確認してください。\n` +
+          `  既に ops console が立っている場合: http://localhost:${args.port}/`
+      );
+    } else if (e.code === "EACCES") {
+      console.error(`[serve-ops] port ${args.port} の bind が権限不足で拒否されました (EACCES)`);
+    } else {
+      console.error("[serve-ops] server error:", err);
+    }
+    process.exit(1);
+  });
+
   server.listen(args.port, () => {
     const nameUrl = `http://localhost:${args.port}/episodes/ep${String(args.episode).padStart(2, "0")}/name/index.html`;
     console.log(`[serve-ops] root=${root} slug=${args.slug} ep=${args.episode}`);
