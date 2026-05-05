@@ -21,15 +21,11 @@ import type {
   StoryboardPageV2,
 } from "../schemas-v2";
 import { estimateBlocking, type EstimatedBlocking } from "./blocking-estimator";
+import { auditPage, findingsToWarnings, type AuditFinding } from "./audit-rules";
 import type { NameWarning } from "./types";
 
 const PAGE_W = 1748;
 const PAGE_H = 2480;
-
-// 警告閾値
-const DIALOGUE_OVERFLOW_CHARS = 60; // パネル内合計文字数 (台詞+モノローグ+ナレーション)
-const PANEL_OVERCROWD = 7; // 1ページあたりのコマ数
-const SHOT_REPETITION_RUN = 3; // 同一 shot_type が連続するコマ数
 
 export type RenderPageInput = {
   slug: string;
@@ -38,11 +34,14 @@ export type RenderPageInput = {
   storyboardPage: StoryboardPageV2;
   bible: BibleSnapshotV2;
   refsExists: (relPath: string) => boolean;
+  /** 事前に計算した audit findings (省略時は内部で計算) */
+  findings?: AuditFinding[];
 };
 
 export type RenderPageResult = {
   svg: string;
   warnings: NameWarning[];
+  findings: AuditFinding[];
 };
 
 function escapeXml(s: string): string {
@@ -112,83 +111,7 @@ function characterFaceHref(
   return `../../../${encodeURI(fromWorkRoot)}`;
 }
 
-function detectWarnings(
-  page: StoryboardPageV2,
-  pagePlanPage: PagePlanPage,
-  refsExists: (relPath: string) => boolean
-): NameWarning[] {
-  const warnings: NameWarning[] = [];
-
-  // panel_overcrowd
-  if (page.panels.length > PANEL_OVERCROWD) {
-    warnings.push({
-      page_no: page.page_no,
-      kind: "panel_overcrowd",
-      message: `コマ数 ${page.panels.length} (推奨上限 ${PANEL_OVERCROWD})`,
-    });
-  }
-
-  // shot_repetition: reading_order 順に同一 shot_type が SHOT_REPETITION_RUN 個以上連続
-  const sortedPanels = [...page.panels].sort((a, b) => a.reading_order - b.reading_order);
-  let runStart = 0;
-  for (let i = 1; i <= sortedPanels.length; i++) {
-    const prev = sortedPanels[i - 1];
-    const curr = sortedPanels[i];
-    if (curr && curr.shot_type === prev.shot_type) continue;
-    const runLen = i - runStart;
-    if (runLen >= SHOT_REPETITION_RUN) {
-      warnings.push({
-        page_no: page.page_no,
-        kind: "shot_repetition",
-        message: `${prev.shot_type} が ${runLen} コマ連続 (panels ${sortedPanels[runStart].panel_no}..${prev.panel_no})`,
-      });
-    }
-    runStart = i;
-  }
-
-  // panel ごとの警告
-  for (const panel of page.panels) {
-    const totalChars =
-      panel.dialogue.reduce((s, d) => s + d.text.length, 0) +
-      panel.monologue.reduce((s, m) => s + m.text.length, 0) +
-      panel.narration.reduce((s, n) => s + n.length, 0);
-    if (totalChars > DIALOGUE_OVERFLOW_CHARS) {
-      warnings.push({
-        page_no: page.page_no,
-        kind: "dialogue_overflow",
-        message: `panel#${panel.panel_no}: 文字数 ${totalChars} (推奨 ${DIALOGUE_OVERFLOW_CHARS})`,
-      });
-    }
-
-    // focus_entity_missing: focus が char_/loc_/prop_ 接頭辞でない or entities にいない
-    const focus = panel.entities.focus_entity_id;
-    const focusInChars = panel.entities.characters.some((c) => c.character_id === focus);
-    const focusIsLoc = focus === panel.entities.location_id;
-    const focusIsProp = panel.entities.props.some((p) => p.prop_id === focus);
-    if (!focusInChars && !focusIsLoc && !focusIsProp) {
-      warnings.push({
-        page_no: page.page_no,
-        kind: "focus_entity_missing",
-        message: `panel#${panel.panel_no}: focus_entity_id "${focus}" が entities に居ない`,
-      });
-    }
-
-    // ref_thumbnail_missing: 主要登場キャラの face_front.png が無い
-    for (const c of panel.entities.characters) {
-      const exists = refsExists(`bible/refs/characters/${c.character_id}/face_front.png`);
-      if (!exists) {
-        warnings.push({
-          page_no: page.page_no,
-          kind: "ref_thumbnail_missing",
-          message: `panel#${panel.panel_no}: ${c.character_id} の face_front.png 不在`,
-        });
-        break; // 同一 panel で複数出さない
-      }
-    }
-  }
-
-  return warnings;
-}
+// L8.6 audit-rules.ts に集約。本ファイルからは findings/warnings を受け取って描画するだけ。
 
 function renderPanel(
   panel: PanelV2,
@@ -346,7 +269,12 @@ function bubbleZoneRect(
 }
 
 export function renderPageSvg(input: RenderPageInput): RenderPageResult {
-  const warnings = detectWarnings(input.storyboardPage, input.pagePlanPage, input.refsExists);
+  const findings = input.findings ?? auditPage({
+    page: input.storyboardPage,
+    pagePlanPage: input.pagePlanPage,
+    refsExists: input.refsExists,
+  });
+  const warnings = findingsToWarnings(findings);
 
   const panelsByPanelId = new Map(input.storyboardPage.panels.map((p) => [p.panel_id, p]));
 
