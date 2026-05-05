@@ -68,3 +68,10 @@ __pycache__/
 /data/manga/works/*/episodes/*/_incremental_refs/
 /data/manga/works/*/volumes/*/kdp/*.pdf
 /data/manga/works/*/volumes/*/kdp/_colophon.png
+# Layer 入力 hash キャッシュ (SHA256 のみ、再生成可能)
+/data/manga/works/*/_cache/
+
+# 事業台帳 (B-1 Track D-2): 構造ドキュメント (README/_template) は
+# docs/business/ledger/ に配置し git 管理。
+# 実数値月次台帳と契約スキャンは data/business/ledger/ (/data/ で除外済) に
+# 置きローカル管理する。

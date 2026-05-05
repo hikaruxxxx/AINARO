@@ -44,6 +44,11 @@ import type {
   KdpMetadata,
   AiDisclosureFlags,
 } from "../../../src/lib/manga/schemas-v2";
+import {
+  KdpMetadataSchema,
+  WorkMetaJsonSchema,
+  parseOrThrow,
+} from "../../../src/lib/manga/schemas-v2.zod";
 
 type Args = {
   slug: string;
@@ -160,7 +165,9 @@ async function loadOptionalCoverBackPng(slug: string, vol: number, override?: st
 
 async function main() {
   const args = parseArgs();
-  const meta = JSON.parse(await fs.readFile(workMetaPath(args.slug), "utf-8"));
+  // C-1: meta.json を Zod で検証 (入力 fail-fast)
+  const metaRaw: unknown = JSON.parse(await fs.readFile(workMetaPath(args.slug), "utf-8"));
+  const meta = parseOrThrow(WorkMetaJsonSchema, metaRaw, `meta.json (${args.slug})`);
 
   await fs.mkdir(kdpDir(args.slug, args.volume), { recursive: true });
 
@@ -241,6 +248,8 @@ async function main() {
     manuscript_pdf_path: manuscriptPath,
     cover_pdf_path: coverPath,
   };
+  // C-1: metadata.json を Zod で fail-fast 検証してから書き出す
+  parseOrThrow(KdpMetadataSchema, metadata, `KdpMetadata (${args.slug} v${args.volume})`);
   const metadataPath = path.join(kdpDir(args.slug, args.volume), "metadata.json");
   await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
   console.log(`[L13] metadata.json: ${metadataPath}`);

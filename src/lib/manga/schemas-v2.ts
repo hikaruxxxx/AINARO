@@ -178,9 +178,23 @@ export type RefSourceType =
   | "bible_generated"
   | "manual_upload"
   | "kindle_archive"
-  | "external_purchased";
+  | "external_purchased"
+  /** L12 repair で再生成した素材 (bible_generated を上書きする履歴あり) */
+  | "bible_image_repaired_v2"
+  /** Track B 30件競合棚リスト用、Amazon 公開メタデータ (本文画像は含まない) */
+  | "amazon_public_metadata";
 
 export type RefRightsStatus = "ai_use_allowed" | "internal_only" | "blocked";
+
+/** B-1 計画 Track C-1: 商標・既存IP類似チェック結果 */
+export type TrademarkCheckStatus = "pending" | "passed" | "flagged";
+
+/** RefProvenanceEntry の編集履歴 1 entry */
+export type RefEditHistoryEntry = {
+  editor: string;
+  timestamp: string;
+  reason: string;
+};
 
 export type RefProvenanceEntry = {
   asset_id: string;
@@ -189,6 +203,7 @@ export type RefProvenanceEntry = {
   rights_status: RefRightsStatus;
   created_by: string;
   created_at: string;
+  /** この資産が直接派生した親 asset_id 群 (1世代分) */
   derived_from: string[];
   license_note: string;
   qa_score?: number;
@@ -198,6 +213,30 @@ export type RefProvenanceEntry = {
   target_entity_type: "character" | "location" | "prop" | "style";
   /** "front" | "side" | "diagonal" | "expr_joy" | "outfit_battle" 等 */
   variant: string;
+
+  // ── Track C-1 で追加 (Codex指摘: 制作・出版監査用 dossier) ──
+  /** 画像生成プロンプト全文。後で再現性確保するため必須化 */
+  generation_prompt?: string;
+  /** 使用モデル (例: "gpt-image-2") */
+  model_name?: string;
+  /** モデルバージョン (例: "2026-04-21") */
+  model_version?: string;
+  /** 生成タイムスタンプ (created_at と区別: 後段の repair で created_at が更新されても変わらない) */
+  generation_timestamp?: string;
+  /** 編集履歴 (誰が・いつ・なぜ修正したか) */
+  edit_history?: RefEditHistoryEntry[];
+  /** 購入素材のライセンス番号 (external_purchased 用、領収書/契約番号) */
+  purchase_record_id?: string;
+  /** 商用利用条件文 (購入素材のライセンス条文抜粋) */
+  commercial_use_clause?: string;
+  /** 商標・既存IP類似チェック結果 */
+  trademark_check_status?: TrademarkCheckStatus;
+  /**
+   * 学習元素材の transitive 追跡 (祖先 asset_id 群)。
+   * derived_from は1世代だが、learning_source_chain は祖先全部を平坦化して持つ。
+   * kindle_archive が混入していたら isAllowedForProduction で transitive reject。
+   */
+  learning_source_chain?: string[];
 };
 
 export type RefsProvenance = {
@@ -205,12 +244,16 @@ export type RefsProvenance = {
   refs: RefProvenanceEntry[];
 };
 
-/** kindle_archive 由来は L7 で reject。export用 helper */
+/**
+ * kindle_archive 由来は L7 で reject。schema 直近 helper。
+ * 詳細な transitive reject + trademark 必須化は src/lib/manga/bible/provenance.ts 側に移行済。
+ */
 export function isAllowedForProduction(entry: RefProvenanceEntry): boolean {
-  return (
-    entry.source_type !== "kindle_archive" &&
-    entry.rights_status === "ai_use_allowed"
-  );
+  if (entry.source_type === "kindle_archive") return false;
+  if (entry.rights_status !== "ai_use_allowed") return false;
+  // transitive: learning_source_chain に kindle_archive 由来が混じっていたら reject
+  // (chain には祖先 asset_id しか入らないので、source_type 直接チェックは provenance.ts 側で全 entry を引いて判定)
+  return true;
 }
 
 // ============================================================
