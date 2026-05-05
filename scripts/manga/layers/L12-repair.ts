@@ -11,7 +11,7 @@
  * 戦略制約: L12 に判定ロジックを入れない (戦略 §8)。version 計算は manifest.ts の純関数。
  */
 import "../_env";
-import { promises as fs } from "node:fs";
+import { promises as fs, openSync, closeSync, unlinkSync } from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import {
@@ -157,7 +157,52 @@ async function loadResolvedIds(args: Args): Promise<Set<string>> {
   return new Set(arr.map((e) => e.revision_id));
 }
 
+/**
+ * Codex review: episode-level lock で複数 process 同時起動を防ぐ。
+ * O_EXCL で lock ファイルを作成し、process exit 時に確実に削除する。
+ *
+ * lock file path: episodes/ep{NN}/_revision_queue.lock
+ * 既存ロックがあれば「他 process が処理中」エラーで exit 6。
+ */
+function acquireLock(slug: string, episode: number): { release: () => void } {
+  const lockPath = path.join(episodeDir(slug, episode), "_revision_queue.lock");
+  let fd: number;
+  try {
+    // wx = O_CREAT | O_EXCL — 既存なら fail
+    fd = openSync(lockPath, "wx");
+  } catch (e: any) {
+    if (e?.code === "EEXIST") {
+      throw new Error(
+        `[L12 revision-queue] lock exists at ${lockPath}. ` +
+        `他 process が処理中の可能性。手動削除前に process が動いていないことを確認。`
+      );
+    }
+    throw e;
+  }
+  closeSync(fd);
+  let released = false;
+  const release = () => {
+    if (released) return;
+    released = true;
+    try { unlinkSync(lockPath); } catch {}
+  };
+  // 異常終了時にも release
+  process.on("exit", release);
+  process.on("SIGINT", () => { release(); process.exit(130); });
+  process.on("SIGTERM", () => { release(); process.exit(143); });
+  return { release };
+}
+
 async function runRevisionQueueMode(args: Args): Promise<void> {
+  const lock = acquireLock(args.slug, args.episode);
+  try {
+    await runRevisionQueueModeInner(args);
+  } finally {
+    lock.release();
+  }
+}
+
+async function runRevisionQueueModeInner(args: Args): Promise<void> {
   const queue = await readJsonl<RevisionEntry>(revisionQueuePath(args.slug, args.episode));
   if (queue.length === 0) {
     console.log("[L12 revision-queue] queue is empty");
@@ -205,12 +250,13 @@ async function runRevisionQueueMode(args: Args): Promise<void> {
       continue;
     }
 
-    // L10 spawn (同 version で bubble overlay)
+    // L10 spawn (同 version で bubble overlay) — provenance 用 revision-id も渡す
     const l10Args = [
       "--slug", args.slug,
       "--episode", String(args.episode),
       "--pages", String(entry.page_no),
       "--version", renderVersion,
+      "--revision-id", entry.id,
     ];
     const l10Code = await spawnLayer("scripts/manga/layers/L10-bubble.ts", l10Args);
     if (l10Code !== 0) {

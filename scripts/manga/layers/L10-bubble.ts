@@ -30,6 +30,8 @@ type Args = {
   version: string;
   /** Phase C: 特定ページのみ処理 (queue 消化用) */
   pages?: number[];
+  /** Phase C: provenance 用 (revision_queue 由来時) */
+  revisionId?: string;
 };
 
 function parseArgs(): Args {
@@ -56,6 +58,7 @@ function parseArgs(): Args {
     else if (key === "episode") a.episode = Number(val);
     else if (key === "version") a.version = val;
     else if (key === "pages") a.pages = val.split(",").map((s) => Number(s));
+    else if (key === "revision-id") a.revisionId = val;
   }
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
   if (a.version && !/^v\d+$/.test(a.version)) throw new Error(`--version must be vN (got ${a.version})`);
@@ -106,6 +109,7 @@ async function main() {
       layer: "bubble",
       image_path: workdirRelative(args.slug, outPath),
       origin: args.version === "v1" ? "initial" : "revision_queue",
+      triggered_by_revision_id: args.revisionId,
     });
     console.log(`[L10] ${renderName}: overlaid=${r.overlaid} skipped=${r.skipped}`);
   }

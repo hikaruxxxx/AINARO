@@ -301,26 +301,31 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
         const panels = lookup.get(page.page_no) || [];
         const pageFailedCount = panels.filter(p => failed.has(p.panel_id)).length;
         const cards = [];
+        // 戦略 §6 / Codex review: page_one_shot は panel ごとの画像を持たないので、
+        // queue/adopted の key も page_(N) 形式に正規化する。これで manifest entry
+        // (panel_id="page_N") と一致し、L09 の nextVersion が正しく既存 v1 を見つけられる。
+        const pageStrategy = page.render_strategy;
+        const isPageOneShot = pageStrategy === 'page_one_shot';
+        const pageOneShotKey = 'page_' + page.page_no;
         for (const p of panels) {
-          const passFilters = checkFilters(p, failed, revised, adopted);
+          const queueKey = isPageOneShot ? pageOneShotKey : p.panel_id;
+          const passFilters = checkFilters(p, failed, revised, adopted, queueKey);
           if (!passFilters) continue;
-          const vs = versions.get(p.panel_id) || [];
-          const pageOneShotKey = 'page_' + page.page_no;
-          // page_one_shot 戦略の場合、panel ごとに画像を持たない → page 画像を panel ごとに表示
+          const vs = versions.get(queueKey) || versions.get(p.panel_id) || [];
           const pageVs = versions.get(pageOneShotKey) || [];
           const display = vs.length > 0 ? vs : pageVs;
           const latest = display[display.length - 1];
-          const adoptedChoice = adopted[p.panel_id] || adopted[pageOneShotKey];
+          const adoptedChoice = adopted[queueKey] || (isPageOneShot ? null : adopted[pageOneShotKey]);
           const showVersion = adoptedChoice?.chosen ? adoptedChoice.chosen : (latest?.version ?? 'v1');
           const imgPath = adoptedChoice?.image_path
             ?? latest?.image_path
             ?? defaultImagePath(state.layer, page.page_no);
           const cls = ['panel'];
           if (failed.has(p.panel_id)) cls.push('failed');
-          if (revised.has(p.panel_id)) cls.push('has-revision');
+          if (revised.has(queueKey)) cls.push('has-revision');
           if (showVersion && showVersion !== 'v1') cls.push('adopted-v2plus');
-          const unresolvedCount = unresolved.get(p.panel_id) || 0;
-          const lastEntry = lastInstr.get(p.panel_id);
+          const unresolvedCount = unresolved.get(queueKey) || 0;
+          const lastEntry = lastInstr.get(queueKey);
           const tooltip = lastEntry
             ? '指示 ' + unresolvedCount + ' 件 / 最新: ' + lastEntry.instruction.slice(0, 80)
             : (failed.has(p.panel_id) ? '監査失敗 panel' : '');
@@ -328,7 +333,7 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
             ? '<span class="rev-badge">' + unresolvedCount + '</span>'
             : '';
           cards.push(
-            '<div class="' + cls.join(' ') + '" data-panel-id="' + escapeHtml(p.panel_id) + '" data-page-no="' + page.page_no + '" data-panel-no="' + p.panel_no + '" data-image-path="' + escapeHtml(imgPath) + '" data-for-version="' + escapeHtml(showVersion) + '" title="' + escapeHtml(tooltip) + '">' +
+            '<div class="' + cls.join(' ') + '" data-panel-id="' + escapeHtml(queueKey) + '" data-storyboard-panel-id="' + escapeHtml(p.panel_id) + '" data-page-no="' + page.page_no + '" data-panel-no="' + p.panel_no + '" data-image-path="' + escapeHtml(imgPath) + '" data-for-version="' + escapeHtml(showVersion) + '" title="' + escapeHtml(tooltip) + '">' +
             '<span class="label">#' + p.reading_order + ' ' + escapeHtml(p.shot_type) + '</span>' +
             '<span class="ver">' + escapeHtml(showVersion) + '</span>' +
             revisionBadge +
@@ -355,15 +360,17 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
       document.getElementById('filter-summary').textContent = summary;
     }
 
-    function checkFilters(panel, failed, revised, adopted) {
+    function checkFilters(panel, failed, revised, adopted, queueKey) {
       const f = state.filters;
+      const key = queueKey || panel.panel_id;
       if (f.failed && !failed.has(panel.panel_id)) return false;
-      if (f.revision && !revised.has(panel.panel_id)) return false;
-      if (f.notAdopted && adopted[panel.panel_id]?.chosen && adopted[panel.panel_id].chosen !== 'v1') return false;
+      if (f.revision && !revised.has(key)) return false;
+      if (f.notAdopted && adopted[key]?.chosen && adopted[key].chosen !== 'v1') return false;
       return true;
     }
 
     function countFiltered(lookup, failed, revised, adopted) {
+      // count は filter UX 表示専用なので queueKey を渡さず大まか集計
       let total = 0, shown = 0;
       for (const arr of lookup.values()) {
         for (const p of arr) {

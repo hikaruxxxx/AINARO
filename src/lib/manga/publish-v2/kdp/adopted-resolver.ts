@@ -86,7 +86,13 @@ export async function resolveBubblePagesForEpisode(args: {
     const choice = adopted?.panels[`page_${page_no}`];
     if (choice && choice.chosen && choice.chosen !== "v1" && choice.image_path) {
       const adoptedAbs = path.resolve(workRoot, choice.image_path);
-      if (await fileExists(adoptedAbs)) {
+      // Codex review (中2): server 側 isSafeImagePath は防御 1 段目、
+      // resolver 側で workRoot 配下に解決されることを 2 段目として確認。
+      // 古い adopted_versions.json に traversal が混入しても L13 入稿前に弾く。
+      const workRootWithSep = workRoot.endsWith(path.sep) ? workRoot : workRoot + path.sep;
+      if (!adoptedAbs.startsWith(workRootWithSep)) {
+        console.warn(`[adopted-resolver] page ${page_no}: adopted image escapes workRoot (${adoptedAbs}), refusing to use`);
+      } else if (await fileExists(adoptedAbs)) {
         results.push({
           page_no,
           image_path: adoptedAbs,
@@ -94,8 +100,9 @@ export async function resolveBubblePagesForEpisode(args: {
           chosen_version: choice.chosen,
         });
         continue;
+      } else {
+        console.warn(`[adopted-resolver] page ${page_no}: adopted image missing (${adoptedAbs}), falling back to default`);
       }
-      console.warn(`[adopted-resolver] page ${page_no}: adopted image missing (${adoptedAbs}), falling back to default`);
     }
     // default
     const defaultAbs = path.join(bubblesDir, `p${String(page_no).padStart(2, "0")}.png`);

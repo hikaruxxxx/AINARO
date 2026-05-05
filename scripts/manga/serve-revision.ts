@@ -28,6 +28,7 @@ import {
   renderManifestPath,
   revisionQueuePath,
   adoptedVersionsPath,
+  episodeDir,
 } from "./layers/_paths";
 import { renderRevisionUiHtml } from "../../src/lib/manga/revision-ui/index-html";
 import { readJsonl } from "../../src/lib/manga/revision-ui/manifest";
@@ -47,6 +48,38 @@ import type {
   EpisodeStoryboardV2,
   PagePlanV2,
 } from "../../src/lib/manga/schemas-v2";
+
+/**
+ * Codex review: page_one_shot 戦略のページに対して storyboard panel_id を
+ * そのまま queue に入れると L09 manifest (panel_id="page_${N}") と不整合になり、
+ * nextVersion が既存 v1 を見つけられなくなる。
+ * server 境界で panel_id を正規化することで、UI/CLI の不一致を防ぐ。
+ */
+function normalizePanelId(
+  pagePlan: PagePlanV2 | null,
+  panelId: string,
+  pageNo: number
+): string {
+  if (!pagePlan) return panelId;
+  const page = pagePlan.pages.find((p) => p.page_no === pageNo);
+  if (!page) return panelId;
+  if (page.render_strategy === "page_one_shot") {
+    return `page_${pageNo}`;
+  }
+  return panelId;
+}
+
+/** adopted_versions の image_path / panel_id を厳格チェック */
+function isSafeImagePath(p: string): boolean {
+  // workdir 起点の相対パス、`..` を含まない、`episodes/ep\d+/(renders|bubbles)/p\d+...` 形
+  if (typeof p !== "string" || p.length === 0 || p.length > 500) return false;
+  if (p.includes("..") || p.startsWith("/") || p.includes("\\")) return false;
+  return /^episodes\/ep\d+\/(renders|bubbles)\/p\d+(_panel_\d+)?(_v\d+)?\.png$/.test(p);
+}
+
+function isPageLevelPanelId(panelId: string): boolean {
+  return /^page_\d+$/.test(panelId);
+}
 
 type Args = { slug: string; episode: number; port: number; openBrowser: boolean };
 
@@ -139,20 +172,44 @@ async function readJsonBody(req: http.IncomingMessage): Promise<unknown> {
 
 // ===== API handlers =====
 
+/** Codex review: _revision_resolved.jsonl を読んで queue entry に resolved_version を inject */
+type ResolvedRecord = {
+  revision_id: string;
+  resolved_version: string;
+  ts: string;
+  succeeded: boolean;
+};
+
+async function loadRevisionResolvedMap(slug: string, episode: number): Promise<Map<string, ResolvedRecord>> {
+  const fp = path.join(episodeDir(slug, episode), "_revision_resolved.jsonl");
+  const records = await readJsonl<ResolvedRecord>(fp);
+  const m = new Map<string, ResolvedRecord>();
+  // 同 id が複数あれば後勝ち (再消化対応)
+  for (const r of records) m.set(r.revision_id, r);
+  return m;
+}
+
 async function handleManifest(slug: string, episode: number, res: http.ServerResponse): Promise<void> {
-  const [bible, storyboard, pagePlan, audit, renderManifest, revisionQueue] = await Promise.all([
+  const [bible, storyboard, pagePlan, audit, renderManifest, revisionQueueRaw, resolvedMap] = await Promise.all([
     loadJsonOpt<BibleSnapshotV2>(bibleSnapshotPath(slug)),
     loadJsonOpt<EpisodeStoryboardV2>(storyboardPath(slug, episode)),
     loadJsonOpt<PagePlanV2>(pagePlanPath(slug, episode)),
     loadJsonOpt<AuditReport>(auditPath(slug, episode)),
     readJsonl<RenderManifestEntry>(renderManifestPath(slug, episode)),
     readJsonl<RevisionEntry>(revisionQueuePath(slug, episode)),
+    loadRevisionResolvedMap(slug, episode),
   ]);
   if (!storyboard || !pagePlan) {
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "storyboard or page_plan missing" }));
     return;
   }
+  // queue は append-only。resolved 情報を merge して UI 用に injected view を作る
+  const revisionQueue = revisionQueueRaw.map((entry) => {
+    const r = resolvedMap.get(entry.id);
+    if (!r || !r.succeeded) return entry;
+    return { ...entry, resolved_version: r.resolved_version, resolved_at: r.ts };
+  });
   const adopted = await loadAdopted(slug, episode, storyboard.episode_id);
   res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify({
@@ -188,7 +245,7 @@ async function handleRevisionQueuePost(
     res.end(JSON.stringify({ error: "scope mismatch" }));
     return;
   }
-  const panel_id = String(body.panel_id ?? "");
+  const rawPanelId = String(body.panel_id ?? "");
   const page_no = Number(body.page_no ?? 0);
   const panel_no = body.panel_no !== undefined ? Number(body.panel_no) : undefined;
   const instruction = String(body.instruction ?? "").slice(0, 1000);
@@ -198,9 +255,14 @@ async function handleRevisionQueuePost(
   const image_path = String(body.image_path ?? "");
   const for_version = String(body.for_version ?? "v1");
 
-  if (!panel_id || !page_no || !image_path) {
+  if (!rawPanelId || !page_no || !image_path) {
     res.writeHead(400, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "missing fields" }));
+    return;
+  }
+  if (!isSafeImagePath(image_path)) {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: `invalid image_path: ${image_path}` }));
     return;
   }
   if (!instruction && checked_tags.length === 0) {
@@ -208,6 +270,10 @@ async function handleRevisionQueuePost(
     res.end(JSON.stringify({ error: "instruction or checked_tags required" }));
     return;
   }
+
+  // 戦略 §6 / Codex review: page_one_shot は panel_id を `page_${N}` に正規化
+  const pagePlan = await loadJsonOpt<PagePlanV2>(pagePlanPath(fixedSlug, fixedEpisode));
+  const panel_id = normalizePanelId(pagePlan, rawPanelId, page_no);
 
   const entry: RevisionEntry = {
     schema_version: 1,
@@ -266,6 +332,38 @@ async function handleAdoptedPost(
   if (!panel_id || !chosen_version || !image_path) {
     res.writeHead(400, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "missing fields" }));
+    return;
+  }
+  // Codex review (重大3): panel-level adopted は L13 が読まない (page_${N} のみ)。
+  // panel_composite 用 panel_id は Phase E の page composer 後に解禁する。
+  if (!isPageLevelPanelId(panel_id)) {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      error: `panel_id "${panel_id}" is not page-level. Only page_${"${N}"} keys are supported until Phase E (page composer).`,
+    }));
+    return;
+  }
+  // Codex review (中2): image_path は traversal 防止の strict regex
+  if (!isSafeImagePath(image_path)) {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: `invalid image_path: ${image_path}` }));
+    return;
+  }
+  if (!/^v\d+$/.test(chosen_version)) {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: `invalid chosen_version: ${chosen_version}` }));
+    return;
+  }
+  // image_path が render_manifest に存在することを確認 (manifest 由来のみ採用可)
+  const manifest = await readJsonl<RenderManifestEntry>(renderManifestPath(fixedSlug, fixedEpisode));
+  const matched = manifest.find(
+    (m) => m.image_path === image_path && m.panel_id === panel_id && m.version === chosen_version
+  );
+  if (!matched) {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      error: `no manifest entry matches (panel_id="${panel_id}", version="${chosen_version}", image_path="${image_path}")`,
+    }));
     return;
   }
   const filePath = adoptedVersionsPath(fixedSlug, fixedEpisode);
@@ -364,7 +462,10 @@ async function serveStatic(req: http.IncomingMessage, res: http.ServerResponse, 
     return;
   }
   const fp = path.join(root, pathname);
-  if (!fp.startsWith(root)) { res.writeHead(403); res.end("forbidden"); return; }
+  // Codex review: 単純 startsWith では root="/foo" / fp="/foobar/x" が通ってしまう。
+  // path.sep を境界として比較する (root 配下のみ許可)。
+  const rootWithSep = root.endsWith(path.sep) ? root : root + path.sep;
+  if (fp !== root && !fp.startsWith(rootWithSep)) { res.writeHead(403); res.end("forbidden"); return; }
   try {
     const stat = await fs.stat(fp);
     if (stat.isDirectory()) {
