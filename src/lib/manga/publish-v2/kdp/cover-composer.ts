@@ -26,7 +26,7 @@ export type CoverInput = {
   outputPath: string;
 };
 
-export async function buildCoverPdf(input: CoverInput): Promise<{ outputPath: string; spine_w_mm: number }> {
+export async function buildCoverPdf(input: CoverInput): Promise<{ outputPath: string; spine_w_mm: number; spine_text_rendered: boolean }> {
   const dims = coverDimensions(input.pageCount);
 
   const pdf = await PDFDocument.create();
@@ -83,13 +83,17 @@ export async function buildCoverPdf(input: CoverInput): Promise<{ outputPath: st
     color: rgb(0.05, 0.05, 0.05),
   });
 
-  // 縦書きはフォントが英字 only でなく日本語フォントが必要なため、
-  // pdf-lib の StandardFonts は CJK 不可。MVP は背表紙テキスト未配置 (背景のみ)。
-  // 将来: japanese-fonts npm パッケージ等で日本語フォントを embed する。
+  // 背表紙テキストは描画しない (KDP規約: 79p未満は背表紙テキスト禁止)。
+  // 79p以上で対応する場合の実装は publish-v2/kdp/spine-text.ts を別途追加予定 (B-1計画 Week3+)。
+  // 当面は背景の黒帯のみで KDP 入稿可能。
 
   const bytes = await pdf.save();
   await fs.mkdir(path.dirname(input.outputPath), { recursive: true });
   await fs.writeFile(input.outputPath, bytes);
 
-  return { outputPath: input.outputPath, spine_w_mm: dims.spine_w_mm };
+  return {
+    outputPath: input.outputPath,
+    spine_w_mm: dims.spine_w_mm,
+    spine_text_rendered: false,
+  };
 }

@@ -436,11 +436,32 @@ export type RepairLog = {
 };
 
 // ============================================================
-// L13 出力: KdpMetadata
+// L13 出力: KdpMetadata / KdpRelease / KdpSeries
 // ============================================================
 
+/**
+ * KDP公式 AI 申告 5 区分
+ * https://kdp.amazon.com/help/topic/G200672390 (Content Guidelines: AI-Generated Content)
+ *
+ * - text: 本文テキスト (台詞・ナレーションを含む)
+ * - images: 内側の画像 (コマ・イラスト)
+ * - translation: 翻訳 (元言語が別の場合)
+ * - cover: 表紙画像
+ * - interior: 本文ページレイアウト全体 (KDP用語のinterior)
+ *
+ * 全項目をbool化して KDP管理画面のチェックリストに 1:1 対応させる。
+ * 自由文ではなく構造化することでアカウント停止リスクを下げる。
+ */
+export type AiDisclosureFlags = {
+  text: boolean;
+  images: boolean;
+  translation: boolean;
+  cover: boolean;
+  interior: boolean;
+};
+
 export type KdpMetadata = {
-  schema_version: 1;
+  schema_version: 2; // ← 1 → 2 (AI開示構造化対応)
   slug: string;
   volume_no: number;
   title: string;
@@ -449,10 +470,113 @@ export type KdpMetadata = {
   isbn?: string;
   asin?: string;
   bisac_categories: string[];
-  ai_disclosure_text: string;
+  /** 旧形式の自由文。後方互換のため残すが、新規入稿では ai_disclosure を使う */
+  ai_disclosure_text?: string;
+  /** KDP公式5区分にbool対応 (Codex指摘で必須化) */
+  ai_disclosure: AiDisclosureFlags;
+  /** AI生成に使ったモデル名一覧 (例: ["gpt-image-2", "claude-opus-4-7"]) */
+  ai_tools_used: string[];
+  /** 著者による人手編集が行われたか */
+  human_review_performed: boolean;
   page_count: number;
   spine_width_mm: number;
   publication_date: string;
   manuscript_pdf_path: string;
   cover_pdf_path: string;
+};
+
+/**
+ * KDP入稿台帳 (kdp-release.json)
+ *
+ * 各巻の入稿に関する全情報を1ファイルに集約。
+ * - 防衛資産: アカウント停止時の弁明・EXIT監査・税務記録
+ * - LLM進化と無関係に資産化される
+ */
+export type KdpReleaseStatus =
+  | "draft"           // 未preflight
+  | "preflight_ok"    // ローカル検証パス
+  | "submitted"       // KDP管理画面に投入済
+  | "published"       // 販売開始
+  | "unpublished";    // 非公開化
+
+export type KdpReleaseInputs = {
+  title: string;
+  subtitle?: string;
+  description_html: string;
+  /** 7キーワード (KDP上限7、各≤50字) */
+  keywords: string[];
+  /** 2カテゴリ (KDP上限2) */
+  categories: string[];
+  isbn?: string;
+  asin?: string;
+};
+
+export type KdpReleasePricing = {
+  price_jpy: number;
+  ku_enrolled: boolean;
+  /** 35% or 70% royalty plan */
+  royalty_plan: "35" | "70";
+};
+
+export type KdpReleaseSchedule = {
+  published_at?: string;
+  ad_start_at?: string;
+};
+
+export type KdpReleaseRightsCheck = {
+  trademark_passed: boolean;
+  ip_similarity_passed: boolean;
+  checked_at: string;
+  notes?: string;
+};
+
+export type KdpReleasePreviewLog = {
+  reviewed_at: string;
+  issues: string[];
+  resolved: boolean;
+};
+
+export type KdpReleaseEditHistoryEntry = {
+  timestamp: string;
+  field: string;
+  old: unknown;
+  new: unknown;
+  reason?: string;
+};
+
+export type KdpRelease = {
+  schema_version: 1;
+  slug: string;
+  volume_no: number;
+  status: KdpReleaseStatus;
+  manuscript_pdf_path: string;
+  cover_pdf_path: string;
+  ai_disclosure: AiDisclosureFlags;
+  ai_tools_used: string[];
+  human_review_performed: boolean;
+  rights_check: KdpReleaseRightsCheck;
+  kdp_inputs: KdpReleaseInputs;
+  pricing: KdpReleasePricing;
+  schedule: KdpReleaseSchedule;
+  preview_log: KdpReleasePreviewLog[];
+  edit_history: KdpReleaseEditHistoryEntry[];
+  /** 任意メモ (KDP管理画面のスクショ位置等) */
+  notes?: string;
+};
+
+/**
+ * シリーズ設定 (kdp-series.json) — 同一slugの複数巻を束ねる。
+ * 永続先: data/manga/works/{slug}/kdp-series.json
+ */
+export type KdpSeries = {
+  schema_version: 1;
+  slug: string;
+  series_title: string;
+  series_title_en?: string;
+  estimated_total_volumes: number;
+  /** vol_no -> ASIN (Amazonがpublish時に発番) */
+  asin_by_volume: Record<number, string>;
+  /** vol_no -> ISBN (任意) */
+  isbn_by_volume?: Record<number, string>;
+  publication_schedule: { volume_no: number; planned_date: string }[];
 };
