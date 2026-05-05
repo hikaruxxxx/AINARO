@@ -69,6 +69,22 @@ export function rendersDir(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "renders");
 }
 
+export function nameDir(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "name");
+}
+
+export function nameManifestPath(slug: string, ep: number): string {
+  return path.join(nameDir(slug, ep), "name_manifest.json");
+}
+
+export function nameIndexHtmlPath(slug: string, ep: number): string {
+  return path.join(nameDir(slug, ep), "index.html");
+}
+
+export function nameApprovalPath(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "name_approval.json");
+}
+
 export function bubblesDir(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "bubbles");
 }

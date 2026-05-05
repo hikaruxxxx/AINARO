@@ -62,6 +62,7 @@ function parseArgs(): Args {
 const ALL_LAYERS = [
   "L01", "L01b", "L01c", "L02", "L02b",
   "L03", "L04", "L05", "L06", "L07", "L08",
+  "L08_5",
   "L09", "L09b", "L10", "L11", "L12", "L13",
 ] as const;
 type LayerId = (typeof ALL_LAYERS)[number];
@@ -78,6 +79,7 @@ const LAYER_SCRIPT: Record<LayerId, string> = {
   L06: "scripts/manga/layers/L06-continuity-resolve.ts",
   L07: "scripts/manga/layers/L07-refs-resolution.ts",
   L08: "scripts/manga/layers/L08-incremental-refs.ts",
+  L08_5: "scripts/manga/layers/L08-5-name-preview.ts",
   L09: "scripts/manga/layers/L09-render.ts",
   L09b: "scripts/manga/layers/L09b-page-compose.ts",
   L10: "scripts/manga/layers/L10-bubble.ts",
@@ -89,6 +91,7 @@ const LAYER_SCRIPT: Record<LayerId, string> = {
 function workScopeForLayer(l: LayerId): "work" | "episode" | "volume" {
   if (l === "L01" || l === "L01b" || l === "L01c" || l === "L02") return "work";
   if (l === "L02b" || l === "L13") return "volume";
+  // L08_5 など、その他の layer は全て episode scope
   return "episode";
 }
 

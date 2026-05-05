@@ -19,6 +19,7 @@ import {
   pagePlanPath,
   resolvedRefsPath,
   rendersDir,
+  nameApprovalPath,
 } from "./_paths";
 import { generateMangaImage } from "../../../src/lib/manga/generate/codex-image";
 import { composePagePrompt, composePanelPrompt } from "../../../src/lib/manga/render-v2/prompt-composer-v2";
@@ -28,11 +29,12 @@ import type {
   PagePlanV2,
   ResolvedRefs,
 } from "../../../src/lib/manga/schemas-v2";
+import type { NameApproval } from "../../../src/lib/manga/name-preview/types";
 
-type Args = { slug: string; episode: number; pages?: number[]; concurrency: number };
+type Args = { slug: string; episode: number; pages?: number[]; concurrency: number; skipNameGate: boolean };
 
 function parseArgs(): Args {
-  const a: Partial<Args> = { concurrency: 2 };
+  const a: Partial<Args> = { concurrency: 2, skipNameGate: false };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -40,7 +42,12 @@ function parseArgs(): Args {
     const eq = arg.match(/^--([^=]+)=(.*)$/);
     if (eq) [, key, val] = eq;
     else { const flag = arg.match(/^--(.+)$/); if (flag && i + 1 < argv.length) { key = flag[1]; val = argv[++i]; } }
-    if (!key || val === null) continue;
+    if (!key) {
+      const bool = arg.match(/^--(.+)$/);
+      if (bool && bool[1] === "skip-name-gate") a.skipNameGate = true;
+      continue;
+    }
+    if (val === null) continue;
     if (key === "slug") a.slug = val;
     else if (key === "episode") a.episode = Number(val);
     else if (key === "pages") a.pages = val.split(",").map((s) => Number(s));
@@ -48,6 +55,45 @@ function parseArgs(): Args {
   }
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
   return a as Args;
+}
+
+/**
+ * Name gate: name_approval.json を読み、approved 以外を render 対象から外す。
+ * - ファイル不存在: hard fail (--skip-name-gate で回避可)
+ * - approved 以外のページ: 警告して skip
+ *
+ * SSoT: ~/.claude/plans/codex-logical-waterfall.md
+ */
+async function loadNameApproval(slug: string, episode: number): Promise<NameApproval | null> {
+  try {
+    const buf = await fs.readFile(nameApprovalPath(slug, episode), "utf-8");
+    return JSON.parse(buf) as NameApproval;
+  } catch {
+    return null;
+  }
+}
+
+function applyNameGate(
+  pageNos: number[],
+  approval: NameApproval | null,
+  skipNameGate: boolean
+): { renderable: number[]; gatedOut: Array<{ no: number; reason: string }> } {
+  if (skipNameGate) return { renderable: pageNos, gatedOut: [] };
+  const gatedOut: Array<{ no: number; reason: string }> = [];
+  const renderable: number[] = [];
+  for (const no of pageNos) {
+    const dec = approval?.pages[String(no)];
+    if (!dec) {
+      gatedOut.push({ no, reason: "missing decision" });
+      continue;
+    }
+    if (dec.status !== "approved") {
+      gatedOut.push({ no, reason: dec.status });
+      continue;
+    }
+    renderable.push(no);
+  }
+  return { renderable, gatedOut };
 }
 
 async function existsAndNonEmpty(p: string, minBytes = 50_000): Promise<boolean> {
@@ -74,9 +120,34 @@ async function main() {
 
   await fs.mkdir(rendersDir(args.slug, args.episode), { recursive: true });
 
+  // Name gate: name_approval.json を読み、approved 以外は除外
+  const approval = await loadNameApproval(args.slug, args.episode);
+  if (!approval && !args.skipNameGate) {
+    console.error(`[L09] name_approval.json not found at ${nameApprovalPath(args.slug, args.episode)}`);
+    console.error(`[L09] Run L8.5 + serve-name to approve, or pass --skip-name-gate to bypass.`);
+    process.exit(3);
+  }
+
   const targetPages = args.pages ? new Set(args.pages) : null;
-  const pagesToRender = pagePlan.pages.filter((p) => !targetPages || targetPages.has(p.page_no));
-  console.log(`[L09] slug=${args.slug} ep=${args.episode} pages=${pagesToRender.length}/${pagePlan.pages.length}`);
+  const candidatePages = pagePlan.pages.filter((p) => !targetPages || targetPages.has(p.page_no));
+  const { renderable, gatedOut } = applyNameGate(
+    candidatePages.map((p) => p.page_no),
+    approval,
+    args.skipNameGate
+  );
+  if (args.skipNameGate) {
+    console.warn(`[L09] WARNING: --skip-name-gate active, name_approval.json bypassed`);
+  }
+  for (const g of gatedOut) {
+    console.warn(`[L09] SKIP page ${g.no}: status=${g.reason}`);
+  }
+  const renderableSet = new Set(renderable);
+  const pagesToRender = candidatePages.filter((p) => renderableSet.has(p.page_no));
+  console.log(`[L09] slug=${args.slug} ep=${args.episode} pages=${pagesToRender.length}/${pagePlan.pages.length} (gated_out=${gatedOut.length})`);
+  if (pagesToRender.length === 0 && !args.skipNameGate) {
+    console.error(`[L09] No approved pages. Approve pages via L8.7 (serve-name) or pass --skip-name-gate.`);
+    process.exit(4);
+  }
 
   const sbPagesByNo = new Map(storyboard.pages.map((p) => [p.page_no, p]));
 
