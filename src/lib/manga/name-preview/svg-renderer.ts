@@ -309,5 +309,5 @@ export function renderPageSvg(input: RenderPageInput): RenderPageResult {
 </svg>
 `;
 
-  return { svg, warnings };
+  return { svg, warnings, findings };
 }
