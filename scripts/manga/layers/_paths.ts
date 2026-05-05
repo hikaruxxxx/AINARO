@@ -85,6 +85,10 @@ export function nameApprovalPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "name_approval.json");
 }
 
+export function nameAuditPath(slug: string, ep: number): string {
+  return path.join(nameDir(slug, ep), "name_audit.json");
+}
+
 export function bubblesDir(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "bubbles");
 }
