@@ -14,6 +14,14 @@ import {
 } from "./_paths";
 import { overlayPageBubbles } from "../../../src/lib/manga/bubble-v2/vertical-typesetter";
 import type { EpisodeStoryboardV2, PagePlanV2 } from "../../../src/lib/manga/schemas-v2";
+import { appendRenderManifest } from "../../../src/lib/manga/revision-ui/manifest";
+
+function workdirRelative(slug: string, absPath: string): string {
+  const root = path.resolve("data/manga/works", slug);
+  const abs = path.resolve(absPath);
+  if (abs.startsWith(root + path.sep)) return abs.slice(root.length + 1);
+  return abs;
+}
 
 type Args = { slug: string; episode: number };
 
@@ -59,6 +67,19 @@ async function main() {
       pageRenderPath: renderPath, storyboardPage: sbPage, pagePlanPage: planPage, outputPath: outPath,
     });
     totalOverlaid += r.overlaid; totalSkipped += r.skipped; processed++;
+    // bubble は page 単位の合成出力 → page_${N} で記録
+    await appendRenderManifest({
+      schema_version: 1,
+      ts: new Date().toISOString(),
+      slug: args.slug,
+      episode: args.episode,
+      page_no: planPage.page_no,
+      panel_id: `page_${planPage.page_no}`,
+      version: "v1",
+      layer: "bubble",
+      image_path: workdirRelative(args.slug, outPath),
+      origin: "initial",
+    });
     console.log(`[L10] p${planPage.page_no}: overlaid=${r.overlaid} skipped=${r.skipped}`);
   }
 

@@ -30,22 +30,45 @@ import type {
   ResolvedRefs,
 } from "../../../src/lib/manga/schemas-v2";
 import type { NameApproval } from "../../../src/lib/manga/name-preview/types";
+import { appendRenderManifest } from "../../../src/lib/manga/revision-ui/manifest";
+
+/**
+ * workdir 起点の相対パスを返す (manifest に格納する用)。
+ * 例: "/Users/.../works/a07/episodes/ep01/renders/p01.png" → "episodes/ep01/renders/p01.png"
+ */
+function workdirRelative(slug: string, absPath: string): string {
+  const root = path.resolve("data/manga/works", slug);
+  const abs = path.resolve(absPath);
+  if (abs.startsWith(root + path.sep)) return abs.slice(root.length + 1);
+  return abs;
+}
 
 type Args = { slug: string; episode: number; pages?: number[]; concurrency: number; skipNameGate: boolean };
 
 function parseArgs(): Args {
   const a: Partial<Args> = { concurrency: 2, skipNameGate: false };
   const argv = process.argv.slice(2);
+  const BOOLEAN_FLAGS = new Set(["skip-name-gate"]);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    let key: string | null = null; let val: string | null = null;
     const eq = arg.match(/^--([^=]+)=(.*)$/);
-    if (eq) [, key, val] = eq;
-    else { const flag = arg.match(/^--(.+)$/); if (flag && i + 1 < argv.length) { key = flag[1]; val = argv[++i]; } }
-    if (!key) {
-      const bool = arg.match(/^--(.+)$/);
-      if (bool && bool[1] === "skip-name-gate") a.skipNameGate = true;
-      continue;
+    let key: string | null = null;
+    let val: string | null = null;
+    if (eq) {
+      [, key, val] = eq;
+    } else {
+      const flag = arg.match(/^--(.+)$/);
+      if (!flag) continue;
+      key = flag[1];
+      if (BOOLEAN_FLAGS.has(key)) {
+        if (key === "skip-name-gate") a.skipNameGate = true;
+        continue;
+      }
+      // 次 token が `--` で始まるなら値ではなくフラグ
+      const nextToken = argv[i + 1];
+      if (i + 1 >= argv.length || (nextToken && nextToken.startsWith("--"))) continue;
+      val = nextToken;
+      i++;
     }
     if (val === null) continue;
     if (key === "slug") a.slug = val;
@@ -62,7 +85,7 @@ function parseArgs(): Args {
  * - ファイル不存在: hard fail (--skip-name-gate で回避可)
  * - approved 以外のページ: 警告して skip
  *
- * SSoT: docs/plans/manga/name-gate.md
+ * SSoT: ~/.claude/plans/manga-pipeline-v2.md
  */
 async function loadNameApproval(slug: string, episode: number): Promise<NameApproval | null> {
   try {
@@ -183,6 +206,20 @@ async function main() {
           .png()
           .toFile(outPath);
         try { await fs.unlink(tmpPath); } catch {}
+        // 修正指示 UI 用の generation manifest 追記 (page_one_shot は panel_id を `page_${N}` で記録)
+        await appendRenderManifest({
+          schema_version: 1,
+          ts: new Date().toISOString(),
+          slug: args.slug,
+          episode: args.episode,
+          page_no: page.page_no,
+          panel_id: `page_${page.page_no}`,
+          version: "v1",
+          layer: "render",
+          image_path: workdirRelative(args.slug, outPath),
+          render_strategy: "page_one_shot",
+          origin: "initial",
+        });
         done++;
         console.log(`[L09] DONE p${page.page_no}`);
       } catch (e) {
@@ -210,6 +247,19 @@ async function main() {
             size: { width: 1024, height: 1536 },
             referenceImagePaths: refImagePaths,
             timeoutMs: 6 * 60 * 1000, maxRetries: 1,
+          });
+          await appendRenderManifest({
+            schema_version: 1,
+            ts: new Date().toISOString(),
+            slug: args.slug,
+            episode: args.episode,
+            page_no: page.page_no,
+            panel_id: pp.panel_id,
+            version: "v1",
+            layer: "render",
+            image_path: workdirRelative(args.slug, panelOut),
+            render_strategy: "panel_composite",
+            origin: "initial",
           });
           done++;
         } catch (e) { console.warn(`[L09] FAIL panel ${pp.panel_id}: ${(e as Error).message}`); failed++; }

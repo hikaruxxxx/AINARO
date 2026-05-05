@@ -89,6 +89,23 @@ export function nameAuditPath(slug: string, ep: number): string {
   return path.join(nameDir(slug, ep), "name_audit.json");
 }
 
+// ===== 修正指示 UI (Phase A〜D) =====
+
+/** L09/L10 が generation 毎に append する render manifest (JSONL, append-only) */
+export function renderManifestPath(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "render_manifest.jsonl");
+}
+
+/** Phase B: ユーザー修正指示の queue (JSONL, append-only) */
+export function revisionQueuePath(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "_revision_queue.jsonl");
+}
+
+/** Phase D: 採用 version の json (episode 単位、L13 が読む) */
+export function adoptedVersionsPath(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "adopted_versions.json");
+}
+
 export function bubblesDir(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "bubbles");
 }
