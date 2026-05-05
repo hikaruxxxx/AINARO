@@ -526,6 +526,16 @@ export type KdpMetadata = {
   publication_date: string;
   manuscript_pdf_path: string;
   cover_pdf_path: string;
+
+  // ── kdp-modular-plum.md (検索最適化拡張、全 optional / 後方互換) ──
+  /** タイトル/サブタイトル候補 (最終1案決定前のドラフト履歴) */
+  title_candidates?: string[];
+  /** シリーズ名の完全文字列 (大文字小文字・句読点厳密一致が必要) */
+  series_name_canonical?: string;
+  /** 7キーワード手動キュレーション結果 (kdp_inputs.keywords へ反映する source of truth) */
+  keyword_picks_7?: string[];
+  /** ghost判定済みカテゴリ候補 (実際にbrowseable確認済の3カテゴリ) */
+  categories_validated?: string[];
 };
 
 /**
@@ -548,7 +558,7 @@ export type KdpReleaseInputs = {
   description_html: string;
   /** 7キーワード (KDP上限7、各≤50字) */
   keywords: string[];
-  /** 2カテゴリ (KDP上限2) */
+  /** 3カテゴリ (KDP上限3、2023年中盤からダッシュボード選択のみ。サポート経由追加申請は廃止) */
   categories: string[];
   isbn?: string;
   asin?: string;

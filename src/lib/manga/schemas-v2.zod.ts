@@ -96,7 +96,7 @@ export const KdpMetadataSchema = z
     author_pen_name: z.string().min(1),
     isbn: z.string().optional(),
     asin: z.string().optional(),
-    bisac_categories: z.array(z.string()).min(1).max(2),
+    bisac_categories: z.array(z.string()).min(1).max(3),
     ai_disclosure_text: z.string().optional(),
     ai_disclosure: AiDisclosureFlagsSchema,
     ai_tools_used: z.array(z.string()),
@@ -106,6 +106,11 @@ export const KdpMetadataSchema = z
     publication_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD 形式"),
     manuscript_pdf_path: z.string().min(1),
     cover_pdf_path: z.string().min(1),
+    // ── kdp-modular-plum.md (検索最適化拡張、全 optional / 後方互換) ──
+    title_candidates: z.array(z.string()).optional(),
+    series_name_canonical: z.string().optional(),
+    keyword_picks_7: z.array(z.string()).max(7).optional(),
+    categories_validated: z.array(z.string()).max(3).optional(),
   })
   .passthrough()
   .refine(
@@ -143,6 +148,27 @@ export const WorkMetaJsonSchema = z
         target_pages_per_volume: z.number().int().positive().optional(),
         target_episodes_per_volume: z.number().int().positive().optional(),
         target_pages_per_episode: z.number().int().positive().optional(),
+      })
+      .passthrough()
+      .optional(),
+    /** kdp-modular-plum.md (検索最適化拡張) */
+    kdp_metadata: z
+      .object({
+        title_candidates: z.array(z.string()).optional(),
+        series_name_canonical: z.string().optional(),
+        keyword_picks_7: z.array(z.string()).max(7).optional(),
+        categories_validated: z.array(z.string()).max(3).optional(),
+        description_seed: z
+          .object({
+            hook_line: z.string().min(1),
+            turn_line: z.string().min(1),
+            synopsis_lines: z.array(z.string()).min(1).max(5),
+            recommend_points: z.array(z.string()).min(1).max(5),
+            cta_line: z.string().optional(),
+            related_keywords: z.array(z.string()).optional(),
+          })
+          .passthrough()
+          .optional(),
       })
       .passthrough()
       .optional(),

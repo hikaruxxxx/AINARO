@@ -12,6 +12,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { KdpRelease, KdpMetadata } from "../../schemas-v2";
 import { disclosureFlagsToKdpType, type AiUsageLevel } from "../../disclosure";
+import { validateKdpKeywords, DEFAULT_NG_WORDS } from "./keyword-validator";
 
 export type KdpInputMdArgs = {
   release: KdpRelease;
@@ -90,13 +91,35 @@ export async function buildKdpInputMd(args: KdpInputMdArgs): Promise<{ outputPat
   }
   lines.push("");
 
+  // ── キーワード自動バリデーション (NG語 / 単語重複 / 単一語チェック) ──
+  if (i.keywords.length > 0) {
+    const kvResult = validateKdpKeywords({ picks: i.keywords, ngWords: DEFAULT_NG_WORDS });
+    lines.push("**バリデーション結果**:");
+    lines.push(`- 索引される単語数 (重複排除後): ${kvResult.unique_word_count}`);
+    if (kvResult.errors.length === 0 && kvResult.warnings.length === 0) {
+      lines.push("- ✅ エラー・警告なし");
+    } else {
+      for (const e of kvResult.errors) lines.push(`- ❌ ERROR ${e.code}: ${e.message}`);
+      for (const w of kvResult.warnings) lines.push(`- ⚠️ WARN ${w.code}: ${w.message}`);
+    }
+    lines.push("");
+  }
+
   // ── カテゴリ ──
-  lines.push("## 4. カテゴリ (最大 2 個)");
+  lines.push("## 4. カテゴリ (最大 3 個 / 2023年中盤改定後)");
   lines.push("");
   if (i.categories.length === 0) {
     lines.push("- (未入力)");
   } else {
     for (const c of i.categories) lines.push(`- ${c}`);
+  }
+  if (i.categories.length > 3) {
+    lines.push(`- ⚠️ ${i.categories.length} 件指定されているが KDP上限は 3。ダッシュボードで上位3件のみ採用される。`);
+  }
+  if (metadata.categories_validated && metadata.categories_validated.length > 0) {
+    lines.push("");
+    lines.push("**ghost判定済みカテゴリ候補** (browseable確認済):");
+    for (const c of metadata.categories_validated) lines.push(`- ${c}`);
   }
   lines.push("");
   if (metadata.bisac_categories.length > 0) {

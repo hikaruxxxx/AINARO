@@ -208,8 +208,8 @@ function defaultStyleDirectives(artStyle: ArtStyle): StyleDirectivesV2 {
   const isUrban = artStyle === "manga_bw_seinen_urban";
   return {
     global: isUrban
-      ? "Tokyo Ghoul (Sui Ishida) 系のモダン都市青年漫画。光と影のコントラストを強調、夜景シーンが多い。線は細め、screentone 多用、ベタは黒髪と影に集中。"
-      : "Berserk/Vagabond 系劇画。濃いベタ・荒いハッチング・力強い線・印刷インクの質感。",
+      ? "Young Ace / Comic Walker / カドコミ系 のなろう系コミカライズ画風 (現代ダンジョン)。表情豊かで親しみやすい線、目はやや大きめ、ライトノベル表紙絵の延長。現代街並みとダンジョンゲートの対比でメリハリ。screentone 多用で柔らかいグラデ、ベタは黒髪と夜景に集中。Solo Leveling 寄りの seinen-realism は避け、Dジェネシス/壊れスキル系の親しみやすさを優先。"
+      : "Young Ace / Comic Walker / カドコミ系 のなろう系コミカライズ画風 (異世界ダンジョン探索)。蜘蛛ですが/転スラ/ヘルモード系の親しみやすい線。戦闘時のみ硬質化。screentone メリハリ型 (ボス戦は密、移動は疎)、ベタは黒髪と影。Berserk/Vagabond 系劇画は避ける。",
     scene_overrides: {
       daily: "線細め、トーンで陰影。会話は中ゴマ多用。",
       dungeon: "ベタ濃く、ハッチングで立体感。階層が深いほど暗くネガティブスペースを増やす。",

@@ -36,6 +36,11 @@ import {
 import { runPreflight, formatPreflightReport } from "../../../src/lib/manga/publish-v2/kdp/preflight";
 import { buildKdpInputMd } from "../../../src/lib/manga/publish-v2/kdp/kdp-input-md";
 import {
+  buildKdpDescriptionHtml,
+  descriptionSeedToInput,
+  type DescriptionSeed,
+} from "../../../src/lib/manga/publish-v2/kdp/description-template";
+import {
   DEFAULT_AI_DISCLOSURE_FLAGS,
   DEFAULT_AI_TOOLS_USED,
   DEFAULT_AI_USAGE_LEVEL,
@@ -46,6 +51,15 @@ import type {
   KdpMetadata,
   AiDisclosureFlags,
 } from "../../../src/lib/manga/schemas-v2";
+
+/** meta.json kdp_metadata ブロック (kdp-modular-plum.md 検索最適化拡張) */
+type WorkKdpMetadataBlock = {
+  title_candidates?: string[];
+  series_name_canonical?: string;
+  keyword_picks_7?: string[];
+  categories_validated?: string[];
+  description_seed?: DescriptionSeed;
+};
 import {
   KdpMetadataSchema,
   WorkMetaJsonSchema,
@@ -239,12 +253,24 @@ async function main() {
   });
   console.log(`[L13] cover.pdf: ${cover.outputPath} (spine ${cover.spine_w_mm.toFixed(2)}mm)`);
 
-  // metadata (schema_version=2, AI開示構造化)
+  // kdp-modular-plum.md (検索最適化拡張): meta.json の kdp_metadata ブロックを読む
+  const kdpMeta: WorkKdpMetadataBlock | undefined =
+    (meta as unknown as { kdp_metadata?: WorkKdpMetadataBlock }).kdp_metadata;
+
+  // タイトル決定優先順位: title_candidates[0] > meta.title
+  const finalTitle = (kdpMeta?.title_candidates && kdpMeta.title_candidates.length > 0)
+    ? kdpMeta.title_candidates[0]
+    : meta.title;
+  if (kdpMeta?.title_candidates && kdpMeta.title_candidates.length > 1) {
+    console.log(`[L13] title_candidates: ${kdpMeta.title_candidates.length}案あり、先頭を採用 → ${finalTitle.substring(0, 40)}...`);
+  }
+
+  // metadata (schema_version=2, AI開示構造化 + 検索最適化拡張)
   const metadata: KdpMetadata = {
     schema_version: 2,
     slug: args.slug,
     volume_no: args.volume,
-    title: meta.title,
+    title: finalTitle,
     subtitle: `第${args.volume}巻`,
     author_pen_name: args.authorPenName,
     isbn: args.isbn,
@@ -258,12 +284,38 @@ async function main() {
     publication_date: args.publicationDate,
     manuscript_pdf_path: manuscriptPath,
     cover_pdf_path: coverPath,
+    // ── kdp-modular-plum.md 検索最適化拡張 (全 optional) ──
+    title_candidates: kdpMeta?.title_candidates,
+    series_name_canonical: kdpMeta?.series_name_canonical,
+    keyword_picks_7: kdpMeta?.keyword_picks_7,
+    categories_validated: kdpMeta?.categories_validated,
   };
   // C-1: metadata.json を Zod で fail-fast 検証してから書き出す
   parseOrThrow(KdpMetadataSchema, metadata, `KdpMetadata (${args.slug} v${args.volume})`);
   const metadataPath = path.join(kdpDir(args.slug, args.volume), "metadata.json");
   await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
   console.log(`[L13] metadata.json: ${metadataPath}`);
+
+  // kdp-modular-plum.md: meta.kdp_metadata.description_seed があれば Description HTML 自動生成
+  let descriptionHtml = "";
+  if (kdpMeta?.description_seed) {
+    try {
+      descriptionHtml = buildKdpDescriptionHtml(
+        descriptionSeedToInput({
+          seed: kdpMeta.description_seed,
+          title: finalTitle,
+          subtitle: `第${args.volume}巻`,
+          seriesName: kdpMeta.series_name_canonical,
+          volumeNo: args.volume,
+          authorPenName: args.authorPenName,
+          genre: (meta as unknown as { genre?: string }).genre,
+        }),
+      );
+      console.log(`[L13] description_html: 自動生成 (${descriptionHtml.length}字)`);
+    } catch (e) {
+      console.warn(`[L13] WARN: description_seed から HTML 生成失敗 → 空のままにします: ${e}`);
+    }
+  }
 
   // A1-1: kdp-release.json (入稿台帳) — 既存があれば PDF パスのみ更新、無ければ初期化
   const releasePath = path.join(kdpDir(args.slug, args.volume), "kdp-release.json");
@@ -273,14 +325,35 @@ async function main() {
     manuscriptPdfPath: manuscriptPath,
     coverPdfPath: coverPath,
     inputs: {
-      title: meta.title,
+      title: finalTitle,
       subtitle: `第${args.volume}巻`,
       isbn: args.isbn,
+      // 検索最適化拡張: meta.kdp_metadata から自動populate (空なら空のまま)
+      description_html: descriptionHtml || undefined,
+      keywords: kdpMeta?.keyword_picks_7 ?? [],
+      categories: kdpMeta?.categories_validated ?? [],
     },
     aiDisclosure,
     aiToolsUsed,
     humanReviewPerformed,
   });
+
+  // 既存 release があってもkdp_inputsの空フィールドだけは meta から補完する
+  const inputUpdates: Partial<typeof release.kdp_inputs> = {};
+  if (!release.kdp_inputs.description_html && descriptionHtml) {
+    inputUpdates.description_html = descriptionHtml;
+  }
+  if (release.kdp_inputs.keywords.length === 0 && kdpMeta?.keyword_picks_7 && kdpMeta.keyword_picks_7.length > 0) {
+    inputUpdates.keywords = kdpMeta.keyword_picks_7;
+  }
+  if (release.kdp_inputs.categories.length === 0 && kdpMeta?.categories_validated && kdpMeta.categories_validated.length > 0) {
+    inputUpdates.categories = kdpMeta.categories_validated;
+  }
+  if (Object.keys(inputUpdates).length > 0) {
+    release = applyUpdates(release, {
+      kdp_inputs: { ...release.kdp_inputs, ...inputUpdates },
+    }, "L13 検索最適化拡張: meta.kdp_metadata から空フィールドを補完");
+  }
 
   // A1-2: preflight 実行
   const pf = await runPreflight({

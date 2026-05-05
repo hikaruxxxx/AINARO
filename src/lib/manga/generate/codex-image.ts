@@ -109,9 +109,13 @@ async function runCodexOnce(opts: {
     }
     args.push("-");
 
+    // detached: true で新しい process group を作る → タイムアウト時に
+    // process group 全体を kill して grandchild (codex バイナリ) が
+    // orphan 化するのを防ぐ (orphan が残ると同一 ChatGPT セッションで衝突する)。
     const child = spawn("codex", args, {
       cwd: opts.cwd,
       stdio: ["pipe", "pipe", "pipe"],
+      detached: true,
     });
 
     let stdout = "";
@@ -121,7 +125,15 @@ async function runCodexOnce(opts: {
     child.stderr.on("data", (chunk) => (stderr += chunk.toString()));
 
     const timer = setTimeout(() => {
-      child.kill("SIGKILL");
+      if (child.pid) {
+        try {
+          // 負の PID で process group 全体に SIGKILL
+          process.kill(-child.pid, "SIGKILL");
+        } catch {
+          // process group が既に消えていれば無視
+          try { child.kill("SIGKILL"); } catch {}
+        }
+      }
       reject(new Error(`Codex CLI タイムアウト (${opts.timeoutMs}ms)`));
     }, opts.timeoutMs);
 

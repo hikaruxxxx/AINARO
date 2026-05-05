@@ -53,6 +53,38 @@ PV・MAUは結果指標。以下の先行指標を追い、意思決定に使う
 - 日本語コメント
 - コミットメッセージ: `<type>: <日本語説明>`
 
+## 実装フロー（Claude × Codex）
+
+AINARO の `src/` `scripts/` を編集する作業は、原則として以下の三段リレーで進める。
+
+1. **設計・リサーチ・要件整理 → Claude Code**
+   Plan モードまたは通常会話でアーキテクチャを固める。MEMORY と各種サブエージェント（auto-pipeline, screen-mass, batch-eval 等）が活きるレイヤー。
+2. **コード実装 → Codex**
+   `mcp__codex__codex` MCP または codex CLI で書かせる。Claude は仕様書をレンダリングし、Codex が手を動かす。
+3. **レビュー → Claude Code**
+   Codex の出力を `/code-review` でレビュー。問題があれば Claude が直接修正（このときコミットメッセージに `Co-Authored-By: Claude` を残す）。
+4. **コミット**
+   レビュー証跡（`/tmp/claude-code-review-passed` または `/tmp/ainaro-codex-reviewed-<HEAD_SHA>`）を持った状態で `git commit`。証跡が無いと `.claude/hooks/codex-commit-review-gate.sh` が exit 2 でブロックする。
+
+### 例外: Claude が直接編集して良い領域
+
+- `docs/` 配下のドキュメント
+- `content/` `data/` 配下のコンテンツ・データ
+- `MEMORY.md`, `CLAUDE.md` などのトップレベル `*.md`
+- `*.json` 設定ファイル（package.json の依存追加、tsconfig 微調整 等）
+- 小さな typo 修正、import 並び替え、型注釈の追加など 5 行以内の機械的変更
+
+### 強制レベル
+
+- `src/` `scripts/` の Edit/Write は Claude が実行可能（警告 stderr のみ、ブロックしない）
+- `git commit` はレビュー証跡が無いとブロック（src/ scripts/ を含むときのみ）
+- `git push` / `gh pr create` は既存のグローバル `pre-push-review-gate.sh` が引き続き管理
+
+### バイパス手段
+
+- 緊急修正: コミットメッセージに `[skip-review]` を含める
+- レビュー済み手動マーキング: `echo ok > /tmp/ainaro-codex-reviewed-$(git rev-parse HEAD)`
+
 ## ディレクトリ構成
 - docs/ — 事業計画・設計ドキュメント（strategy/, architecture/）
 - src/ — Next.js App Routerの標準構成

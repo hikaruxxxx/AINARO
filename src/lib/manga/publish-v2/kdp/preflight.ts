@@ -62,6 +62,8 @@ export type PreflightInput = {
   spineTextRendered?: boolean;
   /** 短い vol0 等を許容 (Day1-5 リハーサル用、本入稿では false 推奨) */
   allowShortVolume?: boolean;
+  /** 79p未満でも背表紙テキストを意図的に描画する場合 true (KDP規約違反となるため warn 降格、運用判断責任) */
+  allowShortVolumeSpineText?: boolean;
 };
 
 export type PreflightResult = {
@@ -121,10 +123,15 @@ export async function runPreflight(input: PreflightInput): Promise<PreflightResu
     }
   }
 
-  // 2. 79p 未満で背表紙テキスト禁止 (Codex 指摘)
+  // 2. 79p 未満で背表紙テキスト禁止 (Codex 指摘) — allowShortVolumeSpineText で warn 降格可
   if (input.pageCount < KDP_MIN_PAGES_FOR_SPINE_TEXT && input.spineTextRendered) {
-    issues.push(err("SPINE_TEXT_FORBIDDEN_UNDER_79P",
-      `ページ数 ${input.pageCount} (79p未満) で背表紙テキストが描画されている。KDP規約違反のため却下対象。背表紙はベタ塗りのみ可。`));
+    if (input.allowShortVolumeSpineText) {
+      issues.push(warn("SPINE_TEXT_FORBIDDEN_UNDER_79P",
+        `ページ数 ${input.pageCount} (79p未満) で背表紙テキストが描画されている。KDP規約違反のリスクあり。--allow-short-volume-spine-text 指定により警告に降格 (運用判断責任)。`));
+    } else {
+      issues.push(err("SPINE_TEXT_FORBIDDEN_UNDER_79P",
+        `ページ数 ${input.pageCount} (79p未満) で背表紙テキストが描画されている。KDP規約違反のため却下対象。背表紙はベタ塗りのみ可。意図的に許容する場合は allowShortVolumeSpineText=true を指定。`));
+    }
   }
 
   // 3. 背幅 5mm 以上 (spineWidthMm が最小5mmを保証するが、再確認)
@@ -180,6 +187,14 @@ export async function runPreflight(input: PreflightInput): Promise<PreflightResu
     if (keywords[i].length > 50) {
       issues.push(err("KEYWORD_TOO_LONG", `keyword[${i}] が 50 字超 (${keywords[i].length})`));
     }
+  }
+
+  // 7b. 3 カテゴリ上限 (kdp-modular-plum.md / Codex指摘)
+  // 2023年中盤以降、KDPダッシュボードのカテゴリ枠は 3 つまで。
+  // 手編集された kdp-release.json で 4 件以上にされていないか防御的に検査。
+  const categories = input.release.kdp_inputs?.categories ?? [];
+  if (categories.length > 3) {
+    issues.push(err("CATEGORIES_TOO_MANY", `カテゴリ ${categories.length} 件 > 3 (KDP 上限、2023年改定後)`));
   }
 
   // 8. description_html 許可タグ

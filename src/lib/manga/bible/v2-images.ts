@@ -121,7 +121,7 @@ function buildCharacterRefPrompt(args: {
   })();
 
   return [
-    `Reference sheet illustration of "${c.name}" — recurring character of an ongoing Japanese seinen manga (B6 KDP+KU, black and white).`,
+    `Reference sheet illustration of "${c.name}" — recurring character of an ongoing Japanese light novel comicalization (なろう系 narou-kei, B6 KDP+KU, black and white). Style tradition: Young Ace / Comic Walker / カドコミ系 (expressive character-driven art, light novel cover lineage), NOT seinen-realism.`,
     "",
     styleDirectiveLine(args.styleDirectives),
     "",
@@ -133,9 +133,10 @@ function buildCharacterRefPrompt(args: {
     "STRICT RULES:",
     "- Render exactly ONE character. NO additional people, NPC, background characters.",
     "- Do NOT render any text, logo, label, watermark, signature, speech bubble, panel border, or page number.",
-    "- BLACK AND WHITE only with screentone and hatching, NO color, NO airbrushed soft skin gradients, NO 3D-render shading, NO photorealistic shading.",
+    "- BLACK AND WHITE only with screentone and hatching, NO color, NO 3D-render shading, NO photorealistic shading.",
+    "- Use screentone gradients sparingly for highlights, blush, and skin shading per light novel comicalization convention; avoid heavy airbrush.",
     "- Hands and fingers must look natural; render no more than five fingers per hand.",
-    "- Confident decisive line work. Published commercial seinen manga quality, NOT AI illustration aesthetic.",
+    "- Confident decisive line work, expressive eyes, character-first composition. Light novel comicalization quality (Young Ace / Comic Walker tradition).",
   ]
     .filter(Boolean)
     .join("\n");
@@ -178,7 +179,7 @@ function buildLocationRefPrompt(args: {
   })();
 
   return [
-    `Reference sheet illustration of the location "${l.name}" for a Japanese seinen manga (B6 KDP+KU, black and white).`,
+    `Reference sheet illustration of the location "${l.name}" for a Japanese light novel comicalization (なろう系 narou-kei, B6 KDP+KU, black and white). Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization background art.`,
     "",
     styleDirectiveLine(args.styleDirectives),
     "",
@@ -193,7 +194,7 @@ function buildLocationRefPrompt(args: {
     "STRICT RULES:",
     "- NO people, NO characters, NO crowd. Empty location only.",
     "- BLACK AND WHITE only with screentone and hatching, NO color.",
-    "- Confident decisive line work, restrained background detail (Naoki Urasawa school).",
+    "- Confident decisive line work with clear silhouettes. Use moderate background detail with genre iconography (fantasy: torches, stone walls, magic circles, guild counters; modern: urban signage, electric poles, contemporary fixtures). Legibility over photoreal density.",
     "- Do NOT render any text, logo, signage detail (only abstract sign shapes), or watermark.",
   ]
     .filter(Boolean)
@@ -211,7 +212,7 @@ function buildPropRefPrompt(args: {
   const anchors = (p.continuity_anchors ?? []).join(", ");
 
   return [
-    `Reference sheet illustration of the prop "${p.name}" for a Japanese seinen manga (black and white).`,
+    `Reference sheet illustration of the prop "${p.name}" for a Japanese light novel comicalization (なろう系 narou-kei, black and white). Style tradition: Young Ace / Comic Walker / カドコミ系.`,
     "",
     styleDirectiveLine(args.styleDirectives),
     "",
@@ -249,6 +250,8 @@ export type GenerateRefsOptions = {
   imageTimeoutMs?: number;
   /** 既に存在する PNG はスキップ */
   skipExisting?: boolean;
+  /** style plate PNG の絶対パス。指定時は generateMangaImage の referenceImagePaths に注入し、画風を一致させる */
+  stylePlatePath?: string | null;
 };
 
 async function existsAndNonEmpty(p: string, minBytes = 50_000): Promise<boolean> {
@@ -325,6 +328,7 @@ export async function generateCharacterRefsForBible(opts: GenerateRefsOptions & 
         prompt,
         outputPath: outPath,
         size,
+        referenceImagePaths: opts.stylePlatePath ? [opts.stylePlatePath] : undefined,
         timeoutMs: opts.imageTimeoutMs ?? 5 * 60 * 1000,
         maxRetries: 1,
       });
@@ -386,6 +390,7 @@ export async function generateLocationRefsForBible(opts: GenerateRefsOptions & {
         prompt,
         outputPath: outPath,
         size,
+        referenceImagePaths: opts.stylePlatePath ? [opts.stylePlatePath] : undefined,
         timeoutMs: opts.imageTimeoutMs ?? 5 * 60 * 1000,
         maxRetries: 1,
       });
@@ -445,6 +450,7 @@ export async function generatePropRefsForBible(opts: GenerateRefsOptions & {
         prompt,
         outputPath: outPath,
         size: MANGA_SIZE_PRESETS.panel_square,
+        referenceImagePaths: opts.stylePlatePath ? [opts.stylePlatePath] : undefined,
         timeoutMs: opts.imageTimeoutMs ?? 5 * 60 * 1000,
         maxRetries: 1,
       });

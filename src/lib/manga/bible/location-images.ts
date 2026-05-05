@@ -56,11 +56,11 @@ export function buildLocationRefPrompt(args: {
   const styleLine = (() => {
     switch (args.artStyle) {
       case "manga_bw_seinen_dark":
-        return "Berserk/Vagabond style background reference plate. Heavy black ink, dense crosshatching for shadows, decisive line weight, paper-grain feel. NO photo render, NO airbrushed gradients.";
+        return "Young Ace / カドコミ系 narou-kei isekai dungeon comicalization background reference plate (蜘蛛ですが / 転スラ / ヘルモード lineage). Confident ink linework with clear silhouettes, fantasy iconography (torches, stone walls, magic circles, guild counters), legibility over photoreal density. NO photo render, NO Berserk/Vagabond gothic-grim.";
       case "manga_bw_shoujo_classic":
         return "Rose of Versailles style classical shoujo background reference plate. Fine delicate line work, ornamental detail, screentone gradations. NO photo render.";
       case "manga_bw_seinen_urban":
-        return "Tokyo Ghoul / Solo Leveling style urban manga background reference plate. Crisp ink linework, controlled blacks, photo-grounded perspective with hand-drawn texture. NO photo render.";
+        return "Young Ace / Comic Walker / カドコミ系 narou-kei modern-dungeon comicalization background reference plate (Dジェネシス / 壊れスキル / 凡人探索者 lineage). Clear urban silhouettes, contemporary signage, dungeon-gate iconography. Crisp ink linework, controlled blacks, hand-drawn perspective. NOT Tokyo Ghoul / Solo Leveling seinen-realism.";
       case "manga_bw_shounen":
         return "Shounen weekly manga background reference plate. Bold ink lines, screentone shading, dynamic perspective. NO photo render.";
       case "manga_bw_seinen":

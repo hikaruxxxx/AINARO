@@ -7,7 +7,8 @@
  * 重要:
  * - capability.ref_role_tagging=false なので image_inputs はフラット配列
  * - inline label を prompt に書く (capability.ref_role_tagging_note 通り「弱いが読まれる」)
- * - dialogue/narration/sfx は L10 SVG overlay で重ねるので画像内テキストは生成しない
+ * - dialogue/monologue/narration/sfx は **画像内に直接描画** する (吹き出しごと, ナレーション枠ごと, 擬音ごと)
+ *   旧 L10 SVG overlay 方式は撤回。AI に typesetting/レイアウトを任せる。
  */
 import type {
   PanelV2,
@@ -67,12 +68,59 @@ function styleHeader(bible: BibleSnapshotV2): string {
 function negativesBlock(): string {
   return [
     "NEGATIVES (must avoid):",
-    "- NO color, NO airbrushed soft skin gradients, NO 3D-render shading, NO photorealistic shading",
-    "- NO speech bubbles, NO dialogue text, NO sound effect text, NO narration boxes drawn IN the image (these are added later as SVG overlay)",
+    "- NO color, NO 3D-render shading, NO photorealistic shading",
     "- NO page numbers, NO signatures, NO watermarks, NO studio logos",
     "- Hands and fingers must look natural; render no more than five fingers per hand",
-    "- Backgrounds MINIMAL. Use the FEWEST lines needed. Empty white space is intentional.",
+    "- Background density should match the scene: establishing/dungeon/world-intro panels can have moderate fantasy/setting iconography (torches, stone walls, magic circles, urban signage); dialogue-only panels stay minimal",
+    "- NO English dialogue. All in-panel text must be Japanese (kanji/kana) using a typical Japanese manga font.",
   ].join("\n");
+}
+
+/**
+ * panel.dialogue / monologue / narration / sfx を「画像内に直接描く」指示文に変換。
+ * 吹き出し・ナレーション枠・擬音を AI 側で typeset させる方針 (旧 L10 SVG overlay は撤回)。
+ */
+function inPanelTextBlock(panel: PanelV2, bible: BibleSnapshotV2): string | null {
+  const hasAny =
+    panel.dialogue.length > 0 ||
+    panel.monologue.length > 0 ||
+    panel.narration.length > 0 ||
+    panel.sfx.length > 0;
+  if (!hasAny) return null;
+
+  const charName = (id: string) => bible.characters.find((c) => c.id === id)?.name ?? id;
+  const lines: string[] = [
+    "IN-PANEL TEXT (must be drawn INSIDE the image as part of the manga page):",
+  ];
+
+  if (panel.dialogue.length > 0) {
+    lines.push("Speech bubbles (rounded oval bubbles with tail pointing to speaker, Japanese vertical text right-to-left):");
+    for (const d of panel.dialogue) {
+      lines.push(`  - ${charName(d.character_id)}: 「${d.text}」`);
+    }
+  }
+  if (panel.monologue.length > 0) {
+    lines.push("Inner monologue (square/angular bubbles WITHOUT tail, or thought-cloud, vertical Japanese text):");
+    for (const m of panel.monologue) {
+      lines.push(`  - ${charName(m.character_id)} (thinks): 「${m.text}」`);
+    }
+  }
+  if (panel.narration.length > 0) {
+    lines.push("Narration boxes (rectangular caption boxes, typically top or bottom of panel, vertical Japanese):");
+    for (const n of panel.narration) {
+      lines.push(`  - ${n}`);
+    }
+  }
+  if (panel.sfx.length > 0) {
+    lines.push("Sound effects / onomatopoeia (hand-drawn katakana/hiragana, dynamic shape, integrated into the artwork):");
+    for (const s of panel.sfx) {
+      lines.push(`  - ${s}`);
+    }
+  }
+  lines.push(
+    "All text MUST be drawn INSIDE the image. Use authentic Japanese manga lettering style. Do NOT translate to English. Do NOT leave blank balloons.",
+  );
+  return lines.join("\n");
 }
 
 export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImagePaths: string[] } {
@@ -83,7 +131,7 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     .join("\n");
 
   const sections = [
-    `B6 portrait Japanese seinen manga PANEL (${args.pageDimensions.width}x${args.pageDimensions.height} px), single panel in BLACK AND WHITE only with screentone and hatching.`,
+    `B6 portrait Japanese light novel comicalization PANEL (${args.pageDimensions.width}x${args.pageDimensions.height} px), single panel in BLACK AND WHITE only with screentone and hatching. Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (expressive character-driven art, large emotive eyes, light novel cover lineage), NOT seinen-realism.`,
     "",
     "ART STYLE:",
     styleHeader(args.bible),
@@ -100,6 +148,8 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     "",
     `Action: ${p.action}`,
     `Visual focus: ${p.key_visual}`,
+    "",
+    inPanelTextBlock(p, args.bible),
     "",
     "MUST PRESERVE invariants from continuity refs (face geometry, outfit details, location layout). Match line weight and screentone density of refs.",
     "",
@@ -120,23 +170,41 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     .map((r, i) => `<ref#${i + 1}> (${r.role}${r.target_entity_id ? ` for ${r.target_entity_id}` : ""}, weight ${r.weight.toFixed(2)})`)
     .join("\n");
 
+  const charName = (id: string) => args.bible!.characters.find((c) => c.id === id)?.name ?? id;
   const panelLines = page.panels.map((p, idx) => {
     const cs = p.entities.characters.map((c) => {
       const ent = args.bible.characters.find((x) => x.id === c.character_id);
       return `${ent?.name ?? c.character_id} (${c.role}, ${c.on_screen_via}, expr=${c.expression})`;
     }).join("; ");
     const loc = args.bible.locations.find((x) => x.id === p.entities.location_id)?.name ?? p.entities.location_id;
-    return [
+    const lines = [
       `PANEL #${p.panel_no} (reading order ${p.reading_order}, ${p.shot_type}, ${p.camera}${p.bleed ? ", BLEED" : ""}${p.silence ? ", SILENT" : ""}):`,
       `  Characters: ${cs || "none"}.`,
       `  Location: ${loc}.`,
       `  Action: ${p.action}.`,
       `  Visual focus: ${p.key_visual}.`,
-    ].join("\n");
+    ];
+    if (p.dialogue.length > 0) {
+      lines.push(`  Speech bubbles (oval bubble + tail pointing to speaker, Japanese vertical text):`);
+      for (const d of p.dialogue) lines.push(`    - ${charName(d.character_id)}: 「${d.text}」`);
+    }
+    if (p.monologue.length > 0) {
+      lines.push(`  Inner monologue (square/thought bubble, vertical Japanese):`);
+      for (const m of p.monologue) lines.push(`    - ${charName(m.character_id)} (thinks): 「${m.text}」`);
+    }
+    if (p.narration.length > 0) {
+      lines.push(`  Narration boxes (rectangular caption, vertical Japanese):`);
+      for (const n of p.narration) lines.push(`    - ${n}`);
+    }
+    if (p.sfx.length > 0) {
+      lines.push(`  Sound effects (hand-drawn katakana/hiragana, integrated into artwork):`);
+      for (const s of p.sfx) lines.push(`    - ${s}`);
+    }
+    return lines.join("\n");
   }).join("\n\n");
 
   const sections = [
-    `B6 portrait Japanese seinen manga PAGE (${args.pageDimensions.width}x${args.pageDimensions.height} px), single page in BLACK AND WHITE only with screentone and hatching.`,
+    `B6 portrait Japanese light novel comicalization PAGE (${args.pageDimensions.width}x${args.pageDimensions.height} px), single page in BLACK AND WHITE only with screentone and hatching. Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (expressive character-driven art, large emotive eyes, light novel cover lineage), NOT seinen-realism.`,
     "",
     "ART STYLE:",
     styleHeader(args.bible),

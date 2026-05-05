@@ -11,9 +11,11 @@
  */
 import "../_env";
 import { promises as fs } from "node:fs";
+import path from "node:path";
 import {
   bibleSnapshotPath,
   bibleRefsDir,
+  STYLE_PLATES_DIR,
 } from "./_paths";
 import {
   generateCharacterRefsForBible,
@@ -21,6 +23,11 @@ import {
   generatePropRefsForBible,
 } from "../../../src/lib/manga/bible/v2-images";
 import type { BibleSnapshotV2 } from "../../../src/lib/manga/schemas-v2";
+
+async function findStylePlate(artStyle: string): Promise<string | null> {
+  const candidate = path.join(STYLE_PLATES_DIR, `${artStyle}.png`);
+  try { await fs.access(candidate); return candidate; } catch { return null; }
+}
 
 type Args = {
   slug: string;
@@ -77,6 +84,13 @@ async function main() {
   const refsDir = bibleRefsDir(args.slug);
   await fs.mkdir(refsDir, { recursive: true });
 
+  const stylePlatePath = await findStylePlate(snapshot.meta.art_style);
+  if (stylePlatePath) {
+    console.log(`[L02] style plate: ${stylePlatePath}`);
+  } else {
+    console.warn(`[L02] WARN: style plate not found for art_style=${snapshot.meta.art_style}`);
+  }
+
   const totals = { generated: 0, skipped: 0, failed: 0 };
 
   if (args.kinds.has("characters")) {
@@ -91,6 +105,8 @@ async function main() {
       characters: chars,
       concurrency: args.concurrency,
       skipExisting: args.skipExisting,
+      stylePlatePath,
+      imageTimeoutMs: 15 * 60 * 1000,
     });
     console.log(`[L02] characters: gen=${r.generated} skip=${r.skipped} fail=${r.failed}`);
     totals.generated += r.generated;
@@ -105,6 +121,8 @@ async function main() {
       refsDir,
       concurrency: args.concurrency,
       skipExisting: args.skipExisting,
+      stylePlatePath,
+      imageTimeoutMs: 15 * 60 * 1000,
     });
     console.log(`[L02] locations: gen=${r.generated} skip=${r.skipped} fail=${r.failed}`);
     totals.generated += r.generated;
@@ -119,6 +137,8 @@ async function main() {
       refsDir,
       concurrency: args.concurrency,
       skipExisting: args.skipExisting,
+      stylePlatePath,
+      imageTimeoutMs: 15 * 60 * 1000,
     });
     console.log(`[L02] props: gen=${r.generated} skip=${r.skipped} fail=${r.failed}`);
     totals.generated += r.generated;
