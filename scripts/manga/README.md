@@ -1,7 +1,7 @@
 # scripts/manga/ 構造 (v2)
 
 横読み白黒漫画パイプライン v2 のスクリプト群。
-SSoT: `~/.claude/plans/manga-pipeline-v2.md`
+SSoT: `docs/plans/manga/pipeline-v2.md`
 
 ## 12-Layer パイプライン
 
@@ -76,8 +76,8 @@ v2 化のため layers/L0N-*.ts に置き換えられた。v1 は scripts/manga/
 
 ## 関連
 
-- 設計 (SSoT): `~/.claude/plans/manga-pipeline-v2.md`
-- 旧設計 (アーカイブ): `~/.claude/plans/_archive-2026-05-02-codex-swift-kettle.md`
+- 設計 (SSoT): `docs/plans/manga/pipeline-v2.md`
+- 旧設計 (アーカイブ): `docs/plans/manga/_archive/pipeline-v1-2026-05-02.md`
 - ライブラリ: `src/lib/manga/`
 - 作法: `docs/strategy/manga_craft_guide.md`
 - データ: `data/manga/`

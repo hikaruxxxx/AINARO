@@ -26,7 +26,7 @@ content/manga/{slug}/
 
 - 戦略: `project_horizontal_manga_pivot.md`、`project_kdp_strategy.md`
 - 並行3作品: `project_genre_3parallel.md`（ダンジョン探索 / 転生貴族領地経営 / 現代ダンジョン）
-- SSoT: `~/.claude/plans/codex-swift-kettle.md`
+- SSoT: `docs/plans/manga/_archive/pipeline-v1-2026-05-02.md`
 - パイプライン: `docs/architecture/manga_pipeline.md`
 - 作法: `docs/strategy/manga_craft_guide.md`
 - スクリプト: `scripts/manga/README.md`

@@ -1,7 +1,7 @@
 /**
  * L8.6 Name Audit (rule-based, warning のみ)
  *
- * SSoT: ~/.claude/plans/codex-logical-waterfall.md
+ * SSoT: ~/.claude/plans/manga-pipeline-v2.md
  *
  * v2 で導入。LLM は使わず決定論ルールでネームを検査する。
  * 結果は warning として `name_manifest.json` と `name_audit.json` に書き出される。

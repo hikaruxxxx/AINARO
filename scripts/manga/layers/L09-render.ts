@@ -62,7 +62,7 @@ function parseArgs(): Args {
  * - ファイル不存在: hard fail (--skip-name-gate で回避可)
  * - approved 以外のページ: 警告して skip
  *
- * SSoT: ~/.claude/plans/codex-logical-waterfall.md
+ * SSoT: docs/plans/manga/name-gate.md
  */
 async function loadNameApproval(slug: string, episode: number): Promise<NameApproval | null> {
   try {

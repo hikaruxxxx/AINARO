@@ -2,7 +2,7 @@
 
 KDP 出版事業の **税務・経費・契約証跡** をテキストで残す台帳。
 
-設計根拠: `~/.claude/plans/b-1-codex-gentle-bengio.md` Track D-2
+設計根拠: `docs/plans/manga/kdp.md` Track D-2
 
 ## なぜこの台帳が必要か
 

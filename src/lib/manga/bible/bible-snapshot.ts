@@ -11,7 +11,7 @@
  *     扱っていた素材を、作品単位で1束にまとめる集約型
  *   - DB の character_bibles / location_bibles に投入する前段の中間表現
  *
- * SSoT: ~/.claude/plans/codex-swift-kettle.md (Month 2 Continuity Packet 設計の前段)
+ * SSoT: docs/plans/manga/_archive/pipeline-v1-2026-05-02.md (Month 2 Continuity Packet 設計の前段)
  */
 
 import type {

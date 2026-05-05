@@ -1,7 +1,7 @@
 # src/lib/manga/ ライブラリ構造 (v2)
 
 横読み白黒漫画パイプライン v2 の本流ロジック。
-SSoT: `~/.claude/plans/manga-pipeline-v2.md`
+SSoT: `docs/plans/manga/pipeline-v2.md`
 
 ## 12-Layer 構造
 
@@ -121,7 +121,7 @@ publish-v2/kdp/* → volumes/vNN/kdp/{manuscript,cover}.pdf
 ## 関連
 
 - スクリプト: `scripts/manga/README.md`
-- SSoT: `~/.claude/plans/manga-pipeline-v2.md`
-- 旧 SSoT: `~/.claude/plans/_archive-2026-05-02-codex-swift-kettle.md`
+- SSoT: `docs/plans/manga/pipeline-v2.md`
+- 旧 SSoT: `docs/plans/manga/_archive/pipeline-v1-2026-05-02.md`
 - 作法: `docs/strategy/manga_craft_guide.md`
 - データ: `data/manga/README.md`

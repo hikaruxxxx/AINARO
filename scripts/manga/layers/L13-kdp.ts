@@ -5,7 +5,7 @@
  *                            + kdp-release.json (入稿台帳, B-1計画 Track A1-1)
  *                            + kdp-input.md     (管理画面コピペ用, A1-5)
  *
- * 設計根拠: ~/.claude/plans/b-1-codex-gentle-bengio.md (Codexレビュー反映版)
+ * 設計根拠: docs/plans/manga/kdp.md (Codexレビュー反映版)
  *   - A1-2: preflight で 79p未満背表紙テキスト禁止を強制
  *   - A1-3: 表紙画像を外部入力必須化 (本文1ページ目流用を禁止)
  *   - A1-4: AI開示を KDP公式5区分で構造化

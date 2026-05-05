@@ -1,7 +1,8 @@
 # 漫画パイプライン v2 アーキテクチャ (2026-05-02 全面再設計)
 
-> SSoT: `~/.claude/plans/manga-pipeline-v2.md`
-> 旧 SSoT (縦読み + 横読み 17層): `~/.claude/plans/_archive-2026-05-02-codex-swift-kettle.md`
+> SSoT (実装): `docs/plans/manga/pipeline-v2.md`
+> 上位戦略 (投資配分・陳腐化耐性): `docs/plans/manga/strategy.md`
+> 旧 SSoT (縦読み + 横読み 17層): `docs/plans/manga/_archive/pipeline-v1-2026-05-02.md`
 > 対応型定義: `src/lib/manga/schemas-v2.ts`, `src/lib/manga/schemas.ts` (primitive 型)
 
 ## 1. 位置づけ
@@ -170,7 +171,7 @@ npx tsx scripts/manga/pipeline.ts \
 
 ## 12. 関連
 
-- SSoT: `~/.claude/plans/manga-pipeline-v2.md`
+- SSoT: `docs/plans/manga/pipeline-v2.md`
 - 作法: `docs/strategy/manga_craft_guide.md`
 - 戦略: `docs/strategy/platform_strategy_v4.md`, `project_kdp_strategy.md` (memory)
 - ライブラリ: `src/lib/manga/README.md`
