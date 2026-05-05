@@ -16,6 +16,7 @@ import {
   handleNameApprovalGet,
   handleNameApprovalPost,
 } from "./handlers/name-approval";
+import { handleNameManifest } from "./handlers/name-manifest";
 import { handleManifest } from "./handlers/manifest";
 import {
   handleRevisionQueueGet,
@@ -140,6 +141,10 @@ export async function handleApi(
         return handleNameApprovalPost(scoped.slug, scoped.episode, body, res);
       }
       return send(res, 405, { error: "method not allowed" });
+    }
+    if (tail === "/name-manifest") {
+      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      return handleNameManifest(scoped.slug, scoped.episode, res);
     }
     if (tail === "/manifest") {
       if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });

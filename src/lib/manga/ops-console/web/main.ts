@@ -4,6 +4,7 @@ import { mountSidebar } from "./sidebar";
 import { mountAssetsView } from "./views/assets";
 import { mountLayersView } from "./views/layers";
 import { mountNameGateView } from "./views/name-gate";
+import { mountRevisionView } from "./views/revision";
 import { mountWorksView } from "./views/works";
 
 type Unmount = () => void;
@@ -45,6 +46,7 @@ function mountCurrentView(main: HTMLElement): () => void {
     prevView = state.currentView;
     if (state.currentView === "assets") unmount = mountAssetsView(main);
     else if (state.currentView === "layers") unmount = mountLayersView(main);
+    else if (state.currentView === "revision") unmount = mountRevisionView(main);
     else if (state.currentView === "works") unmount = mountWorksView(main);
     else unmount = mountNameGateView(main);
   });
