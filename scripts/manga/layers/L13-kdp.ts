@@ -19,7 +19,9 @@ import {
   workMetaPath,
   bubblesDir,
   kdpDir,
+  workDir,
 } from "./_paths";
+import { resolveBubblePagesForEpisode } from "../../../src/lib/manga/publish-v2/kdp/adopted-resolver";
 import {
   buildManuscriptPdf,
 } from "../../../src/lib/manga/publish-v2/kdp/manuscript-pdf";
@@ -106,18 +108,27 @@ function parseArgs(): Args {
   return a as Args;
 }
 
+/**
+ * adopted_versions.json があれば採用版 image_path を、なければ bubbles/p{NN}.png を返す。
+ * Phase D で page-level の採用反映を実現するヘルパー (panel-level は L9.5 後に拡張)。
+ */
 async function listPagesForEpisode(slug: string, ep: number): Promise<string[]> {
-  const dir = bubblesDir(slug, ep);
-  let entries: string[] = [];
-  try {
-    entries = await fs.readdir(dir);
-  } catch {
-    return [];
+  const resolved = await resolveBubblePagesForEpisode({
+    slug,
+    episode: ep,
+    bubblesDir: bubblesDir(slug, ep),
+    workRoot: workDir(slug),
+  });
+  if (resolved.length === 0) return [];
+  // ログで採用状況を可視化
+  const adoptedCount = resolved.filter((r) => r.source === "adopted").length;
+  if (adoptedCount > 0) {
+    console.log(`[L13] ep${ep}: ${adoptedCount}/${resolved.length} pages use adopted versions`);
+    for (const r of resolved.filter((x) => x.source === "adopted")) {
+      console.log(`  - p${String(r.page_no).padStart(2, "0")}: ${r.chosen_version} (${r.image_path})`);
+    }
   }
-  return entries
-    .filter((f) => /^p\d{2}\.png$/.test(f))
-    .sort()
-    .map((f) => path.join(dir, f));
+  return resolved.map((r) => r.image_path);
 }
 
 /**
