@@ -224,12 +224,21 @@ async function handleRevisionQueuePost(
     for_version,
   };
   const filePath = revisionQueuePath(fixedSlug, fixedEpisode);
+  let duplicateWarning: string | null = null;
   await withFileLock(`queue#${fixedSlug}#${fixedEpisode}`, async () => {
+    // 既存 queue を読んで、同 panel_id で resolved_version 未設定のものがあれば警告
+    const existing = await readJsonl<RevisionEntry>(filePath);
+    const unresolvedSamePanel = existing.find(
+      (e) => e.panel_id === panel_id && !e.resolved_version
+    );
+    if (unresolvedSamePanel) {
+      duplicateWarning = `panel "${panel_id}" に未消化の指示が既に ${existing.filter((e) => e.panel_id === panel_id && !e.resolved_version).length} 件あります`;
+    }
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     await fs.appendFile(filePath, JSON.stringify(entry) + "\n", "utf-8");
   });
   res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-  res.end(JSON.stringify({ ok: true, id: entry.id }));
+  res.end(JSON.stringify({ ok: true, id: entry.id, duplicate_warning: duplicateWarning }));
 }
 
 async function handleAdoptedGet(slug: string, episode: number, res: http.ServerResponse): Promise<void> {

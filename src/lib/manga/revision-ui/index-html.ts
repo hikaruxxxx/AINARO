@@ -78,6 +78,7 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
     .panel img { width:100%; height:100%; object-fit:contain; display:block; }
     .panel .label { position:absolute; left:4px; top:4px; background:rgba(31,41,55,0.85); color:#fff; padding:1px 6px; border-radius:3px; font-size:10px; font-weight:600; }
     .panel .ver { position:absolute; right:4px; top:4px; background:rgba(37,99,235,0.85); color:#fff; padding:1px 6px; border-radius:3px; font-size:10px; font-weight:600; }
+    .panel .rev-badge { position:absolute; right:4px; bottom:4px; background:rgba(245,158,11,0.95); color:#fff; padding:1px 7px; border-radius:10px; font-size:11px; font-weight:700; min-width:18px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.3); }
     .panel .miss { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#9ca3af; font-size:11px; }
     .filters { display:flex; gap:10px; margin:10px 14px 0; padding:8px 12px; background:#fff; border-radius:6px; align-items:center; flex-wrap:wrap; font-size:13px; }
     .filters label { display:flex; align-items:center; gap:4px; cursor:pointer; }
@@ -108,6 +109,9 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
     .compare-row .ver-card.adopted button { background:#16a34a; }
     .empty { padding:40px; text-align:center; color:#6b7280; font-size:14px; }
     .help { position:fixed; bottom:10px; right:10px; background:rgba(31,41,55,0.95); color:#fff; padding:8px 12px; border-radius:6px; font-size:11px; line-height:1.5; }
+    .toast { position:fixed; top:60px; right:14px; padding:10px 14px; border-radius:6px; font-size:13px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:1000; transition:opacity .3s; }
+    .toast-ok { background:#16a34a; color:#fff; }
+    .toast-warn { background:#f59e0b; color:#fff; }
     .help code { background:rgba(255,255,255,0.15); padding:1px 4px; border-radius:2px; font-family:ui-monospace,monospace; }
   </style>
 </head>
@@ -229,6 +233,26 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
       return s;
     }
 
+    /** panel_id → 未消化 revision 件数 (resolved_version 未設定のもの) */
+    function unresolvedCountByPanel() {
+      const m = new Map();
+      for (const r of state.manifest.revision_queue || []) {
+        if (r.resolved_version) continue;
+        m.set(r.panel_id, (m.get(r.panel_id) || 0) + 1);
+      }
+      return m;
+    }
+
+    /** panel_id → 最後の未消化 instruction (tooltip 用) */
+    function lastUnresolvedByPanel() {
+      const m = new Map();
+      for (const r of state.manifest.revision_queue || []) {
+        if (r.resolved_version) continue;
+        m.set(r.panel_id, r);  // 後勝ち = 最新
+      }
+      return m;
+    }
+
     function adoptedPanels() {
       return state.manifest.adopted?.panels || {};
     }
@@ -240,12 +264,17 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
     }
 
     function updateSummary() {
-      const queue = (state.manifest.revision_queue || []).length;
+      const all = state.manifest.revision_queue || [];
+      const unresolved = all.filter(r => !r.resolved_version).length;
+      const resolved = all.length - unresolved;
       const adopted = Object.keys(state.manifest.adopted?.panels || {}).length;
       const failed = (state.manifest.audit?.failed_panel_ids || []).length;
-      document.getElementById('cnt-queue').textContent = queue;
+      document.getElementById('cnt-queue').textContent = unresolved + (resolved > 0 ? ' (' + resolved + ' 消化済)' : '');
       document.getElementById('cnt-adopted').textContent = adopted;
       document.getElementById('cnt-failed').textContent = failed;
+      const badge = document.getElementById('badge-resolved');
+      if (resolved > 0) { badge.textContent = '+' + resolved + ' 消化'; badge.classList.add('visible'); }
+      else { badge.classList.remove('visible'); }
       document.querySelectorAll('header.top nav button[data-mode]').forEach(b => {
         b.classList.toggle('active', b.dataset.mode === state.mode);
       });
@@ -262,6 +291,8 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
       const versions = buildVersionMap(state.layer);
       const failed = failedPanelSet();
       const revised = revisedPanelSet();
+      const unresolved = unresolvedCountByPanel();
+      const lastInstr = lastUnresolvedByPanel();
       const adopted = adoptedPanels();
 
       const pages = state.manifest.page_plan.pages.slice().sort((a, b) => a.page_no - b.page_no);
@@ -288,10 +319,19 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
           if (failed.has(p.panel_id)) cls.push('failed');
           if (revised.has(p.panel_id)) cls.push('has-revision');
           if (showVersion && showVersion !== 'v1') cls.push('adopted-v2plus');
+          const unresolvedCount = unresolved.get(p.panel_id) || 0;
+          const lastEntry = lastInstr.get(p.panel_id);
+          const tooltip = lastEntry
+            ? '指示 ' + unresolvedCount + ' 件 / 最新: ' + lastEntry.instruction.slice(0, 80)
+            : (failed.has(p.panel_id) ? '監査失敗 panel' : '');
+          const revisionBadge = unresolvedCount > 0
+            ? '<span class="rev-badge">' + unresolvedCount + '</span>'
+            : '';
           cards.push(
-            '<div class="' + cls.join(' ') + '" data-panel-id="' + escapeHtml(p.panel_id) + '" data-page-no="' + page.page_no + '" data-panel-no="' + p.panel_no + '" data-image-path="' + escapeHtml(imgPath) + '" data-for-version="' + escapeHtml(showVersion) + '">' +
+            '<div class="' + cls.join(' ') + '" data-panel-id="' + escapeHtml(p.panel_id) + '" data-page-no="' + page.page_no + '" data-panel-no="' + p.panel_no + '" data-image-path="' + escapeHtml(imgPath) + '" data-for-version="' + escapeHtml(showVersion) + '" title="' + escapeHtml(tooltip) + '">' +
             '<span class="label">#' + p.reading_order + ' ' + escapeHtml(p.shot_type) + '</span>' +
             '<span class="ver">' + escapeHtml(showVersion) + '</span>' +
+            revisionBadge +
             '<img src="/' + escapeHtml(imgPath) + '" loading="lazy" onerror="this.style.display=\\'none\\'; this.parentElement.insertAdjacentHTML(\\'beforeend\\', \\'<div class=miss>未生成</div>\\')">' +
             '</div>'
           );
@@ -399,12 +439,24 @@ export function renderRevisionUiHtml(slug: string, episode: number, episodeId: s
         body: JSON.stringify({ slug, episode, ...modalContext, instruction, checked_tags }),
       });
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
         modal.close();
+        if (data.duplicate_warning) toast('⚠ ' + data.duplicate_warning, 'warn');
+        else toast('✓ 修正指示を queue に追加しました', 'ok');
         await loadManifest();
       } else {
         alert('送信失敗 ' + res.status);
       }
     });
+
+    /** 簡易 toast (3秒で消える) */
+    function toast(msg, kind) {
+      const div = document.createElement('div');
+      div.className = 'toast toast-' + kind;
+      div.textContent = msg;
+      document.body.appendChild(div);
+      setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 3000);
+    }
 
     // ===== nav / filter listeners =====
     document.querySelectorAll('header.top nav button[data-mode]').forEach(b => {

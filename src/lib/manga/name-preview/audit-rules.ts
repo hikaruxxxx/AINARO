@@ -65,17 +65,20 @@ export type AuditFinding = {
   rule: AuditRuleKind;
   severity: AuditSeverity;
   message: string;
+  /** ref_thumbnail_missing / dialogue_speaker_absent など、character_id を主体とするルール用 */
+  character_id?: string;
 };
 
 export type PageAuditInput = {
   page: StoryboardPageV2;
-  pagePlanPage: PagePlanPage;
+  /** v3 mapper 由来 page_plan。現行ルールでは未参照だが、将来の layout-aware ルール用に予約 */
+  pagePlanPage?: PagePlanPage;
   refsExists: (relPath: string) => boolean;
 };
 
 export function auditPage(input: PageAuditInput): AuditFinding[] {
   const findings: AuditFinding[] = [];
-  const { page, pagePlanPage, refsExists } = input;
+  const { page, refsExists } = input;
   const pageNo = page.page_no;
 
   // panel_overcrowd / panel_undercrowd
@@ -232,9 +235,10 @@ export function auditPage(input: PageAuditInput): AuditFinding[] {
     });
   }
 
-  // panel-scoped checks
+  // panel-scoped checks (ref_thumbnail_missing は page 内で character_id 単位 dedupe)
+  const refMissingCharsOnPage = new Set<string>();
   for (const panel of page.panels) {
-    findings.push(...auditPanel(panel, pageNo, refsExists));
+    findings.push(...auditPanel(panel, pageNo, refsExists, refMissingCharsOnPage));
   }
 
   return findings;
@@ -243,7 +247,8 @@ export function auditPage(input: PageAuditInput): AuditFinding[] {
 function auditPanel(
   panel: PanelV2,
   pageNo: number,
-  refsExists: (relPath: string) => boolean
+  refsExists: (relPath: string) => boolean,
+  refMissingCharsOnPage: Set<string>
 ): AuditFinding[] {
   const findings: AuditFinding[] = [];
 
@@ -290,25 +295,26 @@ function auditPanel(
         rule: "dialogue_speaker_absent",
         severity: "error",
         message: `panel#${panel.panel_no}: dialogue speaker "${d.character_id}" が entities.characters に居ない`,
+        character_id: d.character_id,
       });
       break;
     }
   }
 
-  // ref_thumbnail_missing (主要登場キャラのみ)
+  // ref_thumbnail_missing (主要登場キャラのみ、page 内 character_id 単位で 1 件)
   for (const c of panel.entities.characters) {
     if (c.role === "background" || c.role === "silhouette") continue;
+    if (refMissingCharsOnPage.has(c.character_id)) continue;
     const exists = refsExists(`bible/refs/characters/${c.character_id}/face_front.png`);
     if (!exists) {
+      refMissingCharsOnPage.add(c.character_id);
       findings.push({
         page_no: pageNo,
-        panel_id: panel.panel_id,
-        panel_no: panel.panel_no,
         rule: "ref_thumbnail_missing",
         severity: "info",
-        message: `panel#${panel.panel_no}: ${c.character_id} の face_front.png 不在`,
+        message: `${c.character_id} の face_front.png 不在 (page ${pageNo} 内で複数 panel に登場)`,
+        character_id: c.character_id,
       });
-      break;
     }
   }
 

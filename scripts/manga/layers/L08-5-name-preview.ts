@@ -23,9 +23,11 @@ import {
   nameManifestPath,
   nameIndexHtmlPath,
   nameApprovalPath,
+  nameAuditPath,
 } from "./_paths";
 import { renderPageSvg } from "../../../src/lib/manga/name-preview/svg-renderer";
 import { renderIndexHtml } from "../../../src/lib/manga/name-preview/index-html";
+import { auditPage, type AuditFinding } from "../../../src/lib/manga/name-preview/audit-rules";
 import {
   pendingApproval,
   type NameManifest,
@@ -104,6 +106,7 @@ async function main() {
 
   const sbPagesByNo = new Map(storyboard.pages.map((p) => [p.page_no, p]));
   const manifestPages: NameManifestPage[] = [];
+  const allFindings: AuditFinding[] = [];
 
   for (const planPage of pagePlan.pages) {
     const sbPage = sbPagesByNo.get(planPage.page_no);
@@ -111,6 +114,14 @@ async function main() {
       console.warn(`[L08.5] storyboard page ${planPage.page_no} missing, skipping`);
       continue;
     }
+    // L8.6 audit (rule-based) を一度だけ計算し、SVG renderer に渡す
+    const findings = auditPage({
+      page: sbPage,
+      pagePlanPage: planPage,
+      refsExists,
+    });
+    allFindings.push(...findings);
+
     const { svg, warnings } = renderPageSvg({
       slug: args.slug,
       episode: args.episode,
@@ -118,6 +129,7 @@ async function main() {
       storyboardPage: sbPage,
       bible,
       refsExists,
+      findings,
     });
     const filename = `p${String(planPage.page_no).padStart(2, "0")}.svg`;
     await fs.writeFile(path.join(outDir, filename), svg, "utf-8");
@@ -127,8 +139,31 @@ async function main() {
       panel_count: planPage.panels.length,
       svg_filename: filename,
       warnings,
+      audit_findings: findings.map((f) => ({
+        page_no: f.page_no,
+        panel_id: f.panel_id,
+        panel_no: f.panel_no,
+        rule: f.rule,
+        severity: f.severity,
+        message: f.message,
+        character_id: f.character_id,
+      })),
     });
   }
+
+  // L8.6 audit 結果を name_audit.json に書き出す (manifest.warnings は subset)
+  const auditReport = {
+    schema_version: 1 as const,
+    slug: args.slug,
+    episode: args.episode,
+    episode_id: storyboard.episode_id,
+    audited_at: new Date().toISOString(),
+    pages_total: pagePlan.pages.length,
+    findings: allFindings,
+    counts_by_rule: countByRule(allFindings),
+    counts_by_severity: countBySeverity(allFindings),
+  };
+  await fs.writeFile(nameAuditPath(args.slug, args.episode), JSON.stringify(auditReport, null, 2), "utf-8");
 
   const manifest: NameManifest = {
     schema_version: 1,
@@ -157,8 +192,22 @@ async function main() {
   }
 
   const totalWarnings = manifestPages.reduce((s, p) => s + p.warnings.length, 0);
-  console.log(`[L08.5] DONE: pages=${manifestPages.length} warnings=${totalWarnings}`);
+  const sev = auditReport.counts_by_severity;
+  console.log(`[L08.5] DONE: pages=${manifestPages.length} manifest_warnings=${totalWarnings} audit=info:${sev.info ?? 0}/warn:${sev.warn ?? 0}/error:${sev.error ?? 0}`);
   console.log(`[L08.5] outputs: ${outDir}`);
+  console.log(`[L08.5] audit:   ${nameAuditPath(args.slug, args.episode)}`);
+}
+
+function countByRule(findings: AuditFinding[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const f of findings) out[f.rule] = (out[f.rule] ?? 0) + 1;
+  return out;
+}
+
+function countBySeverity(findings: AuditFinding[]): Record<string, number> {
+  const out: Record<string, number> = { info: 0, warn: 0, error: 0 };
+  for (const f of findings) out[f.severity] = (out[f.severity] ?? 0) + 1;
+  return out;
 }
 
 main().catch((e) => { console.error("[L08.5] FAILED:", e); process.exit(1); });

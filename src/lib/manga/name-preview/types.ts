@@ -1,7 +1,7 @@
 /**
  * L8.5 / L8.7 Name Preview & Approval スキーマ
  *
- * SSoT: ~/.claude/plans/codex-logical-waterfall.md
+ * SSoT: ~/.claude/plans/manga-pipeline-v2.md
  *
  * v1 スコープ:
  * - L8.5 が SVG ネーム + index.html + name_manifest.json を生成
@@ -78,12 +78,29 @@ export type NameWarning = {
   message: string;
 };
 
+/**
+ * audit-rules.ts の AuditFinding を type-erased に保持するための manifest 用 lite 型。
+ * 型循環を避けるため rule は文字列 (audit-rules.AuditRuleKind が SSoT)。
+ */
+export type NameAuditFindingLite = {
+  page_no: number;
+  panel_id?: string;
+  panel_no?: number;
+  rule: string;
+  severity: "info" | "warn" | "error";
+  message: string;
+  character_id?: string;
+};
+
 export type NameManifestPage = {
   page_no: number;
   page_role: string;
   panel_count: number;
   svg_filename: string;
+  /** 互換用 subset。新規 UI は audit_findings を使う */
   warnings: NameWarning[];
+  /** L8.6 の 14 ルール全て (severity 付き) */
+  audit_findings: NameAuditFindingLite[];
 };
 
 export type NameManifest = {

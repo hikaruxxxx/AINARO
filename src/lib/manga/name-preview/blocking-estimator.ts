@@ -30,12 +30,41 @@ export type EstimatedBlocking = {
 };
 
 /**
+ * 同一 character_id が複数役割で出てくるケースを正規化する。
+ * role 優先順位: speaker > listener > background > silhouette
+ * (speaker は最強、silhouette は最弱)
+ *
+ * これにより同一キャラが両側に二重配置される事故を防ぐ。
+ */
+const ROLE_PRIORITY: Record<string, number> = {
+  speaker: 4,
+  listener: 3,
+  background: 2,
+  silhouette: 1,
+};
+
+function dedupeCharactersByRole(
+  characters: PanelV2["entities"]["characters"]
+): PanelV2["entities"]["characters"] {
+  const byId = new Map<string, PanelV2["entities"]["characters"][number]>();
+  for (const c of characters) {
+    const prev = byId.get(c.character_id);
+    if (!prev || (ROLE_PRIORITY[c.role] ?? 0) > (ROLE_PRIORITY[prev.role] ?? 0)) {
+      byId.set(c.character_id, c);
+    }
+  }
+  return Array.from(byId.values());
+}
+
+/**
  * speaker 優先 → 右側
  * listener → 左側
  * background / silhouette → 中央背後
  * focus_entity が登場キャラ → そのキャラの zone を focus に
  *
  * 多人数時 (3+) は focus 以外の同 role が混在 → silhouette_ids へ
+ *
+ * 同一 character_id が複数 role で含まれる場合は最高優先 role に正規化してから振り分ける。
  */
 export function estimateBlocking(panel: PanelV2): EstimatedBlocking {
   const zones: Record<BlockingZone, string[]> = {
@@ -45,7 +74,8 @@ export function estimateBlocking(panel: PanelV2): EstimatedBlocking {
   };
   const silhouette_ids: string[] = [];
 
-  const characters = panel.entities.characters;
+  // 同一 character_id 重複を role 優先順で正規化
+  const characters = dedupeCharactersByRole(panel.entities.characters);
   const focusId = panel.entities.focus_entity_id;
 
   // 役割で振り分け

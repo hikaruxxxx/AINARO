@@ -33,9 +33,16 @@ export function renderIndexHtml(manifest: NameManifest, slug: string, episode: n
 
   const pageCards = manifest.pages
     .map((p) => {
-      const warningHtml = p.warnings.length === 0
-        ? '<span class="ok">✓ 警告なし</span>'
-        : p.warnings.slice(0, 3).map((w) => `<span class="warn" title="${escapeHtml(w.kind)}">⚠ ${escapeHtml(w.message)}</span>`).join("<br>");
+      // 14 ルール全部 (severity 別) を表示。findings 不在の旧 manifest は warnings へ fallback。
+      const findings = p.audit_findings ?? [];
+      const warningHtml = findings.length === 0
+        ? (p.warnings.length === 0
+          ? '<span class="ok">✓ 警告なし</span>'
+          : p.warnings.slice(0, 5).map((w) => `<span class="warn sev-warn" title="${escapeHtml(w.kind)}">⚠ ${escapeHtml(w.message)}</span>`).join("<br>"))
+        : findings.slice(0, 6).map((f) => {
+          const icon = f.severity === "error" ? "✖" : f.severity === "warn" ? "⚠" : "ⓘ";
+          return `<span class="warn sev-${escapeHtml(f.severity)}" title="${escapeHtml(f.rule)}">${icon} ${escapeHtml(f.message)}</span>`;
+        }).join("<br>");
       return `<article class="page-card" data-page-no="${p.page_no}" tabindex="0" id="page-${p.page_no}">
   <header>
     <span class="page-no">P.${p.page_no}</span>
@@ -89,7 +96,10 @@ export function renderIndexHtml(manifest: NameManifest, slug: string, episode: n
     .svg-wrap object { width: 100%; height: 100%; pointer-events: none; }
     .warnings { padding: 8px 0; font-size: 12px; line-height: 1.5; }
     .warnings .ok { color: #16a34a; }
-    .warnings .warn { color: #b91c1c; display: block; }
+    .warnings .warn { display: block; }
+    .warnings .sev-error { color: #991b1b; font-weight: 600; }
+    .warnings .sev-warn  { color: #b45309; }
+    .warnings .sev-info  { color: #6b7280; }
     .reasons { display: flex; flex-wrap: wrap; gap: 8px 12px; padding: 6px 0; font-size: 12px; }
     .reasons label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
     textarea.note { width: 100%; min-height: 36px; padding: 6px 8px; font-size: 12px; border: 1px solid #d1d5db; border-radius: 4px; font-family: inherit; resize: vertical; }

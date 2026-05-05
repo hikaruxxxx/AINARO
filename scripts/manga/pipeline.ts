@@ -20,6 +20,8 @@ type Args = {
   to?: string;
   layer?: string; // 単 layer 実行
   force?: boolean;
+  /** L09 の name gate を bypass する。L09 layer 実行時のみ forward される */
+  skipNameGate?: boolean;
   conceptPath?: string;
   briefFile?: string;
   episodes?: number[];
@@ -27,20 +29,34 @@ type Args = {
   publicationDate?: string;
 };
 
+/** boolean flags: 値を取らない */
+const BOOLEAN_FLAGS = new Set(["force", "skip-name-gate"]);
+
 function parseArgs(): Args {
   const a: Partial<Args> = {};
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    let key: string | null = null; let val: string | null = null;
     const eq = arg.match(/^--([^=]+)=(.*)$/);
-    if (eq) [, key, val] = eq;
-    else { const flag = arg.match(/^--(.+)$/); if (flag && i + 1 < argv.length) { key = flag[1]; val = argv[++i]; } }
-    if (!key) {
-      // boolean flag
-      const bool = arg.match(/^--(.+)$/);
-      if (bool && bool[1] === "force") { a.force = true; }
-      continue;
+    let key: string | null = null;
+    let val: string | null = null;
+    if (eq) {
+      [, key, val] = eq;
+    } else {
+      const flag = arg.match(/^--(.+)$/);
+      if (!flag) continue;
+      key = flag[1];
+      // boolean flag は値を取らない
+      if (BOOLEAN_FLAGS.has(key)) {
+        if (key === "force") a.force = true;
+        else if (key === "skip-name-gate") a.skipNameGate = true;
+        continue;
+      }
+      // 次 token が `--` で始まるなら値ではなくフラグ → スキップ
+      const nextToken = argv[i + 1];
+      if (i + 1 >= argv.length || (nextToken && nextToken.startsWith("--"))) continue;
+      val = nextToken;
+      i++;
     }
     if (val === null) continue;
     if (key === "slug") a.slug = val;
@@ -127,6 +143,10 @@ function buildLayerArgs(layer: LayerId, args: Args): string[] {
   if (layer === "L03") {
     if (!args.briefFile) throw new Error("L03: --brief-file required");
     base.push("--brief-file", args.briefFile);
+  }
+  // L09 のみ name gate bypass フラグを forward
+  if (layer === "L09" && args.skipNameGate) {
+    base.push("--skip-name-gate");
   }
   return base;
 }

@@ -2,7 +2,7 @@
  * 縦読み漫画パイプライン Phase 0 型定義
  *
  * 対応マイグレーション: supabase/migrations/20260501000000_manga_pipeline.sql
- * 対応プラン: ~/.claude/plans/codex-encapsulated-knuth.md
+ * 対応プラン: docs/plans/manga/_archive/pipeline-vertical-readout.md
  *
  * DB の row 型と TypeScript 型を 1:1 で対応させる。
  * JSONB 列のスキーマは ./schemas.ts に分離する。
