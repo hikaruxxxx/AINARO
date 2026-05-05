@@ -3,6 +3,17 @@ import type {
   NameApproval as SourceNameApproval,
   NameManifest as SourceNameManifest,
 } from "../../../name-preview/types";
+import type {
+  AdoptedVersions,
+  RenderManifestEntry,
+  RevisionEntry,
+  RevisionTag,
+} from "../../../revision-ui/types";
+import type {
+  AuditReport,
+  EpisodeStoryboardV2,
+  PagePlanV2,
+} from "../../../schemas-v2";
 
 export class ApiError extends Error {
   constructor(
@@ -25,17 +36,24 @@ export type Manifest = {
   episode: number;
   episode_id: string;
   generated_at: string;
-  page_plan?: unknown;
-  storyboard?: unknown;
-  audit?: unknown;
-  render_manifest?: unknown[];
-  revision_queue?: unknown[];
-  adopted?: unknown;
+  page_plan: PagePlanV2;
+  storyboard: EpisodeStoryboardV2;
+  audit: AuditReport | null;
+  render_manifest: RenderManifestEntry[];
+  revision_queue: RevisionEntry[];
+  adopted: AdoptedVersions;
   bible_characters?: Array<{ id: string; name: string }>;
 };
 
 export type NameManifest = SourceNameManifest;
 export type NameApproval = SourceNameApproval;
+export type {
+  AdoptedPanelChoice,
+  AdoptedVersions,
+  RenderManifestEntry,
+  RevisionEntry,
+  RevisionTag,
+} from "../../../revision-ui/types";
 
 /**
  * 全エラーを ApiError に正規化する fetch wrapper。
@@ -63,7 +81,7 @@ async function getJson<T>(path: string): Promise<T> {
   }
 }
 
-async function postJson<T>(path: string, body: unknown): Promise<T> {
+export async function postJson<T>(path: string, body: unknown): Promise<T> {
   let res: Response;
   try {
     res = await fetch(path, {
@@ -125,6 +143,51 @@ export function apiPostNameApproval(
 ): Promise<{ ok: true; page_no: number; status: string; rerun_from: string | null }> {
   return postJson(
     `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/name-approval`,
+    body
+  );
+}
+
+export function apiGetRevisionQueue(
+  slug: string,
+  episode: number
+): Promise<{ entries: RevisionEntry[] }> {
+  return getJson<{ entries: RevisionEntry[] }>(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/revision-queue`
+  );
+}
+
+export function apiPostRevisionQueue(
+  slug: string,
+  episode: number,
+  body: {
+    panel_id: string;
+    page_no: number;
+    panel_no?: number;
+    instruction: string;
+    checked_tags: RevisionTag[];
+    image_path: string;
+    for_version: string;
+  }
+): Promise<{ ok: true; id: string; duplicate_warning: string | null }> {
+  return postJson(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/revision-queue`,
+    body
+  );
+}
+
+export function apiGetAdopted(slug: string, episode: number): Promise<AdoptedVersions> {
+  return getJson<AdoptedVersions>(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/adopted-versions`
+  );
+}
+
+export function apiPostAdopted(
+  slug: string,
+  episode: number,
+  body: { panel_id: string; chosen_version: string; image_path: string; note?: string }
+): Promise<{ ok: true; panel_id: string; choice: AdoptedVersions["panels"][string] }> {
+  return postJson(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/adopted-versions`,
     body
   );
 }
