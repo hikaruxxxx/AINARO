@@ -524,6 +524,8 @@ export type BibleAssetView = {
   style_directives?: unknown;
   visual_motifs?: unknown;
   continuity_seeds?: unknown;
+  narration_style_guide?: unknown;
+  nav_full_spec?: unknown;
   volume_synopsis?: unknown;
   refs: {
     characters: BibleCharacterRef[];

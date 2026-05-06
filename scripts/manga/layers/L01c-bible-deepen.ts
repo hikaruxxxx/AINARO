@@ -2,7 +2,7 @@
  * L1.6 Bible Deepen
  *
  * snapshot.json + lint_report.json + V2企画書 + 画風参考フレーム説明 を Codex CLI text に流し、
- * 浅さを埋める patch を取得 → snapshot.json を v2.1 に書き戻し (旧版は snapshot.v2.json として退避)
+ * 浅さを埋める patch を取得 → snapshot.json を deepen 後版に書き戻し (旧版は snapshot.bak-{timestamp}.json として退避)
  *
  * Usage:
  *   npx tsx scripts/manga/layers/L01c-bible-deepen.ts \
@@ -83,11 +83,12 @@ async function main() {
 
   const enhanced = applyDeepEnhancements({ bible, patch: patch as never });
 
-  // 旧版を snapshot.v2.json として退避し、本体を上書き
-  const backup = path.join(bibleDir(args.slug), "snapshot.v2.json");
+  // 旧版をタイムスタンプ付き backup として退避し、本体を上書き
+  const ts = new Date().toISOString().slice(0, 16).replace(/:/g, "-");
+  const backup = path.join(bibleDir(args.slug), `snapshot.bak-${ts}.json`);
   await fs.writeFile(backup, JSON.stringify(bible, null, 2));
   await fs.writeFile(bibleSnapshotPath(args.slug), JSON.stringify(enhanced, null, 2));
-  console.log(`[L01c] backup of v2 → ${backup}`);
+  console.log(`[L01c] backup of pre-deepen bible → ${backup}`);
   console.log(`[L01c] saved enhanced → ${bibleSnapshotPath(args.slug)}`);
 
   if (args.reLint) {

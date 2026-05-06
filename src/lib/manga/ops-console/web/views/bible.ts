@@ -29,7 +29,7 @@ import {
 import { store } from "../lib/store";
 import { navigateToAiEdit } from "../lib/layer-actions";
 
-type BibleTab = "world" | "characters" | "locations" | "props" | "style" | "raw";
+type BibleTab = "world" | "characters" | "locations" | "props" | "style" | "costumes" | "relations" | "nav" | "synopsis" | "meta" | "raw";
 type ActionLayer = "L01" | "L01b" | "L01c";
 type DisplayMode = "reader" | "raw";
 type AnyRecord = Record<string, unknown>;
@@ -41,6 +41,11 @@ const BIBLE_TABS: Array<{ id: BibleTab; label: string }> = [
   { id: "locations", label: "場所" },
   { id: "props", label: "小道具" },
   { id: "style", label: "画風指示" },
+  { id: "costumes", label: "衣装" },
+  { id: "relations", label: "関係性" },
+  { id: "nav", label: "ナビ仕様" },
+  { id: "synopsis", label: "巻シノプシス" },
+  { id: "meta", label: "メタ・補足" },
   { id: "raw", label: "生 JSON" },
 ];
 
@@ -55,6 +60,8 @@ const CSS = `
 .bib-section { display: grid; gap: var(--space-2); }
 .bib-section h3 { margin: 0; font-size: var(--fs-lg); }
 .bib-factions,.bib-style-overrides { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-2); }
+.bib-costumes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-3); }
+.bib-costumes-grid .nc-kv__row dd { min-width: 0; word-break: keep-all; overflow-wrap: break-word; }
 .bib-card h3 { margin: 0; font-size: var(--fs-md); line-height: 1.3; overflow-wrap: anywhere; }
 .bib-meta { color: var(--text-tertiary); font-size: var(--fs-sm); overflow-wrap: anywhere; font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
 .bib-summary { color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -561,6 +568,25 @@ function renderDisplayMode(active: DisplayMode): string {
 function renderWorldReader(world: unknown): string {
   const obj = asRecord(world);
   const factions = Array.isArray(obj.factions) ? obj.factions : [];
+  const lexicon = asRecord(obj.lexicon);
+  const { forbidden_terms_global, p1_opening_directive, ...lexiconRest } = lexicon;
+  const lexiconSection = Object.keys(lexicon).length === 0 ? "" : `
+    <section class="nc-card bib-section">
+      <h3>用語規約 (Lexicon)</h3>
+      <section class="bib-section">
+        <h3>禁則語 (forbidden_terms_global)</h3>
+        ${asList(forbidden_terms_global)}
+      </section>
+      ${p1_opening_directive !== undefined ? `<section class="bib-section">
+        <h3>P1 冒頭指示 (p1_opening_directive)</h3>
+        <p>${escapeHtml(asText(p1_opening_directive))}</p>
+      </section>` : ""}
+      ${Object.keys(lexiconRest).length > 0 ? `<section class="bib-section">
+        <h3>その他</h3>
+        ${asKeyValueTable(lexiconRest)}
+      </section>` : ""}
+      ${detailsRaw("生 JSON", obj.lexicon)}
+    </section>`;
   return `<div class="bib-reader">
     <section class="nc-card bib-section">
       <h3>前提 (Premise)</h3>
@@ -593,6 +619,7 @@ function renderWorldReader(world: unknown): string {
       }).join("")}</div>
       ${detailsRaw("生 JSON", obj.factions)}
     </section>
+    ${lexiconSection}
   </div>`;
 }
 
@@ -630,6 +657,197 @@ function renderStyleReader(bible: BibleAssetView): string {
   </div>`;
 }
 
+function characterNameMap(bible: BibleAssetView): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const character of bible.characters) {
+    const id = idOf(character);
+    if (id !== "(no id)") map.set(id, nameOf(character));
+  }
+  return map;
+}
+
+function characterLabel(id: string, names: Map<string, string>): string {
+  const name = names.get(id);
+  return name ? `(${id}) ${name}` : id;
+}
+
+function renderCostumesReader(bible: BibleAssetView): string {
+  const costumes = Array.isArray(bible.costumes) ? bible.costumes : [];
+  if (costumes.length === 0) return `<div class="nc-empty">登録された衣装はありません</div>`;
+  const groups = new Map<string, unknown[]>();
+  for (const costume of costumes) {
+    const obj = asRecord(costume);
+    const characterId = typeof obj.character_id === "string" && obj.character_id.trim() ? obj.character_id : "(character_id 未設定)";
+    const list = groups.get(characterId) ?? [];
+    list.push(costume);
+    groups.set(characterId, list);
+  }
+  const names = characterNameMap(bible);
+  return `<div class="bib-reader">${Array.from(groups.entries()).map(([characterId, items]) => `
+    <section class="nc-card bib-section">
+      <h3>${escapeHtml(characterLabel(characterId, names))}</h3>
+      <div class="bib-costumes-grid">${items.map((costume) => {
+        const obj = asRecord(costume);
+        const id = typeof obj.id === "string" && obj.id.trim() ? obj.id : "(id 未設定)";
+        const from = obj.valid_from_episode;
+        const until = obj.valid_until_episode;
+        const range = `${escapeHtml(asText(from))} 話 〜 ${until === null ? "最終巻" : `${escapeHtml(asText(until))}話`}`;
+        return `<article class="nc-card nc-card--sunken bib-card">
+          <h3>${escapeHtml(id)}</h3>
+          <dl class="bib-spec">
+            <div class="bib-spec__row"><dt class="bib-spec__key">有効話数</dt><dd class="bib-spec__val" title="${range}">${range}</dd></div>
+          </dl>
+          ${asKeyValueTable(asRecord(obj.spec))}
+          <details class="bib-card__raw"><summary>生 JSON</summary><pre>${jsonHtml(costume)}</pre></details>
+        </article>`;
+      }).join("")}</div>
+    </section>`).join("")}</div>`;
+}
+
+function renderRelationsReader(bible: BibleAssetView): string {
+  const relations = Array.isArray(bible.relations) ? bible.relations : [];
+  if (relations.length === 0) return `<div class="nc-empty">登録された関係性はありません</div>`;
+  const names = characterNameMap(bible);
+  return `<div class="bib-reader"><div class="bib-grid">${relations.map((relation) => {
+    const obj = asRecord(relation);
+    const from = typeof obj.from_character_id === "string" ? obj.from_character_id : "";
+    const to = typeof obj.to_character_id === "string" ? obj.to_character_id : "";
+    const title = `${characterLabel(from || "(from 未設定)", names)} → ${characterLabel(to || "(to 未設定)", names)}`;
+    return `<article class="nc-card nc-card--default bib-card">
+      <h3>${escapeHtml(title)}</h3>
+      <div class="bib-meta">${escapeHtml(asText(obj.relation_type))}</div>
+      <div class="bib-summary">${escapeHtml(asText(obj.description))}</div>
+      <details class="bib-card__raw"><summary>生 JSON</summary><pre>${jsonHtml(relation)}</pre></details>
+    </article>`;
+  }).join("")}</div></div>`;
+}
+
+function renderNavReader(bible: BibleAssetView): string {
+  const nav = asRecord(bible.nav_full_spec);
+  if (Object.keys(nav).length === 0) return `<div class="nc-empty">ナビ仕様は未登録です</div>`;
+  const navRest = { ...nav };
+  delete navRest.voice_persona;
+  delete navRest.canonical_disclosure_lines_vol_1;
+  delete navRest.anti_pattern_dialogue;
+  const voice = asRecord(nav.voice_persona);
+  const { default_tone, speech_endings, emotional_range_per_volume, ...voiceRest } = voice;
+  return `<div class="bib-reader">
+    <section class="nc-card bib-section">
+      <h3>声・口調 (voice_persona)</h3>
+      ${default_tone !== undefined ? `<p>${escapeHtml(asText(default_tone))}</p>` : ""}
+      <section class="bib-section">
+        <h3>語尾 (speech_endings)</h3>
+        ${asList(speech_endings)}
+      </section>
+      <section class="bib-section">
+        <h3>巻別の感情幅 (emotional_range_per_volume)</h3>
+        ${asKeyValueTable(asRecord(emotional_range_per_volume))}
+      </section>
+      ${Object.keys(voiceRest).length > 0 ? asKeyValueTable(voiceRest) : ""}
+      ${detailsRaw("生 JSON", nav.voice_persona)}
+    </section>
+    <section class="nc-card bib-section">
+      <h3>Vol.1 開示ライン (canonical_disclosure_lines_vol_1)</h3>
+      ${asList(nav.canonical_disclosure_lines_vol_1)}
+      ${detailsRaw("生 JSON", nav.canonical_disclosure_lines_vol_1)}
+    </section>
+    <section class="nc-card bib-section">
+      <h3>アンチパターン (anti_pattern_dialogue)</h3>
+      ${asKeyValueTable(asRecord(nav.anti_pattern_dialogue))}
+      ${detailsRaw("生 JSON", nav.anti_pattern_dialogue)}
+    </section>
+    ${Object.keys(navRest).length > 0 ? `<section class="nc-card bib-section">
+      <h3>その他</h3>
+      ${asKeyValueTable(navRest)}
+      ${detailsRaw("生 JSON", navRest)}
+    </section>` : ""}
+  </div>`;
+}
+
+function renderSynopsisEntry(value: unknown, index?: number): string {
+  const synopsis = asRecord(value);
+  const theme = synopsis.theme;
+  const summary = synopsis.summary;
+  const cliffhanger = synopsis.cliffhanger;
+  return `<section class="nc-card bib-section">
+    ${index !== undefined ? `<h3>巻シノプシス ${index + 1}</h3>` : ""}
+    ${theme !== undefined ? `<section class="bib-section"><h3>テーマ (theme)</h3><p>${escapeHtml(asText(theme))}</p></section>` : ""}
+    ${summary !== undefined ? `<section class="bib-section"><h3>あらすじ (summary)</h3><p>${escapeHtml(asText(summary))}</p></section>` : ""}
+    ${cliffhanger !== undefined ? `<section class="bib-section"><h3>引き (cliffhanger)</h3><p>${escapeHtml(asText(cliffhanger))}</p></section>` : ""}
+    ${detailsRaw("生 JSON", value)}
+  </section>`;
+}
+
+function renderSynopsisReader(bible: BibleAssetView): string {
+  const value = bible.volume_synopsis;
+  if (Array.isArray(value)) {
+    if (value.length === 0) return `<div class="nc-empty">巻シノプシスは未登録です</div>`;
+    return `<div class="bib-reader">${value.map((entry, index) => renderSynopsisEntry(entry, index)).join("")}</div>`;
+  }
+  if (Object.keys(asRecord(value)).length === 0) return `<div class="nc-empty">巻シノプシスは未登録です</div>`;
+  return `<div class="bib-reader">${renderSynopsisEntry(value)}</div>`;
+}
+
+function asKeyValueTableWithLists(obj: Record<string, unknown>): string {
+  const entries = Object.entries(obj);
+  if (entries.length === 0) return `<div class="nc-empty">項目がありません。</div>`;
+  return `<dl class="nc-kv">${entries.map(([key, value]) => `
+    <div class="nc-kv__row">
+      <dt>${escapeHtml(key)}</dt>
+      <dd>${Array.isArray(value) ? asList(value) : typeof value === "object" && value !== null ? `<pre class="nc-code-block">${jsonHtml(value)}</pre>` : escapeHtml(asText(value))}</dd>
+    </div>`).join("")}</dl>`;
+}
+
+function renderNarrationStyleGuide(value: unknown): string {
+  const guide = asRecord(value);
+  const { p1_opening_directive_specific, ban_list_phrases, monologue_signature_patterns, ...rest } = guide;
+  return `<section class="nc-card bib-section">
+    <h3>ナレーション規約 (narration_style_guide)</h3>
+    ${Object.keys(asRecord(p1_opening_directive_specific)).length > 0 ? `<section class="bib-section">
+      <h3>P1 冒頭具体指示 (p1_opening_directive_specific)</h3>
+      ${asKeyValueTableWithLists(asRecord(p1_opening_directive_specific))}
+    </section>` : ""}
+    ${ban_list_phrases !== undefined ? `<section class="bib-section">
+      <h3>禁止フレーズ (ban_list_phrases)</h3>
+      ${asList(ban_list_phrases)}
+    </section>` : ""}
+    ${monologue_signature_patterns !== undefined ? `<section class="bib-section">
+      <h3>モノローグ定型 (monologue_signature_patterns)</h3>
+      ${asList(monologue_signature_patterns)}
+    </section>` : ""}
+    ${Object.keys(rest).length > 0 ? `<section class="bib-section"><h3>その他</h3>${asKeyValueTable(rest)}</section>` : ""}
+    ${detailsRaw("生 JSON", value)}
+  </section>`;
+}
+
+function renderMetaReader(bible: BibleAssetView): string {
+  const sections: string[] = [];
+  if (Object.keys(asRecord(bible.meta)).length > 0) {
+    sections.push(`<section class="nc-card bib-section">
+      <h3>Bible メタ (meta)</h3>
+      ${asKeyValueTable(asRecord(bible.meta))}
+      ${detailsRaw("生 JSON", bible.meta)}
+    </section>`);
+  }
+  if (Object.keys(asRecord(bible.narration_style_guide)).length > 0) {
+    sections.push(renderNarrationStyleGuide(bible.narration_style_guide));
+  }
+  const provenance = {
+    schema_version: bible.schema_version,
+    generated_at: bible.generated_at,
+    generated_from: bible.generated_from,
+  };
+  if (Object.values(provenance).some((value) => value !== undefined)) {
+    sections.push(`<section class="nc-card bib-section">
+      <h3>生成情報 (provenance)</h3>
+      ${asKeyValueTable(provenance)}
+      ${detailsRaw("生 JSON", provenance)}
+    </section>`);
+  }
+  if (sections.length === 0) return `<div class="nc-empty">メタ情報はありません</div>`;
+  return `<div class="bib-reader">${sections.join("")}</div>`;
+}
+
 function renderBibleContent(state: ViewState): string {
   const bible = state.bible;
   if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
@@ -649,6 +867,30 @@ function renderBibleContent(state: ViewState): string {
       continuity_seeds: bible.continuity_seeds,
     };
     return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(raw)}</pre>` : renderStyleReader(bible)}`;
+  }
+  if (state.tab === "costumes") {
+    return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(bible.costumes)}</pre>` : renderCostumesReader(bible)}`;
+  }
+  if (state.tab === "relations") {
+    return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(bible.relations)}</pre>` : renderRelationsReader(bible)}`;
+  }
+  if (state.tab === "nav") {
+    return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(bible.nav_full_spec)}</pre>` : renderNavReader(bible)}`;
+  }
+  if (state.tab === "synopsis") {
+    return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(bible.volume_synopsis)}</pre>` : renderSynopsisReader(bible)}`;
+  }
+  if (state.tab === "meta") {
+    const raw = {
+      meta: bible.meta,
+      narration_style_guide: bible.narration_style_guide,
+      provenance: {
+        schema_version: bible.schema_version,
+        generated_at: bible.generated_at,
+        generated_from: bible.generated_from,
+      },
+    };
+    return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(raw)}</pre>` : renderMetaReader(bible)}`;
   }
   return `<pre class="nc-code-block">${jsonHtml(bible)}</pre>`;
 }
