@@ -57,6 +57,7 @@ import {
   handleTrademarkCheckGet,
   handleTrademarkCheckPost,
 } from "./handlers/trademark";
+import { handleImprovementsGet } from "./handlers/improvements";
 
 export type RouterDefaults = {
   /**
@@ -201,15 +202,31 @@ export async function handleApi(
         } catch (e) {
           return send(res, 400, { error: String(e) });
         }
-        const isAiEdit = body?.layer === "L99" && body?.slug === "_console";
-        if (!isAiEdit && (defaults.defaultSlug === null || defaults.defaultEpisode === null)) {
+        const isAiEditConsole = body?.layer === "L99" && body?.slug === "_console";
+        // 一覧モードの L99 AI 編集では実 slug はジョブ一覧の scope hint なので、
+        // repo 全体編集の安全性は ai-edit の diff/commit review に委ねて bypass 対象にする。
+        const isAiEditWorkInListMode =
+          body?.layer === "L99" &&
+          typeof body?.slug === "string" &&
+          body.slug !== "_console" &&
+          isValidSlug(body.slug) &&
+          (defaults.defaultSlug === null || defaults.defaultEpisode === null);
+        if (
+          !isAiEditConsole &&
+          !isAiEditWorkInListMode &&
+          (defaults.defaultSlug === null || defaults.defaultEpisode === null)
+        ) {
           return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
         }
-        const scopedDefaults: ScopedRouterDefaults = {
-          defaultSlug: isAiEdit ? "_console" : defaults.defaultSlug!,
-          defaultEpisode: isAiEdit ? 0 : defaults.defaultEpisode!,
-          allowCrossScopeRead: defaults.allowCrossScopeRead,
-        };
+        const scopedDefaults: ScopedRouterDefaults = isAiEditConsole
+          ? { defaultSlug: "_console", defaultEpisode: 0, allowCrossScopeRead: defaults.allowCrossScopeRead }
+          : isAiEditWorkInListMode
+            ? { defaultSlug: body.slug, defaultEpisode: 0, allowCrossScopeRead: defaults.allowCrossScopeRead }
+            : {
+                defaultSlug: defaults.defaultSlug!,
+                defaultEpisode: defaults.defaultEpisode!,
+                allowCrossScopeRead: defaults.allowCrossScopeRead,
+              };
         return handleJobsStart(req, res, body, scopedDefaults);
       }
       return send(res, 405, { error: "このメソッドは許可されていません" });
@@ -406,6 +423,10 @@ export async function handleApi(
     if (tail === "/pipeline-status") {
       if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       return handlePipelineStatus(scoped.slug, scoped.episode, res);
+    }
+    if (tail === "/improvements") {
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
+      return handleImprovementsGet(res, scoped.slug, scoped.episode);
     }
     if (tail === "/audit-overrides") {
       if (req.method === "GET") return handleGetAuditOverrides(scoped.slug, scoped.episode, res);
