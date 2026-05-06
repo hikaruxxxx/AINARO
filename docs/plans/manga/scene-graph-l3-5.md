@@ -318,6 +318,32 @@ npx tsx scripts/manga/layers/L03_5-scene-graph.ts --slug a07-modern-dungeon --ep
 
 - **scene 数 10 = 上限ぴったり**。Phase A 検証作品 (a07/d02/d03) のうち a07-ep01 は densely packed なエピソードと判明。d02/d03 で 5-7 scene に収まれば「5-10 scene」の幅が validate される。
 - **a07-ep02 で 6 scene 構成を追加検証** (2026-05-07)。10 scene と異なる粒度でも schema/validator 通過。新たに使用した field: presence=phone_screen (S06: Nm の攻略 wiki 通知)、subtype_directive.external_social=true (S06 のみ)、cross-episode foreshadow 6 件 (next_episode/later_in_volume/cross_volume)。Panel-Scene Inheritance で「P4 が gate location なのに S03 の sub_locations 未登録」エラーを即時検出 → sub_locations 追加で解消、検査機構が新 episode でも実不整合を捉える証拠。
+
+### 2026-05-07: a07-ep01 を新方式で 1 episode 通し実走
+
+`L04-storyboard --from-scene-graph --enrich` で a07-ep01 (10 scene) を end-to-end 実走。
+
+**実測**:
+- 所要時間: **269.1 秒** (約 4.5 分) for 1 episode
+- 1 巻試算 (10 episodes sequential): **約 45 分**
+- Codex CLI subscription 内、ANTHROPIC_API_KEY 課金ゼロ
+
+**結果**:
+- pages=22, total_panels=110 (旧 Phase α 手作業版と同一の panel 数)
+- validateStoryboardEntityBinding: ok=true (entity 検査全 panel pass)
+- validatePanelSceneInheritance: ok=true (warnings 0、旧版に残っていた p111/p112 panel_no 警告が**自動消滅**)
+- auditEpisode (B5-6): panel_no_gap=0、cast_subset_violation=0、dialogue_dedup_across_pages=1 件 (S05 mono "俺は、入口で止まったままだ。" を uniqueness=may_repeat で意図的に panel 跨ぎ繰り返し → severity=warn の許容範囲)
+
+**品質印象 (旧手作業版との比較)**:
+- panel.action は具体的・映像的に向上 (例 P3 panel 11: 「レンは床のモップを取り、テレビの音を背中で受けながら歩き出す」)
+- key_visual も丁寧な絵作り指示 (例: 「明るすぎる通路の中央に、黒フードの背中だけがぽつんと残る」)
+- scene_exclusive 台詞 (cliffhanger, etc.) は所有 scene のみで使用、scene-graph と二段ガード
+- 旧手作業版は段階的修正の積み重ねで panel 番号欠番 (p111/p112) 等の歪みがあったが、新方式は決定的採番で歪みなし
+
+**設計効果の実証**:
+- 「設計図 → コマ割り」の往路がエンドツーエンドで動作
+- panel renumber 問題が自動解消 (B5-5 設計目標達成)
+- dialogue_dedup の検出は scene-graph (Rule 4 scene_exclusive uniqueness) と auditEpisode の二段で機能
 - **time_axis.order の値域**: flashforward は 999 のような大値、flashback は -1, -2 等の負値で表現可能。整数で十分。
 - **sub_locations の使い所**: S07 (gate→corridor 連続通過) と S10 (corridor + DPC cross-cut) のような演出。1 scene に複数 location を許すが、主軸は 1 つ。
 - **cast.presence**: in_person (8), voice_off (5), tv (1), memory (1) を a07-ep01 で使用。phone_screen と log_visual は ep01 では未使用 (将来 episode で出る想定)。
