@@ -8,7 +8,7 @@ import type { PagePlanV2 } from "../../../schemas-v2";
 
 /**
  * adopted_versions / revision_queue が参照する image_path を厳格チェック。
- * 期待形: episodes/epNN/(renders|bubbles)/p{N}[_panel_M][_vK].png
+ * 期待形: episodes/epNN/renders/p{N}[_panel_M][_vK].png
  *  - workdir 起点の相対パス (絶対や `..` は禁止)
  *  - 長さ 500 字以下
  *  - バックスラッシュ禁止 (Windows パス対策)
@@ -16,7 +16,7 @@ import type { PagePlanV2 } from "../../../schemas-v2";
 export function isSafeImagePath(p: string): boolean {
   if (typeof p !== "string" || p.length === 0 || p.length > 500) return false;
   if (p.includes("..") || p.startsWith("/") || p.includes("\\")) return false;
-  return /^episodes\/ep\d+\/(renders|bubbles)\/p\d+(_panel_\d+)?(_v\d+)?\.png$/.test(p);
+  return /^episodes\/ep\d+\/renders\/p\d+(_panel_\d+)?(_v\d+)?\.png$/.test(p);
 }
 
 export function isPageLevelPanelId(panelId: string): boolean {

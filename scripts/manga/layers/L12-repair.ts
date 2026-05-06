@@ -2,10 +2,10 @@
  * L12 Repair (戦略 §6 / §8 準拠の薄い接続層)
  *
  * 2 モード:
- * 1. --audit (default): audit.failed_panel_ids → 該当ページの render+bubble を削除して
- *    L9 → L10 を pipeline 側で再走させる (既存挙動)。判定ロジックを持たない。
+ * 1. --audit (default): audit.failed_panel_ids → 該当ページの render を削除して
+ *    L9 を pipeline 側で再走させる (既存挙動)。判定ロジックを持たない。
  * 2. --revision-queue (Phase C): _revision_queue.jsonl の未消化 entry を順次消化。
- *    panel_id ごとに既存 render_manifest から nextVersion を計算し、L9 → L10 を spawn。
+ *    panel_id ごとに既存 render_manifest から nextVersion を計算し、L9 を spawn。
  *    完了したら _revision_resolved.jsonl に append (queue 自体は append-only)。
  *
  * 戦略制約: L12 に判定ロジックを入れない (戦略 §8)。version 計算は manifest.ts の純関数。
@@ -17,7 +17,6 @@ import { spawn } from "node:child_process";
 import {
   auditPath,
   rendersDir,
-  bubblesDir,
   pagePlanPath,
   repairLogPath,
   revisionQueuePath,
@@ -107,15 +106,13 @@ async function runAuditMode(args: Args): Promise<void> {
   const attempts: RepairAttempt[] = [];
   for (const pageNo of pagesToRepair) {
     const rPath = path.join(rendersDir(args.slug, args.episode), `p${String(pageNo).padStart(2, "0")}.png`);
-    const bPath = path.join(bubblesDir(args.slug, args.episode), `p${String(pageNo).padStart(2, "0")}.png`);
     try { await fs.unlink(rPath); } catch {}
-    try { await fs.unlink(bPath); } catch {}
     attempts.push({
       panel_id: `page_${pageNo}`,
       attempt_no: 1,
       triggered_by_check: "audit_failed",
       action: "regenerate_with_stronger_refs",
-      rationale: "L11 audit page-level fail → render+bubble削除、orchestrator に再生成委ねる",
+      rationale: "L11 audit page-level fail → render削除、orchestrator に再生成委ねる",
       succeeded: false,
     });
   }
@@ -127,7 +124,7 @@ async function runAuditMode(args: Args): Promise<void> {
   };
   await fs.writeFile(repairLogPath(args.slug, args.episode), JSON.stringify(log, null, 2));
   console.log(`[L12 audit] DONE: ${repairLogPath(args.slug, args.episode)}`);
-  console.log(`[L12 audit] → re-run L09 → L10 → L11 (pipeline で --from L09)`);
+  console.log(`[L12 audit] → re-run L09 → L11 (pipeline で --from L09)`);
 }
 
 // ===== Mode 2: revision-queue =====
@@ -141,7 +138,6 @@ type ResolvedEntry = {
   panel_id: string;
   resolved_version: string;
   l09_exit_code: number;
-  l10_exit_code: number;
   succeeded: boolean;
 };
 
@@ -235,7 +231,7 @@ async function runRevisionQueueModeInner(args: Args): Promise<void> {
     ];
     const l09Code = await spawnLayer("scripts/manga/layers/L09-render.ts", l09Args);
     if (l09Code !== 0) {
-      console.warn(`[L12 revision-queue] L09 exit=${l09Code}, skipping L10 for ${entry.id.slice(0, 8)}`);
+      console.warn(`[L12 revision-queue] L09 exit=${l09Code} for ${entry.id.slice(0, 8)}`);
       await appendResolved(args, {
         schema_version: 1,
         ts: new Date().toISOString(),
@@ -243,24 +239,10 @@ async function runRevisionQueueModeInner(args: Args): Promise<void> {
         panel_id: entry.panel_id,
         resolved_version: renderVersion,
         l09_exit_code: l09Code,
-        l10_exit_code: -1,
         succeeded: false,
       });
       failed++;
       continue;
-    }
-
-    // L10 spawn (同 version で bubble overlay) — provenance 用 revision-id も渡す
-    const l10Args = [
-      "--slug", args.slug,
-      "--episode", String(args.episode),
-      "--pages", String(entry.page_no),
-      "--version", renderVersion,
-      "--revision-id", entry.id,
-    ];
-    const l10Code = await spawnLayer("scripts/manga/layers/L10-bubble.ts", l10Args);
-    if (l10Code !== 0) {
-      console.warn(`[L12 revision-queue] L10 exit=${l10Code} for ${entry.id.slice(0, 8)}`);
     }
 
     await appendResolved(args, {
@@ -270,10 +252,9 @@ async function runRevisionQueueModeInner(args: Args): Promise<void> {
       panel_id: entry.panel_id,
       resolved_version: renderVersion,
       l09_exit_code: l09Code,
-      l10_exit_code: l10Code,
-      succeeded: l09Code === 0 && l10Code === 0,
+      succeeded: l09Code === 0,
     });
-    if (l09Code === 0 && l10Code === 0) succeeded++;
+    if (l09Code === 0) succeeded++;
     else failed++;
   }
   console.log(`\n[L12 revision-queue] DONE: succeeded=${succeeded} failed=${failed}`);

@@ -1,12 +1,12 @@
 /**
  * L11 Audit v2
  *
- * 出力 bubbles/p{NN}.png に対して minimal な検査を実施。
+ * 出力 renders/p{NN}.png に対して minimal な検査を実施。
  *
  * MVP 検査:
  * - file_exists & size > min_bytes (画像が壊れていないか)
  * - render_strategy 通りの解像度になっているか (1748x2480)
- * - bubble_overlap 概算: storyboard.dialogue 数 ≒ overlay 完了報告数 (L10 ログ)
+ * - dialogue_count: L09 焼き込み済み画像の dialogue 期待数を informational に記録
  * - continuity_check (同一 character の page 間 sha256 比較は弱い指標、未実装)
  *
  * face_consistency などの重い CV 検査は将来 (qa/face-consistency.ts は v1 にあり再利用可)。
@@ -27,7 +27,7 @@ const EXPECTED_PAGE_H = 2480;
 const EXPECTED_TOLERANCE = 50;
 
 export async function auditEpisode(args: {
-  bubblesDir: string;
+  rendersDir: string;
   storyboard: EpisodeStoryboardV2;
   pagePlan: PagePlanV2;
 }): Promise<AuditReport> {
@@ -41,7 +41,7 @@ export async function auditEpisode(args: {
 
     for (const planPanel of planPage.panels) panelsTotal++;
 
-    const pageImg = path.join(args.bubblesDir, `p${String(planPage.page_no).padStart(2, "0")}.png`);
+    const pageImg = path.join(args.rendersDir, `p${String(planPage.page_no).padStart(2, "0")}.png`);
     const pageId = `page_${planPage.page_no}`;
     let pageOk = true;
 
@@ -51,7 +51,7 @@ export async function auditEpisode(args: {
         checks.push({
           panel_id: pageId, check_kind: "regulation_violation", passed: false,
           score: stat.size, threshold: MIN_PAGE_BYTES,
-          detail: `bubble image too small (${stat.size} < ${MIN_PAGE_BYTES})`,
+          detail: `rendered page image too small (${stat.size} < ${MIN_PAGE_BYTES})`,
         });
         pageOk = false;
       } else {
@@ -64,14 +64,14 @@ export async function auditEpisode(args: {
         });
         if (!(wOk && hOk)) pageOk = false;
 
-        // bubble_overlap: ページ内 dialogue 数を比較 (L10 が大半を載せた前提)
+        // L09 焼き込み済み画像の dialogue 期待数を informational に記録
         const expectedBubbles = sbPage.panels.reduce(
           (n, p) => n + p.dialogue.length + p.monologue.length + p.narration.length + p.sfx.length,
           0
         );
         // 実測は CV 必要だが MVP は「期待値が 0 でなければ OK」とする
         checks.push({
-          panel_id: pageId, check_kind: "bubble_overlap", passed: true,
+          panel_id: pageId, check_kind: "dialogue_count", passed: true,
           score: expectedBubbles, threshold: 1,
           detail: `expected_bubbles=${expectedBubbles}`,
         });
@@ -79,7 +79,7 @@ export async function auditEpisode(args: {
     } catch (e) {
       checks.push({
         panel_id: pageId, check_kind: "regulation_violation", passed: false,
-        detail: `bubble image missing or unreadable: ${(e as Error).message}`,
+        detail: `rendered page image missing or unreadable: ${(e as Error).message}`,
       });
       pageOk = false;
     }

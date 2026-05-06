@@ -42,11 +42,10 @@ L8.6 Name Audit (rule)    audit-rules.ts (純TS、LLM 不使用) で 14 ルー�
 L8.7 Name Approval        serve-ops.ts の ops console SPA で a/r 操作 → name_approval.json 上書き
 
 ═══ PHASE 3: RENDER (per ep) ═══
-L9  Render                 page_plan + resolved_refs + name_approval (gate) → renders/p{NN}.png
+L9  Render                 page_plan + resolved_refs + name_approval (gate) → renders/p{NN}.png (吹き出し・ナレーション・擬音を画像内に焼き込み)
                           ※ approved 以外のページは skip / hard fail (--skip-name-gate で回避可)
-L10 Bubble Overlay         renders + storyboard.dialogue → bubbles/p{NN}.png
-L11 Audit                  bubbles + bible → audit.json
-L12 Repair                 audit.failed → re-run L7-L10 for failed panels
+L11 Audit                  renders + bible → audit.json
+L12 Repair                 audit.failed → re-run L7-L9 for failed panels
 
 ═══ PHASE 4: PUBLISH (per volume) ═══
 L13 KDP Package            volumes/vNN/episodes 全部 → kdp/{manuscript,cover}.pdf
@@ -87,7 +86,6 @@ data/manga/
         │   └── name_audit.json  ← L8.6 出力 (audit findings、warning のみ、gate しない)
         ├── name_approval.json   ← L8.7 出力 (人間 or migration 判定)
         ├── renders/p{NN}.png
-        ├── bubbles/p{NN}.png
         ├── audit.json
         ├── repair_log.json
         └── _incremental_refs/
@@ -148,7 +146,6 @@ npx tsx scripts/manga/layers/L05-page-director.ts --slug a07-modern-dungeon --ep
 | L8.7 | `scripts/manga/serve-ops.ts` (ops console SPA) | `ops-console/web/views/name-gate.ts` + `name-preview/types.ts` schema |
 | Reject report | `scripts/manga/name-reject-report.ts` | `name_approval.json` + `name_audit.json` 集計 |
 | L9 | `scripts/manga/layers/L09-render.ts` (name gate 内蔵) | `render/gpt-image-2-adapter.ts` + `generate/prompt-composer-v2.ts` |
-| L10 | `scripts/manga/layers/L10-bubble.ts` | `bubble/vertical/typesetter.ts` + `svg-overlay.ts` |
 | L11 | `scripts/manga/layers/L11-audit.ts` | `qa/{face-consistency, bubble-overlap, continuity-check}.ts` |
 | L12 | `scripts/manga/layers/L12-repair.ts` | `repair/policy.ts` |
 | L13 | `scripts/manga/layers/L13-kdp.ts` | `publish/kdp/{pdf-x1a, spine-calc, cover-composer, colophon-gen}.ts` |
@@ -410,6 +407,6 @@ RULE 10 budget 超過時の優先: style > continuity_forced > focus_entity > �
 - ✗ L0 Init を独立 layer 化: meta.json + bible に集約
 - ✗ L4 Aux Bible 細分化: snapshot 1ファイルで十分
 - ✗ L6 Episode Plot 独立 layer 化: shotlist/scene-splitter で扱える
-- ✗ L10 Ref Selector 独立 layer 化: continuity-refs/resolver の拡張で十分
+- ✗ Ref Selector 独立 layer 化: continuity-refs/resolver の拡張で十分
 - ✗ ResolvedRefs に mask_binding/negative_ref 最初から含める: capability 確定後に optional 追加
 - ✗ stage4 storyboard JSON の変換器: 1週間 vs 半日再生成、捨てて再生成判断

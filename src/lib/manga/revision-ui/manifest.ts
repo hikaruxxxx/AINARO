@@ -66,7 +66,7 @@ export async function readJsonl<T>(filePath: string): Promise<T[]> {
  * 指定 panel に対する次 version 文字列を決める。
  * 既存 manifest にある最大 version を見て v(N+1)。最初は v1。
  */
-export function nextVersion(existingManifest: RenderManifestEntry[], panelId: string, layer: "render" | "bubble"): string {
+export function nextVersion(existingManifest: RenderManifestEntry[], panelId: string, layer: "render"): string {
   const versions = existingManifest
     .filter((m) => m.panel_id === panelId && m.layer === layer)
     .map((m) => parseVersion(m.version))

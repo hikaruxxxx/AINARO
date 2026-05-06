@@ -14,7 +14,7 @@
  */
 
 /**
- * codex-image.ts (or L09/L10) で 1 枚画像を生成した時に追記する manifest エントリ。
+ * codex-image.ts (L09) で 1 枚画像を生成した時に追記する manifest エントリ。
  * append-only な JSONL で、Phase D の比較 UI が読み取る。
  */
 export type RenderManifestEntry = {
@@ -28,8 +28,8 @@ export type RenderManifestEntry = {
   panel_id: string;
   /** "v1" | "v2" | ... バージョン文字列。同一 panel_id で 2回目以降は v2, v3, ... */
   version: string;
-  /** "render" | "bubble" — 出力種別 */
-  layer: "render" | "bubble";
+  /** "render" — 出力種別 */
+  layer: "render";
   /** workdir 起点の相対パス (例: "episodes/ep01/renders/p01.png") */
   image_path: string;
   /** L09 の generation 戦略 */
@@ -47,7 +47,6 @@ export type RevisionTag =
   | "face"        // 顔の崩れ
   | "composition" // 構図/カメラ
   | "tone"        // トーン/濃淡
-  | "bubble"      // 吹き出し位置
   | "ref"         // ref 一致しない
   | "anatomy"     // 体格/手足
   | "background" // 背景
@@ -121,7 +120,6 @@ export const REVISION_TAGS: ReadonlyArray<RevisionTag> = [
   "face",
   "composition",
   "tone",
-  "bubble",
   "ref",
   "anatomy",
   "background",

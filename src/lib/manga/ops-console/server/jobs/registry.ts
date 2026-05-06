@@ -5,7 +5,6 @@ export type LayerId =
   | "L02"
   | "L02b"
   | "L09"
-  | "L10"
   | "L11"
   | "L12"
   | "L13"
@@ -84,16 +83,6 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
   },
   L09: {
     script: "scripts/manga/layers/L09-render.ts",
-    scope: "episode",
-    allowedFlags: [
-      { name: "--pages", pattern: /^[0-9]+(,[0-9]+)*$/ },
-      { name: "--version", pattern: /^v[0-9]+$/ },
-      { name: "--revision-id", pattern: /^[0-9a-f-]{36}$/i },
-    ],
-    timeoutMs: 30 * 60 * 1000,
-  },
-  L10: {
-    script: "scripts/manga/layers/L10-bubble.ts",
     scope: "episode",
     allowedFlags: [
       { name: "--pages", pattern: /^[0-9]+(,[0-9]+)*$/ },

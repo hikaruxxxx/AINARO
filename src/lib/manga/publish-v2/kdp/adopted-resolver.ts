@@ -1,10 +1,10 @@
 /**
- * KDP manuscript の bubble 画像を解決する (Phase D: adopted_versions 反映)
+ * KDP manuscript の rendered page image を解決する (Phase D: adopted_versions 反映)
  *
  * SSoT: ~/.claude/plans/codex-logical-waterfall.md (Phase D)
  *
  * 既存挙動:
- *   bubbles/p{NN}.png を sort 順に取って一覧化
+ *   renders/p{NN}.png を sort 順に取って一覧化
  *
  * Phase D 拡張:
  *   adopted_versions.json があれば panel_id=`page_${N}` の chosen.image_path を採用、
@@ -44,25 +44,25 @@ async function fileExists(p: string): Promise<boolean> {
 }
 
 /**
- * episode の bubble dir / adopted_versions / page_plan を統合してページを解決する。
+ * episode の renders dir / adopted_versions / page_plan を統合してページを解決する。
  *
  * 走査順:
  *   1. page_plan.json から期待 page_no 集合を取る (一次基準)
  *   2. 各 page_no で:
  *      - adopted_versions に page_${N} が chosen=v2+ で登録されてれば adopted を採用
- *      - そうでなければ bubbles/p{NN}.png を default として採用
+ *      - そうでなければ renders/p{NN}.png を default として採用
  *      - 両方欠落なら warning ログ + skip
- *   3. page_plan が無ければ legacy: bubbles/p{NN}.png のみを走査 (v1 のみで完結する旧運用)
+ *   3. page_plan が無ければ legacy: renders/p{NN}.png のみを走査
  *
  * @returns RTL 並び順の解決済みページリスト
  */
-export async function resolveBubblePagesForEpisode(args: {
+export async function resolveRenderedPagesForEpisode(args: {
   slug: string;
   episode: number;
-  bubblesDir: string;
+  rendersDir: string;
   workRoot: string;
 }): Promise<ResolvedPage[]> {
-  const { slug, episode, bubblesDir, workRoot } = args;
+  const { slug, episode, rendersDir, workRoot } = args;
   const [adopted, planPageNos] = await Promise.all([
     loadAdopted(slug, episode),
     loadPagePlanPageNos(slug, episode),
@@ -74,7 +74,7 @@ export async function resolveBubblePagesForEpisode(args: {
     pageNos = planPageNos;
   } else {
     let entries: string[] = [];
-    try { entries = await fs.readdir(bubblesDir); } catch { return []; }
+    try { entries = await fs.readdir(rendersDir); } catch { return []; }
     pageNos = entries
       .filter((f) => /^p\d{2}\.png$/.test(f))
       .map((f) => Number(f.match(/^p(\d{2})\.png$/)![1]))
@@ -105,7 +105,7 @@ export async function resolveBubblePagesForEpisode(args: {
       }
     }
     // default
-    const defaultAbs = path.join(bubblesDir, `p${String(page_no).padStart(2, "0")}.png`);
+    const defaultAbs = path.join(rendersDir, `p${String(page_no).padStart(2, "0")}.png`);
     if (await fileExists(defaultAbs)) {
       results.push({
         page_no,

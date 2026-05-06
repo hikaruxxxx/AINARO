@@ -100,7 +100,7 @@ export function auditOverridesPath(slug: string, ep: number): string {
 
 // ===== 修正指示 UI (Phase A〜D) =====
 
-/** L09/L10 が generation 毎に append する render manifest (JSONL, append-only) */
+/** L09 が generation 毎に append する render manifest (JSONL, append-only) */
 export function renderManifestPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "render_manifest.jsonl");
 }
@@ -113,10 +113,6 @@ export function revisionQueuePath(slug: string, ep: number): string {
 /** Phase D: 採用 version の json (episode 単位、L13 が読む) */
 export function adoptedVersionsPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "adopted_versions.json");
-}
-
-export function bubblesDir(slug: string, ep: number): string {
-  return path.join(episodeDir(slug, ep), "bubbles");
 }
 
 export function auditPath(slug: string, ep: number): string {

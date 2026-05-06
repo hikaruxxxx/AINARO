@@ -22,9 +22,8 @@ L08 incremental-refs     bible/v2-images.ts (variants 引数で個別生成)
 
 ═══ PHASE 3: RENDER ═══
 L09 render               render-v2/prompt-composer-v2.ts + generate/codex-image.ts (流用)
-L10 bubble               bubble-v2/vertical-typesetter.ts
 L11 audit                qa-v2/audit.ts
-L12 repair               (L9/L10 を re-run、新規モジュール最小)
+L12 repair               (L9 を re-run、新規モジュール最小)
 
 ═══ PHASE 4: PUBLISH ═══
 L13 kdp                  publish-v2/kdp/{spine-calc,manuscript-pdf,cover-composer,colophon-gen}.ts
@@ -64,9 +63,6 @@ src/lib/manga/
 ├── render-v2/                             # L9
 │   └── prompt-composer-v2.ts              # panel/page → English prompt + refs paths
 │
-├── bubble-v2/                             # L10
-│   └── vertical-typesetter.ts             # 縦書きSVG overlay (sharp合成)
-│
 ├── qa-v2/                                 # L11
 │   └── audit.ts                           # 解像度/サイズ/期待 bubble 数チェック
 │
@@ -103,11 +99,9 @@ page-director-v2/refs-resolver-v2.ts → resolved_refs.json
     ↓
 render-v2/prompt-composer-v2.ts + generate/codex-image.ts → renders/p{NN}.png
     ↓
-bubble-v2/vertical-typesetter.ts → bubbles/p{NN}.png
-    ↓
 qa-v2/audit.ts → audit.json
     ↓
-repair/ (L12) → re-run L9-L10
+repair/ (L12) → re-run L9
     ↓
 publish-v2/kdp/* → volumes/vNN/kdp/{manuscript,cover}.pdf
 ```

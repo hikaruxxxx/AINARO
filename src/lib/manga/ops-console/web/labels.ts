@@ -16,7 +16,6 @@ export type LayerKey =
   | "L08.6"
   | "L08.7"
   | "L09"
-  | "L10"
   | "L11"
   | "L12"
   | "L13";
@@ -35,7 +34,6 @@ export const LAYER_LABELS: Record<LayerKey, { title: string; subtitle: string }>
   "L08.6": { title: "ネーム監査 (ルール)", subtitle: "L08.6 Name Audit" },
   "L08.7": { title: "ネーム判定 (人間 a/r)", subtitle: "L08.7 Name Approval" },
   L09: { title: "本番画像生成 (Render)", subtitle: "L09" },
-  L10: { title: "吹き出し合成 (Bubble)", subtitle: "L10" },
   L11: { title: "品質監査 (Audit)", subtitle: "L11" },
   L12: { title: "修正再生成 (Repair)", subtitle: "L12" },
   L13: { title: "KDP 入稿パッケージ", subtitle: "L13 KDP" },
@@ -114,11 +112,6 @@ export const LAYER_AI_EDIT_HINTS: Partial<Record<LayerKey, LayerAiEditHint>> = {
     target: "data/manga/works/{slug}/episodes/ep{ep}/renders/",
     promptTemplate:
       "L09 Render の panel #{N} を {変更内容} で再生成する指示を revision_queue.jsonl に追加してください。",
-  },
-  L10: {
-    target: "data/manga/works/{slug}/episodes/ep{ep}/bubbles/",
-    promptTemplate:
-      "L10 Bubble Overlay の panel #{N} の吹き出し位置 / サイズ / 形状を {変更内容} に調整してください。",
   },
   L11: {
     target: "data/manga/works/{slug}/episodes/ep{ep}/audit.json",

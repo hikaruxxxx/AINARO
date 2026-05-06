@@ -2,7 +2,7 @@
  * GET/POST /api/adopted-versions ハンドラ (旧 serve-revision.ts:handleAdoptedGet/Post)
  *
  * scope 確定は呼び出し側の責務。
- * Phase D 採用版選択。bubble layer 限定 (renders/ は L13 が読まないため弾く)。
+ * Phase D 採用版選択。render layer 限定。
  * panel-level は page_${N} のみ許可 (Phase E の page composer 後に解禁予定)。
  */
 import type http from "node:http";
@@ -91,12 +91,12 @@ export async function handleAdoptedPost(
     res.end(JSON.stringify({ error: `invalid chosen_version: ${chosen_version}` }));
     return;
   }
-  // L13 は本文に bubble overlay 済みを使う。renders/ は弾く。
-  if (!/^episodes\/ep\d+\/bubbles\/p\d+(_v\d+)?\.png$/.test(image_path)) {
+  // L13 は本文に render layer のページ画像を使う。他 layer の画像は弾く。
+  if (!/^episodes\/ep\d+\/renders\/p\d+(_v\d+)?\.png$/.test(image_path)) {
     res.writeHead(400, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
-        error: `image_path must be under episodes/epN/bubbles/ (got: ${image_path}). renders/ にある overlay 前画像は L13 manuscript に混入するため adopted には採用できません`,
+        error: `image_path must be under episodes/epN/renders/ (got: ${image_path}). 他 layer の画像は KDP に採用できません`,
       })
     );
     return;
@@ -107,13 +107,13 @@ export async function handleAdoptedPost(
       m.image_path === image_path &&
       m.panel_id === panel_id &&
       m.version === chosen_version &&
-      m.layer === "bubble"
+      m.layer === "render"
   );
   if (!matched) {
     res.writeHead(400, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
-        error: `no bubble-layer manifest entry matches (panel_id="${panel_id}", version="${chosen_version}", image_path="${image_path}")`,
+        error: `no render-layer manifest entry matches (panel_id="${panel_id}", version="${chosen_version}", image_path="${image_path}")`,
       })
     );
     return;

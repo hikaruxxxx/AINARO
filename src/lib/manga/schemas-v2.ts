@@ -453,7 +453,7 @@ export type AuditCheckResult = {
   panel_id: string;
   check_kind:
     | "face_consistency"
-    | "bubble_overlap"
+    | "dialogue_count"
     | "continuity_anchor"
     | "background_invariant"
     | "regulation_violation";

@@ -37,7 +37,6 @@ LLM / 画像生成モデルは半年〜1年で世代交代するため、決定�
 | **L07 Refs Resolution** | RULE 1-10 決定論 | **高** | **薄** | 50+ 枚 native 参照で大半が不要 |
 | **L08 Incremental Refs** | 不足 ref 追加生成 | **高** | **薄** | character bank unlimited 化で消える |
 | L09 Render | gpt-image-2 adapter | **低** (差替で対応) | **中** (interface のみ厚く) | RenderAdapter 抽象が残れば model swap で OK |
-| L10 Bubble Overlay | SVG 縦組吹き出し | **低** | **厚** | 多言語 + 縦組ルビは image gen の構造的弱点 |
 | L11 Audit | 自社品質基準 | **中** | **厚** | judgement は durable、自社差別化資産 |
 | L12 Repair | 失敗 panel 再走 | **中** | **薄** | self-correct する model が来たら薄くなる |
 | L13 KDP Package | PDF/X-1a・背幅・奥付 | **極低** | **厚** | 物理印刷制約、LLM 射程外 |
@@ -133,4 +132,4 @@ LLM / 画像生成モデルは半年〜1年で世代交代するため、決定�
 
 ## 10. 改訂履歴
 
-- 2026-05-05: 初版。陳腐化リスク 6ヶ月 20-30% / 12ヶ月 50-60% の見立てから策定。L05-L08 を「薄く」、L01/L10/L11/L13 を「厚く」の方針確定。
+- 2026-05-05: 初版。陳腐化リスク 6ヶ月 20-30% / 12ヶ月 50-60% の見立てから策定。L05-L08 を「薄く」、L01/L11/L13 を「厚く」の方針確定。

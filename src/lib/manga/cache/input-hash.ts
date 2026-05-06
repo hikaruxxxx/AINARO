@@ -3,7 +3,7 @@
  *
  * 目的:
  *   - L1-L8 (決定論的 layer): 入力 SHA256 が一致したら出力を再利用 (skip)
- *   - L9-L13 (画像生成・PDF 生成: 非決定論): hash は **記録のみ** で skip しない
+ *   - L9, L11-L13 (画像生成・PDF 生成: 非決定論): hash は **記録のみ** で skip しない
  *
  * Codex レビュー反映:
  *   - L9 以降は乱数依存なので「冪等性で品質安定」期待は危険
@@ -19,7 +19,7 @@ import { workDir } from "../../../../scripts/manga/layers/_paths";
 
 /** 各 layer の確定論性 */
 export const DETERMINISTIC_LAYERS = ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"] as const;
-export const NON_DETERMINISTIC_LAYERS = ["L9", "L9b", "L10", "L11", "L12", "L13"] as const;
+export const NON_DETERMINISTIC_LAYERS = ["L9", "L9b", "L11", "L12", "L13"] as const;
 
 export type LayerId =
   | (typeof DETERMINISTIC_LAYERS)[number]

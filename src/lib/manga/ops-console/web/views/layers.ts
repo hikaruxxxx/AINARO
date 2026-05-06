@@ -39,16 +39,6 @@ const LAYERS: LayerCard[] = [
       { name: "--revision-id", label: "revision id", type: "text" },
     ],
   },
-  {
-    id: "L10",
-    label: "L10 Bubble",
-    scope: "episode",
-    fields: [
-      { name: "--pages", label: "pages", type: "text", placeholder: "1,2" },
-      { name: "--version", label: "version", type: "text", placeholder: "v2" },
-      { name: "--revision-id", label: "revision id", type: "text" },
-    ],
-  },
   { id: "L11", label: "L11 Audit", scope: "episode", fields: [] },
   {
     id: "L12",

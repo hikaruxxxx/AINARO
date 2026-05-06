@@ -2,11 +2,8 @@ import {
   ApiError,
   apiGetManifest,
   apiPostAdopted,
-  apiPostJob,
   apiPostRevisionQueue,
-  openJobStream,
   type Manifest,
-  type RenderManifestEntry,
   type RevisionEntry,
 } from "../lib/api";
 import { store } from "../lib/store";
@@ -20,8 +17,7 @@ import {
 import type { PagePlanPage, PanelV2 } from "../../../schemas-v2";
 
 type Mode = "grid" | "compare" | "effects";
-type UiLayer = "renders" | "bubbles";
-type ManifestLayer = RenderManifestEntry["layer"];
+type UiLayer = "renders";
 type Filters = {
   failed: boolean;
   revised: boolean;
@@ -228,7 +224,6 @@ const TAG_LABELS: Record<RevisionTag, string> = {
   face: "顔",
   composition: "構図",
   tone: "トーン",
-  bubble: "吹き出し",
   ref: "ref不一致",
   anatomy: "体格/手足",
   background: "背景",
@@ -256,8 +251,8 @@ function epLabel(episode: number): string {
   return `ep${String(episode).padStart(2, "0")}`;
 }
 
-function manifestLayer(layer: UiLayer): ManifestLayer {
-  return layer === "renders" ? "render" : "bubble";
+function manifestLayer(_layer: UiLayer): "render" {
+  return "render";
 }
 
 function parseVersion(version: string): number {
@@ -272,8 +267,8 @@ function assetUrl(path: string): string {
 function defaultImagePath(layer: UiLayer, episode: number, pageNo: number): string {
   const ep = epLabel(episode);
   const page = String(pageNo).padStart(2, "0");
-  const dir = layer === "renders" ? "renders" : "bubbles";
-  return `episodes/${ep}/${dir}/p${page}.png`;
+  void layer;
+  return `episodes/${ep}/renders/p${page}.png`;
 }
 
 function errorText(error: unknown): string {
@@ -313,13 +308,10 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
           <button type="button" class="rv-button" data-rv-mode="compare">Compare</button>
           <button type="button" class="rv-button" data-rv-mode="effects">Effects</button>
           <button type="button" class="rv-button" data-rv-layer="renders">Renders</button>
-          <button type="button" class="rv-button" data-rv-layer="bubbles">Bubbles</button>
           <span style="width: 1px; height: 20px; background: var(--border-default); margin: 0 4px;"></span>
           <button type="button" class="rv-button" data-rv-rerun="L09" title="L09 Render を再実行">L09 再実行</button>
-          <button type="button" class="rv-button" data-rv-rerun="L10" title="L10 Bubble Overlay を再実行">L10 再実行</button>
           <button type="button" class="rv-button" data-rv-rerun="L12" title="L12 Repair で revision_queue を適用">L12 適用</button>
           <button type="button" class="rv-button" data-rv-ai-edit="L09" title="L09 を AI 編集 view へ">L09 AI</button>
-          <button type="button" class="rv-button" data-rv-ai-edit="L10" title="L10 を AI 編集 view へ">L10 AI</button>
         </div>
       </div>
       <div class="rv-filters">
@@ -328,7 +320,7 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
         <label class="rv-filter-check"><input type="checkbox" data-rv-filter="notAdopted"> hide adopted</label>
         <span id="rv-filter-summary"></span>
       </div>
-      <div class="rv-help"><code>1</code> renders <code>2</code> bubbles <code>g</code> grid <code>c</code> compare <code>3</code> effects <code>j/k</code> panel 移動 <code>esc</code> close</div>
+      <div class="rv-help"><code>1</code> renders <code>g</code> grid <code>c</code> compare <code>3</code> effects <code>j/k</code> panel 移動 <code>esc</code> close</div>
       <div class="rv-main" id="rv-main"><div class="rv-empty">読み込み中...</div></div>
       <div class="rv-modal" id="rv-modal" role="dialog" aria-modal="true" aria-labelledby="rv-modal-title">
         <div class="rv-modal-card">
@@ -667,14 +659,9 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
       `);
     }
     if (panelHtml.length === 0) continue;
-    // L09 (renders) は revision_queue から panel 単位で再走するのが従来動線。
-    // L10 (bubbles) は page 単位なので、ここでだけ「このページだけ L10 再実行」ボタンを露出する。
-    const pageRerunBtn = state.layer === "bubbles"
-      ? `<button type="button" class="rv-button rv-button--sm" data-rv-rerun-page="${page.page_no}" title="L10 Bubble をこのページ (P.${page.page_no}) だけ再実行 (--pages ${page.page_no})">L10 を P.${page.page_no} だけ再実行</button>`
-      : "";
     pageHtml.push(`
       <section class="rv-page-card">
-        <h3>P.${page.page_no} <span class="rv-page-role">[${escapeHtml(String(page.page_role))}]</span>${pageFailedCount > 0 ? `<span class="rv-audit-fail">audit failed: ${pageFailedCount}</span>` : ""}${pageRerunBtn}</h3>
+        <h3>P.${page.page_no} <span class="rv-page-role">[${escapeHtml(String(page.page_role))}]</span>${pageFailedCount > 0 ? `<span class="rv-audit-fail">audit failed: ${pageFailedCount}</span>` : ""}</h3>
         <div class="rv-panel-grid">${panelHtml.join("")}</div>
       </section>
     `);
@@ -742,11 +729,6 @@ function renderCompare(root: HTMLElement, state: ViewState): void {
   const manifest = state.manifest;
   const main = root.querySelector<HTMLElement>("#rv-main");
   if (!manifest || !main) return;
-  if (state.layer !== "bubbles") {
-    main.innerHTML = '<div class="rv-empty">採用は Bubbles レイヤでのみ可能です。上部の Bubbles に切り替えてください。</div>';
-    setText(root, "#rv-filter-summary", "compare: bubbles only");
-    return;
-  }
 
   const versions = versionMap(manifest, state.layer);
   const adopted = adoptedPanels(manifest);
@@ -905,8 +887,8 @@ function bindStaticListeners(
       "click",
       () => {
         const layer = button.dataset.rvLayer;
-        if (layer === "renders" || layer === "bubbles") {
-          state.layer = layer;
+        if (layer === "renders") {
+          state.layer = "renders";
           refresh(root, state, slug, episode);
         }
       },
@@ -977,10 +959,6 @@ function bindStaticListeners(
         state.layer = "renders";
         refresh(root, state, slug, episode);
         event.preventDefault();
-      } else if (event.key === "2") {
-        state.layer = "bubbles";
-        refresh(root, state, slug, episode);
-        event.preventDefault();
       } else if (event.key === "g" || event.key === "G") {
         state.mode = "grid";
         refresh(root, state, slug, episode);
@@ -1007,13 +985,12 @@ function bindStaticListeners(
         const panel = focusedPanel();
         if (panel) {
           state.mode = "compare";
-          state.layer = "bubbles";
           refresh(root, state, slug, episode);
           toast(root, `${panel.dataset.panelId ?? "panel"} の採用候補を Compare で確認してください`, "ok");
         }
         event.preventDefault();
       } else if (event.key === "?") {
-        toast(root, "j/k 移動 / Enter 修正指示 / Space Compare / 1 renders / 2 bubbles / g grid / c compare / 3 effects / esc close", "ok");
+        toast(root, "j/k 移動 / Enter 修正指示 / Space Compare / 1 renders / g grid / c compare / 3 effects / esc close", "ok");
         event.preventDefault();
       } else if (event.key === "Escape") {
         closeRevisionModal(root, state);
@@ -1113,37 +1090,6 @@ function bindStaticListeners(
     (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
-      // ページヘッダの「L10 を P.{N} だけ再実行」ボタン (Bubbles tab のみ表示)。
-      // event.preventDefault で panel クリック処理に流れないよう先に拾う。
-      const pageRerunBtn = target.closest<HTMLButtonElement>("[data-rv-rerun-page]");
-      if (pageRerunBtn) {
-        const pageNo = Number(pageRerunBtn.dataset.rvRerunPage);
-        if (!Number.isInteger(pageNo) || pageNo <= 0) return;
-        const ok = window.confirm(
-          `L10 Bubble Overlay を P.${pageNo} だけ再実行します。\n` +
-            `既存の bubbles/p${String(pageNo).padStart(2, "0")}.png は上書きされます。\n続行しますか？`
-        );
-        if (!ok) return;
-        // import 経由で circular にならないよう、動的読み込み (jobs API は既に bind 済)。
-        void apiPostJob({
-          layer: "L10",
-          slug,
-          episode,
-          args: { "--pages": String(pageNo) },
-        })
-          .then((job) => {
-            const stream = openJobStream(job.job_id, {
-              onEvent: () => undefined,
-              onDone: () => {
-                stream.close();
-                refresh(root, state, slug, episode);
-              },
-              onError: (e) => alert(`L10 P.${pageNo}: ${e.message}`),
-            });
-          })
-          .catch((e) => alert(`L10 P.${pageNo} の起動に失敗: ${errorText(e)}`));
-        return;
-      }
       const panel = target.closest<HTMLElement>(".rv-panel");
       if (panel) {
         openRevisionModal(root, state, {

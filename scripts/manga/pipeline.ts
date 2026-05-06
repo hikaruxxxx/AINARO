@@ -82,7 +82,7 @@ const ALL_LAYERS = [
   "L01", "L01b", "L01c", "L02", "L02b",
   "L03", "L04", "L05", "L06", "L07", "L08",
   "L08_5",
-  "L09", "L09b", "L10", "L11", "L12", "L13",
+  "L09", "L09b", "L11", "L12", "L13",
 ] as const;
 type LayerId = (typeof ALL_LAYERS)[number];
 
@@ -104,7 +104,6 @@ const LAYER_SCRIPT: Record<LayerId, string> = {
   L08_5: "scripts/manga/layers/L08-5-name-preview.ts",
   L09: "scripts/manga/layers/L09-render.ts",
   L09b: "scripts/manga/layers/L09b-page-compose.ts",
-  L10: "scripts/manga/layers/L10-bubble.ts",
   L11: "scripts/manga/layers/L11-audit.ts",
   L12: "scripts/manga/layers/L12-repair.ts",
   L13: "scripts/manga/layers/L13-kdp.ts",

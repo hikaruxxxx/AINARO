@@ -32,12 +32,11 @@ type PipelineLayerId =
   | "L08.6"
   | "L08.7"
   | "L09"
-  | "L10"
   | "L11"
   | "L12"
   | "L13";
 
-type RunnableLayerId = "L01" | "L02" | "L02b" | "L09" | "L10" | "L11" | "L12" | "L13";
+type RunnableLayerId = "L01" | "L02" | "L02b" | "L09" | "L11" | "L12" | "L13";
 
 type PipelineStatusLayer = {
   id: PipelineLayerId;
@@ -141,7 +140,6 @@ function specs(slug: string, episode: number): LayerSpec[] {
   const epDir = episodeDir(slug, episode);
   const bibleRefs = bibleRefsDir(slug);
   const renders = path.join(epDir, "renders");
-  const bubbles = path.join(epDir, "bubbles");
   const revisionResolved = path.join(epDir, "_revision_resolved.jsonl");
   const kdpPdf = path.join(workDir(slug), "volumes", "v01", "kdp", "manuscript.pdf");
   const shotlist = path.join(epDir, "shotlist.json");
@@ -184,7 +182,6 @@ function specs(slug: string, episode: number): LayerSpec[] {
     { id: "L08.6", label: "L08.6 Name Audit", artifacts: [artifact(nameAuditPath(slug, episode), "file")], next_view: "name-gate", next_layer_id: null },
     { id: "L08.7", label: "L08.7 Name Approval", artifacts: [artifact(nameApprovalPath(slug, episode), "file")], next_view: "name-gate", next_layer_id: null },
     { id: "L09", label: "L09 Render", artifacts: [artifact(renders, "png-in-dir")], next_view: "revision", next_layer_id: "L09" },
-    { id: "L10", label: "L10 Bubble Overlay", artifacts: [artifact(bubbles, "png-in-dir")], next_view: "revision", next_layer_id: "L10" },
     { id: "L11", label: "L11 Audit", artifacts: [artifact(auditPath(slug, episode), "file")], next_view: "quality", next_layer_id: "L11" },
     { id: "L12", label: "L12 Repair", artifacts: [artifact(revisionResolved, "file")], next_view: "revision", next_layer_id: "L12" },
     { id: "L13", label: "L13 KDP", artifacts: [artifact(kdpPdf, "file")], next_view: "volumes", next_layer_id: "L13" },

@@ -17,11 +17,11 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import {
   workMetaPath,
-  bubblesDir,
+  rendersDir,
   kdpDir,
   workDir,
 } from "./_paths";
-import { resolveBubblePagesForEpisode } from "../../../src/lib/manga/publish-v2/kdp/adopted-resolver";
+import { resolveRenderedPagesForEpisode } from "../../../src/lib/manga/publish-v2/kdp/adopted-resolver";
 import {
   buildManuscriptPdf,
 } from "../../../src/lib/manga/publish-v2/kdp/manuscript-pdf";
@@ -129,14 +129,14 @@ function parseArgs(): Args {
 }
 
 /**
- * adopted_versions.json があれば採用版 image_path を、なければ bubbles/p{NN}.png を返す。
+ * adopted_versions.json があれば採用版 image_path を、なければ renders/p{NN}.png を返す。
  * Phase D で page-level の採用反映を実現するヘルパー (panel-level は L9.5 後に拡張)。
  */
 async function listPagesForEpisode(slug: string, ep: number): Promise<string[]> {
-  const resolved = await resolveBubblePagesForEpisode({
+  const resolved = await resolveRenderedPagesForEpisode({
     slug,
     episode: ep,
-    bubblesDir: bubblesDir(slug, ep),
+    rendersDir: rendersDir(slug, ep),
     workRoot: workDir(slug),
   });
   if (resolved.length === 0) return [];
@@ -206,10 +206,10 @@ async function main() {
   const allPages: string[] = [];
   for (const ep of args.episodes) {
     const pages = await listPagesForEpisode(args.slug, ep);
-    if (pages.length === 0) console.warn(`[L13] WARN: ep${ep} bubbles not found`);
+    if (pages.length === 0) console.warn(`[L13] WARN: ep${ep} renders not found`);
     allPages.push(...pages);
   }
-  if (allPages.length === 0) throw new Error("[L13] no bubble pages found, cannot build manuscript");
+  if (allPages.length === 0) throw new Error("[L13] no render pages found, cannot build manuscript");
 
   // A1-3: 表紙画像を外部入力必須化
   const coverFrontPath = await loadRequiredCoverFrontPng(args.slug, args.volume, args.coverFront);

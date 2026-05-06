@@ -8,7 +8,7 @@
  * - capability.ref_role_tagging=false なので image_inputs はフラット配列
  * - inline label を prompt に書く (capability.ref_role_tagging_note 通り「弱いが読まれる」)
  * - dialogue/monologue/narration/sfx は **画像内に直接描画** する (吹き出しごと, ナレーション枠ごと, 擬音ごと)
- *   旧 L10 SVG overlay 方式は撤回。AI に typesetting/レイアウトを任せる。
+ *   旧 SVG overlay 方式は撤回。AI に typesetting/レイアウトを任せる。
  */
 import type {
   PanelV2,
@@ -78,7 +78,7 @@ function negativesBlock(): string {
 
 /**
  * panel.dialogue / monologue / narration / sfx を「画像内に直接描く」指示文に変換。
- * 吹き出し・ナレーション枠・擬音を AI 側で typeset させる方針 (旧 L10 SVG overlay は撤回)。
+ * 吹き出し・ナレーション枠・擬音を AI 側で typeset させる方針 (旧 SVG overlay は撤回)。
  */
 function inPanelTextBlock(panel: PanelV2, bible: BibleSnapshotV2): string | null {
   const hasAny =

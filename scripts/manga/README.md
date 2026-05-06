@@ -24,9 +24,8 @@ L08 incremental-refs     layers/L08-incremental-refs.ts  ← resolved_refs.unres
 ═══ PHASE 3: RENDER (per ep) ═══
 L09  render              layers/L09-render.ts            ← page_plan + resolved_refs → renders/p{NN}.png (panels + page_one_shot)
 L09b page-compose        layers/L09b-page-compose.ts     ← panel PNGs + page_plan rect → renders/p{NN}.png (panel_composite用)
-L10  bubble              layers/L10-bubble.ts            ← renders + storyboard.dialogue → bubbles/p{NN}.png
-L11 audit                layers/L11-audit.ts             ← bubbles + bible → audit.json
-L12 repair               layers/L12-repair.ts            ← audit.failed → re-run L9-L10
+L11 audit                layers/L11-audit.ts             ← renders + bible → audit.json
+L12 repair               layers/L12-repair.ts            ← audit.failed → re-run L9
 
 ═══ PHASE 4: PUBLISH (per volume) ═══
 L13 kdp                  layers/L13-kdp.ts               ← volumes/v{NN}/episodes 全部 → kdp/{manuscript,cover}.pdf

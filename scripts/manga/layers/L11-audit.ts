@@ -1,11 +1,11 @@
 /**
  * L11 Audit
  *
- * bubbles/p{NN}.png を検査して audit.json を生成
+ * renders/p{NN}.png を検査して audit.json を生成
  */
 import "../_env";
 import { promises as fs } from "node:fs";
-import { storyboardPath, pagePlanPath, bubblesDir, auditPath } from "./_paths";
+import { storyboardPath, pagePlanPath, rendersDir, auditPath } from "./_paths";
 import { auditEpisode } from "../../../src/lib/manga/qa-v2/audit";
 import type { EpisodeStoryboardV2, PagePlanV2 } from "../../../src/lib/manga/schemas-v2";
 
@@ -34,7 +34,7 @@ async function main() {
   const pagePlan = JSON.parse(await fs.readFile(pagePlanPath(args.slug, args.episode), "utf-8")) as PagePlanV2;
 
   const report = await auditEpisode({
-    bubblesDir: bubblesDir(args.slug, args.episode), storyboard, pagePlan,
+    rendersDir: rendersDir(args.slug, args.episode), storyboard, pagePlan,
   });
 
   await fs.writeFile(auditPath(args.slug, args.episode), JSON.stringify(report, null, 2));

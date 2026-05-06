@@ -260,7 +260,6 @@ export type LayerId =
   | "L02"
   | "L02b"
   | "L09"
-  | "L10"
   | "L11"
   | "L12"
   | "L13"

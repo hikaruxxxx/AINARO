@@ -1,7 +1,7 @@
 /**
  * KDP 本文 PDF/X-1a 生成 (簡易版)
  *
- * pdf-lib を使って bubbles/p{NN}.png を 1 ページ 1 画像で結合。
+ * pdf-lib を使って renders/p{NN}.png を 1 ページ 1 画像で結合。
  * 厳密な PDF/X-1a 準拠は KDP 入稿時の Amazon 側変換でも吸収されるため、
  * MVP は B6 サイズに合わせた高解像度 PDF を出すまで。
  *
