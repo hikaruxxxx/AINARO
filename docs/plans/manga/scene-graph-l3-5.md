@@ -344,6 +344,30 @@ npx tsx scripts/manga/layers/L03_5-scene-graph.ts --slug a07-modern-dungeon --ep
 - 「設計図 → コマ割り」の往路がエンドツーエンドで動作
 - panel renumber 問題が自動解消 (B5-5 設計目標達成)
 - dialogue_dedup の検出は scene-graph (Rule 4 scene_exclusive uniqueness) と auditEpisode の二段で機能
+
+### 2026-05-07: a07 ep01-03 を新方式で連続生成
+
+ep01 / ep02 / ep03 を `--from-scene-graph --enrich` で連続生成、scene-graph 中心パイプラインの量産耐性を確認。
+
+| episode | scene 数 | 所要時間 | total_panels | validation |
+|---|---|---|---|---|
+| ep01 | 10 | 281s (4.7 min) | 110 | all pass |
+| ep02 | 6 | 229s (3.8 min) | 110 | all pass |
+| ep03 | 7 | 247s (4.1 min) | 110 | all pass |
+| 平均 | 7.7 | **252s/episode** | 110 | |
+
+**1 巻 (10 episode sequential) 試算**: 約 **42 分** (Codex CLI subscription 内、API 課金ゼロ)
+
+**ep03 で発見した validator 課題**:
+- cross-episode payoff (ep02 で setup した token を ep03 で payoff) が validateSceneGraph Rule 5 で「setup なしの payoff」として検出される
+- 暫定対応: ep03 から該当 payoff を削除 (ep02 setup は hint=later_in_volume として保留)
+- 根本対応: 巻全体の cross-episode validator を Phase γ で実装予定 (volume-level foreshadow DAG)
+
+**運用知見**:
+- 1 巻 10 episode 並行作業は Max 5h 上限 (~25M tokens) 内で 6 巻並行可能
+- 各 episode の scene 数 6-10 が安定範囲
+- panel.action / key_visual の品質は Codex 出力で十分 (key_visual_intent と key_lines を context として渡せば schema 制約を守って生成)
+- panel renumber 警告は新方式の決定的採番で全 episode 自動解消
 - **time_axis.order の値域**: flashforward は 999 のような大値、flashback は -1, -2 等の負値で表現可能。整数で十分。
 - **sub_locations の使い所**: S07 (gate→corridor 連続通過) と S10 (corridor + DPC cross-cut) のような演出。1 scene に複数 location を許すが、主軸は 1 つ。
 - **cast.presence**: in_person (8), voice_off (5), tv (1), memory (1) を a07-ep01 で使用。phone_screen と log_visual は ep01 では未使用 (将来 episode で出る想定)。

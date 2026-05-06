@@ -1,0 +1,650 @@
+{
+  "schema_version": 1,
+  "episode_id": "a07-modern-dungeon-ep03",
+  "generated_at": "2026-05-07T03:30:00+09:00",
+  "source": {
+    "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep03/_brief.v2.md",
+    "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep03/shotlist.json",
+    "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
+  },
+  "_note": "Phase β B5-5 検証 #3 - a07-ep03 を 7 scene で手動切り出し。便利さ→不気味さの反転、ナビ沈黙 cliff。",
+  "scenes": [
+    {
+      "scene_id": "S01",
+      "scene_no": 1,
+      "prev_scene_id": null,
+      "next_scene_id": "S02",
+      "page_range": {
+        "start": 1,
+        "end": 3
+      },
+      "panel_range": {
+        "start_panel_no": 1,
+        "end_panel_no": 15
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 3,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.20
+      },
+      "beat_type": "introduce",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "俺の一日が、攻略チャートみたいになっていく。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "3F隠し採取棚、売却窓口の混雑回避、夜勤シフトの組み替えを提案します。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_navi_lifestyle_optimization",
+          "payoff_episode_hint": "this_episode"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "ナビは便利な攻略音声、収入と生活を改善できそうだ",
+        "goal": "提案を受けて 1 日の動きを最適化する",
+        "emotion": "curiosity",
+        "delta_from_prev": "ep02 末の Nm 警戒から、ナビの便利さを再評価する朝へ"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "戦闘以外の領域 (採取/売却/シフト) まで具体的な提案がナビから来た"
+        }
+      ],
+      "time_axis": {
+        "label": "三日目早朝、自室、壁の手書き予定表",
+        "order": 1,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "dialogue",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "壁に貼った手書き予定表とヒビ入りスマホの画面、青光が淡く文字を撫でる"
+    },
+    {
+      "scene_id": "S02",
+      "scene_no": 2,
+      "prev_scene_id": "S01",
+      "next_scene_id": "S03",
+      "page_range": {
+        "start": 4,
+        "end": 7
+      },
+      "panel_range": {
+        "start_panel_no": 16,
+        "end_panel_no": 35
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 3,
+        "arc_phase": "rising",
+        "arc_position_normalized": 0.30
+      },
+      "beat_type": "setup",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "ナビの答えを、俺の目で裏取りする。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "壁の湿りと足跡。湧き周期は、合っている。",
+            "uniqueness": "scene_exclusive",
+            "intent": "callback"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_ren_verification_protocol_advances",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "従うだけでなく、自分の目で裏取りすれば俺の判断にできる",
+        "goal": "3F 隠し採取棚で公開 wiki 外の素材を入手",
+        "emotion": "determination",
+        "delta_from_prev": "便利さに依存せず、情報強者としての主体性を獲得"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "三日目朝、3F 採取エリア",
+        "order": 2,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "hours"
+      },
+      "location_id": "loc_shinjuku_third_3f_hidden_cache_v1",
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
+      "mode": "action",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "壁の苔の影と湿り、ナビ青光に重なる足跡、レンの瞳が裏取りモードに切り替わる"
+    },
+    {
+      "scene_id": "S03",
+      "scene_no": 3,
+      "prev_scene_id": "S02",
+      "next_scene_id": "S04",
+      "page_range": {
+        "start": 8,
+        "end": 10
+      },
+      "panel_range": {
+        "start_panel_no": 36,
+        "end_panel_no": 50
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 3,
+        "arc_phase": "rising",
+        "arc_position_normalized": 0.40
+      },
+      "beat_type": "transition",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "売却窓口、東口は午前10時から12時まで混雑。西口へ。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
+        ]
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "最適化は時間も金も生む",
+        "goal": "素材を最短で売却し、収入を増やす",
+        "emotion": "elation",
+        "delta_from_prev": "情報強者としての裏取り成功の余韻、収入が伸び始める実感"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "三日目昼、売却窓口へ移動 → 西口で売却",
+        "order": 3,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "hours"
+      },
+      "location_id": "loc_dpc_public_counter_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "transition_montage",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "売却窓口の混雑カットと西口の空いた窓口、レンの足取りが軽くなる"
+    },
+    {
+      "scene_id": "S04",
+      "scene_no": 4,
+      "prev_scene_id": "S03",
+      "next_scene_id": "S05",
+      "page_range": {
+        "start": 11,
+        "end": 14
+      },
+      "panel_range": {
+        "start_panel_no": 51,
+        "end_panel_no": 70
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 3,
+        "arc_phase": "rising",
+        "arc_position_normalized": 0.55
+      },
+      "beat_type": "setup",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "週3にしたい。売上が落ちる時間帯の棚卸しは、俺が先回りで片づけます。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_ren_negotiation_skill",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "条件を提示すれば、俺の時間も最適化できる",
+        "goal": "夜勤を週4から週3に減らす交渉を成立させる",
+        "emotion": "determination",
+        "delta_from_prev": "売却の収入アップを背景に、時間の取り戻しを攻める"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "三日目夕方、コンビニのレジ前で店長と交渉",
+        "order": 4,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_lawson_interior_v1",
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
+      "mode": "dialogue",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "店長の渋面と、棚卸し先回りの提案を手で示すレン、レジ越しの交渉"
+    },
+    {
+      "scene_id": "S05",
+      "scene_no": 5,
+      "prev_scene_id": "S04",
+      "next_scene_id": "S06",
+      "page_range": {
+        "start": 15,
+        "end": 16
+      },
+      "panel_range": {
+        "start_panel_no": 71,
+        "end_panel_no": 80
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 3,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.70
+      },
+      "beat_type": "reveal",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "最適解の外に出た瞬間、俺はただのFだ。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_level_vs_base_stats_gap",
+          "payoff_episode_hint": "next_episode"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "レベルだけが上がっても、俺の素ステータスはFのまま、ナビが消えれば無力",
+        "goal": "公社アプリの曲線を読み解き、自分の現在地を確認",
+        "emotion": "fear",
+        "delta_from_prev": "便利さの陶酔から、依存の脆さへ気づく"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "三日目夜、コンビニ夜勤前、バックヤードでスマホを見る",
+        "order": 5,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_lawson_interior_v1",
+      "page_budget": {
+        "min": 2,
+        "max": 2,
+        "preferred": 2
+      },
+      "mode": "introspection",
+      "turn_anchor": {
+        "at_panel_no": 80,
+        "type": "reveal_turn"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "レベル曲線が急上昇するグラフと、F平均で動かない筋力/耐久/敏捷の数値、対比"
+    },
+    {
+      "scene_id": "S06",
+      "scene_no": 6,
+      "prev_scene_id": "S05",
+      "next_scene_id": "S07",
+      "page_range": {
+        "start": 17,
+        "end": 19
+      },
+      "panel_range": {
+        "start_panel_no": 81,
+        "end_panel_no": 95
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 3,
+        "arc_phase": "falling",
+        "arc_position_normalized": 0.85
+      },
+      "beat_type": "turn",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "栄養配分は、現在の予算内で炭水化物を減らし、たんぱく質を優先してください。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "帰宅ルートは、夜勤後は東口より西口の方が街灯密度で5分速くなります。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_navi_overreach_warning",
+          "payoff_episode_hint": "this_episode"
+        }
+      ],
+      "foreshadow_payoff": [
+        "F_navi_lifestyle_optimization"
+      ],
+      "protagonist_arc_state": {
+        "belief": "ナビの距離が近すぎる、便利さが不気味さに反転していく",
+        "goal": "ナビの過剰な助言を一旦切り離し、自分の境界を保つ",
+        "emotion": "tension",
+        "delta_from_prev": "Fランクの脆さへの恐怖から、ナビとの距離の違和感へ"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "tense",
+          "intensity": -1,
+          "trigger": "栄養配分や帰宅ルートまでナビが助言、距離の近さが反転して怖さに変わる"
+        }
+      ],
+      "time_axis": {
+        "label": "三日目深夜、コンビニのバックヤードで廃棄弁当を食べる",
+        "order": 6,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_lawson_interior_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "introspection",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "廃棄弁当を箸で持つ手と、スマホから流れるナビの助言、距離の近さを画面の侵食で表現"
+    },
+    {
+      "scene_id": "S07",
+      "scene_no": 7,
+      "prev_scene_id": "S06",
+      "next_scene_id": null,
+      "page_range": {
+        "start": 20,
+        "end": 22
+      },
+      "panel_range": {
+        "start_panel_no": 96,
+        "end_panel_no": 110
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 3,
+        "arc_phase": "climax",
+        "arc_position_normalized": 1.0
+      },
+      "beat_type": "cliff",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "一日の開示量、上限を超えました。明朝までお待ちください。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "誰のための規約だ。",
+            "uniqueness": "scene_exclusive",
+            "intent": "cliff"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "私の、ではない誰かの、ためです。",
+            "uniqueness": "scene_exclusive",
+            "intent": "cliff"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "あなたに、私を見つけてほしくはないのですが。",
+            "uniqueness": "scene_exclusive",
+            "intent": "cliff"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_navi_disclosure_limit",
+          "payoff_episode_hint": "next_episode"
+        },
+        {
+          "token": "F_navi_serves_someone_else",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_navi_doesnt_want_to_be_found",
+          "payoff_episode_hint": "next_episode"
+        }
+      ],
+      "foreshadow_payoff": [
+        "F_navi_overreach_warning"
+      ],
+      "protagonist_arc_state": {
+        "belief": "ナビは道具ではない。私を見つけてほしくない誰かが、声の向こうにいる",
+        "goal": "ナビの正体と「私を見つけないで」の意味を解明する",
+        "emotion": "despair",
+        "delta_from_prev": "便利さの陶酔から、ナビ自身を相手として認識する転換"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "tense",
+          "intensity": -1,
+          "trigger": "ナビが規約と「見つけてほしくない」を口にし、距離が大きく開く"
+        }
+      ],
+      "time_axis": {
+        "label": "三日目深夜→四日未明、自室、青光の消えた部屋",
+        "order": 7,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "silence",
+      "turn_anchor": {
+        "at_panel_no": 110,
+        "type": "cliff_turn"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "空白の吹き出し連続、スマホの光だけ、レンの顔だけ、青光の消えた自室"
+    }
+  ],
+  "pull_link": {
+    "current_episode_cliff": "ability_or_identity_glimpse",
+    "next_opening_hook_hint": "次話冒頭は、レンが「見つけてほしくない」の意味を考えながら、ナビ不在の朝を迎える。情報なしで動けるか、自分の素ステータスとどう向き合うか。",
+    "is_volume_end": false
+  }
+}
