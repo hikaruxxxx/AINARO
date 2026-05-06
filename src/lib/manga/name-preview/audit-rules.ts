@@ -87,7 +87,11 @@ export type AuditRuleKind =
   // Phase Y WY-2 で追加 (narration_kind + budget)
   | "narration_panel_chars_exceeded"
   | "narration_page_count_exceeded"
-  | "narration_episode_omniscient_exceeded";
+  | "narration_episode_omniscient_exceeded"
+  // Phase β B5-6 で追加 (scene-graph 経路でない storyboard の narrative セーフティネット)
+  | "panel_no_gap"
+  | "dialogue_dedup_across_pages"
+  | "cast_subset_violation";
 
 export type AuditSeverity = "info" | "warn" | "error";
 
@@ -409,6 +413,10 @@ export function findingsToWarnings(findings: AuditFinding[]): NameWarning[] {
       case "narration_panel_chars_exceeded":
       case "narration_page_count_exceeded":
       case "narration_episode_omniscient_exceeded":
+      // Phase β B5-6 で追加された episode スコープルールも manifest.warnings には入れない
+      case "panel_no_gap":
+      case "dialogue_dedup_across_pages":
+      case "cast_subset_violation":
         continue;
     }
     warnings.push({ page_no: f.page_no, kind, message: f.message });
@@ -543,4 +551,105 @@ function collectEpisodeText(ep: EpisodeStoryboardV2): string {
     }
   }
   return buf.join(" ");
+}
+
+// ============================================================
+// Phase β B5-6: episode スコープ narrative 検査
+// ============================================================
+
+export type EpisodeAuditInput = {
+  episode: EpisodeStoryboardV2;
+  /**
+   * brief.cast (任意)。指定されると panel.entities.characters[].character_id の
+   * subset 違反を検出する。scene-graph 経路では validateSceneGraph Rule 2 で防げるが、
+   * 旧 panel-level 経路には本検査をセーフティネットとして残す
+   */
+  briefCast?: string[];
+};
+
+/**
+ * episode スコープのルール検査。page を跨ぐ panel_no 整合や台詞重複など、
+ * page 単独では検出できないパターンを拾う。
+ *
+ * 追加ルール (B5-6):
+ *   - panel_no_gap: panel_no が 1 から始まらない / 連番でない (旧 panel_insert 経由で起きる)
+ *   - dialogue_dedup_across_pages: 同じ台詞テキストが複数 page の panel に存在
+ *     (cliffhanger 台詞先出しなどの最後の砦、scene-graph で防いだものをさらに保険として検出)
+ *   - cast_subset_violation: panel.entities.characters[].character_id が brief.cast 外
+ *     (旧経路で氷室 ep01 不在のような違反を検出)
+ */
+export function auditEpisode(input: EpisodeAuditInput): AuditFinding[] {
+  const findings: AuditFinding[] = [];
+  const ep = input.episode;
+
+  // panel_no_gap
+  const allPanels = ep.pages.flatMap((p) => p.panels);
+  const sortedNos = allPanels.map((p) => p.panel_no).sort((a, b) => a - b);
+  for (let i = 0; i < sortedNos.length; i++) {
+    if (sortedNos[i] !== i + 1) {
+      const offending = allPanels.find((p) => p.panel_no === sortedNos[i]);
+      findings.push({
+        page_no: 0,
+        panel_id: offending?.panel_id,
+        panel_no: sortedNos[i],
+        rule: "panel_no_gap",
+        severity: "warn",
+        message: `panel_no が連番でない: index ${i + 1} の位置に panel#${sortedNos[i]} (期待値 ${i + 1})`,
+      });
+      break; // 最初の gap のみ報告 (連鎖通知を避ける)
+    }
+  }
+
+  // dialogue_dedup_across_pages
+  const textOwners = new Map<string, Array<{ page: number; panel: number }>>();
+  for (const page of ep.pages) {
+    for (const panel of page.panels) {
+      const texts = [
+        ...panel.dialogue.map((d) => d.text),
+        ...panel.monologue.map((m) => m.text),
+      ].filter((t) => t.trim().length > 0);
+      for (const t of texts) {
+        const list = textOwners.get(t) ?? [];
+        list.push({ page: page.page_no, panel: panel.panel_no });
+        textOwners.set(t, list);
+      }
+    }
+  }
+  for (const [text, owners] of textOwners) {
+    if (owners.length < 2) continue;
+    const distinctPages = new Set(owners.map((o) => o.page));
+    if (distinctPages.size < 2) continue; // 同 page 内の重複は別ルール (silent_run 等) で扱う
+    const summary = owners.map((o) => `P${o.page}/panel#${o.panel}`).join(", ");
+    findings.push({
+      page_no: owners[0].page,
+      panel_no: owners[0].panel,
+      rule: "dialogue_dedup_across_pages",
+      severity: "warn",
+      message: `同一台詞が複数 page で重複: "${text.slice(0, 30)}${text.length > 30 ? "…" : ""}" (${summary})`,
+    });
+  }
+
+  // cast_subset_violation
+  if (input.briefCast && input.briefCast.length > 0) {
+    const briefSet = new Set(input.briefCast);
+    for (const page of ep.pages) {
+      for (const panel of page.panels) {
+        for (const c of panel.entities.characters) {
+          if (!briefSet.has(c.character_id)) {
+            findings.push({
+              page_no: page.page_no,
+              panel_id: panel.panel_id,
+              panel_no: panel.panel_no,
+              rule: "cast_subset_violation",
+              severity: "error",
+              character_id: c.character_id,
+              message: `panel.characters の "${c.character_id}" が brief.cast に未登録 (episode-level 制約違反)`,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return findings;
 }
