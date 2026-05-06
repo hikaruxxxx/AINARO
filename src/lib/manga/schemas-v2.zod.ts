@@ -58,6 +58,65 @@ export const ToneProfileSchema = z
   })
   .passthrough();
 
+// 未配線 zod schema (2026-05-06): bible のテキスト品質パック (world.lexicon /
+// characters[*].speech_style / narration_style_guide / nav_full_spec) 用に
+// 定義されたが、現状この repo に BibleSnapshotV2Schema 親が無いため呼び出し側ゼロ。
+// 親 schema 整備時に組み込む。それまでは TS 型 (schemas-v2.ts) のみで運用。
+export const TextQualityLexiconSchema = z
+  .object({
+    forbidden_terms_global: z.array(z.string()).optional(),
+    p1_opening_directive: z.string().optional(),
+  })
+  .passthrough();
+
+export const CharacterSpeechStyleSchema = z
+  .object({
+    first_person: z.string().optional(),
+    register: z.string().optional(),
+    sentence_rhythm: z.string().optional(),
+    verbosity_dial: z.record(z.string(), z.string()).optional(),
+    preferred_techniques: z.array(z.string()).optional(),
+    characteristic_phrases: z.array(z.string()).optional(),
+    to_navi_dialog_pattern: z.string().optional(),
+    speech_drift_per_volume: z.record(z.string(), z.string()).optional(),
+    monologue_signature: z.string().optional(),
+    ban_phrases: z.array(z.string()).optional(),
+  })
+  .passthrough();
+
+export const NarrationStyleGuideSchema = z
+  .object({
+    p1_opening_directive_specific: z
+      .object({
+        max_lines: z.number().int().positive().optional(),
+        max_chars_per_line: z.number().int().positive().optional(),
+        must_contain_at_most_one_of: z.array(z.string()).optional(),
+        must_avoid: z.array(z.string()).optional(),
+        preferred_pattern_examples: z.array(z.string()).optional(),
+        rejected_pattern_examples: z.array(z.string()).optional(),
+      })
+      .passthrough()
+      .optional(),
+    ban_list_phrases: z.array(z.string()).optional(),
+    monologue_signature_patterns: z.array(z.string()).optional(),
+  })
+  .passthrough();
+
+export const NavFullSpecSchema = z
+  .object({
+    voice_persona: z
+      .object({
+        default_tone: z.string().optional(),
+        speech_endings: z.array(z.string()).optional(),
+        emotional_range_per_volume: z.record(z.string(), z.string()).optional(),
+      })
+      .passthrough()
+      .optional(),
+    canonical_disclosure_lines_vol_1: z.array(z.string()).optional(),
+    anti_pattern_dialogue: z.record(z.string(), z.unknown()).optional(),
+  })
+  .passthrough();
+
 export const BibleSnapshotV2MetaSchema = z
   .object({
     slug: z.string().min(1),

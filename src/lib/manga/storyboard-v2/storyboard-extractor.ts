@@ -37,6 +37,71 @@ type StoryboardOutput = {
 };
 `;
 
+export function buildTextQualityMaterials(bible: BibleSnapshotV2): {
+  world_lexicon: BibleSnapshotV2["world"]["lexicon"] | null;
+  narration_style_guide: BibleSnapshotV2["narration_style_guide"] | null;
+  nav_full_spec: BibleSnapshotV2["nav_full_spec"] | null;
+  character_speech_styles: Array<{
+    id: string;
+    role: string;
+    speech_style: NonNullable<BibleSnapshotV2["characters"][number]["speech_style"]>;
+  }>;
+} {
+  return {
+    world_lexicon: bible.world.lexicon ?? null,
+    narration_style_guide: bible.narration_style_guide ?? null,
+    nav_full_spec: bible.nav_full_spec ?? null,
+    character_speech_styles: bible.characters.flatMap((c) => (
+      c.speech_style ? [{
+        id: c.id,
+        role: c.role,
+        speech_style: c.speech_style,
+      }] : []
+    )),
+  };
+}
+
+function buildTextQualityPromptDirectives(bible: BibleSnapshotV2): string {
+  const materials = buildTextQualityMaterials(bible);
+  const lines: string[] = [];
+
+  lines.push("## Text Quality Directives (dialogue / narration / monologue / sfx)");
+  lines.push("以下は optional bible sections です。存在する場合は strict directive として扱い、panel text 生成時に必ず適用してください。");
+
+  const forbidden = materials.world_lexicon?.forbidden_terms_global ?? [];
+  if (forbidden.length > 0) {
+    lines.push("- bible.world.lexicon.forbidden_terms_global は禁止語リスト。dialogue / monologue / narration に出した時点で失敗です。");
+    lines.push(`  禁止語リスト: ${forbidden.join(" / ")}`);
+  }
+  const p1Directive = materials.world_lexicon?.p1_opening_directive;
+  if (p1Directive) {
+    lines.push(`- page 1 / page_role=opening_hook の text guard: ${p1Directive}`);
+  }
+  const p1Specific = materials.narration_style_guide?.p1_opening_directive_specific;
+  if (p1Specific) {
+    lines.push("- narration_style_guide.p1_opening_directive_specific を opening_hook の最初の panel に強制適用。max_lines / max_chars_per_line / must_avoid を守る。");
+    if (p1Specific.rejected_pattern_examples?.length) {
+      lines.push(`  rejected_pattern_examples は生成した時点で失敗扱い: ${p1Specific.rejected_pattern_examples.join(" / ")}`);
+    }
+  }
+  const anchors = materials.nav_full_spec?.canonical_disclosure_lines_vol_1 ?? [];
+  if (anchors.length > 0) {
+    lines.push("- ナビ発話は nav_full_spec.canonical_disclosure_lines_vol_1 を anchor として、敬体・事務的・開示プロトコル寄りにする。");
+    lines.push(`  anchor examples: ${anchors.slice(0, 5).join(" / ")}`);
+  }
+  const antiPattern = materials.nav_full_spec?.anti_pattern_dialogue;
+  if (antiPattern) {
+    lines.push("- nav_full_spec.anti_pattern_dialogue は絶対禁止例。似た命令口調・スマホナビ感の語彙も避ける。");
+    lines.push(JSON.stringify(antiPattern, null, 2));
+  }
+  if (materials.character_speech_styles.length > 0) {
+    lines.push("- character_speech_styles は該当キャラの dialogue / monologue 文体ガード。first_person / register / ban_phrases を必ず守る。");
+    lines.push(JSON.stringify(materials.character_speech_styles, null, 2));
+  }
+
+  return lines.join("\n");
+}
+
 export async function extractStoryboardFromShotlist(args: {
   bible: BibleSnapshotV2;
   shotlist: ShotlistV2;
@@ -91,7 +156,14 @@ export async function extractStoryboardFromShotlist(args: {
         bible.meta.tone_profile,
         bible.meta.genre,
         bible.meta.subtype,
+        {
+          worldLexicon: bible.world.lexicon,
+          narrationStyleGuide: bible.narration_style_guide,
+          navFullSpec: bible.nav_full_spec,
+          characters: bible.characters,
+        },
       ),
+      buildTextQualityPromptDirectives(bible),
     ].join("\n"),
     materials: {
       bible_meta: JSON.stringify(bible.meta, null, 2),
@@ -99,6 +171,14 @@ export async function extractStoryboardFromShotlist(args: {
       locations: locsBlock,
       style_directives: JSON.stringify(bible.style_directives, null, 2),
       visual_motifs: JSON.stringify(bible.visual_motifs, null, 2),
+      world_lexicon: JSON.stringify(bible.world.lexicon ?? null, null, 2),
+      narration_style_guide: JSON.stringify(bible.narration_style_guide ?? null, null, 2),
+      nav_full_spec: JSON.stringify(bible.nav_full_spec ?? null, null, 2),
+      character_speech_styles: JSON.stringify(
+        buildTextQualityMaterials(bible).character_speech_styles,
+        null,
+        2,
+      ),
       shotlist_scenes: JSON.stringify(shotlist.scenes, null, 2),
       shotlist_panels: JSON.stringify(shotlist.panels, null, 2),
     },
@@ -107,6 +187,8 @@ export async function extractStoryboardFromShotlist(args: {
       `総ページ数 ${shotlist.total_pages_target}、総コマ数 ${shotlist.total_panels}。`,
       "pages[] には全 panel_id を漏れなくページに配置。pages を panel_no 昇順を保ちつつ RTL でめくり推奨。",
       "panels_extra[] には全 panel_id について 1 entry。",
+      "panel text 生成では systemContext と materials の Text Quality Directives を strict に適用してください。",
+      "dialogue / monologue / narration / sfx は分類を混ぜず、禁止語・opening_hook・ナビ発話・speech_style の全ガードを通過する文だけを出力してください。",
     ].join("\n"),
     outputSchema: STORYBOARD_SCHEMA,
     cwd: args.cwd,
@@ -115,7 +197,6 @@ export async function extractStoryboardFromShotlist(args: {
   });
 
   // shotlist と panels_extra を merge して PanelV2 を組み立てる
-  const skeletonByPanelId = new Map(shotlist.panels.map((p) => [p.panel_id, p]));
   const extraByPanelId = new Map(result.panels_extra.map((e) => [e.panel_id, e]));
 
   const fullPanels: Map<string, PanelV2> = new Map();

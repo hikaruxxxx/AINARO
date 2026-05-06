@@ -15,7 +15,21 @@
  *   - genre 別の追加 directive (現代ダンジョン/異世界転生/領地経営) も差し込み可
  */
 
-import type { DungeonModernSubtype, ToneProfile } from "../schemas-v2";
+import type {
+  CharacterEntryV2,
+  DungeonModernSubtype,
+  NarrationStyleGuideV2,
+  NavFullSpecV2,
+  TextQualityLexiconV2,
+  ToneProfile,
+} from "../schemas-v2";
+
+type TextQualityDirectiveInputs = {
+  worldLexicon?: TextQualityLexiconV2;
+  narrationStyleGuide?: NarrationStyleGuideV2;
+  navFullSpec?: NavFullSpecV2;
+  characters?: CharacterEntryV2[];
+};
 
 /**
  * 全 storyboard 生成で共通に使う panel craft directives。
@@ -197,6 +211,7 @@ export function buildCraftGuideDirectives(
   toneProfile?: ToneProfile,
   genre?: string,
   subtype?: string,
+  textQuality?: TextQualityDirectiveInputs,
 ): string {
   const lines: string[] = [];
 
@@ -211,7 +226,7 @@ export function buildCraftGuideDirectives(
   lines.push("");
 
   lines.push("### 共通 panel craft ルール");
-  for (const [_key, rule] of Object.entries(PANEL_CRAFT_RULES)) {
+  for (const rule of Object.values(PANEL_CRAFT_RULES)) {
     lines.push(`- ${rule}`);
   }
   lines.push("");
@@ -256,6 +271,55 @@ export function buildCraftGuideDirectives(
     lines.push(`### ジャンル別 directive (${genre})`);
     for (const d of GENRE_DIRECTIVES[genre]) {
       lines.push(`- ${d}`);
+    }
+    lines.push("");
+  }
+
+  const hasLexicon = Boolean(textQuality?.worldLexicon);
+  const hasNarrationStyleGuide = Boolean(textQuality?.narrationStyleGuide);
+  const hasNavFullSpec = Boolean(textQuality?.navFullSpec);
+  const speechStyleCharacters = textQuality?.characters?.filter((c) => c.speech_style) ?? [];
+  if (
+    hasLexicon ||
+    hasNarrationStyleGuide ||
+    hasNavFullSpec ||
+    speechStyleCharacters.length > 0
+  ) {
+    lines.push("### text quality directives (bible optional sections)");
+    if (hasLexicon) {
+      lines.push(
+        "- RULE TX-1 (lexicon strict): bible.world.lexicon.forbidden_terms_global に含まれる語彙を panel.dialogue / monologue / narration に出現させてはならない。違反箇所は再生成対象。",
+      );
+      const forbidden = textQuality?.worldLexicon?.forbidden_terms_global ?? [];
+      if (forbidden.length > 0) {
+        lines.push(`  禁止語リスト: ${forbidden.join(" / ")}`);
+      }
+    }
+    if (hasNarrationStyleGuide) {
+      lines.push(
+        "- RULE TX-2 (p1 opening): page_role === \"opening_hook\" の最初の panel では bible.narration_style_guide.p1_opening_directive_specific を強制適用。max_lines / max_chars_per_line / must_avoid を厳守。",
+      );
+      const rejected =
+        textQuality?.narrationStyleGuide?.p1_opening_directive_specific
+          ?.rejected_pattern_examples ?? [];
+      if (rejected.length > 0) {
+        lines.push(`  rejected_pattern_examples は生成した時点で失敗扱い: ${rejected.join(" / ")}`);
+      }
+    }
+    if (hasNavFullSpec) {
+      lines.push(
+        "- RULE TX-3 (nav voice): bible.nav_full_spec.voice_persona.default_tone に従い、ナビ発話は「敬体・事務的」を default、巻別 emotional_range_per_volume の例外指定がある場合のみ感情表出を許可。",
+      );
+      const tone = textQuality?.navFullSpec?.voice_persona?.default_tone;
+      if (tone) lines.push(`  ナビ default_tone: ${tone}`);
+    }
+    if (speechStyleCharacters.length > 0) {
+      lines.push(
+        "- RULE TX-4 (speech style): bible.characters[*].speech_style が存在するキャラの dialogue / monologue は speech_style.first_person / register / ban_phrases を厳守。",
+      );
+      lines.push(
+        `  speech_style 対象: ${speechStyleCharacters.map((c) => `${c.id} (${c.name})`).join(" / ")}`,
+      );
     }
     lines.push("");
   }

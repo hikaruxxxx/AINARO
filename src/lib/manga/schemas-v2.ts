@@ -35,6 +35,56 @@ export type WorldSpec = {
   system: string;
   timeline: string;
   factions: WorldFaction[];
+  lexicon?: TextQualityLexiconV2;
+};
+
+export type TextQualityLexiconV2 = {
+  forbidden_terms_global?: string[];
+  p1_opening_directive?: string;
+  [key: string]: unknown;
+};
+
+export type CharacterSpeechStyleV2 = {
+  first_person?: string;
+  register?: string;
+  sentence_rhythm?: string;
+  verbosity_dial?: Record<string, string>;
+  preferred_techniques?: string[];
+  characteristic_phrases?: string[];
+  to_navi_dialog_pattern?: string;
+  speech_drift_per_volume?: Record<string, string>;
+  monologue_signature?: string;
+  ban_phrases?: string[];
+  [key: string]: unknown;
+};
+
+export type NarrationStyleGuideV2 = {
+  p1_opening_directive_specific?: {
+    max_lines?: number;
+    max_chars_per_line?: number;
+    must_contain_at_most_one_of?: string[];
+    must_avoid?: string[];
+    preferred_pattern_examples?: string[];
+    rejected_pattern_examples?: string[];
+    [key: string]: unknown;
+  };
+  ban_list_phrases?: string[];
+  monologue_signature_patterns?: string[];
+  [key: string]: unknown;
+};
+
+export type NavFullSpecV2 = {
+  voice_persona?: {
+    default_tone?: string;
+    speech_endings?: string[];
+    emotional_range_per_volume?: Record<string, string>;
+    [key: string]: unknown;
+  };
+  canonical_disclosure_lines_vol_1?: string[];
+  anti_pattern_dialogue?: {
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
 };
 
 export type CharacterEntryV2 = {
@@ -51,6 +101,8 @@ export type CharacterEntryV2 = {
   appears_in_volumes: number[];
   /** 任意の脚本ノート (storyboard-builder への自由ヒント) */
   appearance_notes?: string;
+  /** 任意の dialogue / monologue 文体ガード */
+  speech_style?: CharacterSpeechStyleV2;
 };
 
 export type LocationEntryV2 = {
@@ -179,6 +231,8 @@ export type BibleSnapshotV2 = {
   style_directives: StyleDirectivesV2;
   visual_motifs: VisualMotifV2[];
   continuity_seeds: ContinuitySeedV2[];
+  narration_style_guide?: NarrationStyleGuideV2;
+  nav_full_spec?: NavFullSpecV2;
   volume_synopsis: {
     theme: string;
     summary: string;

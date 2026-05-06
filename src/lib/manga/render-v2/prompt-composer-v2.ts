@@ -114,6 +114,60 @@ function negativesBlock(): string {
   ].join("\n");
 }
 
+export type PanelTextValidationResult =
+  | { ok: true }
+  | { ok: false; reason: string };
+
+export function extractForbiddenKeywords(term: string): string[] {
+  const withoutNotes = term.replace(/[（(].*?[）)]/g, "");
+  return withoutNotes
+    .split(/[／/]/)
+    .map((part) => part.replace(/[『』「」【】]/g, "").trim())
+    .filter(Boolean);
+}
+
+export function validatePanelText(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+): PanelTextValidationResult {
+  const forbidden = bible.world.lexicon?.forbidden_terms_global ?? [];
+  const textEntries: Array<{ field: string; text: string }> = [
+    ...panel.dialogue.map((d) => ({ field: "dialogue", text: d.text })),
+    ...panel.monologue.map((m) => ({ field: "monologue", text: m.text })),
+    ...panel.narration.map((text) => ({ field: "narration", text })),
+    ...panel.sfx.map((text) => ({ field: "sfx", text })),
+  ];
+
+  for (const entry of textEntries) {
+    for (const term of forbidden) {
+      for (const keyword of extractForbiddenKeywords(term)) {
+        if (entry.text.includes(keyword)) {
+          return {
+            ok: false,
+            reason: `forbidden term in ${entry.field}: ${term}`,
+          };
+        }
+      }
+    }
+  }
+  return { ok: true };
+}
+
+function panelTextValidationWarning(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+): string | null {
+  const validation = validatePanelText(panel, bible);
+  if (validation.ok) return null;
+  const message = `[prompt-composer-v2] panel ${panel.panel_id}: ${validation.reason}. Storyboard L4 text should be regenerated or corrected before render.`;
+  console.warn(message);
+  return [
+    "TEXT QUALITY WARNING:",
+    `- ${message}`,
+    "- Do not normalize or preserve this forbidden wording in final in-panel text. Fix the storyboard upstream before production render.",
+  ].join("\n");
+}
+
 /**
  * panel.dialogue / monologue / narration / sfx を「画像内に直接描く」指示文に変換。
  * 吹き出し・ナレーション枠・擬音を AI 側で typeset させる方針 (旧 SVG overlay は撤回)。
@@ -130,6 +184,8 @@ function inPanelTextBlock(panel: PanelV2, bible: BibleSnapshotV2): string | null
   const lines: string[] = [
     "IN-PANEL TEXT (must be drawn INSIDE the image as part of the manga page):",
   ];
+  const warning = panelTextValidationWarning(panel, bible);
+  if (warning) lines.push(warning);
 
   if (panel.dialogue.length > 0) {
     lines.push("Speech bubbles (rounded oval bubbles with tail pointing to speaker, Japanese vertical text right-to-left):");
@@ -211,7 +267,7 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     .join("\n");
 
   const charName = (id: string) => args.bible!.characters.find((c) => c.id === id)?.name ?? id;
-  const panelLines = page.panels.map((p, idx) => {
+  const panelLines = page.panels.map((p) => {
     const cs = p.entities.characters.map((c) => {
       const ent = args.bible.characters.find((x) => x.id === c.character_id);
       return `${ent?.name ?? c.character_id} (${c.role}, ${c.on_screen_via}, expr=${c.expression})`;
@@ -224,6 +280,8 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
       `  Action: ${p.action}.`,
       `  Visual focus: ${p.key_visual}.`,
     ];
+    const warning = panelTextValidationWarning(p, args.bible);
+    if (warning) lines.push(`  ${warning.replace(/\n/g, "\n  ")}`);
     if (p.dialogue.length > 0) {
       lines.push(`  Speech bubbles (oval bubble + tail pointing to speaker, Japanese vertical text):`);
       for (const d of p.dialogue) lines.push(`    - ${charName(d.character_id)}: 「${d.text}」`);
