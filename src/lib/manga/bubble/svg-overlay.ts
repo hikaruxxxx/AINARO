@@ -23,6 +23,10 @@ export type SvgOverlayOptions = {
   panelWidth: number;
   panelHeight: number;
   bubbles: SvgBubble[];
+  /** 指定時、bubble 描画をこの polygon にクリップする */
+  clipPolygon?: [number, number][];
+  /** clipPolygon 指定時の clipPath id。呼び出し側でユニークにする。 */
+  clipPathId?: string;
   /** 日本語フォントスタック */
   fontFamily?: string;
 };
@@ -182,9 +186,20 @@ export function buildBubbleOverlaySvg(opts: SvgOverlayOptions): string {
     .sort((a, b) => a.reading_order - b.reading_order)
     .map((b) => bubbleGroup(b, fontFamily))
     .join("");
+  const useClip = opts.clipPolygon && opts.clipPolygon.length >= 3;
+  const clipPathId = opts.clipPathId ?? "bubble-overlay-clip";
+  const defs = useClip
+    ? `<defs><clipPath id="${escapeXml(clipPathId)}"><polygon points="${opts.clipPolygon!
+        .map(([x, y]) => `${x},${y}`)
+        .join(" ")}" /></clipPath></defs>`
+    : "";
+  const body = useClip ? `<g clip-path="url(#${escapeXml(clipPathId)})">${groups}</g>` : groups;
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${opts.panelWidth} ${opts.panelHeight}" preserveAspectRatio="none">`,
-    groups,
+    defs,
+    body,
     "</svg>",
   ].join("");
 }
+
+export const renderBubbleOverlay = buildBubbleOverlaySvg;

@@ -24,6 +24,8 @@ import {
 } from "./_paths";
 import { generateMangaImage } from "../../../src/lib/manga/generate/codex-image";
 import { composePagePrompt, composePanelPrompt } from "../../../src/lib/manga/render-v2/prompt-composer-v2";
+import { composePanelsIntoPage } from "../../../src/lib/manga/render-v2/page-composer";
+import { overlayBubblesOntoPage } from "../../../src/lib/manga/render/page-with-bubbles";
 import type {
   BibleSnapshotV2,
   EpisodeStoryboardV2,
@@ -267,6 +269,12 @@ async function main() {
           .png()
           .toFile(outPath);
         try { await fs.unlink(tmpPath); } catch {}
+        const bubbleResult = await overlayBubblesOntoPage({
+          pagePngPath: outPath,
+          outputPath: outPath,
+          pageBubbleInput: { pagePlanPage: page, storyboardPage: sbPage, pageWidth: 1748, pageHeight: 2480 },
+        });
+        if (bubbleResult.bubbleCount > 0) console.log(`[L09] bubbles p${page.page_no}: ${bubbleResult.bubbleCount}`);
         await appendRenderManifest({
           schema_version: 1,
           ts: new Date().toISOString(),
@@ -329,6 +337,20 @@ async function main() {
           });
           done++;
         } catch (e) { console.warn(`[L09] FAIL panel ${pp.panel_id}: ${(e as Error).message}`); failed++; }
+      }
+      const composed = await composePanelsIntoPage({
+        pageNo: page.page_no,
+        rendersDir: rendersDir(args.slug, args.episode),
+        pagePlanPage: page,
+        outputPath: outPath,
+      });
+      if (composed.missingPanels.length === 0) {
+        const bubbleResult = await overlayBubblesOntoPage({
+          pagePngPath: outPath,
+          outputPath: outPath,
+          pageBubbleInput: { pagePlanPage: page, storyboardPage: sbPage, pageWidth: 1748, pageHeight: 2480 },
+        });
+        if (bubbleResult.bubbleCount > 0) console.log(`[L09] bubbles p${page.page_no}: ${bubbleResult.bubbleCount}`);
       }
     }
   });
