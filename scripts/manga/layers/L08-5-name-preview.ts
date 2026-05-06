@@ -26,6 +26,7 @@ import {
 } from "./_paths";
 import { renderPageSvg } from "../../../src/lib/manga/name-preview/svg-renderer";
 import { auditPage, auditVolume, type AuditFinding } from "../../../src/lib/manga/name-preview/audit-rules";
+import { loadNarrationBudgets } from "../../../src/lib/manga/storyboard-v2/narration-budget";
 import {
   pendingApproval,
   type NameManifest,
@@ -153,9 +154,16 @@ async function main() {
   // L8.5 は1 episode 単位なので、当該 episode を VolumeAuditInput として渡し
   // recovery_beat_missing / expectation_reality_gap_absent の signal を episode-level で取得する。
   // bible.meta.tone_profile を渡せば light_recovery 帯のみで判定がかかる (hellmode は skip)。
+  //
+  // Phase Y WY-2 追加: narration_budgets.json をロードして渡し、
+  // narration_panel_chars_exceeded / narration_page_count_exceeded /
+  // narration_episode_omniscient_exceeded を全 tone で検査する。
+  const narrationBudgets = await loadNarrationBudgets().catch(() => undefined);
   const volumeFindings = auditVolume({
     episodes: [storyboard],
     toneProfile: bible.meta.tone_profile,
+    genre: bible.meta.genre,
+    narrationBudgets,
   });
   allFindings.push(...volumeFindings);
 

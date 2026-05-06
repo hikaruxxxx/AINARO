@@ -44,6 +44,10 @@ import type {
   EpisodeStoryboardV2,
   ToneProfile,
 } from "../schemas-v2";
+import type {
+  NarrationBudgetFile,
+} from "../storyboard-v2/narration-budget";
+import { checkNarrationBudget } from "../storyboard-v2/narration-budget";
 import type { NameWarning } from "./types";
 
 // 閾値
@@ -79,7 +83,11 @@ export type AuditRuleKind =
   | "face_only_emotion_run"
   | "mascot_temperature_pair_missing"
   | "recovery_beat_missing"
-  | "expectation_reality_gap_absent";
+  | "expectation_reality_gap_absent"
+  // Phase Y WY-2 で追加 (narration_kind + budget)
+  | "narration_panel_chars_exceeded"
+  | "narration_page_count_exceeded"
+  | "narration_episode_omniscient_exceeded";
 
 export type AuditSeverity = "info" | "warn" | "error";
 
@@ -398,6 +406,9 @@ export function findingsToWarnings(findings: AuditFinding[]): NameWarning[] {
       case "mascot_temperature_pair_missing":
       case "recovery_beat_missing":
       case "expectation_reality_gap_absent":
+      case "narration_panel_chars_exceeded":
+      case "narration_page_count_exceeded":
+      case "narration_episode_omniscient_exceeded":
         continue;
     }
     warnings.push({ page_no: f.page_no, kind, message: f.message });
@@ -413,6 +424,13 @@ export type VolumeAuditInput = {
   episodes: EpisodeStoryboardV2[];
   /** bible.meta.tone_profile (任意、無ければ light_recovery 想定で判定) */
   toneProfile?: ToneProfile;
+  /** Phase Y WY-2 で追加: bible.meta.genre (narration budget の genre relax 用、任意) */
+  genre?: string;
+  /**
+   * Phase Y WY-2 で追加: 事前にロードした narration-budgets.json
+   * (audit-rules.ts は同期実装のため、呼び出し側で loadNarrationBudgets() してから渡す)
+   */
+  narrationBudgets?: NarrationBudgetFile;
 };
 
 /**
@@ -424,6 +442,27 @@ export type VolumeAuditInput = {
 export function auditVolume(input: VolumeAuditInput): AuditFinding[] {
   const findings: AuditFinding[] = [];
   const tone = input.toneProfile;
+
+  // Phase Y WY-2: narration budget 検査 (tone 関係なく全 episode で適用)
+  if (input.narrationBudgets) {
+    for (const ep of input.episodes) {
+      const violations = checkNarrationBudget(
+        ep,
+        input.narrationBudgets,
+        tone,
+        input.genre,
+      );
+      for (const v of violations) {
+        findings.push({
+          page_no: v.page_no,
+          panel_no: v.panel_no,
+          rule: v.rule,
+          severity: v.scope === "panel" ? "warn" : v.scope === "page" ? "warn" : "info",
+          message: `[${ep.episode_id}] ${v.message}`,
+        });
+      }
+    }
+  }
 
   // light_recovery 帯のみ対象 (hellmode では intentionally 重い beat なので skip)
   const isLightRecovery = !tone || tone.darkness < 0.5;

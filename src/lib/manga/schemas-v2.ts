@@ -328,6 +328,20 @@ export type PageRoleV2 =
   | "dialogue"
   | "action";
 
+/**
+ * ナレーション種別 (Phase Y WY-2 で追加、Codex レビュー指摘の「独立layer でなく schema 拡張」に従う)
+ *
+ *   - omniscient: 神視点ナレ (「夜だった」「街は静かだった」等)。地の文型
+ *   - protagonist_monologue: 主人公の内的独白 (雲型吹き出しで描画されるべき内容)
+ *   - thought_bubble: 主人公以外のキャラの心情 (補助的、登場頻度低)
+ *   - caption_box: 状況注釈 (「※息子の初バイト帰り」「3年前」等の補足ボックス)
+ */
+export type NarrationKind =
+  | "omniscient"
+  | "protagonist_monologue"
+  | "thought_bubble"
+  | "caption_box";
+
 export type PanelV2 = {
   panel_id: string;
   panel_no: number;
@@ -343,6 +357,12 @@ export type PanelV2 = {
   dialogue: Array<{ character_id: string; text: string }>;
   monologue: Array<{ character_id: string; text: string }>;
   narration: string[];
+  /**
+   * Phase Y WY-2 で追加 (後方互換 optional)。narration[i] と同じ index で対応する種別。
+   * 未指定時は audit/render 側で "caption_box" にフォールバック。
+   * storyboard-extractor / opening-hook-pass / cliffhanger-architect は kind を明示推奨。
+   */
+  narration_kinds?: NarrationKind[];
   sfx: string[];
   /** L6 Continuity Resolve で注入される */
   continuity_group_ids?: string[];

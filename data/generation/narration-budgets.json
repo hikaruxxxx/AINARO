@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-06",
+  "_source": "Plan groovy-wishing-castle.md WY-2 + manga_craft_guide.md v2 ナレーション禁則",
+  "_purpose": "L4 storyboard / L4.1 opening-hook / L4.9 cliffhanger / L8.6 audit が tone × genre × page_role ごとに narration の種類別上限を判定する辞書",
+
+  "_principle": [
+    "manga_craft_guide v2 ナレーション禁則: 商業ラノベコミカライズは「会話で世界観説明」が基本。神視点ナレ過多は読者を退屈させる",
+    "ただし opening_hook page では世界観一文ナレが有効、cliffhanger page では caption_box 系が締めに使える",
+    "主人公モノローグ (protagonist_monologue) は雲型吹き出しで描画される想定。narration とは別装置として扱う",
+    "tone_profile.darkness が高いほど主人公モノローグ多用、低いほど会話/dialogue 主体"
+  ],
+
+  "_audit_pass_criteria": {
+    "per_panel_total_narration_chars": "tone別/page_role別 上限以下",
+    "per_page_total_narration_count": "page_role 別 上限以下",
+    "per_episode_omniscient_count": "tone別 上限以下 (神視点ナレは episode 全体で抑制)"
+  },
+
+  "default_budget": {
+    "_note": "tone_profile / genre / page_role が辞書に未登録のときの安全な fallback",
+    "per_panel_chars_max": 25,
+    "per_page_count_max": 2,
+    "per_episode_omniscient_max": 5
+  },
+
+  "by_tone_profile": {
+    "darkness_lt_0_3": {
+      "_label": "light_recovery (Phase A 標準)",
+      "per_panel_chars_max": 20,
+      "per_page_count_max": 1,
+      "per_episode_omniscient_max": 3,
+      "per_episode_protagonist_monologue_max": 12,
+      "kind_ratio_recommendation": {
+        "omniscient": 0.15,
+        "protagonist_monologue": 0.5,
+        "thought_bubble": 0.1,
+        "caption_box": 0.25
+      }
+    },
+    "darkness_0_3_to_0_5": {
+      "_label": "balanced (中間)",
+      "per_panel_chars_max": 25,
+      "per_page_count_max": 1,
+      "per_episode_omniscient_max": 5,
+      "per_episode_protagonist_monologue_max": 18,
+      "kind_ratio_recommendation": {
+        "omniscient": 0.2,
+        "protagonist_monologue": 0.5,
+        "thought_bubble": 0.1,
+        "caption_box": 0.2
+      }
+    },
+    "darkness_0_5_to_0_7": {
+      "_label": "moderate hellmode",
+      "per_panel_chars_max": 30,
+      "per_page_count_max": 2,
+      "per_episode_omniscient_max": 8,
+      "per_episode_protagonist_monologue_max": 25,
+      "kind_ratio_recommendation": {
+        "omniscient": 0.25,
+        "protagonist_monologue": 0.55,
+        "thought_bubble": 0.1,
+        "caption_box": 0.1
+      }
+    },
+    "darkness_gte_0_7": {
+      "_label": "hellmode (高分散枠)",
+      "per_panel_chars_max": 35,
+      "per_page_count_max": 2,
+      "per_episode_omniscient_max": 12,
+      "per_episode_protagonist_monologue_max": 35,
+      "kind_ratio_recommendation": {
+        "omniscient": 0.3,
+        "protagonist_monologue": 0.55,
+        "thought_bubble": 0.05,
+        "caption_box": 0.1
+      }
+    }
+  },
+
+  "by_page_role": {
+    "_note": "page_role ごとに narration count 上限を override (tone より厳しい方を採用)",
+    "opening_hook": {
+      "per_page_count_max": 2,
+      "_note": "世界観一文ナレが有効なので 2 まで許容"
+    },
+    "buildup": {
+      "per_page_count_max": 1
+    },
+    "reveal": {
+      "per_page_count_max": 1
+    },
+    "action": {
+      "per_page_count_max": 0,
+      "_note": "戦闘・action page は narration 抑制 (会話/SFX 主体)"
+    },
+    "establishing": {
+      "per_page_count_max": 2,
+      "_note": "場面 establishing は caption_box 1個 + 神視点ナレ 1個まで許容"
+    },
+    "dialogue": {
+      "per_page_count_max": 0,
+      "_note": "会話 page は narration 禁則 (dialogue/monologue のみ)"
+    },
+    "cliffhanger": {
+      "per_page_count_max": 1,
+      "_note": "締めの caption_box 1個まで。protagonist_monologue は別カウント"
+    },
+    "aftermath": {
+      "per_page_count_max": 1
+    }
+  },
+
+  "by_genre": {
+    "_note": "genre 固有調整 (tone × page_role の上に乗る微調整、optional)",
+    "modern_dungeon": {
+      "per_page_count_max_relax": 0
+    },
+    "battle_dungeon": {
+      "per_page_count_max_relax": 0
+    },
+    "isekai_high_fantasy": {
+      "per_page_count_max_relax": 1,
+      "_note": "重厚世界観は establishing 等で caption_box 多用許容"
+    },
+    "modern_human_drama": {
+      "per_page_count_max_relax": 0,
+      "per_episode_omniscient_max_relax": 5,
+      "_note": "人間ドラマは神視点ナレが文学的演出として有効"
+    },
+    "mystery_horror": {
+      "per_page_count_max_relax": 1,
+      "_note": "ホラーは雰囲気作りに caption_box / 神視点ナレが要"
+    }
+  },
+
+  "_phase_y_notes": [
+    "L4 storyboard-extractor / L4.1 opening-hook-pass / L4.9 cliffhanger-architect は narration 配列と同じ index で narration_kinds を必ず付ける",
+    "L8.6 audit-rules.ts に narration_budget_exceeded ルール追加 (panel/page/episode 各スコープ)",
+    "Phase Y 後半で narration_kinds が未指定の既存 storyboard を一括推定 migration (audit が caption_box にフォールバックするので緊急性は低い)",
+    "Phase Z で実 KENP データを取得後、各 budget の妥当性を読了率と相関で再校正"
+  ]
+}
