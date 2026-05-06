@@ -264,24 +264,29 @@ function buildPropRefPrompt(args: {
   const anchors = (p.continuity_anchors ?? []).join(", ");
 
   return [
-    `Reference sheet illustration of the prop "${p.name}" for a Japanese light novel comicalization (なろう系 narou-kei, black and white). Style tradition: Young Ace / Comic Walker / カドコミ系.`,
+    `STRICT STYLE: this is a black-and-white narou-kei comicalization manga prop reference plate (Young Ace / Comic Walker / カドコミ系 lineage, B6 KDP+KU). Hand-inked linework + sparse screentone only. NOT photoreal, NOT a 3D render, NOT a CAD render, NOT product photography, NOT airbrush, NOT seinen-realism. Treat as a published light-novel-comicalization manga panel asset.`,
+    "",
+    `Reference sheet illustration of the prop "${p.name}" — recurring item of the same series.`,
     "",
     styleDirectiveLine(args.styleDirectives),
     "",
     spec.kind ? `Kind: ${spec.kind}.` : "",
-    spec.color ? `Color tone (translate to grayscale): ${spec.color}.` : "",
-    spec.material ? `Material: ${spec.material}.` : "",
-    features ? `Distinguishing features: ${features}.` : "",
-    anchors ? `MUST PRESERVE invariants: ${anchors}.` : "",
+    // 注: spec.color / spec.material をそのまま渡すと gpt-image-2 が
+    // 写実的な質感・反射・色情報を再現しにいくため、ref plate では意図的に省略する。
+    // distinguishing_features と continuity_anchors で形状/識別記号は十分伝達できる。
+    features ? `Distinguishing features (must be visibly drawn): ${features}.` : "",
+    anchors ? `MUST PRESERVE invariants (must be clearly drawn in image): ${anchors}.` : "",
     "",
     args.variant === "default"
-      ? "Camera: isolated object on plain off-white plate, 3/4 angle product-shot framing. NO hands, NO background."
+      ? "Camera: isolated single object on plain off-white plate, hand-drawn 3/4 manga panel framing. NO hands, NO background, NO product-photo lighting."
       : "Camera: held in a hand, hand visible from wrist down. Plain background.",
     "",
     "STRICT RULES:",
     "- Single prop only, NO additional objects.",
-    "- BLACK AND WHITE only.",
-    "- Do NOT render any text or watermark.",
+    "- BLACK AND WHITE only with sparse screentone + hatching. NO color. NO 3D-render shading. NO photorealistic shading. NO CAD render. NO airbrush. NO ambient occlusion. NO photographic specular highlight.",
+    "- Treat as an inked manga panel asset: decisive black silhouette + flat whites, screentone only where a published manga page would use it. Avoid filling every surface with detail.",
+    "- Confident decisive line work. Distinguishing features and anchor markers must be visually unambiguous (e.g. stamps, beacon dots, screen overlays must be clearly drawn — not implied).",
+    "- Do NOT render any text, logo, label, watermark, or signature anywhere in the image.",
   ]
     .filter(Boolean)
     .join("\n");
