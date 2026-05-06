@@ -322,14 +322,39 @@ function specSummary(spec?: LocationSpec): string {
   return lines.join("\n");
 }
 
-function variantCameraDoc(variant: string): string {
+/**
+ * 屋内/屋外で variant の期待値が異なるため、location 情報を渡して dispatch する。
+ * 生成側 (v2-images.ts buildLocationRefPrompt) と同じ判定ロジックを使う。
+ */
+function isOutdoorLocation(l: LocationInput): boolean {
+  const layoutType = String(l.spec?.layout?.type ?? "").toLowerCase();
+  const locationType = String(l.location_type ?? "").toLowerCase();
+  return layoutType === "open" || layoutType === "outdoor" || locationType === "outdoor";
+}
+
+function variantCameraDoc(variant: string, l: LocationInput): string {
+  const outdoor = isOutdoorLocation(l);
+  if (outdoor) {
+    switch (variant) {
+      case "wide_establishing":
+        return "wide_establishing (この location は屋外): EXTERIOR の引き。空間全体・周辺街路/ランドスケープが見えるべき。屋内描写は不適切。";
+      case "interior_eye_level":
+        return "interior_eye_level (この location は屋外、variant 名は schema 互換のため流用): EXTERIOR の街路レベル人物視点。歩行者目線から外観/路面を捉えるべき。屋内描写は不適切。";
+      case "interior_high_angle":
+        return "interior_high_angle (この location は屋外、variant 名は schema 互換のため流用): EXTERIOR の俯瞰/上空からの bird's-eye。屋外スカイライン or 上層階からの見下ろし。屋内描写は不適切。";
+      case "exterior_night":
+        return "exterior_night: 夜の外観 establishing。建物外観 + 近隣街路の夜景。";
+      default:
+        return `${variant}: (variant 説明が定義されていません)`;
+    }
+  }
   switch (variant) {
     case "wide_establishing":
-      return "wide_establishing: 引きの全景。空間全体が把握できるべき。低角度から。屋内なら interior wide、屋外なら exterior 引き。";
+      return "wide_establishing (この location は屋内): INTERIOR WIDE。視点は room 内のコーナーまたはドア付近、天井と奥壁が画角内に入り、家具/ドア/窓が一覧できる構図。屋外/外観 shot は variant_drift。";
     case "interior_eye_level":
-      return "interior_eye_level: 屋内人物視点 (立ち姿の眼の高さ)。前景を含み、空間に踏み入った印象を与えるべき。";
+      return "interior_eye_level (屋内): 立ち姿の人物視点 (~1.6m)、室内に踏み入った前景込み。屋外/窓越し は variant_drift。";
     case "interior_high_angle":
-      return "interior_high_angle: 屋内俯瞰 (天井寄り 3/4 view)。床平面と家具配置が読めるべき。";
+      return "interior_high_angle (屋内): 天井寄り 3/4 view、床平面と家具配置が読める俯瞰。建物外観を上空から見た aerial は variant_drift。";
     case "exterior_night":
       return "exterior_night: 夜の外観 establishing。建物外観 + 近隣街路の夜景。";
     default:
@@ -345,7 +370,7 @@ function buildPrompt(args: {
   const variantBlocks = args.variants
     .map(
       (v) =>
-        `- variant: ${v.variant}\n  image: ${v.abs_path}\n  カメラ仕様: ${variantCameraDoc(v.variant)}`
+        `- variant: ${v.variant}\n  image: ${v.abs_path}\n  カメラ仕様: ${variantCameraDoc(v.variant, l)}`
     )
     .join("\n");
 

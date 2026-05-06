@@ -22,7 +22,20 @@ import {
   nameApprovalPath,
   revisionQueuePath,
 } from "./_paths";
-import { generateMangaImage } from "../../../src/lib/manga/generate/codex-image";
+import { generateMangaImage, MANGA_SIZE_PRESETS, type MangaImageSize } from "../../../src/lib/manga/generate/codex-image";
+
+/**
+ * panel rect の aspect ratio に応じて、最適な生成サイズを選ぶ。
+ * 横長 (>1.3) は landscape、縦長 (<0.77) は portrait、それ以外は square。
+ * 全パネルを 1024x1536 ハードコードで生成すると、ページ合成時に rect に
+ * fit: cover で押し込まれて構図が壊れるため。
+ */
+function pickPanelSize(rect: { w: number; h: number }): MangaImageSize {
+  const ratio = rect.w / rect.h;
+  if (ratio > 1.3) return MANGA_SIZE_PRESETS.panel_landscape;
+  if (ratio < 0.77) return MANGA_SIZE_PRESETS.panel_portrait;
+  return MANGA_SIZE_PRESETS.panel_square;
+}
 import { composePagePrompt, composePanelPrompt } from "../../../src/lib/manga/render-v2/prompt-composer-v2";
 import { composePanelsIntoPage } from "../../../src/lib/manga/render-v2/page-composer";
 import { overlayEffectLinesOntoPage } from "../../../src/lib/manga/render/page-with-effect-lines";
@@ -329,7 +342,7 @@ async function main() {
           console.log(`[L09] gen p${page.page_no}/panel#${pp.reading_order} (${args.version})`);
           await generateMangaImage({
             prompt, outputPath: panelOut,
-            size: { width: 1024, height: 1536 },
+            size: pickPanelSize(pp.rect),
             referenceImagePaths: refImagePaths,
             timeoutMs: 15 * 60 * 1000, maxRetries: 1,
           });

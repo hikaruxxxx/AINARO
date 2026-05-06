@@ -216,16 +216,50 @@ function buildLocationRefPrompt(args: {
     : "";
   const anchors = (l.continuity_anchors ?? []).join(", ");
 
+  // ============================================================
+  // 屋内 / 屋外 dispatch
+  //   - 同じ variant 名でも、屋内 location なら interior wide / 屋外なら exterior wide
+  //     を要求しないと「屋内のはずが外観に化ける」事故が頻発する。
+  //   - 判定: layout.type === "open" or location_type === "outdoor" のみ屋外。
+  //     残り (indoor / dungeon / その他 layout.type) はすべて屋内扱い。
+  //   - 屋外 location で interior_* variant が要求されたら exterior の別アングル
+  //     (street_eye_level / aerial_high_angle 相当) として再解釈する。
+  // ============================================================
+  // 注: schemas.ts の layout.type union は "rectangular" | "L_shaped" | "open" | "complex" だが、
+  // 実データは "wide_hall" "l_shaped_corridor" 等 free-form なので string にキャストして比較する。
+  const layoutType = String(l.spec?.layout?.type ?? "").toLowerCase();
+  const locationType = String(l.location_type ?? "").toLowerCase();
+  const isOutdoor =
+    layoutType === "open" ||
+    layoutType === "outdoor" ||
+    locationType === "outdoor";
+
   const camera = (() => {
-    switch (args.variant) {
-      case "wide_establishing":
-        return "Camera: wide establishing shot, low-angle from across the street. Show the location's overall silhouette and surrounding context.";
-      case "interior_eye_level":
-        return "Camera: interior eye-level wide-angle, showing the entire room. Standing person POV.";
-      case "interior_high_angle":
-        return "Camera: high-angle / overhead 3/4 view of the interior. Show floor layout and furniture placement clearly.";
-      case "exterior_night":
-        return "Camera: exterior establishing shot at night. Show the building exterior with night lighting.";
+    if (isOutdoor) {
+      switch (args.variant) {
+        case "wide_establishing":
+          return "Camera: EXTERIOR wide establishing shot, low-angle from across the street. Show the location's overall silhouette and surrounding urban/landscape context. NO interior, NO indoor furniture.";
+        case "interior_eye_level":
+          // 屋外 location に interior_* が振られた場合: street-level eye view として再解釈
+          return "Camera: EXTERIOR street-level eye-level shot (~1.6m height standing pedestrian POV), looking at this outdoor location from the street/sidewalk. NO indoor scene.";
+        case "interior_high_angle":
+          // 屋外 location に interior_high_angle: aerial / 上層階からの俯瞰として再解釈
+          return "Camera: EXTERIOR aerial / high-angle birds-eye view of this outdoor location and its immediate surroundings. NO indoor scene, NO room interiors.";
+        case "exterior_night":
+          return "Camera: exterior establishing shot at night. Show the building exterior with night lighting.";
+      }
+    } else {
+      // 屋内 location: variant_drift 防止のため、各 variant で「INTERIOR」を強く明示
+      switch (args.variant) {
+        case "wide_establishing":
+          return "Camera: INTERIOR WIDE-ANGLE shot taken from a corner or doorway INSIDE the room. Camera is INSIDE the location, ceiling visible at top of frame, opposite wall visible at the back. Show the entire room layout including doors, windows, and furniture in one frame. ABSOLUTELY NOT an exterior building shot. ABSOLUTELY NOT a view from across the street. The viewer is standing INSIDE the room.";
+        case "interior_eye_level":
+          return "Camera: INTERIOR eye-level wide-angle (~1.6m height standing-person POV) FROM INSIDE the room. The viewer is standing inside the room. Show the room's interior with furniture and walls visible. NOT an exterior shot.";
+        case "interior_high_angle":
+          return "Camera: INTERIOR high-angle / overhead 3/4 view from near the ceiling, looking DOWN INTO the room. Show floor plan, walls and furniture placement clearly. NOT an exterior aerial shot of the building.";
+        case "exterior_night":
+          return "Camera: exterior establishing shot at night. Show the building exterior with night lighting.";
+      }
     }
   })();
 

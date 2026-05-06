@@ -116,8 +116,8 @@ function renderPagePlan(manifest: Manifest): string {
           ${panels.map((panel: any) => `
             <article class="nc-card nc-card--sunken sb-panel">
               <h4>${escapeHtml(String(panel.panel_id ?? "-"))}</h4>
-              <div class="sb-meta">順序=${escapeHtml(String(panel.reading_order ?? "-"))} / bbox=${escapeHtml(JSON.stringify(panel.bbox ?? null))}</div>
-              <div class="sb-meta">参照画像: ${escapeHtml(JSON.stringify(panel.ref_ids ?? []))}</div>
+              <div class="sb-meta">順序=${escapeHtml(String(panel.reading_order ?? "-"))} / 重要度=${escapeHtml(String(panel.importance ?? "-"))} / rect=${escapeHtml(JSON.stringify(panel.rect ?? null))}</div>
+              <div class="sb-meta">borderless=${escapeHtml(String(panel.is_borderless ?? false))} / bleed=${escapeHtml(String(panel.bleed_polygon ?? false))} / bg=${escapeHtml(String(panel.background_treatment ?? "-"))}</div>
             </article>`).join("")}
         </div>
         <details class="sb-details">
