@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "duplicate_word_info",
+      "message": "単語 \"ダンジョン\" が 2 回出現 (info: 索引上は無駄だが系列強化等の意図があれば許容)"
+    }
+  ],
+  "unique_word_count": 25
+}

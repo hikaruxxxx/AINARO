@@ -54,6 +54,8 @@ import type {
 
 /** meta.json kdp_metadata ブロック (kdp-modular-plum.md 検索最適化拡張) */
 type WorkKdpMetadataBlock = {
+  /** Phase Y WY-7 で導入: Codex 統一案採用後の確定タイトル (main + subtitle) */
+  title_decision?: { main: string; subtitle?: string };
   title_candidates?: string[];
   series_name_canonical?: string;
   keyword_picks_7?: string[];
@@ -200,6 +202,23 @@ async function main() {
   const metaRaw: unknown = JSON.parse(await fs.readFile(workMetaPath(args.slug), "utf-8"));
   const meta = parseOrThrow(WorkMetaJsonSchema, metaRaw, `meta.json (${args.slug})`);
 
+  // Phase Y WY-8: title_decision (Codex 統一案) を main() の冒頭で解決
+  // (subtitle は line 232 の colophon でも参照されるため、関数冒頭で確定が必要)
+  const earlyKdpMeta: WorkKdpMetadataBlock | undefined =
+    (meta as unknown as { kdp_metadata?: WorkKdpMetadataBlock }).kdp_metadata;
+  const finalTitle =
+    earlyKdpMeta?.title_decision?.main ||
+    (earlyKdpMeta?.title_candidates && earlyKdpMeta.title_candidates.length > 0
+      ? earlyKdpMeta.title_candidates[0]
+      : meta.title);
+  const finalSubtitle = earlyKdpMeta?.title_decision?.subtitle;
+  if (earlyKdpMeta?.title_decision) {
+    console.log(`[L13] title_decision (Codex統一案): ${finalTitle}`);
+    if (finalSubtitle) console.log(`[L13] subtitle (Codex統一案): ${finalSubtitle}`);
+  } else if (earlyKdpMeta?.title_candidates && earlyKdpMeta.title_candidates.length > 1) {
+    console.log(`[L13] title_candidates: ${earlyKdpMeta.title_candidates.length}案あり、先頭を採用 → ${finalTitle.substring(0, 40)}...`);
+  }
+
   await fs.mkdir(kdpDir(args.slug, args.volume), { recursive: true });
 
   // 全エピソードのページを収集
@@ -227,7 +246,7 @@ async function main() {
   const colophonPath = path.join(kdpDir(args.slug, args.volume), "_colophon.png");
   await buildColophonPng({
     title: meta.title_short ?? meta.title,
-    subtitle: `第${args.volume}巻`,
+    subtitle: finalSubtitle ?? `第${args.volume}巻`,
     authorPenName: args.authorPenName,
     publicationDate: args.publicationDate,
     publisher: args.authorPenName,
@@ -260,16 +279,9 @@ async function main() {
   console.log(`[L13] cover.pdf: ${cover.outputPath} (spine ${cover.spine_w_mm.toFixed(2)}mm)`);
 
   // kdp-modular-plum.md (検索最適化拡張): meta.json の kdp_metadata ブロックを読む
+  // Phase Y WY-8: finalTitle / finalSubtitle は main() 冒頭で earlyKdpMeta から解決済 (colophon で先に参照)
   const kdpMeta: WorkKdpMetadataBlock | undefined =
     (meta as unknown as { kdp_metadata?: WorkKdpMetadataBlock }).kdp_metadata;
-
-  // タイトル決定優先順位: title_candidates[0] > meta.title
-  const finalTitle = (kdpMeta?.title_candidates && kdpMeta.title_candidates.length > 0)
-    ? kdpMeta.title_candidates[0]
-    : meta.title;
-  if (kdpMeta?.title_candidates && kdpMeta.title_candidates.length > 1) {
-    console.log(`[L13] title_candidates: ${kdpMeta.title_candidates.length}案あり、先頭を採用 → ${finalTitle.substring(0, 40)}...`);
-  }
 
   // metadata (schema_version=2, AI開示構造化 + 検索最適化拡張)
   const metadata: KdpMetadata = {
@@ -277,7 +289,7 @@ async function main() {
     slug: args.slug,
     volume_no: args.volume,
     title: finalTitle,
-    subtitle: `第${args.volume}巻`,
+    subtitle: finalSubtitle ?? `第${args.volume}巻`,
     author_pen_name: args.authorPenName,
     isbn: args.isbn,
     bisac_categories: ["COM004000", "FIC036000"], // TODO(A2-3): bisac-map.json から動的取得
@@ -310,7 +322,7 @@ async function main() {
         descriptionSeedToInput({
           seed: kdpMeta.description_seed,
           title: finalTitle,
-          subtitle: `第${args.volume}巻`,
+          subtitle: finalSubtitle ?? `第${args.volume}巻`,
           seriesName: kdpMeta.series_name_canonical,
           volumeNo: args.volume,
           authorPenName: args.authorPenName,
@@ -332,7 +344,7 @@ async function main() {
     coverPdfPath: coverPath,
     inputs: {
       title: finalTitle,
-      subtitle: `第${args.volume}巻`,
+      subtitle: finalSubtitle ?? `第${args.volume}巻`,
       isbn: args.isbn,
       // 検索最適化拡張: meta.kdp_metadata から自動populate (空なら空のまま)
       description_html: descriptionHtml || undefined,

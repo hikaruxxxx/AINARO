@@ -31,6 +31,8 @@ import type {
 import { DEFAULT_AI_DISCLOSURE_FLAGS, DEFAULT_AI_TOOLS_USED, DEFAULT_AI_USAGE_LEVEL } from "../../src/lib/manga/disclosure";
 
 type WorkKdpMetadataBlock = {
+  /** Phase Y WY-7 で導入: Codex 統一案採用後の確定タイトル (main + subtitle) */
+  title_decision?: { main: string; subtitle?: string };
   title_candidates?: string[];
   series_name_canonical?: string;
   keyword_picks_7?: string[];
@@ -75,11 +77,17 @@ async function main() {
   const kdpMeta = meta.kdp_metadata as WorkKdpMetadataBlock | undefined;
   if (!kdpMeta) throw new Error(`meta.json に kdp_metadata ブロックがない (slug=${args.slug})`);
 
-  const finalTitle = (kdpMeta.title_candidates && kdpMeta.title_candidates.length > 0)
-    ? kdpMeta.title_candidates[0]
-    : (meta.title as string);
+  // Phase Y WY-8: title_decision (Codex 統一案) > title_candidates[0] > meta.title の優先順位
+  const finalTitle =
+    kdpMeta.title_decision?.main ||
+    (kdpMeta.title_candidates && kdpMeta.title_candidates.length > 0
+      ? kdpMeta.title_candidates[0]
+      : (meta.title as string));
+  const finalSubtitle = kdpMeta.title_decision?.subtitle;
 
-  console.log(`[dry-run] title (採用): ${finalTitle.substring(0, 60)}...`);
+  console.log(`[dry-run] title (採用): ${finalTitle}`);
+  if (finalSubtitle) console.log(`[dry-run] subtitle (採用): ${finalSubtitle}`);
+  console.log(`[dry-run] title_decision: ${kdpMeta.title_decision ? "確定済 (Codex統一案)" : "未確定"}`);
   console.log(`[dry-run] title_candidates: ${kdpMeta.title_candidates?.length ?? 0}案`);
   console.log(`[dry-run] series_name_canonical: ${kdpMeta.series_name_canonical ?? "(未設定)"}`);
   console.log(`[dry-run] keyword_picks_7: ${kdpMeta.keyword_picks_7?.length ?? 0}枠`);
@@ -116,12 +124,14 @@ async function main() {
   for (const w of kvResult.warnings) console.log(`    ⚠️ ${w.code}: ${w.message}`);
 
   // 3. ダミー release/metadata を構築して buildKdpInputMd 実行
+  // Phase Y WY-8: subtitle は title_decision.subtitle (Codex 統一案) を優先、fallback で「第N巻」
+  const finalSubtitleForKdp = finalSubtitle ?? `第${args.volume}巻`;
   const dummyMetadata: KdpMetadata = {
     schema_version: 2,
     slug: args.slug,
     volume_no: args.volume,
     title: finalTitle,
-    subtitle: `第${args.volume}巻`,
+    subtitle: finalSubtitleForKdp,
     author_pen_name: "AINARO",
     bisac_categories: ["COM004000", "FIC036000"],
     ai_disclosure: { ...DEFAULT_AI_DISCLOSURE_FLAGS },
@@ -156,7 +166,7 @@ async function main() {
     },
     kdp_inputs: {
       title: finalTitle,
-      subtitle: `第${args.volume}巻`,
+      subtitle: finalSubtitleForKdp,
       description_html: descriptionHtml,
       keywords: kdpMeta.keyword_picks_7 ?? [],
       categories: kdpMeta.categories_validated ?? [],
