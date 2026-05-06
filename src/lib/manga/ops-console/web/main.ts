@@ -4,11 +4,13 @@ import { mountBreadcrumb } from "./breadcrumb";
 import { mountSidebar } from "./sidebar";
 import { mountThemeToggle } from "./theme-toggle";
 import { mountAssetsView } from "./views/assets";
+import { mountBibleView } from "./views/bible";
 import { mountIndexView } from "./views/index";
 import { mountLayersView } from "./views/layers";
 import { mountNameGateView } from "./views/name-gate";
 import { mountPipelineView } from "./views/pipeline";
 import { mountRevisionView } from "./views/revision";
+import { mountVolumePlotView } from "./views/volume-plot";
 import { mountWorksView } from "./views/works";
 
 type Unmount = () => void;
@@ -63,6 +65,8 @@ function mountCurrentView(main: HTMLElement): () => void {
     if (state.currentView === "index") unmount = mountIndexView(main);
     else if (state.currentView === "pipeline") unmount = mountPipelineView(main);
     else if (state.currentView === "assets") unmount = mountAssetsView(main);
+    else if (state.currentView === "bible") unmount = mountBibleView(main);
+    else if (state.currentView === "volume-plot") unmount = mountVolumePlotView(main);
     else if (state.currentView === "layers") unmount = mountLayersView(main);
     else if (state.currentView === "revision") unmount = mountRevisionView(main);
     else if (state.currentView === "works") unmount = mountWorksView(main);

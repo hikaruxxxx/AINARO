@@ -29,6 +29,7 @@ import {
 } from "./handlers/adopted-versions";
 import { handleBootstrap } from "./handlers/bootstrap";
 import { handleBible } from "./handlers/bible";
+import { handleVolumePlot } from "./handlers/volume-plot";
 import {
   handleJobsAbort,
   handleJobsList,
@@ -199,6 +200,22 @@ export async function handleApi(
         return send(res, 403, { error: "scope mismatch" });
       }
       return handleBible(slug, res);
+    }
+  }
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/volumes\/v(\d+)\/plot$/);
+    if (m) {
+      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      const slug = m[1];
+      const volume = Number(m[2]);
+      if (!isValidSlug(slug) || !Number.isInteger(volume) || volume <= 0) {
+        return send(res, 400, { error: "invalid slug or volume" });
+      }
+      // 一覧モード (default null) は任意 slug を許可、scope 固定モードは default のみ。
+      if (defaults.defaultSlug !== null && slug !== defaults.defaultSlug) {
+        return send(res, 403, { error: "scope mismatch" });
+      }
+      return handleVolumePlot(slug, volume, res);
     }
   }
   {

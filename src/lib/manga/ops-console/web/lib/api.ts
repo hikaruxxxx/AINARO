@@ -217,7 +217,11 @@ export function apiPostAdopted(
 }
 
 export type LayerId =
+  | "L01"
+  | "L01b"
+  | "L01c"
   | "L02"
+  | "L02b"
   | "L09"
   | "L10"
   | "L11"
@@ -336,4 +340,16 @@ export type BibleAssetView = {
 
 export function apiGetBible(slug: string): Promise<BibleAssetView> {
   return getJson<BibleAssetView>(`/api/works/${encodeURIComponent(slug)}/bible`);
+}
+
+export type VolumePlot = {
+  slug: string;
+  volume: number;
+  plot: unknown;
+};
+
+export function apiGetVolumePlot(slug: string, volume: number): Promise<VolumePlot> {
+  return getJson<VolumePlot>(
+    `/api/works/${encodeURIComponent(slug)}/volumes/v${String(volume).padStart(2, "0")}/plot`
+  );
 }

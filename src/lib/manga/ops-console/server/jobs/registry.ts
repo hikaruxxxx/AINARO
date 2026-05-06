@@ -1,5 +1,9 @@
 export type LayerId =
+  | "L01"
+  | "L01b"
+  | "L01c"
   | "L02"
+  | "L02b"
   | "L09"
   | "L10"
   | "L11"
@@ -30,6 +34,35 @@ export type LayerRegistryEntry = {
 // src/lib/manga/ops-console/server/jobs/registry.ts:LAYER_REGISTRY は
 // 同じ script path を持つ。一方を更新したらもう一方も同期すること。
 export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
+  L01: {
+    script: "scripts/manga/layers/L01-bible.ts",
+    scope: "work",
+    allowedFlags: [
+      { name: "--concept", pattern: /^[\w./-]+\.json$/, isPath: true },
+      { name: "--art-style", pattern: /^[\w-]+$/ },
+    ],
+    timeoutMs: 10 * 60 * 1000,
+  },
+  L01b: {
+    script: "scripts/manga/layers/L01b-bible-lint.ts",
+    scope: "work",
+    allowedFlags: [
+      { name: "--skip-llm", pattern: /^$/ },
+      { name: "--fail-on-fatal", pattern: /^$/ },
+    ],
+    timeoutMs: 10 * 60 * 1000,
+  },
+  L01c: {
+    script: "scripts/manga/layers/L01c-bible-deepen.ts",
+    scope: "work",
+    allowedFlags: [
+      { name: "--concept", pattern: /^[\w./-]+\.json$/, isPath: true },
+      { name: "--style-ref-note", pattern: /^[\s\S]{1,2000}$/ },
+      { name: "--style-ref-note-file", pattern: /^[\w./-]+\.(md|txt)$/, isPath: true },
+      { name: "--re-lint", pattern: /^$/ },
+    ],
+    timeoutMs: 15 * 60 * 1000,
+  },
   L02: {
     script: "scripts/manga/layers/L02-bible-images.ts",
     scope: "work",
@@ -39,6 +72,14 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
       { name: "--concurrency", pattern: /^[1-9][0-9]?$/ },
     ],
     timeoutMs: 60 * 60 * 1000,
+  },
+  L02b: {
+    script: "scripts/manga/layers/L02b-volume-plot.ts",
+    scope: "volume",
+    allowedFlags: [
+      { name: "--concept", pattern: /^[\w./-]+\.json$/, isPath: true },
+    ],
+    timeoutMs: 10 * 60 * 1000,
   },
   L09: {
     script: "scripts/manga/layers/L09-render.ts",

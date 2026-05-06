@@ -4,6 +4,8 @@ export type ViewName =
   | "name-gate"
   | "revision"
   | "assets"
+  | "bible"
+  | "volume-plot"
   | "layers"
   | "works";
 
@@ -55,6 +57,8 @@ export function isViewName(value: string | null | undefined): value is ViewName 
     value === "name-gate" ||
     value === "revision" ||
     value === "assets" ||
+    value === "bible" ||
+    value === "volume-plot" ||
     value === "layers" ||
     value === "works"
   );

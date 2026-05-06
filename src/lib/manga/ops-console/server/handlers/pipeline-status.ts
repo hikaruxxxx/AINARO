@@ -37,7 +37,7 @@ type PipelineLayerId =
   | "L12"
   | "L13";
 
-type RunnableLayerId = "L02" | "L09" | "L10" | "L11" | "L12" | "L13";
+type RunnableLayerId = "L01" | "L02" | "L02b" | "L09" | "L10" | "L11" | "L12" | "L13";
 
 type PipelineStatusLayer = {
   id: PipelineLayerId;
@@ -157,8 +157,8 @@ function specs(slug: string, episode: number): LayerSpec[] {
       id: "L01",
       label: "L01 Bible Snapshot",
       artifacts: [artifact(bibleSnapshotPath(slug), "file")],
-      next_view: "assets",
-      next_layer_id: null,
+      next_view: "bible",
+      next_layer_id: "L01",
     },
     {
       id: "L02",
@@ -171,7 +171,8 @@ function specs(slug: string, episode: number): LayerSpec[] {
       id: "L02b",
       label: "L02b Volume Plot",
       artifacts: [artifact(volumePlotPath(slug, 1), "file")],
-      next_layer_id: null,
+      next_view: "volume-plot",
+      next_layer_id: "L02b",
     },
     { id: "L03", label: "L03 Shotlist", artifacts: [artifact(shotlist, "file")], next_view: "assets", next_layer_id: null },
     { id: "L04", label: "L04 Storyboard", artifacts: [artifact(storyboardPath(slug, episode), "file")], next_view: "assets", next_layer_id: null },

@@ -91,7 +91,7 @@ function badgeLabel(layer: PipelineStatusLayer, running: boolean): string {
 }
 
 function isRunnableLayer(value: string | null | undefined): value is LayerId {
-  return value === "L02" || value === "L09" || value === "L10" || value === "L11" || value === "L12" || value === "L13";
+  return value === "L01" || value === "L02" || value === "L02b" || value === "L09" || value === "L10" || value === "L11" || value === "L12" || value === "L13";
 }
 
 function startRequest(layer: LayerId, slug: string, episode: number): JobStartRequest {
@@ -260,6 +260,14 @@ export function mountPipelineView(container: HTMLElement): () => void {
       }
       const layer = target.closest<HTMLButtonElement>("[data-start-layer]")?.dataset.startLayer;
       if (!isRunnableLayer(layer)) return;
+      if (layer === "L01") {
+        store.update({ currentView: "bible" });
+        return;
+      }
+      if (layer === "L02b") {
+        store.update({ currentView: "volume-plot" });
+        return;
+      }
       state.running.add(layer);
       render(container, state);
       void apiPostJob(startRequest(layer, state.slug, state.episode))
