@@ -17,6 +17,7 @@ import {
   writeBibleSnapshot,
 } from "../../../src/lib/manga/bible/v2-adapter";
 import { workDir, workMetaPath } from "./_paths";
+import type { DungeonModernSubtype } from "../../../src/lib/manga/schemas-v2";
 import type { ArtStyle } from "../../../src/lib/manga/types";
 
 type Args = {
@@ -57,6 +58,13 @@ async function loadMeta(slug: string) {
   return JSON.parse(txt);
 }
 
+function parseDungeonModernSubtype(value: unknown): DungeonModernSubtype | undefined {
+  if (value === "external_social" || value === "gacha_ui" || value === "hybrid") {
+    return value;
+  }
+  return undefined;
+}
+
 async function main() {
   const args = parseArgs();
   console.log(`[L01] slug=${args.slug} concept=${args.concept}`);
@@ -73,6 +81,8 @@ async function main() {
     targetPagesPerEpisode: meta.volume_plan?.target_pages_per_episode ?? 22,
     estimatedVolumes: meta.volume_plan?.estimated_volumes ?? 13,
     titleShort: meta.title_short,
+    genre: meta.genre,
+    subtype: parseDungeonModernSubtype(meta.subtype),
     targetAudience: meta.target_audience,
   });
 

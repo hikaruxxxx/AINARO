@@ -14,6 +14,7 @@ import {
   KdpMetadataSchema,
   RefsProvenanceSchema,
   WorkMetaJsonSchema,
+  BibleSnapshotV2MetaSchema,
   parseOrThrow,
 } from "../../src/lib/manga/schemas-v2.zod";
 import {
@@ -85,14 +86,42 @@ async function smokeZod() {
     title: "Fランク探索者",
     title_short: "Fランク",
     genre: "modern_dungeon",
+    subtype: "external_social",
     art_style: "manga_bw_seinen_urban",
     extra_field_should_be_allowed: "yes",
   };
   try {
     parseOrThrow(WorkMetaJsonSchema, a07Meta, "a07 meta");
-    console.log("  OK: a07 meta parsed (passthrough)");
+    console.log("  OK: a07 meta parsed (subtype + passthrough)");
   } catch (e) {
     fail(`a07 meta should parse: ${e}`);
+  }
+
+  try {
+    parseOrThrow(
+      BibleSnapshotV2MetaSchema,
+      {
+        slug: "a07-modern-dungeon",
+        title: "Fランク探索者",
+        art_style: "manga_bw_seinen_urban",
+        genre: "modern_dungeon",
+        subtype: "gacha_ui",
+        target_pages_per_volume: 200,
+        target_episodes_per_volume: 10,
+        target_pages_per_episode: 22,
+      },
+      "bible meta subtype",
+    );
+    console.log("  OK: bible meta subtype parsed");
+  } catch (e) {
+    fail(`bible meta subtype should parse: ${e}`);
+  }
+
+  try {
+    parseOrThrow(WorkMetaJsonSchema, { ...a07Meta, subtype: "sns_heavy" }, "bad subtype");
+    fail("bad subtype should not parse");
+  } catch {
+    console.log("  OK: bad subtype rejected");
   }
 
   // 1e. RefsProvenance 通る (1 entry)

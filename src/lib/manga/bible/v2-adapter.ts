@@ -25,6 +25,7 @@ import type {
   StyleDirectivesV2,
   VisualMotifV2,
   WorldSpec,
+  DungeonModernSubtype,
 } from "../schemas-v2";
 
 // ============================================================
@@ -447,6 +448,8 @@ export function adaptV2ConceptToBibleSnapshot(
     targetPagesPerEpisode: number;
     estimatedVolumes: number;
     titleShort?: string;
+    genre?: string;
+    subtype?: DungeonModernSubtype;
     targetAudience?: string;
   }
 ): BibleSnapshotV2 {
@@ -480,7 +483,8 @@ export function adaptV2ConceptToBibleSnapshot(
       title: concept.title,
       title_short: args.titleShort,
       art_style: args.artStyle,
-      genre: concept.tags?.["houkou"] ?? "modern_dungeon",
+      genre: args.genre ?? concept.tags?.["houkou"] ?? "modern_dungeon",
+      subtype: args.subtype,
       target_pages_per_volume: args.targetPagesPerVolume,
       target_episodes_per_volume: args.targetEpisodesPerVolume,
       target_pages_per_episode: args.targetPagesPerEpisode,

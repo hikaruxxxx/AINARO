@@ -185,14 +185,16 @@ function buildLocationRefPrompt(args: {
   const l = args.location;
   const spec = l.spec ?? {};
   const atmosphere = spec.atmosphere ?? "";
-  const lighting = spec.lighting_default ?? "";
-  const palette = (spec.color_palette ?? []).join(", ");
+  // 注: lighting_default / color_palette はそのまま渡すと gpt-image-2 が
+  // 写実的なライティング・配色を再現しにいくため、ref plate では意図的に省略する
+  // (panel render 時の cue としては別経路で利用)。
   const layout = spec.layout
     ? [
         spec.layout.type ? `type=${spec.layout.type}` : "",
         spec.layout.size_m ? `size=${spec.layout.size_m}` : "",
+        // 家具の色も同様に省略 (素材色は写実化を加速する)
         ...(spec.layout.furniture ?? []).map(
-          (f) => `${f.type}@${f.position}${f.color ? ` (${f.color})` : ""}`
+          (f) => `${f.type}@${f.position}`
         ),
       ]
         .filter(Boolean)
@@ -214,23 +216,24 @@ function buildLocationRefPrompt(args: {
   })();
 
   return [
-    `Reference sheet illustration of the location "${l.name}" for a Japanese light novel comicalization (なろう系 narou-kei, B6 KDP+KU, black and white). Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization background art.`,
+    `STRICT STYLE: this is a black-and-white narou-kei comicalization manga page background plate (Young Ace / Comic Walker / カドコミ系 lineage, B6 KDP+KU). Hand-inked linework + sparse screentone only, white-paper feel with generous negative space. NOT photoreal, NOT a 3D render, NOT realistic photography, NOT seinen-realism. Treat as a published light-novel-comicalization manga asset, not as a real-world scene.`,
+    "",
+    `Reference sheet illustration of the location "${l.name}" — recurring setting of the same series.`,
     "",
     styleDirectiveLine(args.styleDirectives),
     "",
-    atmosphere ? `Atmosphere: ${atmosphere}.` : "",
-    lighting ? `Lighting: ${lighting}.` : "",
-    palette ? `Color palette (translate to grayscale tones): ${palette}.` : "",
-    layout ? `Layout: ${layout}.` : "",
+    atmosphere ? `Mood (compositional only, do NOT translate to photographic light): ${atmosphere}.` : "",
+    layout ? `Spatial layout invariants: ${layout}.` : "",
     anchors ? `MUST PRESERVE structural invariants: ${anchors}.` : "",
     "",
     camera,
     "",
     "STRICT RULES:",
     "- NO people, NO characters, NO crowd. Empty location only.",
-    "- BLACK AND WHITE only with screentone and hatching, NO color.",
-    "- Confident decisive line work with clear silhouettes. Use moderate background detail with genre iconography (fantasy: torches, stone walls, magic circles, guild counters; modern: urban signage, electric poles, contemporary fixtures). Legibility over photoreal density.",
-    "- Do NOT render any text, logo, signage detail (only abstract sign shapes), or watermark.",
+    "- BLACK AND WHITE only with sparse screentone + hatching. NO color. NO 3D-render shading. NO photorealistic shading. NO airbrush. NO ambient occlusion.",
+    "- Treat surfaces as inked manga panels: large flat whites, decisive black silhouettes, screentone only where a published manga page would use it. Avoid filling every surface with detail.",
+    "- Confident decisive line work with clear silhouettes. Use ICONOGRAPHIC background detail (fantasy: torches, stone walls, magic circles, guild counters; modern: urban signage shapes, electric poles, contemporary fixtures). Legibility and silhouette over photoreal density.",
+    "- Do NOT render any text, logo, signage detail (only abstract sign shapes), watermark, or photographic specular highlight.",
   ]
     .filter(Boolean)
     .join("\n");

@@ -15,7 +15,7 @@
  *   - genre 別の追加 directive (現代ダンジョン/異世界転生/領地経営) も差し込み可
  */
 
-import type { ToneProfile } from "../schemas-v2";
+import type { DungeonModernSubtype, ToneProfile } from "../schemas-v2";
 
 /**
  * 全 storyboard 生成で共通に使う panel craft directives。
@@ -121,12 +121,8 @@ const HELLMODE_ADDITIONAL_DIRECTIVES = [
   "【hellmode 推奨】緊張・葛藤の3段階深掘り panel を章ごとに1回作る",
 ] as const;
 
-/** ジャンル別の追加 directive (manga_craft_guide.md v3 で genres[] セクションが追加されたら拡充) */
+/** ジャンル別の追加 directive (modern_dungeon は subtype 分岐で別管理) */
 const GENRE_DIRECTIVES: Record<string, string[]> = {
-  modern_dungeon: [
-    "【現代ダンジョン】SNS/配信動画/ニュース速報 panel を活用して『主人公の社会的影響』を可視化",
-    "【現代ダンジョン】現代の生活感 (制服/コンビニ/スマホ) と異世界要素 (ダンジョン/魔物) のコントラストを panel 配置で強調",
-  ],
   battle_dungeon: [
     "【battle_dungeon】ダンジョンの神秘性を establishing 大コマで示す",
     "【battle_dungeon】戦闘の動作分割を厳守 (5 panel = 構え→中間→決定打→結果→反応)",
@@ -142,16 +138,65 @@ const GENRE_DIRECTIVES: Record<string, string[]> = {
   ],
 };
 
+type SubtypeDirectives = Record<DungeonModernSubtype, string[]>;
+
+export const MODERN_DUNGEON_SUBTYPE_DIRECTIVES: SubtypeDirectives = {
+  external_social: [
+    "【modern_dungeon/external_social】SNS/配信/ニュース panel を 1 巻 5-10 回配置",
+    "【modern_dungeon/external_social】SNS 前後に主人公のスマホ視聴 panel を置く",
+    "【modern_dungeon/external_social】ステータス画面は章末/章頭の簡素 1 panel 更新",
+    "【modern_dungeon/external_social】制服/コンビニ/スマホと魔物/ダンジョンを併置",
+    "【modern_dungeon/external_social】1 巻終盤 cliffhanger で海外探索者をシルエット初登場",
+    "【modern_dungeon/external_social】章扉は 1 ページ全面、主人公全身+マスコット+ロゴ",
+    "【modern_dungeon/external_social】主人公は制服のまま戦闘、装備切替演出は最小限",
+  ],
+  gacha_ui: [
+    "【modern_dungeon/gacha_ui】SNS panel は使わず、rarity と数値で社会的価値を示す",
+    "【modern_dungeon/gacha_ui】ステータスは 2 ページ全面、スキル一覧+rarity+New",
+    "【modern_dungeon/gacha_ui】数値 before/after は矢印付きで「121 (←115)」",
+    "【modern_dungeon/gacha_ui】ガチャ pull は見開き+「ジャララ」「キラッ」+斜め文字",
+    "【modern_dungeon/gacha_ui】1回/10回ガチャ button と skill icon grid を UI として描く",
+    "【modern_dungeon/gacha_ui】制服↔甲冑の装備切替 panel で現代/異世界境界を可視化",
+    "【modern_dungeon/gacha_ui】各話冒頭は「第N話」小枠+同ページ establishing",
+    "【modern_dungeon/gacha_ui】1 巻冒頭は opening establishing 見開き、ナレ 4-5 個可",
+    "【modern_dungeon/gacha_ui】巻末 cliffhanger は海外でなくタイム制ミッション提示",
+  ],
+  hybrid: [
+    "【modern_dungeon/hybrid】SNS 外部反応と gacha UI 作法を半量ずつ併用",
+    "【modern_dungeon/hybrid】SNS は要所のみ、重要成長は rarity/数値 UI で補強",
+    "【modern_dungeon/hybrid】生成難易度が高いため Phase A では採用理由を明示",
+  ],
+};
+
+function isModernDungeonGenre(genre: string | undefined): boolean {
+  return genre === "modern_dungeon" || genre === "modern-dungeon" || genre === "dungeon-modern";
+}
+
+function resolveModernDungeonSubtype(
+  subtype: string | undefined,
+): DungeonModernSubtype {
+  if (
+    subtype === "external_social" ||
+    subtype === "gacha_ui" ||
+    subtype === "hybrid"
+  ) {
+    return subtype;
+  }
+  return "external_social";
+}
+
 /**
  * tone_profile / genre に応じた craft directives 文字列を構築。
  * storyboard-extractor.ts の systemContext に注入する。
  *
  * @param toneProfile bible.meta.tone_profile (任意、未指定なら共通ルールのみ)
  * @param genre bible.meta.genre (任意、未指定ならジャンル別 directive をスキップ)
+ * @param subtype bible.meta.subtype (modern_dungeon の genre 内サブタイプ)
  */
 export function buildCraftGuideDirectives(
   toneProfile?: ToneProfile,
   genre?: string,
+  subtype?: string,
 ): string {
   const lines: string[] = [];
 
@@ -200,7 +245,14 @@ export function buildCraftGuideDirectives(
   }
 
   // ジャンル別の追加 directive
-  if (genre && GENRE_DIRECTIVES[genre]) {
+  if (isModernDungeonGenre(genre)) {
+    const sub = resolveModernDungeonSubtype(subtype);
+    lines.push(`### modern_dungeon/${sub} の追加 directive`);
+    for (const d of MODERN_DUNGEON_SUBTYPE_DIRECTIVES[sub]) {
+      lines.push(`- ${d}`);
+    }
+    lines.push("");
+  } else if (genre && GENRE_DIRECTIVES[genre]) {
     lines.push(`### ジャンル別 directive (${genre})`);
     for (const d of GENRE_DIRECTIVES[genre]) {
       lines.push(`- ${d}`);

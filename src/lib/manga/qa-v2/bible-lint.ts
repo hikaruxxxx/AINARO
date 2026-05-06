@@ -37,9 +37,35 @@ export type BibleLintReport = {
 // ============================================================
 
 const TEMPLATE_TEXTS = ["TODO_post_bible_review", "TODO", "TBD", "未定", "後で書く"];
+const DUNGEON_MODERN_SUBTYPES = new Set(["external_social", "gacha_ui", "hybrid"]);
+
+function isModernDungeonGenre(genre: string | undefined): boolean {
+  return genre === "modern_dungeon" || genre === "modern-dungeon" || genre === "dungeon-modern";
+}
 
 function staticLint(bible: BibleSnapshotV2): LintFinding[] {
   const f: LintFinding[] = [];
+
+  if (isModernDungeonGenre(bible.meta.genre)) {
+    if (!bible.meta.subtype) {
+      f.push({
+        severity: "warn",
+        scope: "global",
+        rule: "modern_dungeon_subtype_missing",
+        message:
+          "bible.meta.subtype が未設定です。modern_dungeon は external_social / gacha_ui / hybrid のいずれかを明示推奨。",
+        hint: "docs/plans/manga/subtype-support.md 参照",
+      });
+    } else if (!DUNGEON_MODERN_SUBTYPES.has(bible.meta.subtype)) {
+      f.push({
+        severity: "warn",
+        scope: "global",
+        rule: "modern_dungeon_subtype_unknown",
+        message: `bible.meta.subtype="${bible.meta.subtype}" は未定義です。external_social / gacha_ui / hybrid から選んでください。`,
+        hint: "docs/strategy/manga_craft/40_genres/modern_dungeon.md 参照",
+      });
+    }
+  }
 
   // world
   if (bible.world.premise.length < 100) {

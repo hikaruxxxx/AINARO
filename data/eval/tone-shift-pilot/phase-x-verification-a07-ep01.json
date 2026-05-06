@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-06T06:14:29.030Z",
+  "generated_at": "2026-05-06T08:02:54.024Z",
   "target_slug": "a07-modern-dungeon",
   "target_episode": 1,
   "target_storyboard_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep01/storyboard.json",
   "bible_meta_original": {
     "title": "Fランク探索者の俺にだけ聞こえるんだけど　～システム音声【ナビ】が現代ダンジョンの隠しルール全部教えてくれるから、世界最速でレベルアップした件～",
-    "genre": "主人公最強無双",
+    "genre": "modern_dungeon",
     "art_style": "manga_bw_seinen_urban",
     "tone_profile": null,
     "profile_id": null
@@ -24,66 +24,44 @@
   },
   "audit_summary": {
     "pages_total": 22,
-    "panels_total": 110,
-    "total_findings": 6,
-    "total_findings_panel_scope": 4,
-    "total_findings_volume_scope_light": 2,
+    "panels_total": 112,
+    "total_findings": 1,
+    "total_findings_panel_scope": 1,
+    "total_findings_volume_scope_light": 0,
     "total_findings_volume_scope_hellmode": 0,
-    "total_findings_volume_scope_no_tone": 2,
+    "total_findings_volume_scope_no_tone": 0,
     "counts_by_severity": {
-      "info": 3,
-      "warn": 3
+      "warn": 1
     },
     "counts_by_rule": {
-      "importance_imbalance": 2,
-      "shot_repetition": 1,
-      "narration_dominant": 1,
-      "recovery_beat_missing": 1,
-      "expectation_reality_gap_absent": 1
+      "cliffhanger_role_mismatch": 1
     },
-    "new_rules_findings_count": 3,
-    "old_rules_findings_count": 3
+    "new_rules_findings_count": 0,
+    "old_rules_findings_count": 1
   },
   "new_rules_breakdown": {
-    "narration_dominant": 1,
+    "narration_dominant": 0,
     "face_only_emotion_run": 0,
     "mascot_temperature_pair_missing": 0,
-    "recovery_beat_missing": 1,
-    "expectation_reality_gap_absent": 1
+    "recovery_beat_missing": 0,
+    "expectation_reality_gap_absent": 0
   },
   "craft_directives_compare": {
-    "light_recovery_chars": 2240,
-    "hellmode_chars": 1944,
+    "light_recovery_chars": 2724,
+    "hellmode_chars": 2428,
     "light_recovery_has_required_section": true,
     "hellmode_has_required_section": true,
-    "both_share_panel_craft_rules": true
+    "both_share_panel_craft_rules": true,
+    "external_social_has_sns": true,
+    "gacha_ui_has_status_spread": true,
+    "hybrid_has_section": true
   },
-  "sample_new_rule_findings": [
-    {
-      "page_no": 22,
-      "panel_no": 110,
-      "rule": "narration_dominant",
-      "severity": "warn",
-      "message": "panel#110: ナレーション 17字 が会話 13字 を上回る (manga_craft_guide v2 ナレーション禁則)"
-    },
-    {
-      "page_no": 0,
-      "rule": "recovery_beat_missing",
-      "severity": "warn",
-      "message": "episode a07-modern-dungeon-ep01: 「小報酬/生活感/相棒との温度」beat が検出されない (light_recovery では1話1回以上必須)"
-    },
-    {
-      "page_no": 0,
-      "rule": "expectation_reality_gap_absent",
-      "severity": "info",
-      "message": "巻全体で「期待 vs 現実」のギャップ panel が検出されない (manga_craft_guide v2 の typical pattern #4 推奨)"
-    }
-  ],
+  "sample_new_rule_findings": [],
   "interpretation": {
-    "narration_dominant_per_episode": 1,
+    "narration_dominant_per_episode": 0,
     "narration_dominant_threshold_warn": 5,
-    "recovery_beat_missing_present": true,
-    "expectation_reality_gap_absent_present": true,
-    "verdict": "PASS: 新ルールが既存 a07 の構造的問題を検出 (Phase X 設計が正しく動作)"
+    "recovery_beat_missing_present": false,
+    "expectation_reality_gap_absent_present": false,
+    "verdict": "INCONCLUSIVE: 新ルールが何も検出せず。a07 が既に「軽い」状態か、ルール閾値が緩すぎる可能性"
   }
 }

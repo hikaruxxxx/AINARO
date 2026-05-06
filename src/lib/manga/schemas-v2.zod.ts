@@ -34,6 +34,12 @@ export const TrademarkCheckStatusSchema = z.enum(["pending", "passed", "flagged"
 
 export const RefEntityTypeSchema = z.enum(["character", "location", "prop", "style"]);
 
+export const DungeonModernSubtypeSchema = z.enum([
+  "external_social",
+  "gacha_ui",
+  "hybrid",
+]);
+
 // ── AI 開示 (KDP公式 5 区分) ──
 export const AiDisclosureFlagsSchema = z.object({
   text: z.boolean(),
@@ -42,6 +48,34 @@ export const AiDisclosureFlagsSchema = z.object({
   cover: z.boolean(),
   interior: z.boolean(),
 });
+
+export const ToneProfileSchema = z
+  .object({
+    darkness: z.number(),
+    comedic_density: z.number(),
+    recovery_cadence: z.number(),
+    sidekick_presence: z.number(),
+  })
+  .passthrough();
+
+export const BibleSnapshotV2MetaSchema = z
+  .object({
+    slug: z.string().min(1),
+    title: z.string().min(1),
+    title_short: z.string().optional(),
+    title_en: z.string().optional(),
+    art_style: z.string().min(1),
+    genre: z.string().min(1),
+    subtype: DungeonModernSubtypeSchema.optional(),
+    target_pages_per_volume: z.number().int().positive(),
+    target_episodes_per_volume: z.number().int().positive(),
+    target_pages_per_episode: z.number().int().positive(),
+    target_audience: z.string().optional(),
+    estimated_volumes: z.number().int().positive().optional(),
+    tone_profile: ToneProfileSchema.optional(),
+    profile_id: z.string().optional(),
+  })
+  .passthrough();
 
 // ── RefProvenanceEntry ──
 export const RefEditHistoryEntrySchema = z.object({
@@ -139,6 +173,7 @@ export const WorkMetaJsonSchema = z
     title_en_working: z.string().optional(),
     genre: z.string().optional(),
     subgenre: z.string().optional(),
+    subtype: DungeonModernSubtypeSchema.optional(),
     art_style: z.string().optional(),
     target_audience: z.string().optional(),
     phase: z.string().optional(),

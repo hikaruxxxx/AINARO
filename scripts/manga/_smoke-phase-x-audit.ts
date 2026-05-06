@@ -134,11 +134,37 @@ async function main(): Promise<void> {
   const directivesLight = buildCraftGuideDirectives(
     bibleLightRecovery.meta.tone_profile,
     bibleLightRecovery.meta.genre,
+    bibleLightRecovery.meta.subtype,
   );
   const directivesHellmode = buildCraftGuideDirectives(
     bibleHellmode.meta.tone_profile,
     bibleHellmode.meta.genre,
+    bibleHellmode.meta.subtype,
   );
+  const directivesExternalSocial = buildCraftGuideDirectives(
+    bibleLightRecovery.meta.tone_profile,
+    "modern_dungeon",
+    "external_social",
+  );
+  const directivesGachaUi = buildCraftGuideDirectives(
+    bibleLightRecovery.meta.tone_profile,
+    "modern_dungeon",
+    "gacha_ui",
+  );
+  const directivesHybrid = buildCraftGuideDirectives(
+    bibleLightRecovery.meta.tone_profile,
+    "modern_dungeon",
+    "hybrid",
+  );
+  if (!directivesExternalSocial.includes("SNS/配信/ニュース")) {
+    fail("external_social directives should include SNS/配信/ニュース");
+  }
+  if (!directivesGachaUi.includes("ステータスは 2 ページ全面")) {
+    fail("gacha_ui directives should include 2 ページ全面ステータス");
+  }
+  if (!directivesHybrid.includes("modern_dungeon/hybrid")) {
+    fail("hybrid directives should include hybrid section");
+  }
 
   console.log(`[3/4] craft-guide-directives: light=${directivesLight.length}字 hellmode=${directivesHellmode.length}字`);
 
@@ -204,6 +230,9 @@ async function main(): Promise<void> {
       light_recovery_has_required_section: directivesLight.includes("light_recovery"),
       hellmode_has_required_section: directivesHellmode.includes("hellmode"),
       both_share_panel_craft_rules: directivesLight.includes("PANEL_CRAFT") || directivesLight.includes("panel craft"),
+      external_social_has_sns: directivesExternalSocial.includes("SNS/配信/ニュース"),
+      gacha_ui_has_status_spread: directivesGachaUi.includes("ステータスは 2 ページ全面"),
+      hybrid_has_section: directivesHybrid.includes("modern_dungeon/hybrid"),
     },
 
     sample_new_rule_findings: newRuleFindings.slice(0, 10).map((f) => ({

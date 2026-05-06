@@ -141,6 +141,8 @@ export type ToneProfile = {
   sidekick_presence: number;
 };
 
+export type DungeonModernSubtype = "external_social" | "gacha_ui" | "hybrid";
+
 export type BibleSnapshotV2 = {
   schema_version: 2;
   generated_at: string;
@@ -165,6 +167,8 @@ export type BibleSnapshotV2 = {
     tone_profile?: ToneProfile;
     /** どのプロファイルから生成されたか (例: "light_recovery_type" | "hellmode_type") */
     profile_id?: string;
+    /** ジャンル内サブタイプ (現状 modern_dungeon でのみ使用) */
+    subtype?: DungeonModernSubtype;
   };
   world: WorldSpec;
   characters: CharacterEntryV2[];

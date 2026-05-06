@@ -44,3 +44,12 @@
 - 【light_recovery 推奨】食事/服装/街並み描写の panel を増やす (S3食事/S4服装/S7建築 の軽い充実が生活感を生む)
 - 【light_recovery 禁則】1話で『主人公の心の傷の独白』が3回を超えないこと (重い独白は完読率を下げる)
 - 【light_recovery 禁則】『初期敵が主人公をいじめる/見下す』panel を作らない (likability 軸を損なう)
+
+### modern_dungeon/external_social の追加 directive
+- 【modern_dungeon/external_social】SNS/配信/ニュース panel を 1 巻 5-10 回配置
+- 【modern_dungeon/external_social】SNS 前後に主人公のスマホ視聴 panel を置く
+- 【modern_dungeon/external_social】ステータス画面は章末/章頭の簡素 1 panel 更新
+- 【modern_dungeon/external_social】制服/コンビニ/スマホと魔物/ダンジョンを併置
+- 【modern_dungeon/external_social】1 巻終盤 cliffhanger で海外探索者をシルエット初登場
+- 【modern_dungeon/external_social】章扉は 1 ページ全面、主人公全身+マスコット+ロゴ
+- 【modern_dungeon/external_social】主人公は制服のまま戦闘、装備切替演出は最小限

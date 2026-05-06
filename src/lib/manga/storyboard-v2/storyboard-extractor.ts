@@ -81,7 +81,11 @@ export async function extractStoryboardFromShotlist(args: {
       "- ページ末 (cliffhanger / page_end_hook) は重要 panel を最後に置く。",
       "",
       // Phase X WX-3 で追加: craft 知見を tone_profile / genre に応じて注入
-      buildCraftGuideDirectives(bible.meta.tone_profile, bible.meta.genre),
+      buildCraftGuideDirectives(
+        bible.meta.tone_profile,
+        bible.meta.genre,
+        bible.meta.subtype,
+      ),
     ].join("\n"),
     materials: {
       bible_meta: JSON.stringify(bible.meta, null, 2),
