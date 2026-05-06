@@ -6,6 +6,7 @@ export type ViewName =
   | "assets"
   | "bible"
   | "volume-plot"
+  | "kdp-metadata"
   | "layers"
   | "works";
 
@@ -59,6 +60,7 @@ export function isViewName(value: string | null | undefined): value is ViewName 
     value === "assets" ||
     value === "bible" ||
     value === "volume-plot" ||
+    value === "kdp-metadata" ||
     value === "layers" ||
     value === "works"
   );

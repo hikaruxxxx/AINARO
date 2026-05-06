@@ -187,7 +187,7 @@ function specs(slug: string, episode: number): LayerSpec[] {
     { id: "L10", label: "L10 Bubble Overlay", artifacts: [artifact(bubbles, "png-in-dir")], next_view: "revision", next_layer_id: "L10" },
     { id: "L11", label: "L11 Audit", artifacts: [artifact(auditPath(slug, episode), "file")], next_view: "assets", next_layer_id: "L11" },
     { id: "L12", label: "L12 Repair", artifacts: [artifact(revisionResolved, "file")], next_view: "revision", next_layer_id: "L12" },
-    { id: "L13", label: "L13 KDP", artifacts: [artifact(kdpPdf, "file")], next_layer_id: "L13" },
+    { id: "L13", label: "L13 KDP", artifacts: [artifact(kdpPdf, "file")], next_view: "kdp-metadata", next_layer_id: "L13" },
   ];
 }
 

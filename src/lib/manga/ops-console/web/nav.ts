@@ -9,6 +9,7 @@ export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = 
   { view: "assets", label: "アセット", group: "view" },
   { view: "bible", label: "Bible", group: "work" },
   { view: "volume-plot", label: "Volume Plot", group: "work" },
+  { view: "kdp-metadata", label: "KDP メタ", group: "work" },
   { view: "layers", label: "生成 layer", group: "exec" },
   { view: "works", label: "作品管理", group: "exec" },
 ];

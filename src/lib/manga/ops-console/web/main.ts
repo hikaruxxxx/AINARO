@@ -6,6 +6,7 @@ import { mountThemeToggle } from "./theme-toggle";
 import { mountAssetsView } from "./views/assets";
 import { mountBibleView } from "./views/bible";
 import { mountIndexView } from "./views/index";
+import { mountKdpMetadataView } from "./views/kdp-metadata";
 import { mountLayersView } from "./views/layers";
 import { mountNameGateView } from "./views/name-gate";
 import { mountPipelineView } from "./views/pipeline";
@@ -67,6 +68,7 @@ function mountCurrentView(main: HTMLElement): () => void {
     else if (state.currentView === "assets") unmount = mountAssetsView(main);
     else if (state.currentView === "bible") unmount = mountBibleView(main);
     else if (state.currentView === "volume-plot") unmount = mountVolumePlotView(main);
+    else if (state.currentView === "kdp-metadata") unmount = mountKdpMetadataView(main);
     else if (state.currentView === "layers") unmount = mountLayersView(main);
     else if (state.currentView === "revision") unmount = mountRevisionView(main);
     else if (state.currentView === "works") unmount = mountWorksView(main);

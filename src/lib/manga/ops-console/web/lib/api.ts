@@ -83,10 +83,18 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 export async function postJson<T>(path: string, body: unknown): Promise<T> {
+  return sendJson<T>("POST", path, body);
+}
+
+export async function putJson<T>(path: string, body: unknown): Promise<T> {
+  return sendJson<T>("PUT", path, body);
+}
+
+async function sendJson<T>(method: "POST" | "PUT", path: string, body: unknown): Promise<T> {
   let res: Response;
   try {
     res = await fetch(path, {
-      method: "POST",
+      method,
       headers: { Accept: "application/json", "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
@@ -352,4 +360,61 @@ export function apiGetVolumePlot(slug: string, volume: number): Promise<VolumePl
   return getJson<VolumePlot>(
     `/api/works/${encodeURIComponent(slug)}/volumes/v${String(volume).padStart(2, "0")}/plot`
   );
+}
+
+export type WorkKdpMetadataBlock = {
+  title_candidates?: string[];
+  series_name_canonical?: string;
+  keyword_picks_7?: string[];
+  categories_validated?: string[];
+  description_seed?: unknown;
+};
+
+export type WorkMeta = {
+  schema_version: number;
+  slug: string;
+  title?: string;
+  genre?: string;
+  art_style?: string;
+  target_audience?: string;
+  kdp_metadata?: WorkKdpMetadataBlock;
+  [key: string]: unknown;
+};
+
+export type KeywordValidationIssue = {
+  index?: number;
+  code: string;
+  message: string;
+};
+
+export type KeywordValidationResult = {
+  ok: boolean;
+  errors: KeywordValidationIssue[];
+  warnings: KeywordValidationIssue[];
+  unique_word_count: number;
+};
+
+export function apiGetWorkMeta(slug: string): Promise<WorkMeta> {
+  return getJson<WorkMeta>(`/api/works/${encodeURIComponent(slug)}/meta`);
+}
+
+export function apiPutKdpMetadata(
+  slug: string,
+  body: WorkKdpMetadataBlock
+): Promise<{
+  ok: true;
+  kdp_metadata: WorkKdpMetadataBlock;
+  validation?: { keywords?: KeywordValidationResult };
+}> {
+  return putJson(`/api/works/${encodeURIComponent(slug)}/meta/kdp-metadata`, body);
+}
+
+export function apiCreateWork(body: {
+  slug: string;
+  title: string;
+  genre?: string;
+  art_style?: string;
+  target_audience?: string;
+}): Promise<{ ok: true; slug: string; meta: WorkMeta }> {
+  return postJson("/api/works", body);
 }

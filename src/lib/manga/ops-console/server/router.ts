@@ -31,6 +31,11 @@ import { handleBootstrap } from "./handlers/bootstrap";
 import { handleBible } from "./handlers/bible";
 import { handleVolumePlot } from "./handlers/volume-plot";
 import {
+  handleWorkCreate,
+  handleWorkKdpMetadataPut,
+  handleWorkMetaGet,
+} from "./handlers/work-meta";
+import {
   handleJobsAbort,
   handleJobsList,
   handleJobsStart,
@@ -186,8 +191,49 @@ export async function handleApi(
 
   // ===== works enumerate (Phase 1 で新規追加、scope check 不要) =====
   if (p === "/api/works") {
-    if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
-    return handleWorksList(res);
+    if (req.method === "GET") return handleWorksList(res);
+    if (req.method === "POST") {
+      let body: any;
+      try {
+        body = await readJsonBody(req);
+      } catch (e) {
+        return send(res, 400, { error: String(e) });
+      }
+      // 新規作品作成は scope を作る側なので、Phase 2A の default scope 制約から除外する。
+      return handleWorkCreate(body, res);
+    }
+    return send(res, 405, { error: "method not allowed" });
+  }
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/meta$/);
+    if (m) {
+      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      const slug = m[1];
+      if (!isValidSlug(slug)) return send(res, 400, { error: "invalid slug" });
+      if (defaults.defaultSlug !== null && slug !== defaults.defaultSlug) {
+        return send(res, 403, { error: "scope mismatch" });
+      }
+      return handleWorkMetaGet(slug, res);
+    }
+  }
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/meta\/kdp-metadata$/);
+    if (m) {
+      if (req.method !== "PUT") return send(res, 405, { error: "method not allowed" });
+      const slug = m[1];
+      if (!isValidSlug(slug)) return send(res, 400, { error: "invalid slug" });
+      if (defaults.defaultSlug === null) {
+        return send(res, 400, { error: "no active scope; restart console with --slug for writes" });
+      }
+      if (slug !== defaults.defaultSlug) return send(res, 403, { error: "scope mismatch" });
+      let body: any;
+      try {
+        body = await readJsonBody(req);
+      } catch (e) {
+        return send(res, 400, { error: String(e) });
+      }
+      return handleWorkKdpMetadataPut(slug, body, res);
+    }
   }
   {
     const m = p.match(/^\/api\/works\/([^/]+)\/bible$/);
