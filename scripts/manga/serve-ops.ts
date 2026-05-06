@@ -1,15 +1,16 @@
 /**
- * 漫画 ops console HTTP server
+ * Novelis Console (漫画 ops UI) HTTP server
  *
- * Phase 2C:
- *   - root `/` は ops console shell を返す
+ * Phase 2C+:
+ *   - 引数なし起動 → root `/` は作品一覧 (index view) を含む shell を返す
+ *   - --slug/--episode 指定起動 → 旧 default scope を固定する Phase 1 互換モード
  *   - 新 URL `/works/{slug}/episodes/epNN/` は SPA shell を返す
- *   - 旧 URL `/episodes/epNN/name/index.html` は SPA name-gate へ 302 redirect
- *   - scope は起動引数 --slug --episode で固定 (Phase 3 以降で複数 slug 横断を解禁予定)
+ *   - 旧 URL `/episodes/epNN/name/index.html` は SPA name-gate へ 302 redirect (default scope のみ)
+ *   - Phase 3 以降で複数 slug 横断を解禁予定
  *
  * Usage:
- *   npx tsx scripts/manga/serve-ops.ts --slug a07-modern-dungeon --episode 1
- *   # → http://localhost:5174/works/a07-modern-dungeon/episodes/ep01/#name-gate
+ *   npm run console
+ *   npm run console -- --slug a07-modern-dungeon --episode 1
  */
 import "./_env";
 import http from "node:http";
@@ -25,10 +26,15 @@ import { renderOpsConsoleShellHtml } from "../../src/lib/manga/ops-console/index
 import { buildOpsConsoleClient } from "../../src/lib/manga/ops-console/web/build";
 import { isValidEpisode, isValidSlug } from "../../src/lib/manga/ops-console/server/lib/path-guards";
 
-type Args = { slug: string; episode: number; port: number; openBrowser: boolean };
+type Args = {
+  slug: string | null;
+  episode: number | null;
+  port: number;
+  openBrowser: boolean;
+};
 
 function parseArgs(): Args {
-  const a: Partial<Args> = { port: 5174, openBrowser: true };
+  const a: Args = { slug: null, episode: null, port: 5174, openBrowser: true };
   const argv = process.argv.slice(2);
   const BOOLEAN_FLAGS = new Set(["no-open"]);
   for (let i = 0; i < argv.length; i++) {
@@ -56,8 +62,12 @@ function parseArgs(): Args {
     else if (key === "episode") a.episode = Number(val);
     else if (key === "port") a.port = Number(val);
   }
-  if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
-  return a as Args;
+  // 完全に未指定 (= 一覧モード) と、両方指定 (= scope 固定モード) のみ valid。
+  // 片方だけは誤用なので明示エラー。
+  if ((a.slug === null) !== (a.episode === null)) {
+    throw new Error("--slug と --episode は両方指定するか、両方省略してください");
+  }
+  return a;
 }
 
 function maybeOpenBrowser(url: string): void {
@@ -76,7 +86,7 @@ async function main() {
   try {
     clientBuild = await buildOpsConsoleClient({ outDir: "dist/ops-console" });
   } catch (e) {
-    console.error("[serve-ops] client build failed:", e);
+    console.error("[novelis-console] client build failed:", e);
     process.exit(1);
   }
   if (!isValidSlug(args.slug)) {
@@ -85,14 +95,14 @@ async function main() {
   if (!isValidEpisode(args.episode)) {
     throw new Error(`invalid episode ${args.episode}: must be positive integer`);
   }
-  const root = workDir(args.slug);
-  await fs.access(root);
+  const scopedRoot = workDir(args.slug);
+  await fs.access(scopedRoot);
 
   // L8.5 前置きチェック。Phase 2C 以降は index.html ではなく SPA が操作 UI。
   const manifestP = nameManifestPath(args.slug, args.episode);
   if (!(await fs.stat(manifestP).catch(() => null))) {
     console.warn(
-      `[serve-ops] WARN: ${manifestP} not found. Run L8.5 first:\n` +
+      `[novelis-console] WARN: ${manifestP} not found. Run L8.5 first:\n` +
         `  npx tsx scripts/manga/layers/L08-5-name-preview.ts --slug ${args.slug} --episode ${args.episode}\n` +
         `  SPA URL: http://localhost:${args.port}/works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/#name-gate`
     );
@@ -109,6 +119,7 @@ async function main() {
     }
     const url = new URL(req.url, `http://localhost:${args.port}`);
 
+    // 旧 URL → SPA name-gate redirect。
     const oldName = url.pathname.match(/^\/episodes\/ep(\d+)\/name\/index\.html$/);
     if (oldName) {
       const ep = oldName[1].padStart(2, "0");
@@ -133,7 +144,7 @@ async function main() {
     }
 
     // 静的配信: 二系統の root を提供
-    //   - `/`, `/works/{slug}/episodes/epNN/` → ops console shell
+    //   - `/`, `/works/{slug}/episodes/epNN/` → Novelis Console shell
     //   - `/_ops/*` → esbuild bundle
     //   - `/episodes/...`, その他 → workDir(slug) 配下 (SVG 等の静的 asset)
     //   - `/works/{slug}/episodes/.../path` → default scope のみ legacy static に解決
@@ -154,39 +165,43 @@ async function main() {
           const ep = m[2];
           const sub = m[3] ?? "/";
           if (slug !== args.slug) return null; // Phase 1: default のみ
-          return { root, subPath: path.posix.join("/episodes", ep, sub) };
+          return { root: scopedRoot, subPath: path.posix.join("/episodes", ep, sub) };
         }
-        return { root, subPath: p };
+        return { root: scopedRoot, subPath: p };
       },
     });
   });
 
   // listen 失敗 (主に EADDRINUSE) を意味のあるメッセージに置換する。
+  // EADDRINUSE は「同名 console がすでに立っている」可能性が高い。launchd 常駐を将来やる際に
+  // 再起動ループを起こさないため、明示的に exit 0 で抜ける。
   server.on("error", (err) => {
     const e = err as NodeJS.ErrnoException;
     if (e.code === "EADDRINUSE") {
-      console.error(
-        `[serve-ops] port ${args.port} は既に使用されています。` +
-          `別の serve-ops インスタンスが起動していないか確認してください。\n` +
-          `  既に ops console が立っている場合: http://localhost:${args.port}/`
+      console.warn(
+        `[novelis-console] port ${args.port} は既に使用されています。` +
+          `他の Novelis Console が起動中の可能性があります。\n` +
+          `  既に立っている場合: http://localhost:${args.port}/`
       );
-    } else if (e.code === "EACCES") {
-      console.error(`[serve-ops] port ${args.port} の bind が権限不足で拒否されました (EACCES)`);
+      process.exit(0);
+    }
+    if (e.code === "EACCES") {
+      console.error(`[novelis-console] port ${args.port} の bind が権限不足で拒否されました (EACCES)`);
     } else {
-      console.error("[serve-ops] server error:", err);
+      console.error("[novelis-console] server error:", err);
     }
     process.exit(1);
   });
 
   server.listen(args.port, () => {
     const consoleUrl = `http://localhost:${args.port}/`;
+    console.log(`[novelis-console] client bundle: ${clientBuild.outFile}`);
+    console.log(`[novelis-console] listening: ${consoleUrl}`);
     const scopedUrl = `http://localhost:${args.port}/works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/`;
-    console.log(`[serve-ops] root=${root} slug=${args.slug} ep=${args.episode}`);
-    console.log(`[serve-ops] client bundle: ${clientBuild.outFile}`);
-    console.log(`[serve-ops] console: ${consoleUrl}`);
-    console.log(`[serve-ops] console scope: ${scopedUrl}`);
-    console.log(`[serve-ops] name gate: ${scopedUrl}#name-gate`);
-    console.log(`[serve-ops] revision:  ${scopedUrl}#revision`);
+    console.log(`[novelis-console] mode: scope-fixed (slug=${args.slug} ep=${args.episode})`);
+    console.log(`[novelis-console] scope: ${scopedUrl}`);
+    console.log(`[novelis-console] name gate: ${scopedUrl}#name-gate`);
+    console.log(`[novelis-console] revision:  ${scopedUrl}#revision`);
     if (args.openBrowser) maybeOpenBrowser(consoleUrl);
   });
 
@@ -196,6 +211,6 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error("[serve-ops] FAILED:", e);
+  console.error("[novelis-console] FAILED:", e);
   process.exit(1);
 });

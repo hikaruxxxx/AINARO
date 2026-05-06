@@ -1,13 +1,13 @@
 /**
  * GET /api/bootstrap
  *
- * Phase 2A の SPA 初期化に必要な default scope と works 一覧をまとめて返す。
+ * SPA 初期化に必要な default scope と works 一覧をまとめて返す。
  */
 import type http from "node:http";
 import { listWorksInfo } from "./works";
 
 export async function handleBootstrap(
-  defaults: { defaultSlug: string; defaultEpisode: number },
+  defaults: { defaultSlug: string | null; defaultEpisode: number | null },
   res: http.ServerResponse
 ): Promise<void> {
   const works = await listWorksInfo();

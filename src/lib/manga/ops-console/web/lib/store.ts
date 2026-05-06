@@ -1,4 +1,4 @@
-export type ViewName = "name-gate" | "revision" | "assets" | "layers" | "works";
+export type ViewName = "index" | "name-gate" | "revision" | "assets" | "layers" | "works";
 
 export type WorkInfo = {
   slug: string;
@@ -43,6 +43,7 @@ export const store = {
 
 export function isViewName(value: string | null | undefined): value is ViewName {
   return (
+    value === "index" ||
     value === "name-gate" ||
     value === "revision" ||
     value === "assets" ||

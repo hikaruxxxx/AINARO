@@ -1,6 +1,6 @@
 import type http from "node:http";
 import { isValidEpisode, isValidSlug } from "../lib/path-guards";
-import type { RouterDefaults } from "../router";
+import type { ScopedRouterDefaults } from "../router";
 import { streamJob } from "../jobs/sse";
 import { isLayerId, type LayerId } from "../jobs/registry";
 import { JobError, jobRegistry, type JobRecord } from "../jobs/runner";
@@ -38,7 +38,7 @@ export async function handleJobsList(
   req: http.IncomingMessage,
   res: http.ServerResponse,
   url: URL,
-  defaults: RouterDefaults
+  defaults: ScopedRouterDefaults
 ): Promise<void> {
   void req;
   const slug = url.searchParams.get("slug") ?? undefined;
@@ -67,7 +67,7 @@ export async function handleJobsStart(
   req: http.IncomingMessage,
   res: http.ServerResponse,
   body: any,
-  defaults: RouterDefaults
+  defaults: ScopedRouterDefaults
 ): Promise<void> {
   void req;
   if (body?.slug !== defaults.defaultSlug) {
@@ -103,7 +103,7 @@ export async function handleJobsStream(
   req: http.IncomingMessage,
   res: http.ServerResponse,
   jobId: string,
-  defaults: RouterDefaults
+  defaults: ScopedRouterDefaults
 ): Promise<void> {
   void defaults;
   const job = jobRegistry.get(jobId);
@@ -115,7 +115,7 @@ export async function handleJobsAbort(
   req: http.IncomingMessage,
   res: http.ServerResponse,
   jobId: string,
-  defaults: RouterDefaults
+  defaults: ScopedRouterDefaults
 ): Promise<void> {
   void req;
   void defaults;

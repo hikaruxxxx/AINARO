@@ -27,6 +27,7 @@ import {
   handleAdoptedPost,
 } from "./handlers/adopted-versions";
 import { handleBootstrap } from "./handlers/bootstrap";
+import { handleBible } from "./handlers/bible";
 import {
   handleJobsAbort,
   handleJobsList,
@@ -36,11 +37,22 @@ import {
 import { handleWorkEpisodes, handleWorksList } from "./handlers/works";
 
 export type RouterDefaults = {
-  /** 起動引数で固定された slug。Phase 1 では cross-scope 書き込みを許さない。 */
-  defaultSlug: string;
-  /** 起動引数で固定された episode。 */
-  defaultEpisode: number;
+  /**
+   * 起動引数で固定された slug。Phase 1 では cross-scope 書き込みを許さない。
+   * 一覧モード (`npm run console` 引数なし) では null。null の間は scope 固定の handler は
+   * すべて 400 を返し、SPA 側は作品一覧 (index view) から scope を選んでもらう。
+   */
+  defaultSlug: string | null;
+  /** 起動引数で固定された episode。一覧モードでは null。 */
+  defaultEpisode: number | null;
   /** Phase 2 以降で `true` にすると複数 slug 横断 read を許可する (write は引き続き default-only)。 */
+  allowCrossScopeRead?: boolean;
+};
+
+/** scope が確定している場合の defaults。jobs / legacy handler が期待する non-null 型。 */
+export type ScopedRouterDefaults = {
+  defaultSlug: string;
+  defaultEpisode: number;
   allowCrossScopeRead?: boolean;
 };
 
@@ -54,6 +66,9 @@ function checkLegacyScope(
   url: URL,
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
+  if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+    return { ok: false, status: 400, error: "no active scope; pick a work from /" };
+  }
   const slug = url.searchParams.get("slug");
   const ep = Number(url.searchParams.get("episode"));
   if (slug !== defaults.defaultSlug || ep !== defaults.defaultEpisode) {
@@ -66,6 +81,9 @@ function checkLegacyBodyScope(
   body: any,
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
+  if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+    return { ok: false, status: 400, error: "no active scope; pick a work from /" };
+  }
   if (body?.slug !== defaults.defaultSlug || Number(body?.episode) !== defaults.defaultEpisode) {
     return { ok: false, status: 403, error: "scope mismatch" };
   }
@@ -90,6 +108,9 @@ function checkScopedPath(
   scoped: { slug: string; episode: number },
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
+  if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+    return { ok: false, status: 400, error: "no active scope; pick a work from /" };
+  }
   if (scoped.slug !== defaults.defaultSlug || scoped.episode !== defaults.defaultEpisode) {
     return {
       ok: false,
@@ -108,34 +129,49 @@ export async function handleApi(
 ): Promise<void> {
   const p = url.pathname;
 
+  // health probe (slash command / launchd の生死確認用)。fs アクセスを伴わない最薄 endpoint。
+  if (p === "/api/health") {
+    if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+    return send(res, 200, { ok: true, ts: Date.now() });
+  }
+
   if (p === "/api/bootstrap") {
     if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
     return handleBootstrap(defaults, res);
   }
 
-  if (p === "/api/jobs") {
-    if (req.method === "GET") return handleJobsList(req, res, url, defaults);
-    if (req.method === "POST") {
-      let body: any;
-      try {
-        body = await readJsonBody(req);
-      } catch (e) {
-        return send(res, 400, { error: String(e) });
-      }
-      return handleJobsStart(req, res, body, defaults);
+  // jobs API は default scope (slug+episode) が必須。一覧モードでは scope を選ぶまで使えない。
+  if (p === "/api/jobs" || p.match(/^\/api\/jobs\/[^/]+\/(stream|abort)$/)) {
+    if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+      return send(res, 400, { error: "no active scope; pick a work from /" });
     }
-    return send(res, 405, { error: "method not allowed" });
-  }
-  {
+    const scopedDefaults: ScopedRouterDefaults = {
+      defaultSlug: defaults.defaultSlug,
+      defaultEpisode: defaults.defaultEpisode,
+      allowCrossScopeRead: defaults.allowCrossScopeRead,
+    };
+    if (p === "/api/jobs") {
+      if (req.method === "GET") return handleJobsList(req, res, url, scopedDefaults);
+      if (req.method === "POST") {
+        let body: any;
+        try {
+          body = await readJsonBody(req);
+        } catch (e) {
+          return send(res, 400, { error: String(e) });
+        }
+        return handleJobsStart(req, res, body, scopedDefaults);
+      }
+      return send(res, 405, { error: "method not allowed" });
+    }
     const m = p.match(/^\/api\/jobs\/([^/]+)\/(stream|abort)$/);
     if (m) {
       const jobId = m[1];
       const action = m[2];
       if (action === "stream" && req.method === "GET") {
-        return handleJobsStream(req, res, jobId, defaults);
+        return handleJobsStream(req, res, jobId, scopedDefaults);
       }
       if (action === "abort" && req.method === "POST") {
-        return handleJobsAbort(req, res, jobId, defaults);
+        return handleJobsAbort(req, res, jobId, scopedDefaults);
       }
       return send(res, 405, { error: "method not allowed" });
     }
@@ -145,6 +181,19 @@ export async function handleApi(
   if (p === "/api/works") {
     if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
     return handleWorksList(res);
+  }
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/bible$/);
+    if (m) {
+      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      const slug = m[1];
+      if (!isValidSlug(slug)) return send(res, 400, { error: "invalid slug" });
+      if (defaults.defaultSlug === null) {
+        return send(res, 400, { error: "no active scope; pick a work from /" });
+      }
+      if (slug !== defaults.defaultSlug) return send(res, 403, { error: "scope mismatch" });
+      return handleBible(slug, res);
+    }
   }
   {
     const m = p.match(/^\/api\/works\/([^/]+)\/episodes$/);
@@ -218,7 +267,7 @@ export async function handleApi(
     if (req.method === "GET") {
       const g = checkLegacyScope(url, defaults);
       if (!g.ok) return send(res, g.status, { error: g.error });
-      return handleNameApprovalGet(defaults.defaultSlug, defaults.defaultEpisode, res);
+      return handleNameApprovalGet(defaults.defaultSlug!, defaults.defaultEpisode!, res);
     }
     if (req.method === "POST") {
       let body: any;
@@ -229,7 +278,7 @@ export async function handleApi(
       }
       const g = checkLegacyBodyScope(body, defaults);
       if (!g.ok) return send(res, g.status, { error: g.error });
-      return handleNameApprovalPost(defaults.defaultSlug, defaults.defaultEpisode, body, res);
+      return handleNameApprovalPost(defaults.defaultSlug!, defaults.defaultEpisode!, body, res);
     }
     return send(res, 405, { error: "method not allowed" });
   }
@@ -238,14 +287,14 @@ export async function handleApi(
     if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
     const g = checkLegacyScope(url, defaults);
     if (!g.ok) return send(res, g.status, { error: g.error });
-    return handleManifest(defaults.defaultSlug, defaults.defaultEpisode, res);
+    return handleManifest(defaults.defaultSlug!, defaults.defaultEpisode!, res);
   }
 
   if (p === "/api/revision-queue") {
     if (req.method === "GET") {
       const g = checkLegacyScope(url, defaults);
       if (!g.ok) return send(res, g.status, { error: g.error });
-      return handleRevisionQueueGet(defaults.defaultSlug, defaults.defaultEpisode, res);
+      return handleRevisionQueueGet(defaults.defaultSlug!, defaults.defaultEpisode!, res);
     }
     if (req.method === "POST") {
       let body: any;
@@ -256,7 +305,7 @@ export async function handleApi(
       }
       const g = checkLegacyBodyScope(body, defaults);
       if (!g.ok) return send(res, g.status, { error: g.error });
-      return handleRevisionQueuePost(defaults.defaultSlug, defaults.defaultEpisode, body, res);
+      return handleRevisionQueuePost(defaults.defaultSlug!, defaults.defaultEpisode!, body, res);
     }
     return send(res, 405, { error: "method not allowed" });
   }
@@ -265,7 +314,7 @@ export async function handleApi(
     if (req.method === "GET") {
       const g = checkLegacyScope(url, defaults);
       if (!g.ok) return send(res, g.status, { error: g.error });
-      return handleAdoptedGet(defaults.defaultSlug, defaults.defaultEpisode, res);
+      return handleAdoptedGet(defaults.defaultSlug!, defaults.defaultEpisode!, res);
     }
     if (req.method === "POST") {
       let body: any;
@@ -276,7 +325,7 @@ export async function handleApi(
       }
       const g = checkLegacyBodyScope(body, defaults);
       if (!g.ok) return send(res, g.status, { error: g.error });
-      return handleAdoptedPost(defaults.defaultSlug, defaults.defaultEpisode, body, res);
+      return handleAdoptedPost(defaults.defaultSlug!, defaults.defaultEpisode!, body, res);
     }
     return send(res, 405, { error: "method not allowed" });
   }

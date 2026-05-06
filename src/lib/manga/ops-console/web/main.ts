@@ -12,9 +12,16 @@ type Unmount = () => void;
 function parseRoute(): { slug: string | null; episode: number | null; view: ViewName } {
   const m = window.location.pathname.match(/^\/works\/([^/]+)\/episodes\/ep(\d+)\/?$/);
   const hashView = window.location.hash.replace(/^#/, "");
+  if (!m) {
+    return {
+      slug: null,
+      episode: null,
+      view: isViewName(hashView) ? hashView : "name-gate",
+    };
+  }
   return {
-    slug: m ? decodeURIComponent(m[1]) : null,
-    episode: m ? Number(m[2]) : null,
+    slug: decodeURIComponent(m[1]),
+    episode: Number(m[2]),
     view: isViewName(hashView) ? hashView : "name-gate",
   };
 }
@@ -59,8 +66,11 @@ function mountCurrentView(main: HTMLElement): () => void {
 function mountHeader(scopeEl: HTMLElement): () => void {
   let prev = "";
   return store.subscribe((state) => {
-    const ep = `ep${String(state.currentEpisode).padStart(2, "0")}`;
-    const next = state.currentSlug ? `${state.currentSlug} / ${ep}` : "loading...";
+    let next: string;
+    if (state.currentSlug) {
+      const ep = `ep${String(state.currentEpisode).padStart(2, "0")}`;
+      next = `${state.currentSlug} / ${ep}`;
+    } else next = "loading...";
     if (next === prev) return;
     prev = next;
     scopeEl.textContent = next;
@@ -82,7 +92,7 @@ async function start(): Promise<void> {
   const sidebar = document.querySelector<HTMLElement>("#sidebar");
   const main = document.querySelector<HTMLElement>("#main");
   const topScope = document.querySelector<HTMLElement>("#top-scope");
-  if (!sidebar || !main || !topScope) throw new Error("ops console shell is incomplete");
+  if (!sidebar || !main || !topScope) throw new Error("Novelis Console shell is incomplete");
 
   mountSidebar(sidebar);
   mountCurrentView(main);
@@ -92,6 +102,7 @@ async function start(): Promise<void> {
   const route = parseRoute();
   const currentSlug = route.slug ?? boot.default_slug;
   const currentEpisode = route.episode ?? boot.default_episode;
+  const currentView: ViewName = route.view;
 
   store.update({
     works: boot.works,
@@ -99,9 +110,9 @@ async function start(): Promise<void> {
     defaultEpisode: boot.default_episode,
     currentSlug,
     currentEpisode,
-    currentView: route.view,
+    currentView,
   });
-  syncRoute(currentSlug, currentEpisode, route.view);
+  syncRoute(currentSlug, currentEpisode, currentView);
   store.subscribe((state) => syncRoute(state.currentSlug, state.currentEpisode, state.currentView));
 
   window.addEventListener("popstate", () => {

@@ -25,8 +25,9 @@ export class ApiError extends Error {
 }
 
 export type Bootstrap = {
-  default_slug: string;
-  default_episode: number;
+  /** 一覧モード (`npm run console` 引数なし) では null。SPA は index view を表示する。 */
+  default_slug: string | null;
+  default_episode: number | null;
   works: WorkInfo[];
 };
 
@@ -284,4 +285,32 @@ export function openJobStream(
     opts.onError?.(new Error("job stream error"));
   };
   return { close: () => source.close() };
+}
+
+export type BibleCharacterRef = { id: string; files: string[] };
+
+export type BibleAssetView = {
+  schema_version: number;
+  generated_at?: string;
+  generated_from?: unknown;
+  meta: unknown;
+  world: unknown;
+  characters: unknown[];
+  locations: unknown[];
+  props: unknown[];
+  costumes?: unknown[];
+  relations?: unknown[];
+  style_directives?: unknown;
+  visual_motifs?: unknown;
+  continuity_seeds?: unknown;
+  volume_synopsis?: unknown;
+  refs: {
+    characters: BibleCharacterRef[];
+    locations: BibleCharacterRef[];
+    props: BibleCharacterRef[];
+  };
+};
+
+export function apiGetBible(slug: string): Promise<BibleAssetView> {
+  return getJson<BibleAssetView>(`/api/works/${encodeURIComponent(slug)}/bible`);
 }

@@ -1,5 +1,5 @@
 /**
- * 漫画 ops console の HTML shell。
+ * Novelis Console (漫画 ops UI) の HTML shell。
  *
  * Phase 2A では CSS は inline のままにして、挙動だけ TS bundle へ移す。
  */
@@ -9,7 +9,7 @@ export function renderOpsConsoleShellHtml(): string {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>manga-ops console</title>
+  <title>Novelis Console</title>
   <style>
     :root {
       color: #172033;
@@ -113,7 +113,7 @@ export function renderOpsConsoleShellHtml(): string {
 </head>
 <body>
   <header class="top">
-    <div class="top-title">manga-ops console</div>
+    <div class="top-title">Novelis Console</div>
     <div class="top-scope" id="top-scope">loading...</div>
   </header>
   <div class="app">

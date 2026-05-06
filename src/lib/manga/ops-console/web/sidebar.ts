@@ -30,6 +30,7 @@ function episodeLabel(n: number): string {
  * Phase 2B/3 で複数 slug/episode 切替を解禁するまで、disabled で表示のみとする。
  *
  * URL hash の同期は main.ts の syncRoute に一元化。ここでは pushState を呼ばない。
+ *
  */
 function rerender(root: HTMLElement, state: AppState): void {
   const currentWork = state.works.find((w) => w.slug === state.currentSlug);
