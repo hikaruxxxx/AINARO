@@ -1,21 +1,33 @@
 /**
- * a07 ep01 storyboard.json に Codex patches を適用する smoke script
+ * @deprecated Phase β B5-4 (2026-05-07) で deprecated 化。
  *
- * 設計根拠:
+ * 旧仕様: a07 ep01 storyboard.json に panel-level Codex patches (panel_insert /
+ * panel_modify / page_metadata_modify) を直接適用する smoke script。
+ *
+ * 撤回理由: panel-level patch は scene-graph (L3.5) を経由しないため、
+ * L4-1 hook / L4-9 cliffhanger と衝突して a07-ep01 で時系列逆行・台詞先出し等の
+ * 構造矛盾を生んだ。詳細は docs/plans/manga/scene-graph-l3-5.md "9. L4-1 / L4-9 を scene swap" 参照。
+ *
+ * 代替経路 (新方式):
+ *   1. scene-graph 上で swap を行う: src/lib/manga/scene-graph/scene-swap.ts
+ *      - swapScenes / regenerateOpeningHookScenes / regenerateCliffhangerScene
+ *   2. scene-graph から storyboard を再展開: src/lib/manga/scene-graph/storyboard-from-scenes.ts
+ *      - npx tsx scripts/manga/layers/L04-storyboard.ts --slug X --episode N --from-scene-graph
+ *
+ * 削除予定: L04-1/L04-9 を scene swap に切り替えた段階で本ファイルを完全削除。
+ * それまでは互換性のため残すが、実行時に警告を出して新規利用を抑止する。
+ *
+ * 設計根拠 (旧):
  *   - ユーザー指示: 全 patch 採用 (Codex 品質高、機械検証で効果が定量的に測れる)
  *   - 入力: data/eval/a07-quality-improve/codex-patches.json (6 patches)
  *   - 出力: storyboard.json を更新 (元は .backup として保存)
  *
- * 操作種別:
+ * 操作種別 (旧):
  *   1. panel_modify: 該当 panel の dialogue/monologue/narration/shot_type/action を proposed で上書き
  *   2. page_metadata_modify: 該当 page の panel.importance を proposed の importances 表に従って更新
- *   3. panel_insert: 新 panel を該当位置に挿入、後続の panel_no を re-index (panel_id は再採番せず新規生成)
+ *   3. panel_insert: 新 panel を該当位置に挿入、後続の panel_no を re-index
  *
- * 適用後:
- *   - audit 再実行で findings 数が減ったか確認
- *   - 編集判断カードDB シードに記録
- *
- * 使い方: npx tsx scripts/manga/_smoke-a07-apply-patches.ts
+ * 使い方 (deprecated): npx tsx scripts/manga/_smoke-a07-apply-patches.ts
  */
 
 import {
@@ -256,6 +268,25 @@ function applyPanelInsert(
 // ===== main =====
 
 async function main(): Promise<void> {
+  // Phase β B5-4: deprecated 警告。新規ユース禁止、既存検証専用。
+  console.warn(
+    "\x1b[33m[DEPRECATED]\x1b[0m _smoke-a07-apply-patches.ts は scene-graph (L3.5) 撤回経路です。" +
+      "\n  panel-level patch は scene-graph と衝突するため、Phase β B5-4 で deprecated 化されました。"
+  );
+  console.warn(
+    "  代替: npx tsx scripts/manga/layers/L04-storyboard.ts --slug a07-modern-dungeon --episode 1 --from-scene-graph"
+  );
+  console.warn(
+    "  詳細: docs/plans/manga/scene-graph-l3-5.md '9. L4-1 / L4-9 を scene swap'"
+  );
+  if (!process.env.AINARO_ALLOW_DEPRECATED_PHASE_X) {
+    console.error(
+      "\x1b[31m[BLOCKED]\x1b[0m AINARO_ALLOW_DEPRECATED_PHASE_X=1 が設定されていない場合は実行を停止します。" +
+        "\n  どうしても旧経路を使う必要がある場合は、AINARO_ALLOW_DEPRECATED_PHASE_X=1 を export してください。"
+    );
+    process.exit(2);
+  }
+
   if (!existsSync(STORYBOARD_PATH)) throw new Error(`storyboard 不在: ${STORYBOARD_PATH}`);
   if (!existsSync(PATCHES_PATH)) throw new Error(`patches 不在: ${PATCHES_PATH}`);
 
