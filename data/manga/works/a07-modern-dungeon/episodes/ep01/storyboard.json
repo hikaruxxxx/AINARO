@@ -17,25 +17,32 @@
           "silence": false,
           "importance": 5,
           "entities": {
-            "characters": [],
-            "location_id": "loc_shinjuku_night_skyline_v1",
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "voice_off",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_5f_boss_room_v1",
             "props": [],
-            "focus_entity_id": "loc_shinjuku_night_skyline_v1"
+            "focus_entity_id": "loc_shinjuku_third_5f_boss_room_v1"
           },
-          "action": "巨大な黒鉄の階層主が崩れ落ちる直前、レンが下降階段の最下段から跳び込む。床には薄いナビ青光の導線と数値オーバーレイの空枠が走る。",
-          "key_visual": "黒フードのレンが巨大ボスの影に呑まれかけながら、青白い軌道だけを信じて刃を振り抜く大ゴマ。",
+          "action": "黒鉄の階層主が天井を割る勢いで崩れ、レンが下降階段の最下段から一直線に跳び込む。床には薄いナビ青光の導線と数値オーバーレイの空枠が走る。",
+          "key_visual": "巨大ボスの影に対して、黒フードのレンだけが青い導線上にいる。",
           "dialogue": [
             {
               "character_id": "char_桐生_レン_v1",
-              "text": "ナビ、最短ルートを出せ。"
+              "text": "ナビ、こいつの正解を出せ。"
             }
           ],
           "monologue": [],
           "narration": [
-            "これは、Fランクの俺が世界記録を塗り替える三十秒前。"
+            "Fランク探索者が踏破不能を三十秒で塗り替える ── その三十秒前。"
           ],
           "sfx": [
-            "ゴォッ"
+            "ゴオッ"
           ]
         },
         {
@@ -45,7 +52,7 @@
           "shot_type": "close_up",
           "camera": "eye_level",
           "bleed": false,
-          "silence": false,
+          "silence": true,
           "importance": 5,
           "entities": {
             "characters": [
@@ -56,18 +63,16 @@
                 "expression": "眠気を押し殺した無表情"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_shinjuku_third_5f_boss_room_v1",
             "props": [],
-            "focus_entity_id": "char_桐生_レン_v1"
+            "focus_entity_id": "loc_shinjuku_third_5f_boss_room_v1"
           },
-          "action": "レンの瞳に薄い青光が差し、ヒビ入りスマホの画面が視界の端で点滅する。口元は震えているが、視線だけは逸らさない。",
-          "key_visual": "前髪越しの目と、画面上に浮く空のHUD枠。",
+          "action": "レンの瞳に薄い青光が差し、ヒビ入りスマホの画面が視界の端で点滅する。口元は震えているが、視線だけは階層主の核を捉えている。",
+          "key_visual": "ひび割れたスマホ越しに、青い座標線とレンの片目が重なる。",
           "dialogue": [],
           "monologue": [],
           "narration": [],
-          "sfx": [
-            "キィン"
-          ]
+          "sfx": []
         }
       ]
     },
@@ -90,8 +95,8 @@
             "props": [],
             "focus_entity_id": "char_白瀬_灯里_v1"
           },
-          "action": "深夜の新宿西口、ローソン看板だけが白く浮く。さっきの激戦とは別世界のように、街路は湿って静まり返っている。",
-          "key_visual": "コンビニの白い光と、遠くのダンジョン公社ビルの赤い警告灯。",
+          "action": "深夜の新宿西口、雨上がりの路面にコンビニの白い看板だけが浮かぶ。店内時計は二十四時間前を示している。",
+          "key_visual": "派手なダンジョンから一転し、湿った現代の夜景を広く見せる。",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -104,7 +109,7 @@
           "shot_type": "wide",
           "camera": "eye_level",
           "bleed": false,
-          "silence": false,
+          "silence": true,
           "importance": 3,
           "entities": {
             "characters": [],
@@ -112,14 +117,12 @@
             "props": [],
             "focus_entity_id": "char_白瀬_灯里_v1"
           },
-          "action": "レンが無人の通路を見ながらレジに立つ。黒のフードジャケットは制服の下に見え、袖口は少し擦り切れている。",
-          "key_visual": "蛍光灯に照らされた空の棚と、ひとりだけ立つレン。",
+          "action": "レンが無人の通路を背にレジへ立つ。制服の下から黒のフードジャケットが覗き、袖口は擦り切れている。",
+          "key_visual": "明るすぎる蛍光灯の下で、レンだけが小さく疲れて見える。",
           "dialogue": [],
           "monologue": [],
           "narration": [],
-          "sfx": [
-            "ジー"
-          ]
+          "sfx": []
         },
         {
           "panel_id": "p05_hook_P4_splash_pullback",
@@ -131,18 +134,25 @@
           "silence": false,
           "importance": 3,
           "entities": {
-            "characters": [],
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "voice_off",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
             "location_id": "loc_lawson_interior_v1",
             "props": [],
             "focus_entity_id": "char_白瀬_灯里_v1"
           },
-          "action": "レンが期限前の商品を棚から下げ、半額シールの束を機械的に貼っていく。胸ポケットからFランクID証が少し覗く。",
-          "key_visual": "半額弁当、FランクID、ヒビ入りスマホが同じ高さに並ぶ。",
+          "action": "レンが期限前の商品を棚から下げ、半額シールを機械的に貼っていく。胸ポケットからFランクID証が少し覗く。",
+          "key_visual": "半額シール、FランクID、ヒビ入りスマホを同じ画面内に収める。",
           "dialogue": [],
           "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
-              "text": "眠い。けど、寝たら終わる。"
+              "text": "眠い。けど、寝たら家賃も装備代も詰む。"
             }
           ],
           "narration": [],
@@ -164,23 +174,29 @@
                 "role": "background",
                 "on_screen_via": "tv",
                 "expression": "英雄然とした笑顔"
+              },
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "voice_off",
+                "on_screen_via": "voice_off",
+                "expression": ""
               }
             ],
             "location_id": "loc_lawson_interior_v1",
             "props": [
               {
-                "prop_id": "prop_akane_badge_akari_v1"
+                "prop_id": "prop_akari_rank_s_choker_v1"
               }
             ],
             "focus_entity_id": "char_白瀬_灯里_v1"
           },
           "action": "レンの目元だけを抜く。さっきの青光はなく、テレビの白い反射だけが瞳に映っている。",
-          "key_visual": "乾いた目元と、前髪の影。",
+          "key_visual": "未来の覚醒した瞳と同じ構図で、今は光が消えている。",
           "dialogue": [],
           "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
-              "text": "世界記録なんて、俺には一生関係ない。"
+              "text": "Sランクの記録なんて、俺には一生関係ない。"
             }
           ],
           "narration": [],
@@ -207,13 +223,13 @@
             "location_id": "loc_lawson_interior_v1",
             "props": [
               {
-                "prop_id": "prop_akane_badge_akari_v1"
+                "prop_id": "prop_akari_rank_s_choker_v1"
               }
             ],
-            "focus_entity_id": "prop_akane_badge_akari_v1"
+            "focus_entity_id": "prop_akari_rank_s_choker_v1"
           },
           "action": "店内テレビに白瀬灯里が映り、朱色の部隊章がニュース画面で強調される。レンはレジ越しにそれを見上げる。",
-          "key_visual": "朱色の公的光を背負う灯里と、黒フードのレンの対比。",
+          "key_visual": "朱色の公的光と、レンの黒フードを対比させる。",
           "dialogue": [
             {
               "character_id": "char_白瀬_灯里_v1",
@@ -231,7 +247,7 @@
           "shot_type": "close_up",
           "camera": "over_shoulder",
           "bleed": false,
-          "silence": false,
+          "silence": true,
           "importance": 4,
           "entities": {
             "characters": [
@@ -252,14 +268,12 @@
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "レンがスマホを裏返そうとした瞬間、公社アプリの通知がヒビ割れた画面に灯る。通知欄の奥で、薄い青い枠だけが一瞬浮かぶ。",
-          "key_visual": "上部が割れたスマホ画面と、空白のHUD枠。",
+          "action": "レンがスマホを裏返そうとした瞬間、公社アプリの通知がヒビ割れた画面に灯る。通知欄の奥で、薄い青い予定表の枠だけが一瞬浮かぶ。",
+          "key_visual": "上部のヒビを通して、通常通知ではない青い空枠が見える。",
           "dialogue": [],
           "monologue": [],
           "narration": [],
-          "sfx": [
-            "ピコン"
-          ]
+          "sfx": []
         }
       ]
     },
@@ -268,56 +282,70 @@
       "page_role": "buildup",
       "panels": [
         {
-          "panel_id": "p09_hook_P4_splash_pullback",
+          "panel_id": "p09",
           "panel_no": 9,
           "reading_order": 1,
-          "shot_type": "wide",
-          "camera": "eye_level",
-          "bleed": false,
-          "silence": false,
-          "importance": 4,
-          "entities": {
-            "characters": [],
-            "location_id": "loc_lawson_interior_v1",
-            "props": [],
-            "focus_entity_id": "prop_dpc_rank_id_card_ren_v1"
-          },
-          "action": "コンビニの外で非常サイレンが鳴り、通行人が新宿地下ダンジョン入口のほうへ振り返る。公社アプリには低階層の異常警報が流れる。",
-          "key_visual": "夜の歩道に伸びる赤い警告灯と、地下へ降りる階段の黒い口。",
-          "dialogue": [
-            {
-              "character_id": "char_槇島_主任_v1",
-              "text": "西口第三入口、封鎖しろ！"
-            }
-          ],
-          "monologue": [],
-          "narration": [],
-          "sfx": [
-            "ウーッ"
-          ]
-        },
-        {
-          "panel_id": "p10_hook_P4_splash_pullback",
-          "panel_no": 10,
-          "reading_order": 2,
           "shot_type": "medium",
           "camera": "eye_level",
           "bleed": false,
           "silence": false,
-          "importance": 4,
+          "importance": 3,
           "entities": {
-            "characters": [],
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "lead",
+                "on_screen_via": "in_person",
+                "expression": "疲労と諦念の半眼"
+              }
+            ],
             "location_id": "loc_lawson_interior_v1",
             "props": [],
-            "focus_entity_id": "prop_dpc_rank_id_card_ren_v1"
+            "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "レンはレジを離れ、黒フードの前を握って店の出口へ向かう。手にはまだヒビ入りスマホを握っている。",
-          "key_visual": "自動ドアの白光へ踏み出すレンの背中。",
+          "action": "深夜のレジ前でPOS端末の集計画面を眺めるレン。客足は途絶え、外の濡れた路面が窓越しに白く反射する。",
+          "key_visual": "蛍光灯の白光の下、空のレジと丸まった肩が疲労を示す。",
           "dialogue": [],
           "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
-              "text": "Fランクでも、近いなら動ける。"
+              "text": "店長は、来月も夜勤固定だと言った。"
+            }
+          ],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p10",
+          "panel_no": 10,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "lead",
+                "on_screen_via": "in_person",
+                "expression": "口を引き結んだ無表情"
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [
+              "prop_smartphone_cracked_v1"
+            ],
+            "focus_entity_id": "prop_smartphone_cracked_v1"
+          },
+          "action": "ヒビ入りスマホで来月のシフト表を開く。夜勤の枠だけが連続して並ぶ。",
+          "key_visual": "割れた画面に並ぶ夜勤の矩形枠と、親指の影。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "探索の時間は、また減る。"
             }
           ],
           "narration": [],
@@ -327,72 +355,59 @@
           "panel_id": "p11",
           "panel_no": 11,
           "reading_order": 3,
-          "shot_type": "close_up",
-          "camera": "high_angle",
-          "bleed": false,
-          "silence": false,
-          "importance": 5,
-          "entities": {
-            "characters": [
-              {
-                "character_id": "char_桐生_レン_v1",
-                "role": "background",
-                "on_screen_via": "in_person",
-                "expression": "手元だけ無感情"
-              }
-            ],
-            "location_id": "loc_lawson_interior_v1",
-            "props": [
-              {
-                "prop_id": "prop_dpc_rank_id_card_ren_v1"
-              }
-            ],
-            "focus_entity_id": "prop_dpc_rank_id_card_ren_v1"
-          },
-          "action": "スマホ画面のヒビの下で、通常の公社通知とは違う青い座標線が一瞬だけ走る。レンの瞳にも同じ青光が差す。",
-          "key_visual": "page 1 と同じナビ青光が、まだ弱く小さく点る。",
-          "dialogue": [],
-          "monologue": [],
-          "narration": [],
-          "sfx": [
-            "キィン"
-          ]
-        },
-        {
-          "panel_id": "p12",
-          "panel_no": 12,
-          "reading_order": 4,
-          "shot_type": "wide",
+          "shot_type": "medium",
           "camera": "eye_level",
           "bleed": false,
           "silence": false,
-          "importance": 4,
+          "importance": 3,
           "entities": {
             "characters": [
               {
                 "character_id": "char_桐生_レン_v1",
-                "role": "background",
+                "role": "lead",
                 "on_screen_via": "in_person",
-                "expression": "作業に沈む顔"
+                "expression": "視線を逸らさない硬さ"
               }
             ],
             "location_id": "loc_lawson_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "駆けつけた探索者たちが階段前で足を止め、FランクIDを下げたレンを見てざわつく。テレビ中継の灯里の映像だけが店内に残っている。",
-          "key_visual": "朱のニュース画面と、黒フードで階段へ向かうレンが画面奥で交差する。",
-          "dialogue": [
-            {
-              "character_id": "char_氷室_玲二_v1",
-              "text": "Fランクが前に出るな。死にたいのか。"
-            }
-          ],
+          "action": "店内テレビが次のニュースに切り替わるが、画面下部の字幕に灯里の名前が短く流れる。レンは目を逸らさない。",
+          "key_visual": "テレビ画面の白光と細い字幕、レンの横顔の輪郭。",
+          "dialogue": [],
           "monologue": [],
           "narration": [],
-          "sfx": [
-            "ざわ"
-          ]
+          "sfx": []
+        },
+        {
+          "panel_id": "p12",
+          "panel_no": 12,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 2,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "lead",
+                "on_screen_via": "in_person",
+                "expression": "手元のみ、表情は隠す"
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "残った弁当に半額シールを貼り続ける手元。動きは機械的で、表情は写さない。",
+          "key_visual": "半額シール、弁当の蓋、ヒビ入りスマホの端を同じ画面内に収める。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
         },
         {
           "panel_id": "p13",
@@ -402,37 +417,31 @@
           "camera": "eye_level",
           "bleed": false,
           "silence": false,
-          "importance": 5,
+          "importance": 4,
           "entities": {
             "characters": [
               {
-                "character_id": "char_白瀬_灯里_v1",
-                "role": "speaker",
-                "on_screen_via": "tv",
-                "expression": "完璧な笑顔"
+                "character_id": "char_桐生_レン_v1",
+                "role": "lead",
+                "on_screen_via": "in_person",
+                "expression": "重い瞼と固く閉じた口"
               }
             ],
             "location_id": "loc_lawson_interior_v1",
-            "props": [
-              {
-                "prop_id": "prop_akane_badge_akari_v1"
-              }
-            ],
-            "focus_entity_id": "char_白瀬_灯里_v1"
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "レンのスマホに、文字のない青い予定表の枠だけが浮かぶ。レンは階段の暗がりを見下ろし、page 1 と同じ目をする。",
-          "key_visual": "ヒビ入りスマホ越しの空白スケジュール枠と、下降階段の青い導線。",
-          "dialogue": [
+          "action": "レンがレジ越しに視線を落とす。蛍光灯の白光が顔半分に当たり、もう半分は深い影に沈む。",
+          "key_visual": "眠気で重い瞼、白光と影の対比、固く閉じた口元。",
+          "dialogue": [],
+          "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
-              "text": "頼む。"
+              "text": "この夜は、終わらない。"
             }
           ],
-          "monologue": [],
           "narration": [],
-          "sfx": [
-            "ピ..."
-          ]
+          "sfx": []
         }
       ]
     },
@@ -578,7 +587,7 @@
           "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
-              "text": "俺には、聞こえるものなんて何もない。"
+              "text": "俺の側に、声なんてない。"
             }
           ],
           "narration": [],
@@ -605,7 +614,7 @@
             "location_id": "loc_lawson_interior_v1",
             "props": [
               {
-                "prop_id": "prop_dpc_rank_id_card_ren_v1"
+                "prop_id": "prop_dpc_rank_id_f_v1"
               }
             ],
             "focus_entity_id": "char_桐生_レン_v1"
@@ -675,12 +684,8 @@
               }
             ],
             "location_id": "loc_lawson_exterior_night_v1",
-            "props": [
-              {
-                "prop_id": "prop_ren_secondhand_explorer_bag_v1"
-              }
-            ],
-            "focus_entity_id": "prop_ren_secondhand_explorer_bag_v1"
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
           },
           "action": "中古探索バッグの肩紐を直して歩く。",
           "key_visual": "くたびれたバッグと黒パーカーの擦れ。",
@@ -789,10 +794,10 @@
                 "expression": "事務的な無表情"
               }
             ],
-            "location_id": "loc_dpc_shinjuku_window_v1",
+            "location_id": "loc_dpc_public_counter_v1",
             "props": [
               {
-                "prop_id": "prop_reappraisal_consent_form_v1"
+                "prop_id": "prop_makishima_red_reanalysis_folder_v1"
               }
             ],
             "focus_entity_id": "char_槇島_主任_v1"
@@ -829,13 +834,13 @@
                 "expression": "冷淡"
               }
             ],
-            "location_id": "loc_dpc_shinjuku_window_v1",
+            "location_id": "loc_dpc_public_counter_v1",
             "props": [
               {
-                "prop_id": "prop_reappraisal_consent_form_v1"
+                "prop_id": "prop_makishima_red_reanalysis_folder_v1"
               }
             ],
-            "focus_entity_id": "prop_reappraisal_consent_form_v1"
+            "focus_entity_id": "prop_makishima_red_reanalysis_folder_v1"
           },
           "action": "再鑑定同意書に赤印が押される。",
           "key_visual": "空の署名欄と赤印だけを強く見せる制度の記号。",
@@ -875,13 +880,13 @@
                 "expression": "十五歳の空白"
               }
             ],
-            "location_id": "loc_dpc_shinjuku_window_v1",
+            "location_id": "loc_dpc_public_counter_v1",
             "props": [
               {
-                "prop_id": "prop_dpc_rank_id_card_ren_v1"
+                "prop_id": "prop_dpc_rank_id_f_v1"
               }
             ],
-            "focus_entity_id": "prop_dpc_rank_id_card_ren_v1"
+            "focus_entity_id": "prop_dpc_rank_id_f_v1"
           },
           "action": "FランクID証が手渡される記憶。",
           "key_visual": "無表情な手に渡るFランクカード、背景は白抜き。",
@@ -979,11 +984,7 @@
               }
             ],
             "location_id": "loc_ren_apartment_v1",
-            "props": [
-              {
-                "prop_id": "prop_ren_secondhand_explorer_bag_v1"
-              }
-            ],
+            "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
           "action": "中古探索バッグを床に落とす。",
@@ -1060,10 +1061,10 @@
             "location_id": "loc_ren_apartment_v1",
             "props": [
               {
-                "prop_id": "prop_rank_app_status_screen_v1"
+                "prop_id": "prop_app_nav_overlay_screen_v1"
               }
             ],
-            "focus_entity_id": "prop_rank_app_status_screen_v1"
+            "focus_entity_id": "prop_app_nav_overlay_screen_v1"
           },
           "action": "壁の印刷ログに低い経験値履歴が並ぶ。",
           "key_visual": "読み文字なしの矩形ログ行が壁に貼られている。",
@@ -1098,10 +1099,10 @@
                 "prop_id": "prop_smartphone_cracked_v1"
               },
               {
-                "prop_id": "prop_rank_app_status_screen_v1"
+                "prop_id": "prop_app_nav_overlay_screen_v1"
               }
             ],
-            "focus_entity_id": "prop_rank_app_status_screen_v1"
+            "focus_entity_id": "prop_app_nav_overlay_screen_v1"
           },
           "action": "公社アプリのFランク表示枠を見る。",
           "key_visual": "スマホ内は空の矩形HUD、ヒビがランク枠にかかる。",
@@ -1244,7 +1245,7 @@
             "location_id": "loc_ren_apartment_v1",
             "props": [
               {
-                "prop_id": "prop_dpc_rank_id_card_ren_v1"
+                "prop_id": "prop_dpc_rank_id_f_v1"
               }
             ],
             "focus_entity_id": "char_桐生_レン_v1"
@@ -1562,7 +1563,7 @@
             "location_id": "loc_ren_apartment_v1",
             "props": [
               {
-                "prop_id": "prop_rank_app_status_screen_v1"
+                "prop_id": "prop_app_nav_overlay_screen_v1"
               }
             ],
             "focus_entity_id": "char_桐生_レン_v1"
@@ -1608,7 +1609,7 @@
           "dialogue": [
             {
               "character_id": "char_桐生_レン_v1",
-              "text": "……抜け道、あるじゃねえか。"
+              "text": "……抜け道、あるな。"
             }
           ],
           "monologue": [],
@@ -1642,13 +1643,10 @@
             "location_id": "loc_ren_apartment_v1",
             "props": [
               {
-                "prop_id": "prop_ren_secondhand_explorer_bag_v1"
-              },
-              {
                 "prop_id": "prop_iron_pipe_v1"
               }
             ],
-            "focus_entity_id": "prop_ren_secondhand_explorer_bag_v1"
+            "focus_entity_id": "char_桐生_レン_v1"
           },
           "action": "バッグに鉄パイプとペットボトルを押し込む。",
           "key_visual": "中古装備の即席準備、狭い部屋の散らかり。",
@@ -1804,10 +1802,7 @@
             "location_id": "loc_ren_apartment_v1",
             "props": [
               {
-                "prop_id": "prop_ren_secondhand_explorer_bag_v1"
-              },
-              {
-                "prop_id": "prop_dpc_rank_id_card_ren_v1"
+                "prop_id": "prop_dpc_rank_id_f_v1"
               }
             ],
             "focus_entity_id": "char_桐生_レン_v1"
@@ -1851,11 +1846,7 @@
               }
             ],
             "location_id": "loc_lawson_exterior_night_v1",
-            "props": [
-              {
-                "prop_id": "prop_ren_secondhand_explorer_bag_v1"
-              }
-            ],
+            "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
           "action": "朝の薄い光の中、レンが路地を走る。",
@@ -1995,7 +1986,7 @@
             "location_id": "loc_shinjuku_third_dungeon_gate_v1",
             "props": [
               {
-                "prop_id": "prop_dpc_rank_id_card_ren_v1"
+                "prop_id": "prop_dpc_rank_id_f_v1"
               }
             ],
             "focus_entity_id": "loc_shinjuku_third_dungeon_gate_v1"
@@ -2060,7 +2051,7 @@
             "location_id": "loc_shinjuku_third_dungeon_gate_v1",
             "props": [
               {
-                "prop_id": "prop_dpc_rank_id_card_ren_v1"
+                "prop_id": "prop_dpc_rank_id_f_v1"
               }
             ],
             "focus_entity_id": "char_桐生_レン_v1"
@@ -2095,10 +2086,10 @@
             "location_id": "loc_shinjuku_third_dungeon_gate_v1",
             "props": [
               {
-                "prop_id": "prop_dpc_rank_id_card_ren_v1"
+                "prop_id": "prop_dpc_rank_id_f_v1"
               }
             ],
-            "focus_entity_id": "prop_dpc_rank_id_card_ren_v1"
+            "focus_entity_id": "prop_dpc_rank_id_f_v1"
           },
           "action": "FランクID証が古い端末に読み込まれる。",
           "key_visual": "カード、端末スリット、処理中の空矩形枠。",
@@ -2214,7 +2205,7 @@
             "location_id": "loc_shinjuku_third_dungeon_gate_v1",
             "props": [
               {
-                "prop_id": "prop_dpc_rank_id_card_ren_v1"
+                "prop_id": "prop_dpc_rank_id_f_v1"
               }
             ],
             "focus_entity_id": "char_桐生_レン_v1"
@@ -2287,12 +2278,8 @@
               }
             ],
             "location_id": "loc_shinjuku_third_dungeon_gate_v1",
-            "props": [
-              {
-                "prop_id": "prop_ren_secondhand_explorer_bag_v1"
-              }
-            ],
-            "focus_entity_id": "prop_ren_secondhand_explorer_bag_v1"
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
           },
           "action": "バッグ内の軽装備が見える。",
           "key_visual": "装備の貧弱さと公共施設の清潔さの対比。",
@@ -2321,13 +2308,13 @@
                 "expression": "警戒"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
               }
             ],
-            "focus_entity_id": "loc_shinjuku_third_1f_ne_corridor_v1"
+            "focus_entity_id": "loc_shinjuku_third_1f_northeast_corridor_v1"
           },
           "action": "初心者階層の明るい通路へ入る。",
           "key_visual": "明るい整備通路、奥へ伸びる北東通路、片手の鉄パイプ。",
@@ -2358,7 +2345,7 @@
                 "expression": "確認に集中"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_smartphone_cracked_v1"
@@ -2405,7 +2392,7 @@
                 "expression": "補正中"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -2439,7 +2426,7 @@
                 "expression": "足元を測る"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -2470,7 +2457,7 @@
                 "expression": "肩が硬い"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -2510,9 +2497,9 @@
                 "expression": "小さく構える"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
-            "focus_entity_id": "loc_shinjuku_third_1f_ne_corridor_v1"
+            "focus_entity_id": "loc_shinjuku_third_1f_northeast_corridor_v1"
           },
           "action": "朝6時14分の光が亀裂から差す。",
           "key_visual": "通路の一点だけ薄く明るく、他は公共地下道の白さ。",
@@ -2547,7 +2534,7 @@
                 "expression": "警告"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -2587,7 +2574,7 @@
                 "expression": "位置取りに集中"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -2622,13 +2609,13 @@
                 "expression": "息を止める"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
               }
             ],
-            "focus_entity_id": "loc_shinjuku_third_1f_ne_corridor_v1"
+            "focus_entity_id": "loc_shinjuku_third_1f_northeast_corridor_v1"
           },
           "action": "通路奥の影が三つに割れて湧く。",
           "key_visual": "ゴブリン本体は影と爪だけで予兆、レンを手前に小さく置く。",
@@ -2663,7 +2650,7 @@
                 "expression": "淡々"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -2703,7 +2690,7 @@
                 "expression": "引きつる"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -2712,7 +2699,7 @@
           "dialogue": [
             {
               "character_id": "char_桐生_レン_v1",
-              "text": "本当に来やがった。"
+              "text": "本当に来た。"
             }
           ],
           "monologue": [],
@@ -2743,7 +2730,7 @@
                 "expression": "指示"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -2783,7 +2770,7 @@
                 "expression": "必死の踏み込み"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -2818,7 +2805,7 @@
                 "expression": "目を見開く"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -2853,7 +2840,7 @@
                 "expression": "体勢が崩れて焦る"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -2893,7 +2880,7 @@
                 "expression": "足元に気づく"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -2930,7 +2917,7 @@
                 "expression": "即応"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -2970,13 +2957,13 @@
                 "expression": "軌道を読む"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
               }
             ],
-            "focus_entity_id": "loc_shinjuku_third_1f_ne_corridor_v1"
+            "focus_entity_id": "loc_shinjuku_third_1f_northeast_corridor_v1"
           },
           "action": "壁際へ流れて二体目の突進角度をずらす。",
           "key_visual": "鳥瞰でレン、壁、水たまり、敵影の位置関係を読ませる。",
@@ -3005,7 +2992,7 @@
                 "expression": "呼吸を止めた集中"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -3034,7 +3021,7 @@
                 "expression": "角度に賭ける"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -3069,7 +3056,7 @@
                 "expression": "息を詰める"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -3104,7 +3091,7 @@
                 "expression": "背後に気づかない緊張"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -3147,7 +3134,7 @@
                 "expression": "短い警告"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -3181,9 +3168,9 @@
                 "expression": "誘導に集中"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
-            "focus_entity_id": "loc_shinjuku_third_1f_ne_corridor_v1"
+            "focus_entity_id": "loc_shinjuku_third_1f_northeast_corridor_v1"
           },
           "action": "水たまりを踏み、敵の足を滑らせる位置へ誘導する。",
           "key_visual": "床の反射、足運び、敵影の重心崩れを鳥瞰気味に。",
@@ -3212,7 +3199,7 @@
                 "expression": "勝機を掴む"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -3243,7 +3230,7 @@
                 "expression": "低い姿勢の決断"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -3283,7 +3270,7 @@
                 "expression": "撃ち切る"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -3324,7 +3311,7 @@
                 "expression": "息切れ"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -3359,7 +3346,7 @@
                 "expression": "震えを見つめる"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -3395,16 +3382,16 @@
                 "expression": "驚く"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_smartphone_cracked_v1"
               },
               {
-                "prop_id": "prop_rank_app_status_screen_v1"
+                "prop_id": "prop_app_nav_overlay_screen_v1"
               }
             ],
-            "focus_entity_id": "prop_rank_app_status_screen_v1"
+            "focus_entity_id": "prop_app_nav_overlay_screen_v1"
           },
           "action": "スマホに経験値加算の通知枠が立ち上がる。",
           "key_visual": "未分類ではない通常経験値の大幅加算を空ログ枠で表現。",
@@ -3435,13 +3422,13 @@
                 "expression": "異常を理解して笑う寸前"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_smartphone_cracked_v1"
               },
               {
-                "prop_id": "prop_rank_app_status_screen_v1"
+                "prop_id": "prop_app_nav_overlay_screen_v1"
               }
             ],
             "focus_entity_id": "char_桐生_レン_v1"
@@ -3482,7 +3469,7 @@
                 "expression": "淡々"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_smartphone_cracked_v1"
@@ -3526,7 +3513,7 @@
                 "expression": "neutral"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_獅童_響_v1"
           },
@@ -3572,7 +3559,7 @@
                 "expression": "笑いかけて咳き込む"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
@@ -3612,9 +3599,9 @@
                 "expression": "座り込んだまま呆然"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
-            "focus_entity_id": "loc_shinjuku_third_1f_ne_corridor_v1"
+            "focus_entity_id": "loc_shinjuku_third_1f_northeast_corridor_v1"
           },
           "action": "倒れた三つの影と座り込むレンを通路全体で見せる。",
           "key_visual": "公共地下道の明るさの中、Fランク単独勝利の異常さ。",
@@ -3643,7 +3630,7 @@
                 "expression": "言葉を失う"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_smartphone_cracked_v1"
@@ -3676,16 +3663,16 @@
                 "expression": "食い入る目"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_smartphone_cracked_v1"
               },
               {
-                "prop_id": "prop_rank_app_status_screen_v1"
+                "prop_id": "prop_app_nav_overlay_screen_v1"
               }
             ],
-            "focus_entity_id": "prop_rank_app_status_screen_v1"
+            "focus_entity_id": "prop_app_nav_overlay_screen_v1"
           },
           "action": "公社アプリに大幅加算ログが並ぶ。",
           "key_visual": "空の矩形ログ行が通常経験値枠として連続表示される。",
@@ -3725,7 +3712,7 @@
                 "expression": "穏やか"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_smartphone_cracked_v1"
@@ -3738,7 +3725,7 @@
           "dialogue": [
             {
               "character_id": "char_獅童_響_v1",
-              "text": "明日の最適攻略予定を作成しますか？"
+              "text": "明日の予定、組みますか？"
             }
           ],
           "monologue": [],
@@ -3769,7 +3756,7 @@
                 "expression": "疲労と攻める笑み"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -3803,13 +3790,10 @@
                 "expression": "痛みを押して立つ"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_iron_pipe_v1"
-              },
-              {
-                "prop_id": "prop_ren_secondhand_explorer_bag_v1"
               }
             ],
             "focus_entity_id": "char_桐生_レン_v1"
@@ -3841,9 +3825,9 @@
                 "expression": "奥を見据える"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
-            "focus_entity_id": "loc_shinjuku_third_1f_ne_corridor_v1"
+            "focus_entity_id": "loc_shinjuku_third_1f_northeast_corridor_v1"
           },
           "action": "北東通路の奥に下降階段の影が見える。",
           "key_visual": "地下へ降りる階段を小さく見せ、次の攻略対象を示す。",
@@ -3872,7 +3856,7 @@
                 "expression": "一瞬の不安"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -3907,7 +3891,7 @@
                 "expression": "計算開始"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_smartphone_cracked_v1"
@@ -3946,9 +3930,9 @@
           "importance": 3,
           "entities": {
             "characters": [],
-            "location_id": "loc_dpc_internal_audit_room_v1",
+            "location_id": "loc_dpc_monitor_room_v1",
             "props": [],
-            "focus_entity_id": "loc_dpc_internal_audit_room_v1"
+            "focus_entity_id": "loc_dpc_monitor_room_v1"
           },
           "action": "無人のDPC新宿支部・内部監査室。暗い室内で、壁一面のモニターだけが冷たく点灯している。",
           "key_visual": "朱色の公的光を帯びた監査モニター群。中央にだけ薄い青の異常枠が浮き始める。",
@@ -3972,13 +3956,13 @@
           "importance": 4,
           "entities": {
             "characters": [],
-            "location_id": "loc_dpc_internal_audit_room_v1",
+            "location_id": "loc_dpc_monitor_room_v1",
             "props": [
               {
-                "prop_id": "prop_rank_app_status_screen_v1"
+                "prop_id": "prop_app_nav_overlay_screen_v1"
               }
             ],
-            "focus_entity_id": "prop_rank_app_status_screen_v1"
+            "focus_entity_id": "prop_app_nav_overlay_screen_v1"
           },
           "action": "監査モニターに、Fランク一階限定入域者の戦闘ログが高速で巻き戻される。レンの黒フード姿だけが何度も停止表示される。",
           "key_visual": "ひび割れた画面越しの世界を思わせるノイズ入りログ画面。空の数値オーバーレイ枠が急速に増殖する。",
@@ -4003,13 +3987,13 @@
           "importance": 3,
           "entities": {
             "characters": [],
-            "location_id": "loc_dpc_internal_audit_room_v1",
+            "location_id": "loc_dpc_monitor_room_v1",
             "props": [
               {
-                "prop_id": "prop_rank_app_status_screen_v1"
+                "prop_id": "prop_app_nav_overlay_screen_v1"
               }
             ],
-            "focus_entity_id": "loc_dpc_internal_audit_room_v1"
+            "focus_entity_id": "loc_dpc_monitor_room_v1"
           },
           "action": "監査室の全モニターが一瞬だけ白飛びし、異常ログの枠も警告文も消える。室内に人影はない。",
           "key_visual": "沈黙の白コマ。中央モニターに薄い青光だけが残り、情報の欠落を大きな余白で見せる。",
@@ -4028,17 +4012,30 @@
           "silence": false,
           "importance": 4,
           "entities": {
-            "characters": [],
-            "location_id": "loc_dpc_internal_audit_room_v1",
-            "props": [
+            "characters": [
               {
-                "prop_id": "prop_rank_app_status_screen_v1"
+                "character_id": "char_桐生_レン_v1",
+                "role": "voice_off",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "voice_off",
+                "on_screen_via": "voice_off",
+                "expression": ""
               }
             ],
-            "focus_entity_id": "prop_rank_app_status_screen_v1"
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
+            "props": [
+              {
+                "prop_id": "prop_app_nav_overlay_screen_v1"
+              }
+            ],
+            "focus_entity_id": "prop_app_nav_overlay_screen_v1"
           },
           "action": "ダンジョン内。レンのヒビ入りスマートフォンが震え、通常の公社アプリとは違う青いステータス枠が画面の奥からせり上がる。",
-          "key_visual": " cracked smartphone screen越しに、未入力のステータス画面とスキル欄が重なる。レンの瞳にナビ青光。",
+          "key_visual": "ヒビ入りスマホ越しに、未入力のステータス画面とスキル欄が重なる。レンの瞳にナビ青光。",
           "dialogue": [
             {
               "character_id": "char_獅童_響_v1",
@@ -4080,13 +4077,13 @@
                 "expression": "静かな導き"
               }
             ],
-            "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+            "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
             "props": [
               {
                 "prop_id": "prop_smartphone_cracked_v1"
               }
             ],
-            "focus_entity_id": "loc_shinjuku_third_1f_ne_corridor_v1"
+            "focus_entity_id": "loc_shinjuku_third_1f_northeast_corridor_v1"
           },
           "action": "レンの目元とスマホ画面を極端な寄りで重ねる。画面のスキル欄に、通常ランク表記を押しのけて未知の能力名が浮かび上がる。",
           "key_visual": "ステータス画面 panel。青白いHUDに『固有スキル：階層ナビゲート』の空枠演出、背後に暗く伸びる下降階段。",
