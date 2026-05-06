@@ -1,0 +1,141 @@
+/* Novelis Console の共通デザイントークン。Wave 以降の view 移行で参照する。 */
+:root {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-fg: #ffffff;
+  --color-success: #16a34a;
+  --color-success-bg: #dcfce7;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fef3c7;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fee2e2;
+  --color-info: #0ea5e9;
+  --color-info-bg: #e0f2fe;
+  --color-neutral: #475569;
+  --color-neutral-bg: #f1f5f9;
+
+  --surface-base: #f8fafc;
+  --surface-elevated: #ffffff;
+  --surface-sunken: #eef2f6;
+  --surface-overlay: rgba(15, 23, 42, .42);
+  --surface-code: #0f172a;
+
+  --border-subtle: #e5e7eb;
+  --border-default: #dbe1ea;
+  --border-strong: #c7cfdb;
+
+  --text-primary: #172033;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-inverted: #ffffff;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 18px;
+  --fs-2xl: 22px;
+
+  --fw-normal: 400;
+  --fw-medium: 600;
+  --fw-bold: 700;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 999px;
+
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, .06);
+  --shadow-2: 0 4px 12px rgba(15, 23, 42, .10);
+  --shadow-3: 0 12px 42px rgba(15, 23, 42, .32);
+
+  --dur-fast: 100ms;
+  --dur-base: 160ms;
+  --dur-slow: 240ms;
+  --ease-standard: cubic-bezier(.2, 0, 0, 1);
+  --ease-decel: cubic-bezier(0, 0, .2, 1);
+}
+
+[data-theme="dark"] {
+  --color-primary: #3b82f6;
+  --color-primary-hover: #60a5fa;
+  --color-primary-fg: #0b1220;
+  --color-success: #22c55e;
+  --color-success-bg: #14532d;
+  --color-warning: #fbbf24;
+  --color-warning-bg: #713f12;
+  --color-danger: #f87171;
+  --color-danger-bg: #7f1d1d;
+  --color-info: #38bdf8;
+  --color-info-bg: #075985;
+  --color-neutral: #94a3b8;
+  --color-neutral-bg: #1f2937;
+
+  --surface-base: #0b1220;
+  --surface-elevated: #111827;
+  --surface-sunken: #0f172a;
+  --surface-overlay: rgba(0, 0, 0, .62);
+  --surface-code: #020617;
+
+  --border-subtle: #1f2937;
+  --border-default: #273244;
+  --border-strong: #374151;
+
+  --text-primary: #e5e7eb;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-inverted: #0b1220;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, .5);
+  --shadow-3: 0 12px 42px rgba(0, 0, 0, .55);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] {
+    --color-primary: #3b82f6;
+    --color-primary-hover: #60a5fa;
+    --color-primary-fg: #0b1220;
+    --color-success: #22c55e;
+    --color-success-bg: #14532d;
+    --color-warning: #fbbf24;
+    --color-warning-bg: #713f12;
+    --color-danger: #f87171;
+    --color-danger-bg: #7f1d1d;
+    --color-info: #38bdf8;
+    --color-info-bg: #075985;
+    --color-neutral: #94a3b8;
+    --color-neutral-bg: #1f2937;
+
+    --surface-base: #0b1220;
+    --surface-elevated: #111827;
+    --surface-sunken: #0f172a;
+    --surface-overlay: rgba(0, 0, 0, .62);
+    --surface-code: #020617;
+
+    --border-subtle: #1f2937;
+    --border-default: #273244;
+    --border-strong: #374151;
+
+    --text-primary: #e5e7eb;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
+    --text-inverted: #0b1220;
+
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, .4);
+    --shadow-2: 0 4px 12px rgba(0, 0, 0, .5);
+    --shadow-3: 0 12px 42px rgba(0, 0, 0, .55);
+  }
+}

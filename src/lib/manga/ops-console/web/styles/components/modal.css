@@ -1,0 +1,36 @@
+.nc-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--surface-overlay);
+}
+
+.nc-modal.is-open {
+  display: flex;
+}
+
+.nc-modal__card {
+  max-height: 92vh;
+  overflow: auto;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-3);
+}
+
+.nc-modal__card--sm {
+  width: min(420px, 92vw);
+}
+
+.nc-modal__card--md {
+  width: min(680px, 92vw);
+}
+
+.nc-modal__card--lg {
+  width: min(960px, 92vw);
+}

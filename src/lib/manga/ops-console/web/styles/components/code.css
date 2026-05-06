@@ -1,0 +1,21 @@
+.nc-code,
+.nc-code-block {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+}
+
+.nc-code {
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+}
+
+.nc-code-block {
+  max-height: 480px;
+  overflow: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-code);
+  color: #e5e7eb;
+}

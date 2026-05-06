@@ -1,0 +1,90 @@
+.nc-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard),
+    opacity var(--dur-fast) var(--ease-standard);
+}
+
+.nc-button:hover:not(:disabled) {
+  background: var(--surface-sunken);
+  border-color: var(--border-strong);
+}
+
+.nc-button:disabled,
+.nc-button[aria-disabled="true"],
+.nc-button.is-disabled {
+  cursor: not-allowed;
+  opacity: .58;
+}
+
+.nc-button--primary {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-primary-fg);
+}
+
+.nc-button--primary:hover:not(:disabled) {
+  border-color: var(--color-primary-hover);
+  background: var(--color-primary-hover);
+}
+
+.nc-button--secondary {
+  border-color: var(--border-default);
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+}
+
+.nc-button--secondary:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--surface-elevated);
+}
+
+.nc-button--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.nc-button--ghost:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--surface-sunken);
+}
+
+.nc-button--danger {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: #ffffff;
+}
+
+.nc-button--danger:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+}
+
+.nc-button--sm {
+  min-height: 28px;
+  padding: 0 var(--space-2);
+  font-size: var(--fs-sm);
+}
+
+.nc-button--md {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--fs-base);
+}

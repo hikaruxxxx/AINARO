@@ -1,0 +1,36 @@
+.nc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+}
+
+.nc-badge--info {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.nc-badge--success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.nc-badge--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.nc-badge--danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.nc-badge--neutral {
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral);
+}

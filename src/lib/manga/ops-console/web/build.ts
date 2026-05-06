@@ -10,14 +10,18 @@ export async function buildOpsConsoleClient(opts: {
   const outFile = path.join(outDir, "main.js");
 
   await build({
-    entryPoints: [path.resolve(repoRoot, "src/lib/manga/ops-console/web/main.ts")],
-    outfile: outFile,
+    entryPoints: {
+      main: path.resolve(repoRoot, "src/lib/manga/ops-console/web/main.ts"),
+      styles: path.resolve(repoRoot, "src/lib/manga/ops-console/web/styles/index.css"),
+    },
+    outdir: outDir,
     bundle: true,
     format: "iife",
     target: "es2020",
     sourcemap: "inline",
     minify: opts.minify ?? false,
     logLevel: "warning",
+    loader: { ".css": "css" },
   });
 
   return { outFile };

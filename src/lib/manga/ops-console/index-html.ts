@@ -1,7 +1,7 @@
 /**
  * Novelis Console (漫画 ops UI) の HTML shell。
  *
- * Phase 2A では CSS は inline のままにして、挙動だけ TS bundle へ移す。
+ * Wave 0 では inline CSS を互換のため残し、共通 stylesheet を追加配信する。
  */
 export function renderOpsConsoleShellHtml(): string {
   return `<!doctype html>
@@ -10,6 +10,17 @@ export function renderOpsConsoleShellHtml(): string {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Novelis Console</title>
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem("nc.theme") || "system";
+        document.documentElement.dataset.theme = t;
+      } catch(e) {
+        document.documentElement.dataset.theme = "system";
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/_ops/styles.css">
   <style>
     :root {
       color: #172033;

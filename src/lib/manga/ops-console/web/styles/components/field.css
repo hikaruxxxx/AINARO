@@ -1,0 +1,53 @@
+.nc-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.nc-field__label {
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+
+.nc-field__input,
+.nc-field__select,
+.nc-field__textarea {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--fs-base);
+  transition:
+    border-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard);
+}
+
+.nc-field__input,
+.nc-field__select {
+  min-height: 34px;
+  padding: 0 var(--space-2);
+}
+
+.nc-field__textarea {
+  min-height: 96px;
+  padding: var(--space-2);
+  resize: vertical;
+}
+
+.nc-field__input:focus,
+.nc-field__select:focus,
+.nc-field__textarea:focus {
+  border-color: var(--color-primary);
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.nc-field__input:disabled,
+.nc-field__select:disabled,
+.nc-field__textarea:disabled {
+  cursor: not-allowed;
+  opacity: .58;
+}
