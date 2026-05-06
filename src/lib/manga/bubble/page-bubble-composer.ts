@@ -1,4 +1,5 @@
 import type { EpisodeStoryboardV2, PagePlanV2 } from "../schemas-v2";
+import { detectBreakouts, type BreakoutCandidate } from "./breakout-detector";
 import { placeBubbles, type DialogueInput } from "./placer";
 import { renderBubbleOverlay } from "./svg-overlay";
 
@@ -13,12 +14,21 @@ export type PageBubbleOutput = {
   svg: string;
   bubbleCount: number;
   warnings: string[];
+  breakouts: BreakoutCandidate[];
+  breakoutMasks: Array<{
+    panel_id: string;
+    target_panel_id: string;
+    rect: { x: number; y: number; w: number; h: number };
+  }>;
 };
 
 export function composePageBubbles(input: PageBubbleInput): PageBubbleOutput {
   const { pagePlanPage, storyboardPage, pageWidth, pageHeight } = input;
   const warnings: string[] = [];
   const groups: string[] = [];
+  const breakouts = detectBreakouts({ pagePlanPage, storyboardPage });
+  const breakoutsByPanel = new Map(breakouts.map((b) => [b.panel_id, b]));
+  const breakoutMasks: PageBubbleOutput["breakoutMasks"] = [];
   let bubbleCount = 0;
 
   for (let i = 0; i < pagePlanPage.panels.length; i++) {
@@ -68,9 +78,30 @@ export function composePageBubbles(input: PageBubbleInput): PageBubbleOutput {
       dialogues,
       pageOriginX: pp.rect.x,
       pageOriginY: pp.rect.y,
-    });
+    }).map((bubble) => ({
+      ...bubble,
+      position: { ...bubble.position },
+    }));
 
     if (placed.length === 0) continue;
+
+    const breakout = breakoutsByPanel.get(pp.panel_id);
+    const breakoutIndex = breakout
+      ? findBreakoutBubbleIndex(placed, breakout.reading_order)
+      : -1;
+    if (breakout && breakoutIndex >= 0) {
+      const position = placed[breakoutIndex].position;
+      applyBreakoutShift(position, breakout.direction);
+      breakoutMasks.push({
+        panel_id: breakout.panel_id,
+        target_panel_id: breakout.target_panel_id,
+        rect: expandedRect(position, 8),
+      });
+    }
+
+    const clipPolygon = breakout
+      ? unionBBoxPolygon(breakout.source_panel_polygon, breakout.target_panel_polygon)
+      : pp.polygon;
 
     const panelSvg = renderBubbleOverlay({
       panelWidth: pageWidth,
@@ -81,11 +112,14 @@ export function composePageBubbles(input: PageBubbleInput): PageBubbleOutput {
         bubble_type: b.bubble_type,
         reading_order: b.reading_order,
       })),
-      clipPolygon: pp.polygon,
+      clipPolygon,
       clipPathId: `bubble-clip-p${pagePlanPage.page_no}-${pp.panel_id.replace(/[^A-Za-z0-9_-]/g, "_")}`,
     });
 
-    groups.push(`<g data-panel-id="${escapeXml(pp.panel_id)}">${innerSvg(panelSvg)}</g>`);
+    const breakoutAttrs = breakout
+      ? ` data-breakout-target="${escapeXml(breakout.target_panel_id)}" data-breakout-direction="${breakout.direction}"`
+      : "";
+    groups.push(`<g data-panel-id="${escapeXml(pp.panel_id)}"${breakoutAttrs}>${innerSvg(panelSvg)}</g>`);
     bubbleCount += placed.length;
   }
 
@@ -97,7 +131,51 @@ export function composePageBubbles(input: PageBubbleInput): PageBubbleOutput {
     ].join(""),
     bubbleCount,
     warnings,
+    breakouts,
+    breakoutMasks,
   };
+}
+
+function findBreakoutBubbleIndex(
+  placed: ReturnType<typeof placeBubbles>,
+  readingOrder: number
+): number {
+  const exact = placed.findIndex((bubble) => bubble.reading_order === readingOrder);
+  return exact >= 0 ? exact : placed.length - 1;
+}
+
+function applyBreakoutShift(
+  position: { x: number; y: number; width: number; height: number },
+  direction: BreakoutCandidate["direction"]
+): void {
+  const ratio = 0.3;
+  if (direction === "top") position.y -= Math.round(position.height * ratio);
+  if (direction === "bottom") position.y += Math.round(position.height * ratio);
+  if (direction === "left") position.x -= Math.round(position.width * ratio);
+  if (direction === "right") position.x += Math.round(position.width * ratio);
+}
+
+function expandedRect(
+  position: { x: number; y: number; width: number; height: number },
+  pad: number
+): { x: number; y: number; w: number; h: number } {
+  return {
+    x: Math.round(position.x - pad),
+    y: Math.round(position.y - pad),
+    w: Math.round(position.width + pad * 2),
+    h: Math.round(position.height + pad * 2),
+  };
+}
+
+function unionBBoxPolygon(...polygons: [number, number][][]): [number, number][] {
+  const points = polygons.flat();
+  const xs = points.map(([x]) => x);
+  const ys = points.map(([, y]) => y);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  const maxX = Math.max(...xs);
+  const maxY = Math.max(...ys);
+  return [[minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY]];
 }
 
 function innerSvg(svg: string): string {
