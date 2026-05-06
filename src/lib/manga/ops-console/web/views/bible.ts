@@ -22,6 +22,7 @@ type BibleTab = "world" | "characters" | "locations" | "props" | "style" | "raw"
 type ActionLayer = "L01" | "L01b" | "L01c";
 type DisplayMode = "reader" | "raw";
 type AnyRecord = Record<string, unknown>;
+type AssetKind = "characters" | "locations" | "props";
 
 const BIBLE_TABS: Array<{ id: BibleTab; label: string }> = [
   { id: "world", label: "世界観" },
@@ -54,6 +55,27 @@ const CSS = `
 .bib-actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
 .bib-log { min-height: 160px; white-space: pre-wrap; }
 .bib-info { color: var(--text-secondary); font-size: var(--fs-sm); }
+.bib-thumb[data-bib-lightbox], .bib-ref-count[data-bib-lightbox] { cursor: zoom-in; }
+.bib-ref-count[data-bib-lightbox] { border: 0; padding: 0; background: transparent; color: var(--text-tertiary); font-family: inherit; font-size: var(--fs-sm); text-align: left; }
+.bib-ref-count[data-bib-lightbox]:hover { color: var(--color-primary); text-decoration: underline; }
+.bib-lightbox { align-items: center; justify-content: center; padding: var(--space-3); }
+.bib-lightbox__card { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: var(--space-2); width: min(96vw, 1120px); height: min(94vh, 960px); padding: var(--space-3) var(--space-4); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--surface-elevated); box-shadow: var(--shadow-3); box-sizing: border-box; }
+.bib-lightbox__head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.bib-lightbox__title { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-lg); }
+.bib-lightbox__stage { position: relative; display: flex; align-items: center; justify-content: center; min-height: 0; min-width: 0; overflow: hidden; border-radius: var(--radius-md); background: #111318; padding: var(--space-2); }
+.bib-lightbox__image { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: var(--radius-sm); }
+.bib-lightbox__meta { display: flex; align-items: center; gap: var(--space-2); color: var(--text-secondary); font-size: var(--fs-sm); min-width: 0; }
+.bib-lightbox__file { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bib-lightbox__count { flex: 0 0 auto; color: var(--text-tertiary); }
+.bib-lightbox__close { flex: 0 0 auto; }
+.bib-lightbox__nav { position: absolute; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--border-subtle); border-radius: 999px; background: color-mix(in srgb, var(--surface-elevated) 72%, transparent); color: var(--text-primary); font-size: 28px; line-height: 1; cursor: pointer; z-index: 1; }
+.bib-lightbox__nav:hover { background: var(--surface-elevated); }
+.bib-lightbox__nav--prev { left: var(--space-2); }
+.bib-lightbox__nav--next { right: var(--space-2); }
+.bib-lightbox__thumbs { display: flex; gap: var(--space-1); overflow-x: auto; padding-bottom: var(--space-1); flex: 0 0 auto; }
+.bib-lightbox__thumb { flex: 0 0 auto; width: 56px; height: 56px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 2px; background: var(--surface-sunken); cursor: pointer; }
+.bib-lightbox__thumb.is-active { border: 2px solid var(--color-primary); padding: 1px; }
+.bib-lightbox__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--radius-sm) - 2px); }
 `;
 
 type ViewState = {
@@ -66,6 +88,13 @@ type ViewState = {
   modal: ActionLayer | null;
   runningLayer: ActionLayer | null;
   log: string[];
+  lightbox: {
+    kind: AssetKind;
+    id: string;
+    name: string;
+    files: string[];
+    index: number;
+  } | null;
   toast: { message: string; kind: "success" | "warning" | "danger" | "info" } | null;
 };
 
@@ -120,13 +149,13 @@ function refMap(refs: BibleCharacterRef[]): Map<string, string[]> {
   return new Map(refs.map((ref) => [ref.id, ref.files]));
 }
 
-function refUrl(slug: string, kind: "characters" | "locations" | "props", id: string, file: string): string {
+function refUrl(slug: string, kind: AssetKind, id: string, file: string): string {
   return `/works/${encodeURIComponent(slug)}/bible/refs/${kind}/${encodeURIComponent(id)}/${encodeURIComponent(file)}`;
 }
 
 function renderAssetCards(
   slug: string,
-  kind: "characters" | "locations" | "props",
+  kind: AssetKind,
   items: unknown[],
   refs: BibleCharacterRef[]
 ): string {
@@ -134,15 +163,17 @@ function renderAssetCards(
   const byId = refMap(refs);
   return `<div class="bib-grid">${items.map((item) => {
     const id = idOf(item);
+    const name = nameOf(item);
     const files = byId.get(id) ?? [];
     const thumb = files[0] ? refUrl(slug, kind, id, files[0]) : "";
+    const lbAttrs = `data-bib-lightbox data-bib-kind="${kind}" data-bib-id="${escapeHtml(id)}"`;
     return `
       <article class="nc-card nc-card--default bib-card">
-        ${thumb ? `<img class="bib-thumb" src="${escapeHtml(thumb)}" alt="${escapeHtml(nameOf(item))}">` : ""}
-        <h3>${escapeHtml(nameOf(item))}</h3>
+        ${thumb ? `<img class="bib-thumb" src="${escapeHtml(thumb)}" alt="${escapeHtml(name)}" ${lbAttrs}>` : ""}
+        <h3>${escapeHtml(name)}</h3>
         <div class="bib-meta">${escapeHtml(id)}</div>
         <div class="bib-summary">${escapeHtml(summaryOf(item))}</div>
-        ${files.length > 1 ? `<div class="bib-meta">${files.length} refs</div>` : ""}
+        ${files.length > 1 ? `<button type="button" class="bib-meta bib-ref-count" ${lbAttrs}>${files.length} refs</button>` : ""}
       </article>`;
   }).join("")}</div>`;
 }
@@ -309,6 +340,75 @@ function renderModal(state: ViewState): string {
     </div>`;
 }
 
+function refsForKind(bible: BibleAssetView, kind: AssetKind): BibleCharacterRef[] {
+  if (kind === "characters") return bible.refs.characters;
+  if (kind === "locations") return bible.refs.locations;
+  return bible.refs.props;
+}
+
+function itemsForKind(bible: BibleAssetView, kind: AssetKind): unknown[] {
+  if (kind === "characters") return bible.characters;
+  if (kind === "locations") return bible.locations;
+  return bible.props;
+}
+
+function openLightbox(state: ViewState, kind: AssetKind, id: string, index = 0): void {
+  const bible = state.bible;
+  if (!bible) return;
+  const files = refMap(refsForKind(bible, kind)).get(id) ?? [];
+  if (files.length === 0) return;
+  const item = itemsForKind(bible, kind).find((entry) => idOf(entry) === id);
+  const name = item ? nameOf(item) : id;
+  state.lightbox = {
+    kind,
+    id,
+    name,
+    files,
+    index: Math.max(0, Math.min(index, files.length - 1)),
+  };
+}
+
+function navigateLightbox(state: ViewState, direction: -1 | 1): void {
+  const lightbox = state.lightbox;
+  if (!lightbox || lightbox.files.length <= 1) return;
+  lightbox.index = (lightbox.index + direction + lightbox.files.length) % lightbox.files.length;
+}
+
+function renderLightbox(state: ViewState): string {
+  const lightbox = state.lightbox;
+  if (!lightbox) return "";
+  const total = lightbox.files.length;
+  const index = Math.max(0, Math.min(lightbox.index, total - 1));
+  const file = lightbox.files[index] ?? "";
+  const src = refUrl(state.slug, lightbox.kind, lightbox.id, file);
+  const multi = total > 1;
+  return `
+    <div class="nc-modal is-open bib-lightbox" id="bib-lightbox" data-bib-lightbox-overlay>
+      <div class="bib-lightbox__card" role="dialog" aria-modal="true" aria-label="${escapeHtml(lightbox.name)}" data-bib-lightbox-card>
+        <div class="bib-lightbox__head">
+          <h3 class="bib-lightbox__title">${escapeHtml(lightbox.name)}</h3>
+          <span class="bib-spacer"></span>
+          <button type="button" class="nc-button nc-button--ghost nc-button--sm bib-lightbox__close" data-bib-lightbox-close aria-label="閉じる">×</button>
+        </div>
+        <div class="bib-lightbox__stage">
+          ${multi ? `<button type="button" class="bib-lightbox__nav bib-lightbox__nav--prev" data-bib-lightbox-prev aria-label="Previous image">‹</button>` : ""}
+          <img class="bib-lightbox__image" src="${escapeHtml(src)}" alt="${escapeHtml(lightbox.name)}">
+          ${multi ? `<button type="button" class="bib-lightbox__nav bib-lightbox__nav--next" data-bib-lightbox-next aria-label="Next image">›</button>` : ""}
+        </div>
+        <div class="bib-lightbox__meta">
+          <span class="bib-lightbox__file">${escapeHtml(file)}</span>
+          ${multi ? `<span class="bib-lightbox__count">${index + 1} / ${total}</span>` : ""}
+        </div>
+        ${multi ? `<div class="bib-lightbox__thumbs">${lightbox.files.map((thumbFile, thumbIndex) => {
+          const thumb = refUrl(state.slug, lightbox.kind, lightbox.id, thumbFile);
+          return `<button type="button" class="bib-lightbox__thumb${thumbIndex === index ? " is-active" : ""}" data-bib-lightbox-index="${thumbIndex}" aria-label="${escapeHtml(thumbFile)}">
+            <img src="${escapeHtml(thumb)}" alt="${escapeHtml(thumbFile)}">
+          </button>`;
+        }).join("")}</div>` : ""}
+      </div>
+    </div>`;
+}
+
 function render(container: HTMLElement, state: ViewState): void {
   container.innerHTML = `
     <div class="bib-view">
@@ -325,6 +425,7 @@ function render(container: HTMLElement, state: ViewState): void {
       <div class="bib-content">${renderBibleContent(state)}</div>
     </div>
     ${renderModal(state)}
+    ${renderLightbox(state)}
     ${state.toast ? `<div class="nc-toast nc-toast--${state.toast.kind}">${escapeHtml(state.toast.message)}</div>` : ""}
   `;
 }
@@ -386,15 +487,94 @@ export function mountBibleView(container: HTMLElement): () => void {
     modal: null,
     runningLayer: null,
     log: [],
+    lightbox: null,
     toast: null,
   };
   let stream: { close: () => void } | null = null;
+  let lightboxKeyListenerAttached = false;
+
+  function onLightboxKeydown(event: KeyboardEvent): void {
+    if (!state.lightbox) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeLightbox();
+      return;
+    }
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      navigateLightbox(state, -1);
+      render(container, state);
+      return;
+    }
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      navigateLightbox(state, 1);
+      render(container, state);
+    }
+  }
+
+  const detachLightboxKeys = (): void => {
+    if (!lightboxKeyListenerAttached) return;
+    document.removeEventListener("keydown", onLightboxKeydown);
+    lightboxKeyListenerAttached = false;
+  };
+
+  const attachLightboxKeys = (): void => {
+    if (lightboxKeyListenerAttached) return;
+    document.addEventListener("keydown", onLightboxKeydown);
+    lightboxKeyListenerAttached = true;
+  };
+
+  const closeLightbox = (): void => {
+    state.lightbox = null;
+    detachLightboxKeys();
+    render(container, state);
+  };
 
   void refresh(state, container);
 
   container.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
+    if (target.closest("[data-bib-lightbox-close]")) {
+      closeLightbox();
+      return;
+    }
+    if (target.closest("[data-bib-lightbox-prev]")) {
+      navigateLightbox(state, -1);
+      render(container, state);
+      return;
+    }
+    if (target.closest("[data-bib-lightbox-next]")) {
+      navigateLightbox(state, 1);
+      render(container, state);
+      return;
+    }
+    const lightboxIndex = target.closest<HTMLElement>("[data-bib-lightbox-index]")?.dataset.bibLightboxIndex;
+    if (lightboxIndex !== undefined && state.lightbox) {
+      const index = Number(lightboxIndex);
+      if (Number.isInteger(index)) {
+        state.lightbox.index = Math.max(0, Math.min(index, state.lightbox.files.length - 1));
+        render(container, state);
+      }
+      return;
+    }
+    const lightboxOverlay = target.closest<HTMLElement>("[data-bib-lightbox-overlay]");
+    if (lightboxOverlay && !target.closest("[data-bib-lightbox-card]")) {
+      closeLightbox();
+      return;
+    }
+    const lightboxTrigger = target.closest<HTMLElement>("[data-bib-lightbox]");
+    const lightboxKind = lightboxTrigger?.dataset.bibKind;
+    const lightboxId = lightboxTrigger?.dataset.bibId;
+    if ((lightboxKind === "characters" || lightboxKind === "locations" || lightboxKind === "props") && lightboxId) {
+      openLightbox(state, lightboxKind, lightboxId);
+      if (state.lightbox) {
+        attachLightboxKeys();
+        render(container, state);
+      }
+      return;
+    }
     const tab = target.closest<HTMLButtonElement>("[data-bible-tab]")?.dataset.bibleTab as BibleTab | undefined;
     if (tab && BIBLE_TABS.some((item) => item.id === tab)) {
       state.tab = tab;
@@ -464,6 +644,7 @@ export function mountBibleView(container: HTMLElement): () => void {
 
   return () => {
     controller.abort();
+    detachLightboxKeys();
     stream?.close();
     container.innerHTML = "";
   };
