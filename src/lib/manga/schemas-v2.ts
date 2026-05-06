@@ -359,6 +359,48 @@ export type EpisodeStoryboardV2 = {
   episode_id: string;
   total_pages: number;
   pages: StoryboardPageV2[];
+  /** Phase Y WY-3 で追加。後方互換 optional。cliffhanger architect で割り当てる */
+  pull_link?: PullLink;
+};
+
+/**
+ * Phase Y WY-3: cliffhanger 引きパターン (manga_craft_guide v2 + a07 商業引き分析より7種)
+ *
+ * 各話/各巻の最終 panel に割り当てる「次を読みたくなる引き」の典型構造。
+ * KU 読者の次話/次巻購読率を最大化するための定型パターン辞書。
+ */
+export type CliffhangerPatternId =
+  /** 未知の脅威がシルエットで現れる (「Sランクの戦力が…」「監査室の異常検知」等) */
+  | "unknown_threat_silhouette"
+  /** 主人公の決意/能動的モノローグで終わる (「次は俺が」「まだ、行ける」等) */
+  | "protagonist_resolve_monologue"
+  /** 日常に異物が侵入する (普段の日常 → 異常な来訪者/通知/光) */
+  | "daily_intrusion"
+  /** 次巻表紙への伏線 (新キャラのシルエット/新組織のロゴ/予告コマ) */
+  | "next_volume_foreshadow"
+  /** 仲間/相棒との関係に変化 (告白未満の温度上昇/相棒の去り際) */
+  | "relationship_shift"
+  /** 主人公の能力/正体が明かされる片鱗 (新スキル/隠しステータス/制度の真実) */
+  | "ability_or_identity_glimpse"
+  /** ヒロイン格の消滅リスク/危機 (a07 のナビ消滅リスク型) */
+  | "heroine_jeopardy";
+
+/**
+ * 1 episode の最終 panel と次 episode/巻の opening_hook を繋ぐリンク情報。
+ * EpisodeStoryboardV2.pull_link / VolumePlot.episodes[].pull_link で使う。
+ */
+export type PullLink = {
+  /** 当該 episode の cliffhanger パターン */
+  current_episode_cliff: CliffhangerPatternId;
+  /** 次 episode の opening_hook の予告メモ (1-2文、storyboard-extractor が次話 ep0+1 の opening 設計に使う) */
+  next_opening_hook_hint: string;
+  /**
+   * 巻末か否か (vol.last_episode === true なら、cliffhanger の重みが「次巻 buy」になる、
+   * そうでなければ「次話 read-through」)。最終巻 vol13 の last_ep は最終回判定。
+   */
+  is_volume_end?: boolean;
+  /** 巻末の場合、次巻表紙への伏線テキスト (next_volume_foreshadow パターン用) */
+  next_volume_teaser?: string;
 };
 
 // ============================================================

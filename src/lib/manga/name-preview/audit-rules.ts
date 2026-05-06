@@ -223,15 +223,19 @@ export function auditPage(input: PageAuditInput): AuditFinding[] {
   // page_role 別ルール
   if (page.page_role === "cliffhanger") {
     const last = sortedPanels[sortedPanels.length - 1];
-    if (last && last.importance <= 2) {
-      findings.push({
-        page_no: pageNo,
-        panel_id: last.panel_id,
-        panel_no: last.panel_no,
-        rule: "cliffhanger_role_mismatch",
-        severity: "warn",
-        message: `cliffhanger なのに最終コマ importance=${last.importance} (引きが弱い)`,
-      });
+    if (last) {
+      // Phase Y WY-3: cliffhanger ページの最終 panel は importance=5 必須 (manga_craft_guide v2)
+      // last.importance=5 でなければ error 格上げ (旧 warning から変更)
+      if (last.importance < 5) {
+        findings.push({
+          page_no: pageNo,
+          panel_id: last.panel_id,
+          panel_no: last.panel_no,
+          rule: "cliffhanger_role_mismatch",
+          severity: last.importance <= 2 ? "error" : "warn",
+          message: `cliffhanger ページの最終 panel は importance=5 必須だが ${last.importance} (引きの山が作れていない)`,
+        });
+      }
     }
   }
   if (page.page_role === "opening_hook") {

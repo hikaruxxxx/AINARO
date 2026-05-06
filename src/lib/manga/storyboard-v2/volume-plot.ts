@@ -12,7 +12,7 @@
  *   - tone_profile.recovery_cadence ≤ 0.3 の bible には「小報酬 beat 必須」を強制注入
  */
 import { runCodexText } from "../llm/codex-text";
-import type { BibleSnapshotV2 } from "../schemas-v2";
+import type { BibleSnapshotV2, PullLink } from "../schemas-v2";
 import type { V2Concept } from "../bible/v2-adapter";
 import { findGenreByArtStyle } from "../storyboard/genre-presets";
 
@@ -34,6 +34,8 @@ export type VolumeEpisodePlan = {
   cliffhanger_hook: string;
   page_target: number;
   brief_for_L3: string;                 // L3 _brief.md にそのまま流せる本文
+  /** Phase Y WY-3 で追加。後方互換 optional。cliffhanger architect が pattern_id と次話 hook を設計 */
+  pull_link?: PullLink;
 };
 
 export type VolumePlot = {

@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-06T07:19:10.378Z",
+  "slug": "a07-modern-dungeon",
+  "episode": 1,
+  "source_last_page": {
+    "page_no": 22,
+    "page_role": "cliffhanger",
+    "panels": [
+      {
+        "panel_id": "p106",
+        "panel_no": 106,
+        "reading_order": 1,
+        "shot_type": "establishing",
+        "camera": "high_angle",
+        "bleed": false,
+        "silence": false,
+        "importance": 4,
+        "entities": {
+          "characters": [],
+          "location_id": "loc_dpc_internal_audit_room_v1",
+          "props": [],
+          "focus_entity_id": "loc_dpc_internal_audit_room_v1"
+        },
+        "action": "無人のDPC内部監査室でモニターだけが点いている。",
+        "key_visual": "窓のない解析室、壁一面の空ログ枠、椅子は空。",
+        "dialogue": [],
+        "monologue": [],
+        "narration": [
+          "同時刻。DPC新宿支部、内部監査室。"
+        ],
+        "sfx": [
+          "ヴン"
+        ]
+      },
+      {
+        "panel_id": "p107",
+        "panel_no": 107,
+        "reading_order": 2,
+        "shot_type": "close_up",
+        "camera": "eye_level",
+        "bleed": false,
+        "silence": false,
+        "importance": 3,
+        "entities": {
+          "characters": [],
+          "location_id": "loc_dpc_internal_audit_room_v1",
+          "props": [
+            {
+              "prop_id": "prop_rank_app_status_screen_v1"
+            }
+          ],
+          "focus_entity_id": "prop_rank_app_status_screen_v1"
+        },
+        "action": "監査室モニターにFランク一階限定入域者の戦闘ログが浮かぶ。",
+        "key_visual": "実名なしの空ログ行、異常値だけが枠で強調される。",
+        "dialogue": [],
+        "monologue": [],
+        "narration": [
+          "制度は、異常値を見逃さない。"
+        ],
+        "sfx": [
+          "ピ"
+        ]
+      },
+      {
+        "panel_id": "p108",
+        "panel_no": 108,
+        "reading_order": 3,
+        "shot_type": "medium",
+        "camera": "birds_eye",
+        "bleed": false,
+        "silence": false,
+        "importance": 3,
+        "entities": {
+          "characters": [],
+          "location_id": "loc_dpc_internal_audit_room_v1",
+          "props": [
+            {
+              "prop_id": "prop_rank_app_status_screen_v1"
+            }
+          ],
+          "focus_entity_id": "loc_dpc_internal_audit_room_v1"
+        },
+        "action": "壁一面のモニターの一つだけが異常ログで点滅する。",
+        "key_visual": "人のいない部屋に制度の視線だけが迫る。",
+        "dialogue": [],
+        "monologue": [],
+        "narration": [],
+        "sfx": [
+          "ピピ"
+        ]
+      },
+      {
+        "panel_id": "p109",
+        "panel_no": 109,
+        "reading_order": 4,
+        "shot_type": "close_up",
+        "camera": "eye_level",
+        "bleed": false,
+        "silence": true,
+        "importance": 2,
+        "entities": {
+          "characters": [],
+          "location_id": "loc_dpc_internal_audit_room_v1",
+          "props": [
+            {
+              "prop_id": "prop_rank_app_status_screen_v1"
+            }
+          ],
+          "focus_entity_id": "prop_rank_app_status_screen_v1"
+        },
+        "action": "無人監視画面の異常枠だけが白く浮く。",
+        "key_visual": "完全無音の監視画面、空の矩形枠を中央に大きく。",
+        "dialogue": [],
+        "monologue": [],
+        "narration": [],
+        "sfx": []
+      },
+      {
+        "panel_id": "p110",
+        "panel_no": 110,
+        "reading_order": 5,
+        "shot_type": "establishing",
+        "camera": "low_angle",
+        "bleed": true,
+        "silence": false,
+        "importance": 5,
+        "entities": {
+          "characters": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "role": "background",
+              "on_screen_via": "in_person",
+              "expression": "背中に決意"
+            },
+            {
+              "character_id": "char_獅童_響_v1",
+              "role": "speaker",
+              "on_screen_via": "phone",
+              "expression": "静かな導き"
+            }
+          ],
+          "location_id": "loc_shinjuku_third_1f_ne_corridor_v1",
+          "props": [
+            {
+              "prop_id": "prop_smartphone_cracked_v1"
+            }
+          ],
+          "focus_entity_id": "loc_shinjuku_third_1f_ne_corridor_v1"
+        },
+        "action": "レンの背後で下降階段が暗く伸び、上向きの空HUDが浮かぶ。レンの指が鉄パイプを握り直す。",
+        "key_visual": "下降階段と上向きの数値枠、レンの耳元に薄い青光を入れた次回への見せゴマ。",
+        "dialogue": [
+          {
+            "character_id": "char_獅童_響_v1",
+            "text": "次の隠し条件を開示します。"
+          }
+        ],
+        "monologue": [
+          {
+            "character_id": "char_桐生_レン_v1",
+            "text": "まだ、行ける。"
+          }
+        ],
+        "narration": [
+          "Fランクが、動き出す。"
+        ],
+        "sfx": [
+          "キン"
+        ]
+      }
+    ]
+  },
+  "volume_position": "early",
+  "candidate_patterns": [
+    "ability_or_identity_glimpse"
+  ],
+  "proposals": [
+    {
+      "pattern_id": "ability_or_identity_glimpse",
+      "pattern_name": "能力/正体の片鱗",
+      "rationale": "監査ログからレン本人の新表示へ焦点を移し、制度異常と能力覚醒を同時に引く。",
+      "expected_effect": "next_episode_pull +0.5 / world_immersion +0.4 / commercial_pull +0.3",
+      "last_page": {
+        "page_no": 22,
+        "page_role": "cliffhanger",
+        "panels": [
+          {
+            "panel_no": 106,
+            "shot_type": "close_up",
+            "importance": 3,
+            "silence": false,
+            "action": "無人のDPC内部監査室。監査モニターにFランク一階限定入域者の戦闘ログが自動展開される。",
+            "key_visual": "朱色の警告枠が走る監査UI。ログ欄は空枠中心で、異常値だけが白く点滅する。",
+            "dialogue": [],
+            "monologue": [],
+            "narration": [
+              "制度は、異常値を見逃さない。"
+            ],
+            "sfx": [
+              "カチッ"
+            ]
+          },
+          {
+            "panel_no": 107,
+            "shot_type": "insert",
+            "importance": 4,
+            "silence": false,
+            "action": "監査ログの一行が拡大され、レンの討伐タイムだけが記録不能の表示に切り替わる。",
+            "key_visual": "『Fランク』『一階限定』の空欄UIと、数値オーバーレイの空枠がぶつかる画面。",
+            "dialogue": [],
+            "monologue": [],
+            "narration": [
+              "測定値は、規格の外へ跳ねた。"
+            ],
+            "sfx": [
+              "ピロン"
+            ]
+          },
+          {
+            "panel_no": 108,
+            "shot_type": "medium",
+            "importance": 3,
+            "silence": true,
+            "action": "ダンジョンの下降階段前。黒のフードジャケット姿のレンが、ヒビ入りスマホを見下ろしたまま足を止める。",
+            "key_visual": "沈黙の白コマ。スマホの青光だけがレンの目元と階段の端を薄く照らす。",
+            "dialogue": [],
+            "monologue": [],
+            "narration": [],
+            "sfx": []
+          },
+          {
+            "panel_no": 109,
+            "shot_type": "over_shoulder",
+            "importance": 4,
+            "silence": false,
+            "action": "レンのスマホ画面に、公社アプリではない薄青いステータス枠が上書き表示される。",
+            "key_visual": "ひび割れた画面越しの世界。上向きの空HUDに未知のスキル欄が生成される瞬間。",
+            "dialogue": [
+              {
+                "character_id": "char_獅童_響_v1",
+                "text": "条件達成。未登録スキルを解放します。"
+              }
+            ],
+            "monologue": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "text": "未登録……？"
+              }
+            ],
+            "narration": [],
+            "sfx": [
+              "ヴゥン"
+            ]
+          },
+          {
+            "panel_no": 110,
+            "shot_type": "close_up",
+            "importance": 5,
+            "silence": false,
+            "action": "レンの瞳とスマホ画面を極端な近景で重ねる。青いHUDに新スキル名の一部だけが浮かび、背後の下降階段が暗く伸びる。",
+            "key_visual": "ステータス画面パネル。『隠し階層ナビゲート』の先頭だけ読める空枠、レンの瞳にナビ青光。",
+            "dialogue": [
+              {
+                "character_id": "char_獅童_響_v1",
+                "text": "あなたは、二階への最短経路を取得しました。"
+              }
+            ],
+            "monologue": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "text": "これは……道が見える。"
+              }
+            ],
+            "narration": [],
+            "sfx": [
+              "ピロン"
+            ]
+          }
+        ]
+      },
+      "pull_link": {
+        "current_episode_cliff": "ability_or_identity_glimpse",
+        "next_opening_hook_hint": "次話冒頭は、レンが表示された最短経路を疑いながら一階の壁際へ進み、通常マップに存在しない二階直通ルートを検証する場面から始める。",
+        "is_volume_end": false
+      }
+    }
+  ],
+  "recommendation": {
+    "pattern_id": "ability_or_identity_glimpse",
+    "rationale": "tone=unset / genre=主人公最強無双 / volume_position=early の組み合わせで selection_guide が最初に推奨するパターン"
+  }
+}
