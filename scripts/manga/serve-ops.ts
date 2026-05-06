@@ -165,6 +165,15 @@ async function main() {
         if (p.startsWith("/_ops/")) {
           return { root: opsDistRoot, subPath: p.slice("/_ops".length) };
         }
+        // /works/{slug}/volumes/v{NN}/kdp/{filename}: KDP 出力 PDF/JSON を配信。
+        // scope 固定モードは default のみ、一覧モードは任意 slug。
+        const kdpMatch = p.match(/^\/works\/([^/]+)\/volumes\/(v\d+)\/kdp\/(.+)$/);
+        if (kdpMatch) {
+          const slug = kdpMatch[1];
+          if (!isValidSlug(slug)) return null;
+          if (args.slug && slug !== args.slug) return null;
+          return { root: workDir(slug), subPath: `/volumes/${kdpMatch[2]}/kdp/${kdpMatch[3]}` };
+        }
         // /works/{slug}/episodes/epNN/path: scope 固定モードは default のみ、一覧モードは任意 slug。
         // path から slug を取って workDir(slug) に解決するので、両モードで動く。
         const m = p.match(/^\/works\/([^/]+)\/episodes\/(ep\d+)(\/.*)?$/);

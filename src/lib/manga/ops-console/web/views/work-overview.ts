@@ -112,6 +112,7 @@ function render(container: HTMLElement, state: ViewState): void {
             <button type="button" class="nc-button nc-button--secondary" data-view="bible">Bible 全体構築 (L01)</button>
             <button type="button" class="nc-button nc-button--secondary" data-view="volume-plot">Volume Plot 構築 (L02b)</button>
             <button type="button" class="nc-button nc-button--primary" data-view="kdp-metadata">KDP メタ編集</button>
+            <button type="button" class="nc-button nc-button--secondary" data-view="volumes">巻管理 (Volumes)</button>
           </div>
         </section>
       </div>

@@ -16,7 +16,7 @@ export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = 
   { view: "kdp-metadata", label: "KDP メタ情報", group: "work" },
   { view: "work-overview", label: "作品概要", group: "work" },
   { view: "layers", label: "個別 layer 起動", group: "exec" },
-  { view: "works", label: "作品管理", group: "exec" },
+  { view: "volumes", label: "巻管理", group: "exec" },
 ];
 
 export const GROUP_LABELS: Record<MenuGroup, string> = {

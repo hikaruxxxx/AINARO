@@ -17,8 +17,8 @@ import { mountQualityHubView } from "./views/quality-hub";
 import { mountRevisionView } from "./views/revision";
 import { mountStoryboardView } from "./views/storyboard";
 import { mountVolumePlotView } from "./views/volume-plot";
+import { mountVolumesView } from "./views/volumes";
 import { mountWorkOverviewView } from "./views/work-overview";
-import { mountWorksView } from "./views/works";
 
 type Unmount = () => void;
 
@@ -122,9 +122,9 @@ function mountCurrentView(main: HTMLElement): () => void {
     else if (state.currentView === "bible") unmount = mountBibleView(main);
     else if (state.currentView === "volume-plot") unmount = mountVolumePlotView(main);
     else if (state.currentView === "kdp-metadata") unmount = mountKdpMetadataView(main);
+    else if (state.currentView === "volumes") unmount = mountVolumesView(main);
     else if (state.currentView === "layers") unmount = mountLayersView(main);
     else if (state.currentView === "revision") unmount = mountRevisionView(main);
-    else if (state.currentView === "works") unmount = mountWorksView(main);
     else unmount = mountNameGateView(main);
   });
 }

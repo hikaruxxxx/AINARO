@@ -36,6 +36,7 @@ import {
 import { handleBootstrap } from "./handlers/bootstrap";
 import { handleBible } from "./handlers/bible";
 import { handleVolumePlot } from "./handlers/volume-plot";
+import { handleVolumesList } from "./handlers/volumes";
 import {
   handleWorkCreate,
   handleWorkKdpMetadataPut,
@@ -282,6 +283,15 @@ export async function handleApi(
       const slug = m[1];
       if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
       return handleBible(slug, res);
+    }
+  }
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/volumes$/);
+    if (m) {
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
+      const slug = m[1];
+      if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
+      return handleVolumesList(slug, res);
     }
   }
   {

@@ -16,4 +16,6 @@ export const MIME: Record<string, string> = {
   ".css": "text/css; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
   ".txt": "text/plain; charset=utf-8",
+  ".pdf": "application/pdf",
+  ".md": "text/markdown; charset=utf-8",
 };

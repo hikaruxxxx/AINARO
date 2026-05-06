@@ -127,6 +127,8 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
       { name: "--keywords", pattern: /^[^\n\r\t<>&"'`$\\-][^\n\r\t<>&"'`$\\]{0,499}$/ },
       { name: "--author", pattern: /^[^\n\r\t<>&"'`$\\-][^\n\r\t<>&"'`$\\]{0,79}$/ },
       { name: "--publication-date", pattern: /^\d{4}-\d{2}-\d{2}$/ },
+      { name: "--cover-front", pattern: /^[\w./-]+\.(png|jpg|jpeg)$/, isPath: true },
+      { name: "--isbn", pattern: /^[0-9Xx-]{10,20}$/ },
     ],
     timeoutMs: 15 * 60 * 1000,
   },

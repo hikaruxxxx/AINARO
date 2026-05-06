@@ -404,6 +404,29 @@ export function apiGetVolumePlot(slug: string, volume: number): Promise<VolumePl
   );
 }
 
+export type VolumeKdpFileStatus = {
+  exists: boolean;
+  mtime?: string;
+  size?: number;
+};
+
+export type VolumeKdpStatus = {
+  manuscript_pdf: VolumeKdpFileStatus;
+  cover_pdf: VolumeKdpFileStatus;
+  metadata_json: VolumeKdpFileStatus;
+  kdp_input_md: VolumeKdpFileStatus;
+};
+
+export type VolumeInfo = {
+  volume: number;
+  episodes: number[];
+  kdp_status: VolumeKdpStatus;
+};
+
+export function apiGetVolumes(slug: string): Promise<{ slug: string; volumes: VolumeInfo[] }> {
+  return getJson<{ slug: string; volumes: VolumeInfo[] }>(`/api/works/${encodeURIComponent(slug)}/volumes`);
+}
+
 export type WorkKdpMetadataBlock = {
   title_candidates?: string[];
   series_name_canonical?: string;

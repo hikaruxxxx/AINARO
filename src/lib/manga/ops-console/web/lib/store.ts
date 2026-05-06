@@ -12,8 +12,8 @@ export type ViewName =
   | "volume-plot"
   | "kdp-metadata"
   | "work-overview"
-  | "layers"
-  | "works";
+  | "volumes"
+  | "layers";
 
 export type WorkInfo = {
   slug: string;
@@ -87,7 +87,7 @@ export function isViewName(value: string | null | undefined): value is ViewName 
     value === "volume-plot" ||
     value === "kdp-metadata" ||
     value === "work-overview" ||
-    value === "layers" ||
-    value === "works"
+    value === "volumes" ||
+    value === "layers"
   );
 }
