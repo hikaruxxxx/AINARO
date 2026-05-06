@@ -317,6 +317,7 @@ npx tsx scripts/manga/layers/L03_5-scene-graph.ts --slug a07-modern-dungeon --ep
 ### 設計上の確認事項
 
 - **scene 数 10 = 上限ぴったり**。Phase A 検証作品 (a07/d02/d03) のうち a07-ep01 は densely packed なエピソードと判明。d02/d03 で 5-7 scene に収まれば「5-10 scene」の幅が validate される。
+- **a07-ep02 で 6 scene 構成を追加検証** (2026-05-07)。10 scene と異なる粒度でも schema/validator 通過。新たに使用した field: presence=phone_screen (S06: Nm の攻略 wiki 通知)、subtype_directive.external_social=true (S06 のみ)、cross-episode foreshadow 6 件 (next_episode/later_in_volume/cross_volume)。Panel-Scene Inheritance で「P4 が gate location なのに S03 の sub_locations 未登録」エラーを即時検出 → sub_locations 追加で解消、検査機構が新 episode でも実不整合を捉える証拠。
 - **time_axis.order の値域**: flashforward は 999 のような大値、flashback は -1, -2 等の負値で表現可能。整数で十分。
 - **sub_locations の使い所**: S07 (gate→corridor 連続通過) と S10 (corridor + DPC cross-cut) のような演出。1 scene に複数 location を許すが、主軸は 1 つ。
 - **cast.presence**: in_person (8), voice_off (5), tv (1), memory (1) を a07-ep01 で使用。phone_screen と log_visual は ep01 では未使用 (将来 episode で出る想定)。
