@@ -24,6 +24,8 @@ import "../_env";
 import { promises as fs } from "node:fs";
 import {
   bibleSnapshotPath,
+  episodeBriefV2Path,
+  sceneGraphPath,
   storyboardPath,
 } from "./_paths";
 import {
@@ -32,6 +34,12 @@ import {
   mergeCliffhangerProposalIntoStoryboard,
   saveCliffhangerAlts,
 } from "../../../src/lib/manga/cliffhanger/cliffhanger-architect";
+import { regenerateCliffhangerScene } from "../../../src/lib/manga/scene-graph/scene-swap";
+import { DEFAULT_SCORING_CONFIG } from "../../../src/lib/manga/scene-graph/scoring-loop";
+import {
+  isSceneGraphV1,
+  type SceneGraphV1,
+} from "../../../src/lib/manga/scene-graph/schema";
 import type {
   BibleSnapshotV2,
   EpisodeStoryboardV2,
@@ -45,10 +53,19 @@ type Args = {
   volumePosition: VolumePosition;
   applyRecommendation: boolean;
   maxProposals: number;
+  fromSceneGraph: boolean;
+  pattern: string | null;
+  live: boolean;
 };
 
 function parseArgs(): Args {
-  const a: Partial<Args> = { applyRecommendation: false, maxProposals: 3 };
+  const a: Partial<Args> = {
+    applyRecommendation: false,
+    maxProposals: 3,
+    fromSceneGraph: false,
+    pattern: null,
+    live: false,
+  };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -58,6 +75,12 @@ function parseArgs(): Args {
     if (eq) [, key, val] = eq;
     else if (arg === "--apply-recommendation") {
       a.applyRecommendation = true;
+      continue;
+    } else if (arg === "--from-scene-graph") {
+      a.fromSceneGraph = true;
+      continue;
+    } else if (arg === "--live") {
+      a.live = true;
       continue;
     } else {
       const flag = arg.match(/^--(.+)$/);
@@ -71,6 +94,7 @@ function parseArgs(): Args {
     else if (key === "episode") a.episode = Number(val);
     else if (key === "volume-position") a.volumePosition = val as VolumePosition;
     else if (key === "max-proposals") a.maxProposals = Number(val);
+    else if (key === "pattern") a.pattern = val ?? null;
   }
   if (!a.slug) throw new Error("--slug=<slug> is required");
   if (!Number.isInteger(a.episode) || (a.episode ?? 0) <= 0)
@@ -102,8 +126,13 @@ async function readJson<T>(p: string): Promise<T> {
 async function main() {
   const args = parseArgs();
   console.log(
-    `[L4.9] cliffhanger-architect start: slug=${args.slug} episode=${args.episode} volume_position=${args.volumePosition}`,
+    `[L4.9] cliffhanger-architect start: slug=${args.slug} episode=${args.episode} volume_position=${args.volumePosition} mode=${args.fromSceneGraph ? "scene-graph" : "panel-level"}`,
   );
+
+  if (args.fromSceneGraph) {
+    await runSceneGraphMode(args);
+    return;
+  }
 
   const bible = await readJson<BibleSnapshotV2>(bibleSnapshotPath(args.slug));
   const sbPath = storyboardPath(args.slug, args.episode);
@@ -163,6 +192,57 @@ async function main() {
   } else {
     console.log(
       `[L4.9] proposals だけ生成済 (storyboard 未変更)。--apply-recommendation で推奨案を直接マージ可`,
+    );
+  }
+}
+
+async function runSceneGraphMode(args: Args): Promise<void> {
+  const sgPath = sceneGraphPath(args.slug, args.episode);
+  const sgRaw = await readJson<unknown>(sgPath);
+  if (!isSceneGraphV1(sgRaw)) {
+    throw new Error(`[L4.9] scene_graph.json is not a valid SceneGraphV1: ${sgPath}`);
+  }
+  const sceneGraph = sgRaw as SceneGraphV1;
+  const patternId = args.pattern ?? "ability_or_identity_glimpse"; // a07-ep01 デフォルト
+
+  console.log(
+    `[L4.9] scene-graph cliff swap: pattern=${patternId} live=${args.live}`
+  );
+
+  const result = await regenerateCliffhangerScene(
+    sceneGraph,
+    patternId,
+    {
+      slug: args.slug,
+      episode: args.episode,
+      bibleSnapshotPath: bibleSnapshotPath(args.slug),
+      briefPath: episodeBriefV2Path(args.slug, args.episode),
+      finalizedScenes: [],
+    },
+    {
+      ...DEFAULT_SCORING_CONFIG,
+      dry_run: !args.live,
+    }
+  );
+
+  console.log(
+    `[L4.9] swap done: scenes=${result.scene_graph.scenes.length} candidates_per_scene=${result.candidates_per_scene}`
+  );
+
+  if (args.applyRecommendation) {
+    const backupPath = `${sgPath}.pre-l4-9-cliffhanger.backup`;
+    try {
+      await fs.access(backupPath);
+      console.log(`[L4.9] backup 既存、スキップ: ${backupPath}`);
+    } catch {
+      await fs.copyFile(sgPath, backupPath);
+      console.log(`[L4.9] backup: ${backupPath}`);
+    }
+    await fs.writeFile(sgPath, JSON.stringify(result.scene_graph, null, 2), "utf-8");
+    console.log(`[L4.9] scene_graph.json updated (cliff pattern=${patternId})`);
+  } else {
+    console.log(
+      `[L4.9] dry-run: scene_graph.json was NOT written. --apply-recommendation で書き戻し。`
     );
   }
 }
