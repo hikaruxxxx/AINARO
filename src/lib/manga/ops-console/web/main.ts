@@ -3,14 +3,15 @@ import { isViewName, store, type ViewName } from "./lib/store";
 import { mountBreadcrumb } from "./breadcrumb";
 import { mountSidebar } from "./sidebar";
 import { mountThemeToggle } from "./theme-toggle";
-import { mountAssetsView } from "./views/assets";
 import { mountBibleView } from "./views/bible";
 import { mountIndexView } from "./views/index";
 import { mountKdpMetadataView } from "./views/kdp-metadata";
 import { mountLayersView } from "./views/layers";
 import { mountNameGateView } from "./views/name-gate";
 import { mountPipelineView } from "./views/pipeline";
+import { mountQualityView } from "./views/quality";
 import { mountRevisionView } from "./views/revision";
+import { mountStoryboardView } from "./views/storyboard";
 import { mountVolumePlotView } from "./views/volume-plot";
 import { mountWorksView } from "./views/works";
 
@@ -65,7 +66,8 @@ function mountCurrentView(main: HTMLElement): () => void {
     prevView = state.currentView;
     if (state.currentView === "index") unmount = mountIndexView(main);
     else if (state.currentView === "pipeline") unmount = mountPipelineView(main);
-    else if (state.currentView === "assets") unmount = mountAssetsView(main);
+    else if (state.currentView === "storyboard") unmount = mountStoryboardView(main);
+    else if (state.currentView === "quality") unmount = mountQualityView(main);
     else if (state.currentView === "bible") unmount = mountBibleView(main);
     else if (state.currentView === "volume-plot") unmount = mountVolumePlotView(main);
     else if (state.currentView === "kdp-metadata") unmount = mountKdpMetadataView(main);

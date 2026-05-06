@@ -3,7 +3,8 @@ export type ViewName =
   | "pipeline"
   | "name-gate"
   | "revision"
-  | "assets"
+  | "quality"
+  | "storyboard"
   | "bible"
   | "volume-plot"
   | "kdp-metadata"
@@ -57,7 +58,8 @@ export function isViewName(value: string | null | undefined): value is ViewName 
     value === "pipeline" ||
     value === "name-gate" ||
     value === "revision" ||
-    value === "assets" ||
+    value === "quality" ||
+    value === "storyboard" ||
     value === "bible" ||
     value === "volume-plot" ||
     value === "kdp-metadata" ||
