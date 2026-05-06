@@ -483,3 +483,77 @@ export function apiCreateWork(body: {
 }): Promise<{ ok: true; slug: string; meta: WorkMeta }> {
   return postJson("/api/works", body);
 }
+
+// ===== Phase X WX-5: trademark / IP 類似チェック (Console UI) =====
+
+export type TrademarkSearchTargetClient = {
+  keyword: string;
+  kind: "title" | "subtitle" | "character_name" | "label_name" | "series_title";
+  origin?: string;
+};
+
+export type TrademarkSearchSourceClient = {
+  source: "j_platpat" | "uspto_tess" | "amazon_jp" | "amazon_us";
+  url: string;
+  intent: string;
+};
+
+export type TrademarkCheckResultClient = {
+  status: "pending" | "passed" | "flagged";
+  targets: TrademarkSearchTargetClient[];
+  searches: Array<{
+    target: TrademarkSearchTargetClient;
+    sources: TrademarkSearchSourceClient[];
+  }>;
+  checked_at: string;
+  human_review_notes?: string;
+  auto_flagged?: Array<{
+    target: TrademarkSearchTargetClient;
+    source: TrademarkSearchSourceClient["source"];
+    reason: string;
+  }>;
+};
+
+export type RightsCheckClient = {
+  trademark_passed: boolean;
+  ip_similarity_passed: boolean;
+  checked_at: string;
+  notes?: string;
+};
+
+export type TrademarkCheckGetResponse = {
+  slug: string;
+  volume: number;
+  checkResult: TrademarkCheckResultClient;
+  currentRightsCheck: RightsCheckClient | null;
+  releaseExists: boolean;
+};
+
+export function apiGetTrademarkCheck(
+  slug: string,
+  volume: number,
+): Promise<TrademarkCheckGetResponse> {
+  const v = String(volume).padStart(2, "0");
+  return getJson<TrademarkCheckGetResponse>(
+    `/api/works/${encodeURIComponent(slug)}/volumes/v${v}/trademark-check`,
+  );
+}
+
+export type TrademarkCheckSaveRequest = {
+  trademarkPassed: boolean;
+  ipSimilarityPassed: boolean;
+  flaggedKeywords?: TrademarkSearchTargetClient[];
+  notes?: string;
+};
+
+export function apiPostTrademarkCheck(
+  slug: string,
+  volume: number,
+  body: TrademarkCheckSaveRequest,
+): Promise<{ ok: true; rights_check: RightsCheckClient; message: string }> {
+  const v = String(volume).padStart(2, "0");
+  return postJson(
+    `/api/works/${encodeURIComponent(slug)}/volumes/v${v}/trademark-check`,
+    body,
+  );
+}

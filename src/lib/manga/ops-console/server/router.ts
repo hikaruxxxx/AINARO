@@ -49,6 +49,10 @@ import {
   handleJobsStream,
 } from "./handlers/jobs";
 import { handleWorkEpisodes, handleWorksList } from "./handlers/works";
+import {
+  handleTrademarkCheckGet,
+  handleTrademarkCheckPost,
+} from "./handlers/trademark";
 
 export type RouterDefaults = {
   /**
@@ -304,6 +308,41 @@ export async function handleApi(
         return send(res, 400, { error: "作品 ID または巻番号が不正です" });
       }
       return handleVolumePlot(slug, volume, res);
+    }
+  }
+  // Phase X WX-5: trademark / IP 類似チェックの人間判定
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/volumes\/v(\d+)\/trademark-check$/);
+    if (m) {
+      const slug = m[1];
+      const volume = Number(m[2]);
+      if (!isValidSlug(slug) || !Number.isInteger(volume) || volume <= 0) {
+        return send(res, 400, { error: "作品 ID または巻番号が不正です" });
+      }
+      if (req.method === "GET") {
+        return handleTrademarkCheckGet(res, slug, volume);
+      }
+      if (req.method === "POST") {
+        if (defaults.defaultSlug === null) {
+          return send(res, 400, {
+            error:
+              "書き込みには scope 固定モードが必要です。`npm run console -- --slug <slug> --episode <NN>` で起動してください",
+          });
+        }
+        if (slug !== defaults.defaultSlug) {
+          return send(res, 403, {
+            error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)",
+          });
+        }
+        let body: any;
+        try {
+          body = await readJsonBody(req);
+        } catch (e) {
+          return send(res, 400, { error: String(e) });
+        }
+        return handleTrademarkCheckPost(req, res, body, slug, volume);
+      }
+      return send(res, 405, { error: "このメソッドは許可されていません" });
     }
   }
   {

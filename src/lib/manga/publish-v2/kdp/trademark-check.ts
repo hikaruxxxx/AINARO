@@ -64,17 +64,22 @@ export type TrademarkCheckResult = {
   }>;
 };
 
+/** buildTrademarkSearches が参照する最小 metadata subset (KdpMetadata 全体は不要) */
+export type TrademarkCheckMetaInput = Pick<KdpMetadata, "title"> & {
+  subtitle?: string;
+};
+
 /**
  * KDP メタデータ + キャラ名リスト + レーベル名から、
  * 商標チェック対象を抽出して各サイトの検索URLを生成する。
  *
- * @param metadata KDP 入稿メタデータ (タイトル/サブタイトル等)
+ * @param metadata title (必須) / subtitle (任意) のみ参照
  * @param characterNames 主要キャラクター名 (主人公・ヒロイン)
  * @param labelName レーベル名 (例: "Novelis")
  * @param seriesTitle シリーズタイトル (任意)
  */
 export function buildTrademarkSearches(
-  metadata: KdpMetadata,
+  metadata: TrademarkCheckMetaInput,
   characterNames: string[] = [],
   labelName?: string,
   seriesTitle?: string,

@@ -14,6 +14,7 @@ export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = 
   { view: "bible", label: "世界観・設定", group: "work" },
   { view: "volume-plot", label: "巻プロット", group: "work" },
   { view: "kdp-metadata", label: "KDP メタ情報", group: "work" },
+  { view: "trademark-gate", label: "商標 / IP チェック", group: "work" },
   { view: "work-overview", label: "作品概要", group: "work" },
   { view: "layers", label: "個別 layer 起動", group: "exec" },
   { view: "volumes", label: "巻管理", group: "exec" },
