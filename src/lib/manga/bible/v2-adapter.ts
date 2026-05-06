@@ -26,6 +26,9 @@ import type {
   VisualMotifV2,
   WorldSpec,
   DungeonModernSubtype,
+  TextQualityLexiconV2,
+  NarrationStyleGuideV2,
+  NavFullSpecV2,
 } from "../schemas-v2";
 
 // ============================================================
@@ -71,7 +74,10 @@ export type V2Concept = {
     system: string;
     timeline: string;
     factions: Array<{ name: string; summary: string }>;
+    lexicon?: TextQualityLexiconV2;
   };
+  narration_style_guide?: NarrationStyleGuideV2;
+  nav_full_spec?: NavFullSpecV2;
   main_arc?: unknown;
   volume_outline?: unknown;
   volume1_detail?: unknown;
@@ -202,6 +208,7 @@ function adaptWorld(w: V2Concept["world"]): WorldSpec {
     system: w.system,
     timeline: w.timeline,
     factions: w.factions,
+    ...(w.lexicon ? { lexicon: w.lexicon } : {}),
   };
 }
 
@@ -471,7 +478,7 @@ export function adaptV2ConceptToBibleSnapshot(
   const visualMotifs = defaultVisualMotifs();
   const continuitySeeds = deriveContinuitySeeds(characters, locations, props);
 
-  return {
+  const snapshot: BibleSnapshotV2 = {
     schema_version: 2,
     generated_at: new Date().toISOString(),
     generated_from: {
@@ -513,6 +520,13 @@ export function adaptV2ConceptToBibleSnapshot(
         "8話末ラストコマ: 灯里がレンのIDを照合し終わる、画面に『該当者なし』と表示されるが、彼女の指がスクロールを止める。「いや、絶対いる」",
     },
   };
+  if (concept.narration_style_guide) {
+    snapshot.narration_style_guide = concept.narration_style_guide;
+  }
+  if (concept.nav_full_spec) {
+    snapshot.nav_full_spec = concept.nav_full_spec;
+  }
+  return snapshot;
 }
 
 // ============================================================

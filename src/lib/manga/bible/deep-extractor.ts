@@ -16,7 +16,12 @@
  *   - volume_synopsis.summary 500-1000字
  */
 import { runCodexText } from "../llm/codex-text";
-import type { BibleSnapshotV2 } from "../schemas-v2";
+import type {
+  BibleSnapshotV2,
+  NavFullSpecV2,
+  NarrationStyleGuideV2,
+  TextQualityLexiconV2,
+} from "../schemas-v2";
 import type { V2Concept } from "./v2-adapter";
 import type { BibleLintReport } from "../qa-v2/bible-lint";
 
@@ -83,8 +88,36 @@ type DeepExtractorOutput = {
     summary: string;                // 500-1000字、章ビート骨格
     cliffhanger: string;            // 巻末の引き 100-200字
   };
+  lexicon_patch?: {
+    [key: string]: unknown;          // world.lexicon (TextQualityLexiconV2) の生成 patch。forbidden_terms_global (string[]) / p1_opening_directive (string) を含む。作品の用語禁則・ナレーション語彙ガード。bible の既存 lexicon が空のときのみ生成すること。
+  } | null;
+  narration_style_guide_patch?: {
+    [key: string]: unknown;          // narration_style_guide (NarrationStyleGuideV2) 全体の生成 patch。p1_opening_directive_specific / ban_list_phrases / monologue_signature_patterns を含む。bible.narration_style_guide が未設定のときのみ生成すること。
+  } | null;
+  nav_full_spec_patch?: {
+    [key: string]: unknown;          // nav_full_spec (NavFullSpecV2) 全体の生成 patch。voice_persona / canonical_disclosure_lines_vol_1 / anti_pattern_dialogue を含む。案内役が存在しないなら null。
+  } | null;
 };
 `;
+
+export type DeepExtractionPatch = {
+  characters_patch?: Array<{
+    id: string;
+    spec_overrides?: Partial<BibleSnapshotV2["characters"][number]["spec"]>;
+    continuity_anchors_replace?: string[];
+    appearance_notes_replace?: string;
+  }>;
+  locations_add?: Array<BibleSnapshotV2["locations"][number]>;
+  props_add?: Array<BibleSnapshotV2["props"][number]>;
+  visual_motifs_add?: Array<BibleSnapshotV2["visual_motifs"][number]>;
+  costumes_add?: Array<BibleSnapshotV2["costumes"][number]>;
+  relations_replace?: Array<BibleSnapshotV2["relations"][number]>;
+  style_directives_overrides?: Partial<BibleSnapshotV2["style_directives"]>;
+  volume_synopsis_replace?: Partial<BibleSnapshotV2["volume_synopsis"]>;
+  lexicon_patch?: TextQualityLexiconV2 | null;
+  narration_style_guide_patch?: NarrationStyleGuideV2 | null;
+  nav_full_spec_patch?: NavFullSpecV2 | null;
+};
 
 export async function runDeepExtractor(args: {
   v2Concept: V2Concept;
@@ -93,16 +126,7 @@ export async function runDeepExtractor(args: {
   styleReferenceNote: string;       // 画風参考フレームの説明 (Codex が画像を直接見られないので言葉で渡す)
   cwd?: string;
   timeoutMs?: number;
-}): Promise<{
-  characters_patch: Array<unknown>;
-  locations_add: Array<unknown>;
-  props_add: Array<unknown>;
-  visual_motifs_add: Array<unknown>;
-  costumes_add: Array<unknown>;
-  relations_replace: Array<unknown>;
-  style_directives_overrides?: unknown;
-  volume_synopsis_replace?: unknown;
-}> {
+}): Promise<DeepExtractionPatch> {
   const lintHints = args.lintReport.findings
     .filter((f) => f.severity !== "info")
     .slice(0, 50)
@@ -149,6 +173,27 @@ export async function runDeepExtractor(args: {
     "- relations_replace: 既存 relations を双方向化 + 巻ごとの変化 4件以上",
     "- volume_synopsis_replace: theme 100字 / summary 700字+ / cliffhanger 150字",
     "",
+    "# テキスト品質パック (text_quality_pack) の生成",
+    "",
+    "bible が「商業作家として通用する」テキスト品質を持つために、以下 3 セクションを生成して返してください。",
+    "ただし、bible に既に該当フィールドが存在し中身がある場合 (currentBible.world.lexicon に key があり、 narration_style_guide / nav_full_spec が undefined でない) は、そのキーの patch は **null を返す** か、**そのキー自体を返さない** こと。",
+    "",
+    "## lexicon_patch (world.lexicon の patch)",
+    "作品独自の禁則語と P1 冒頭 directive を生成。形式:",
+    "- forbidden_terms_global: string[] — その作品で使ってはいけない語彙 (10-30 件)。「平凡な日常」「最強の」などの既視感ある言い回し、別作品の固有語、安易な現代俗語など。",
+    "- p1_opening_directive: string — 1ページ目の独白に対する強制指示 1-3 文。重い陰鬱導入を避け、状況・行動・結果のいずれかを 1 ライン目で読者に提示させる、等。",
+    "",
+    "## narration_style_guide_patch (narration_style_guide 全体の patch)",
+    "- p1_opening_directive_specific: { max_lines: number, max_chars_per_line: number, must_avoid: string[], must_contain_at_most_one_of: string[], preferred_pattern_examples: string[], rejected_pattern_examples: string[] } — P1 1コマ目の独白具体指示",
+    "- ban_list_phrases: string[] — 全話通底で禁止する陳腐フレーズ (10-20 件)。例: \"～かもしれない\", \"そうこうしているうちに\", \"それは突然のことだった\" 等",
+    "- monologue_signature_patterns: string[] — 主人公モノローグの定型パターン (3-5 件)。短文 / 体言止め / 行動先出し etc.",
+    "",
+    "## nav_full_spec_patch (nav_full_spec 全体の patch)",
+    "作品に「システム音声 / 異世界の声 / 内なる声 / 神視点ガイド」のような「主人公だけに聞こえる external/internal 案内役」が存在する場合に限り生成。存在しない作品は null を返すこと。形式:",
+    "- voice_persona: { default_tone: string, speech_endings: string[], emotional_range_per_volume: { vol_1: string, vol_2: string, ... } }",
+    "- canonical_disclosure_lines_vol_1: string[] — Vol.1 でナビが発する代表的開示ライン 5-10 件",
+    "- anti_pattern_dialogue: { reason: string, examples: string[] } — ナビ発話として絶対禁止の口調・表現",
+    "",
     "## 出力形式",
     "上記スキーマに従う JSON のみを返してください。説明文・前置き・後書きは不要。",
     "出力は ```json ... ``` のコードブロックで囲んでください。",
@@ -172,21 +217,7 @@ export async function runDeepExtractor(args: {
 
 export function applyDeepEnhancements(args: {
   bible: BibleSnapshotV2;
-  patch: {
-    characters_patch?: Array<{
-      id: string;
-      spec_overrides?: Partial<BibleSnapshotV2["characters"][number]["spec"]>;
-      continuity_anchors_replace?: string[];
-      appearance_notes_replace?: string;
-    }>;
-    locations_add?: Array<BibleSnapshotV2["locations"][number]>;
-    props_add?: Array<BibleSnapshotV2["props"][number]>;
-    visual_motifs_add?: Array<BibleSnapshotV2["visual_motifs"][number]>;
-    costumes_add?: Array<BibleSnapshotV2["costumes"][number]>;
-    relations_replace?: Array<BibleSnapshotV2["relations"][number]>;
-    style_directives_overrides?: Partial<BibleSnapshotV2["style_directives"]>;
-    volume_synopsis_replace?: Partial<BibleSnapshotV2["volume_synopsis"]>;
-  };
+  patch: DeepExtractionPatch;
 }): BibleSnapshotV2 {
   const out: BibleSnapshotV2 = JSON.parse(JSON.stringify(args.bible));
 
@@ -240,6 +271,18 @@ export function applyDeepEnhancements(args: {
   }
   if (args.patch.volume_synopsis_replace) {
     out.volume_synopsis = { ...out.volume_synopsis, ...args.patch.volume_synopsis_replace };
+  }
+  if (
+    args.patch.lexicon_patch &&
+    (!out.world.lexicon || Object.keys(out.world.lexicon).length === 0)
+  ) {
+    out.world.lexicon = args.patch.lexicon_patch;
+  }
+  if (args.patch.narration_style_guide_patch && !out.narration_style_guide) {
+    out.narration_style_guide = args.patch.narration_style_guide_patch;
+  }
+  if (args.patch.nav_full_spec_patch && !out.nav_full_spec) {
+    out.nav_full_spec = args.patch.nav_full_spec_patch;
   }
 
   // continuity_seeds を新規 entity 用に追加

@@ -23,8 +23,13 @@ L1  Bible Snapshot         V2企画書 → bible/snapshot.json
 L2  Bible Images           snapshot → bible/refs/{characters,locations,props}/
 
 ═══ PHASE 2: EPISODE PLANNING (per ep) ═══
-L3  Shotlist               bible + ep_text → episodes/epNN/shotlist.json
-L4  Storyboard             shotlist + bible → storyboard.json (entity_id binding hard required)
+L3   Shotlist              bible + ep_text → episodes/epNN/shotlist.json
+L3.5 Scene-Graph           bible + shotlist + brief + volume_plot → episodes/epNN/scene_graph.json
+                           物語論理 (arc/beat/cast/dialogue_plan/foreshadow/protagonist/relationship/time)
+                           × 頁演出 (page_budget/mode/turn_anchor/layout_pattern/subtype/render_strategy)
+                           × 選別ループ (candidates×5 → pairwise → predict-hit → anchor 比較 → 採用)
+                           Phase β B1-B3 で実装予定。詳細: docs/plans/manga/scene-graph-l3-5.md
+L4   Storyboard            scene_graph + bible → storyboard.json (panel は scene_id を継承、entity_id binding hard required)
 L5  Page Director          storyboard + capability → page_plan.json
 L6  Continuity Resolve     page_plan + bible → page_plan + continuity_group_ids
 L7  Refs Resolution        page_plan + bible/refs → resolved_refs.json

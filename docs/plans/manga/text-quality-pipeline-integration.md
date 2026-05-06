@@ -127,3 +127,7 @@ function validatePanelText(panel: StoryboardPanel, bible: BibleSnapshotV2): Vali
 ## 改訂履歴
 
 - 2026-05-06: 初版作成。Explore agent 調査で 4 セクションがパイプラインに 0 接続と判明したため、統合計画を成文化。Codex 実装ターゲット。
+
+## 自動生成への組み込み (2026-05-07)
+
+L01c (bible deepen) の deep-extractor が 3 フィールド (world.lexicon / narration_style_guide / nav_full_spec) の patch を生成するようになった (deep-extractor.ts の ENHANCEMENT_SCHEMA + prompt 拡張)。新規 slug は L01c を回せばこれら 3 フィールドが自動で入る。既存 slug の bible に既に値がある場合は patch を skip して上書き保護する設計。
