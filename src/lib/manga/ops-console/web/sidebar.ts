@@ -49,8 +49,8 @@ function groupedMenuHtml(currentView: ViewName): string {
 function rerender(root: HTMLElement, state: AppState): void {
   if (!state.currentSlug) {
     root.innerHTML = `
-      <div class="scope-panel">
-        <p class="scope-note">作品を選択してください。</p>
+      <div class="nc-scope-panel">
+        <p class="nc-scope-note">作品を選択してください。</p>
         <button type="button" class="sidebar__menu-item${state.currentView === "index" ? " is-active" : ""}" data-view="index">作品一覧</button>
       </div>
     `;
@@ -67,8 +67,8 @@ function rerender(root: HTMLElement, state: AppState): void {
   const episodes = currentWork?.episodes.length ? currentWork.episodes : [state.currentEpisode];
   const lockTitle = "Phase 2A は default scope 固定。Phase 2B/3 で切替を解禁予定。";
   root.innerHTML = `
-    <div class="scope-panel">
-      <div class="field">
+    <div class="nc-scope-panel">
+      <div class="nc-field-legacy">
         <label for="scope-slug">work</label>
         <select id="scope-slug" disabled aria-disabled="true" title="${escapeHtml(lockTitle)}">
           ${renderOptions(
@@ -77,7 +77,7 @@ function rerender(root: HTMLElement, state: AppState): void {
           )}
         </select>
       </div>
-      <div class="field">
+      <div class="nc-field-legacy">
         <label for="scope-episode">episode</label>
         <select id="scope-episode" disabled aria-disabled="true" title="${escapeHtml(lockTitle)}">
           ${renderOptions(
@@ -86,7 +86,7 @@ function rerender(root: HTMLElement, state: AppState): void {
           )}
         </select>
       </div>
-      <p class="scope-note">Phase 2A は default scope 固定。切替は Phase 2B/3 で解禁予定。</p>
+      <p class="nc-scope-note">Phase 2A は default scope 固定。切替は Phase 2B/3 で解禁予定。</p>
     </div>
     <nav class="menu" aria-label="ops views">
       ${groupedMenuHtml(state.currentView)}

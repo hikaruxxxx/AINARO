@@ -1,0 +1,24 @@
+.view-placeholder {
+  max-width: 720px;
+  padding: var(--space-5);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--surface-elevated);
+}
+
+.view-placeholder h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-2xl);
+  letter-spacing: 0;
+}
+
+.view-placeholder p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-md);
+  line-height: 1.7;
+}
+
+.view-placeholder a {
+  color: var(--color-primary);
+}

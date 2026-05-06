@@ -1,15 +1,19 @@
 /**
  * Novelis Console (漫画 ops UI) の HTML shell。
  *
- * Wave 0 では inline CSS を互換のため残し、共通 stylesheet を追加配信する。
+ * Wave 1B-1 では shell を共通 stylesheet へ移し、旧 view 用の最小 fallback だけ残す。
  */
 export function renderOpsConsoleShellHtml(): string {
+  const favicon =
+    "data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3E%3Ctext%20x='8'%20y='13'%20text-anchor='middle'%20font-family='-apple-system,sans-serif'%20font-weight='700'%20font-size='13'%20fill='%232563eb'%3EN%3C/text%3E%3C/svg%3E";
+
   return `<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Novelis Console</title>
+  <link rel="icon" type="image/svg+xml" href="${favicon}">
   <script>
     (function(){
       try {
@@ -22,114 +26,53 @@ export function renderOpsConsoleShellHtml(): string {
   </script>
   <link rel="stylesheet" href="/_ops/styles.css">
   <style>
-    :root {
-      color: #172033;
-      background: #f6f7f9;
-      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: #f6f7f9; }
-    .top {
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 0 20px;
-      border-bottom: 1px solid #d9dee7;
-      background: #ffffff;
-    }
-    .top-title { font-size: 15px; font-weight: 700; letter-spacing: 0; }
-    .top-scope { color: #5e6a7f; font-size: 13px; white-space: nowrap; }
-    .app {
-      min-height: calc(100vh - 48px);
-      display: grid;
-      grid-template-columns: 240px minmax(0, 1fr);
-    }
-    #sidebar {
-      width: 240px;
-      border-right: 1px solid #d9dee7;
-      background: #eef2f6;
-      padding: 16px 12px;
-    }
-    #main {
-      min-width: 0;
-      padding: 24px;
-      background: #f8fafc;
-    }
-    .scope-panel { display: grid; gap: 10px; margin-bottom: 18px; }
-    .field { display: grid; gap: 5px; }
-    .field label {
-      color: #526076;
-      font-size: 12px;
-      font-weight: 700;
-    }
+    /* Wave 1B-2 までの過渡期: 旧 view 内の生 selector を残す */
     select {
       width: 100%;
       min-height: 34px;
-      border: 1px solid #c7cfdb;
-      border-radius: 6px;
-      background: #ffffff;
-      color: #172033;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--surface-elevated);
+      color: var(--text-primary);
       padding: 0 8px;
       font: inherit;
-      font-size: 13px;
+      font-size: var(--fs-base);
     }
-    .scope-note {
-      margin: 0;
-      color: #6f7b8f;
-      font-size: 12px;
-      line-height: 1.5;
-    }
-    .menu { display: grid; gap: 6px; }
+    .menu { display: grid; gap: var(--space-1); }
     .menu-button {
       width: 100%;
       min-height: 36px;
       border: 0;
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       background: transparent;
-      color: #243044;
-      padding: 0 10px;
+      color: var(--text-primary);
+      padding: 0 var(--space-2);
       text-align: left;
       font: inherit;
-      font-size: 14px;
+      font-size: var(--fs-md);
       cursor: pointer;
     }
-    .menu-button:hover { background: #dfe6ef; }
+    .menu-button:hover { background: var(--surface-sunken); }
     .menu-button.is-active {
-      background: #1f5eff;
-      color: #ffffff;
-      font-weight: 700;
+      background: var(--color-primary);
+      color: var(--color-primary-fg);
+      font-weight: var(--fw-medium);
     }
-    .view-placeholder {
-      max-width: 720px;
-      padding: 24px;
-      border: 1px solid #dbe1ea;
-      border-radius: 8px;
-      background: #ffffff;
-    }
-    .view-placeholder h2 {
-      margin: 0 0 10px;
-      font-size: 22px;
-      letter-spacing: 0;
-    }
-    .view-placeholder p {
-      margin: 0;
-      color: #526076;
-      font-size: 14px;
-      line-height: 1.7;
-    }
-    .view-placeholder a { color: #1f5eff; }
   </style>
 </head>
 <body>
-  <header class="top">
-    <div class="top-title">Novelis Console</div>
-    <nav class="nc-breadcrumb" id="top-breadcrumb" aria-label="breadcrumb"></nav>
+  <header class="nc-header">
+    <span class="nc-header__brand">Novelis Console</span>
+    <span class="nc-header__divider" aria-hidden="true"></span>
+    <nav class="nc-breadcrumb nc-header__breadcrumb-slot" id="top-breadcrumb" aria-label="breadcrumb"></nav>
+    <div class="nc-header__actions">
+      <span class="nc-header__env" id="nc-env-badge"></span>
+      <span id="nc-theme-toggle"></span>
+    </div>
   </header>
-  <div class="app">
-    <aside id="sidebar"></aside>
-    <main id="main"></main>
+  <div class="nc-app">
+    <aside class="nc-sidebar" id="sidebar"></aside>
+    <main class="nc-main" id="main"></main>
   </div>
   <script type="module" src="/_ops/main.js"></script>
 </body>

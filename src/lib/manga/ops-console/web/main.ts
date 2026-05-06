@@ -2,6 +2,7 @@ import { apiGetBootstrap } from "./lib/api";
 import { isViewName, store, type ViewName } from "./lib/store";
 import { mountBreadcrumb } from "./breadcrumb";
 import { mountSidebar } from "./sidebar";
+import { mountThemeToggle } from "./theme-toggle";
 import { mountAssetsView } from "./views/assets";
 import { mountIndexView } from "./views/index";
 import { mountLayersView } from "./views/layers";
@@ -84,11 +85,13 @@ async function start(): Promise<void> {
   const sidebar = document.querySelector<HTMLElement>("#sidebar");
   const main = document.querySelector<HTMLElement>("#main");
   const topBreadcrumb = document.querySelector<HTMLElement>("#top-breadcrumb");
-  if (!sidebar || !main || !topBreadcrumb) throw new Error("Novelis Console shell is incomplete");
+  const themeToggle = document.querySelector<HTMLElement>("#nc-theme-toggle");
+  if (!sidebar || !main || !topBreadcrumb || !themeToggle) throw new Error("Novelis Console shell is incomplete");
 
   mountSidebar(sidebar);
   mountCurrentView(main);
   mountBreadcrumb(topBreadcrumb);
+  mountThemeToggle(themeToggle);
 
   const boot = await loadBootstrap();
   const route = parseRoute();
