@@ -128,6 +128,16 @@ export type ImprovementsResponse = {
       is_volume_end: boolean;
     };
   };
+  /** Phase Y WY-4: L5.5 Engagement LLM Audit (engagement_audit.json) */
+  engagement_audit: {
+    available: boolean;
+    overall_drop_off_risk?: number;
+    boring_pages?: number[];
+    worst_page?: { page_no: number; drop_off_risk: number; reason: string } | null;
+    human_review_required?: boolean;
+    rationale_summary?: string;
+    generated_at?: string;
+  };
   /** 編集判断カードDB の関連カード一覧 */
   related_cards: Array<{
     card_id: string;
@@ -293,6 +303,28 @@ export async function handleImprovementsGet(
       }
     }
 
+    // Phase Y WY-4: engagement_audit.json
+    const engagementPath = path.join(epDir, "engagement_audit.json");
+    const engagement = await readJsonOrNull<{
+      overall_drop_off_risk: number;
+      boring_pages: number[];
+      worst_page: { page_no: number; drop_off_risk: number; reason: string } | null;
+      human_review_required: boolean;
+      rationale_summary: string;
+      generated_at: string;
+    }>(engagementPath);
+    const engagementSummary: ImprovementsResponse["engagement_audit"] = engagement
+      ? {
+          available: true,
+          overall_drop_off_risk: engagement.overall_drop_off_risk,
+          boring_pages: engagement.boring_pages,
+          worst_page: engagement.worst_page,
+          human_review_required: engagement.human_review_required,
+          rationale_summary: engagement.rationale_summary,
+          generated_at: engagement.generated_at,
+        }
+      : { available: false };
+
     // 編集判断カードDB シード一覧 (REPO_ROOT 基準で cwd 非依存)
     const cardFiles = (await listFilesInDir(EDITORIAL_CARDS_DIR)).filter(
       (f) => f.startsWith("EC-") && f.endsWith(".json"),
@@ -353,6 +385,12 @@ export async function handleImprovementsGet(
         },
         description: `推奨案で last_page を直接更新 + pull_link 書き込み (volume_position=${volumePosition})`,
       },
+      {
+        label: "Engagement Audit を実行 (LLM)",
+        job_layer: "L05_5",
+        job_flags: {},
+        description: "storyboard 全 page を claude opus で「読者離脱リスク」採点 + 退屈page検出 + キャラ好感度推移 (12-20分)",
+      },
     ];
 
     const response: ImprovementsResponse = {
@@ -362,6 +400,7 @@ export async function handleImprovementsGet(
       name_audit_summary: nameAuditSummary,
       opening_hook_proposals: openingProposals,
       cliffhanger_proposals: cliffProposals,
+      engagement_audit: engagementSummary,
       related_cards: relatedCards,
       next_actions: nextActions,
     };

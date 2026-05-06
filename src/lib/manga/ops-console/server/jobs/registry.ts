@@ -6,6 +6,7 @@ export type LayerId =
   | "L02b"
   | "L04_1"
   | "L04_9"
+  | "L05_5"
   | "L09"
   | "L11"
   | "L12"
@@ -101,6 +102,12 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
       { name: "--volume-position", pattern: /^(early|mid|late|volume_end)$/ },
     ],
     timeoutMs: 30 * 60 * 1000,
+  },
+  L05_5: {
+    script: "scripts/manga/layers/L05-5-engagement-audit.ts",
+    scope: "episode",
+    allowedFlags: [],
+    timeoutMs: 20 * 60 * 1000,
   },
   L09: {
     script: "scripts/manga/layers/L09-render.ts",

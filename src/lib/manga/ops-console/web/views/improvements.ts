@@ -189,6 +189,42 @@ function renderProposalSection(
   return lines.join("");
 }
 
+function renderEngagementAudit(data: ImprovementsResponse): string {
+  const e = data.engagement_audit;
+  if (!e.available) {
+    return `
+      <div class="imp-section">
+        <h3>L5.5 Engagement Audit (LLM 判定)</h3>
+        <p class="imp-section-sub">storyboard を claude opus で「読者離脱リスク」採点。下の next_actions から実行</p>
+        <div class="imp-empty">未生成。「Engagement Audit を実行 (LLM)」ボタンから起動してください (12-20分)</div>
+      </div>
+    `;
+  }
+  const riskLevel = (e.overall_drop_off_risk ?? 0) >= 60 ? "danger" : (e.overall_drop_off_risk ?? 0) >= 30 ? "warning" : "info";
+  return `
+    <div class="imp-section">
+      <h3>L5.5 Engagement Audit (LLM 判定)</h3>
+      <p class="imp-section-sub">claude opus による「読者離脱リスク」採点。生成: ${escapeHtml(e.generated_at ?? "")}</p>
+      <dl class="imp-stat-row">
+        <div><dt>overall_drop_off_risk</dt><dd>${(e.overall_drop_off_risk ?? 0).toFixed(1)} / 100</dd></div>
+        <div><dt>boring pages</dt><dd>${(e.boring_pages ?? []).length}件 [${(e.boring_pages ?? []).join(", ")}]</dd></div>
+        <div><dt>human_review_required</dt><dd>${e.human_review_required ? "✅ 要レビュー" : "—"}</dd></div>
+      </dl>
+      ${e.worst_page ? `
+        <div class="imp-finding imp-finding--${riskLevel}">
+          <strong>worst_page: page ${e.worst_page.page_no}</strong> (risk ${e.worst_page.drop_off_risk})
+          <div class="imp-finding-meta">${escapeHtml(e.worst_page.reason)}</div>
+        </div>
+      ` : ""}
+      ${e.rationale_summary ? `
+        <div class="imp-pull-link">
+          <strong>所感:</strong> ${escapeHtml(e.rationale_summary)}
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
 function renderRelatedCards(data: ImprovementsResponse): string {
   return `
     <div class="imp-section">
@@ -265,6 +301,7 @@ function render(container: HTMLElement, state: ViewState): void {
             state.data.cliffhanger_proposals.pull_link,
           )}
         </div>
+        ${renderEngagementAudit(state.data)}
         ${renderRelatedCards(state.data)}
         ${renderNextActions(state.data, state)}
       `

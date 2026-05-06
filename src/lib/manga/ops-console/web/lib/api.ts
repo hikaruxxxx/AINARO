@@ -653,6 +653,15 @@ export type ImprovementsResponse = {
       is_volume_end: boolean;
     };
   };
+  engagement_audit: {
+    available: boolean;
+    overall_drop_off_risk?: number;
+    boring_pages?: number[];
+    worst_page?: { page_no: number; drop_off_risk: number; reason: string } | null;
+    human_review_required?: boolean;
+    rationale_summary?: string;
+    generated_at?: string;
+  };
   related_cards: Array<{
     card_id: string;
     title: string;
