@@ -1,0 +1,412 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-06",
+  "_source": "Plan groovy-wishing-castle.md WY-1 + manga_craft_guide.md v2 + Codex KDP統一案",
+  "_purpose": "L4 Opening Hook 編集パス (pages[0..2] 専用再生成) で参照する掴みパターン辞書。なろう系の代表的な掴み構造を抽象化",
+  "_target_genres": ["modern_dungeon", "battle_dungeon", "isekai_tensei_cheat", "isekai_tsuiho_zamaa"],
+  "_audit_pass_criteria": {
+    "must_match_one_pattern": "pages[0..2] のうち最低1パターン適用",
+    "page_1_role": "opening_hook 必須",
+    "panel_count_per_page": "4-6 推奨",
+    "first_panel_importance": "≥4 (sumb で読まれる)",
+    "first_speech_within_pages": "page 1-2 までに dialogue or monologue 1個以上"
+  },
+
+  "patterns": [
+    {
+      "id": "P1_daily_anomaly",
+      "name": "日常×異変",
+      "description": "主人公の平凡で底辺の日常を establishing → そこに突然の異変 (音/光/能力/声) が割り込む構造。読者に共感できる出発点を提供してから世界観に引き込む",
+      "best_for_genres": ["modern_dungeon", "battle_modern_power", "modern_school"],
+      "best_for_tone": ["light_recovery", "balanced"],
+      "structure": [
+        {
+          "page": 1,
+          "panels": [
+            { "panel_no": 1, "shot_type": "establishing", "importance": 5, "purpose": "場所/時間/世界観の establishing (大ゴマ)" },
+            { "panel_no": 2, "shot_type": "wide", "importance": 3, "purpose": "主人公の底辺生活 (夜勤/コンビニ/中古装備等)" },
+            { "panel_no": 3, "shot_type": "close_up", "importance": 2, "purpose": "主人公の表情・諦めの色" },
+            { "panel_no": 4, "shot_type": "medium", "importance": 3, "purpose": "周囲の対比 (Sランクの噂/ヒエラルキー上位の存在)" },
+            { "panel_no": 5, "shot_type": "close_up", "importance": 4, "purpose": "page 1 の引き (微かな違和感、伏線)" }
+          ]
+        },
+        {
+          "page": 2,
+          "panels": [
+            { "panel_no": 6, "shot_type": "wide", "importance": 3, "purpose": "翌朝/翌日への場面転換 (時間流動)" },
+            { "panel_no": 7, "shot_type": "medium", "importance": 4, "purpose": "通常ルーチンに見える行動" },
+            { "panel_no": 8, "shot_type": "close_up", "importance": 5, "purpose": "★ 異変の瞬間 (声/光/通知) — 大ゴマ可" },
+            { "panel_no": 9, "shot_type": "close_up", "importance": 4, "purpose": "主人公の困惑・戸惑い反応" },
+            { "panel_no": 10, "shot_type": "medium", "importance": 3, "purpose": "page 2 末の引き (異変の継続)" }
+          ]
+        },
+        {
+          "page": 3,
+          "panels": [
+            { "panel_no": 11, "shot_type": "wide", "importance": 3, "purpose": "状況の客観把握" },
+            { "panel_no": 12, "shot_type": "medium", "importance": 3, "purpose": "主人公の検証行動 (本当に?)" },
+            { "panel_no": 13, "shot_type": "close_up", "importance": 4, "purpose": "確信の瞬間 (これは現実だ)" },
+            { "panel_no": 14, "shot_type": "medium", "importance": 4, "purpose": "主人公の決意 or 第一歩" },
+            { "panel_no": 15, "shot_type": "establishing", "importance": 5, "purpose": "★ page 3 末の大ゴマ引き (新しい日常への転換)" }
+          ]
+        }
+      ],
+      "speech_distribution": {
+        "page_1": { "dialogue": 0, "monologue": 1, "narration": 1 },
+        "page_2": { "dialogue": 1, "monologue": 1, "narration": 0 },
+        "page_3": { "dialogue": 2, "monologue": 1, "narration": 0 }
+      },
+      "narration_quota_total": 2,
+      "first_speech_panel": 3,
+      "examples": {
+        "best": "「Fランクの俺にだけ聞こえる」 ep01 page 1-3 (夜勤コンビニ→朝6時の声)",
+        "worst": "page 1 がナレ過多で establishing なし、page 2 まで主人公が登場しない"
+      },
+      "expected_effect": "reader_friction -0.3 / hook_strength +0.4 / familiar_entry_point +0.5"
+    },
+
+    {
+      "id": "P2_world_one_line_narration",
+      "name": "世界観一文ナレ",
+      "description": "「この世界には__がある」のような世界観を一文ナレで提示してから、主人公の現在地へズームインする構造。世界観が複雑なジャンルで有効",
+      "best_for_genres": ["isekai_high_fantasy", "battle_war_chronicle", "mystery_sf"],
+      "best_for_tone": ["balanced", "hellmode"],
+      "structure": [
+        {
+          "page": 1,
+          "panels": [
+            { "panel_no": 1, "shot_type": "establishing", "importance": 5, "purpose": "★ 世界全景大ゴマ (ナレ「この世界には__」)" },
+            { "panel_no": 2, "shot_type": "wide", "importance": 3, "purpose": "世界観の象徴 (ダンジョン/魔法陣/異種族)" },
+            { "panel_no": 3, "shot_type": "medium", "importance": 3, "purpose": "ヒエラルキーの提示 (S/A/B/C/D/F のような序列)" },
+            { "panel_no": 4, "shot_type": "wide", "importance": 4, "purpose": "主人公の出現 (底辺位置)" },
+            { "panel_no": 5, "shot_type": "close_up", "importance": 4, "purpose": "主人公の顔 + 引き" }
+          ]
+        },
+        {
+          "page": 2,
+          "panels": [
+            { "panel_no": 6, "shot_type": "medium", "importance": 4, "purpose": "主人公の行動 (世界観の中で何をしているか)" },
+            { "panel_no": 7, "shot_type": "close_up", "importance": 3, "purpose": "主人公の感情" },
+            { "panel_no": 8, "shot_type": "medium", "importance": 4, "purpose": "他者との対比 (Sランクや上位者)" },
+            { "panel_no": 9, "shot_type": "close_up", "importance": 4, "purpose": "主人公の独白 (内的動機の片鱗)" },
+            { "panel_no": 10, "shot_type": "wide", "importance": 5, "purpose": "★ page 2 末の大引き (異変の予兆)" }
+          ]
+        },
+        {
+          "page": 3,
+          "panels": [
+            { "panel_no": 11, "shot_type": "establishing", "importance": 4, "purpose": "場面転換" },
+            { "panel_no": 12, "shot_type": "medium", "importance": 4, "purpose": "異変の本格発生" },
+            { "panel_no": 13, "shot_type": "close_up", "importance": 5, "purpose": "主人公の覚醒/能力獲得" },
+            { "panel_no": 14, "shot_type": "wide", "importance": 4, "purpose": "周囲の混乱/驚き" },
+            { "panel_no": 15, "shot_type": "close_up", "importance": 5, "purpose": "★ 主人公の決意 (引き)" }
+          ]
+        }
+      ],
+      "speech_distribution": {
+        "page_1": { "dialogue": 0, "monologue": 0, "narration": 2 },
+        "page_2": { "dialogue": 1, "monologue": 1, "narration": 1 },
+        "page_3": { "dialogue": 2, "monologue": 1, "narration": 0 }
+      },
+      "narration_quota_total": 3,
+      "first_speech_panel": 6,
+      "examples": {
+        "best": "「ヘルモード」「シャングリラ」の冒頭 (世界観紹介→主人公)",
+        "worst": "page 1 が世界観だけで主人公が page 3 まで顔出ししない"
+      },
+      "expected_effect": "world_immersion +0.5 / hook_strength +0.2 / reader_friction +0.1 (世界観難解化リスク)"
+    },
+
+    {
+      "id": "P3_protagonist_monologue_outburst",
+      "name": "主人公モノローグ吐露",
+      "description": "主人公の内面独白を冒頭から押し出す構造。「俺の幸運値は100だった」「俺は最弱と呼ばれている」のような自己紹介+苦さを早期提示",
+      "best_for_genres": ["isekai_tsuiho_zamaa", "battle_dungeon", "modern_human_drama"],
+      "best_for_tone": ["hellmode", "balanced"],
+      "structure": [
+        {
+          "page": 1,
+          "panels": [
+            { "panel_no": 1, "shot_type": "close_up", "importance": 5, "purpose": "★ 主人公の顔/瞳/手元 大ゴマ + 強い独白「俺は__だ」" },
+            { "panel_no": 2, "shot_type": "wide", "importance": 3, "purpose": "状況establishing (主人公の置かれた場所)" },
+            { "panel_no": 3, "shot_type": "medium", "importance": 3, "purpose": "周囲の人物 (上位者/敵対者の片鱗)" },
+            { "panel_no": 4, "shot_type": "close_up", "importance": 4, "purpose": "主人公の追加独白 (動機/憎悪/執着)" },
+            { "panel_no": 5, "shot_type": "wide", "importance": 4, "purpose": "page 1 の引き" }
+          ]
+        },
+        {
+          "page": 2,
+          "panels": [
+            { "panel_no": 6, "shot_type": "medium", "importance": 4, "purpose": "状況の進行 (具体的な事件/出来事)" },
+            { "panel_no": 7, "shot_type": "close_up", "importance": 4, "purpose": "主人公の応答/対処" },
+            { "panel_no": 8, "shot_type": "medium", "importance": 4, "purpose": "対話 or 対立" },
+            { "panel_no": 9, "shot_type": "close_up", "importance": 5, "purpose": "★ 主人公の心情ピーク (決意/覚悟/絶望)" },
+            { "panel_no": 10, "shot_type": "wide", "importance": 4, "purpose": "page 2 末の状況転換" }
+          ]
+        },
+        {
+          "page": 3,
+          "panels": [
+            { "panel_no": 11, "shot_type": "establishing", "importance": 4, "purpose": "新展開の場面" },
+            { "panel_no": 12, "shot_type": "medium", "importance": 4, "purpose": "主人公の行動開始" },
+            { "panel_no": 13, "shot_type": "close_up", "importance": 5, "purpose": "覚醒/能力発現" },
+            { "panel_no": 14, "shot_type": "wide", "importance": 4, "purpose": "結果/周囲の反応" },
+            { "panel_no": 15, "shot_type": "close_up", "importance": 5, "purpose": "★ 主人公の独白で締める (引き)" }
+          ]
+        }
+      ],
+      "speech_distribution": {
+        "page_1": { "dialogue": 0, "monologue": 3, "narration": 0 },
+        "page_2": { "dialogue": 2, "monologue": 2, "narration": 0 },
+        "page_3": { "dialogue": 1, "monologue": 2, "narration": 0 }
+      },
+      "narration_quota_total": 0,
+      "first_speech_panel": 1,
+      "examples": {
+        "best": "「ヘルモード」(山田健一の前世独白)",
+        "worst": "独白が3行以上連続で読みにくい / 主人公の苦さが過剰でlikability低下"
+      },
+      "expected_effect": "character_depth +0.5 / hook_strength +0.3 / likability +0.1 (overdone なら -0.2)"
+    },
+
+    {
+      "id": "P4_splash_pullback",
+      "name": "派手見開きから引き戻し",
+      "description": "1ページ目で大ゴマ・派手・激戦・派手な能力を見せて引きつけ、2ページ目で「実はこれは未来/過去/夢」と引き戻す。インパクト先行型",
+      "best_for_genres": ["battle_modern_power", "battle_vrmmo", "battle_dungeon"],
+      "best_for_tone": ["hellmode", "high_tension"],
+      "structure": [
+        {
+          "page": 1,
+          "panels": [
+            { "panel_no": 1, "shot_type": "wide", "importance": 5, "purpose": "★ 派手大ゴマ (戦闘/必殺技/巨大ボス) — 全面1コマ可" },
+            { "panel_no": 2, "shot_type": "close_up", "importance": 5, "purpose": "★ 主人公の構え/瞳/必殺技発動" }
+          ]
+        },
+        {
+          "page": 2,
+          "panels": [
+            { "panel_no": 3, "shot_type": "establishing", "importance": 3, "purpose": "場面転換 (実は数年前/夢から覚める/底辺の現実)" },
+            { "panel_no": 4, "shot_type": "wide", "importance": 3, "purpose": "現在地の establishing (派手から地味へ)" },
+            { "panel_no": 5, "shot_type": "medium", "importance": 3, "purpose": "主人公の現状 (落ちこぼれ/底辺)" },
+            { "panel_no": 6, "shot_type": "close_up", "importance": 4, "purpose": "主人公の独白 (落差の説明)" },
+            { "panel_no": 7, "shot_type": "medium", "importance": 3, "purpose": "周囲との対比" },
+            { "panel_no": 8, "shot_type": "close_up", "importance": 4, "purpose": "page 2 末の引き" }
+          ]
+        },
+        {
+          "page": 3,
+          "panels": [
+            { "panel_no": 9, "shot_type": "wide", "importance": 4, "purpose": "新展開 (現在の事件)" },
+            { "panel_no": 10, "shot_type": "medium", "importance": 4, "purpose": "主人公の行動" },
+            { "panel_no": 11, "shot_type": "close_up", "importance": 5, "purpose": "覚醒/能力発現の片鱗 (page 1 とリンク)" },
+            { "panel_no": 12, "shot_type": "wide", "importance": 4, "purpose": "周囲の反応" },
+            { "panel_no": 13, "shot_type": "close_up", "importance": 5, "purpose": "★ 引き (page 1 と未来の繋がり示唆)" }
+          ]
+        }
+      ],
+      "speech_distribution": {
+        "page_1": { "dialogue": 1, "monologue": 0, "narration": 1 },
+        "page_2": { "dialogue": 1, "monologue": 2, "narration": 0 },
+        "page_3": { "dialogue": 2, "monologue": 1, "narration": 0 }
+      },
+      "narration_quota_total": 1,
+      "first_speech_panel": 1,
+      "examples": {
+        "best": "「Solo Leveling」「断罪のクリスタ」など派手系コミカライズの冒頭",
+        "worst": "page 1 が派手だが page 2 への落差が極端で読者が混乱"
+      },
+      "expected_effect": "hook_strength +0.6 / commercial_pull +0.4 / character_depth +0.1"
+    },
+
+    {
+      "id": "P5_heroine_encounter",
+      "name": "ヒロイン遭遇",
+      "description": "冒頭からヒロイン (or 重要相棒キャラ) との出会い・遭遇を主軸に置く構造。関係性ドラマで引きつけるタイプ",
+      "best_for_genres": ["modern_romance", "isekai_slowlife", "otome_isekai_pure"],
+      "best_for_tone": ["light_recovery", "balanced"],
+      "structure": [
+        {
+          "page": 1,
+          "panels": [
+            { "panel_no": 1, "shot_type": "establishing", "importance": 4, "purpose": "場所/季節 establishing (柔らかい光・温度)" },
+            { "panel_no": 2, "shot_type": "wide", "importance": 3, "purpose": "主人公の登場 (生活感ある場面)" },
+            { "panel_no": 3, "shot_type": "medium", "importance": 4, "purpose": "★ ヒロインの初登場 (シルエット or 後ろ姿)" },
+            { "panel_no": 4, "shot_type": "close_up", "importance": 5, "purpose": "★ ヒロインの顔 (印象的なフルショット)" },
+            { "panel_no": 5, "shot_type": "medium", "importance": 4, "purpose": "主人公の反応" }
+          ]
+        },
+        {
+          "page": 2,
+          "panels": [
+            { "panel_no": 6, "shot_type": "medium", "importance": 4, "purpose": "二人の最初の交流 (会話/事件)" },
+            { "panel_no": 7, "shot_type": "close_up", "importance": 4, "purpose": "ヒロインの個性が出る瞬間" },
+            { "panel_no": 8, "shot_type": "medium", "importance": 3, "purpose": "主人公の応答/共感" },
+            { "panel_no": 9, "shot_type": "close_up", "importance": 4, "purpose": "二人の距離感" },
+            { "panel_no": 10, "shot_type": "wide", "importance": 4, "purpose": "page 2 末 (関係性の予感)" }
+          ]
+        },
+        {
+          "page": 3,
+          "panels": [
+            { "panel_no": 11, "shot_type": "establishing", "importance": 3, "purpose": "場面継続/転換" },
+            { "panel_no": 12, "shot_type": "medium", "importance": 4, "purpose": "事件の展開" },
+            { "panel_no": 13, "shot_type": "close_up", "importance": 5, "purpose": "ヒロインの本気 or 主人公の本気" },
+            { "panel_no": 14, "shot_type": "medium", "importance": 4, "purpose": "二人の協力/対立" },
+            { "panel_no": 15, "shot_type": "close_up", "importance": 5, "purpose": "★ 関係性の宣言 or 引き" }
+          ]
+        }
+      ],
+      "speech_distribution": {
+        "page_1": { "dialogue": 1, "monologue": 1, "narration": 0 },
+        "page_2": { "dialogue": 3, "monologue": 1, "narration": 0 },
+        "page_3": { "dialogue": 3, "monologue": 1, "narration": 0 }
+      },
+      "narration_quota_total": 0,
+      "first_speech_panel": 3,
+      "examples": {
+        "best": "「薬屋のひとりごと」「本好きの下剋上」の冒頭",
+        "worst": "ヒロインが顔出しだけで個性が出ない"
+      },
+      "expected_effect": "character_warmth +0.5 / sidekick_presence +0.6 / hook_strength +0.3"
+    },
+
+    {
+      "id": "P6_status_window_reveal",
+      "name": "ステータス画面/能力可視化",
+      "description": "冒頭でステータス画面・能力一覧・ガチャ結果のような視覚UIを提示し、主人公の数値的位置を即明示する構造。なろう系ゲーム化で典型",
+      "best_for_genres": ["battle_vrmmo", "modern_dungeon", "isekai_tensei_cheat"],
+      "best_for_tone": ["balanced", "hellmode"],
+      "structure": [
+        {
+          "page": 1,
+          "panels": [
+            { "panel_no": 1, "shot_type": "establishing", "importance": 4, "purpose": "場面 establishing (ダンジョン入口/ゲーム画面起動)" },
+            { "panel_no": 2, "shot_type": "wide", "importance": 3, "purpose": "主人公の存在" },
+            { "panel_no": 3, "shot_type": "close_up", "importance": 5, "purpose": "★ ステータス画面 panel (UI 全画面表示)" },
+            { "panel_no": 4, "shot_type": "close_up", "importance": 4, "purpose": "主人公の数値への反応 (溜息/苦笑/驚き)" },
+            { "panel_no": 5, "shot_type": "medium", "importance": 3, "purpose": "page 1 の引き" }
+          ]
+        },
+        {
+          "page": 2,
+          "panels": [
+            { "panel_no": 6, "shot_type": "wide", "importance": 4, "purpose": "周囲の対比 (上位者の数値/上位ランク)" },
+            { "panel_no": 7, "shot_type": "medium", "importance": 4, "purpose": "ヒエラルキーの社会的意味" },
+            { "panel_no": 8, "shot_type": "close_up", "importance": 4, "purpose": "主人公の決意 (この数値で何ができるか)" },
+            { "panel_no": 9, "shot_type": "medium", "importance": 4, "purpose": "行動開始" },
+            { "panel_no": 10, "shot_type": "close_up", "importance": 5, "purpose": "★ 異変 (数値が変動 or 隠しスキル発見)" }
+          ]
+        },
+        {
+          "page": 3,
+          "panels": [
+            { "panel_no": 11, "shot_type": "wide", "importance": 4, "purpose": "新展開" },
+            { "panel_no": 12, "shot_type": "close_up", "importance": 5, "purpose": "ステータス画面 panel #2 (新スキル・新数値)" },
+            { "panel_no": 13, "shot_type": "medium", "importance": 4, "purpose": "主人公の検証/驚き" },
+            { "panel_no": 14, "shot_type": "wide", "importance": 4, "purpose": "周囲の反応" },
+            { "panel_no": 15, "shot_type": "close_up", "importance": 5, "purpose": "★ 引き (隠しルールの全貌の片鱗)" }
+          ]
+        }
+      ],
+      "speech_distribution": {
+        "page_1": { "dialogue": 0, "monologue": 2, "narration": 0 },
+        "page_2": { "dialogue": 1, "monologue": 2, "narration": 0 },
+        "page_3": { "dialogue": 2, "monologue": 2, "narration": 0 }
+      },
+      "narration_quota_total": 0,
+      "first_speech_panel": 3,
+      "examples": {
+        "best": "「Fランクの俺にだけ聞こえる」 (ステータス画面 + ナビ音声)、「Solo Leveling」",
+        "worst": "ステータス画面ばかりで主人公の感情が出ない"
+      },
+      "expected_effect": "hook_strength +0.4 / world_immersion +0.4 / commercial_pull +0.4"
+    },
+
+    {
+      "id": "P7_in_media_res_action",
+      "name": "戦闘中盤からの突入",
+      "description": "主人公が既に戦闘・危機の真っ只中にいる場面から始まり、後で経緯を回想する構造。緊張感最優先",
+      "best_for_genres": ["battle_modern_power", "battle_war_chronicle", "mystery_action"],
+      "best_for_tone": ["hellmode", "high_tension"],
+      "structure": [
+        {
+          "page": 1,
+          "panels": [
+            { "panel_no": 1, "shot_type": "wide", "importance": 5, "purpose": "★ 戦闘中盤 establishing (主人公がピンチ)" },
+            { "panel_no": 2, "shot_type": "close_up", "importance": 4, "purpose": "主人公の苦悶・必死さ" },
+            { "panel_no": 3, "shot_type": "medium", "importance": 4, "purpose": "敵の存在/圧倒的能力" },
+            { "panel_no": 4, "shot_type": "close_up", "importance": 5, "purpose": "★ 一瞬の思考/独白 (どうしてこうなった)" }
+          ]
+        },
+        {
+          "page": 2,
+          "panels": [
+            { "panel_no": 5, "shot_type": "establishing", "importance": 3, "purpose": "回想開始 (場面転換)" },
+            { "panel_no": 6, "shot_type": "wide", "importance": 3, "purpose": "数時間/数日前の平穏" },
+            { "panel_no": 7, "shot_type": "medium", "importance": 4, "purpose": "事件の発端" },
+            { "panel_no": 8, "shot_type": "close_up", "importance": 4, "purpose": "主人公の選択" },
+            { "panel_no": 9, "shot_type": "wide", "importance": 5, "purpose": "★ 戦闘の始まり (回想終わり)" }
+          ]
+        },
+        {
+          "page": 3,
+          "panels": [
+            { "panel_no": 10, "shot_type": "medium", "importance": 4, "purpose": "現在に戻る (戦闘継続)" },
+            { "panel_no": 11, "shot_type": "close_up", "importance": 5, "purpose": "主人公の覚悟" },
+            { "panel_no": 12, "shot_type": "wide", "importance": 5, "purpose": "★ 必殺技発動 or 反撃" },
+            { "panel_no": 13, "shot_type": "medium", "importance": 4, "purpose": "結果/敵の反応" },
+            { "panel_no": 14, "shot_type": "close_up", "importance": 5, "purpose": "★ 引き (まだ終わらない)" }
+          ]
+        }
+      ],
+      "speech_distribution": {
+        "page_1": { "dialogue": 1, "monologue": 2, "narration": 0 },
+        "page_2": { "dialogue": 2, "monologue": 1, "narration": 0 },
+        "page_3": { "dialogue": 1, "monologue": 2, "narration": 0 }
+      },
+      "narration_quota_total": 0,
+      "first_speech_panel": 1,
+      "examples": {
+        "best": "「呪術廻戦」冒頭、緊迫アクション系コミカライズ",
+        "worst": "回想が長すぎて現在に戻らない / 主人公の動機がわからない"
+      },
+      "expected_effect": "tension +0.6 / hook_strength +0.5 / character_depth -0.1 (説明不足リスク)"
+    }
+  ],
+
+  "selection_guide": {
+    "by_tone_profile": {
+      "darkness_lt_0_3": ["P1_daily_anomaly", "P5_heroine_encounter"],
+      "darkness_0_3_to_0_5": ["P1_daily_anomaly", "P5_heroine_encounter", "P6_status_window_reveal"],
+      "darkness_0_5_to_0_7": ["P2_world_one_line_narration", "P3_protagonist_monologue_outburst", "P4_splash_pullback", "P6_status_window_reveal"],
+      "darkness_gte_0_7": ["P3_protagonist_monologue_outburst", "P4_splash_pullback", "P7_in_media_res_action"]
+    },
+    "by_genre": {
+      "modern_dungeon": ["P1_daily_anomaly", "P6_status_window_reveal", "P4_splash_pullback"],
+      "battle_dungeon": ["P3_protagonist_monologue_outburst", "P6_status_window_reveal", "P4_splash_pullback"],
+      "isekai_tensei_cheat": ["P2_world_one_line_narration", "P6_status_window_reveal"],
+      "isekai_tsuiho_zamaa": ["P3_protagonist_monologue_outburst", "P4_splash_pullback"],
+      "isekai_slowlife": ["P5_heroine_encounter", "P1_daily_anomaly"],
+      "modern_romance": ["P5_heroine_encounter"],
+      "modern_school": ["P1_daily_anomaly", "P5_heroine_encounter"],
+      "battle_war_chronicle": ["P2_world_one_line_narration", "P7_in_media_res_action"],
+      "mystery_action": ["P7_in_media_res_action", "P4_splash_pullback"],
+
+      "_aliases_note": "bible.meta.genre が自由日本語文字列の場合の fallback。Phase Y で genre 正規化 (英文ID統一) するまでの暫定対応",
+      "主人公最強無双": ["P1_daily_anomaly", "P6_status_window_reveal", "P4_splash_pullback"],
+      "現代ダンジョン": ["P1_daily_anomaly", "P6_status_window_reveal", "P4_splash_pullback"],
+      "ダンジョン探索": ["P3_protagonist_monologue_outburst", "P6_status_window_reveal", "P4_splash_pullback"],
+      "異世界転生": ["P2_world_one_line_narration", "P6_status_window_reveal"],
+      "追放ざまぁ": ["P3_protagonist_monologue_outburst", "P4_splash_pullback"],
+      "領地経営": ["P5_heroine_encounter", "P2_world_one_line_narration"],
+      "スローライフ": ["P5_heroine_encounter", "P1_daily_anomaly"]
+    }
+  },
+
+  "_phase_y_notes": [
+    "L4.1 Opening Hook 編集パスでは、bible.meta.tone_profile + bible.meta.genre から selection_guide で候補パターンを絞り、Codex に「pages[0..2] を構造に従って書き直す」ことを依頼する",
+    "Phase Y WY-1 後半で、各パターンの best/worst examples を編集判断カードDB の learning_from に紐付けて精度を上げる",
+    "Phase Z WZ-2 で実 KENP 取得後、各パターンの完読率寄与を計測してパターン重みを調整する"
+  ]
+}
