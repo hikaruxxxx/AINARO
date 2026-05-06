@@ -20,7 +20,9 @@ import {
   ApiError,
   apiGetImprovements,
   apiPostJob,
+  openJobStream,
   type ImprovementsResponse,
+  type JobState,
 } from "../lib/api";
 import { store } from "../lib/store";
 // store 経由で view 遷移するので追加 import は不要
@@ -28,6 +30,17 @@ import { store } from "../lib/store";
 type Toast = {
   message: string;
   kind: "success" | "warning" | "danger" | "info";
+};
+
+type ChainStepStatus = "pending" | "running" | "succeeded" | "failed" | "skipped";
+
+type ChainStep = {
+  label: string;
+  layer: string;
+  flags: Record<string, string | true>;
+  status: ChainStepStatus;
+  jobId?: string;
+  error?: string;
 };
 
 type ViewState = {
@@ -38,6 +51,9 @@ type ViewState = {
   starting: string | null; // 起動中のジョブ label
   error: string | null;
   toast: Toast | null;
+  /** Phase Y WY-12: チェーン実行 (audit → 提案適用 → 再audit) の進捗 */
+  chainSteps: ChainStep[] | null;
+  chainRunning: boolean;
 };
 
 const CSS = `
@@ -70,6 +86,18 @@ const CSS = `
 .imp-card-list { display:grid; gap: 6px; }
 .imp-card-row { padding: 6px 10px; background: var(--surface-subtle); border-radius: 4px; font-size: var(--fs-xs); }
 .imp-card-id { color: var(--color-primary); font-weight: 600; }
+
+.imp-chain { display: grid; gap: var(--space-2); padding: var(--space-3); background: var(--surface-base); border: 2px solid var(--color-primary); border-radius: 8px; }
+.imp-chain h3 { margin: 0 0 var(--space-1); font-size: var(--fs-lg); }
+.imp-chain-controls { display:flex; gap:var(--space-2); align-items:center; flex-wrap: wrap; }
+.imp-chain-step { display:flex; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 4px; background: var(--surface-subtle); font-size: var(--fs-sm); }
+.imp-chain-step--running { background: var(--surface-elevated); border-left: 3px solid var(--color-primary); }
+.imp-chain-step--succeeded { background: var(--surface-subtle); border-left: 3px solid #22c55e; }
+.imp-chain-step--failed { background: var(--surface-subtle); border-left: 3px solid var(--color-danger); }
+.imp-chain-step--pending { opacity: 0.6; }
+.imp-chain-step--skipped { opacity: 0.5; text-decoration: line-through; }
+.imp-chain-icon { width: 18px; text-align: center; }
+.imp-chain-error { color: var(--color-danger); font-size: var(--fs-xs); }
 `;
 
 function ensureStyles(): void {
@@ -229,6 +257,48 @@ function renderCompletionRisk(data: ImprovementsResponse): string {
   `;
 }
 
+function chainStepIcon(status: ChainStepStatus): string {
+  if (status === "running") return "⏳";
+  if (status === "succeeded") return "✅";
+  if (status === "failed") return "❌";
+  if (status === "skipped") return "—";
+  return "○";
+}
+
+function renderChain(state: ViewState): string {
+  const hasOpening = state.data?.opening_hook_proposals.recommendation;
+  const hasCliff = state.data?.cliffhanger_proposals.recommendation;
+  const canChain = !!hasOpening || !!hasCliff;
+  const reason = !canChain ? "提案 (Opening Hook / Cliffhanger) が未生成です。先に L04_1 / L04_9 を実行してください" : "";
+
+  return `
+    <div class="imp-chain">
+      <h3>品質改善チェーン実行 (audit → Hook 適用 → Cliff 適用 → 再audit)</h3>
+      <p class="imp-section-sub">L11 audit で現状確認 → 既存提案を storyboard に直接適用 → 再 audit で findings 解消を検証 を 1 ボタンで実行</p>
+      <div class="imp-chain-controls">
+        <button type="button" class="nc-button nc-button--primary" data-action="chain-start" ${(!canChain || state.chainRunning) ? "disabled" : ""}>
+          ${state.chainRunning ? "実行中…" : "チェーンを実行"}
+        </button>
+        ${state.chainSteps && !state.chainRunning ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm" data-action="chain-clear">進捗をクリア</button>` : ""}
+        ${reason ? `<span class="imp-info">${escapeHtml(reason)}</span>` : ""}
+      </div>
+      ${state.chainSteps ? `
+        <div>
+          ${state.chainSteps.map((step) => `
+            <div class="imp-chain-step imp-chain-step--${step.status}">
+              <span class="imp-chain-icon">${chainStepIcon(step.status)}</span>
+              <strong>${escapeHtml(step.label)}</strong>
+              <code class="imp-info">${escapeHtml(step.layer)}</code>
+              ${step.jobId ? `<span class="imp-info">job=${escapeHtml(step.jobId.slice(0, 8))}</span>` : ""}
+              ${step.error ? `<span class="imp-chain-error">${escapeHtml(step.error)}</span>` : ""}
+            </div>
+          `).join("")}
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
 function renderEngagementEcSuggestions(data: ImprovementsResponse): string {
   if (!data.engagement_ec_suggestions || data.engagement_ec_suggestions.length === 0) return "";
   return `
@@ -362,6 +432,7 @@ function render(container: HTMLElement, state: ViewState): void {
         ${renderCompletionRisk(state.data)}
         ${renderEngagementAudit(state.data)}
         ${renderEngagementEcSuggestions(state.data)}
+        ${renderChain(state)}
         ${renderRelatedCards(state.data)}
         ${renderNextActions(state.data, state)}
       `
@@ -411,6 +482,110 @@ async function loadData(state: ViewState, container: HTMLElement): Promise<void>
   }
 }
 
+/** ジョブの SSE stream を開いて完了 (succeeded) を待つ。succeeded 以外は reject。 */
+function awaitJobCompletion(jobId: string): Promise<{ state: JobState; exitCode: number | null }> {
+  return new Promise((resolve, reject) => {
+    const stream = openJobStream(jobId, {
+      onEvent: () => {},
+      onDone: (info) => {
+        if (info.state === "succeeded") {
+          resolve(info);
+        } else {
+          reject(new Error(`job ${jobId} ended with state=${info.state} exit=${info.exitCode ?? "?"}`));
+        }
+      },
+      onError: (err) => {
+        // EventSource error の後 SSE は close される。完了通知を取り逃した可能性があるが、
+        // ここでは reject して呼び出し側で扱う。
+        reject(err);
+      },
+    });
+    // タイムアウト保険 (60 分) — Codex の長時間ジョブを許容するが、永続接続は避ける
+    setTimeout(() => {
+      stream.close();
+      reject(new Error(`job ${jobId} timed out after 60 minutes`));
+    }, 60 * 60 * 1000);
+  });
+}
+
+/** L04_9 の volume_position を next_actions から取得 */
+function pickVolumePosition(data: ImprovementsResponse): string {
+  const cliffApply = data.next_actions.find((a) => a.job_layer === "L04_9" && a.job_flags["--apply-recommendation"] === true);
+  const vp = cliffApply?.job_flags["--volume-position"];
+  return typeof vp === "string" ? vp : "mid";
+}
+
+async function runChain(state: ViewState, container: HTMLElement): Promise<void> {
+  if (!state.data) return;
+  const hasOpening = !!state.data.opening_hook_proposals.recommendation;
+  const hasCliff = !!state.data.cliffhanger_proposals.recommendation;
+  if (!hasOpening && !hasCliff) {
+    setToast(state, container, "提案が未生成です。先に L04_1 / L04_9 を実行してください", "warning");
+    return;
+  }
+  const volumePosition = pickVolumePosition(state.data);
+  const steps: ChainStep[] = [];
+  steps.push({ label: "L11 audit (pre)", layer: "L11", flags: {}, status: "pending" });
+  if (hasOpening) {
+    steps.push({
+      label: "L04_1 Opening Hook 推奨案を直接適用",
+      layer: "L04_1",
+      flags: { "--max-proposals": "1", "--apply-recommendation": true },
+      status: "pending",
+    });
+  } else {
+    steps.push({ label: "L04_1 (skipped — 提案なし)", layer: "L04_1", flags: {}, status: "skipped" });
+  }
+  if (hasCliff) {
+    steps.push({
+      label: "L04_9 Cliffhanger 推奨案を直接適用",
+      layer: "L04_9",
+      flags: { "--max-proposals": "1", "--apply-recommendation": true, "--volume-position": volumePosition },
+      status: "pending",
+    });
+  } else {
+    steps.push({ label: "L04_9 (skipped — 提案なし)", layer: "L04_9", flags: {}, status: "skipped" });
+  }
+  steps.push({ label: "L11 audit (post)", layer: "L11", flags: {}, status: "pending" });
+
+  state.chainSteps = steps;
+  state.chainRunning = true;
+  render(container, state);
+
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    if (step.status === "skipped") continue;
+    step.status = "running";
+    render(container, state);
+    try {
+      const argsRecord: Record<string, string> = {};
+      for (const [k, v] of Object.entries(step.flags)) argsRecord[k] = v === true ? "" : v;
+      const job = await apiPostJob({
+        layer: step.layer as Parameters<typeof apiPostJob>[0]["layer"],
+        slug: state.slug,
+        episode: state.episode,
+        args: argsRecord,
+      });
+      step.jobId = job.job_id;
+      render(container, state);
+      await awaitJobCompletion(job.job_id);
+      step.status = "succeeded";
+      render(container, state);
+    } catch (e) {
+      step.status = "failed";
+      step.error = errorText(e);
+      state.chainRunning = false;
+      render(container, state);
+      setToast(state, container, `${step.label} で失敗。チェーンを中断しました`, "danger");
+      return;
+    }
+  }
+
+  state.chainRunning = false;
+  setToast(state, container, "チェーン完了。最新状態を再読込しています", "success");
+  await loadData(state, container);
+}
+
 async function startJob(
   state: ViewState,
   container: HTMLElement,
@@ -455,6 +630,8 @@ export function mountImprovementsView(container: HTMLElement): () => void {
     starting: null,
     error: null,
     toast: null,
+    chainSteps: null,
+    chainRunning: false,
   };
 
   const unsubscribe = store.subscribe((s) => {
@@ -497,6 +674,17 @@ export function mountImprovementsView(container: HTMLElement): () => void {
         }
         if (!layer || !label) return;
         void startJob(state, container, label, layer, flags);
+      }
+      if (action === "chain-start") {
+        if (state.chainRunning) return;
+        void runChain(state, container);
+        return;
+      }
+      if (action === "chain-clear") {
+        if (state.chainRunning) return;
+        state.chainSteps = null;
+        render(container, state);
+        return;
       }
       if (action === "apply-ec") {
         const cardId = btn.dataset.cardId ?? "";
