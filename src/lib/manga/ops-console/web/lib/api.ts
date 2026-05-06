@@ -179,6 +179,35 @@ export function apiPostNameApproval(
   );
 }
 
+export type AuditOverrideAction = "ignore" | "fixed" | "clear";
+export type AuditOverrideEntry = {
+  panel_id: string;
+  check_kind: string;
+  action: AuditOverrideAction;
+  reason: string;
+  created_at: string;
+};
+
+export function apiGetAuditOverrides(
+  slug: string,
+  episode: number
+): Promise<{ entries: AuditOverrideEntry[] }> {
+  return getJson<{ entries: AuditOverrideEntry[] }>(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/audit-overrides`
+  );
+}
+
+export function apiPostAuditOverride(
+  slug: string,
+  episode: number,
+  body: { panel_id: string; check_kind: string; action: AuditOverrideAction; reason: string }
+): Promise<{ ok: true; entry: AuditOverrideEntry }> {
+  return postJson(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/audit-overrides`,
+    body
+  );
+}
+
 export function apiGetRevisionQueue(
   slug: string,
   episode: number

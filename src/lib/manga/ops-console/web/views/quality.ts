@@ -1,6 +1,10 @@
 import {
   ApiError,
+  apiGetAuditOverrides,
   apiGetManifest,
+  apiPostAuditOverride,
+  type AuditOverrideAction,
+  type AuditOverrideEntry,
   type Manifest,
 } from "../lib/api";
 import { store } from "../lib/store";
@@ -28,18 +32,41 @@ const CSS = `
 .q-filters { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .q-findings { display: grid; gap: var(--space-2); }
 .q-finding { display: grid; gap: 4px; padding: var(--space-2); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-sunken); }
+.q-finding--override { opacity: 0.55; border-style: dashed; }
 .q-finding__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.q-finding__actions { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+.q-finding__override-tag { font-size: var(--fs-xs); color: var(--text-tertiary); padding: 2px 6px; border-radius: var(--radius-sm); background: var(--surface-elevated); }
 .q-panel-actions { margin-left: auto; }
+.q-finding__reason { font-size: var(--fs-xs); color: var(--text-secondary); font-style: italic; }
 `;
 
 type ViewState = {
   slug: string;
   episode: number;
   manifest: Manifest | null;
+  /** panel_id + check_kind 単位の最新 override (append-only JSONL を reduce した結果) */
+  overrides: Map<string, AuditOverrideEntry>;
   selectedKinds: Set<string>;
   loading: boolean;
   error: string | null;
+  /** override 入力中の対象 (panel_id, check_kind, action) */
+  overridePrompt: { panelId: string; checkKind: string; action: AuditOverrideAction } | null;
 };
+
+function overrideKey(panelId: string, checkKind: string): string {
+  return `${panelId}::${checkKind}`;
+}
+
+/** entries は append-only なので、同 panel_id + check_kind の最新行を取り、 clear なら削除する。 */
+function reduceOverrides(entries: AuditOverrideEntry[]): Map<string, AuditOverrideEntry> {
+  const map = new Map<string, AuditOverrideEntry>();
+  for (const entry of entries) {
+    const key = overrideKey(entry.panel_id, entry.check_kind);
+    if (entry.action === "clear") map.delete(key);
+    else map.set(key, entry);
+  }
+  return map;
+}
 
 function ensureStyles(): void {
   if (document.getElementById("q-styles")) return;
@@ -124,7 +151,11 @@ function renderKindFilters(findings: AuditFinding[], selectedKinds: Set<string>)
   </div>`;
 }
 
-function renderAudit(manifest: Manifest, selectedKinds: Set<string>): string {
+function renderAudit(
+  manifest: Manifest,
+  selectedKinds: Set<string>,
+  overrides: Map<string, AuditOverrideEntry>
+): string {
   const audit = manifest.audit;
   if (!audit) return `<div class="nc-empty">audit.json はまだ生成されていません</div>`;
   const obj = asRecord(audit);
@@ -138,8 +169,18 @@ function renderAudit(manifest: Manifest, selectedKinds: Set<string>): string {
     list.push(finding);
     byPanel.set(finding.panel_id, list);
   }
+  // 自動カウント: override 適用後の真の failed 数を表示する。
+  const overriddenCount = findings.filter((finding) => {
+    const ov = overrides.get(overrideKey(finding.panel_id, finding.check_kind));
+    return ov?.action === "ignore" || ov?.action === "fixed";
+  }).length;
+
   const drilldown = Array.from(byPanel.entries()).map(([panelId, panelFindings]) => {
-    const hasError = panelFindings.some((finding) => finding.severity.toLowerCase() === "error" || finding.passed === false);
+    const hasError = panelFindings.some((finding) => {
+      if (finding.severity.toLowerCase() !== "error" && finding.passed !== false) return false;
+      const ov = overrides.get(overrideKey(finding.panel_id, finding.check_kind));
+      return !(ov?.action === "ignore" || ov?.action === "fixed");
+    });
     return `<section class="nc-card q-card">
       <div class="q-card__head">
         <h4>${escapeHtml(panelId)}</h4>
@@ -147,13 +188,32 @@ function renderAudit(manifest: Manifest, selectedKinds: Set<string>): string {
         <span class="q-panel-actions"><button type="button" class="nc-button nc-button--secondary nc-button--sm" data-q-revision-panel="${escapeHtml(panelId)}">修正指示する</button></span>
       </div>
       <div class="q-findings">
-        ${panelFindings.map((finding) => `<div class="q-finding">
-          <div class="q-finding__head">
-            <span class="nc-badge ${badgeClass(finding.severity)}">${escapeHtml(finding.severity)}</span>
-            <span class="q-meta">${escapeHtml(finding.check_kind)}</span>
-          </div>
-          <div>${escapeHtml(finding.message)}</div>
-        </div>`).join("")}
+        ${panelFindings.map((finding) => {
+          const ov = overrides.get(overrideKey(finding.panel_id, finding.check_kind));
+          const isOverridden = ov?.action === "ignore" || ov?.action === "fixed";
+          const overrideTag = ov?.action === "ignore"
+            ? `<span class="q-finding__override-tag" title="${escapeHtml(ov.reason)}">false positive 扱い</span>`
+            : ov?.action === "fixed"
+              ? `<span class="q-finding__override-tag" title="${escapeHtml(ov.reason)}">対応済み</span>`
+              : "";
+          const reasonLine = isOverridden && ov?.reason
+            ? `<div class="q-finding__reason">理由: ${escapeHtml(ov.reason)}</div>`
+            : "";
+          const actions = isOverridden
+            ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm" data-q-override="clear" data-q-panel="${escapeHtml(finding.panel_id)}" data-q-kind-id="${escapeHtml(finding.check_kind)}">override 解除</button>`
+            : `<button type="button" class="nc-button nc-button--secondary nc-button--sm" data-q-override="ignore" data-q-panel="${escapeHtml(finding.panel_id)}" data-q-kind-id="${escapeHtml(finding.check_kind)}">false positive</button>
+               <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-q-override="fixed" data-q-panel="${escapeHtml(finding.panel_id)}" data-q-kind-id="${escapeHtml(finding.check_kind)}">対応済み</button>`;
+          return `<div class="q-finding${isOverridden ? " q-finding--override" : ""}">
+            <div class="q-finding__head">
+              <span class="nc-badge ${badgeClass(finding.severity)}">${escapeHtml(finding.severity)}</span>
+              <span class="q-meta">${escapeHtml(finding.check_kind)}</span>
+              ${overrideTag}
+              <div class="q-finding__actions">${actions}</div>
+            </div>
+            <div>${escapeHtml(finding.message)}</div>
+            ${reasonLine}
+          </div>`;
+        }).join("")}
       </div>
     </section>`;
   }).join("");
@@ -163,6 +223,7 @@ function renderAudit(manifest: Manifest, selectedKinds: Set<string>): string {
         <div class="q-card__head">
           <h3>サマリ</h3>
           <span class="nc-badge ${failed.length > 0 ? "nc-badge--danger" : "nc-badge--success"}">失敗 ${failed.length} 件</span>
+          ${overriddenCount > 0 ? `<span class="nc-badge nc-badge--neutral">override 済 ${overriddenCount} 件</span>` : ""}
         </div>
         <pre class="nc-code-block">${jsonHtml(obj.summary ?? {})}</pre>
         <div class="q-meta">失敗 panel ID 一覧: ${escapeHtml(JSON.stringify(failed))}</div>
@@ -198,8 +259,21 @@ function render(container: HTMLElement, state: ViewState): void {
     if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
     if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>品質監査 (Audit)</h2><p>${escapeHtml(state.error)}</p></div>`;
     if (!state.manifest) return `<div class="nc-empty">manifest が読み込まれていません。</div>`;
-    return renderAudit(state.manifest, state.selectedKinds);
+    return renderAudit(state.manifest, state.selectedKinds, state.overrides);
   })();
+  const promptModal = state.overridePrompt
+    ? `<div class="nc-modal is-open"><div class="nc-modal__card nc-modal__card--sm" style="padding: var(--space-4); display: grid; gap: var(--space-3);">
+        <h3 style="margin: 0;">${state.overridePrompt.action === "ignore" ? "false positive 扱いにする" : state.overridePrompt.action === "fixed" ? "対応済みにする" : "override を解除する"}</h3>
+        <div class="q-meta">panel ${escapeHtml(state.overridePrompt.panelId)} / ${escapeHtml(state.overridePrompt.checkKind)}</div>
+        <label class="nc-field"><span class="nc-field__label">理由 (audit_overrides.jsonl に残ります)</span>
+          <input class="nc-field__input" id="q-override-reason" placeholder="例: 実画像は問題なし、検出側のしきい値ミス">
+        </label>
+        <div style="display: flex; gap: var(--space-2); justify-content: flex-end;">
+          <button type="button" class="nc-button nc-button--secondary" data-q-override-cancel>キャンセル</button>
+          <button type="button" class="nc-button nc-button--primary" data-q-override-confirm>確定</button>
+        </div>
+      </div></div>`
+    : "";
   container.innerHTML = `
     <div class="q-view">
       <div class="nc-toolbar">
@@ -211,7 +285,7 @@ function render(container: HTMLElement, state: ViewState): void {
         <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L11" title="AI 編集 view へ遷移し、L11 Audit の context を prefill します">L11 を AI で修正</button>
       </div>
       <div class="q-content">${body}</div>
-    </div>`;
+    </div>${promptModal}`;
 }
 
 async function refresh(state: ViewState, container: HTMLElement): Promise<void> {
@@ -223,6 +297,13 @@ async function refresh(state: ViewState, container: HTMLElement): Promise<void> 
   } catch (error) {
     state.manifest = null;
     state.error = errorText(error);
+  }
+  try {
+    const result = await apiGetAuditOverrides(state.slug, state.episode);
+    state.overrides = reduceOverrides(result.entries);
+  } catch {
+    // override は補助情報なので、取得失敗時は空でも UI は描画する。
+    state.overrides = new Map();
   }
   state.loading = false;
   render(container, state);
@@ -236,9 +317,11 @@ export function mountQualityView(container: HTMLElement): () => void {
     slug: app.currentSlug || app.defaultSlug,
     episode: app.currentEpisode || app.defaultEpisode,
     manifest: null,
+    overrides: new Map(),
     selectedKinds: new Set(),
     loading: false,
     error: null,
+    overridePrompt: null,
   };
 
   void refresh(state, container);
@@ -270,6 +353,48 @@ export function mountQualityView(container: HTMLElement): () => void {
       if (state.selectedKinds.has(kind)) state.selectedKinds.delete(kind);
       else state.selectedKinds.add(kind);
       render(container, state);
+      return;
+    }
+    // override 入力 modal を開く / キャンセル / 確定。
+    const overrideBtn = target.closest<HTMLButtonElement>("[data-q-override]");
+    if (overrideBtn) {
+      const action = overrideBtn.dataset.qOverride as AuditOverrideAction | undefined;
+      const panelId = overrideBtn.dataset.qPanel ?? "";
+      const checkKind = overrideBtn.dataset.qKindId ?? "";
+      if (!action || !panelId || !checkKind) return;
+      // clear は即時反映 (理由不要)。ignore / fixed は modal を出す。
+      if (action === "clear") {
+        void apiPostAuditOverride(state.slug, state.episode, {
+          panel_id: panelId,
+          check_kind: checkKind,
+          action: "clear",
+          reason: "",
+        })
+          .then(() => refresh(state, container))
+          .catch((error) => alert(`override 解除に失敗: ${errorText(error)}`));
+        return;
+      }
+      state.overridePrompt = { panelId, checkKind, action };
+      render(container, state);
+      return;
+    }
+    if (target.closest("[data-q-override-cancel]")) {
+      state.overridePrompt = null;
+      render(container, state);
+      return;
+    }
+    if (target.closest("[data-q-override-confirm]") && state.overridePrompt) {
+      const reason = container.querySelector<HTMLInputElement>("#q-override-reason")?.value.trim() ?? "";
+      const { panelId, checkKind, action } = state.overridePrompt;
+      state.overridePrompt = null;
+      void apiPostAuditOverride(state.slug, state.episode, {
+        panel_id: panelId,
+        check_kind: checkKind,
+        action,
+        reason,
+      })
+        .then(() => refresh(state, container))
+        .catch((error) => alert(`override 保存に失敗: ${errorText(error)}`));
       return;
     }
     if (target.closest("[data-q-revision-panel]")) {

@@ -89,6 +89,15 @@ export function nameAuditPath(slug: string, ep: number): string {
   return path.join(nameDir(slug, ep), "name_audit.json");
 }
 
+/**
+ * L11 audit findings の override (false positive / fixed マーク)。
+ * Console quality view から append される append-only JSONL。
+ * audit 自体は決定論的に判定するが、人間の判断結果をここに残して UI 上で隠す。
+ */
+export function auditOverridesPath(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "audit_overrides.jsonl");
+}
+
 // ===== 修正指示 UI (Phase A〜D) =====
 
 /** L09/L10 が generation 毎に append する render manifest (JSONL, append-only) */

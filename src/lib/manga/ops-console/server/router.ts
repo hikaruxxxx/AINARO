@@ -26,6 +26,10 @@ import { handleManifest } from "./handlers/manifest";
 import { handlePipelineStatus } from "./handlers/pipeline-status";
 import { handleQualityOverview } from "./handlers/quality";
 import {
+  handleGetAuditOverrides,
+  handlePostAuditOverride,
+} from "./handlers/audit-overrides";
+import {
   handleRevisionQueueGet,
   handleRevisionQueuePost,
 } from "./handlers/revision-queue";
@@ -392,6 +396,16 @@ export async function handleApi(
     if (tail === "/pipeline-status") {
       if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       return handlePipelineStatus(scoped.slug, scoped.episode, res);
+    }
+    if (tail === "/audit-overrides") {
+      if (req.method === "GET") return handleGetAuditOverrides(scoped.slug, scoped.episode, res);
+      if (req.method === "POST") {
+        // override は人間判断の永続化なので、scope 制限は通常 write 系と同じ。
+        const guard = checkScopedWritePath(scoped, defaults);
+        if (!guard.ok) return send(res, guard.status, { error: guard.error });
+        return handlePostAuditOverride(scoped.slug, scoped.episode, req, res);
+      }
+      return send(res, 405, { error: "このメソッドは許可されていません" });
     }
     if (tail === "/revision-queue") {
       if (req.method === "GET") return handleRevisionQueueGet(scoped.slug, scoped.episode, res);
