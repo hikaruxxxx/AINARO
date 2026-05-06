@@ -565,7 +565,10 @@ export type AuditCheckResult = {
     | "dialogue_count"
     | "continuity_anchor"
     | "background_invariant"
-    | "regulation_violation";
+    | "regulation_violation"
+    /** 2026-05-06 追加。pattern dictionary 由来 background_treatment と
+     *  実 ref/render の整合性検査 (RULE 11 が遵守されているか) */
+    | "bg_treatment_compliance";
   passed: boolean;
   score?: number;
   threshold?: number;

@@ -17,9 +17,106 @@ import { promises as fs } from "node:fs";
 import type {
   AuditCheckResult,
   AuditReport,
+  BackgroundTreatment,
   EpisodeStoryboardV2,
   PagePlanV2,
+  ResolvedRefs,
 } from "../schemas-v2";
+
+/**
+ * RULE 11 (refs-resolver-v2) と整合: background_treatment の各値で
+ * 「期待される ref 構成」を返す。実際の ref と突き合わせて contradiction を検出する。
+ */
+function expectedRefBehavior(t: BackgroundTreatment): {
+  allowLocation: boolean;
+  allowCharacter: boolean;
+} {
+  switch (t) {
+    case "tone_back":
+    case "solid_white":
+    case "solid_black":
+      return { allowLocation: false, allowCharacter: true };
+    case "floating_ui":
+      return { allowLocation: false, allowCharacter: false };
+    case "atmospheric_fade":
+    case "detailed_bg":
+    case "unspecified":
+      return { allowLocation: true, allowCharacter: true };
+  }
+}
+
+/**
+ * 静的監査: PagePlanPanel.background_treatment と ResolvedRefs.packets の整合性を検査。
+ *
+ * RULE 11 が refs-resolver-v2 で正しく適用されていれば、tone_back/floating_ui 等の panel に
+ * location/character ref が混入していないはず。混入していたら矛盾として fail する。
+ *
+ * vision-based チェック (実 render 画像 vs treatment) は別 script (audit-bg-vision.ts) で
+ * agent dispatch して実施する想定。本関数は cheap な regression detector。
+ */
+export function auditBackgroundTreatment(args: {
+  pagePlan: PagePlanV2;
+  resolvedRefs: ResolvedRefs;
+}): AuditCheckResult[] {
+  const checks: AuditCheckResult[] = [];
+
+  for (const planPage of args.pagePlan.pages) {
+    for (const panel of planPage.panels) {
+      const t = panel.background_treatment;
+      if (!t || t === "unspecified") continue;
+
+      // page_one_shot scope の場合、packet は page_{N} に集約され panel 単独 packet は無いことがある
+      const packet =
+        args.resolvedRefs.packets[panel.panel_id] ??
+        args.resolvedRefs.packets[`page_${planPage.page_no}`];
+      if (!packet) {
+        checks.push({
+          panel_id: panel.panel_id,
+          check_kind: "bg_treatment_compliance",
+          passed: false,
+          detail: `treatment=${t} だが resolved_refs に該当 packet なし`,
+        });
+        continue;
+      }
+
+      const expected = expectedRefBehavior(t);
+      const hasLocationRef = packet.refs.some((r) => r.role === "location");
+      const hasCharRef = packet.refs.some(
+        (r) =>
+          r.role === "character_face" ||
+          r.role === "character_full" ||
+          r.role === "character_back" ||
+          r.role === "character_outfit" ||
+          r.role === "character_3view"
+      );
+
+      const violations: string[] = [];
+      // page_one_shot 集約 packet は他 panel 由来の ref も含むため、
+      // panel スコープ packet (scope=panel) のときだけ厳密チェック
+      const isPanelScope = packet.scope === "panel";
+      if (isPanelScope) {
+        if (!expected.allowLocation && hasLocationRef) {
+          violations.push(`treatment=${t} は location ref 不可だが location ref 検出`);
+        }
+        if (!expected.allowCharacter && hasCharRef) {
+          violations.push(`treatment=${t} は character ref 不可だが character ref 検出`);
+        }
+      }
+
+      checks.push({
+        panel_id: panel.panel_id,
+        check_kind: "bg_treatment_compliance",
+        passed: violations.length === 0,
+        detail:
+          violations.length > 0
+            ? violations.join("; ")
+            : `treatment=${t} ref 構成 OK (scope=${packet.scope})`,
+      });
+    }
+  }
+
+  return checks;
+}
 
 const MIN_PAGE_BYTES = 100_000;
 const EXPECTED_PAGE_W = 1748;
@@ -30,10 +127,22 @@ export async function auditEpisode(args: {
   rendersDir: string;
   storyboard: EpisodeStoryboardV2;
   pagePlan: PagePlanV2;
+  /** 2026-05-06 追加。指定時は bg_treatment_compliance 検査も実行 */
+  resolvedRefs?: ResolvedRefs;
 }): Promise<AuditReport> {
   const checks: AuditCheckResult[] = [];
   const failedPanels = new Set<string>();
   let panelsTotal = 0; let panelsPassed = 0;
+
+  // bg_treatment 静的監査 (resolved_refs 指定時のみ)
+  if (args.resolvedRefs) {
+    const bgChecks = auditBackgroundTreatment({
+      pagePlan: args.pagePlan,
+      resolvedRefs: args.resolvedRefs,
+    });
+    checks.push(...bgChecks);
+    for (const c of bgChecks) if (!c.passed) failedPanels.add(c.panel_id);
+  }
 
   for (const planPage of args.pagePlan.pages) {
     const sbPage = args.storyboard.pages.find((p) => p.page_no === planPage.page_no);

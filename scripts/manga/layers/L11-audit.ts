@@ -5,9 +5,9 @@
  */
 import "../_env";
 import { promises as fs } from "node:fs";
-import { storyboardPath, pagePlanPath, rendersDir, auditPath } from "./_paths";
+import { storyboardPath, pagePlanPath, rendersDir, auditPath, resolvedRefsPath } from "./_paths";
 import { auditEpisode } from "../../../src/lib/manga/qa-v2/audit";
-import type { EpisodeStoryboardV2, PagePlanV2 } from "../../../src/lib/manga/schemas-v2";
+import type { EpisodeStoryboardV2, PagePlanV2, ResolvedRefs } from "../../../src/lib/manga/schemas-v2";
 
 type Args = { slug: string; episode: number };
 
@@ -32,9 +32,18 @@ async function main() {
   const args = parseArgs();
   const storyboard = JSON.parse(await fs.readFile(storyboardPath(args.slug, args.episode), "utf-8")) as EpisodeStoryboardV2;
   const pagePlan = JSON.parse(await fs.readFile(pagePlanPath(args.slug, args.episode), "utf-8")) as PagePlanV2;
+  // resolved_refs.json があれば bg_treatment_compliance も実施 (任意、無くても従前挙動)
+  let resolvedRefs: ResolvedRefs | undefined;
+  try {
+    resolvedRefs = JSON.parse(
+      await fs.readFile(resolvedRefsPath(args.slug, args.episode), "utf-8")
+    ) as ResolvedRefs;
+  } catch {
+    /* no resolved_refs → skip bg compliance check */
+  }
 
   const report = await auditEpisode({
-    rendersDir: rendersDir(args.slug, args.episode), storyboard, pagePlan,
+    rendersDir: rendersDir(args.slug, args.episode), storyboard, pagePlan, resolvedRefs,
   });
 
   await fs.writeFile(auditPath(args.slug, args.episode), JSON.stringify(report, null, 2));
