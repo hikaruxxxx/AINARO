@@ -1,3 +1,21 @@
+> **⚠ 2026-05-06: v3 (モジュール構造) に移行中**
+>
+> 本ファイル v2 は **互換性のため当面残す** が、新規参照は v3 を推奨:
+>
+> - 索引: [`manga_craft/README.md`](./manga_craft/README.md)
+> - 大原則 + 3 軸定義: [`manga_craft/00_principles.md`](./manga_craft/00_principles.md)
+> - 機械可読タグ: [`manga_craft/50_index.json`](./manga_craft/50_index.json)
+>
+> 移行理由: v2 は 80+ 要素フラット記述で、storyboard-builder への注入時に
+> 全要素を渡すしか選択肢がなく、注意散漫化と「戦闘指針が会話シーンに混入」
+> 系のミスが起きていた。v3 で **階層 (tier: L0/L1/L2/L3) / 場面 (scene-type) /
+> ジャンル** の 3 軸でタグ付けし、必要な作法だけ場面別に注入できるようにした。
+>
+> 旧 v2 → v3 マッピング表は [`manga_craft/00_principles.md`](./manga_craft/00_principles.md)
+> 末尾参照。
+
+---
+
 # 漫画作法ガイド v2 — 商業ラノベコミカライズの完全分析
 
 2026-05-01 v2 完全版。kindle-test-1「現代ダンジョンで最強になる物語 (缶詰ガチャ) Vol.1」全156ページを精読して抽出した作法体系。
