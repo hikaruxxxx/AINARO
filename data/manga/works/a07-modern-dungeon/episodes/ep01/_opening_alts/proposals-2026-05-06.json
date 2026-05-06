@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-06T07:07:05.827Z",
+  "generated_at": "2026-05-06T09:51:03.271Z",
   "slug": "a07-modern-dungeon",
   "episode": 1,
   "source_storyboard_pages_0_2": [
@@ -534,14 +534,13 @@
     }
   ],
   "candidate_patterns": [
-    "P4_splash_pullback",
-    "P6_status_window_reveal"
+    "P4_splash_pullback"
   ],
   "proposals": [
     {
       "pattern_id": "P4_splash_pullback",
       "pattern_name": "派手見開きから引き戻し",
-      "rationale": "未来の無双を先に見せ、底辺夜勤へ引き戻す落差で主人公の伸びしろとナビの異常性を即提示する。",
+      "rationale": "未来の世界記録更新を先に見せ、直後に深夜バイトの底辺現実へ引き戻すことで、落差と成り上がり期待を同時に作る。",
       "expected_effect": "hook_strength +0.6 / commercial_pull +0.4 / character_depth +0.1",
       "pages": [
         {
@@ -553,21 +552,20 @@
               "shot_type": "wide",
               "importance": 5,
               "silence": false,
-              "action": "崩落寸前の現代ダンジョン深層で、巨大ボスの腕が床を砕く。黒フードのレンだけが青い導線を踏み、死角へ滑り込む。",
-              "key_visual": "下降階段の影と数値オーバーレイの空枠が、巨大ボスの体表を囲む。",
+              "action": "巨大な黒鉄の階層主が崩れ落ちる直前、レンが下降階段の最下段から跳び込む。床には薄いナビ青光の導線と数値オーバーレイの空枠が走る。",
+              "key_visual": "黒フードのレンが巨大ボスの影に呑まれかけながら、青白い軌道だけを信じて刃を振り抜く大ゴマ。",
               "dialogue": [
                 {
                   "character_id": "char_桐生_レン_v1",
-                  "text": "見えた。そこが隠し判定だ。"
+                  "text": "ナビ、こいつの正解を出せ。"
                 }
               ],
               "monologue": [],
               "narration": [
-                "これは、Fランク探索者が世界記録を塗り替える数秒前。"
+                "Fランク探索者が踏破不能を三十秒で塗り替える ── その三十秒前。"
               ],
               "sfx": [
-                "ゴォッ",
-                "ピッ"
+                "ゴォッ"
               ]
             },
             {
@@ -575,8 +573,8 @@
               "shot_type": "close_up",
               "importance": 5,
               "silence": false,
-              "action": "レンの瞳に淡い青光が走り、ヒビ入りスマホの画面が反射する。握った短剣の先が、ボスの急所へ向く。",
-              "key_visual": "前髪の奥の目元、青いリムライト、割れたスマホの右上ヒビ。",
+              "action": "レンの瞳に薄い青光が差し、ヒビ入りスマホの画面が視界の端で点滅する。口元は震えているが、視線だけは逸らさない。",
+              "key_visual": "前髪越しの目と、画面上に浮く空のHUD枠。",
               "dialogue": [],
               "monologue": [],
               "narration": [],
@@ -595,8 +593,8 @@
               "shot_type": "establishing",
               "importance": 3,
               "silence": true,
-              "action": "深夜の新宿西口。白く光るローソン看板の下だけが、雨上がりの路面に浮いている。",
-              "key_visual": "派手な深層から一転した、無人のコンビニ外観。",
+              "action": "深夜の新宿西口、ローソン看板だけが白く浮く。さっきの激戦とは別世界のように、街路は湿って静まり返っている。",
+              "key_visual": "コンビニの白い光と、遠くのダンジョン公社ビルの赤い警告灯。",
               "dialogue": [],
               "monologue": [],
               "narration": [],
@@ -607,15 +605,10 @@
               "shot_type": "wide",
               "importance": 3,
               "silence": false,
-              "action": "店内は空で、レンがレジに立ったまま眠気をこらえる。奥のテレビだけが探索者ニュースを流している。",
-              "key_visual": "黒フードのレンが、蛍光灯の白い通路に小さく立つ。",
+              "action": "レンが無人の通路を見ながらレジに立つ。黒のフードジャケットは制服の下に見え、袖口は少し擦り切れている。",
+              "key_visual": "蛍光灯に照らされた空の棚と、ひとりだけ立つレン。",
               "dialogue": [],
-              "monologue": [
-                {
-                  "character_id": "char_桐生_レン_v1",
-                  "text": "午前二時。俺の現実は、こっちだ。"
-                }
-              ],
+              "monologue": [],
               "narration": [],
               "sfx": [
                 "ジー"
@@ -626,29 +619,32 @@
               "shot_type": "medium",
               "importance": 3,
               "silence": false,
-              "action": "レンが半額弁当を袋に詰め、袖口からFランクID証がのぞく。手の動きだけが妙に慣れている。",
-              "key_visual": "擦れた黒フード、安い弁当、FランクIDの三点。",
+              "action": "レンが期限前の商品を棚から下げ、半額シールの束を機械的に貼っていく。胸ポケットからFランクID証が少し覗く。",
+              "key_visual": "半額弁当、FランクID、ヒビ入りスマホが同じ高さに並ぶ。",
               "dialogue": [],
               "monologue": [
                 {
                   "character_id": "char_桐生_レン_v1",
-                  "text": "探索者で食えないから、夜勤で食いつなぐ。"
+                  "text": "眠い。けど、寝たら終わる。"
                 }
               ],
               "narration": [],
-              "sfx": [
-                "カサ"
-              ]
+              "sfx": []
             },
             {
               "panel_no": 6,
               "shot_type": "close_up",
               "importance": 4,
-              "silence": true,
-              "action": "ヒビ入りスマホに公社アプリの通知が灯る。画面上部の割れ目が、Fランク表示を歪ませる。",
-              "key_visual": "ひび割れた画面越しのFランク通知。",
+              "silence": false,
+              "action": "レンの目元だけを抜く。さっきの青光はなく、テレビの白い反射だけが瞳に映っている。",
+              "key_visual": "乾いた目元と、前髪の影。",
               "dialogue": [],
-              "monologue": [],
+              "monologue": [
+                {
+                  "character_id": "char_桐生_レン_v1",
+                  "text": "Sランクの記録なんて、俺には一生関係ない。"
+                }
+              ],
               "narration": [],
               "sfx": []
             },
@@ -657,8 +653,8 @@
               "shot_type": "medium",
               "importance": 3,
               "silence": false,
-              "action": "店内テレビに白瀬灯里が映り、朱の部隊章が画面いっぱいに輝く。レンはレジ越しにその光を見る。",
-              "key_visual": "朱色の公的光と黒フードの対比。",
+              "action": "店内テレビに白瀬灯里が映り、朱色の部隊章がニュース画面で強調される。レンはレジ越しにそれを見上げる。",
+              "key_visual": "朱色の公的光を背負う灯里と、黒フードのレンの対比。",
               "dialogue": [
                 {
                   "character_id": "char_白瀬_灯里_v1",
@@ -673,13 +669,15 @@
               "panel_no": 8,
               "shot_type": "close_up",
               "importance": 4,
-              "silence": true,
-              "action": "レンの瞳にテレビの白い光とスマホの青い点滅が重なる。口元だけがわずかにこわばる。",
-              "key_visual": "白いニュース光の中に、小さなナビ青光が混じる。",
+              "silence": false,
+              "action": "レンがスマホを裏返そうとした瞬間、公社アプリの通知がヒビ割れた画面に灯る。通知欄の奥で、薄い青い枠だけが一瞬浮かぶ。",
+              "key_visual": "上部が割れたスマホ画面と、空白のHUD枠。",
               "dialogue": [],
               "monologue": [],
               "narration": [],
-              "sfx": []
+              "sfx": [
+                "ピコン"
+              ]
             }
           ]
         },
@@ -692,18 +690,18 @@
               "shot_type": "wide",
               "importance": 4,
               "silence": false,
-              "action": "新宿駅地下の低ランク用ダンジョン入口で、警告灯が回る。Fランク探索者たちがざわつき、係員が通路を塞ぐ。",
-              "key_visual": "下降階段とランク階段の影が、地下へ鋭く伸びる。",
+              "action": "コンビニの外で非常サイレンが鳴り、通行人が新宿地下ダンジョン入口のほうへ振り返る。公社アプリには低階層の異常警報が流れる。",
+              "key_visual": "夜の歩道に伸びる赤い警告灯と、地下へ降りる階段の黒い口。",
               "dialogue": [
                 {
                   "character_id": "char_槇島_主任_v1",
-                  "text": "下層で異常反応だ。Fランクは待機しろ。"
+                  "text": "西口第三入口、封鎖しろ！"
                 }
               ],
               "monologue": [],
               "narration": [],
               "sfx": [
-                "ウー"
+                "ウーッ"
               ]
             },
             {
@@ -711,32 +709,30 @@
               "shot_type": "medium",
               "importance": 4,
               "silence": false,
-              "action": "レンは列の外でスマホを握り直す。割れた画面に、誰にも見えていない薄い座標枠が浮かぶ。",
-              "key_visual": "ヒビ入りスマホの上に重なる数値オーバーレイの空枠。",
+              "action": "レンはレジを離れ、黒フードの前を握って店の出口へ向かう。手にはまだヒビ入りスマホを握っている。",
+              "key_visual": "自動ドアの白光へ踏み出すレンの背中。",
               "dialogue": [],
               "monologue": [
                 {
                   "character_id": "char_桐生_レン_v1",
-                  "text": "今の警告、表示より二十秒早い。なんで俺だけ見えてる？"
+                  "text": "Fランクでも、近いなら動ける。"
                 }
               ],
               "narration": [],
-              "sfx": [
-                "ピ"
-              ]
+              "sfx": []
             },
             {
               "panel_no": 11,
               "shot_type": "close_up",
               "importance": 5,
               "silence": false,
-              "action": "レンの目に淡い青光が差し、ページ1と同じ角度で瞳が細まる。スマホ画面の空枠が、地下階段の一点を指す。",
-              "key_visual": "未来の戦闘カットと重なる、青く縁取られたレンの瞳。",
+              "action": "スマホ画面のヒビの下で、通常の公社通知とは違う青い座標線が一瞬だけ走る。レンの瞳にも同じ青光が差す。",
+              "key_visual": "page 1 と同じナビ青光が、まだ弱く小さく点る。",
               "dialogue": [],
               "monologue": [],
               "narration": [],
               "sfx": [
-                "NAV: 推奨ルートを検出"
+                "キィン"
               ]
             },
             {
@@ -744,286 +740,27 @@
               "shot_type": "wide",
               "importance": 4,
               "silence": false,
-              "action": "周囲の探索者は警告灯ばかり見ている。レンだけが一歩、封鎖線の横の細い階段へ向かう。",
-              "key_visual": "群衆の停滞と、黒フード一人の斜め移動。",
-              "dialogue": [
-                {
-                  "character_id": "char_九条_ナナミ_v1",
-                  "text": "ちょっと、そっちは封鎖区域ですよ！"
-                }
-              ],
-              "monologue": [],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 13,
-              "shot_type": "close_up",
-              "importance": 5,
-              "silence": false,
-              "action": "レンが振り返らず、スマホの青光にだけ視線を落とす。画面には明日の予定表のような空欄が開く。",
-              "key_visual": "割れたスマホに浮かぶ青い予定枠と、レンの小さな笑み。",
-              "dialogue": [
-                {
-                  "character_id": "char_桐生_レン_v1",
-                  "text": "頼む。"
-                }
-              ],
-              "monologue": [],
-              "narration": [],
-              "sfx": [
-                "NAV: 明日の予定、組みますか？"
-              ]
-            }
-          ]
-        }
-      ],
-      "warnings": [
-        "ナビはbible内にcharacter_idがないため、発話はsfx表現で処理。",
-        "page 1は未来示唆の先出しなので、以降の本編で同構図を回収すると混乱が減る。"
-      ]
-    },
-    {
-      "pattern_id": "P6_status_window_reveal",
-      "pattern_name": "ステータス画面/能力可視化",
-      "rationale": "Fランクの数値を即提示し、灯里との格差とナビの異変を三ページ内で接続するため、KU棚での理解と引きが速い。",
-      "expected_effect": "hook_strength +0.4 / world_immersion +0.4 / commercial_pull +0.4",
-      "pages": [
-        {
-          "page_no": 1,
-          "page_role": "opening_hook",
-          "panels": [
-            {
-              "panel_no": 1,
-              "shot_type": "establishing",
-              "importance": 4,
-              "silence": true,
-              "action": "深夜の新宿西口地下、ダンジョン公社の入口ゲートだけが白く光る。地上のコンビニ看板が遠くに見える。",
-              "key_visual": "下降階段とランク階段を重ねた、無人の公社ゲート。",
-              "dialogue": [],
-              "monologue": [],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 2,
-              "shot_type": "wide",
-              "importance": 3,
-              "silence": true,
-              "action": "黒のフードジャケットのレンが、夜勤明けの制服のままゲート前に立つ。手にはヒビ入りスマートフォン。",
-              "key_visual": "巨大な入口に対して小さく見えるレンの背中。",
-              "dialogue": [],
-              "monologue": [],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 3,
-              "shot_type": "close_up",
-              "importance": 5,
-              "silence": false,
-              "action": "公社アプリのステータス画面がスマホいっぱいに表示される。Fランク、低い筋力値、未取得スキル欄が並ぶ。",
-              "key_visual": "ヒビ割れた画面越しのFランクステータスUI。",
-              "dialogue": [],
-              "monologue": [
-                {
-                  "character_id": "char_桐生_レン_v1",
-                  "text": "Fランク。筋力も敏捷も、昨日と同じ底辺だ。"
-                }
-              ],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 4,
-              "shot_type": "close_up",
-              "importance": 4,
-              "silence": false,
-              "action": "レンがスマホを見下ろして小さく息を吐く。目元には諦めと、それでもログインする癖が残っている。",
-              "key_visual": "前髪の影と、画面光に照らされた苦笑。",
-              "dialogue": [],
-              "monologue": [
-                {
-                  "character_id": "char_桐生_レン_v1",
-                  "text": "でも、潜らなきゃ明日の飯もない。"
-                }
-              ],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 5,
-              "shot_type": "medium",
-              "importance": 3,
-              "silence": true,
-              "action": "レンが探索者IDをゲートにかざし、下降階段へ一歩踏み出す。スマホ画面の端に空のHUD枠が一瞬だけ浮く。",
-              "key_visual": "黒フードと、足元に淡く走るナビ青光。",
-              "dialogue": [],
-              "monologue": [],
-              "narration": [],
-              "sfx": []
-            }
-          ]
-        },
-        {
-          "page_no": 2,
-          "page_role": "opening_hook",
-          "panels": [
-            {
-              "panel_no": 6,
-              "shot_type": "wide",
-              "importance": 4,
-              "silence": true,
-              "action": "ゲート横の大型ビジョンに、上位探索者ランキングが映る。白瀬灯里のSランク記録と朱色の部隊章が大きく表示される。",
-              "key_visual": "朱色の公的光と、レンの黒フードの対比。",
-              "dialogue": [],
-              "monologue": [],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 7,
-              "shot_type": "medium",
-              "importance": 4,
-              "silence": false,
-              "action": "ビジョン内の氷室玲二が記者に囲まれ、余裕の笑みでランキングを語る。レンは画面の端に小さく映り込む。",
-              "key_visual": "Aランク以上の華やかな数値群と、FランクIDの小ささ。",
+              "action": "駆けつけた探索者たちが階段前で足を止め、FランクIDを下げたレンを見てざわつく。テレビ中継の灯里の映像だけが店内に残っている。",
+              "key_visual": "朱のニュース画面と、黒フードで階段へ向かうレンが画面奥で交差する。",
               "dialogue": [
                 {
                   "character_id": "char_氷室_玲二_v1",
-                  "text": "Fランクは入口で引き返すのが社会貢献だ。"
+                  "text": "Fランクが前に出るな。死にたいのか。"
                 }
               ],
-              "monologue": [],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 8,
-              "shot_type": "close_up",
-              "importance": 4,
-              "silence": false,
-              "action": "レンがビジョンから目をそらし、スマホの低い数値を親指で閉じかける。だが指が止まる。",
-              "key_visual": "ヒビ入りスマホに映るレンの目。",
-              "dialogue": [],
-              "monologue": [
-                {
-                  "character_id": "char_桐生_レン_v1",
-                  "text": "笑われる数値でも、死なない階層なら稼げる。"
-                }
-              ],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 9,
-              "shot_type": "medium",
-              "importance": 4,
-              "silence": false,
-              "action": "レンが階段を降り、第一階層の薄暗い通路へ入る。スマホを胸元で握り直す。",
-              "key_visual": "下降階段の影がランク表の段差のように伸びる。",
-              "dialogue": [],
-              "monologue": [
-                {
-                  "character_id": "char_桐生_レン_v1",
-                  "text": "今日も最短で帰る。それだけでいい。"
-                }
-              ],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 10,
-              "shot_type": "close_up",
-              "importance": 5,
-              "silence": false,
-              "action": "スマホのステータス欄に、登録されていない薄青い項目が割り込む。数値オーバーレイの空枠が震える。",
-              "key_visual": "未取得スキル欄に浮かぶ青い空白フレーム。",
-              "dialogue": [],
               "monologue": [],
               "narration": [],
               "sfx": [
-                "ピ"
+                "ざわ"
               ]
-            }
-          ]
-        },
-        {
-          "page_no": 3,
-          "page_role": "buildup",
-          "panels": [
-            {
-              "panel_no": 11,
-              "shot_type": "wide",
-              "importance": 4,
-              "silence": true,
-              "action": "第一階層の通路に、通常ルートとは違う床の青い導線が現れる。レンだけがそれに気づき、足を止める。",
-              "key_visual": "暗い床に細く伸びるナビ青光。",
-              "dialogue": [],
-              "monologue": [],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 12,
-              "shot_type": "close_up",
-              "importance": 5,
-              "silence": false,
-              "action": "スマホ画面に新しいステータス表示が開く。スキル欄に【ナビ】、効果欄には未表示の矩形だけが並ぶ。",
-              "key_visual": "ステータス画面panel #2、青光に縁取られた新スキル枠。",
-              "dialogue": [],
-              "monologue": [
-                {
-                  "character_id": "char_桐生_レン_v1",
-                  "text": "スキル……？　俺の欄に、今までなかった。"
-                }
-              ],
-              "narration": [],
-              "sfx": []
             },
             {
               "panel_no": 13,
-              "shot_type": "medium",
-              "importance": 4,
-              "silence": false,
-              "action": "レンが導線の先に小石を投げる。直後、天井から罠の槍が空振りし、彼の頬を冷たい汗が伝う。",
-              "key_visual": "罠を避けた小石と、青い導線を凝視するレン。",
-              "dialogue": [],
-              "monologue": [
-                {
-                  "character_id": "char_桐生_レン_v1",
-                  "text": "見えた通りに動いたら、罠を避けた。"
-                }
-              ],
-              "narration": [],
-              "sfx": [
-                "ガシャン"
-              ]
-            },
-            {
-              "panel_no": 14,
-              "shot_type": "wide",
-              "importance": 4,
-              "silence": false,
-              "action": "入口側のビジョンでは灯里の中継が続き、周囲の探索者たちは誰もレンの異変に気づかない。レンだけが青い光の中にいる。",
-              "key_visual": "朱色の画面光と、レンの足元の青光が画面内で分かれる。",
-              "dialogue": [
-                {
-                  "character_id": "char_白瀬_灯里_v1",
-                  "text": "守れる人を、増やしたいんです。"
-                }
-              ],
-              "monologue": [],
-              "narration": [],
-              "sfx": []
-            },
-            {
-              "panel_no": 15,
               "shot_type": "close_up",
               "importance": 5,
               "silence": false,
-              "action": "レンのスマホに予定表の空白UIが開き、青い文字だけが浮かぶ。レンは画面を握り、初めて前を向く。",
-              "key_visual": "『明日の予定、組みますか？』の青いUIとレンの決意した目。",
+              "action": "レンのスマホに、文字のない青い予定表の枠だけが浮かぶ。レンは階段の暗がりを見下ろし、page 1 と同じ目をする。",
+              "key_visual": "ヒビ入りスマホ越しの空白スケジュール枠と、下降階段の青い導線。",
               "dialogue": [
                 {
                   "character_id": "char_桐生_レン_v1",
@@ -1033,19 +770,20 @@
               "monologue": [],
               "narration": [],
               "sfx": [
-                "【ナビ】明日の予定、組みますか？"
+                "ピ..."
               ]
             }
           ]
         }
       ],
       "warnings": [
-        "ナビ音声はbibleに専用character_idがないため、台詞ではなくUI/SFX表現に寄せている。"
+        "ナビ専用character_idがbibleにないため、ナビの声は台詞化せず、HUD枠と効果音で示唆している。",
+        "page 1 は未来断片として処理するため、page 2 冒頭で現実への引き戻しが伝わるよう作画上の落差を強める必要がある。"
       ]
     }
   ],
   "recommendation": {
     "pattern_id": "P4_splash_pullback",
-    "rationale": "tone_profile.darkness=unset / genre=主人公最強無双 の組み合わせで selection_guide が最初に推奨するパターン"
+    "rationale": "tone_profile.darkness=unset / genre=modern_dungeon の組み合わせで selection_guide が最初に推奨するパターン"
   }
 }
