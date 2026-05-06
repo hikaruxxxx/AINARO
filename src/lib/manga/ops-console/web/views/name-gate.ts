@@ -47,6 +47,7 @@ const NAME_GATE_CSS = `
 .name-gate-toolbar h2 { margin: 0; font-size: 18px; letter-spacing: 0; }
 .name-gate-toolbar .info { color: #64748b; font-size: 13px; }
 .name-gate-toolbar .summary { margin-left: auto; color: #334155; font-size: 13px; }
+.ng-kpi { color: var(--text-secondary); font-size: var(--fs-sm); margin-left: auto; }
 .name-gate-toolbar strong { font-weight: 700; }
 .name-gate-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px; }
 .name-gate-container .page-card {
@@ -201,7 +202,7 @@ function renderShell(
       <div class="name-gate-toolbar">
         <h2>ネーム gate</h2>
         <span class="info">${escapeHtml(slug)} / ${epLabel(episode)} (${escapeHtml(manifest.episode_id)})</span>
-        <span class="summary">approved <strong id="ng-cnt-approved">0</strong> / rejected <strong id="ng-cnt-rejected">0</strong> / pending <strong id="ng-cnt-pending">${manifest.pages.length}</strong></span>
+        <span class="summary ng-kpi">pending <strong id="ng-cnt-pending">${manifest.pages.length}</strong> / approved <strong id="ng-cnt-approved">0</strong> / rejected <strong id="ng-cnt-rejected">0</strong> / total <strong id="ng-cnt-total">${manifest.pages.length}</strong></span>
       </div>
       <div class="name-gate-help">
         <code>a</code> approve <code>r</code> reject <code>p</code> pending
@@ -229,6 +230,7 @@ function refreshSummary(container: HTMLElement, decisions: Map<number, DecisionD
   setCounter(container, "#ng-cnt-approved", approved);
   setCounter(container, "#ng-cnt-rejected", rejected);
   setCounter(container, "#ng-cnt-pending", pending);
+  setCounter(container, "#ng-cnt-total", decisions.size);
 }
 
 function refreshCard(container: HTMLElement, pageNo: number, decision: DecisionDraft): void {

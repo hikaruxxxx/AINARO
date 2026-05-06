@@ -16,7 +16,7 @@ import {
 } from "../../../revision-ui/types";
 import type { PagePlanPage, PanelV2 } from "../../../schemas-v2";
 
-type Mode = "grid" | "compare";
+type Mode = "grid" | "compare" | "effects";
 type UiLayer = "renders" | "bubbles";
 type ManifestLayer = RenderManifestEntry["layer"];
 type Filters = {
@@ -66,6 +66,16 @@ type ViewState = {
   filters: Filters;
   modal: ModalContext | null;
   adoptModal: AdoptModalContext | null;
+};
+
+type EffectsStats = {
+  totalQueued: number;
+  resolved: number;
+  adoptedNonV1: number;
+  resolutionRate: number;
+  adoptionRate: number;
+  byTag: Map<RevisionTag, { queued: number; resolved: number; adopted: number }>;
+  panelStats: Array<{ panel_id: string; instructionCount: number; adoptedVersion: string | null; rounds: number }>;
 };
 
 const RV_CSS = `
@@ -163,6 +173,19 @@ const RV_CSS = `
 .rv-ver-meta button { background: #2563eb; color: #fff; border: 0; border-radius: 3px; padding: 2px 8px; font-size: 10px; cursor: pointer; }
 .rv-ver-card.rv-adopted .rv-ver-meta button { background: #16a34a; }
 .rv-ver-note { margin-top: 4px; padding: 4px 6px; background: #f0fdf4; border: 1px solid #16a34a; border-radius: 3px; color: #166534; font-size: 11px; line-height: 1.4; }
+.rv-hard { padding: var(--space-3, 12px); border: 1px solid var(--color-warning, #f59e0b); border-radius: var(--radius-md, 6px); background: var(--color-warning-bg, #fef3c7); margin-bottom: var(--space-3, 12px); }
+.rv-hard h3 { margin: 0 0 8px; font-size: 14px; }
+.rv-hard ul { margin: 0; padding-left: 18px; color: #334155; font-size: 12px; line-height: 1.6; }
+.rv-effects { display: grid; gap: 14px; }
+.rv-effects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.rv-effects-card { border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; padding: 12px; }
+.rv-effects-card span { display: block; color: #64748b; font-size: 12px; font-weight: 700; }
+.rv-effects-card strong { display: block; margin-top: 4px; color: #111827; font-size: 26px; line-height: 1; }
+.rv-effects-section { border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; padding: 12px; }
+.rv-effects-section h3 { margin: 0 0 10px; font-size: 14px; }
+.rv-effects-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rv-effects-table th, .rv-effects-table td { border-top: 1px solid #e5e7eb; padding: 7px 8px; text-align: left; }
+.rv-effects-table th { color: #64748b; font-weight: 700; background: #f8fafc; }
 .rv-help { color: #64748b; font-size: 12px; line-height: 1.6; }
 .rv-help code { background: #eef2f6; padding: 1px 5px; border-radius: 3px; font-family: ui-monospace, monospace; }
 .rv-modal {
@@ -284,6 +307,7 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
         <div class="rv-controls">
           <button type="button" class="rv-button" data-rv-mode="grid">Grid</button>
           <button type="button" class="rv-button" data-rv-mode="compare">Compare</button>
+          <button type="button" class="rv-button" data-rv-mode="effects">Effects</button>
           <button type="button" class="rv-button" data-rv-layer="renders">Renders</button>
           <button type="button" class="rv-button" data-rv-layer="bubbles">Bubbles</button>
         </div>
@@ -294,7 +318,7 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
         <label class="rv-filter-check"><input type="checkbox" data-rv-filter="notAdopted"> hide adopted</label>
         <span id="rv-filter-summary"></span>
       </div>
-      <div class="rv-help"><code>1</code> renders <code>2</code> bubbles <code>g</code> grid <code>c</code> compare <code>esc</code> close</div>
+      <div class="rv-help"><code>1</code> renders <code>2</code> bubbles <code>g</code> grid <code>c</code> compare <code>3</code> effects <code>j/k</code> panel 移動 <code>esc</code> close</div>
       <div class="rv-main" id="rv-main"><div class="rv-empty">読み込み中...</div></div>
       <div class="rv-modal" id="rv-modal" role="dialog" aria-modal="true" aria-labelledby="rv-modal-title">
         <div class="rv-modal-card">
@@ -421,6 +445,67 @@ function adoptedPanels(manifest: Manifest): AdoptedVersions["panels"] {
   return manifest.adopted?.panels ?? {};
 }
 
+function formatPct(value: number): string {
+  return `${Math.round(value * 100)}%`;
+}
+
+function instructionCountByPanel(manifest: Manifest): Map<string, number> {
+  const result = new Map<string, number>();
+  for (const entry of manifest.revision_queue ?? []) {
+    result.set(entry.panel_id, (result.get(entry.panel_id) ?? 0) + 1);
+  }
+  return result;
+}
+
+function computeEffects(manifest: Manifest): EffectsStats {
+  const queue = manifest.revision_queue ?? [];
+  const adopted = adoptedPanels(manifest);
+  const totalQueued = queue.length;
+  const resolved = queue.filter((entry) => Boolean(entry.resolved_version)).length;
+  const adoptedNonV1 = Object.values(adopted).filter((choice) => choice?.chosen && choice.chosen !== "v1").length;
+  const byTag = new Map<RevisionTag, { queued: number; resolved: number; adopted: number }>();
+  for (const tag of REVISION_TAGS) byTag.set(tag, { queued: 0, resolved: 0, adopted: 0 });
+
+  const panelStats = new Map<string, { panel_id: string; instructionCount: number; adoptedVersion: string | null; rounds: number }>();
+  for (const entry of queue) {
+    const tags = (entry.checked_tags ?? []).filter(isRevisionTag);
+    const resolvedVersion = entry.resolved_version ?? null;
+    for (const tag of tags) {
+      const row = byTag.get(tag);
+      if (!row) continue;
+      row.queued++;
+      if (resolvedVersion) row.resolved++;
+      if (resolvedVersion && adopted[entry.panel_id]?.chosen === resolvedVersion) row.adopted++;
+    }
+
+    const stat = panelStats.get(entry.panel_id) ?? {
+      panel_id: entry.panel_id,
+      instructionCount: 0,
+      adoptedVersion: adopted[entry.panel_id]?.chosen ?? null,
+      rounds: 0,
+    };
+    stat.instructionCount++;
+    stat.adoptedVersion = adopted[entry.panel_id]?.chosen ?? stat.adoptedVersion;
+    stat.rounds = Math.max(
+      stat.rounds,
+      parseVersion(stat.adoptedVersion ?? ""),
+      parseVersion(entry.resolved_version ?? ""),
+      parseVersion(entry.for_version ?? "")
+    );
+    panelStats.set(entry.panel_id, stat);
+  }
+
+  return {
+    totalQueued,
+    resolved,
+    adoptedNonV1,
+    resolutionRate: totalQueued > 0 ? resolved / totalQueued : 0,
+    adoptionRate: resolved > 0 ? adoptedNonV1 / resolved : 0,
+    byTag,
+    panelStats: Array.from(panelStats.values()).sort((a, b) => b.instructionCount - a.instructionCount),
+  };
+}
+
 function matchingVersions(versions: Map<string, VersionView[]>, panel: PanelView): VersionView[] {
   return versions.get(panel.queueKey) ?? [];
 }
@@ -490,6 +575,29 @@ function renderSummary(root: HTMLElement, state: ViewState): void {
   });
 }
 
+function renderHardPanels(manifest: Manifest): string {
+  const queued = instructionCountByPanel(manifest);
+  const adopted = adoptedPanels(manifest);
+  const failed = failedPanelSet(manifest);
+  const hard = Array.from(queued.entries())
+    .filter(([id, count]) => count >= 3 || failed.has(id) || !adopted[id])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  if (hard.length === 0) return "";
+  return `<section class="rv-hard">
+    <h3>注意が必要な panel (上位 ${hard.length})</h3>
+    <ul>${hard.map(([id, count]) => {
+      const choice = adopted[id];
+      const status = [
+        `指示 ${count} 回`,
+        failed.has(id) ? "audit failed" : "",
+        choice ? `採用済 (${choice.chosen})` : "未採用",
+      ].filter(Boolean).join(" / ");
+      return `<li><strong>${escapeHtml(id)}</strong> ${escapeHtml(status)}</li>`;
+    }).join("")}</ul>
+  </section>`;
+}
+
 function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: number): void {
   const manifest = state.manifest;
   const main = root.querySelector<HTMLElement>("#rv-main");
@@ -557,9 +665,62 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
     `);
   }
 
-  main.innerHTML = `<div class="rv-grid">${pageHtml.join("") || '<div class="rv-empty">該当パネルなし</div>'}</div>`;
+  main.innerHTML = `${renderHardPanels(manifest)}<div class="rv-grid">${pageHtml.join("") || '<div class="rv-empty">該当パネルなし</div>'}</div>`;
   setText(root, "#rv-filter-summary", `${shown} / ${total} panels`);
   void slug;
+}
+
+function renderEffects(root: HTMLElement, state: ViewState): void {
+  const manifest = state.manifest;
+  const main = root.querySelector<HTMLElement>("#rv-main");
+  if (!manifest || !main) return;
+  const stats = computeEffects(manifest);
+  const unresolved = stats.totalQueued - stats.resolved;
+  const tagRows = REVISION_TAGS.map((tag) => {
+    const row = stats.byTag.get(tag) ?? { queued: 0, resolved: 0, adopted: 0 };
+    const conv = row.resolved > 0 ? row.adopted / row.resolved : 0;
+    return `<tr>
+      <td>${escapeHtml(TAG_LABELS[tag])}</td>
+      <td>${row.queued}</td>
+      <td>${row.resolved}</td>
+      <td>${row.adopted}</td>
+      <td>${formatPct(conv)}</td>
+    </tr>`;
+  }).join("");
+  const hardRows = stats.panelStats
+    .filter((panel) => panel.instructionCount >= 3)
+    .map((panel) => `<tr>
+      <td>${escapeHtml(panel.panel_id)}</td>
+      <td>${panel.instructionCount}</td>
+      <td>${escapeHtml(panel.adoptedVersion ?? "-")}</td>
+      <td>${panel.rounds || "-"}</td>
+    </tr>`)
+    .join("");
+
+  main.innerHTML = `
+    <div class="rv-effects">
+      <div class="rv-effects-grid">
+        <section class="rv-effects-card"><span>総指示数</span><strong>${stats.totalQueued}</strong></section>
+        <section class="rv-effects-card"><span>解消率</span><strong>${formatPct(stats.resolutionRate)}</strong></section>
+        <section class="rv-effects-card"><span>採用率</span><strong>${formatPct(stats.adoptionRate)}</strong></section>
+        <section class="rv-effects-card"><span>未解消</span><strong>${unresolved}</strong></section>
+      </div>
+      <section class="rv-effects-section">
+        <h3>タグ別の効果</h3>
+        <table class="rv-effects-table">
+          <thead><tr><th>tag</th><th>queued</th><th>resolved</th><th>adopted</th><th>conv%</th></tr></thead>
+          <tbody>${tagRows}</tbody>
+        </table>
+      </section>
+      <section class="rv-effects-section">
+        <h3>困難 panel ランキング</h3>
+        ${hardRows ? `<table class="rv-effects-table">
+          <thead><tr><th>panel_id</th><th>指示回数</th><th>採用 v?</th><th>rounds</th></tr></thead>
+          <tbody>${hardRows}</tbody>
+        </table>` : '<div class="rv-empty">指示回数 3 回以上の panel はありません。</div>'}
+      </section>
+    </div>`;
+  setText(root, "#rv-filter-summary", "effects");
 }
 
 function renderCompare(root: HTMLElement, state: ViewState): void {
@@ -606,7 +767,8 @@ function renderCompare(root: HTMLElement, state: ViewState): void {
 
 function refresh(root: HTMLElement, state: ViewState, slug: string, episode: number): void {
   renderSummary(root, state);
-  if (state.mode === "compare") renderCompare(root, state);
+  if (state.mode === "effects") renderEffects(root, state);
+  else if (state.mode === "compare") renderCompare(root, state);
   else renderGrid(root, state, slug, episode);
 }
 
@@ -692,12 +854,30 @@ function bindStaticListeners(
   signal: AbortSignal,
   chains: Map<string, Promise<void>>
 ): void {
+  let focusIndex = 0;
+  const panels = () => Array.from(root.querySelectorAll<HTMLElement>(".rv-panel"));
+  const focusPanel = (idx: number): void => {
+    const list = panels();
+    if (list.length === 0) return;
+    focusIndex = (idx + list.length) % list.length;
+    list[focusIndex]?.focus();
+  };
+  const focusedPanel = (): HTMLElement | undefined => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.classList.contains("rv-panel")) {
+      const idx = panels().indexOf(active);
+      if (idx >= 0) focusIndex = idx;
+      return active;
+    }
+    return panels()[focusIndex];
+  };
+
   root.querySelectorAll<HTMLButtonElement>("[data-rv-mode]").forEach((button) => {
     button.addEventListener(
       "click",
       () => {
         const mode = button.dataset.rvMode;
-        if (mode === "grid" || mode === "compare") {
+        if (mode === "grid" || mode === "compare" || mode === "effects") {
           state.mode = mode;
           refresh(root, state, slug, episode);
         }
@@ -733,6 +913,14 @@ function bindStaticListeners(
   root.addEventListener(
     "keydown",
     (event) => {
+      if (state.modal || state.adoptModal) {
+        if (event.key === "Escape") {
+          closeRevisionModal(root, state);
+          closeAdoptModal(root, state);
+          event.preventDefault();
+        }
+        return;
+      }
       const target = event.target;
       if (target instanceof HTMLElement) {
         const tag = target.tagName;
@@ -755,6 +943,32 @@ function bindStaticListeners(
       } else if (event.key === "c" || event.key === "C") {
         state.mode = "compare";
         refresh(root, state, slug, episode);
+        event.preventDefault();
+      } else if (event.key === "3") {
+        state.mode = "effects";
+        refresh(root, state, slug, episode);
+        event.preventDefault();
+      } else if (event.key === "j" || event.key === "ArrowDown") {
+        focusPanel(focusIndex + 1);
+        event.preventDefault();
+      } else if (event.key === "k" || event.key === "ArrowUp") {
+        focusPanel(focusIndex - 1);
+        event.preventDefault();
+      } else if (event.key === "Enter") {
+        const panel = focusedPanel();
+        if (panel) panel.click();
+        event.preventDefault();
+      } else if (event.key === " ") {
+        const panel = focusedPanel();
+        if (panel) {
+          state.mode = "compare";
+          state.layer = "bubbles";
+          refresh(root, state, slug, episode);
+          toast(root, `${panel.dataset.panelId ?? "panel"} の採用候補を Compare で確認してください`, "ok");
+        }
+        event.preventDefault();
+      } else if (event.key === "?") {
+        toast(root, "j/k 移動 / Enter 修正指示 / Space Compare / 1 renders / 2 bubbles / g grid / c compare / 3 effects / esc close", "ok");
         event.preventDefault();
       } else if (event.key === "Escape") {
         closeRevisionModal(root, state);
