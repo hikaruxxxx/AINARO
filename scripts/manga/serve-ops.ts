@@ -1,20 +1,15 @@
 /**
- * 漫画 ops console HTTP server (Phase 1)
+ * 漫画 ops console HTTP server
  *
- * 旧 serve-name.ts (port 5174) と serve-revision.ts (port 5180) を統合。
- * 5174 を母体に両者の API/static を expose、Phase 2 以降で UI 統合と Jobs を追加していく。
- *
- * Phase 1 の互換ポリシー:
- *   - 旧 URL `/episodes/epNN/name/index.html` は引き続き 200
- *   - root `/` は Phase 2A の ops console shell を返す
+ * Phase 2C:
+ *   - root `/` は ops console shell を返す
  *   - 新 URL `/works/{slug}/episodes/epNN/` は SPA shell を返す
- *   - 新 API `/api/works`, `/api/works/{slug}/episodes` を追加 (UI 用 enumerate)
- *   - scope は起動引数 --slug --episode で固定 (Phase 2 で複数 slug 横断を解禁予定)
+ *   - 旧 URL `/episodes/epNN/name/index.html` は SPA name-gate へ 302 redirect
+ *   - scope は起動引数 --slug --episode で固定 (Phase 3 以降で複数 slug 横断を解禁予定)
  *
  * Usage:
  *   npx tsx scripts/manga/serve-ops.ts --slug a07-modern-dungeon --episode 1
- *   # → http://localhost:5174/episodes/ep01/name/index.html (旧 serve-name 互換)
- *   # → http://localhost:5174/                              (旧 serve-revision 互換)
+ *   # → http://localhost:5174/works/a07-modern-dungeon/episodes/ep01/#name-gate
  */
 import "./_env";
 import http from "node:http";
@@ -22,16 +17,13 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import {
   workDir,
-  storyboardPath,
-  nameIndexHtmlPath,
+  nameManifestPath,
 } from "./layers/_paths";
 import { handleApi } from "../../src/lib/manga/ops-console/server/router";
 import { serveStatic } from "../../src/lib/manga/ops-console/server/static";
 import { renderOpsConsoleShellHtml } from "../../src/lib/manga/ops-console/index-html";
 import { buildOpsConsoleClient } from "../../src/lib/manga/ops-console/web/build";
-import { renderRevisionUiHtml } from "../../src/lib/manga/revision-ui/index-html";
 import { isValidEpisode, isValidSlug } from "../../src/lib/manga/ops-console/server/lib/path-guards";
-import type { EpisodeStoryboardV2 } from "../../src/lib/manga/schemas-v2";
 
 type Args = { slug: string; episode: number; port: number; openBrowser: boolean };
 
@@ -68,14 +60,6 @@ function parseArgs(): Args {
   return a as Args;
 }
 
-async function loadJsonOpt<T>(p: string): Promise<T | null> {
-  try {
-    return JSON.parse(await fs.readFile(p, "utf-8")) as T;
-  } catch {
-    return null;
-  }
-}
-
 function maybeOpenBrowser(url: string): void {
   const { spawn } = require("node:child_process") as typeof import("node:child_process");
   const cmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "explorer" : "xdg-open";
@@ -104,18 +88,16 @@ async function main() {
   const root = workDir(args.slug);
   await fs.access(root);
 
-  // L8.5 前置きチェック (旧 serve-name と同じ警告)
-  const indexP = nameIndexHtmlPath(args.slug, args.episode);
-  if (!(await fs.stat(indexP).catch(() => null))) {
+  // L8.5 前置きチェック。Phase 2C 以降は index.html ではなく SPA が操作 UI。
+  const manifestP = nameManifestPath(args.slug, args.episode);
+  if (!(await fs.stat(manifestP).catch(() => null))) {
     console.warn(
-      `[serve-ops] WARN: ${indexP} not found. Run L8.5 first:\n  npx tsx scripts/manga/layers/L08-5-name-preview.ts --slug ${args.slug} --episode ${args.episode}`
+      `[serve-ops] WARN: ${manifestP} not found. Run L8.5 first:\n` +
+        `  npx tsx scripts/manga/layers/L08-5-name-preview.ts --slug ${args.slug} --episode ${args.episode}\n` +
+        `  SPA URL: http://localhost:${args.port}/works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/#name-gate`
     );
   }
 
-  // 旧 serve-revision の HTML は Phase 2A では逃げ道として残す。
-  const sb = await loadJsonOpt<EpisodeStoryboardV2>(storyboardPath(args.slug, args.episode));
-  const episodeId = sb?.episode_id ?? `${args.slug}-ep${String(args.episode).padStart(2, "0")}`;
-  const revisionIndexHtml = renderRevisionUiHtml(args.slug, args.episode, episodeId);
   const opsShellHtml = renderOpsConsoleShellHtml();
   const opsDistRoot = path.resolve(process.cwd(), "dist/ops-console");
 
@@ -126,6 +108,15 @@ async function main() {
       return;
     }
     const url = new URL(req.url, `http://localhost:${args.port}`);
+
+    const oldName = url.pathname.match(/^\/episodes\/ep(\d+)\/name\/index\.html$/);
+    if (oldName) {
+      const ep = oldName[1].padStart(2, "0");
+      const location = `/works/${args.slug}/episodes/ep${ep}/#name-gate`;
+      res.writeHead(302, { Location: location, "Cache-Control": "no-store" });
+      res.end();
+      return;
+    }
 
     // /api/* は router へ
     if (url.pathname.startsWith("/api/")) {
@@ -141,16 +132,14 @@ async function main() {
       return;
     }
 
-    // 静的配信: 三系統の root を提供
+    // 静的配信: 二系統の root を提供
     //   - `/`, `/works/{slug}/episodes/epNN/` → ops console shell
     //   - `/_ops/*` → esbuild bundle
-    //   - `/legacy-revision` → revision UI HTML (Phase 2B までの逃げ道)
-    //   - `/episodes/...`, その他 → workDir(slug) 配下 (旧 serve-name 互換)
+    //   - `/episodes/...`, その他 → workDir(slug) 配下 (SVG 等の静的 asset)
     //   - `/works/{slug}/episodes/.../path` → default scope のみ legacy static に解決
     await serveStatic(req, res, url, {
       rootIndex: (p) => {
         if (p === "/" || p === "") return opsShellHtml;
-        if (p === "/legacy-revision") return revisionIndexHtml;
         if (p.match(/^\/works\/[^/]+\/episodes\/ep\d+\/?$/)) return opsShellHtml;
         return null;
       },
@@ -173,14 +162,12 @@ async function main() {
   });
 
   // listen 失敗 (主に EADDRINUSE) を意味のあるメッセージに置換する。
-  // shim 経由 (serve-name.ts / serve-revision.ts) でも同じパスを通るため、
-  // ここで一度補足しておけば全 entry で挙動が揃う。
   server.on("error", (err) => {
     const e = err as NodeJS.ErrnoException;
     if (e.code === "EADDRINUSE") {
       console.error(
         `[serve-ops] port ${args.port} は既に使用されています。` +
-          `別の serve-ops / serve-name / serve-revision インスタンスが起動していないか確認してください。\n` +
+          `別の serve-ops インスタンスが起動していないか確認してください。\n` +
           `  既に ops console が立っている場合: http://localhost:${args.port}/`
       );
     } else if (e.code === "EACCES") {
@@ -192,15 +179,14 @@ async function main() {
   });
 
   server.listen(args.port, () => {
-    const nameUrl = `http://localhost:${args.port}/episodes/ep${String(args.episode).padStart(2, "0")}/name/index.html`;
     const consoleUrl = `http://localhost:${args.port}/`;
     const scopedUrl = `http://localhost:${args.port}/works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/`;
     console.log(`[serve-ops] root=${root} slug=${args.slug} ep=${args.episode}`);
     console.log(`[serve-ops] client bundle: ${clientBuild.outFile}`);
     console.log(`[serve-ops] console: ${consoleUrl}`);
     console.log(`[serve-ops] console scope: ${scopedUrl}`);
-    console.log(`[serve-ops] name preview: ${nameUrl}`);
-    console.log(`[serve-ops] revision UI:  http://localhost:${args.port}/legacy-revision`);
+    console.log(`[serve-ops] name gate: ${scopedUrl}#name-gate`);
+    console.log(`[serve-ops] revision:  ${scopedUrl}#revision`);
     if (args.openBrowser) maybeOpenBrowser(consoleUrl);
   });
 

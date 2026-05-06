@@ -3,7 +3,6 @@
  *
  * storyboard.json + page_plan.json + bible/snapshot.json + bible/refs →
  *   episodes/ep{NN}/name/p{NN}.svg
- *   episodes/ep{NN}/name/index.html
  *   episodes/ep{NN}/name/name_manifest.json
  *
  * 加えて、name_approval.json が無ければ全ページ pending で初期化する。
@@ -26,7 +25,6 @@ import {
   nameAuditPath,
 } from "./_paths";
 import { renderPageSvg } from "../../../src/lib/manga/name-preview/svg-renderer";
-import { renderIndexHtml } from "../../../src/lib/manga/name-preview/index-html";
 import { auditPage, type AuditFinding } from "../../../src/lib/manga/name-preview/audit-rules";
 import {
   pendingApproval,
@@ -175,8 +173,12 @@ async function main() {
   };
   await fs.writeFile(nameManifestPath(args.slug, args.episode), JSON.stringify(manifest, null, 2), "utf-8");
 
-  const indexHtml = renderIndexHtml(manifest, args.slug, args.episode);
-  await fs.writeFile(nameIndexHtmlPath(args.slug, args.episode), indexHtml, "utf-8");
+  // Phase 2C: 操作 UI は ops console SPA に統合済み。旧 index.html は redirect stub のみ残す。
+  await fs.writeFile(
+    nameIndexHtmlPath(args.slug, args.episode),
+    renderSpaRedirectStub(args.slug, args.episode),
+    "utf-8"
+  );
 
   // name_approval.json が無ければ全ページ pending で初期化
   const approvalP = nameApprovalPath(args.slug, args.episode);
@@ -196,6 +198,33 @@ async function main() {
   console.log(`[L08.5] DONE: pages=${manifestPages.length} manifest_warnings=${totalWarnings} audit=info:${sev.info ?? 0}/warn:${sev.warn ?? 0}/error:${sev.error ?? 0}`);
   console.log(`[L08.5] outputs: ${outDir}`);
   console.log(`[L08.5] audit:   ${nameAuditPath(args.slug, args.episode)}`);
+  console.log(`[L08.5] UI:      /works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/#name-gate`);
+}
+
+function renderSpaRedirectStub(slug: string, episode: number): string {
+  const ep = String(episode).padStart(2, "0");
+  const url = `/works/${slug}/episodes/ep${ep}/#name-gate`;
+  return `<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="0; url=${escapeHtml(url)}">
+  <title>name gate moved</title>
+</head>
+<body>
+  <p>name gate は ops console に移動しました。<a href="${escapeHtml(url)}">ops console を開く</a></p>
+</body>
+</html>
+`;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function countByRule(findings: AuditFinding[]): Record<string, number> {

@@ -31,7 +31,7 @@ L7  Refs Resolution        page_plan + bible/refs → resolved_refs.json
 L8  Incremental Refs       resolved_refs.unresolved → bible/refs/_ep{N}/
 
 ═══ PHASE 2.5: NAME GATE (per ep, 人間判定) ═══
-L8.5 Name Preview         storyboard + page_plan + bible/refs → name/p{NN}.svg + index.html + name_manifest.json + name_approval.json (all-pending)
+L8.5 Name Preview         storyboard + page_plan + bible/refs → name/p{NN}.svg + name_manifest.json + name_approval.json (all-pending)
                           + L8.6 audit を内部呼出し → name/name_audit.json
 L8.6 Name Audit (rule)    audit-rules.ts (純TS、LLM 不使用) で 14 ルール検査
                           - dialogue_overflow / panel_overcrowd / panel_undercrowd / shot_repetition
@@ -39,7 +39,7 @@ L8.6 Name Audit (rule)    audit-rules.ts (純TS、LLM 不使用) で 14 ルー�
                           - importance_imbalance / silent_run / bleed_overuse / reading_order_jump
                           - establishing_late / cliffhanger_role_mismatch / opening_hook_no_focus
                           warning 表示のみ。L9 gate は人間判定のみで走る (audit は gate しない)
-L8.7 Name Approval        serve-name.ts (HTTP server) で a/r 操作 → name_approval.json 上書き
+L8.7 Name Approval        serve-ops.ts の ops console SPA で a/r 操作 → name_approval.json 上書き
 
 ═══ PHASE 3: RENDER (per ep) ═══
 L9  Render                 page_plan + resolved_refs + name_approval (gate) → renders/p{NN}.png
@@ -81,9 +81,8 @@ data/manga/
         ├── storyboard.json
         ├── page_plan.json
         ├── resolved_refs.json
-        ├── name/                ← L8.5 出力 (SVG ネーム + index.html)
+        ├── name/                ← L8.5 出力 (SVG ネーム + manifest)
         │   ├── p{NN}.svg
-        │   ├── index.html
         │   ├── name_manifest.json
         │   └── name_audit.json  ← L8.6 出力 (audit findings、warning のみ、gate しない)
         ├── name_approval.json   ← L8.7 出力 (人間 or migration 判定)
@@ -112,8 +111,8 @@ npx tsx scripts/manga/pipeline.ts --slug a07-modern-dungeon --volume 1 --layer L
 # === ネーム gate (L8.5 / L8.7 / L9 gate) ===
 # ネーム生成 → ブラウザで承認 → L9 から再開
 npx tsx scripts/manga/pipeline.ts --slug a07-modern-dungeon --episode 1 --to L08_5
-npx tsx scripts/manga/serve-name.ts --slug a07-modern-dungeon --episode 1
-# → http://localhost:5174/episodes/ep01/name/index.html で a/r 操作
+npx tsx scripts/manga/serve-ops.ts --slug a07-modern-dungeon --episode 1
+# → http://localhost:5174/works/a07-modern-dungeon/episodes/ep01/#name-gate で a/r 操作
 npx tsx scripts/manga/pipeline.ts --slug a07-modern-dungeon --episode 1 --from L09
 
 # 既存 ep を all-approved (migration) で初期化
@@ -144,9 +143,9 @@ npx tsx scripts/manga/layers/L05-page-director.ts --slug a07-modern-dungeon --ep
 | L6 | `scripts/manga/layers/L06-continuity-resolve.ts` | `page-director/continuity-resolver.ts` |
 | L7 | `scripts/manga/layers/L07-refs-resolution.ts` | `page-director/continuity-refs-v2.ts` (shot_type 引数追加) |
 | L8 | `scripts/manga/layers/L08-incremental-refs.ts` | `bible/character-images.ts` (variant 引数で個別生成) |
-| L8.5 | `scripts/manga/layers/L08-5-name-preview.ts` | `name-preview/{svg-renderer, index-html, blocking-estimator, audit-rules, types}.ts` |
+| L8.5 | `scripts/manga/layers/L08-5-name-preview.ts` | `name-preview/{svg-renderer, blocking-estimator, audit-rules, types}.ts` |
 | L8.6 | (L8.5 から内部呼出) | `name-preview/audit-rules.ts` (rule-based、14 ルール、warning 表示のみ) |
-| L8.7 | `scripts/manga/serve-name.ts` (HTTP server) | `name-preview/types.ts` schema |
+| L8.7 | `scripts/manga/serve-ops.ts` (ops console SPA) | `ops-console/web/views/name-gate.ts` + `name-preview/types.ts` schema |
 | Reject report | `scripts/manga/name-reject-report.ts` | `name_approval.json` + `name_audit.json` 集計 |
 | L9 | `scripts/manga/layers/L09-render.ts` (name gate 内蔵) | `render/gpt-image-2-adapter.ts` + `generate/prompt-composer-v2.ts` |
 | L10 | `scripts/manga/layers/L10-bubble.ts` | `bubble/vertical/typesetter.ts` + `svg-overlay.ts` |

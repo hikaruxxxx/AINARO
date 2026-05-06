@@ -201,7 +201,7 @@ async function main() {
   const approval = await loadNameApproval(args.slug, args.episode);
   if (!approval && !skipGate) {
     console.error(`[L09] name_approval.json not found at ${nameApprovalPath(args.slug, args.episode)}`);
-    console.error(`[L09] Run L8.5 + serve-name to approve, or pass --skip-name-gate to bypass.`);
+    console.error(`[L09] Run L8.5 + serve-ops name-gate to approve, or pass --skip-name-gate to bypass.`);
     process.exit(3);
   }
 
@@ -222,7 +222,7 @@ async function main() {
   const pagesToRender = candidatePages.filter((p) => renderableSet.has(p.page_no));
   console.log(`[L09] slug=${args.slug} ep=${args.episode} pages=${pagesToRender.length}/${pagePlan.pages.length} (gated_out=${gatedOut.length})`);
   if (pagesToRender.length === 0 && !args.skipNameGate) {
-    console.error(`[L09] No approved pages. Approve pages via L8.7 (serve-name) or pass --skip-name-gate.`);
+    console.error(`[L09] No approved pages. Approve pages via ops console name-gate or pass --skip-name-gate.`);
     process.exit(4);
   }
 

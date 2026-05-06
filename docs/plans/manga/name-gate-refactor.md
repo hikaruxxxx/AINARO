@@ -1,5 +1,7 @@
 # L8.5 Name Preview 実装後のリファクタリング/整理
 
+> **Status**: ARCHIVED (2026-05-05) — Phase 2C で ops console SPA に統合済み。serve-name.ts shim 撤廃済み。本ドキュメントの記述する旧 inline UI / serve-name.ts 構成は現役ではない。歴史記録として残置。
+
 ## Context
 
 L8.5 ネームプレビュー gate (SSoT: `docs/plans/manga/name-gate.md`) を実装した直後で、コミット前。Codex 同期 (thread `019df57b-e00b-7bc2-9cf6-7cd980041882`) を経た最終プラン。

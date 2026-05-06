@@ -1,6 +1,6 @@
 # ネーム gate 導入計画 (L8.5 / L8.7 / L9 gate)
 
-**Status**: Draft (2026-05-05)
+**Status**: ARCHIVED (2026-05-05) — Phase 2C で ops console SPA に統合済み。serve-name.ts shim と旧 inline HTML は撤廃。現役の操作 UI は `npx tsx scripts/manga/serve-ops.ts --slug ... --episode N` → `http://localhost:5174/works/{slug}/episodes/epNN/#name-gate`。本ドキュメントは初期計画の歴史記録として残置。
 **SSoT 関連**: `docs/plans/manga/pipeline-v2.md` の追補
 **Codex thread**: 019df56b-f62c-79e2-990b-84d8c66b1e4d (2026-05-05)
 

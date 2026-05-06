@@ -4,8 +4,8 @@
  * SSoT: ~/.claude/plans/manga-pipeline-v2.md
  *
  * v1 スコープ:
- * - L8.5 が SVG ネーム + index.html + name_manifest.json を生成
- * - L8.7 (serve-name.ts) が人間判定を name_approval.json に書き込む
+ * - L8.5 が SVG ネーム + name_manifest.json を生成
+ * - L8.7 (ops console name-gate) が人間判定を name_approval.json に書き込む
  * - L9 が name_approval.json を読み、approved 以外を skip / hard fail
  */
 
@@ -64,7 +64,7 @@ export type NameApproval = {
 };
 
 /**
- * name_manifest.json — index.html / serve-name.ts が読む。
+ * name_manifest.json — ops console name-gate が読む。
  * SVG ファイル名や警告サマリーを提供。
  */
 export type NameWarning = {
@@ -134,7 +134,7 @@ export const RERUN_FROM_ORDER: ReadonlyArray<NonNullable<NameRerunFrom>> = [
  * reasons から rerun_from を導出する SSoT 関数。
  * - render_risk のみ → null (ネーム自体は OK 扱い)
  * - 複数 reason → 最も上流の layer
- * 派生値なので、保存境界 (serve-name.ts の POST handler) で server がこの関数で
+ * 派生値なので、保存境界 (ops console server handler) で server がこの関数で
  * 再計算し、client から送られた rerun_from は無視するべき。
  */
 export function deriveRerunFrom(reasons: NameRejectReason[]): NameRerunFrom {
