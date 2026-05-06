@@ -1,0 +1,233 @@
+{
+  "schema_version": 1,
+  "slug": "a07-modern-dungeon",
+  "legacy_id": "A07",
+  "title": "Fランク探索者の俺にだけ聞こえるんだけど　～システム音声【ナビ】が現代ダンジョンの隠しルール全部教えてくれるから、世界最速でレベルアップした件～",
+  "title_short": "Fランクの俺にだけ聞こえる",
+  "title_en_working": "TODO: 英題未確定",
+  "genre": "modern_dungeon",
+  "subgenre": "system_voice_protagonist_strongest",
+  "art_style": "manga_bw_seinen_urban",
+  "target_audience": "10-30代男性、KU ヘビーユーザー、現代ダンジョン×ガチャ×システム音声系の系譜",
+
+  "phase": "phase_a_pilot",
+  "phase_a_role": "validation_work_3_of_3",
+  "phase_a_role_note": "Phase A 検証3作品 (ダンジョン探索/転生貴族/現代ダンジョン) のうち現代ダンジョン担当",
+
+  "tags": {
+    "kyoguu": "落ちこぼれ探索者",
+    "tenki": "システム音声覚醒",
+    "houkou": "主人公最強無双",
+    "fukku": "ゲーム的メタ視点"
+  },
+
+  "volume_plan": {
+    "estimated_volumes": 13,
+    "target_pages_per_volume": 200,
+    "target_episodes_per_volume": 10,
+    "target_episodes_per_subscription_unit": 4,
+    "target_pages_per_episode": 22,
+    "subscription_unit_note": "1話=3〜4エピソード単位 (さきよみ課金単位、feedback_series_scale_design.md準拠)"
+  },
+
+  "comparable_hits": [
+    "世界最速のレベルアップ",
+    "現実世界に現れたガチャに給料全部つぎ込んだら引くほど無双に",
+    "ハズレスキル「逃げる」で俺は極限低レベルのまま最強を目指す",
+    "レベルガチャ"
+  ],
+
+  "differentiation": "ナビ自身に規約と物語があり、ヒロインとして消滅リスクを背負う点。最終巻で武力ではなく交渉でランク制度そのものを書き換える着地。同型ヒットは個人の成り上がりで終わるが、本作は構造改革まで踏み込みつつ、毎話の爽快感を犠牲にしない。",
+
+  "kdp_target": {
+    "format": "B6_350dpi",
+    "page_dimensions_px": [1748, 2480],
+    "bleed_dimensions_px": [1843, 2587],
+    "channel": "amazon_kdp_select_ku_exclusive",
+    "ebook_price_yen": 700,
+    "paperback_price_yen_range": [800, 1000]
+  },
+
+  "kdp_metadata": {
+    "_source": "kdp-modular-plum.md (検索最適化拡張) + Codex KDP 統一案 (2026-05-06)",
+    "_status": "decided_2026-05-06_codex_unified",
+    "_note": "Codex 全体クオリティ診断 (a07 クオリティ B / 1巻10万円達成確率 中-低寄り) のトップ1優先項目「タイトル/表紙/商品説明統一」を採用。詳細は data/eval/a07-quality-improve/codex-kdp-pack.md 参照",
+
+    "title_decision": {
+      "main": "Fランクの俺にだけ聞こえる",
+      "subtitle": "俺だけナビで現代ダンジョン世界最速レベルアップ",
+      "decided_at": "2026-05-06",
+      "decided_by": "Codex MCP review + ユーザー採用",
+      "rationale": "KU 棚で「Fランク」「俺だけ」「ナビ」「世界最速」が1秒で読める強い約束。シリーズ名 series_name_canonical と完全一致 (Vol2以降同じ文字列で展開可能)"
+    },
+    "title_candidates_history": [
+      {
+        "title": "Fランク探索者の俺にだけ聞こえるんだけど　～システム音声【ナビ】が現代ダンジョンの隠しルール全部教えてくれるから、世界最速でレベルアップした件～",
+        "status": "rejected",
+        "reason": "Codex 指摘: 競合棚で過剰に長く視認性が低い (CTR 低下リスク)"
+      },
+      {
+        "title": "Fランクの俺にだけ聞こえる　〜現代ダンジョンの隠しスキルでレベルアップ無双〜",
+        "status": "rejected",
+        "reason": "副題に「世界最速」「俺だけ」が入らない"
+      },
+      {
+        "title": "Fランク探索者と俺だけが聞けるシステム音声　〜現代ダンジョンの隠しルールを攻略したら最強になった〜",
+        "status": "rejected",
+        "reason": "主タイトルが説明的、シリーズ名と不一致"
+      },
+      {
+        "title": "システム音声【ナビ】が俺だけに告げる隠しルール　〜Fランク探索者、現代ダンジョン世界最速攻略〜",
+        "status": "rejected",
+        "reason": "主タイトルがシリーズ名と不一致"
+      },
+      {
+        "title": "Fランクの俺、ナビと組んで現代ダンジョン無双",
+        "status": "rejected_short",
+        "reason": "短すぎて検索語不足"
+      }
+    ],
+    "title_decision_note": "Codex 指摘採用。シリーズ名 series_name_canonical と主タイトルを完全一致させ、副題で差別化。",
+
+    "series_name_canonical": "Fランクの俺にだけ聞こえる",
+    "series_name_canonical_note": "大文字小文字・句読点厳密一致が必要 (KDP仕様)。Vol2以降は完全に同じ文字列を使うこと。「Fランクの俺にだけ聞こえる。」(末尾句点あり) と別シリーズ扱いになる。",
+
+    "keyword_picks_7": [
+      "現代ダンジョン 世界最速 レベルアップ 漫画",
+      "Fランク 主人公最強 下剋上 無双",
+      "システム音声 ナビ 俺だけ 隠しルール",
+      "ダンジョン ガチャ スキル ステータス",
+      "落ちこぼれ探索者 覚醒 成り上がり",
+      "なろう系 コミカライズ風 青年マンガ",
+      "現代日本 ダンジョン 公社 Sランク"
+    ],
+    "keyword_picks_7_note": "Codex KDP 統一案 (2026-05-06) 採用。「世界最速」「俺だけ」「ガチャ」「Sランク」を前面に押すよう旧版を入れ替え。NG語「KU/Kindle Unlimited」は引き続き禁則 (Amazon 内施策語)。L13 実行時に keyword-validator が自動チェック。",
+    "keyword_picks_7_history": [
+      {
+        "version": "draft_2026-05-05",
+        "values": [
+          "現代ダンジョン 隠しスキル 探索者",
+          "Fランク 主人公最強 なろう系",
+          "システム音声 ヒロイン 二人三脚",
+          "サクサク無双 ダンジョン漫画 完結予定",
+          "落ちこぼれ 覚醒 下剋上 痛快",
+          "ステータス可視化 数値バトル 漫画",
+          "現代日本 ダンジョン出現 サラリーマン"
+        ],
+        "rejected_reason": "Codex 指摘: 「サクサク無双」「ステータス可視化」「サラリーマン」は商品説明向きで検索語として弱い。代わりに「世界最速」「俺だけ」「ガチャ」「Sランク」を採用。"
+      }
+    ],
+
+    "categories_validated": [
+      "Kindleストア > Kindle本 > マンガ > 少年マンガ",
+      "Kindleストア > Kindle本 > マンガ > 青年マンガ",
+      "本 > コミック・ラノベ・BL > コミック"
+    ],
+    "categories_validated_note": "2026-05-05 amazon.co.jp で実競合5件のbreadcrumbsを確認。『Kindleコミック』は俗称で、正式パスは『Kindle本 > マンガ > 少年マンガ/青年マンガ』。第3カテゴリは商業出版が使う物理書籍寄りの『本 > コミック・ラノベ・BL > コミック』を採用 (Kindle単独でも分類される)。3カテゴリはKDP上限 (2023年中盤改定)。bisac_categories とは別 (BISACコードはmetadata.json側)。",
+    "categories_evidence": [
+      "B0C27F9K6D Dジェネシス4: Kindle本 > マンガ > 少年マンガ (BSR 4,577位)",
+      "B086YQZWQ8 ダンジョン暮らしの元勇者2: Kindle本 > マンガ > 青年マンガ (BSR 4,799位)",
+      "B0G4QP86FB 幸運の初期値〜: 本 > コミック・ラノベ・BL > コミック (BSR 5,567位)"
+    ],
+
+    "description_seed": {
+      "_version": "v3_codex_unified_2026-05-06",
+      "_note": "Codex KDP 統一案を採用。冒頭から「2.4倍 / 世界最速 / Fランク下剋上 / 俺だけのナビ」を押す。詳細 description_html は data/manga/works/a07-modern-dungeon/kdp/kdp-input.md 参照",
+      "hook_line": "Fランクの俺だけに、世界最速ルートが聞こえる。",
+      "turn_line": "経験値効率2.4倍。隠しドロップ条件、開示。",
+      "synopsis_lines": [
+        "Sランク探索者が20年かけても辿り着けなかった現代ダンジョンの裏ルールを、頭の中のシステム音声【ナビ】だけが教えてくれる。",
+        "ダンジョン適性Fランクの桐生レンは、職業欄すら空白のまま社会の底辺に押し込まれていた。探索者ランクは生涯固定。Fランクは入口整理か雑用で終わる。誰もがそう決めつけていた。",
+        "だがある朝、レンにだけ女性の声が響く。「経験値倍化条件、開示します」",
+        "誰にも聞こえないナビ。誰も知らない隠しルール。誰も選ばない最短ルート。Fランクのまま、レンは世界最速のレベルアップ記録を塗り替えていく。",
+        "現代日本に出現した管理ダンジョン、未鑑定スキルガチャ、国家直轄のSランク部隊、記録を疑う公社監査室。底辺認定された少年が、情報とナビだけでランク制度を踏み越える、現代ダンジョン下剋上漫画。"
+      ],
+      "recommend_points": [
+        "全13巻完結予定。打ち切りなしの読了体験を保証。",
+        "横読み白黒漫画、Kindle Unlimited 対応。",
+        "第1巻ではナビとの最初の取引と、Fランク探索者による最初の記録更新を収録。"
+      ],
+      "cta_line": "冒頭30ページの試し読みで、ナビと俺の最初の取引をご覧ください。",
+      "related_keywords": [
+        "現代ダンジョン",
+        "世界最速",
+        "Fランク",
+        "ナビ",
+        "なろう系",
+        "主人公最強",
+        "下剋上"
+      ]
+    },
+
+    "cover_concept": {
+      "_version": "v1_codex_unified_2026-05-06",
+      "_decision": "案1「FランクID破壊型」を採用",
+      "_detail_doc": "docs/strategy/a07-cover-concept.md",
+      "title": "FランクID破壊型",
+      "visual_elements": [
+        "黒フードのレン正面 (主人公、20代、表情冷静)",
+        "胸元に巨大な「F RANK」ID (白抜き、バッジ風)",
+        "背後に青HUD「EXP ×2.4」「FASTEST ROUTE」",
+        "暗いビル群と青いダンジョンゲート (新宿都心想定)",
+        "HUD グリッド線"
+      ],
+      "color_palette": {
+        "base": "白黒青年漫画 (manga_bw_seinen_urban)",
+        "accent": "青の発光 (HUD のみ)",
+        "highlight": "白抜き (Fランク文字)"
+      },
+      "differentiation": "ガチャ系の派手なアイテム絵ではなく、情報チートを前面化",
+      "shelf_visibility_rationale": "サムネで「F」と「2.4倍」が読める = KU 棚で約束が最短"
+    },
+
+    "volume_end_cliffhanger_pattern": {
+      "vol_1": "ナビ消滅リスク型 (1巻末で「ナビが消えるかも」を提示し、2巻必読化)",
+      "vol_2_3": "記録更新バレ型 → 幼馴染照合型 (公社/灯里との接触)",
+      "vol_4_6": "ナビ新条件開示型 (毎巻新スキル/新階層)",
+      "vol_7_9": "ガチャ未開封暴発型 (固有スキル覚醒)",
+      "vol_10_12": "大規模イベント (制度交渉序章 / 中ボス連戦)",
+      "vol_13": "完結 (ナビとの最終取引、ランク制度書き換え)"
+    },
+
+    "launch_sns_announcements": [
+      {
+        "type": "標準訴求",
+        "text": "「Fランクの俺にだけ聞こえる」 第1巻配信開始。Fランク探索者が、俺だけナビで現代ダンジョンを世界最速レベルアップ。KU対応。\n#現代ダンジョン #漫画 #Kindle"
+      },
+      {
+        "type": "数値訴求",
+        "text": "経験値効率2.4倍。隠しルール、開示。\n「Fランクの俺にだけ聞こえる」 第1巻、本日配信開始。底辺探索者の下剋上漫画です。\n#ダンジョン漫画 #主人公最強 #KU"
+      },
+      {
+        "type": "Sランク対比",
+        "text": "Sランクが20年知らなかった最短ルートを、Fランクの俺だけが聞いている。\n「Fランクの俺にだけ聞こえる」 第1巻配信開始。\n#現代ダンジョン #なろう系漫画 #KindleUnlimited"
+      }
+    ]
+  },
+
+  "rights": {
+    "ai_use_allowed": true,
+    "commercial_allowed": true,
+    "ai_disclosure_required": true,
+    "ai_disclosure_basis": "カクヨム3段階AIタグ義務化準拠 (project_kakuyomu_ai_tag_mandate.md)、KDP も同等タグ運用"
+  },
+
+  "source_seed": {
+    "stage1_logline": "data/manga/_archive/2026-05-02-pre-redesign/modern_dungeon-stage1-8/loglines_a_v2.json",
+    "stage2_v2_concept": "data/manga/_archive/2026-05-02-pre-redesign/modern_dungeon-stage1-8/stage2/A07_v2.json",
+    "discarded_stage3_volume_plot": "data/manga/_archive/2026-05-02-pre-redesign/modern_dungeon-stage1-8/stage3/A07_manga.json",
+    "discarded_stage4_storyboard": "data/manga/_archive/2026-05-02-pre-redesign/modern_dungeon-stage1-8/stage4/A07_ep1_storyboard.json"
+  },
+
+  "next_layers": {
+    "L1_bible": "未着手 (V2企画書 → bible/snapshot.json 変換)",
+    "L2_bible_images": "未着手 (5キャラ × 5 variants + 4ロケ × 3 angles)",
+    "L3_shotlist_ep1": "未着手 (V2企画書から ep1 shotlist 構築)",
+    "L4_storyboard_ep1": "未着手 (旧 stage4 ネームは破棄、L3 から再生成)",
+    "L5_page_director_ep1": "未着手",
+    "L9_render_ep1": "未着手"
+  },
+
+  "created_at": "2026-05-02T11:00:00+09:00",
+  "schema_version_note": "v2 パイプライン (manga-pipeline-v2.md) 準拠、v1 旧パイプライン互換なし"
+}

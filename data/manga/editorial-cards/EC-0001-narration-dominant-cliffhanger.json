@@ -1,0 +1,61 @@
+{
+  "card_id": "EC-0001",
+  "version": "1.0",
+  "title": "cliffhanger ページの締めナレ短縮 + 主人公モノローグ追加",
+  "scope": "panel",
+  "trigger": {
+    "layer": "L8.6",
+    "flag": "narration_dominant",
+    "min_severity": "warn"
+  },
+  "preconditions": {
+    "page_role": "cliffhanger",
+    "panel_position": "last_panel_of_page",
+    "tone_profile.darkness": "<0.7"
+  },
+  "contraindications": {
+    "tone_profile.darkness": ">=0.7",
+    "genre": ["horror"],
+    "panel_silence": true
+  },
+  "diagnosis": "cliffhanger 末尾 panel でナレが会話を上回ると、読者の感情移入が断絶し次話への能動性が弱まる",
+  "decision_type": "rewrite",
+  "instruction": "ナレを3割削り、削った分を主人公モノローグ(雲型) + action 描写に分散。会話 dominance を回復させ、主人公の能動的な決意で次話に繋ぐ",
+  "target_axis": ["likability", "pull"],
+  "expected_delta": {
+    "narration_chars": "-30% to -40%",
+    "cliffhanger_agency": "+0.2",
+    "audit_findings_resolved": "narration_dominant"
+  },
+  "success_metric": "L8.6 audit narration_dominant 解消 + cliffhanger panel に主人公の能動的台詞 1個以上",
+  "examples": [
+    {
+      "kind": "before",
+      "asset_id": "a07-modern-dungeon/ep01/p110",
+      "panel_ids": ["p110"],
+      "snippet": "narration: 〔Fランクの停滞は、この日終わった。〕(17字) / dialogue [響]: 「次の隠し条件を開示します。」(13字)"
+    },
+    {
+      "kind": "after",
+      "asset_id": "a07-modern-dungeon/ep01/p110",
+      "panel_ids": ["p110"],
+      "snippet": "narration: 〔Fランクが、動き出す。〕(11字) / monologue [レン]: (まだ、行ける。) ★追加 / dialogue [響]: 維持"
+    }
+  ],
+  "applied_to": [
+    {
+      "asset_id": "a07-modern-dungeon/ep01/p110",
+      "applied_at": "2026-05-06T06:30:00Z",
+      "result": "audit findings: narration_dominant 1→0"
+    }
+  ],
+  "reviewer_decision": "accepted",
+  "outcome": null,
+  "learned_from": {
+    "source": "Codex MCP review (Phase X effective verification followup)",
+    "context": "a07-modern-dungeon ep01 quality improvement"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T06:30:00Z",
+  "created_by": "Phase X verification + Codex"
+}

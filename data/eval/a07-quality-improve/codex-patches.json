@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-06T06:30:00Z",
+  "generated_by": "Codex MCP (Phase X 効果検証 → a07 品質改善依頼)",
+  "slug": "a07-modern-dungeon",
+  "episode": 1,
+  "patches": [
+    {
+      "finding_rule": "narration_dominant",
+      "page_no": 22,
+      "panel_no": 110,
+      "scope": "panel_modify",
+      "current": {
+        "shot_type": "establishing",
+        "importance": 5,
+        "action": "レンの背後で下降階段が暗く伸び、上向きの空HUDが浮かぶ。",
+        "narration": ["Fランクの停滞は、この日終わった。"],
+        "monologue": [],
+        "dialogue": [
+          { "character_id": "char_獅童_響_v1", "text": "次の隠し条件を開示します。" }
+        ],
+        "sfx": ["キン"]
+      },
+      "proposed": {
+        "shot_type": "establishing",
+        "importance": 5,
+        "action": "レンの背後で下降階段が暗く伸び、上向きの空HUDが浮かぶ。レンの指が鉄パイプを握り直す。",
+        "narration": ["Fランクが、動き出す。"],
+        "monologue": [
+          { "character_id": "char_桐生_レン_v1", "text": "まだ、行ける。" }
+        ],
+        "dialogue": [
+          { "character_id": "char_獅童_響_v1", "text": "次の隠し条件を開示します。" }
+        ],
+        "sfx": ["キン"]
+      },
+      "rationale": "締めの断定ナレーションを短縮し、主人公の手元と短い心象へ分散して、次回への能動性を強める。",
+      "expected_effect": "narration_chars 17→11 / dialogue dominance restored / cliffhanger agency +0.2"
+    },
+    {
+      "finding_rule": "importance_imbalance",
+      "page_no": 18,
+      "panel_no": null,
+      "scope": "page_metadata_modify",
+      "current": {
+        "importances": [
+          { "panel_no": 86, "importance": 4 },
+          { "panel_no": 87, "importance": 4 },
+          { "panel_no": 88, "importance": 4 },
+          { "panel_no": 89, "importance": 5 },
+          { "panel_no": 90, "importance": 5 }
+        ]
+      },
+      "proposed": {
+        "importances": [
+          { "panel_no": 86, "importance": 4 },
+          { "panel_no": 87, "importance": 3 },
+          { "panel_no": 88, "importance": 3 },
+          { "panel_no": 89, "importance": 5 },
+          { "panel_no": 90, "importance": 5 }
+        ]
+      },
+      "rationale": "誘導と水しぶきの中継コマを一段落とし、最後の突き上げと撃破に視線の山を集中させる。",
+      "expected_effect": "page_importance_pattern 4/4/4/5/5 → 4/3/3/5/5 / action readability +0.2"
+    },
+    {
+      "finding_rule": "importance_imbalance",
+      "page_no": 22,
+      "panel_no": null,
+      "scope": "page_metadata_modify",
+      "current": {
+        "importances": [
+          { "panel_no": 106, "importance": 4 },
+          { "panel_no": 107, "importance": 4 },
+          { "panel_no": 108, "importance": 4 },
+          { "panel_no": 109, "importance": 4 },
+          { "panel_no": 110, "importance": 5 }
+        ]
+      },
+      "proposed": {
+        "importances": [
+          { "panel_no": 106, "importance": 4 },
+          { "panel_no": 107, "importance": 3 },
+          { "panel_no": 108, "importance": 3 },
+          { "panel_no": 109, "importance": 2 },
+          { "panel_no": 110, "importance": 5 }
+        ]
+      },
+      "rationale": "監査室の情報提示を抑え、無音の異常枠を溜めにして、最終コマの下降階段とナビ告知を最大の山にする。",
+      "expected_effect": "page_importance_pattern 4/4/4/4/5 → 4/3/3/2/5 / cliffhanger contrast +0.3"
+    },
+    {
+      "finding_rule": "shot_repetition",
+      "page_no": 19,
+      "panel_no": 94,
+      "scope": "panel_modify",
+      "current": {
+        "shot_type": "close_up",
+        "importance": 5,
+        "action": "スマホ光を映した瞳が数値の異常を理解する。",
+        "narration": [],
+        "monologue": [
+          { "character_id": "char_桐生_レン_v1", "text": "跳ねた。桁が、違う。" }
+        ],
+        "dialogue": []
+      },
+      "proposed": {
+        "shot_type": "over_the_shoulder",
+        "importance": 5,
+        "action": "レンの肩越しに、ヒビ入りスマホの経験値ログと倒れた敵影を同時に見せる。",
+        "narration": [],
+        "monologue": [
+          { "character_id": "char_桐生_レン_v1", "text": "跳ねた。桁が、違う。" }
+        ],
+        "dialogue": []
+      },
+      "rationale": "close_up 3連続を崩しつつ、スマホ数値と戦闘結果を同一画面に入れて成果の実感を増やす。",
+      "expected_effect": "shot_sequence close_up/close_up/close_up → close_up/close_up/over_the_shoulder / visual_variation +0.3"
+    },
+    {
+      "finding_rule": "recovery_beat_missing",
+      "scope": "panel_insert",
+      "insert_after_page": 19,
+      "insert_after_panel": 95,
+      "new_panel": {
+        "shot_type": "medium",
+        "importance": 2,
+        "silence": false,
+        "action": "レンが壁にもたれ、支給用ゼリー飲料を一口だけ飲む。耳元の青光が少し柔らかく灯る。",
+        "key_visual": "割れたスマホ、安いゼリー飲料、倒れた影の奥で小さく息を整える生活感のある余白コマ。",
+        "dialogue": [
+          { "character_id": "char_獅童_響_v1", "text": "水分補給を推奨。三十秒、休んでください。" },
+          { "character_id": "char_桐生_レン_v1", "text": "……ありがとう。少し、ほっとした。" }
+        ],
+        "monologue": [],
+        "narration": [],
+        "sfx": ["ぷし"]
+      },
+      "rationale": "戦闘後の張り詰めた流れに小さな休息とナビへの感謝を差し込み、相棒感と主人公への共感を補強する。",
+      "expected_effect": "recovery_cadence 0→0.6 / sidekick_warmth +0.4 / reader_friction -0.2"
+    },
+    {
+      "finding_rule": "expectation_reality_gap_absent",
+      "scope": "panel_insert",
+      "insert_after_page": 5,
+      "insert_after_panel": 23,
+      "new_panel": {
+        "shot_type": "close_up",
+        "importance": 2,
+        "silence": false,
+        "action": "スマホに探索報酬三百二十円の振込通知が出る。背後ではコンビニの廃棄弁当袋が揺れる。",
+        "key_visual": "ヒビ入り画面の少額振込通知と、半額シールの弁当袋を同じコマに収める。",
+        "dialogue": [],
+        "monologue": [
+          { "character_id": "char_桐生_レン_v1", "text": "探索者になれば、少しは変わると思ってた。" }
+        ],
+        "narration": [],
+        "sfx": ["ピコン"]
+      },
+      "rationale": "探索者への期待と少額報酬の現実を一コマで見せ、Fランク境遇の苦さを軽く刺さる形にする。",
+      "expected_effect": "expectation_reality_gap 0→1 / early_empathy +0.3 / commercial_hook +0.2"
+    }
+  ],
+  "summary": {
+    "total_patches": 6,
+    "panel_modify": 2,
+    "page_metadata_modify": 2,
+    "panel_insert": 2,
+    "expected_total_effect": [
+      "narration_dominant 解消 (panel#110)",
+      "importance_imbalance 解消 (page 18, 22)",
+      "shot_repetition 解消 (page 19)",
+      "recovery_cadence 0 → 0.6 (相棒との温度ある会話を1 panel追加)",
+      "expectation_reality_gap 0 → 1 (探索者期待 vs 報酬320円のギャップ panel追加)"
+    ],
+    "narrative_continuity": "既存の Fランク探索者 / ナビ音声 / 現代ダンジョン軸を維持。新規 panel も世界観に整合"
+  }
+}

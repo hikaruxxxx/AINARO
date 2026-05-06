@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-06T06:37:38.585Z",
+  "slug": "a07-modern-dungeon",
+  "episode": 1,
+  "target_tone": {
+    "darkness": 0.3,
+    "comedic_density": 0.8,
+    "recovery_cadence": 0.9,
+    "sidekick_presence": 0.9
+  },
+  "storyboard_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep01/storyboard.json",
+  "backup_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep01/storyboard.json.pre-phase-x-patches.backup",
+  "before": {
+    "panel_total": 110,
+    "findings_total": 6,
+    "findings_by_rule": {
+      "importance_imbalance": 2,
+      "shot_repetition": 1,
+      "narration_dominant": 1,
+      "recovery_beat_missing": 1,
+      "expectation_reality_gap_absent": 1
+    }
+  },
+  "after": {
+    "panel_total": 112,
+    "findings_total": 0,
+    "findings_by_rule": {},
+    "remaining_findings": []
+  },
+  "patches_applied": [
+    {
+      "finding_rule": "narration_dominant",
+      "scope": "panel_modify",
+      "ok": true
+    },
+    {
+      "finding_rule": "importance_imbalance",
+      "scope": "page_metadata_modify",
+      "ok": true
+    },
+    {
+      "finding_rule": "importance_imbalance",
+      "scope": "page_metadata_modify",
+      "ok": true
+    },
+    {
+      "finding_rule": "shot_repetition",
+      "scope": "panel_modify",
+      "ok": true
+    },
+    {
+      "finding_rule": "recovery_beat_missing",
+      "scope": "panel_insert",
+      "ok": true,
+      "insertedAt": {
+        "page": 19,
+        "panel": 111
+      }
+    },
+    {
+      "finding_rule": "expectation_reality_gap_absent",
+      "scope": "panel_insert",
+      "ok": true,
+      "insertedAt": {
+        "page": 5,
+        "panel": 112
+      }
+    }
+  ],
+  "summary": {
+    "patches_total": 6,
+    "patches_ok": 6,
+    "patches_failed": 0,
+    "findings_reduction": 6
+  }
+}

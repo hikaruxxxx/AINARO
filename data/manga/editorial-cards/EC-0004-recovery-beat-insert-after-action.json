@@ -1,0 +1,55 @@
+{
+  "card_id": "EC-0004",
+  "version": "1.0",
+  "title": "戦闘直後に「相棒との温度ある会話」panel を差し込む (recovery beat)",
+  "scope": "page",
+  "trigger": {
+    "layer": "L8.6",
+    "flag": "recovery_beat_missing",
+    "min_severity": "warn"
+  },
+  "preconditions": {
+    "tone_profile.darkness": "<0.5",
+    "page_role": ["aftermath", "buildup"],
+    "previous_page_role": ["action", "reveal"]
+  },
+  "contraindications": {
+    "tone_profile.darkness": ">=0.7",
+    "genre": ["horror"],
+    "page_role": ["cliffhanger"]
+  },
+  "diagnosis": "戦闘/緊迫シーン直後に相棒/家族との温度ある会話 beat がないと、読者の感情疲労が累積し離脱する。特に light_recovery 帯では各話最低1回必須",
+  "decision_type": "panel_insert",
+  "instruction": "戦闘直後の aftermath ページに『主人公が相棒に小さな感謝を示す + 生活感ある小道具 (飲料/食料/小休憩)』の panel を挿入。importance=2 (低め)、shot_type=medium、台詞に「ありがとう」「ほっとした」「助かった」等の POSITIVE_TOKEN を直接入れる",
+  "target_axis": ["recovery", "likability", "comedic_relief"],
+  "expected_delta": {
+    "recovery_cadence": "0 → 0.6+",
+    "sidekick_warmth": "+0.4",
+    "reader_friction": "-0.2"
+  },
+  "success_metric": "L8.6 audit recovery_beat_missing 解消 + 各話 POSITIVE_TOKEN マッチ panel が 1個以上",
+  "examples": [
+    {
+      "kind": "after",
+      "asset_id": "a07-modern-dungeon/ep01/inserted-after-p95",
+      "panel_ids": ["新規 panel"],
+      "snippet": "shot_type: medium / importance: 2 / action: レンが壁にもたれ、支給用ゼリー飲料を一口だけ飲む / dialogue: ナビ「水分補給を推奨」+ レン「ありがとう。少し、ほっとした。」 / sfx: ぷし"
+    }
+  ],
+  "applied_to": [
+    {
+      "asset_id": "a07-modern-dungeon/ep01/inserted-after-p95",
+      "applied_at": "2026-05-06T06:30:00Z",
+      "result": "audit findings: recovery_beat_missing 1→0"
+    }
+  ],
+  "reviewer_decision": "accepted",
+  "outcome": null,
+  "learned_from": {
+    "source": "Codex MCP review (Phase X effective verification followup)",
+    "context": "a07-modern-dungeon ep01 quality improvement"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T06:30:00Z",
+  "created_by": "Phase X verification + Codex"
+}

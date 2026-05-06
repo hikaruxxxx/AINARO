@@ -1,0 +1,57 @@
+{
+  "card_id": "EC-0003",
+  "version": "1.0",
+  "title": "close_up 3連続を over_the_shoulder で崩す",
+  "scope": "panel",
+  "trigger": {
+    "layer": "L8.6",
+    "flag": "shot_repetition",
+    "min_severity": "warn"
+  },
+  "preconditions": {
+    "shot_type_run_length": ">=3",
+    "shot_type": "close_up"
+  },
+  "contraindications": {
+    "page_role": ["cliffhanger"],
+    "panel_count_per_page": "<3"
+  },
+  "diagnosis": "close_up が3 panel 連続すると視覚的単調になり、読者の没入が切れる。特に「気付き → 観察 → 反応」の心象連鎖で起きやすい",
+  "decision_type": "rewrite",
+  "instruction": "3連続の中央 or 末尾 panel を over_the_shoulder に変更し、主人公の主観 + 客観要素 (スマホ画面/敵の状態/周囲) を同一画面に入れる。情報密度を上げつつ視覚変化を作る",
+  "target_axis": ["pull", "prose"],
+  "expected_delta": {
+    "shot_sequence_variation": "+0.3",
+    "info_density_per_panel": "+0.2"
+  },
+  "success_metric": "L8.6 audit shot_repetition 解消 + 同一 page 内に最低2種の shot_type",
+  "examples": [
+    {
+      "kind": "before",
+      "asset_id": "a07-modern-dungeon/ep01/p94",
+      "panel_ids": ["p92", "p93", "p94"],
+      "snippet": "shot_type: close_up / close_up / close_up (主人公の心象3連続)"
+    },
+    {
+      "kind": "after",
+      "asset_id": "a07-modern-dungeon/ep01/p94",
+      "panel_ids": ["p92", "p93", "p94"],
+      "snippet": "shot_type: close_up / close_up / over_the_shoulder (スマホ経験値ログ + 倒れた敵影を同一画面に)"
+    }
+  ],
+  "applied_to": [
+    {
+      "asset_id": "a07-modern-dungeon/ep01/p94",
+      "applied_at": "2026-05-06T06:30:00Z"
+    }
+  ],
+  "reviewer_decision": "accepted",
+  "outcome": null,
+  "learned_from": {
+    "source": "Codex MCP review (Phase X effective verification followup)",
+    "context": "a07-modern-dungeon ep01 quality improvement"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T06:30:00Z",
+  "created_by": "Phase X verification + Codex"
+}

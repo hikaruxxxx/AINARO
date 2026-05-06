@@ -1,0 +1,54 @@
+{
+  "card_id": "EC-0005",
+  "version": "1.0",
+  "title": "巻前半に「期待 vs 現実」ギャップ panel を差し込む (商業フック)",
+  "scope": "volume",
+  "trigger": {
+    "layer": "L8.6",
+    "flag": "expectation_reality_gap_absent",
+    "min_severity": "info"
+  },
+  "preconditions": {
+    "tone_profile.darkness": "<0.5",
+    "volume_position": "first_half",
+    "main_genre": ["modern_dungeon", "isekai_tensei_cheat", "battle_modern_power"]
+  },
+  "contraindications": {
+    "tone_profile.darkness": ">=0.7",
+    "genre": ["mystery_horror", "modern_human_drama"]
+  },
+  "diagnosis": "巻全体で「期待→現実」のギャップ panel が0回だと、主人公の苦さ/共感装置が立ち上がらず、Fランク/底辺/落ちこぼれ系の商業フックが弱まる",
+  "decision_type": "panel_insert",
+  "instruction": "巻前半 (page 1-7) のうち主人公の独白可能な箇所に『主人公が期待を口にする → 次 panel で現実が突き付けられる』の対比 panel を挿入。台詞に「思ってた」「予想外」「まさか」「だと思った」等の GAP_TOKEN を直接入れる。importance=2 (低め)、生活感ある小道具 (少額振込通知/廃棄弁当/中古装備等) で現実を示す",
+  "target_axis": ["pull", "character", "hook"],
+  "expected_delta": {
+    "expectation_reality_gap": "0 → 1+",
+    "early_empathy": "+0.3",
+    "commercial_hook": "+0.2"
+  },
+  "success_metric": "L8.6 audit expectation_reality_gap_absent 解消 + 巻前半に GAP_TOKEN マッチ panel 1個以上",
+  "examples": [
+    {
+      "kind": "after",
+      "asset_id": "a07-modern-dungeon/ep01/inserted-after-p23",
+      "panel_ids": ["新規 panel"],
+      "snippet": "shot_type: close_up / importance: 2 / action: スマホに探索報酬三百二十円の振込通知が出る。背後ではコンビニの廃棄弁当袋が揺れる / monologue [レン]: (探索者になれば、少しは変わると思ってた。) / sfx: ピコン"
+    }
+  ],
+  "applied_to": [
+    {
+      "asset_id": "a07-modern-dungeon/ep01/inserted-after-p23",
+      "applied_at": "2026-05-06T06:30:00Z",
+      "result": "audit findings: expectation_reality_gap_absent 1→0"
+    }
+  ],
+  "reviewer_decision": "accepted",
+  "outcome": null,
+  "learned_from": {
+    "source": "Codex MCP review (Phase X effective verification followup)",
+    "context": "a07-modern-dungeon ep01 quality improvement"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T06:30:00Z",
+  "created_by": "Phase X verification + Codex"
+}
