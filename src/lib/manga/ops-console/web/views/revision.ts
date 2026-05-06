@@ -2,7 +2,9 @@ import {
   ApiError,
   apiGetManifest,
   apiPostAdopted,
+  apiPostJob,
   apiPostRevisionQueue,
+  openJobStream,
   type Manifest,
   type RenderManifestEntry,
   type RevisionEntry,
@@ -114,6 +116,7 @@ const RV_CSS = `
   cursor: pointer;
 }
 .rv-button.is-active, .rv-pill.is-active { background: #2563eb; border-color: #2563eb; color: #fff; }
+.rv-button--sm { min-height: 24px; padding: 0 6px; font-size: 11px; margin-left: 8px; font-weight: 500; }
 .rv-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: #64748b; font-size: 12px; }
 .rv-filter-check {
   display: flex;
@@ -664,9 +667,14 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
       `);
     }
     if (panelHtml.length === 0) continue;
+    // L09 (renders) は revision_queue から panel 単位で再走するのが従来動線。
+    // L10 (bubbles) は page 単位なので、ここでだけ「このページだけ L10 再実行」ボタンを露出する。
+    const pageRerunBtn = state.layer === "bubbles"
+      ? `<button type="button" class="rv-button rv-button--sm" data-rv-rerun-page="${page.page_no}" title="L10 Bubble をこのページ (P.${page.page_no}) だけ再実行 (--pages ${page.page_no})">L10 を P.${page.page_no} だけ再実行</button>`
+      : "";
     pageHtml.push(`
       <section class="rv-page-card">
-        <h3>P.${page.page_no} <span class="rv-page-role">[${escapeHtml(String(page.page_role))}]</span>${pageFailedCount > 0 ? `<span class="rv-audit-fail">audit failed: ${pageFailedCount}</span>` : ""}</h3>
+        <h3>P.${page.page_no} <span class="rv-page-role">[${escapeHtml(String(page.page_role))}]</span>${pageFailedCount > 0 ? `<span class="rv-audit-fail">audit failed: ${pageFailedCount}</span>` : ""}${pageRerunBtn}</h3>
         <div class="rv-panel-grid">${panelHtml.join("")}</div>
       </section>
     `);
@@ -1105,6 +1113,37 @@ function bindStaticListeners(
     (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
+      // ページヘッダの「L10 を P.{N} だけ再実行」ボタン (Bubbles tab のみ表示)。
+      // event.preventDefault で panel クリック処理に流れないよう先に拾う。
+      const pageRerunBtn = target.closest<HTMLButtonElement>("[data-rv-rerun-page]");
+      if (pageRerunBtn) {
+        const pageNo = Number(pageRerunBtn.dataset.rvRerunPage);
+        if (!Number.isInteger(pageNo) || pageNo <= 0) return;
+        const ok = window.confirm(
+          `L10 Bubble Overlay を P.${pageNo} だけ再実行します。\n` +
+            `既存の bubbles/p${String(pageNo).padStart(2, "0")}.png は上書きされます。\n続行しますか？`
+        );
+        if (!ok) return;
+        // import 経由で circular にならないよう、動的読み込み (jobs API は既に bind 済)。
+        void apiPostJob({
+          layer: "L10",
+          slug,
+          episode,
+          args: { "--pages": String(pageNo) },
+        })
+          .then((job) => {
+            const stream = openJobStream(job.job_id, {
+              onEvent: () => undefined,
+              onDone: () => {
+                stream.close();
+                refresh(root, state, slug, episode);
+              },
+              onError: (e) => alert(`L10 P.${pageNo}: ${e.message}`),
+            });
+          })
+          .catch((e) => alert(`L10 P.${pageNo} の起動に失敗: ${errorText(e)}`));
+        return;
+      }
       const panel = target.closest<HTMLElement>(".rv-panel");
       if (panel) {
         openRevisionModal(root, state, {
