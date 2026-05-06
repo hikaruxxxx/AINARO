@@ -4,6 +4,7 @@ import { isViewName, store, type ViewName } from "./lib/store";
 import { mountBreadcrumb } from "./breadcrumb";
 import { mountSidebar } from "./sidebar";
 import { mountThemeToggle } from "./theme-toggle";
+import { mountAiEditView } from "./views/ai-edit";
 import { mountBibleView } from "./views/bible";
 import { mountIndexView } from "./views/index";
 import { mountJobsHubView } from "./views/jobs-hub";
@@ -24,6 +25,9 @@ type Unmount = () => void;
 function parseRoute(): { slug: string | null; episode: number | null; view: ViewName } {
   if (window.location.pathname === "/jobs") {
     return { slug: null, episode: null, view: "jobs-hub" };
+  }
+  if (window.location.pathname === "/ai-edit") {
+    return { slug: null, episode: null, view: "ai-edit" };
   }
   if (window.location.pathname === "/quality") {
     return { slug: null, episode: null, view: "quality-hub" };
@@ -65,6 +69,13 @@ function syncRoute(slug: string, episode: number, view: ViewName): void {
     history.pushState(null, "", next);
     return;
   }
+  if (view === "ai-edit") {
+    const next = "/ai-edit";
+    const current = `${window.location.pathname}${window.location.hash}`;
+    if (current === next) return;
+    history.pushState(null, "", next);
+    return;
+  }
   if (view === "quality-hub") {
     const next = "/quality";
     const current = `${window.location.pathname}${window.location.hash}`;
@@ -101,6 +112,7 @@ function mountCurrentView(main: HTMLElement): () => void {
     if (unmount) unmount();
     prevKey = key;
     if (state.currentView === "index") unmount = mountIndexView(main);
+    else if (state.currentView === "ai-edit") unmount = mountAiEditView(main);
     else if (state.currentView === "jobs-hub") unmount = mountJobsHubView(main);
     else if (state.currentView === "quality-hub") unmount = mountQualityHubView(main);
     else if (state.currentView === "work-overview") unmount = mountWorkOverviewView(main);
@@ -146,7 +158,7 @@ async function start(): Promise<void> {
   // 各 view は currentSlug が空の間は呼ばれない (mountCurrentView は index へ)。
   const currentSlug = route.slug ?? boot.default_slug ?? "";
   const currentEpisode = route.episode ?? boot.default_episode ?? 0;
-  const currentView: ViewName = route.view === "jobs-hub" || route.view === "quality-hub"
+  const currentView: ViewName = route.view === "jobs-hub" || route.view === "quality-hub" || route.view === "ai-edit"
     ? route.view
     : route.slug
       ? route.view

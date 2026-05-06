@@ -235,6 +235,7 @@ export type LayerId =
   | "L11"
   | "L12"
   | "L13"
+  | "L99"
   | "kdp-dry-run"
   | "scrape-bsr";
 
@@ -321,6 +322,18 @@ export function apiGetJobs(filter?: {
 
 export function apiAbortJob(jobId: string): Promise<{ ok: true; state: JobState }> {
   return postJson(`/api/jobs/${encodeURIComponent(jobId)}/abort`, {});
+}
+
+export function apiAiEditCommit(message: string): Promise<{ ok: true; sha: string }> {
+  return postJson("/api/ai-edit/commit", { message });
+}
+
+export function apiAiEditDiscard(): Promise<{ ok: true }> {
+  return postJson("/api/ai-edit/discard", {});
+}
+
+export function apiAiEditDiff(): Promise<{ stat: string; diff: string }> {
+  return getJson<{ stat: string; diff: string }>("/api/ai-edit/diff");
 }
 
 export function openJobStream(

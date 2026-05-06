@@ -13,6 +13,11 @@ import type http from "node:http";
 import { readJsonBody } from "./lib/body";
 import { isValidEpisode, isValidSlug } from "./lib/path-guards";
 import {
+  handleAiEditCommit,
+  handleAiEditDiff,
+  handleAiEditDiscard,
+} from "./handlers/ai-edit";
+import {
   handleNameApprovalGet,
   handleNameApprovalPost,
 } from "./handlers/name-approval";
@@ -157,25 +162,45 @@ export async function handleApi(
     return handleQualityOverview(res);
   }
 
+  if (p === "/api/ai-edit/diff") {
+    if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
+    return handleAiEditDiff(res);
+  }
+  if (p === "/api/ai-edit/commit") {
+    if (req.method !== "POST") return send(res, 405, { error: "このメソッドは許可されていません" });
+    let body: any;
+    try {
+      body = await readJsonBody(req);
+    } catch (e) {
+      return send(res, 400, { error: String(e) });
+    }
+    return handleAiEditCommit(body, res);
+  }
+  if (p === "/api/ai-edit/discard") {
+    if (req.method !== "POST") return send(res, 405, { error: "このメソッドは許可されていません" });
+    return handleAiEditDiscard(res);
+  }
+
   // jobs API の read は横断可。write/abort は default scope (slug+episode) が必須。
   if (p === "/api/jobs" || p.match(/^\/api\/jobs\/[^/]+\/(stream|abort)$/)) {
     if (p === "/api/jobs") {
       if (req.method === "GET") return handleJobsList(req, res, url, defaults);
       if (req.method === "POST") {
-        if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-          return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
-        }
-        const scopedDefaults: ScopedRouterDefaults = {
-          defaultSlug: defaults.defaultSlug,
-          defaultEpisode: defaults.defaultEpisode,
-          allowCrossScopeRead: defaults.allowCrossScopeRead,
-        };
         let body: any;
         try {
           body = await readJsonBody(req);
         } catch (e) {
           return send(res, 400, { error: String(e) });
         }
+        const isAiEdit = body?.layer === "L99" && body?.slug === "_console";
+        if (!isAiEdit && (defaults.defaultSlug === null || defaults.defaultEpisode === null)) {
+          return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
+        }
+        const scopedDefaults: ScopedRouterDefaults = {
+          defaultSlug: isAiEdit ? "_console" : defaults.defaultSlug!,
+          defaultEpisode: isAiEdit ? 0 : defaults.defaultEpisode!,
+          allowCrossScopeRead: defaults.allowCrossScopeRead,
+        };
         return handleJobsStart(req, res, body, scopedDefaults);
       }
       return send(res, 405, { error: "このメソッドは許可されていません" });
@@ -185,12 +210,9 @@ export async function handleApi(
       const jobId = m[1];
       const action = m[2];
       if (action === "stream" && req.method === "GET") {
-        if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-          return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
-        }
         const scopedDefaults: ScopedRouterDefaults = {
-          defaultSlug: defaults.defaultSlug,
-          defaultEpisode: defaults.defaultEpisode,
+          defaultSlug: defaults.defaultSlug ?? "_console",
+          defaultEpisode: defaults.defaultEpisode ?? 0,
           allowCrossScopeRead: defaults.allowCrossScopeRead,
         };
         return handleJobsStream(req, res, jobId, scopedDefaults);

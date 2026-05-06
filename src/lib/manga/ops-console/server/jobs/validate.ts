@@ -31,9 +31,13 @@ function assertDataPath(value: string): void {
   }
 }
 
+function isValidSlugForLayer(layer: LayerId, slug: string): boolean {
+  return layer === "L99" ? slug === "_console" || isValidSlug(slug) : isValidSlug(slug);
+}
+
 export function validateJobRequest(req: JobRequest): ValidatedJob {
   if (!isLayerId(req.layer)) throw new ValidationError("invalid layer");
-  if (!isValidSlug(req.slug)) throw new ValidationError("invalid slug");
+  if (!isValidSlugForLayer(req.layer, req.slug)) throw new ValidationError("invalid slug");
 
   const entry = LAYER_REGISTRY[req.layer];
   if (entry.scope === "episode" && !isValidEpisode(req.episode)) {

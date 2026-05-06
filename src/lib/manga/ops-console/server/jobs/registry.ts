@@ -9,6 +9,7 @@ export type LayerId =
   | "L11"
   | "L12"
   | "L13"
+  | "L99"
   | "kdp-dry-run"
   | "scrape-bsr";
 
@@ -128,6 +129,16 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
       { name: "--publication-date", pattern: /^\d{4}-\d{2}-\d{2}$/ },
     ],
     timeoutMs: 15 * 60 * 1000,
+  },
+  L99: {
+    script: "scripts/manga/layers/L99-ai-edit.ts",
+    scope: "work",
+    allowedFlags: [
+      { name: "--prompt", pattern: /^[\s\S]{1,8000}$/ },
+      { name: "--target", pattern: /^[\w./-]+$/ },
+      { name: "--auto-commit", pattern: /^$/ },
+    ],
+    timeoutMs: 30 * 60 * 1000,
   },
   "kdp-dry-run": {
     script: "scripts/manga/kdp-dry-run.ts",

@@ -1,5 +1,6 @@
 export type ViewName =
   | "index"
+  | "ai-edit"
   | "jobs-hub"
   | "quality-hub"
   | "pipeline"
@@ -74,6 +75,7 @@ export const store = {
 export function isViewName(value: string | null | undefined): value is ViewName {
   return (
     value === "index" ||
+    value === "ai-edit" ||
     value === "jobs-hub" ||
     value === "quality-hub" ||
     value === "pipeline" ||

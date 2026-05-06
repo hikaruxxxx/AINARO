@@ -5,6 +5,7 @@ export type MenuGroup = "global" | "judge" | "view" | "work" | "exec";
 export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = [
   { view: "jobs-hub", label: "全作品ジョブ", group: "global" },
   { view: "quality-hub", label: "全作品品質", group: "global" },
+  { view: "ai-edit", label: "AI 編集", group: "global" },
   { view: "pipeline", label: "パイプライン進捗", group: "judge" },
   { view: "name-gate", label: "ネーム判定", group: "judge" },
   { view: "revision", label: "修正・採用", group: "judge" },
