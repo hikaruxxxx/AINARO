@@ -10,7 +10,7 @@ type StoryboardTab = "storyboard" | "page-plan" | "resolved-refs" | "raw";
 type AnyRecord = Record<string, unknown>;
 
 const TABS: Array<{ id: StoryboardTab; label: string; key: string }> = [
-  { id: "storyboard", label: "コンテ", key: "1" },
+  { id: "storyboard", label: "ネーム原案", key: "1" },
   { id: "page-plan", label: "ページ配置", key: "2" },
   { id: "resolved-refs", label: "参照画像 (Resolved Refs)", key: "3" },
   { id: "raw", label: "生 JSON", key: "4" },
@@ -76,7 +76,7 @@ function renderTabs(active: StoryboardTab): string {
 
 function renderStoryboard(manifest: Manifest): string {
   const pages = manifest.storyboard?.pages ?? [];
-  if (pages.length === 0) return `<div class="nc-empty">コンテのページが空です。</div>`;
+  if (pages.length === 0) return `<div class="nc-empty">ネーム原案のページが空です。</div>`;
   return `<div class="sb-list">${pages.map((page: any) => {
     const panels = Array.isArray(page.panels) ? page.panels : [];
     return `
@@ -147,7 +147,7 @@ function renderRaw(manifest: Manifest, copied: string | null): string {
 
 function renderContent(state: ViewState): string {
   if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
-  if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>コンテ・ページ配置</h2><p>${escapeHtml(state.error)}</p></div>`;
+  if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>ネーム原案・ページ配置</h2><p>${escapeHtml(state.error)}</p></div>`;
   const manifest = state.manifest;
   if (!manifest) return `<div class="nc-empty">manifest が読み込まれていません。</div>`;
   if (state.tab === "storyboard") return renderStoryboard(manifest);
@@ -163,7 +163,7 @@ function render(container: HTMLElement, state: ViewState): void {
   container.innerHTML = `
     <div class="sb-view">
       <div class="nc-toolbar">
-        <h2 class="nc-toolbar__title">コンテ・ページ配置</h2>
+        <h2 class="nc-toolbar__title">ネーム原案・ページ配置</h2>
         <span class="sb-info">${escapeHtml(scope)}</span>
         <span class="sb-spacer"></span>
         <select class="nc-field__select" data-sb-ai-layer aria-label="AI 編集対象 layer">

@@ -423,7 +423,7 @@ function deriveNextStep(data: ImprovementsResponse): {
       primary: { label: "パイプライン進捗 view へ", action: "nav-pipeline" },
       secondary: [
         { label: "L11 audit を手動再実行", nav: "layers" },
-        { label: "コンテ (storyboard) を確認", nav: "storyboard" },
+        { label: "ネーム原案 (storyboard) を確認", nav: "storyboard" },
       ],
     };
   }
