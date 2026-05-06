@@ -11,6 +11,7 @@
  *   旧 SVG overlay 方式は撤回。AI に typesetting/レイアウトを任せる。
  */
 import type {
+  BackgroundTreatment,
   PanelV2,
   ResolvedRefPacket,
   StoryboardPageV2,
@@ -29,7 +30,38 @@ type ComposeArgs = {
    * 既存 prompt 構造には影響しないので、未指定時は v2 出力と完全一致。
    */
   userInstructions?: string;
+  /**
+   * 2026-05-06 追加。panel スコープでは単一値、page_one_shot スコープでは
+   * panel_id → BackgroundTreatment の Map。両方 undefined OK (現行挙動)。
+   * RULE 11 と整合した「背景描き込みの粒度」を prompt に直接書き込む。
+   */
+  backgroundTreatment?: BackgroundTreatment;
+  pageBackgroundTreatments?: Map<string, BackgroundTreatment>;
 };
+
+/**
+ * background_treatment 別のプロンプト直接指示。pattern dictionary 由来の slot
+ * メタ + RULE 11 の ref 抑制と一致した「LLM への描画指令」を出す。
+ */
+function backgroundDirective(t: BackgroundTreatment | undefined): string | null {
+  switch (t) {
+    case "detailed_bg":
+      return "BACKGROUND DIRECTIVE: Draw the location/environment with clear, iconographic background detail (interior fixtures, dungeon walls, urban silhouettes, etc.). Match the screentone density of the location reference if provided.";
+    case "atmospheric_fade":
+      return "BACKGROUND DIRECTIVE: Render only the immediate area around the subject. Fade or omit the background near panel edges. Use speedlines, screentone bursts, or negative white space rather than a fully drawn environment.";
+    case "tone_back":
+      return "BACKGROUND DIRECTIVE: SOLID SCREENTONE ONLY. No drawn environment, no walls, no scenery, no horizon line. The entire background is a flat tone (uniform dot pattern or simple gradient) used to convey emotion or pause. The subject (character/object) is the only drawn element on top of the tone.";
+    case "solid_white":
+      return "BACKGROUND DIRECTIVE: PURE WHITE paper background. No drawing in the background area at all. Only the subject is rendered.";
+    case "solid_black":
+      return "BACKGROUND DIRECTIVE: PURE BLACK void as background. No drawn environment. Only minimal subject silhouette or text on the black field.";
+    case "floating_ui":
+      return "BACKGROUND DIRECTIVE: This panel IS a UI/HUD/SNS/news artifact (status screen, app interface, posted message, etc.). Render the UI element ITSELF as the entire panel content. Do NOT include character or location around the UI; the UI is the picture.";
+    case "unspecified":
+    case undefined:
+      return null;
+  }
+}
 
 function userInstructionsBlock(s: string | undefined): string | null {
   if (!s || !s.trim()) return null;
@@ -149,6 +181,8 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     `Action: ${p.action}`,
     `Visual focus: ${p.key_visual}`,
     "",
+    backgroundDirective(args.backgroundTreatment),
+    "",
     inPanelTextBlock(p, args.bible),
     "",
     "MUST PRESERVE invariants from continuity refs (face geometry, outfit details, location layout). Match line weight and screentone density of refs.",
@@ -200,6 +234,10 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
       lines.push(`  Sound effects (hand-drawn katakana/hiragana, integrated into artwork):`);
       for (const s of p.sfx) lines.push(`    - ${s}`);
     }
+    // 2026-05-06 追加: panel ごとの bg_treatment 指示 (page_one_shot 用)
+    const bg = args.pageBackgroundTreatments?.get(p.panel_id);
+    const bgLine = backgroundDirective(bg);
+    if (bgLine) lines.push(`  ${bgLine}`);
     return lines.join("\n");
   }).join("\n\n");
 

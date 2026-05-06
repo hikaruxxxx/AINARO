@@ -248,9 +248,11 @@ async function main() {
     if (page.render_strategy === "page_one_shot") {
       const packet = resolved.packets[`page_${page.page_no}`];
       if (!packet) { console.warn(`[L09] missing packet for page_${page.page_no}`); failed++; return; }
+      const pageBgMap = new Map(page.panels.map((pp) => [pp.panel_id, pp.background_treatment]).filter(([, v]) => v !== undefined) as [string, NonNullable<typeof page.panels[0]["background_treatment"]>][]);
       const { prompt, refImagePaths } = composePagePrompt({
         page: sbPage, packet, bible, pageDimensions: { width: 1748, height: 2480 },
         userInstructions,
+        pageBackgroundTreatments: pageBgMap.size > 0 ? pageBgMap : undefined,
       });
       try {
         console.log(`[L09] gen p${page.page_no} (page_one_shot, refs=${refImagePaths.length})`);
@@ -312,6 +314,7 @@ async function main() {
         const { prompt, refImagePaths } = composePanelPrompt({
           panel: sbPanel, packet, bible, pageDimensions: { width: pp.rect.w, height: pp.rect.h },
           userInstructions,
+          backgroundTreatment: pp.background_treatment,
         });
         try {
           console.log(`[L09] gen p${page.page_no}/panel#${pp.reading_order} (${args.version})`);
