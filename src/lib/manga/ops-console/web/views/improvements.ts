@@ -189,6 +189,45 @@ function renderProposalSection(
   return lines.join("");
 }
 
+function renderCompletionRisk(data: ImprovementsResponse): string {
+  const r = data.completion_risk;
+  if (!r) return "";
+  const levelClass = r.level === "high" ? "danger" : r.level === "medium" ? "warning" : "info";
+  const levelLabel = r.level === "high" ? "高リスク" : r.level === "medium" ? "中リスク" : "低リスク";
+  return `
+    <div class="imp-section">
+      <h3>KU 完読率リスク (v0、ヒューリスティック)</h3>
+      <p class="imp-section-sub">audit findings + engagement_audit + 編集判断カード適用数 から自動算出。実 KENP データ取得後 (Phase Z) で v1 学習予定</p>
+      <div class="imp-finding imp-finding--${levelClass}">
+        <strong>${escapeHtml(levelLabel)}</strong> (penalty: ${r.total_penalty})
+        <div class="imp-finding-meta">${escapeHtml(r.summary)}</div>
+      </div>
+      ${r.top_factors.length > 0 ? `
+        <div class="imp-card-list">
+          <strong>主要因子 (penalty 順):</strong>
+          ${r.top_factors.map((f) => `
+            <div class="imp-card-row">
+              <span class="${f.penalty < 0 ? "imp-info" : "imp-finding-meta"}">[${f.penalty > 0 ? "+" : ""}${f.penalty}]</span>
+              <strong>${escapeHtml(f.name)}</strong>
+              <br>
+              <span class="imp-info">観測: ${escapeHtml(f.observed)}</span>
+              ${f.hint ? `<br><span class="imp-info">→ ${escapeHtml(f.hint)}</span>` : ""}
+            </div>
+          `).join("")}
+        </div>
+      ` : ""}
+      ${r.recommended_actions.length > 0 ? `
+        <div class="imp-pull-link">
+          <strong>推奨アクション:</strong>
+          <ul>
+            ${r.recommended_actions.map((a) => `<li>${escapeHtml(a)}</li>`).join("")}
+          </ul>
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
 function renderEngagementAudit(data: ImprovementsResponse): string {
   const e = data.engagement_audit;
   if (!e.available) {
@@ -301,6 +340,7 @@ function render(container: HTMLElement, state: ViewState): void {
             state.data.cliffhanger_proposals.pull_link,
           )}
         </div>
+        ${renderCompletionRisk(state.data)}
         ${renderEngagementAudit(state.data)}
         ${renderRelatedCards(state.data)}
         ${renderNextActions(state.data, state)}

@@ -29,6 +29,10 @@ import {
   volumeDir,
 } from "../../../../../../scripts/manga/layers/_paths";
 import { isValidSlug, isValidEpisode } from "../lib/path-guards";
+import {
+  assessCompletionRisk,
+  type CompletionRiskAssessment,
+} from "../../../predict/completion-risk-v0";
 
 /**
  * リポジトリルート (cwd 非依存) を解決。
@@ -138,6 +142,8 @@ export type ImprovementsResponse = {
     rationale_summary?: string;
     generated_at?: string;
   };
+  /** Phase Y WY-5: KU 完読率リスク分類器 v0 (audit + engagement_audit から自動算出) */
+  completion_risk: CompletionRiskAssessment | null;
   /** 編集判断カードDB の関連カード一覧 */
   related_cards: Array<{
     card_id: string;
@@ -393,6 +399,19 @@ export async function handleImprovementsGet(
       },
     ];
 
+    // Phase Y WY-5: KU 完読率リスク分類器 (各 audit + engagement_audit + cards から自動算出)
+    const completionRisk = assessCompletionRisk({
+      audit_findings_total: auditSummary?.findings_total,
+      audit_findings_error: auditSummary?.counts_by_severity?.error,
+      name_audit_new_rule_findings: nameAuditSummary?.new_rules_findings.length,
+      engagement_overall_drop_off_risk: engagementSummary.overall_drop_off_risk,
+      engagement_boring_pages: engagementSummary.boring_pages?.length,
+      engagement_human_review_required: engagementSummary.human_review_required,
+      engagement_character_drops: undefined, // engagementSummary に詳細展開してないので一旦 undefined
+      engagement_reward_gap_warning: undefined,
+      editorial_cards_applied_count: relatedCards.length, // applied_to[] を読まないと正確でないが、available カード数で proxy
+    });
+
     const response: ImprovementsResponse = {
       slug,
       episode,
@@ -401,6 +420,7 @@ export async function handleImprovementsGet(
       opening_hook_proposals: openingProposals,
       cliffhanger_proposals: cliffProposals,
       engagement_audit: engagementSummary,
+      completion_risk: completionRisk,
       related_cards: relatedCards,
       next_actions: nextActions,
     };

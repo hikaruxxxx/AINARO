@@ -662,6 +662,20 @@ export type ImprovementsResponse = {
     rationale_summary?: string;
     generated_at?: string;
   };
+  completion_risk: {
+    schema_version: 1;
+    generated_at: string;
+    level: "low" | "medium" | "high";
+    total_penalty: number;
+    top_factors: Array<{
+      name: string;
+      penalty: number;
+      observed: string;
+      hint: string;
+    }>;
+    summary: string;
+    recommended_actions: string[];
+  } | null;
   related_cards: Array<{
     card_id: string;
     title: string;
