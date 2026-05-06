@@ -38,9 +38,9 @@ export function renderEffectLineOverlay(
 }
 
 function strokeWidthFor(intensity: EffectLineIntensity): number {
-  if (intensity === "subtle") return 1;
-  if (intensity === "normal") return 2;
-  return 3;
+  if (intensity === "subtle") return 2;
+  if (intensity === "normal") return 3;
+  return 4;
 }
 
 function renderSpeedLines(
@@ -69,7 +69,10 @@ function renderSpeedLines(
     const y1 = my - uy * diagonal;
     const x2 = mx + ux * diagonal;
     const y2 = my + uy * diagonal;
-    return `<line data-effect-line="speed" x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="#000000" stroke-width="${strokeWidth}" stroke-linecap="round" opacity="0.5"/>`;
+    return [
+      `<line data-effect-line="speed-halo" x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="#ffffff" stroke-width="${strokeWidth + 3}" stroke-linecap="round" opacity="0.85"/>`,
+      `<line data-effect-line="speed" x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="#000000" stroke-width="${strokeWidth}" stroke-linecap="round" opacity="0.85"/>`,
+    ].join("");
   }).join("");
 }
 
@@ -91,7 +94,10 @@ function renderFocusLines(
     const y1 = cy + Math.sin(angle) * inner;
     const x2 = cx + Math.cos(angle) * length;
     const y2 = cy + Math.sin(angle) * length;
-    return `<line data-effect-line="focus" x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="#000000" stroke-width="${strokeWidth}" stroke-linecap="round" opacity="0.55"/>`;
+    return [
+      `<line data-effect-line="focus-halo" x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="#ffffff" stroke-width="${strokeWidth + 3}" stroke-linecap="round" opacity="0.85"/>`,
+      `<line data-effect-line="focus" x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="#000000" stroke-width="${strokeWidth}" stroke-linecap="round" opacity="0.85"/>`,
+    ].join("");
   }).join("");
 }
 
@@ -114,7 +120,8 @@ function renderRadialLines(
     const y1 = cy + Math.sin(angle) * inner;
     const x2 = cx + Math.cos(angle) * length;
     const y2 = cy + Math.sin(angle) * length;
-    lines.push(`<line data-effect-line="radial" x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="#000000" stroke-width="${strokeWidth}" stroke-linecap="round" opacity="0.75"/>`);
+    lines.push(`<line data-effect-line="radial-halo" x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="#ffffff" stroke-width="${strokeWidth + 3}" stroke-linecap="round" opacity="0.9"/>`);
+    lines.push(`<line data-effect-line="radial" x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="#000000" stroke-width="${strokeWidth}" stroke-linecap="round" opacity="0.9"/>`);
 
     // 衝撃の切れ目を短い補助線で足す。
     const gapStart = length * 0.38;
@@ -142,7 +149,9 @@ function renderVibrationLines(
     const baseX = side === 1 ? panelWidth - marginX : side === 3 ? marginX : marginX + (panelWidth - marginX * 2) * t;
     const baseY = side === 0 ? marginY : side === 2 ? panelHeight - marginY : marginY + (panelHeight - marginY * 2) * t;
     const horizontal = side === 0 || side === 2;
-    paths.push(`<path data-effect-line="vibration" d="${vibrationPath(baseX, baseY, horizontal)}" fill="none" stroke="#000000" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>`);
+    const d = vibrationPath(baseX, baseY, horizontal);
+    paths.push(`<path data-effect-line="vibration-halo" d="${d}" fill="none" stroke="#ffffff" stroke-width="${strokeWidth + 3}" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>`);
+    paths.push(`<path data-effect-line="vibration" d="${d}" fill="none" stroke="#000000" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>`);
   }
 
   return paths.join("");
