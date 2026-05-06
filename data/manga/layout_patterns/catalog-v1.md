@@ -1914,3 +1914,458 @@ pat_038_monster_bestiary_grid_5
 - **連続ページの pattern 選択は前ページの reader_effect を考慮**: 「緊張 → 解放」「静 → 動」のリズム維持は archetype 並びで作る (例: pat_019 の次に pat_001 が来ると緩急が壊れる、pat_009 か pat_022 で解放を入れるべき)
 - **chapter_door / cover / colophon は archetype dictionary の本流から外し、テンプレ管理**: pat_005 / pat_023 は物語アルゴリズムが選ぶのではなく、章構造から自動配置する
 
+# --- 拡張パス3 (2026-05-06) kindle-vol-2 走査追加 ---
+
+## 拡張パス3 メタ
+
+- **対象**: kindle-vol-2 (レベルガチャ Vol.2, page_0001-0274)
+- **当初想定**: a08/a09 (異世界転生・領地経営) 用 archetype 抽出
+- **実観察**: vol-2 は kindle-test-1 と同じ作品系列 (現代ダンジョン+ガチャ系) であり、純粋な異世界転生・貴族領地経営の素材は出現しなかった
+- **方針調整**: 観察事実に基づき「test-1 で抽出しきれなかった gacha_ui 派生 + bishoujo love-comedy 系 + 構造的特殊形」を追加。発明禁止ルールに従い、isekai_transmigration / aristocrat_territory 等の subtype 命名は行わない
+- **新 subtype_hints 値**:
+  - `bishoujo_focus` — ヒロインcloseup・花/heart装飾・blush主軸の relationship coded archetype
+  - `omake_4koma` — 章末/巻末のおまけ4コマ専用 (本編archetype系統と分離管理)
+- **archetype 数**: 38 → **52** (新規14個追加)
+
+## ページ別観察 (拡張パス3 / 2026-05-06 追加 / vol-2)
+
+### page_0006 (vol-2 振り返りページ)
+- panel_count: 3 / 3-tier rect mix
+- 上段establishing (世界感再説明), 中段 illustration with PC操作, 下段 atmospheric flashback
+- 既存 pat_004 + pat_001 の組合せで再現可能 → 新規不要
+
+### page_0010 (ステータス7種解説)
+- panel_count: 5 / 左右非対称
+- 既存 pat_021 (screentone info anchor) で対応可能 → 新規不要
+
+### page_0035 (運silhouette+大型silhouette)
+- panel_count: 3 / 上段大silhouette + 中段close + 下段caption
+- 既存 pat_019 は monster silhouette = threat。こちらは loot silhouette = positive shock
+- → **pat_051_silhouette_loot_discovery_3** 新規
+
+### page_0050 (レベルガチャ確認モーダル)
+- panel_count: 3 / 上段中央モーダル + 横status + 下段reaction
+- pat_008 (UI overlay status) は status display 中心。こちらは modal dialogue + sidebar
+- → **pat_039_confirmation_modal_sidebar_3** 新規
+
+### page_0055 (ガチャ装置オプションUI)
+- panel_count: 3 / 上段 1回/10回ボタン UI + 中段 装置 establishing + 下段 reaction
+- 既存pattern では「選択肢提示UI」を持たない
+- → **pat_041_vendor_option_select_3** 新規
+
+### page_0060 (3段階heroポーズescalation)
+- panel_count: 3 / 顔close → 全身pose → 手のドアップ
+- 既存 pat_003 (extreme hero action) で代用可能 → 新規不要
+
+### page_0070 (ガチャ結果カード3並列)
+- panel_count: 4 / 上段reaction → 下段3カード並列
+- pat_008 は status overlay 単一画面、こちらは『複数結果が来た瞬間』
+- → **pat_040_gacha_pull_triple_result_4** 新規
+
+### page_0080 (スライム背景パターン dialogue)
+- panel_count: 4 / 全panel が slime顔タイル背景の上に乗る
+- 既存に「装飾pattern背景dialogue」がない
+- → **pat_046_pattern_tiled_background_dialogue_4** 新規
+
+### page_0090 (ヒロインアキ初登場)
+- panel_count: 3 / 花柄背景 + 全身立ち絵 + chibi reaction
+- pat_013 (two-shot iconic) は2人対比、こちらは単独立ち絵 + 装飾SFX
+- → **pat_042_bishoujo_full_body_intro_3** 新規 ＋ **pat_049_floral_emotion_focus_3** の素材
+
+### page_0110 (第2話 chapter opener with chat UI)
+- panel_count: 3 / 章タイトル plate + chat balloon UI + 下段 location establishing
+- pat_032 (chapter title overlay full) は本編 action 上に title 重畳。こちらは UI artifact 主体の章入り方
+- → **pat_050_chapter_chat_artifact_opener_3** 新規
+
+### page_0115 (受付嬢マキ全身立ち絵)
+- panel_count: 5 だが構造は pat_042 (heroine introduction) と同じ
+- → pat_042 の追加 example_page
+
+### page_0125 (ヒロイン blush + chibi モード切替)
+- panel_count: 5 / blush close + chibi inset 多用
+- 既存pattern にラブコメ系 chibi inset がない
+- → **pat_044_bishoujo_chibi_observer_inset_5** 新規
+
+### page_0130 (handwritten label panel)
+- panel_count: 5 / 装飾handwritten label "極上度石ドロップ率アップ!!"
+- 既存 pat_015 (label strip decor) で対応可能 → 新規不要
+
+### page_0145 (ガチャ装置 dungeon中で発見)
+- panel_count: 5 / 上段reaction + 中段establishing + 下段ガチャUI
+- pat_041 の追加 example_page
+
+### page_0160 (主人公vsボス対峙)
+- panel_count: 3 / 斜め対角線上に主人公→breath→ボス
+- pat_002 (diag split) は1panel関係性ピボット、こちらは戦闘前の3コマ confrontation
+- → **pat_048_diagonal_confrontation_3** 新規
+
+### page_0190 (警備兵包囲)
+- panel_count: 3 / 上段dialogue + 中段周囲多人数panel + 下段個別reaction
+- pat_019 は単一脅威silhouette。こちらは群衆による圧
+- → **pat_043_encirclement_surround_3** 新規
+
+### page_0195 (love progress blush)
+- panel_count: 3 / 花/heart SFX + blush close + observer reaction
+- pat_009 (extreme close emotion) は shock peak、こちらは positive peak
+- → **pat_049_floral_emotion_focus_3** 新規
+
+### page_0210 (ヒロイン dialogue + chibi observer)
+- pat_044 の追加 example_page
+
+### page_0230 (ベッドside intimate dialogue)
+- pat_044 / pat_049 の追加 example_page
+
+### page_0240 (受付嬢pointer explanation)
+- panel_count: 5 / 上段pointer pose + chart inset + 下段listener reaction
+- pat_007 (info dense) は無人カタログ、こちらは『説明する人物』中心
+- → **pat_052_explanation_pointer_presentation_5** 新規
+
+### page_0260 (場所chain transition)
+- panel_count: 4 / 上=hallway A + 中=room B + 下=building exterior C
+- pat_024 (temporal compression strip) は同一場所の時間圧縮、こちらは異なる場所の空間移動
+- → **pat_047_vertical_location_journey_4** 新規
+
+### page_0270 (巻末おまけ4コマ)
+- panel_count: 8 / 4列2段 uniform rect grid
+- 既存pattern に4コマ omake 専用がない
+- → **pat_045_omake_4koma_grid_8** 新規
+
+### page_0274 (rainbow slime レアドロップ発見)
+- pat_051 の追加 example_page
+
+### 走査だが新規不要だった代表 page
+
+- page_0015 / 0020 / 0030: 既存 pat_001 / pat_026 / pat_010 で対応
+- page_0040 / 0042: pat_017 (bubble panel power) で対応
+- page_0075: pat_037 (zoom burst dialogue) で対応
+- page_0095: pat_021 + pat_001 組合せで対応
+- page_0100: pat_009 + pat_001 で対応
+- page_0120: pat_001 (3tier dialogue) で対応
+- page_0140 / 0150 / 0170: pat_010 + pat_022 で対応
+- page_0155: 章末 colophon 風 → 別管理 (pat_023 系統)
+- page_0175 / 0185: pat_028 / pat_029 で対応
+- page_0220 / 0225: pat_008 + pat_044 で対応
+- page_0250: pat_044 (chibi observer) で対応
+
+## 抽出された Pattern Archetypes (拡張パス3追加 14個)
+
+### pat_039_confirmation_modal_sidebar_3
+- **頻度**: rare (2/40)
+- **panel_count**: 3
+- **shape_mix**: 中央大modal panel + 横status sidebar + 下段reaction
+- **size_hierarchy**: extreme
+- **典型 page_role**: confirmation_choice / ui_decision_moment / skill_use_prompt
+- **特徴**: 「はい/いいえ」モーダルとstatus並列表示、ボタンUI内蔵
+- **観察pages**: 0050, 0180
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: ui_decision_moment — 主人公がガチャ/スキル使用に踏み切る瞬間。pat_008 は status check (受動的閲覧)、こちらは『yes/no選択を迫られている』能動的決断
+- **reader_effect**: 読者も画面のボタンを押すような『一緒に選んでいる』臨場感。subtype=gacha_ui 作品の決断pageに必須
+- **why_this_shape**: モーダル中央配置で『選択ダイアログ＝ゲームと同期した自分の選択』を示し、横のstatus sidebarで『今の自分のステータスでこれを使うとどうなるか』の文脈を並列で提供。下段reactionは選んだ直後の感情peak
+- **匹敵する代替手段の不採用理由**: pat_008 はstatus閲覧で『見ている』だけ、ここでは『選ぶ』必要がある。pat_017 (bubble power) は能力発動後、こちらは発動前の決断
+- **trigger conditions**: page_role∈{confirmation_choice,ui_decision_moment,skill_use_prompt} AND subtype∈{gacha_ui,hybrid} AND has_yes_no_modal AND has_status_sidebar
+
+### pat_040_gacha_pull_triple_result_4
+- **頻度**: medium (3/40)
+- **panel_count**: 4
+- **shape_mix**: 上段large reaction + 下段3並列カード + 左下reaction breakout
+- **size_hierarchy**: extreme
+- **典型 page_role**: gacha_pull_result / skill_acquisition_burst / rare_drop_reveal
+- **特徴**: rarity ラベル付きカード3枚並列、SFX多用、最後panelは breakout
+- **観察pages**: 0070, 0188
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: triple_burst_reveal — 1度のpullで複数結果が同時に来た瞬間。pat_008は単一status画面、こちらは『複数reveal同時着弾』
+- **reader_effect**: ガチャを引いた読者が体感する『3枚出た!』の連続快感。subtype=gacha_ui の高揚peak
+- **why_this_shape**: 上段の大kreactionで読者の期待を作り、下段3並列カードで一気に reveal、左下breakoutで爆発的reactionを排出する3段階構成
+- **匹敵する代替手段の不採用理由**: pat_008 (UI status) は1個のstatus画面、pat_027 (item spotlight reveal) は単一item に光、ここは『複数同時 reveal』が要件
+- **trigger conditions**: page_role∈{gacha_pull_result,skill_acquisition_burst,rare_drop_reveal} AND subtype∈{gacha_ui,hybrid} AND result_card_count=3 AND beat=triple_burst
+
+### pat_041_vendor_option_select_3
+- **頻度**: rare (2/40)
+- **panel_count**: 3
+- **shape_mix**: 上段option button row + 中段device establishing + 下段reaction
+- **size_hierarchy**: medium
+- **典型 page_role**: vendor_interaction / purchase_decision / ui_option_select
+- **特徴**: 「1回/10回」ボタンpair、装置 establishing
+- **観察pages**: 0055, 0145
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: option_select_lead_in — 何かを購入/引く前段の選択肢提示。pat_039 (confirmation modal) は yes/no、こちらは『複数オプション』
+- **reader_effect**: ゲームのVendor画面と同じ感覚で『どれを選ぶか』読者も思考に参加
+- **why_this_shape**: 上段にoption列を置くことで『これから選ぶ』ことを冒頭で宣言、中段で装置を見せて文脈固定、下段で主人公が決断
+- **匹敵する代替手段の不採用理由**: pat_008 はpassive閲覧、pat_039 は2択、ここは複数択
+- **trigger conditions**: page_role∈{vendor_interaction,purchase_decision,ui_option_select} AND subtype∈{gacha_ui,hybrid} AND has_option_buttons AND has_vendor_device
+
+### pat_042_bishoujo_full_body_intro_3
+- **頻度**: medium (3/40)
+- **panel_count**: 3
+- **shape_mix**: 左dialogue setup + 右縦長フルボディportrait + 下observer reaction
+- **size_hierarchy**: extreme
+- **典型 page_role**: heroine_introduction / first_appearance_female / love_interest_reveal
+- **特徴**: 花柄/sparkle装飾SFX、フルボディ立ち絵、blush表情
+- **観察pages**: 0090, 0115, 0195
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: heroine_first_impression_anchor — ヒロイン (重要女性キャラ) の登場を1ページで完結させる。pat_013 (two-shot iconic) は対比、こちらは単独主役
+- **reader_effect**: 読者が『この子は重要キャラだ』と即座に理解する。視線の集中を強制
+- **why_this_shape**: 縦長フルボディportraitを画面の3分の1幅で確保することで、読者の視線が真っ先にヒロインに行く。装飾SFXがcharacterの好感度signalとして機能
+- **匹敵する代替手段の不採用理由**: pat_013は2人比較、pat_005 (full bleed single)は『誰でもbig presence化』、ここは『フルボディ立ち絵による好感度誘導』が要件
+- **trigger conditions**: page_role∈{heroine_introduction,first_appearance_female,love_interest_reveal} AND character_count=1_dominant AND has_decorative_sfx AND first_appearance=true
+
+### pat_043_encirclement_surround_3
+- **頻度**: rare (1/40)
+- **panel_count**: 3
+- **shape_mix**: 上dialogue setup + 中段大encirclement panel + 下段individual reaction strip
+- **size_hierarchy**: extreme
+- **典型 page_role**: surrounded_threat / guard_encirclement / unwanted_attention_reveal
+- **特徴**: 周囲多人数のatmospheric panel、shield/helmet motif、中央キャラを取り囲む構図
+- **観察pages**: 0190
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: collective_pressure_reveal — 単一脅威ではなく『集団による包囲』を見せる。pat_019 は単一silhouette monster、こちらは多人数による圧
+- **reader_effect**: 包囲された側のキャラと一緒に『逃げ場がない』と感じる
+- **why_this_shape**: 中段大panelで包囲を確実に見せ、下段reactionでターゲットの個別感情を切り出す。上段はdialogueで状況説明
+- **匹敵する代替手段の不採用理由**: pat_019 は monster silhouette、pat_011 (l-shape inset) は action with reaction、ここは『集団圧 + 中央refocus』が要件
+- **trigger conditions**: page_role∈{surrounded_threat,guard_encirclement,unwanted_attention_reveal} AND surrounding_actor_count≥3 AND central_character_count∈[1,2] AND atmosphere=tension
+
+### pat_044_bishoujo_chibi_observer_inset_5
+- **頻度**: medium (3/40)
+- **panel_count**: 5
+- **shape_mix**: 上dialogue + 左大blush close + 右上下chibi inset + 下resolution close
+- **size_hierarchy**: extreme
+- **典型 page_role**: dialogue_intimate / relationship_progress / comedic_aside
+- **特徴**: ヒロインblush close + SD/chibi化キャラのreaction inset
+- **観察pages**: 0125, 0210, 0230
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: serio_comedic_balance — シリアスなloveシーンの最中に第三者chibi reaction を挿入し、緩急を作る。pat_009 (extreme close emotion) はshock close、こちらは『love + chibi laugh』のtonal mix
+- **reader_effect**: ベタ甘なシーンの圧を『第三者の素直な反応』で和らげ、読者がのめり込みつつ笑える
+- **why_this_shape**: 大blush close で love mode を確立 → chibi insetで観客視点を提供 → 下resolutionで love mode に戻る、というサンドイッチ構造
+- **匹敵する代替手段の不採用理由**: pat_011 はaction inset、pat_029 (memory flashback inset) は記憶 inset、ここは『chibi化キャラのコメディ inset』
+- **trigger conditions**: page_role∈{dialogue_intimate,relationship_progress,comedic_aside} AND has_bishoujo_close_up AND has_chibi_reaction_inset AND atmosphere∈{tender,comedic}
+
+### pat_045_omake_4koma_grid_8
+- **頻度**: rare (1/40)
+- **panel_count**: 8
+- **shape_mix**: 4列2段 uniform small rect grid (4コマ漫画形式の連結)
+- **size_hierarchy**: flat
+- **典型 page_role**: omake_extra / 4koma_strip / after_word_comedy
+- **特徴**: 全panel uniform rect、簡素な背景、コメディ tone
+- **観察pages**: 0270
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: bonus_levity — 本編後の小ネタ展開。本編archetypeとは別レイヤー
+- **reader_effect**: 巻末/章末のリラックスタイム、本編シリアスから抜けて読者をクールダウン
+- **why_this_shape**: 4コマ形式は『独立した小エピソード』を並べるのに最適。uniform rect = flat hierarchy = 各コマが等価
+- **匹敵する代替手段の不採用理由**: 本編archetypeはhierarchy重視、4コマ専用archetype は別管理が妥当 (mapper-v4 で chapter_end signal時のみ呼ぶ)
+- **trigger conditions**: page_role∈{omake_extra,4koma_strip,after_word_comedy} AND panel_count∈[6,8] AND all_panels_small_uniform_rect AND chapter_end_or_volume_end
+
+### pat_046_pattern_tiled_background_dialogue_4
+- **頻度**: rare (1/40)
+- **panel_count**: 4
+- **shape_mix**: 全panel が pattern tile 背景の上に乗る + label strip
+- **size_hierarchy**: medium
+- **典型 page_role**: dialogue_decorative / tonal_levity / monotony_compression
+- **特徴**: スライム顔・花柄・ハート等の繰り返しパターン、装飾的panel背景
+- **観察pages**: 0080
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: decorative_tone_modulation — 退屈な日常/コメディ/かわいさの tonal cueを背景pattern で表現
+- **reader_effect**: 『今は serious mode じゃないよ』signal が一瞬で伝わる
+- **why_this_shape**: panel本体はrectで読みやすさ確保、背景patternで装飾。labelstrip でナレーション補強
+- **匹敵する代替手段の不採用理由**: pat_001 (3tier) は背景pattern なし、pat_014 (atmospheric text background) は文字背景、ここは『繰り返し図像pattern』
+- **trigger conditions**: page_role∈{dialogue_decorative,tonal_levity,monotony_compression} AND has_repeating_pattern_background AND panel_count∈[3,5] AND atmosphere∈{comedic,tedious,cute}
+
+### pat_047_vertical_location_journey_4
+- **頻度**: medium (2/40)
+- **panel_count**: 4
+- **shape_mix**: 上→中→下に異なる location が縦並び + 下段landmark
+- **size_hierarchy**: medium
+- **典型 page_role**: scene_transition_chain / location_montage / travel_compression
+- **特徴**: 異なる location per panel、actor continuity (同主人公)
+- **観察pages**: 0110, 0260
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: spatial_compression — 移動を1ページで圧縮。pat_024 (temporal compression strip) は時間圧縮、こちらは空間圧縮
+- **reader_effect**: 読者が長い移動を体感せず物語を進める
+- **why_this_shape**: location が違うことを panel 切替で示す、actor continuity を保つことで主人公の移動だと理解させる
+- **匹敵する代替手段の不採用理由**: pat_024 は同場所反復、pat_004 (atmospheric establishing) は単一location、ここは『複数locationを順に』
+- **trigger conditions**: page_role∈{scene_transition_chain,location_montage,travel_compression} AND location_count≥3 AND same_actor_through_locations
+
+### pat_048_diagonal_confrontation_3
+- **頻度**: rare (1/40)
+- **panel_count**: 3
+- **shape_mix**: 左上protagonist + 中央breath SFX大panel + 右下antagonist
+- **size_hierarchy**: extreme
+- **典型 page_role**: boss_confrontation / duel_setup / imminent_clash
+- **特徴**: 斜め対角線上のキャラ配置、中央 atmospheric breath
+- **観察pages**: 0160
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: pre_combat_tension_buildup — 戦闘『前』の対峙。pat_002 (diag split) は関係性ピボット (single panel)、こちらは3コマ confrontation
+- **reader_effect**: 戦闘前の緊張で息を詰める。次page で衝突する予感
+- **why_this_shape**: 対角線配置で物理的距離を視覚化、中央 atmospheric で『間合い』を表現
+- **匹敵する代替手段の不採用理由**: pat_010 (diag speedline combat) は既に交戦中、pat_002 は関係性pivot だが action ではない、ここは『戦闘前の睨み合い』
+- **trigger conditions**: page_role∈{boss_confrontation,duel_setup,imminent_clash} AND character_count=2_opposing AND tension=peak AND no_strike_yet
+
+### pat_049_floral_emotion_focus_3
+- **頻度**: medium (3/40)
+- **panel_count**: 3
+- **shape_mix**: 上dialogue setup + 中段大blush close + 下observer internal reaction
+- **size_hierarchy**: extreme
+- **典型 page_role**: affection_peak / tender_revelation / positive_emotional_climax
+- **特徴**: 花柄/heart/sparkle装飾SFX、soft screentone、blush face close
+- **観察pages**: 0090, 0195, 0230
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: positive_emotion_peak — pat_009 はshock peak (negative)、こちらは positive peak (love/affection)
+- **reader_effect**: relationship 進展を読者に体感させる。胸キュン peak
+- **why_this_shape**: 大blush close を中段に配置することで pageの主役にし、装飾SFXで positive 感情の visual signal を補強
+- **匹敵する代替手段の不採用理由**: pat_009 は negative shock、pat_044 はchibi mix、ここは『純粋な positive close』
+- **trigger conditions**: page_role∈{affection_peak,tender_revelation,positive_emotional_climax} AND has_floral_or_heart_sfx AND emotion_valence=positive AND has_bishoujo_close
+
+### pat_050_chapter_chat_artifact_opener_3
+- **頻度**: rare (1/40)
+- **panel_count**: 3
+- **shape_mix**: 章タイトル plate + chat balloon UI artifact + 全面 establishing background
+- **size_hierarchy**: extreme
+- **典型 page_role**: chapter_opener_chat / external_message_lead_in / connected_world_establish
+- **特徴**: chat UI artifact 重畳、章タイトル plate、下層 establishing
+- **観察pages**: 0110
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: chapter_lead_in_via_external_artifact — pat_032 は本編 action 上に title 重畳、こちらは external UI (chat) artifact 経由で章入り
+- **reader_effect**: 『現実世界とつながった物語』の signal、subtype=external_social の章扉に最適
+- **why_this_shape**: chat artifact を panel 化することで『誰かとのやり取りで章が始まる』signalを送る、その下にlocation を establishing
+- **匹敵する代替手段の不採用理由**: pat_032 は action title、pat_016 (news artifact) は世間validation、ここは『個人間chat で章入り』
+- **trigger conditions**: page_role∈{chapter_opener_chat,external_message_lead_in,connected_world_establish} AND subtype∈{external_social,hybrid} AND has_chat_ui_artifact AND chapter_boundary
+
+### pat_051_silhouette_loot_discovery_3
+- **頻度**: rare (2/40)
+- **panel_count**: 3
+- **shape_mix**: 上段巨大silhouette object + 中段recognition close + 下段caption
+- **size_hierarchy**: extreme
+- **典型 page_role**: loot_discovery / rare_drop_recognition / treasure_first_sight
+- **特徴**: 巨大object silhouette、sparkle装飾、shadow白抜き
+- **観察pages**: 0035, 0274
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: positive_silhouette_reveal — pat_019 は monster silhouette = threat (negative)、こちらは loot silhouette = positive shock
+- **reader_effect**: 『何か出た!』の positive surprise、ガチャ系作品の loot peak
+- **why_this_shape**: silhouette を巨大化させて画面のpresenceを最大化、下段で主人公の認識shock を close で確認
+- **匹敵する代替手段の不採用理由**: pat_019 は脅威、pat_027 (item spotlight reveal) は5パネルで光るitem、ここは『silhouette のままレア度を匂わせる』
+- **trigger conditions**: page_role∈{loot_discovery,rare_drop_recognition,treasure_first_sight} AND has_silhouette_object AND subject∈{item,loot,artifact} AND emotion_valence=positive_shock
+
+### pat_052_explanation_pointer_presentation_5
+- **頻度**: medium (2/40)
+- **panel_count**: 5
+- **shape_mix**: 上段explainer + chart inset + listener panel + 下段dialogue continuation + listener resolution
+- **size_hierarchy**: medium
+- **典型 page_role**: explanation_lecture / rules_briefing_active / instruction_with_props
+- **特徴**: pointer pose、OK balloon icon、chart icon 重畳、左listener / 右explainer split
+- **観察pages**: 0240, 0245
+
+**purpose (なぜこのコマ割りか)**:
+- **narrative_function**: active_lore_dump_with_human_anchor — pat_007 (info dense) は無人カタログ、こちらは『説明する人物』を中心に置くlore dump
+- **reader_effect**: lore dumpの退屈を『説明者キャラの好感』で吸収する
+- **why_this_shape**: 上段の explainer pose で『説明 mode』を宣言、chart insetで内容を visual化、listener panelで読者の代理視点を提供、下段で説明continuation
+- **匹敵する代替手段の不採用理由**: pat_007 は項目並列、pat_021 (info anchor) は単一テーマ + anchor image だが pointer pose を持たない、ここは『explainer character + props』
+- **trigger conditions**: page_role∈{explanation_lecture,rules_briefing_active,instruction_with_props} AND has_explainer_character AND has_pointer_or_chart_prop AND panel_count∈[4,6]
+
+## 横断観察 (拡張パス3 / vol-2 走査追加)
+
+サンプル拡張: N = 68 (test-1) + 約36 (vol-2) = **104 page** を archetype 抽出基盤に追加。 **拡張パス3 (2026-05-06) 追加観察**:
+
+- **archetype 数**: 38 → **52** (新規14個追加)
+- **新subtype_hints導入**: `bishoujo_focus` (pat_042 / pat_044 / pat_049), `omake_4koma` (pat_045)
+- **n=3 archetype が大幅増加**: vol-2 では n=3 (pat_039/041/042/043/048/049/050/051) が 8個追加、n=5 系より優勢
+  - 仮説: vol-2 の物語密度は『1ページ1完結ビート』志向で、n=3 の単純構造で構成
+  - test-1 (n=5 が13個で多数) と対照的な傾向
+- **bishoujo_focus 系の出現比率**: vol-2 で約25% (heroine 関連 page)、test-1 はほぼ0% — **subtype依存の archetype 集中現象を確認**
+- **gacha_ui 派生**: pat_039 (modal) / pat_040 (triple result) / pat_041 (vendor) / pat_051 (loot silhouette) — vol-2 で4個追加。test-1 の pat_008 単独では gacha 系pageを十分にカバーできていなかった
+- **omake / 4koma**: vol-2 巻末 (page_0270) でのみ出現。chapter_end signal で別レイヤー管理
+- **panel_count 別分布 (sampled 104 pages)**:
+  - n=1: 約 10%
+  - n=2: 約 11%
+  - n=3: 約 28% (vol-2 で大幅増、test-1の20% → 全体で28%)
+  - n=4: 約 22%
+  - n=5: 約 20%
+  - n=6+: 約 9% (omake 4koma の n=8 含む)
+
+### subtype 別 archetype 分布 (test-1 系 vs vol-2 系)
+
+| subtype | test-1 archetype 数 | vol-2 追加 | 合計 | 主要 archetype |
+|---|---|---|---|---|
+| neutral (subtype_hints=[]) | 22 | 5 | 27 | pat_001/003/009/010/019 etc. |
+| gacha_ui | 8 | 4 | 12 | pat_008/017/021/027/028/039/040/041/051 |
+| external_social | 4 | 1 | 5 | pat_004/015/016/031/050 |
+| hybrid | 5 | 0 | 5 | pat_007/035/038/044 |
+| **bishoujo_focus** (新規) | 0 | 3 | 3 | pat_042/044/049 |
+| **omake_4koma** (新規) | 0 | 1 | 1 | pat_045 |
+
+### test-1 系と異なる layout 傾向 (vol-2)
+
+1. **n=3 単純構造の比率が高い**: test-1 では情報density重視の n=5 が多数だったが、vol-2 では『1page=1ビート』の n=3 が支配的。同じシリーズでも巻が進むに従い構造が単純化していく可能性
+2. **bishoujo_focus subtype の出現**: ヒロインキャラ関連pageで装飾SFX (花/heart/sparkle) を伴う archetype が独自系統を形成。test-1 (主人公独走+男性キャラ中心) では未出現
+3. **gacha_ui のUI多様化**: test-1 では pat_008 (status overlay) のみだったが、vol-2 では modal / triple result / vendor / loot silhouette の4派生が出現。subtype 進化が観察された
+4. **chibi/SD inset の汎用化**: pat_044 のように SD化 reaction inset が love/comedy系で常用される。test-1 の pat_011 (L-shape action inset) と use case が対照的
+5. **omake 4koma 専用 layer**: 巻末/章末に独立したcomedic layerが存在し、本編archetypeと混ぜないのが商業漫画の慣習
+
+## 補足: archetype 命名一覧 (拡張パス3)
+
+```
+pat_039_confirmation_modal_sidebar_3
+pat_040_gacha_pull_triple_result_4
+pat_041_vendor_option_select_3
+pat_042_bishoujo_full_body_intro_3
+pat_043_encirclement_surround_3
+pat_044_bishoujo_chibi_observer_inset_5
+pat_045_omake_4koma_grid_8
+pat_046_pattern_tiled_background_dialogue_4
+pat_047_vertical_location_journey_4
+pat_048_diagonal_confrontation_3
+pat_049_floral_emotion_focus_3
+pat_050_chapter_chat_artifact_opener_3
+pat_051_silhouette_loot_discovery_3
+pat_052_explanation_pointer_presentation_5
+```
+
+## Pattern 選択ガイド (mapper-v4 向け仕様提案 / 拡張パス3)
+
+### 入力 → 推奨 pattern (追加分)
+
+| storyboard signal | 推奨 archetype |
+|---|---|
+| page_role=confirmation_choice + subtype=gacha_ui | pat_039_confirmation_modal_sidebar_3 |
+| page_role=gacha_pull_result + multiple_card_reveal + subtype=gacha_ui | pat_040_gacha_pull_triple_result_4 |
+| page_role=vendor_interaction + has_option_buttons + subtype=gacha_ui | pat_041_vendor_option_select_3 |
+| page_role=heroine_introduction + decorative_sfx + subtype=bishoujo_focus | pat_042_bishoujo_full_body_intro_3 |
+| page_role=surrounded_threat + actor_count≥3 | pat_043_encirclement_surround_3 |
+| page_role=dialogue_intimate + chibi_observer + subtype=bishoujo_focus | pat_044_bishoujo_chibi_observer_inset_5 |
+| page_role=omake_extra + chapter_end OR volume_end | pat_045_omake_4koma_grid_8 |
+| page_role=dialogue_decorative + tone=comedic_or_cute + has_pattern_background | pat_046_pattern_tiled_background_dialogue_4 |
+| page_role=scene_transition_chain + location_count≥3 | pat_047_vertical_location_journey_4 |
+| page_role=boss_confrontation + tension=peak + no_strike_yet | pat_048_diagonal_confrontation_3 |
+| page_role=affection_peak + emotion_valence=positive + subtype=bishoujo_focus | pat_049_floral_emotion_focus_3 |
+| page_role=chapter_opener_chat + has_chat_ui_artifact + subtype=external_social | pat_050_chapter_chat_artifact_opener_3 |
+| page_role=loot_discovery + has_silhouette_object + subtype=gacha_ui | pat_051_silhouette_loot_discovery_3 |
+| page_role=explanation_lecture + has_explainer_character + has_pointer_prop | pat_052_explanation_pointer_presentation_5 |
+
+### subtype = bishoujo_focus 必須群 (新規)
+
+- pat_042 (heroine intro) — 初登場page
+- pat_044 (chibi observer inset) — comedic dialogue page
+- pat_049 (floral emotion focus) — affection peak page
+
+### subtype = omake_4koma 必須群 (新規)
+
+- pat_045 (4koma grid) — 巻末/章末extra layer 専用
+
+### 設計上の決め事 (vol-2 走査からの追加実証)
+
+- **subtype = bishoujo_focus を持つ作品は pat_042/044/049 を必須テンプレに含める**: ヒロインキャラを中心に据える作品 (love-comedy / harem 系) では3つの archetype を欠かすと『ヒロインの存在感が薄い』pageになる
+- **gacha_ui subtype は pat_008 単独では不十分**: モーダル決断 (pat_039) / 複数結果 reveal (pat_040) / 装置選択 (pat_041) / loot 発見 (pat_051) を combo で配備すべき
+- **omake_4koma は本編 archetype dictionary とは別レイヤーで管理**: chapter_end_signal で別 picker を呼ぶのが妥当。本編 archetype の選択 logic に混ぜない
+- **n=3 archetype が増えたことで mapper-v4 の panel_count 分布調整が必要**: test-1 偏重で n=5 が多かったが、vol-2 を含めた104 page では n=3 がトップ。作品種別によって panel_count 分布を調整すべき
+

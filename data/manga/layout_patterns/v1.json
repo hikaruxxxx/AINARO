@@ -1812,6 +1812,689 @@
           "bleed": false
         }
       ]
+    },
+    {
+      "id": "pat_039_confirmation_modal_sidebar_3",
+      "name": "確認ダイアログ＋ステータスサイドバー",
+      "panel_count": 3,
+      "page_role_hints": ["confirmation_choice", "ui_decision_moment", "skill_use_prompt"],
+      "subtype_hints": ["gacha_ui"],
+      "purpose_summary": "「はい/いいえ」確認モーダルを画面中央に配置し、横にステータスパネルを並列で見せる『UIで意思決定する瞬間』専用archetype",
+      "trigger_conditions": "page_role∈{confirmation_choice,ui_decision_moment,skill_use_prompt} かつ subtype∈{gacha_ui,hybrid} かつ has_yes_no_modal かつ has_status_sidebar",
+      "frequency": "rare",
+      "example_pages": [50, 180],
+      "features": ["center_modal_panel", "sidebar_status_panel", "両端atmospheric_decoration", "ボタンUI"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "ui_modal_dialog",
+          "size_class": "extra_large",
+          "polygon": [[60, 60], [1180, 60], [1180, 1300], [60, 1300]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "status_sidebar",
+          "size_class": "medium",
+          "polygon": [[1200, 60], [1688, 60], [1688, 1300], [1200, 1300]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "decision_reaction",
+          "size_class": "large",
+          "polygon": [[60, 1320], [1688, 1320], [1688, 2420], [60, 2420]],
+          "is_borderless": true,
+          "bleed": false
+        }
+      ]
+    },
+    {
+      "id": "pat_040_gacha_pull_triple_result_4",
+      "name": "ガチャ結果カード3並列reveal",
+      "panel_count": 4,
+      "page_role_hints": ["gacha_pull_result", "skill_acquisition_burst", "rare_drop_reveal"],
+      "subtype_hints": ["gacha_ui"],
+      "purpose_summary": "ガチャ獲得カード3枚を並列で reveal し、上段に光源SFX、下段に大喜びreaction。pat_008 (UI status) は単一画面、こちらは『3つ同時に来た』瞬間に特化",
+      "trigger_conditions": "page_role∈{gacha_pull_result,skill_acquisition_burst,rare_drop_reveal} かつ subtype∈{gacha_ui,hybrid} かつ result_card_count=3 かつ beat=triple_burst",
+      "frequency": "medium",
+      "example_pages": [70, 188],
+      "features": ["3並列_card_panel", "上段sfx_burst", "下段_explosive_reaction", "rarity_label_重畳"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "burst_setup_reaction",
+          "size_class": "large",
+          "polygon": [[60, 60], [1688, 60], [1688, 900], [60, 900]],
+          "is_borderless": true,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "card_result_right",
+          "size_class": "small",
+          "polygon": [[1200, 920], [1688, 920], [1688, 1660], [1200, 1660]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "card_result_center",
+          "size_class": "small",
+          "polygon": [[640, 920], [1180, 920], [1180, 1660], [640, 1660]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s4",
+          "reading_order": 4,
+          "role_hint": "card_result_left_or_burst_reaction",
+          "size_class": "large",
+          "polygon": [[60, 920], [620, 920], [620, 2420], [60, 2420]],
+          "is_borderless": true,
+          "bleed": true
+        }
+      ]
+    },
+    {
+      "id": "pat_041_vendor_option_select_3",
+      "name": "ベンダーUIオプション選択",
+      "panel_count": 3,
+      "page_role_hints": ["vendor_interaction", "purchase_decision", "ui_option_select"],
+      "subtype_hints": ["gacha_ui"],
+      "purpose_summary": "ガチャ装置などの『1回 / 10回』ボタン選択UIを上段に配置し、装置 establishing と主人公 reaction を続ける。pat_008 が status overlay、こちらは『買う/引く』選択肢提示専用",
+      "trigger_conditions": "page_role∈{vendor_interaction,purchase_decision,ui_option_select} かつ subtype∈{gacha_ui,hybrid} かつ has_option_buttons かつ has_vendor_device",
+      "frequency": "rare",
+      "example_pages": [55, 145],
+      "features": ["option_button_pair", "device_establishing", "atmospheric_reaction"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "ui_option_buttons",
+          "size_class": "large",
+          "polygon": [[60, 60], [1688, 60], [1688, 760], [60, 760]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "device_establishing",
+          "size_class": "extra_large",
+          "polygon": [[60, 780], [1688, 780], [1688, 1700], [60, 1700]],
+          "is_borderless": true,
+          "bleed": false
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "user_decision_reaction",
+          "size_class": "medium",
+          "polygon": [[60, 1720], [1688, 1720], [1688, 2420], [60, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        }
+      ]
+    },
+    {
+      "id": "pat_042_bishoujo_full_body_intro_3",
+      "name": "美少女立ち絵フルボディ初登場",
+      "panel_count": 3,
+      "page_role_hints": ["heroine_introduction", "first_appearance_female", "love_interest_reveal"],
+      "subtype_hints": ["bishoujo_focus"],
+      "purpose_summary": "ヒロイン (女性メインキャラ) の初登場を、花/sparkle装飾 + フルボディ立ち絵 + 表情close で印象づけるarchetype。pat_013 (two-shot iconic) は2人の対比、こちらは単独立ち絵での印象づけ",
+      "trigger_conditions": "page_role∈{heroine_introduction,first_appearance_female,love_interest_reveal} かつ character_count=1_dominant かつ has_decorative_sfx (花/sparkle/heart) かつ first_appearance=true",
+      "frequency": "medium",
+      "example_pages": [90, 115, 195],
+      "features": ["full_body_standing_portrait", "decorative_floral_sfx", "atmospheric_pattern_背景", "blush_face_close"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "approach_dialogue_setup",
+          "size_class": "medium",
+          "polygon": [[60, 60], [1100, 60], [1100, 800], [60, 800]],
+          "is_borderless": true,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "heroine_full_body",
+          "size_class": "extra_large",
+          "polygon": [[1120, 60], [1688, 60], [1688, 2200], [1120, 2200]],
+          "is_borderless": true,
+          "bleed": true
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "observer_reaction",
+          "size_class": "medium",
+          "polygon": [[60, 820], [1100, 820], [1100, 2420], [60, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        }
+      ]
+    },
+    {
+      "id": "pat_043_encirclement_surround_3",
+      "name": "中央キャラ多人数包囲reveal",
+      "panel_count": 3,
+      "page_role_hints": ["surrounded_threat", "guard_encirclement", "unwanted_attention_reveal"],
+      "subtype_hints": [],
+      "purpose_summary": "中央のキャラを周囲の多人数 (警備兵・群衆・敵集団) が囲んで威圧する瞬間を、上段dialogue→中段surround_panel→下段個別reactionで構成。pat_019 (silhouette bleed) は単一脅威、こちらは群集による圧",
+      "trigger_conditions": "page_role∈{surrounded_threat,guard_encirclement,unwanted_attention_reveal} かつ surrounding_actor_count≥3 かつ central_character_count=1_2 かつ atmosphere=tension",
+      "frequency": "rare",
+      "example_pages": [190],
+      "features": ["central_close_target", "周囲多人数_atmospheric_panel", "個別reaction_strip", "shield_helmet_motif"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "warning_dialogue_setup",
+          "size_class": "medium",
+          "polygon": [[60, 60], [1688, 60], [1688, 600], [60, 600]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "encirclement_atmospheric",
+          "size_class": "extra_large",
+          "polygon": [[60, 620], [1688, 620], [1688, 1700], [60, 1700]],
+          "is_borderless": true,
+          "bleed": true
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "individual_reaction_strip",
+          "size_class": "medium",
+          "polygon": [[60, 1720], [1688, 1720], [1688, 2420], [60, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        }
+      ]
+    },
+    {
+      "id": "pat_044_bishoujo_chibi_observer_inset_5",
+      "name": "美少女close+SDチビ反応insert",
+      "panel_count": 5,
+      "page_role_hints": ["dialogue_intimate", "relationship_progress", "comedic_aside"],
+      "subtype_hints": ["bishoujo_focus"],
+      "purpose_summary": "ヒロインの blush close-up を主軸に、SD/チビ化キャラの第三者reactionを inset で挟む。シリアスとコメディの緩急を1ページで作る『ラブコメ系』専用archetype",
+      "trigger_conditions": "page_role∈{dialogue_intimate,relationship_progress,comedic_aside} かつ has_bishoujo_close_up かつ has_chibi_reaction_inset かつ atmosphere∈{tender,comedic}",
+      "frequency": "medium",
+      "example_pages": [125, 210, 230],
+      "features": ["heroine_blush_close", "chibi_SD_inset", "heart_floral_decoration", "tone_shift_serious_to_comedic"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "dialogue_setup",
+          "size_class": "medium",
+          "polygon": [[60, 60], [1688, 60], [1688, 600], [60, 600]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "heroine_blush_close",
+          "size_class": "large",
+          "polygon": [[60, 620], [1100, 620], [1100, 1500], [60, 1500]],
+          "is_borderless": true,
+          "bleed": false
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "chibi_reaction_inset_top",
+          "size_class": "small",
+          "polygon": [[1120, 620], [1688, 620], [1688, 1040], [1120, 1040]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s4",
+          "reading_order": 4,
+          "role_hint": "chibi_reaction_inset_bottom",
+          "size_class": "small",
+          "polygon": [[1120, 1060], [1688, 1060], [1688, 1500], [1120, 1500]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s5",
+          "reading_order": 5,
+          "role_hint": "resolution_main_close",
+          "size_class": "large",
+          "polygon": [[60, 1520], [1688, 1520], [1688, 2420], [60, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        }
+      ]
+    },
+    {
+      "id": "pat_045_omake_4koma_grid_8",
+      "name": "巻末おまけ4コマグリッド",
+      "panel_count": 8,
+      "page_role_hints": ["omake_extra", "4koma_strip", "after_word_comedy"],
+      "subtype_hints": ["omake_4koma"],
+      "purpose_summary": "巻末/章末に2x4または4x2の小サイズrect grid (4コマ漫画形式) を配置し、本編後のショート小ネタを展開。本編archetypeとは別系統のレイヤー",
+      "trigger_conditions": "page_role∈{omake_extra,4koma_strip,after_word_comedy} かつ panel_count∈[6,8] かつ all_panels_small_uniform_rect かつ chapter_end_or_volume_end",
+      "frequency": "rare",
+      "example_pages": [270],
+      "features": ["uniform_small_rect", "2x4_or_4x2_grid", "comedic_tone", "簡素な背景"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "4koma_panel_1",
+          "size_class": "small",
+          "polygon": [[864, 60], [1688, 60], [1688, 640], [864, 640]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "4koma_panel_2",
+          "size_class": "small",
+          "polygon": [[60, 60], [844, 60], [844, 640], [60, 640]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "4koma_panel_3",
+          "size_class": "small",
+          "polygon": [[864, 660], [1688, 660], [1688, 1240], [864, 1240]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s4",
+          "reading_order": 4,
+          "role_hint": "4koma_panel_4",
+          "size_class": "small",
+          "polygon": [[60, 660], [844, 660], [844, 1240], [60, 1240]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s5",
+          "reading_order": 5,
+          "role_hint": "4koma_panel_5",
+          "size_class": "small",
+          "polygon": [[864, 1260], [1688, 1260], [1688, 1840], [864, 1840]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s6",
+          "reading_order": 6,
+          "role_hint": "4koma_panel_6",
+          "size_class": "small",
+          "polygon": [[60, 1260], [844, 1260], [844, 1840], [60, 1840]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s7",
+          "reading_order": 7,
+          "role_hint": "4koma_panel_7_punchline",
+          "size_class": "small",
+          "polygon": [[864, 1860], [1688, 1860], [1688, 2420], [864, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s8",
+          "reading_order": 8,
+          "role_hint": "4koma_panel_8_aftermath",
+          "size_class": "small",
+          "polygon": [[60, 1860], [844, 1860], [844, 2420], [60, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        }
+      ]
+    },
+    {
+      "id": "pat_046_pattern_tiled_background_dialogue_4",
+      "name": "パターンタイル背景dialogue",
+      "panel_count": 4,
+      "page_role_hints": ["dialogue_decorative", "tonal_levity", "monotony_compression"],
+      "subtype_hints": [],
+      "purpose_summary": "繰り返しパターン (スライム顔・花柄・ハート等) で panel 背景を埋め尽くし、dialogue panel をその上に乗せる。pat_001 (3tier dialogue) より装飾的で『退屈/コメディ/愛らしさ』を演出",
+      "trigger_conditions": "page_role∈{dialogue_decorative,tonal_levity,monotony_compression} かつ has_repeating_pattern_background かつ panel_count∈[3,5] かつ atmosphere∈{comedic,tedious,cute}",
+      "frequency": "rare",
+      "example_pages": [80],
+      "features": ["repeating_tiled_pattern", "decorative_panel_背景", "label_strip_見出し", "全rect"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "pattern_dialogue_setup",
+          "size_class": "large",
+          "polygon": [[60, 60], [1688, 60], [1688, 900], [60, 900]],
+          "is_borderless": true,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "label_strip_caption",
+          "size_class": "medium",
+          "polygon": [[60, 920], [1100, 920], [1100, 1240], [60, 1240]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "pattern_action_break",
+          "size_class": "medium",
+          "polygon": [[1120, 920], [1688, 920], [1688, 1700], [1120, 1700]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s4",
+          "reading_order": 4,
+          "role_hint": "exit_resolution",
+          "size_class": "large",
+          "polygon": [[60, 1260], [1100, 1260], [1100, 2420], [60, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        }
+      ]
+    },
+    {
+      "id": "pat_047_vertical_location_journey_4",
+      "name": "縦方向location journey",
+      "panel_count": 4,
+      "page_role_hints": ["scene_transition_chain", "location_montage", "travel_compression"],
+      "subtype_hints": [],
+      "purpose_summary": "上→中→下の3-4段で異なる場所を順に並べ、キャラの移動を1ページに圧縮。pat_024 (temporal compression strip) は同一場所の時間圧縮、こちらは異なる場所の空間移動",
+      "trigger_conditions": "page_role∈{scene_transition_chain,location_montage,travel_compression} かつ location_count≥3 かつ same_actor_through_locations",
+      "frequency": "medium",
+      "example_pages": [110, 260],
+      "features": ["異なる_location_per_panel", "縦方向_strip_配置", "transition_atmospheric", "actor_continuity"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "location_a_start",
+          "size_class": "medium",
+          "polygon": [[60, 60], [1688, 60], [1688, 700], [60, 700]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "location_b_transit",
+          "size_class": "medium",
+          "polygon": [[60, 720], [1688, 720], [1688, 1300], [60, 1300]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "location_c_arrival",
+          "size_class": "large",
+          "polygon": [[60, 1320], [1100, 1320], [1100, 2420], [60, 2420]],
+          "is_borderless": true,
+          "bleed": false
+        },
+        {
+          "slot_id": "s4",
+          "reading_order": 4,
+          "role_hint": "destination_landmark",
+          "size_class": "large",
+          "polygon": [[1120, 1320], [1688, 1320], [1688, 2420], [1120, 2420]],
+          "is_borderless": true,
+          "bleed": true
+        }
+      ]
+    },
+    {
+      "id": "pat_048_diagonal_confrontation_3",
+      "name": "斜め対峙confrontation",
+      "panel_count": 3,
+      "page_role_hints": ["boss_confrontation", "duel_setup", "imminent_clash"],
+      "subtype_hints": [],
+      "purpose_summary": "主人公とボスを斜め対角線上に配置し、その間に SFX/breath で緊張を貯める archetype。pat_002 (diag split two-shot) は関係性ピボット、こちらは戦闘前 confrontation",
+      "trigger_conditions": "page_role∈{boss_confrontation,duel_setup,imminent_clash} かつ character_count=2_opposing かつ tension=peak かつ no_strike_yet",
+      "frequency": "rare",
+      "example_pages": [160],
+      "features": ["diagonal_axis_confrontation", "intermediate_breath_sfx", "atmospheric_浸食", "size_hierarchy_extreme"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "protagonist_close_pose",
+          "size_class": "large",
+          "polygon": [[60, 60], [1100, 60], [1100, 900], [60, 900]],
+          "is_borderless": true,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "intermediate_atmospheric_breath",
+          "size_class": "extra_large",
+          "polygon": [[1120, 60], [1688, 60], [1688, 1700], [1120, 1700]],
+          "is_borderless": true,
+          "bleed": true
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "antagonist_emerging",
+          "size_class": "large",
+          "polygon": [[60, 920], [1100, 920], [1100, 2420], [60, 2420]],
+          "is_borderless": true,
+          "bleed": true
+        }
+      ]
+    },
+    {
+      "id": "pat_049_floral_emotion_focus_3",
+      "name": "花/装飾SFX感情close",
+      "panel_count": 3,
+      "page_role_hints": ["affection_peak", "tender_revelation", "positive_emotional_climax"],
+      "subtype_hints": ["bishoujo_focus"],
+      "purpose_summary": "花柄/heart/sparkle の装飾SFXと共にヒロインの blush close を画面に置き、relationship 進展のpositive peakを示す。pat_009 (extreme close emotion) は shock peak、こちらは positive peak",
+      "trigger_conditions": "page_role∈{affection_peak,tender_revelation,positive_emotional_climax} かつ has_floral_or_heart_sfx かつ emotion_valence=positive かつ has_bishoujo_close",
+      "frequency": "medium",
+      "example_pages": [90, 195, 230],
+      "features": ["floral_decoration", "heart_or_sparkle_overlay", "soft_screentone_背景", "blush_face_close"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "approach_setup",
+          "size_class": "medium",
+          "polygon": [[60, 60], [1688, 60], [1688, 700], [60, 700]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "floral_emotion_close",
+          "size_class": "extra_large",
+          "polygon": [[60, 720], [1688, 720], [1688, 1900], [60, 1900]],
+          "is_borderless": true,
+          "bleed": true
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "observer_internal_reaction",
+          "size_class": "medium",
+          "polygon": [[60, 1920], [1688, 1920], [1688, 2420], [60, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        }
+      ]
+    },
+    {
+      "id": "pat_050_chapter_chat_artifact_opener_3",
+      "name": "章扉_チャットUI artifact opener",
+      "panel_count": 3,
+      "page_role_hints": ["chapter_opener_chat", "external_message_lead_in", "connected_world_establish"],
+      "subtype_hints": ["external_social", "hybrid"],
+      "purpose_summary": "章タイトルplate + チャット画面 (LINE/messenger 風) artifact + 後半 establishing で章を始める。pat_032 (chapter title overlay) は本編action上に title、こちらは外部UI artifactを乗せる入り方",
+      "trigger_conditions": "page_role∈{chapter_opener_chat,external_message_lead_in,connected_world_establish} かつ subtype∈{external_social,hybrid} かつ has_chat_ui_artifact かつ chapter_boundary",
+      "frequency": "rare",
+      "example_pages": [110],
+      "features": ["chapter_title_plate", "chat_balloon_UI_overlay", "下段_location_establishing", "soft_transition"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "chapter_title_plate",
+          "size_class": "small",
+          "polygon": [[60, 60], [600, 60], [600, 200], [60, 200]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "chat_artifact_panel",
+          "size_class": "large",
+          "polygon": [[864, 60], [1688, 60], [1688, 900], [864, 900]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "destination_establishing",
+          "size_class": "extra_large",
+          "polygon": [[60, 220], [1688, 220], [1688, 2420], [60, 2420]],
+          "is_borderless": true,
+          "bleed": true,
+          "z_order": -1
+        }
+      ]
+    },
+    {
+      "id": "pat_051_silhouette_loot_discovery_3",
+      "name": "巨大silhouetteアイテム発見",
+      "panel_count": 3,
+      "page_role_hints": ["loot_discovery", "rare_drop_recognition", "treasure_first_sight"],
+      "subtype_hints": ["gacha_ui"],
+      "purpose_summary": "巨大silhouetteのアイテム/レア素材を上段に置き、下段で主人公の認識shockを close で見せる。pat_019 (monster silhouette bleed) は脅威の reveal、こちらは positive な発見reveal",
+      "trigger_conditions": "page_role∈{loot_discovery,rare_drop_recognition,treasure_first_sight} かつ has_silhouette_object かつ subject∈{item,loot,artifact} かつ emotion_valence=positive_shock",
+      "frequency": "rare",
+      "example_pages": [35, 274],
+      "features": ["巨大object_silhouette", "sparkle_装飾", "下段_close_recognition", "shadow_白抜き"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "loot_silhouette_reveal",
+          "size_class": "extra_large",
+          "polygon": [[60, 60], [1688, 60], [1688, 1300], [60, 1300]],
+          "is_borderless": true,
+          "bleed": true
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "recognition_close",
+          "size_class": "large",
+          "polygon": [[60, 1320], [1688, 1320], [1688, 2100], [60, 2100]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "value_judgment_caption",
+          "size_class": "medium",
+          "polygon": [[60, 2120], [1688, 2120], [1688, 2420], [60, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        }
+      ]
+    },
+    {
+      "id": "pat_052_explanation_pointer_presentation_5",
+      "name": "ポインター提示explanation",
+      "panel_count": 5,
+      "page_role_hints": ["explanation_lecture", "rules_briefing_active", "instruction_with_props"],
+      "subtype_hints": [],
+      "purpose_summary": "受付嬢/講師キャラがpointer/chart/iconを持って説明する scene。OK バルーン・矢印・チャートiconが panel 内に重畳。pat_007 (info dense) は無人カタログ、こちらは『説明する人物』が中心",
+      "trigger_conditions": "page_role∈{explanation_lecture,rules_briefing_active,instruction_with_props} かつ has_explainer_character かつ has_pointer_or_chart_prop かつ panel_count∈[4,6]",
+      "frequency": "medium",
+      "example_pages": [240, 245],
+      "features": ["pointer_pose_character", "OK_balloon_iconography", "chart_icon_重畳", "split_left_listener_right_explainer"],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "explainer_pointer_pose",
+          "size_class": "large",
+          "polygon": [[60, 60], [1688, 60], [1688, 900], [60, 900]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "chart_diagram_inset",
+          "size_class": "small",
+          "polygon": [[60, 920], [600, 920], [600, 1500], [60, 1500]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "listener_reaction",
+          "size_class": "medium",
+          "polygon": [[620, 920], [1688, 920], [1688, 1500], [620, 1500]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s4",
+          "reading_order": 4,
+          "role_hint": "explanation_continuation",
+          "size_class": "medium",
+          "polygon": [[864, 1520], [1688, 1520], [1688, 2420], [864, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        },
+        {
+          "slot_id": "s5",
+          "reading_order": 5,
+          "role_hint": "listener_resolution",
+          "size_class": "medium",
+          "polygon": [[60, 1520], [844, 1520], [844, 2420], [60, 2420]],
+          "is_borderless": false,
+          "bleed": false
+        }
+      ]
     }
   ]
 }
