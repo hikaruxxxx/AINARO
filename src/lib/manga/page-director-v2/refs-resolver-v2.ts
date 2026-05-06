@@ -19,6 +19,7 @@
  */
 import path from "node:path";
 import type {
+  BackgroundTreatment,
   BibleSnapshotV2,
   EpisodeStoryboardV2,
   PagePlanV2,
@@ -34,6 +35,26 @@ import {
   loadProvenance,
   isAllowedForProduction,
 } from "../bible/provenance";
+
+/**
+ * RULE 11 (2026-05-06 追加): background_treatment による ref 抑制
+ *
+ * pattern dictionary 由来の panel.background_treatment を読んで、
+ * 背景描画が不要なコマでは location ref を渡さない (LLM が背景を勝手に描かないように)。
+ * floating_ui は UI が panel そのものなので character も渡さない。
+ */
+function shouldSkipLocationRef(bgt: BackgroundTreatment | undefined): boolean {
+  return (
+    bgt === "tone_back" ||
+    bgt === "solid_white" ||
+    bgt === "solid_black" ||
+    bgt === "floating_ui"
+  );
+}
+
+function shouldSkipCharacterRef(bgt: BackgroundTreatment | undefined): boolean {
+  return bgt === "floating_ui";
+}
 
 type ProvenanceLookup = {
   byEntity: Map<string, Array<{ asset_id: string; path: string; variant: string }>>;
@@ -82,11 +103,26 @@ function buildPanelPacket(args: {
   capability: CapabilityProfile;
   stylePlatePath: string | null;
   scope: "panel" | "page";
+  /** PagePlanPanel から伝播された背景表現種別 (RULE 11 で使用) */
+  backgroundTreatment?: BackgroundTreatment;
 }): ResolvedRefPacket {
-  const { panel, bible, lookup, capability, stylePlatePath, scope } = args;
+  const { panel, bible, lookup, capability, stylePlatePath, scope, backgroundTreatment } = args;
   const refs: ResolvedRef[] = [];
   const warnings: string[] = [];
   const unresolved: string[] = [];
+
+  const skipLocation = shouldSkipLocationRef(backgroundTreatment);
+  const skipCharacter = shouldSkipCharacterRef(backgroundTreatment);
+  if (skipLocation) {
+    warnings.push(
+      `RULE 11: background_treatment=${backgroundTreatment} → location ref を抑制 (背景を描かない指示)`
+    );
+  }
+  if (skipCharacter) {
+    warnings.push(
+      `RULE 11: background_treatment=${backgroundTreatment} → character ref も抑制 (UI/HUD 主体パネル)`
+    );
+  }
 
   const useWeight = capability.ref_api_capability.ref_weighting;
   const W = (w: number) => (useWeight ? w : 1.0);
@@ -160,21 +196,26 @@ function buildPanelPacket(args: {
   const numCharacters = panel.entities.characters.length;
 
   // RULE 4 / 6 location 補強 (continuity 注入で出ていなければ)
-  if (!refs.some((r) => r.role === "location")) {
+  // RULE 11 で skip 指示が出ている場合 (tone_back/solid_*/floating_ui) は location ref を attach しない
+  if (!skipLocation && !refs.some((r) => r.role === "location")) {
     let locVariants: string[] = ["interior_eye_level"];
     if (isWide && panel.bleed) locVariants = ["wide_establishing", "exterior_night"];
     else if (isWide) locVariants = ["wide_establishing", "interior_eye_level"];
     else if (panel.camera === "high_angle") locVariants = ["interior_high_angle", "interior_eye_level"];
     const loc = findVariantPrefer(lookup, panel.entities.location_id, locVariants);
     if (loc) {
+      const isAtmosphericFade = backgroundTreatment === "atmospheric_fade";
       refs.push({
         asset_id: loc.asset_id,
         path: loc.path,
-        weight: W(0.8),
+        // atmospheric_fade では location ref を弱め (背景はフェード/部分描画なので参考程度)
+        weight: W(isAtmosphericFade ? 0.5 : 0.8),
         role: "location",
         target_entity_id: panel.entities.location_id,
         source: "deterministic",
-        rationale: `RULE 4/6: shot_type=${panel.shot_type} → location ${loc.variant}`,
+        rationale: isAtmosphericFade
+          ? `RULE 4/6+11: shot_type=${panel.shot_type} → location ${loc.variant} (atmospheric_fade なので weight 抑制)`
+          : `RULE 4/6: shot_type=${panel.shot_type} → location ${loc.variant}`,
       });
     } else {
       unresolved.push(panel.entities.location_id);
@@ -182,8 +223,11 @@ function buildPanelPacket(args: {
   }
 
   // RULE 9: multi-character handling (voice_off キャラは数えない)
+  // RULE 11 で character ref も skip (floating_ui) の場合は character 全体をバイパス
   const visibleChars = panel.entities.characters.filter((c) => c.on_screen_via !== "voice_off");
-  if (visibleChars.length >= 3) {
+  if (skipCharacter) {
+    // skip — UI/HUD が panel そのもの。キャラを抽出しても意味がない
+  } else if (visibleChars.length >= 3) {
     const focus = panel.entities.focus_entity_id;
     // focus キャラのみ強い ref
     const focusChar = visibleChars.find((c) => c.character_id === focus);
@@ -373,6 +417,7 @@ export async function resolveRefsForEpisode(args: {
           capability: args.capability,
           stylePlatePath: args.stylePlatePath,
           scope: "panel",
+          backgroundTreatment: pp.background_treatment,
         });
         for (const r of packet.refs) {
           if (!aggregated.some((a) => a.asset_id === r.asset_id)) aggregated.push(r);
@@ -414,6 +459,7 @@ export async function resolveRefsForEpisode(args: {
           capability: args.capability,
           stylePlatePath: args.stylePlatePath,
           scope: "panel",
+          backgroundTreatment: pp.background_treatment,
         });
       }
     }
