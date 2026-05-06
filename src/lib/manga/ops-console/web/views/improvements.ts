@@ -98,6 +98,34 @@ const CSS = `
 .imp-chain-step--skipped { opacity: 0.5; text-decoration: line-through; }
 .imp-chain-icon { width: 18px; text-align: center; }
 .imp-chain-error { color: var(--color-danger); font-size: var(--fs-xs); }
+
+.imp-next-step {
+  display: grid; gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  background: var(--surface-elevated);
+}
+.imp-next-step h3 { margin: 0; font-size: var(--fs-lg); color: var(--color-primary); }
+.imp-next-step__hint { font-size: var(--fs-sm); color: var(--text-secondary); }
+.imp-next-step__action {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  padding: 10px 12px;
+  background: var(--surface-subtle);
+  border-radius: 6px;
+  font-size: var(--fs-sm);
+}
+.imp-next-step__nav-link {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  padding: 4px 10px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--fs-xs);
+}
+.imp-next-step__nav-link:hover { background: var(--surface-sunken); }
 `;
 
 function ensureStyles(): void {
@@ -251,6 +279,138 @@ function renderCompletionRisk(data: ImprovementsResponse): string {
           <ul>
             ${r.recommended_actions.map((a) => `<li>${escapeHtml(a)}</li>`).join("")}
           </ul>
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
+/**
+ * 「次に何をすべきか」を data から推定して 1 panel で示す。
+ * 「次のアクション」が並列のメニューであるのに対し、こちらは「現在地→次の一手」を 1 つに絞り込む。
+ */
+function deriveNextStep(data: ImprovementsResponse): {
+  title: string;
+  hint: string;
+  primary?: { label: string; layer?: string; flags?: Record<string, string | true>; action: "run" | "chain" | "nav-pipeline" | "nav-layers"; nav?: string };
+  secondary?: Array<{ label: string; nav: string }>;
+} {
+  const errs = data.audit_summary?.counts_by_severity?.error ?? 0;
+  const warns = data.audit_summary?.counts_by_severity?.warn ?? 0;
+  const hasOpening = data.opening_hook_proposals.available;
+  const hasCliff = data.cliffhanger_proposals.available;
+  const hasEngagement = data.engagement_audit.available;
+  const ecCount = data.engagement_ec_suggestions?.length ?? 0;
+  const completionLevel = data.completion_risk?.level;
+
+  // Step 1: audit error が出ているなら最優先で解消
+  if (errs > 0) {
+    return {
+      title: "❌ まず L11 audit の error を解消",
+      hint: `audit findings に error が ${errs} 件残っています。下の「audit findings」一覧を見て、AI 編集 view で個別修正するか、再度 L04_1/L04_9 で生成しなおしてください。`,
+      primary: { label: "AI 編集 view を開く", action: "nav-layers", nav: "ai-edit" },
+    };
+  }
+
+  // Step 2: 提案が片方でも未生成なら生成
+  if (!hasOpening && !hasCliff) {
+    return {
+      title: "▶ Hook / Cliff 提案を生成",
+      hint: "Opening Hook と Cliffhanger の提案がまだありません。下の「次のアクション」から両方の『提案を生成 (3案)』を実行してください (各 2-3分)。",
+      primary: {
+        label: "🚀 チェーンを実行 (生成→適用→再audit を一気通貫)",
+        action: "chain",
+      },
+    };
+  }
+  if (!hasOpening) {
+    return {
+      title: "▶ Opening Hook 提案を生成",
+      hint: "Cliffhanger は揃っていますが、Opening Hook の提案がまだありません。",
+      primary: { label: "Opening Hook 提案を生成 (3案)", action: "run", layer: "L04_1", flags: { "--max-proposals": "3" } },
+    };
+  }
+  if (!hasCliff) {
+    return {
+      title: "▶ Cliffhanger 提案を生成",
+      hint: "Opening Hook は揃っていますが、Cliffhanger の提案がまだありません。",
+      primary: { label: "Cliffhanger 提案を生成 (3案)", action: "run", layer: "L04_9", flags: { "--max-proposals": "3" } },
+    };
+  }
+
+  // Step 3: 提案ある → Engagement Audit でリスク評価がまだなら走らせる
+  if (!hasEngagement) {
+    return {
+      title: "🔍 Engagement Audit (LLM) で読者離脱リスクを採点",
+      hint: "提案は揃いました。次は claude opus に全 22 page を採点させ、p4-7 みたいな『沈み』を検出します (12-20 分)。",
+      primary: { label: "Engagement Audit を実行 (LLM)", action: "run", layer: "L05_5", flags: {} },
+    };
+  }
+
+  // Step 4: Engagement の結果に応じた誘導
+  if (data.engagement_audit.human_review_required) {
+    return {
+      title: "⚠️ Engagement Audit が要レビュー",
+      hint: `LLM が「人間レビュー要」と判定しました${ecCount > 0 ? `。EC suggestion ${ecCount} 件が下に並んでいるので、該当する EC を「AI 編集に流す」で適用` : ""}。または下の「チェーンを実行」で推奨案を一気通貫適用するのも有効。`,
+      primary: ecCount > 0
+        ? { label: "EC suggestion を確認", action: "nav-layers", nav: "improvements" }
+        : { label: "チェーンを実行 (適用→再audit)", action: "chain" },
+    };
+  }
+
+  // Step 5: 完了状態 → 次の layer へ
+  if (completionLevel === "low") {
+    return {
+      title: "✅ 品質改善は十分。次の layer へ",
+      hint: `audit error 0 / Engagement レビュー不要 / KU 完読率リスク=低。これで Hook/Cliff の改善は完了。次は「パイプライン進捗」で L05.5 (engagement) 以降の layer を進めてください${warns > 0 ? ` (warn ${warns} 件は無視可能ですが気になれば AI 編集で潰す)` : ""}。`,
+      primary: { label: "パイプライン進捗 view へ", action: "nav-pipeline" },
+      secondary: [
+        { label: "L11 audit を手動再実行", nav: "layers" },
+        { label: "コンテ (storyboard) を確認", nav: "storyboard" },
+      ],
+    };
+  }
+
+  return {
+    title: "🔧 推奨案の適用が未完了",
+    hint: "提案は揃っているが、まだ storyboard.json に書き込まれていない or 完読率リスクが残っています。下の「Hook 推奨適用」「Cliff 推奨適用」を順に押すか、「チェーンを実行」で audit→適用→再audit を一気通貫してください。",
+    primary: { label: "🚀 チェーンを実行", action: "chain" },
+  };
+}
+
+function renderNextStep(data: ImprovementsResponse, state: ViewState): string {
+  const next = deriveNextStep(data);
+  const primary = next.primary;
+  const buttonAttrs = (() => {
+    if (!primary) return "";
+    if (primary.action === "chain") {
+      return `data-action="chain-start" ${state.chainRunning ? "disabled" : ""}`;
+    }
+    if (primary.action === "run" && primary.layer) {
+      return `data-action="run" data-label="${escapeHtml(primary.label)}" data-job-layer="${escapeHtml(primary.layer)}" data-job-flags='${escapeHtml(JSON.stringify(primary.flags ?? {}))}'`;
+    }
+    if (primary.action === "nav-pipeline") {
+      return `data-action="nav-view" data-view="pipeline"`;
+    }
+    if (primary.action === "nav-layers") {
+      return `data-action="nav-view" data-view="${escapeHtml(primary.nav ?? "layers")}"`;
+    }
+    return "";
+  })();
+
+  return `
+    <div class="imp-next-step">
+      <h3>${escapeHtml(next.title)}</h3>
+      <div class="imp-next-step__hint">${escapeHtml(next.hint)}</div>
+      ${primary ? `
+        <div class="imp-next-step__action">
+          <button type="button" class="nc-button nc-button--primary" ${buttonAttrs}>${escapeHtml(primary.label)}</button>
+        </div>
+      ` : ""}
+      ${next.secondary && next.secondary.length > 0 ? `
+        <div class="imp-next-step__action">
+          <span class="imp-info">他の選択肢:</span>
+          ${next.secondary.map((s) => `<button type="button" class="imp-next-step__nav-link" data-action="nav-view" data-view="${escapeHtml(s.nav)}">${escapeHtml(s.label)}</button>`).join("")}
         </div>
       ` : ""}
     </div>
@@ -415,6 +575,7 @@ function render(container: HTMLElement, state: ViewState): void {
     ? `<div class="imp-error">${escapeHtml(state.error)}</div>`
     : state.data
       ? `
+        ${renderNextStep(state.data, state)}
         ${renderAuditSummary(state.data)}
         <div class="imp-grid">
           ${renderProposalSection(
@@ -674,6 +835,17 @@ export function mountImprovementsView(container: HTMLElement): () => void {
         }
         if (!layer || !label) return;
         void startJob(state, container, label, layer, flags);
+      }
+      if (action === "nav-view") {
+        const view = btn.dataset.view;
+        if (view) {
+          // store の ViewName 型に合致するもののみ受理。安全側で許容リスト方式。
+          const allowed = ["pipeline", "layers", "ai-edit", "improvements", "storyboard", "quality"];
+          if (allowed.includes(view)) {
+            store.update({ currentView: view as Parameters<typeof store.update>[0]["currentView"] });
+          }
+        }
+        return;
       }
       if (action === "chain-start") {
         if (state.chainRunning) return;

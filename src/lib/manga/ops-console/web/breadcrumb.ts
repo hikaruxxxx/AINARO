@@ -13,9 +13,16 @@ function episodeLabel(n: number): string {
   return `ep${String(n).padStart(2, "0")}`;
 }
 
-function workLabel(state: AppState): string {
+/** 長い日本語タイトルは header を圧迫するので、breadcrumb 表示用に 24 字で truncate する。 */
+function truncate(value: string, max = 24): string {
+  if (value.length <= max) return value;
+  return value.slice(0, max) + "…";
+}
+
+function workLabel(state: AppState): { display: string; full: string } {
   const work = state.works.find((item) => item.slug === state.currentSlug);
-  return work?.title || state.currentSlug;
+  const full = work?.title || state.currentSlug;
+  return { display: truncate(full), full };
 }
 
 function render(state: AppState): string {
@@ -27,14 +34,14 @@ function render(state: AppState): string {
     return `
       <button type="button" class="nc-breadcrumb__crumb" data-crumb="works">Works</button>
       <span class="nc-breadcrumb__sep">/</span>
-      <span class="nc-breadcrumb__crumb nc-breadcrumb__crumb--current">${escapeHtml(work)}</span>
+      <span class="nc-breadcrumb__crumb nc-breadcrumb__crumb--current" title="${escapeHtml(work.full)}">${escapeHtml(work.display)}</span>
     `;
   }
   const ep = episodeLabel(state.currentEpisode);
   return `
     <button type="button" class="nc-breadcrumb__crumb" data-crumb="works">Works</button>
     <span class="nc-breadcrumb__sep">/</span>
-    <button type="button" class="nc-breadcrumb__crumb" data-crumb="work">${escapeHtml(work)}</button>
+    <button type="button" class="nc-breadcrumb__crumb" data-crumb="work" title="${escapeHtml(work.full)}">${escapeHtml(work.display)}</button>
     <span class="nc-breadcrumb__sep">/</span>
     <button type="button" class="nc-breadcrumb__crumb" data-crumb="episode">${escapeHtml(ep)}</button>
     <span class="nc-breadcrumb__sep">/</span>

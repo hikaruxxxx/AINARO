@@ -24,6 +24,7 @@ const STYLES = `
   align-items: center;
   gap: 6px;
   height: 28px;
+  max-width: 280px;
   padding: 0 10px;
   border-radius: 999px;
   border: 1px solid var(--border-strong);
@@ -32,6 +33,8 @@ const STYLES = `
   font: inherit;
   font-size: var(--fs-xs);
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .nc-scope-chip:hover { background: var(--surface-sunken); }
 .nc-scope-chip[data-empty="true"] {
@@ -39,8 +42,13 @@ const STYLES = `
   border-color: var(--color-warning);
   font-weight: 600;
 }
-.nc-scope-chip__label { color: var(--text-secondary); font-size: 11px; }
-.nc-scope-chip__value { font-weight: 600; }
+.nc-scope-chip__label { color: var(--text-secondary); font-size: 11px; flex-shrink: 0; }
+.nc-scope-chip__value {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .nc-scope-modal__backdrop {
   position: fixed; inset: 0;
@@ -240,10 +248,14 @@ export function mountScopeSwitcher(root: HTMLElement): () => void {
     const isEmpty = !slug || !episode;
     const work = store.state.works.find((w) => w.slug === slug);
     const title = work?.title || slug;
+    // chip 内には slug + ep のみ。タイトルは tooltip だけに留める (タイトルは長い日本語のことが多く header を圧迫する)。
     const label = isEmpty
       ? `<span class="nc-scope-chip__value">scope 未選択</span>`
-      : `<span class="nc-scope-chip__label">scope</span><span class="nc-scope-chip__value">${escapeHtml(title)} / ep${String(episode).padStart(2, "0")}</span>`;
-    root.innerHTML = `<button type="button" class="nc-scope-chip" data-role="open-scope" data-empty="${isEmpty}" title="クリックで scope を切替 (作品+話)">${label}</button>`;
+      : `<span class="nc-scope-chip__label">scope</span><span class="nc-scope-chip__value">${escapeHtml(slug)} / ep${String(episode).padStart(2, "0")}</span>`;
+    const tooltip = isEmpty
+      ? "クリックで scope を選択"
+      : `${title}\nslug: ${slug} / ep${String(episode).padStart(2, "0")}\nクリックで scope 切替`;
+    root.innerHTML = `<button type="button" class="nc-scope-chip" data-role="open-scope" data-empty="${isEmpty}" title="${escapeHtml(tooltip)}">${label}</button>`;
   }
 
   const unsubscribe = store.subscribe(() => render());
