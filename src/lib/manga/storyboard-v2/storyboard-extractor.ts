@@ -40,10 +40,14 @@ type StoryboardOutput = {
 export async function extractStoryboardFromShotlist(args: {
   bible: BibleSnapshotV2;
   shotlist: ShotlistV2;
+  panelsPerPageRange?: { min: number; max: number };
+  avgPanelsPerPage?: number;
   cwd?: string;
   timeoutMs?: number;
 }): Promise<EpisodeStoryboardV2> {
   const { bible, shotlist } = args;
+  const range = args.panelsPerPageRange ?? { min: 4, max: 7 };
+  const avg = args.avgPanelsPerPage ?? 5;
 
   const charsBlock = bible.characters
     .map((c) => `- ${c.id} :: ${c.name} (${c.role})`)
@@ -77,7 +81,9 @@ export async function extractStoryboardFromShotlist(args: {
       "- セリフは『ナレーション/モノローグ/対話/SFX』のいずれかに分類。混ぜない。",
       "- 1コマあたり吹き出し合計 0-2 個、合計文字数 80字以内。",
       "- silence=true の panel は dialogue/monologue/narration/sfx すべて空配列。",
-      "- 22ページ目標なら 1ページあたり 4-6 panel を割り当てる。",
+      `- 各ページの panel_count は ${range.min}〜${range.max} の範囲で variation を付ける。固定 N の monotonous な配分は商業漫画的に NG。`,
+      `- 配分目安: cliffhanger / 強い見せ場 = ${range.min}〜${avg - 1} (大ゴマ多用), 対話・説明・密度ページ = ${avg + 1}〜${range.max} (情報密度高め), 標準 = ${avg} 中心。`,
+      "- 22ページ目標で全 page の panel_count が同じ値に偏ることは禁止。最低 3 種類の panel_count を使う。",
       "- ページ末 (cliffhanger / page_end_hook) は重要 panel を最後に置く。",
       "",
       // Phase X WX-3 で追加: craft 知見を tone_profile / genre に応じて注入

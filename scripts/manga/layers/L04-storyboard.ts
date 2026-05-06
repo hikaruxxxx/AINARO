@@ -40,7 +40,12 @@ async function main() {
   const bible = JSON.parse(await fs.readFile(bibleSnapshotPath(args.slug), "utf-8")) as BibleSnapshotV2;
   const shotlist = JSON.parse(await fs.readFile(shotlistPath(args.slug, args.episode), "utf-8")) as ShotlistV2;
 
-  const storyboard = await extractStoryboardFromShotlist({ bible, shotlist });
+  const storyboard = await extractStoryboardFromShotlist({
+    bible,
+    shotlist,
+    panelsPerPageRange: { min: 4, max: 7 },
+    avgPanelsPerPage: 5,
+  });
   const v = validateStoryboardEntityBinding(storyboard, bible);
   if (!v.ok) {
     console.error(`[L04] VALIDATION FAILED:\n${v.errors.join("\n")}`);
