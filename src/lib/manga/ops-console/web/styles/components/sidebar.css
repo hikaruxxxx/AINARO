@@ -10,8 +10,6 @@
   color: var(--text-tertiary);
   font-size: var(--fs-xs);
   font-weight: var(--fw-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .sidebar__menu-item {
@@ -30,6 +28,7 @@
 
 .sidebar__menu-item:hover {
   background: var(--surface-sunken);
+  color: var(--text-primary);
 }
 
 .sidebar__menu-item.is-active {

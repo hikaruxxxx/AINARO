@@ -15,12 +15,12 @@ type ActionLayer = "L01" | "L01b" | "L01c";
 type AnyRecord = Record<string, unknown>;
 
 const BIBLE_TABS: Array<{ id: BibleTab; label: string }> = [
-  { id: "world", label: "World" },
-  { id: "characters", label: "Characters" },
-  { id: "locations", label: "Locations" },
-  { id: "props", label: "Props" },
-  { id: "style", label: "Style" },
-  { id: "raw", label: "Raw" },
+  { id: "world", label: "世界観" },
+  { id: "characters", label: "キャラクター" },
+  { id: "locations", label: "場所" },
+  { id: "props", label: "小道具" },
+  { id: "style", label: "画風指示" },
+  { id: "raw", label: "生 JSON" },
 ];
 
 const CSS = `
@@ -142,7 +142,7 @@ function renderTabs(active: BibleTab): string {
 
 function renderBibleContent(state: ViewState): string {
   const bible = state.bible;
-  if (state.loading) return `<div class="nc-empty">loading...</div>`;
+  if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
   if (state.error && !bible) return `<div class="view-placeholder"><h2>Bible</h2><p>${escapeHtml(state.error)}</p></div>`;
   if (!bible) return `<div class="nc-empty">Bible snapshot は未作成です。「Bible 全体構築」から生成してください。</div>`;
   if (state.tab === "characters") return renderAssetCards(state.slug, "characters", bible.characters, bible.refs.characters);
@@ -160,9 +160,9 @@ function renderBibleContent(state: ViewState): string {
 }
 
 function actionLabel(layer: ActionLayer): string {
-  if (layer === "L01") return "Bible 全体構築";
-  if (layer === "L01b") return "Lint";
-  return "Deepen";
+  if (layer === "L01") return "世界観・キャラ設定 (Bible) を構築";
+  if (layer === "L01b") return "Bible の文法チェック";
+  return "Bible の深掘り";
 }
 
 function renderModal(state: ViewState): string {
@@ -173,29 +173,29 @@ function renderModal(state: ViewState): string {
     if (layer === "L01") {
       return `
         <label class="nc-field">
-          <span class="nc-field__label">concept</span>
+          <span class="nc-field__label">企画書ファイル (concept.json)</span>
           <input class="nc-field__input" name="concept" required placeholder="data/manga/...json">
         </label>
         <label class="nc-field">
-          <span class="nc-field__label">art-style</span>
+          <span class="nc-field__label">画風 (art_style)</span>
           <input class="nc-field__input" name="artStyle" placeholder="manga_bw_seinen_urban">
         </label>`;
     }
     if (layer === "L01b") {
       return `
-        <label class="nc-pill nc-pill--check"><input type="checkbox" name="skipLlm"> --skip-llm</label>
-        <label class="nc-pill nc-pill--check"><input type="checkbox" name="failOnFatal"> --fail-on-fatal</label>`;
+        <label class="nc-pill nc-pill--check"><input type="checkbox" name="skipLlm"> LLM チェックを省略 (--skip-llm)</label>
+        <label class="nc-pill nc-pill--check"><input type="checkbox" name="failOnFatal"> 致命エラーで停止 (--fail-on-fatal)</label>`;
     }
     return `
       <label class="nc-field">
-        <span class="nc-field__label">concept</span>
+        <span class="nc-field__label">企画書ファイル (concept.json)</span>
         <input class="nc-field__input" name="concept" required placeholder="data/manga/...json">
       </label>
       <label class="nc-field">
-        <span class="nc-field__label">style-ref-note</span>
+        <span class="nc-field__label">画風参考メモ (style ref note)</span>
         <textarea class="nc-field__textarea" name="styleRefNote" rows="5"></textarea>
       </label>
-      <label class="nc-pill nc-pill--check"><input type="checkbox" name="reLint" checked> --re-lint</label>`;
+      <label class="nc-pill nc-pill--check"><input type="checkbox" name="reLint" checked> 再 Lint (--re-lint)</label>`;
   })();
 
   return `
@@ -220,12 +220,12 @@ function render(container: HTMLElement, state: ViewState): void {
   container.innerHTML = `
     <div class="bib-view">
       <div class="nc-toolbar">
-        <h2 class="nc-toolbar__title">Bible</h2>
+        <h2 class="nc-toolbar__title">世界観・設定 (Bible)</h2>
         <span class="bib-info">${escapeHtml(state.slug)}</span>
         <span class="bib-spacer"></span>
         <button type="button" class="nc-button nc-button--primary" data-action="L01">Bible 全体構築</button>
-        <button type="button" class="nc-button nc-button--secondary" data-action="L01b">Lint</button>
-        <button type="button" class="nc-button nc-button--secondary" data-action="L01c">Deepen</button>
+        <button type="button" class="nc-button nc-button--secondary" data-action="L01b">文法チェック (Lint)</button>
+        <button type="button" class="nc-button nc-button--secondary" data-action="L01c">深掘り (Deepen)</button>
       </div>
       ${renderTabs(state.tab)}
       <div class="bib-content">${renderBibleContent(state)}</div>

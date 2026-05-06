@@ -22,6 +22,9 @@ export async function buildOpsConsoleClient(opts: {
     minify: opts.minify ?? false,
     logLevel: "warning",
     loader: { ".css": "css" },
+    // 日本語ラベル ("世界観・設定" 等) を unicode escape せずそのまま吐く。
+    // ブラウザ動作には影響しないが grep / debug 時に readable になる。
+    charset: "utf8",
   });
 
   return { outFile };

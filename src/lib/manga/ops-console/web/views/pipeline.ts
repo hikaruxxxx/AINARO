@@ -11,6 +11,7 @@ import {
   type PipelineStatusLayer,
 } from "../lib/api";
 import { isViewName, store } from "../lib/store";
+import { layerLabel } from "../labels";
 
 type HintMap = Map<string, string>;
 
@@ -32,8 +33,10 @@ const CSS = `
 .pipe-step { display: grid; gap: var(--space-1); padding: var(--space-3); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-elevated); }
 .pipe-step--current { border-color: var(--color-primary); box-shadow: var(--shadow-1); }
 .pipe-step__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
-.pipe-step__id { color: var(--text-tertiary); font-family: var(--font-mono); font-size: var(--fs-sm); min-width: 48px; }
-.pipe-step__label { font-weight: var(--fw-medium); }
+.pipe-step__id-block { min-width: 92px; }
+.pipe-step__id { color: var(--text-tertiary); font-family: var(--font-mono); font-size: var(--fs-xs); }
+.pipe-step__label-block { display: grid; gap: 2px; min-width: min(320px, 100%); }
+.pipe-step__label { color: var(--text-primary); font-size: var(--fs-base); font-weight: var(--fw-medium); }
 .pipe-step__ts { color: var(--text-tertiary); font-size: var(--fs-sm); margin-left: auto; }
 .pipe-step__actions { display: flex; gap: var(--space-1); }
 .pipe-step__hint { color: var(--color-warning); font-size: var(--fs-sm); padding-left: 56px; }
@@ -87,7 +90,10 @@ function badgeClass(layer: PipelineStatusLayer, running: boolean): string {
 }
 
 function badgeLabel(layer: PipelineStatusLayer, running: boolean): string {
-  return running ? "running" : layer.status;
+  if (running) return "起動中";
+  if (layer.status === "ready") return "生成済み";
+  if (layer.status === "stale") return "要更新";
+  return "未生成";
 }
 
 function isRunnableLayer(value: string | null | undefined): value is LayerId {
@@ -140,11 +146,16 @@ function renderLayer(layer: PipelineStatusLayer, state: ViewState): string {
   const nextView = layer.next_view && isViewName(layer.next_view) ? layer.next_view : "";
   const nextLayer = isRunnableLayer(layer.next_layer_id ?? null) ? layer.next_layer_id : "";
   const ts = formatTs(layer.last_modified);
+  const label = layerLabel(layer.id);
   return `
     <li class="pipe-step${current}">
       <div class="pipe-step__head">
-        <span class="pipe-step__id">${escapeHtml(layer.id)}</span>
-        <span class="pipe-step__label">${escapeHtml(layer.label.replace(/^L[0-9.]+b?\\s*/, ""))}</span>
+        <div class="pipe-step__id-block">
+          <span class="pipe-step__id">${escapeHtml(label.subtitle)}</span>
+        </div>
+        <div class="pipe-step__label-block">
+          <span class="pipe-step__label">${escapeHtml(label.title)}</span>
+        </div>
         <span class="nc-badge ${badgeClass(layer, running)}">${escapeHtml(badgeLabel(layer, running))}</span>
         ${ts ? `<span class="pipe-step__ts">${escapeHtml(ts)}</span>` : `<span class="pipe-step__ts"></span>`}
         <div class="pipe-step__actions">
@@ -159,19 +170,19 @@ function renderLayer(layer: PipelineStatusLayer, state: ViewState): string {
 
 function render(container: HTMLElement, state: ViewState): void {
   if (state.error && !state.status) {
-    container.innerHTML = `<div class="view-placeholder"><h2>Pipeline</h2><p>${escapeHtml(state.error)}</p></div>`;
+    container.innerHTML = `<div class="view-placeholder"><h2>パイプライン進捗</h2><p>${escapeHtml(state.error)}</p></div>`;
     return;
   }
   const scope = `${state.slug} / ${episodeLabel(state.episode)}`;
   const body = state.status
     ? `<ol class="pipe-steps">${state.status.layers.map((layer) => renderLayer(layer, state)).join("")}</ol>`
-    : `<div class="nc-empty pipe-loading">loading...</div>`;
+    : `<div class="nc-empty pipe-loading">読み込み中...</div>`;
   container.innerHTML = `
     <div class="nc-toolbar">
-      <h2 class="nc-toolbar__title">Pipeline</h2>
+      <h2 class="nc-toolbar__title">パイプライン進捗</h2>
       <span class="pipe-info">${escapeHtml(scope)}</span>
       <span class="pipe-spacer"></span>
-      <button type="button" class="nc-button nc-button--primary" disabled title="Wave 6 で実装予定">全自動 run</button>
+      <button type="button" class="nc-button nc-button--primary" disabled title="Wave 6 で実装予定 — 全 layer を順次起動">全自動 run</button>
     </div>
     ${body}
     ${state.toast ? `<div class="nc-toast nc-toast--${state.toast.kind}">${escapeHtml(state.toast.message)}</div>` : ""}

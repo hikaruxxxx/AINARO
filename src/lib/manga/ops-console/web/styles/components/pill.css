@@ -20,6 +20,7 @@
 
 .nc-pill:hover {
   border-color: var(--color-primary);
+  background: var(--surface-sunken);
   color: var(--text-primary);
 }
 

@@ -23,14 +23,14 @@ export async function handleVolumePlot(
   res: http.ServerResponse
 ): Promise<void> {
   if (!isValidSlug(slug) || !isValidVolume(volume)) {
-    return send(res, 400, { error: "invalid slug or volume" });
+    return send(res, 400, { error: "作品 ID または巻番号が不正です" });
   }
 
   let plot: unknown;
   try {
     plot = JSON.parse(await fs.readFile(volumePlotPath(slug, volume), "utf-8"));
   } catch {
-    return send(res, 404, { error: "volume plot not found" });
+    return send(res, 404, { error: "Volume Plot は未生成です" });
   }
 
   return send(res, 200, { slug, volume, plot });

@@ -197,7 +197,7 @@ export async function handlePipelineStatus(
   res: http.ServerResponse
 ): Promise<void> {
   if (!isValidSlug(slug) || !isValidEpisode(episode)) {
-    return send(res, 400, { error: "invalid slug or episode" });
+    return send(res, 400, { error: "作品 ID または episode 番号が不正です" });
   }
   const layers = await Promise.all(specs(slug, episode).map((spec) => toLayerStatus(spec)));
   return send(res, 200, {

@@ -69,11 +69,11 @@ function renderAudit(manifest: Manifest): string {
     <div class="q-content">
       <section class="nc-card q-card">
         <div class="q-card__head">
-          <h3>Summary</h3>
-          <span class="nc-badge ${failed.length > 0 ? "nc-badge--danger" : "nc-badge--success"}">${failed.length} failed</span>
+          <h3>サマリ</h3>
+          <span class="nc-badge ${failed.length > 0 ? "nc-badge--danger" : "nc-badge--success"}">失敗 ${failed.length} 件</span>
         </div>
         <pre class="nc-code-block">${jsonHtml(obj.summary ?? {})}</pre>
-        <div class="q-meta">failed_panel_ids: ${escapeHtml(JSON.stringify(failed))}</div>
+        <div class="q-meta">失敗 panel ID 一覧: ${escapeHtml(JSON.stringify(failed))}</div>
       </section>
       <div class="q-list">
         ${panels.map((panel) => {
@@ -85,12 +85,12 @@ function renderAudit(manifest: Manifest): string {
               <h4>${escapeHtml(id)}</h4>
               <span class="nc-badge ${badgeClass(status)}">${escapeHtml(status)}</span>
             </div>
-            <div class="q-meta">${escapeHtml(JSON.stringify(p.reasons ?? p.findings ?? []))}</div>
+            <div class="q-meta">理由・所見: ${escapeHtml(JSON.stringify(p.reasons ?? p.findings ?? []))}</div>
           </section>`;
         }).join("")}
       </div>
       <details class="nc-card q-card">
-        <summary>Raw audit</summary>
+        <summary>監査結果の生 JSON</summary>
         <pre class="nc-code-block">${jsonHtml(audit)}</pre>
       </details>
     </div>`;
@@ -99,15 +99,15 @@ function renderAudit(manifest: Manifest): string {
 function render(container: HTMLElement, state: ViewState): void {
   const scope = `${state.slug} / ep${String(state.episode).padStart(2, "0")}`;
   const body = (() => {
-    if (state.loading) return `<div class="nc-empty">loading...</div>`;
-    if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>Quality</h2><p>${escapeHtml(state.error)}</p></div>`;
-    if (!state.manifest) return `<div class="nc-empty">manifest is not loaded.</div>`;
+    if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
+    if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>品質監査 (Audit)</h2><p>${escapeHtml(state.error)}</p></div>`;
+    if (!state.manifest) return `<div class="nc-empty">manifest が読み込まれていません。</div>`;
     return renderAudit(state.manifest);
   })();
   container.innerHTML = `
     <div class="q-view">
       <div class="nc-toolbar">
-        <h2 class="nc-toolbar__title">Quality</h2>
+        <h2 class="nc-toolbar__title">品質監査 (Audit)</h2>
         <span class="q-info">${escapeHtml(scope)}</span>
         <span class="q-spacer"></span>
         <button type="button" class="nc-button nc-button--secondary" data-action="reload" ${state.loading ? "disabled" : ""}>再読込</button>

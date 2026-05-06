@@ -9,10 +9,10 @@ type StoryboardTab = "storyboard" | "page-plan" | "resolved-refs" | "raw";
 type AnyRecord = Record<string, unknown>;
 
 const TABS: Array<{ id: StoryboardTab; label: string; key: string }> = [
-  { id: "storyboard", label: "Storyboard", key: "1" },
-  { id: "page-plan", label: "Page Plan", key: "2" },
-  { id: "resolved-refs", label: "Resolved Refs", key: "3" },
-  { id: "raw", label: "Raw", key: "4" },
+  { id: "storyboard", label: "コンテ", key: "1" },
+  { id: "page-plan", label: "ページ配置", key: "2" },
+  { id: "resolved-refs", label: "参照画像 (Resolved Refs)", key: "3" },
+  { id: "raw", label: "生 JSON", key: "4" },
 ];
 
 const CSS = `
@@ -75,25 +75,25 @@ function renderTabs(active: StoryboardTab): string {
 
 function renderStoryboard(manifest: Manifest): string {
   const pages = manifest.storyboard?.pages ?? [];
-  if (pages.length === 0) return `<div class="nc-empty">storyboard pages are empty.</div>`;
+  if (pages.length === 0) return `<div class="nc-empty">コンテのページが空です。</div>`;
   return `<div class="sb-list">${pages.map((page: any) => {
     const panels = Array.isArray(page.panels) ? page.panels : [];
     return `
       <section class="nc-card sb-page">
         <div class="sb-page__head">
-          <h3 class="sb-page__title">Page ${escapeHtml(String(page.page_no ?? "-"))}</h3>
+          <h3 class="sb-page__title">ページ ${escapeHtml(String(page.page_no ?? "-"))}</h3>
           ${page.role ? `<span class="nc-badge nc-badge--neutral">${escapeHtml(String(page.role))}</span>` : ""}
         </div>
         <div class="sb-panels">
           ${panels.map((panel: any) => `
             <article class="nc-card nc-card--sunken sb-panel">
               <h4>${escapeHtml(String(panel.panel_id ?? "-"))}</h4>
-              <div class="sb-meta">order=${escapeHtml(String(panel.reading_order ?? "-"))} shot=${escapeHtml(String(panel.shot_type ?? "-"))}</div>
-              <div class="sb-text">${escapeHtml([panel.dialogue, panel.monologue, panel.narration].filter(Boolean).join(" / ") || "(no text)")}</div>
+              <div class="sb-meta">順序=${escapeHtml(String(panel.reading_order ?? "-"))} / ショット=${escapeHtml(String(panel.shot_type ?? "-"))}</div>
+              <div class="sb-text">${escapeHtml([panel.dialogue, panel.monologue, panel.narration].filter(Boolean).join(" / ") || "(テキストなし)")}</div>
             </article>`).join("")}
         </div>
         <details class="sb-details">
-          <summary>Raw page</summary>
+          <summary>ページの生 JSON</summary>
           <pre class="nc-code-block">${jsonHtml(page)}</pre>
         </details>
       </section>`;
@@ -102,25 +102,25 @@ function renderStoryboard(manifest: Manifest): string {
 
 function renderPagePlan(manifest: Manifest): string {
   const pages = manifest.page_plan?.pages ?? [];
-  if (pages.length === 0) return `<div class="nc-empty">page_plan pages are empty.</div>`;
+  if (pages.length === 0) return `<div class="nc-empty">ページ配置データが空です。</div>`;
   return `<div class="sb-list">${pages.map((page: any) => {
     const panels = Array.isArray(page.panels) ? page.panels : [];
     return `
       <section class="nc-card sb-page">
         <div class="sb-page__head">
-          <h3 class="sb-page__title">Page ${escapeHtml(String(page.page_no ?? "-"))}</h3>
+          <h3 class="sb-page__title">ページ ${escapeHtml(String(page.page_no ?? "-"))}</h3>
           ${page.render_strategy ? `<span class="nc-badge nc-badge--info">${escapeHtml(String(page.render_strategy))}</span>` : ""}
         </div>
         <div class="sb-panels">
           ${panels.map((panel: any) => `
             <article class="nc-card nc-card--sunken sb-panel">
               <h4>${escapeHtml(String(panel.panel_id ?? "-"))}</h4>
-              <div class="sb-meta">order=${escapeHtml(String(panel.reading_order ?? "-"))} bbox=${escapeHtml(JSON.stringify(panel.bbox ?? null))}</div>
-              <div class="sb-meta">refs: ${escapeHtml(JSON.stringify(panel.ref_ids ?? []))}</div>
+              <div class="sb-meta">順序=${escapeHtml(String(panel.reading_order ?? "-"))} / bbox=${escapeHtml(JSON.stringify(panel.bbox ?? null))}</div>
+              <div class="sb-meta">参照画像: ${escapeHtml(JSON.stringify(panel.ref_ids ?? []))}</div>
             </article>`).join("")}
         </div>
         <details class="sb-details">
-          <summary>Raw page_plan page</summary>
+          <summary>ページ配置の生 JSON</summary>
           <pre class="nc-code-block">${jsonHtml(page)}</pre>
         </details>
       </section>`;
@@ -131,7 +131,7 @@ function rawSection(id: string, label: string, value: unknown, copied: string | 
   return `
     <details class="nc-card sb-details" open>
       <summary>${escapeHtml(label)}</summary>
-      <button type="button" class="nc-button nc-button--sm sb-copy" data-copy-raw="${escapeHtml(id)}">${copied === id ? "copied" : "copy"}</button>
+      <button type="button" class="nc-button nc-button--sm sb-copy" data-copy-raw="${escapeHtml(id)}">${copied === id ? "コピー済み" : "コピー"}</button>
       <pre class="nc-code-block" data-raw="${escapeHtml(id)}">${jsonHtml(value)}</pre>
     </details>`;
 }
@@ -145,10 +145,10 @@ function renderRaw(manifest: Manifest, copied: string | null): string {
 }
 
 function renderContent(state: ViewState): string {
-  if (state.loading) return `<div class="nc-empty">loading...</div>`;
-  if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>Storyboard</h2><p>${escapeHtml(state.error)}</p></div>`;
+  if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
+  if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>コンテ・ページ配置</h2><p>${escapeHtml(state.error)}</p></div>`;
   const manifest = state.manifest;
-  if (!manifest) return `<div class="nc-empty">manifest is not loaded.</div>`;
+  if (!manifest) return `<div class="nc-empty">manifest が読み込まれていません。</div>`;
   if (state.tab === "storyboard") return renderStoryboard(manifest);
   if (state.tab === "page-plan") return renderPagePlan(manifest);
   if (state.tab === "resolved-refs") {
@@ -162,7 +162,7 @@ function render(container: HTMLElement, state: ViewState): void {
   container.innerHTML = `
     <div class="sb-view">
       <div class="nc-toolbar">
-        <h2 class="nc-toolbar__title">Storyboard</h2>
+        <h2 class="nc-toolbar__title">コンテ・ページ配置</h2>
         <span class="sb-info">${escapeHtml(scope)}</span>
         <span class="sb-spacer"></span>
       </div>

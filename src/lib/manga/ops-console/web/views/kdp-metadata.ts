@@ -78,14 +78,14 @@ function renderKeywords(kdp: WorkKdpMetadataBlock, validation: KeywordValidation
     return `
       <div class="kdp-keyword-row">
         <label class="nc-field">
-          <span class="nc-field__label">keyword ${i + 1}</span>
+          <span class="nc-field__label">検索キーワード ${i + 1}</span>
           <input class="nc-field__input" name="keyword_${i}" value="${escapeHtml(picks[i] ?? "")}">
         </label>
         ${validation ? issues.map((issue) => `<p class="kdp-keyword-issue ${issueClass(validation, issue)}">${escapeHtml(issue.message)}</p>`).join("") : ""}
       </div>`;
   }).join("");
   const summary = validation
-    ? `${validation.ok ? "ok" : "ng"} / errors ${validation.errors.length} / warnings ${validation.warnings.length} / unique_words ${validation.unique_word_count}`
+    ? `${validation.ok ? "OK" : "NG"} / エラー ${validation.errors.length} / 警告 ${validation.warnings.length} / 索引語数 ${validation.unique_word_count}`
     : "未検証";
   const globalIssues = validation
     ? [...validation.errors, ...validation.warnings]
@@ -100,7 +100,7 @@ function renderCategories(kdp: WorkKdpMetadataBlock): string {
   const categories = kdp.categories_validated ?? [];
   return `<div class="kdp-categories">${Array.from({ length: 3 }, (_, i) => `
     <label class="nc-field">
-      <span class="nc-field__label">category ${i + 1}</span>
+      <span class="nc-field__label">カテゴリ ${i + 1}</span>
       <input class="nc-field__input" name="category_${i}" value="${escapeHtml(categories[i] ?? "")}">
     </label>`).join("")}</div>`;
 }
@@ -108,18 +108,18 @@ function renderCategories(kdp: WorkKdpMetadataBlock): string {
 function render(container: HTMLElement, state: ViewState): void {
   const kdp = state.meta?.kdp_metadata ?? {};
   const body = (() => {
-    if (state.loading) return `<div class="nc-empty">loading...</div>`;
+    if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
     if (state.error && !state.meta) return `<div class="view-placeholder"><h2>KDP メタデータ</h2><p>${escapeHtml(state.error)}</p></div>`;
     return `
       <form class="kdp-form" data-kdp-form>
         <section class="nc-card kdp-section">
           <h3>タイトル候補</h3>
           <label class="nc-field">
-            <span class="nc-field__label">title_candidates (改行区切り)</span>
+            <span class="nc-field__label">タイトル候補 (改行区切り)</span>
             <textarea class="nc-field__textarea" name="title_candidates" rows="6">${escapeHtml(lines(kdp.title_candidates))}</textarea>
           </label>
           <label class="nc-field">
-            <span class="nc-field__label">series_name_canonical</span>
+            <span class="nc-field__label">シリーズ名 (KDP 表記)</span>
             <input class="nc-field__input" name="series_name_canonical" value="${escapeHtml(kdp.series_name_canonical ?? "")}">
           </label>
         </section>
@@ -132,9 +132,9 @@ function render(container: HTMLElement, state: ViewState): void {
           ${renderCategories(kdp)}
         </section>
         <section class="nc-card kdp-section">
-          <h3>description_seed</h3>
+          <h3>商品説明文 (description_seed JSON)</h3>
           <label class="nc-field">
-            <span class="nc-field__label">description_seed (JSON)</span>
+            <span class="nc-field__label">商品説明文 (description_seed JSON)</span>
             <textarea class="nc-field__textarea" name="description_seed" rows="14">${escapeHtml(pretty(kdp.description_seed))}</textarea>
           </label>
         </section>
@@ -235,7 +235,7 @@ export function mountKdpMetadataView(container: HTMLElement): () => void {
     try {
       draft = draftFromForm(form);
     } catch (error) {
-      setToast(state, container, `description_seed JSON エラー: ${errorText(error)}`, "warning");
+      setToast(state, container, `商品説明文 JSON エラー: ${errorText(error)}`, "warning");
       return;
     }
     state.meta = { ...(state.meta ?? { schema_version: 1, slug: state.slug }), kdp_metadata: draft };

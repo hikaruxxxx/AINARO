@@ -3,23 +3,23 @@ import type { ViewName } from "./lib/store";
 export type MenuGroup = "judge" | "view" | "work" | "exec";
 
 export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = [
-  { view: "pipeline", label: "Pipeline", group: "judge" },
-  { view: "name-gate", label: "ネーム gate", group: "judge" },
-  { view: "revision", label: "Revision", group: "judge" },
-  { view: "quality", label: "Quality", group: "judge" },
-  { view: "storyboard", label: "Storyboard", group: "view" },
-  { view: "bible", label: "Bible", group: "work" },
-  { view: "volume-plot", label: "Volume Plot", group: "work" },
-  { view: "kdp-metadata", label: "KDP メタ", group: "work" },
-  { view: "layers", label: "生成 layer", group: "exec" },
+  { view: "pipeline", label: "パイプライン進捗", group: "judge" },
+  { view: "name-gate", label: "ネーム判定", group: "judge" },
+  { view: "revision", label: "修正・採用", group: "judge" },
+  { view: "quality", label: "品質監査", group: "judge" },
+  { view: "storyboard", label: "コンテ", group: "view" },
+  { view: "bible", label: "世界観・設定", group: "work" },
+  { view: "volume-plot", label: "巻プロット", group: "work" },
+  { view: "kdp-metadata", label: "KDP メタ情報", group: "work" },
+  { view: "layers", label: "個別 layer 起動", group: "exec" },
   { view: "works", label: "作品管理", group: "exec" },
 ];
 
 export const GROUP_LABELS: Record<MenuGroup, string> = {
-  judge: "編集判断",
+  judge: "編集・判断",
   view: "閲覧",
-  work: "この work",
-  exec: "実行",
+  work: "作品設定",
+  exec: "ジョブ実行",
 };
 
 export function viewLabel(view: ViewName): string {

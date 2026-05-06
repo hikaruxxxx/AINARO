@@ -88,9 +88,9 @@ function sanitizeKdpMetadataPatch(body: any): WorkKdpMetadataBlock {
 }
 
 export async function handleWorkMetaGet(slug: string, res: http.ServerResponse): Promise<void> {
-  if (!isValidSlug(slug)) return send(res, 400, { error: "invalid slug" });
+  if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
   const meta = await readMeta(slug);
-  if (!meta) return send(res, 404, { error: "meta not found" });
+  if (!meta) return send(res, 404, { error: "meta.json が見つかりません" });
   return send(res, 200, meta);
 }
 
@@ -99,9 +99,9 @@ export async function handleWorkKdpMetadataPut(
   body: any,
   res: http.ServerResponse
 ): Promise<void> {
-  if (!isValidSlug(slug)) return send(res, 400, { error: "invalid slug" });
+  if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
   const meta = await readMeta(slug);
-  if (!meta) return send(res, 404, { error: "meta not found" });
+  if (!meta) return send(res, 404, { error: "meta.json が見つかりません" });
 
   const patch = sanitizeKdpMetadataPatch(body);
   const kdpMetadata = { ...(meta.kdp_metadata ?? {}), ...patch };
@@ -126,8 +126,8 @@ export async function handleWorkKdpMetadataPut(
 function scaffoldMeta(body: any): WorkMeta | { error: string } {
   const slug = String(body?.slug ?? "").trim();
   const title = String(body?.title ?? "").trim();
-  if (!isValidSlug(slug)) return { error: "invalid slug" };
-  if (!title || title.length > 200) return { error: "title must be 1..200 chars" };
+  if (!isValidSlug(slug)) return { error: "作品 ID が不正です" };
+  if (!title || title.length > 200) return { error: "タイトルは 1〜200 文字で入力してください" };
   const genre = typeof body?.genre === "string" ? body.genre.trim() : "";
   const artStyle = typeof body?.art_style === "string" ? body.art_style.trim() : "";
   const targetAudience = typeof body?.target_audience === "string" ? body.target_audience.trim() : "";
@@ -175,7 +175,7 @@ export async function handleWorkCreate(body: any, res: http.ServerResponse): Pro
   try {
     await fs.mkdir(root, { recursive: false });
   } catch (e: any) {
-    if (e?.code === "EEXIST") return send(res, 409, { error: "work already exists" });
+    if (e?.code === "EEXIST") return send(res, 409, { error: "同じ ID の作品が既に存在します" });
     return send(res, 500, { error: e instanceof Error ? e.message : String(e) });
   }
 

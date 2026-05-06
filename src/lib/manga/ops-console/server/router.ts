@@ -74,12 +74,12 @@ function checkLegacyScope(
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
   if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-    return { ok: false, status: 400, error: "no active scope; pick a work from /" };
+    return { ok: false, status: 400, error: "操作対象の作品が未選択です。作品一覧から選択してください" };
   }
   const slug = url.searchParams.get("slug");
   const ep = Number(url.searchParams.get("episode"));
   if (slug !== defaults.defaultSlug || ep !== defaults.defaultEpisode) {
-    return { ok: false, status: 403, error: "slug/episode does not match server scope" };
+    return { ok: false, status: 403, error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" };
   }
   return { ok: true };
 }
@@ -89,10 +89,10 @@ function checkLegacyBodyScope(
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
   if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-    return { ok: false, status: 400, error: "no active scope; pick a work from /" };
+    return { ok: false, status: 400, error: "操作対象の作品が未選択です。作品一覧から選択してください" };
   }
   if (body?.slug !== defaults.defaultSlug || Number(body?.episode) !== defaults.defaultEpisode) {
-    return { ok: false, status: 403, error: "scope mismatch" };
+    return { ok: false, status: 403, error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" };
   }
   return { ok: true };
 }
@@ -127,7 +127,7 @@ function checkScopedPath(
     return {
       ok: false,
       status: 403,
-      error: "scope mismatch (Phase 1: only default slug/episode allowed)",
+      error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)",
     };
   }
   return { ok: true };
@@ -143,19 +143,19 @@ export async function handleApi(
 
   // health probe (slash command / launchd の生死確認用)。fs アクセスを伴わない最薄 endpoint。
   if (p === "/api/health") {
-    if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+    if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
     return send(res, 200, { ok: true, ts: Date.now() });
   }
 
   if (p === "/api/bootstrap") {
-    if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+    if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
     return handleBootstrap(defaults, res);
   }
 
   // jobs API は default scope (slug+episode) が必須。一覧モードでは scope を選ぶまで使えない。
   if (p === "/api/jobs" || p.match(/^\/api\/jobs\/[^/]+\/(stream|abort)$/)) {
     if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-      return send(res, 400, { error: "no active scope; pick a work from /" });
+      return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
     }
     const scopedDefaults: ScopedRouterDefaults = {
       defaultSlug: defaults.defaultSlug,
@@ -173,7 +173,7 @@ export async function handleApi(
         }
         return handleJobsStart(req, res, body, scopedDefaults);
       }
-      return send(res, 405, { error: "method not allowed" });
+      return send(res, 405, { error: "このメソッドは許可されていません" });
     }
     const m = p.match(/^\/api\/jobs\/([^/]+)\/(stream|abort)$/);
     if (m) {
@@ -185,7 +185,7 @@ export async function handleApi(
       if (action === "abort" && req.method === "POST") {
         return handleJobsAbort(req, res, jobId, scopedDefaults);
       }
-      return send(res, 405, { error: "method not allowed" });
+      return send(res, 405, { error: "このメソッドは許可されていません" });
     }
   }
 
@@ -202,16 +202,16 @@ export async function handleApi(
       // 新規作品作成は scope を作る側なので、Phase 2A の default scope 制約から除外する。
       return handleWorkCreate(body, res);
     }
-    return send(res, 405, { error: "method not allowed" });
+    return send(res, 405, { error: "このメソッドは許可されていません" });
   }
   {
     const m = p.match(/^\/api\/works\/([^/]+)\/meta$/);
     if (m) {
-      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       const slug = m[1];
-      if (!isValidSlug(slug)) return send(res, 400, { error: "invalid slug" });
+      if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
       if (defaults.defaultSlug !== null && slug !== defaults.defaultSlug) {
-        return send(res, 403, { error: "scope mismatch" });
+        return send(res, 403, { error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" });
       }
       return handleWorkMetaGet(slug, res);
     }
@@ -219,13 +219,13 @@ export async function handleApi(
   {
     const m = p.match(/^\/api\/works\/([^/]+)\/meta\/kdp-metadata$/);
     if (m) {
-      if (req.method !== "PUT") return send(res, 405, { error: "method not allowed" });
+      if (req.method !== "PUT") return send(res, 405, { error: "このメソッドは許可されていません" });
       const slug = m[1];
-      if (!isValidSlug(slug)) return send(res, 400, { error: "invalid slug" });
+      if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
       if (defaults.defaultSlug === null) {
-        return send(res, 400, { error: "no active scope; restart console with --slug for writes" });
+        return send(res, 400, { error: "書き込みには scope 固定モードが必要です。`npm run console -- --slug <slug> --episode <NN>` で起動してください" });
       }
-      if (slug !== defaults.defaultSlug) return send(res, 403, { error: "scope mismatch" });
+      if (slug !== defaults.defaultSlug) return send(res, 403, { error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" });
       let body: any;
       try {
         body = await readJsonBody(req);
@@ -238,12 +238,12 @@ export async function handleApi(
   {
     const m = p.match(/^\/api\/works\/([^/]+)\/bible$/);
     if (m) {
-      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       const slug = m[1];
-      if (!isValidSlug(slug)) return send(res, 400, { error: "invalid slug" });
+      if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
       // 一覧モード (default null) は任意 slug を許可、scope 固定モードは default のみ。
       if (defaults.defaultSlug !== null && slug !== defaults.defaultSlug) {
-        return send(res, 403, { error: "scope mismatch" });
+        return send(res, 403, { error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" });
       }
       return handleBible(slug, res);
     }
@@ -251,15 +251,15 @@ export async function handleApi(
   {
     const m = p.match(/^\/api\/works\/([^/]+)\/volumes\/v(\d+)\/plot$/);
     if (m) {
-      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       const slug = m[1];
       const volume = Number(m[2]);
       if (!isValidSlug(slug) || !Number.isInteger(volume) || volume <= 0) {
-        return send(res, 400, { error: "invalid slug or volume" });
+        return send(res, 400, { error: "作品 ID または巻番号が不正です" });
       }
       // 一覧モード (default null) は任意 slug を許可、scope 固定モードは default のみ。
       if (defaults.defaultSlug !== null && slug !== defaults.defaultSlug) {
-        return send(res, 403, { error: "scope mismatch" });
+        return send(res, 403, { error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" });
       }
       return handleVolumePlot(slug, volume, res);
     }
@@ -267,9 +267,9 @@ export async function handleApi(
   {
     const m = p.match(/^\/api\/works\/([^/]+)\/episodes$/);
     if (m) {
-      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       const slug = m[1];
-      if (!isValidSlug(slug)) return send(res, 400, { error: "invalid slug" });
+      if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
       return handleWorkEpisodes(slug, res);
     }
   }
@@ -278,7 +278,7 @@ export async function handleApi(
   {
     const m = p.match(/^\/api\/works\/([^/]+)\/episodes\/ep(\d+)\/pipeline-status$/);
     if (m && (!isValidSlug(m[1]) || !isValidEpisode(Number(m[2])))) {
-      return send(res, 400, { error: "invalid slug or episode" });
+      return send(res, 400, { error: "作品 ID または episode 番号が不正です" });
     }
   }
   const scoped = parseScopedPath(p);
@@ -298,18 +298,18 @@ export async function handleApi(
         }
         return handleNameApprovalPost(scoped.slug, scoped.episode, body, res);
       }
-      return send(res, 405, { error: "method not allowed" });
+      return send(res, 405, { error: "このメソッドは許可されていません" });
     }
     if (tail === "/name-manifest") {
-      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       return handleNameManifest(scoped.slug, scoped.episode, res);
     }
     if (tail === "/manifest") {
-      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       return handleManifest(scoped.slug, scoped.episode, res);
     }
     if (tail === "/pipeline-status") {
-      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       return handlePipelineStatus(scoped.slug, scoped.episode, res);
     }
     if (tail === "/revision-queue") {
@@ -323,7 +323,7 @@ export async function handleApi(
         }
         return handleRevisionQueuePost(scoped.slug, scoped.episode, body, res);
       }
-      return send(res, 405, { error: "method not allowed" });
+      return send(res, 405, { error: "このメソッドは許可されていません" });
     }
     if (tail === "/adopted-versions") {
       if (req.method === "GET") return handleAdoptedGet(scoped.slug, scoped.episode, res);
@@ -336,7 +336,7 @@ export async function handleApi(
         }
         return handleAdoptedPost(scoped.slug, scoped.episode, body, res);
       }
-      return send(res, 405, { error: "method not allowed" });
+      return send(res, 405, { error: "このメソッドは許可されていません" });
     }
     return send(res, 404, { error: "not found" });
   }
@@ -359,11 +359,11 @@ export async function handleApi(
       if (!g.ok) return send(res, g.status, { error: g.error });
       return handleNameApprovalPost(defaults.defaultSlug!, defaults.defaultEpisode!, body, res);
     }
-    return send(res, 405, { error: "method not allowed" });
+    return send(res, 405, { error: "このメソッドは許可されていません" });
   }
 
   if (p === "/api/manifest") {
-    if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+    if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
     const g = checkLegacyScope(url, defaults);
     if (!g.ok) return send(res, g.status, { error: g.error });
     return handleManifest(defaults.defaultSlug!, defaults.defaultEpisode!, res);
@@ -386,7 +386,7 @@ export async function handleApi(
       if (!g.ok) return send(res, g.status, { error: g.error });
       return handleRevisionQueuePost(defaults.defaultSlug!, defaults.defaultEpisode!, body, res);
     }
-    return send(res, 405, { error: "method not allowed" });
+    return send(res, 405, { error: "このメソッドは許可されていません" });
   }
 
   if (p === "/api/adopted-versions") {
@@ -406,7 +406,7 @@ export async function handleApi(
       if (!g.ok) return send(res, g.status, { error: g.error });
       return handleAdoptedPost(defaults.defaultSlug!, defaults.defaultEpisode!, body, res);
     }
-    return send(res, 405, { error: "method not allowed" });
+    return send(res, 405, { error: "このメソッドは許可されていません" });
   }
 
   return send(res, 404, { error: "not found" });

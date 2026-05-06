@@ -64,19 +64,19 @@ function renderPlot(plot: unknown): string {
   return `
     <div class="vplot-body">
       <section class="nc-card vplot-section">
-        <h3>synopsis</h3>
+        <h3>巻あらすじ</h3>
         <pre class="nc-code-block">${jsonHtml(obj.synopsis ?? obj.volume_synopsis ?? null)}</pre>
       </section>
       <section class="nc-card vplot-section">
-        <h3>chapters</h3>
+        <h3>章構成</h3>
         <pre class="nc-code-block">${jsonHtml(obj.chapters ?? obj.episodes ?? [])}</pre>
       </section>
       <section class="nc-card vplot-section">
-        <h3>characters</h3>
+        <h3>キャラクター動線</h3>
         <pre class="nc-code-block">${jsonHtml(obj.characters ?? obj.character_arcs ?? [])}</pre>
       </section>
       <details class="nc-card vplot-section">
-        <summary>raw</summary>
+        <summary>生 JSON</summary>
         <pre class="nc-code-block">${jsonHtml(plot)}</pre>
       </details>
     </div>`;
@@ -89,17 +89,17 @@ function renderModal(state: ViewState): string {
     <div class="nc-modal is-open" id="vplot-modal">
       <form class="nc-modal__card nc-modal__card--md vplot-modal-body" data-vplot-form="1">
         <div class="vplot-modal-head">
-          <h3 class="vplot-modal-title">Volume Plot 構築</h3>
+          <h3 class="vplot-modal-title">Volume Plot を構築</h3>
           <span class="vplot-info">${escapeHtml(state.slug)}</span>
           <span class="vplot-spacer"></span>
           <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-close-modal${disabled}>閉じる</button>
         </div>
         <label class="nc-field">
-          <span class="nc-field__label">volume</span>
+          <span class="nc-field__label">巻番号</span>
           <input class="nc-field__input" name="volume" type="number" min="1" step="1" value="${state.volume}" required>
         </label>
         <label class="nc-field">
-          <span class="nc-field__label">concept</span>
+          <span class="nc-field__label">企画書ファイル</span>
           <input class="nc-field__input" name="concept" required placeholder="data/manga/...json">
         </label>
         <div class="vplot-actions">
@@ -113,18 +113,18 @@ function renderModal(state: ViewState): string {
 function render(container: HTMLElement, state: ViewState): void {
   const scope = `${state.slug} / v${String(state.volume).padStart(2, "0")}`;
   const body = (() => {
-    if (state.loading) return `<div class="nc-empty">loading...</div>`;
+    if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
     if (state.plot) return renderPlot(state.plot.plot);
-    if (state.error) return `<div class="nc-empty">Volume Plot は未作成です。「構築」ボタンから生成してください。</div>`;
-    return `<div class="nc-empty">Volume Plot は未作成です。「構築」ボタンから生成してください。</div>`;
+    if (state.error) return `<div class="nc-empty">Volume Plot は未作成です。「Volume Plot を構築」ボタンから生成してください。</div>`;
+    return `<div class="nc-empty">Volume Plot は未作成です。「Volume Plot を構築」ボタンから生成してください。</div>`;
   })();
   container.innerHTML = `
     <div class="vplot-view">
       <div class="nc-toolbar">
-        <h2 class="nc-toolbar__title">Volume Plot</h2>
+        <h2 class="nc-toolbar__title">巻あらすじ・章構成 (Volume Plot)</h2>
         <span class="vplot-info">${escapeHtml(scope)}</span>
         <span class="vplot-spacer"></span>
-        <button type="button" class="nc-button nc-button--primary" data-open-modal>Volume Plot 構築</button>
+        <button type="button" class="nc-button nc-button--primary" data-open-modal>Volume Plot を構築</button>
       </div>
       ${body}
     </div>
