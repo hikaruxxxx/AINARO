@@ -1,0 +1,52 @@
+{
+  "card_id": "EC-0009",
+  "version": "1.0",
+  "title": "巻末 cliffhanger を「ヒロイン消滅リスク」型で締める",
+  "scope": "page",
+  "trigger": {
+    "layer": "L4.9",
+    "flag": "cliffhanger_role_mismatch",
+    "pattern_id": "heroine_jeopardy",
+    "min_severity": "warn"
+  },
+  "preconditions": {
+    "tone_profile.darkness": "0.3-0.7",
+    "tone_profile.sidekick_presence": ">=0.7",
+    "genre": ["modern_dungeon", "battle_dungeon", "modern_romance", "isekai_tensei_cheat"],
+    "volume_position": ["volume_end", "late"],
+    "page_role": "cliffhanger",
+    "heroine_or_sidekick_established": true
+  },
+  "contraindications": {
+    "tone_profile.sidekick_presence": "<0.3",
+    "_note": "ヒロイン/相棒が薄い作品では機能しない。relationship_shift パターン推奨",
+    "frequency_in_series": "1作品で2-3回まで (狼少年化を避ける)"
+  },
+  "diagnosis": "巻末で「ヒロイン格 (相棒/ナビ/家族) に消滅・離脱・危機が訪れる」を提示することで、読者の感情移入を最大化し次巻必読化",
+  "decision_type": "panel_modify",
+  "instruction": "L4.9 Cliffhanger Architect で last_page を pattern=heroine_jeopardy で再設計。is_volume_end=true、最終 panel は close_up + ヒロインの危機表現 (シルエット/フェードアウト/最後の一言) + 主人公の驚愕 monologue。importance pattern: 3/3/4/4/5",
+  "target_axis": ["pull", "sidekick_warmth", "emotional_pull"],
+  "expected_delta": {
+    "next_volume_buy": "+0.7",
+    "sidekick_warmth": "+0.6",
+    "emotional_pull": "+0.6"
+  },
+  "success_metric": "巻末 (vol_X.last_episode) で適用 + ヒロインの危機表現 panel + 主人公の応答 monologue + importance=5",
+  "examples": [
+    {
+      "kind": "best",
+      "asset_id": "a07-modern-dungeon/ep10 (Vol.1 末、kdp-input.md で確定)",
+      "snippet": "ナビの声が途切れる。「契約者上限に接近。私の優先順位が下がります」"
+    }
+  ],
+  "applied_to": [],
+  "reviewer_decision": "accepted",
+  "outcome": null,
+  "learned_from": {
+    "source": "Phase Y WY-3 + Codex KDP統一案 (a07 vol_1 = ナビ消滅リスク型採用)",
+    "context": "巻末でヒロインの危機を提示し2巻必読化"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T07:00:00Z",
+  "created_by": "Phase Y WY-3 + WY-6"
+}

@@ -1,0 +1,56 @@
+{
+  "card_id": "EC-0008",
+  "version": "1.0",
+  "title": "話末 cliffhanger を「主人公の決意モノローグ」型で締める",
+  "scope": "page",
+  "trigger": {
+    "layer": "L4.9",
+    "flag": "cliffhanger_role_mismatch",
+    "pattern_id": "protagonist_resolve_monologue",
+    "min_severity": "warn"
+  },
+  "preconditions": {
+    "tone_profile.darkness": "<0.7",
+    "genre": ["isekai_tensei_cheat", "battle_dungeon", "modern_dungeon"],
+    "volume_position": ["early", "mid"],
+    "page_role": "cliffhanger"
+  },
+  "contraindications": {
+    "tone_profile.darkness": ">=0.7",
+    "volume_position": "volume_end",
+    "_note": "巻末ではより強い引き (heroine_jeopardy / next_volume_foreshadow) 推奨"
+  },
+  "diagnosis": "話末で主人公が受動的な被害者で終わると次話への能動性が見えない。主人公の能動的決意 (「まだ、行ける」「次は俺が」型) で締めることで読者の「次話読みたい」感情を最大化",
+  "decision_type": "panel_modify",
+  "instruction": "L4.9 Cliffhanger Architect で last_page を pattern=protagonist_resolve_monologue で再設計。最終 panel は close_up + 主人公モノローグ (雲型) + 短い宣言。importance=5 必須。importance pattern: 3/3/4/4/5",
+  "target_axis": ["pull", "likability", "character_agency"],
+  "expected_delta": {
+    "next_episode_pull": "+0.4",
+    "character_agency": "+0.5",
+    "likability": "+0.2"
+  },
+  "success_metric": "L8.6 audit cliffhanger_role_mismatch 解消 + 最終 panel に主人公モノローグ 1個以上 + importance=5",
+  "examples": [
+    {
+      "kind": "best",
+      "asset_id": "a07-modern-dungeon/ep01/p110 (Phase X EC-0001 で適用済)",
+      "snippet": "narration: 「Fランクが、動き出す。」(11字、短縮) + monologue [レン]: (まだ、行ける。) + dialogue [響]: 「次の隠し条件を開示します。」"
+    }
+  ],
+  "applied_to": [
+    {
+      "asset_id": "a07-modern-dungeon/ep01/p110",
+      "applied_at": "2026-05-06T06:30:00Z",
+      "result": "Phase X で先行適用済 (EC-0001 と整合)"
+    }
+  ],
+  "reviewer_decision": "accepted",
+  "outcome": null,
+  "learned_from": {
+    "source": "Phase Y WY-3 + Phase X EC-0001",
+    "context": "Phase X で a07 ep01 に適用、Phase Y で他話/他作品に汎用化"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T07:00:00Z",
+  "created_by": "Phase Y WY-3 + WY-6"
+}

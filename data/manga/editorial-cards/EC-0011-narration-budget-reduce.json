@@ -1,0 +1,46 @@
+{
+  "card_id": "EC-0011",
+  "version": "1.0",
+  "title": "page narration 過多を会話/モノローグに置換 (budget 違反解消)",
+  "scope": "page",
+  "trigger": {
+    "layer": "L8.6",
+    "flag": "narration_page_count_exceeded",
+    "min_severity": "warn"
+  },
+  "preconditions": {
+    "narration_count_per_page": ">=2 (tone別上限超過)",
+    "_resolution_logic": "page_role と tone_profile から resolveNarrationBudget() が決めた per_page_count_max を超過"
+  },
+  "contraindications": {
+    "page_role": "establishing",
+    "_note": "場面 establishing では caption_box 系ナレ 2個まで許容 (budget で対応済)"
+  },
+  "diagnosis": "page 内 narration が tone別/page_role別 上限を超過すると読者の説明疲労が累積。会話 (dialogue) または主人公モノローグ (雲型) に置換することで「会話で世界観説明」原則を守る",
+  "decision_type": "rewrite",
+  "instruction": "narration[] を1-2個に削減し、削った内容を以下のいずれかに置換: (a) キャラ同士の dialogue で世界観説明、(b) 主人公の monologue (雲型、protagonist_monologue kind)、(c) caption_box 1個に集約。NarrationKind の明示推奨",
+  "target_axis": ["prose", "pull", "reader_friction"],
+  "expected_delta": {
+    "narration_page_count": "page_role/tone 別上限以下",
+    "reader_friction": "-0.2",
+    "world_immersion": "+0.2 (会話で説明する分、自然になる)"
+  },
+  "success_metric": "L8.6 audit narration_page_count_exceeded 解消 + page 内 narration_kinds が明示済 + dialogue または monologue が増加",
+  "examples": [
+    {
+      "kind": "after",
+      "asset_id": "(将来の a07 修正例)",
+      "snippet": "narration[2] {現代ダンジョンと探索者ランクの説明 + 場面 establishing} → narration[1] {establishing} + dialogue [響] {ランク説明} + monologue [レン] {自分の境遇}"
+    }
+  ],
+  "applied_to": [],
+  "reviewer_decision": "pending",
+  "outcome": null,
+  "learned_from": {
+    "source": "Phase Y WY-2 narration-budget + manga_craft_guide v2 ナレ禁則",
+    "context": "「会話で世界観説明」原則を機械検査可能にしたカード"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T07:00:00Z",
+  "created_by": "Phase Y WY-2 + WY-6"
+}

@@ -1,0 +1,51 @@
+{
+  "card_id": "EC-0010",
+  "version": "1.0",
+  "title": "話末 cliffhanger を「能力/正体の片鱗」型で締める",
+  "scope": "page",
+  "trigger": {
+    "layer": "L4.9",
+    "flag": "cliffhanger_role_mismatch",
+    "pattern_id": "ability_or_identity_glimpse",
+    "min_severity": "warn"
+  },
+  "preconditions": {
+    "tone_profile.darkness": "0.3-0.7",
+    "genre": ["modern_dungeon", "battle_dungeon", "battle_vrmmo", "isekai_tensei_cheat"],
+    "volume_position": ["mid", "late"],
+    "page_role": "cliffhanger",
+    "world_features": ["status_window", "skill_system"]
+  },
+  "contraindications": {
+    "world_features_missing": "ステータス画面/スキルシステムが世界観に存在しない場合",
+    "volume_position": "early",
+    "_note": "early では daily_intrusion / protagonist_resolve_monologue 推奨"
+  },
+  "diagnosis": "話末で主人公の新スキル発現/隠しステータス開示/世界制度の真実の片鱗を提示することで、なろう系読者の「次回どうなる?」感情を最大化",
+  "decision_type": "panel_modify",
+  "instruction": "L4.9 Cliffhanger Architect で last_page を pattern=ability_or_identity_glimpse で再設計。最終 panel は close_up + ステータス画面 panel or スキル発動エフェクト + 主人公の驚き monologue + ナビ等の能力解説 dialogue 1個。importance pattern: 3/4/3/4/5",
+  "target_axis": ["pull", "world_immersion", "commercial_pull"],
+  "expected_delta": {
+    "next_episode_pull": "+0.5",
+    "world_immersion": "+0.4",
+    "commercial_pull": "+0.3"
+  },
+  "success_metric": "最終 panel または直前 panel に status_window or 新スキル可視化要素 + 主人公の驚き表現 + importance=5",
+  "examples": [
+    {
+      "kind": "best",
+      "asset_id": "a07-modern-dungeon/ep01/_cliffhanger_alts/proposals-2026-05-06.json (Phase Y で生成)",
+      "snippet": "next_opening_hook_hint: 「次話冒頭は、レンが表示された最短経路を疑いながら一階の壁際へ進み、通常マップに存在しない二階直通ルートを検証する場面から始める。」"
+    }
+  ],
+  "applied_to": [],
+  "reviewer_decision": "pending",
+  "outcome": null,
+  "learned_from": {
+    "source": "Phase Y WY-3 (a07 ep01 で smoke 検証済)",
+    "context": "ability_or_identity_glimpse パターンの代表例"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T07:00:00Z",
+  "created_by": "Phase Y WY-3 + WY-6"
+}
