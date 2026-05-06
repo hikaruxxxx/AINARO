@@ -82,11 +82,28 @@ function validatePanelText(panel: StoryboardPanel, bible: BibleSnapshotV2): Vali
 
 違反検出時は warning を出して storyboard 修正を促す (現行 L4 で fix される想定)。
 
+### 4. [opening-hook-pass.ts](../../../src/lib/manga/opening-hook/opening-hook-pass.ts) (L4.1 opening hook 提案)
+
+**追記 (2026-05-06 P1 検証で判明した穴)**: L4.1 (`scripts/manga/layers/L04-1-opening-hook.ts` → `src/lib/manga/opening-hook/opening-hook-pass.ts`) は L4 storyboard-extractor とは**別経路**で Codex を呼んで pages[0..2] の proposal を生成・storyboard.json にマージする。改修 1〜3 では L4 メインの storyboard 生成だけが lexicon 注入されたが、L4.1 経由 (`--apply-recommendation`) で proposal を再生成すると lexicon 違反が再発した。
+
+**現状** ([opening-hook-pass.ts:25](../../../src/lib/manga/opening-hook/opening-hook-pass.ts)): `extractStructuredJson` から Codex を呼ぶが、bible.world.lexicon / narration_style_guide / nav_full_spec / characters[*].speech_style への参照ゼロ (grep -rn 確認済み)。
+
+**改修**: `generateOpeningHookProposals` (line 153) と Codex prompt 構築箇所 (line 284 周辺の `extractStructuredJson` 呼び出し) で、bible の新セクションを prompt に注入する。具体的には storyboard-extractor.ts と同じパターンで:
+
+- materials / system context / instruction に `world_lexicon` / `narration_style_guide` / `nav_full_spec` / `character_speech_styles` を追加
+- 特に `forbidden_terms_global` / `narration_style_guide.p1_opening_directive_specific` / `nav_full_spec.anti_pattern_dialogue` は **strict directive** として明示
+- proposal 生成後、validatePanelText を呼んで lexicon 違反を検出 → 違反があれば再生成 or warning
+
+**期待効果**: `npx tsx scripts/manga/layers/L04-1-opening-hook.ts --slug a07-modern-dungeon --episode 1 --apply-recommendation` を実行しても、生成される proposal が bible 準拠 (P1 の冒頭独白・吹き出しが lexicon 違反語を含まない) で出力される。
+
+**検証手順**: 改修後、上記コマンドを実行 → `_opening_alts/proposals-*.json` の `proposals[0]` で「世界記録」「最短ルート」が含まれないこと、storyboard.json の P1 にも違反がないことを確認。
+
 ## 推奨される実装順
 
-1. **L4 storyboard-extractor.ts**: materials への追加 (一次対策、最も効果大)
-2. **L4 craft-guide-directives.ts**: 4 rule の追加 (二次対策、Codex 側の自己制約強化)
-3. **L9 prompt-composer-v2.ts**: validatePanelText 実装 (三次対策、フェイルセーフ)
+1. **L4 storyboard-extractor.ts**: materials への追加 (一次対策、最も効果大) ✅ 実装済
+2. **L4 craft-guide-directives.ts**: 4 rule の追加 (二次対策、Codex 側の自己制約強化) ✅ 実装済
+3. **L9 prompt-composer-v2.ts**: validatePanelText 実装 (三次対策、フェイルセーフ) ✅ 実装済
+4. **L4.1 opening-hook-pass.ts**: 別経路の lexicon 注入 (2026-05-06 検証で発覚した穴) ⏳ 未実装
 
 ## 検証手順
 

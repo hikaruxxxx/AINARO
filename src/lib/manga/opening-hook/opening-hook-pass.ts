@@ -23,6 +23,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { extractStructuredJson } from "../llm/codex-text";
+import { validatePanelText } from "../render-v2/prompt-composer-v2";
 import type {
   BibleSnapshotV2,
   EpisodeStoryboardV2,
@@ -30,6 +31,7 @@ import type {
   StoryboardPageV2,
   ToneProfile,
 } from "../schemas-v2";
+import { buildTextQualityMaterials } from "../storyboard-v2/storyboard-extractor";
 
 // ===== 掴みパターン辞書 (data/generation/opening-hook-patterns.json から読込) =====
 
@@ -234,6 +236,98 @@ type HookProposalOutput = {
 };
 `;
 
+export function buildOpeningHookTextQualityDirectives(bible: BibleSnapshotV2): string {
+  const materials = buildTextQualityMaterials(bible);
+  const lines: string[] = [];
+
+  lines.push("## Text Quality Directives for Opening Hook");
+  lines.push("以下の optional bible sections は、存在する場合 strict directive として扱う。proposal の dialogue / monologue / narration 生成で必ず適用する。");
+
+  const forbidden = materials.world_lexicon?.forbidden_terms_global ?? [];
+  if (forbidden.length > 0) {
+    lines.push("- world.lexicon.forbidden_terms_global は禁止語リスト。これらの語彙を proposal の dialogue / monologue / narration に含めてはならない。");
+    lines.push(`  forbidden_terms_global: ${forbidden.join(" / ")}`);
+  }
+
+  const p1Directive = materials.world_lexicon?.p1_opening_directive;
+  if (p1Directive) {
+    lines.push(`- world.lexicon.p1_opening_directive を page 1 / opening_hook の強制ガードとして適用: ${p1Directive}`);
+  }
+
+  const p1Specific = materials.narration_style_guide?.p1_opening_directive_specific;
+  if (p1Specific) {
+    lines.push("- narration_style_guide.p1_opening_directive_specific は 1ページ目独白の強制ガード。max_lines / max_chars_per_line / must_avoid / rejected_pattern_examples を破る proposal は失敗。");
+    lines.push(JSON.stringify(p1Specific, null, 2));
+  }
+
+  const antiPattern = materials.nav_full_spec?.anti_pattern_dialogue;
+  if (antiPattern) {
+    lines.push("- nav_full_spec.anti_pattern_dialogue は絶対禁止例。似た命令口調、スマホナビ感、禁止語を含むナビ発話も出してはならない。");
+    lines.push(JSON.stringify(antiPattern, null, 2));
+  }
+
+  const anchors = materials.nav_full_spec?.canonical_disclosure_lines_vol_1 ?? [];
+  if (anchors.length > 0) {
+    lines.push("- nav_full_spec.canonical_disclosure_lines_vol_1 はナビ発話の anchor 例。ナビは敬体・事務的な開示プロトコルとして発話させる。");
+    lines.push(`  canonical disclosure anchors: ${anchors.slice(0, 8).join(" / ")}`);
+  }
+
+  if (materials.character_speech_styles.length > 0) {
+    lines.push("- character_speech_styles は該当キャラの dialogue / monologue 文体ガード。first_person / register / ban_phrases を守る。");
+    lines.push(JSON.stringify(materials.character_speech_styles, null, 2));
+  }
+
+  return lines.join("\n");
+}
+
+function proposalPanelToValidationPanel(
+  panel: HookProposalPanel,
+  page: HookProposalPage,
+  patternId: string,
+): PanelV2 {
+  return {
+    panel_id: `opening-hook:${patternId}:p${page.page_no}:${panel.panel_no}`,
+    panel_no: panel.panel_no,
+    reading_order: panel.panel_no,
+    shot_type: panel.shot_type as PanelV2["shot_type"],
+    camera: "eye_level",
+    bleed: false,
+    silence: panel.silence,
+    importance: panel.importance as PanelV2["importance"],
+    entities: {
+      characters: [],
+      location_id: "",
+      props: [],
+      focus_entity_id: "",
+    },
+    action: panel.action,
+    key_visual: panel.key_visual,
+    dialogue: panel.dialogue,
+    monologue: panel.monologue,
+    narration: panel.narration,
+    sfx: panel.sfx,
+  };
+}
+
+function warnTextQualityViolations(
+  proposal: HookProposal,
+  bible: BibleSnapshotV2,
+): void {
+  for (const page of proposal.pages) {
+    for (const panel of page.panels) {
+      const validation = validatePanelText(
+        proposalPanelToValidationPanel(panel, page, proposal.pattern_id),
+        bible,
+      );
+      if (!validation.ok) {
+        console.warn(
+          `[opening-hook-pass] proposal ${proposal.pattern_id} page ${page.page_no} panel ${panel.panel_no}: ${validation.reason}. Re-run L4.1 or manually correct the proposal before applying.`,
+        );
+      }
+    }
+  }
+}
+
 async function generateSingleHookProposal(args: {
   bible: BibleSnapshotV2;
   storyboard: EpisodeStoryboardV2;
@@ -280,6 +374,8 @@ async function generateSingleHookProposal(args: {
   const speechDistGuide = Object.entries(pattern.speech_distribution)
     .map(([page, dist]) => `  ${page}: dialogue=${dist.dialogue}, monologue=${dist.monologue}, narration=${dist.narration}`)
     .join("\n");
+  const textQualityMaterials = buildTextQualityMaterials(bible);
+  const textQualityDirectives = buildOpeningHookTextQualityDirectives(bible);
 
   const result = await extractStructuredJson<{
     pattern_id: string;
@@ -320,6 +416,8 @@ async function generateSingleHookProposal(args: {
       "- ナレーション禁則: 各 page の narration 数は speech_distribution の上限を超えない",
       "- 主人公の独白(雲型)は monologue として明示、地のナレと混ぜない",
       "- パターンの structure に書かれた shot_type / importance / purpose を尊重",
+      "",
+      textQualityDirectives,
     ].join("\n"),
     materials: {
       bible_meta: JSON.stringify(
@@ -336,6 +434,10 @@ async function generateSingleHookProposal(args: {
       ),
       characters: charsBlock,
       visual_motifs: JSON.stringify(bible.visual_motifs ?? [], null, 2),
+      world_lexicon: JSON.stringify(textQualityMaterials.world_lexicon, null, 2),
+      narration_style_guide: JSON.stringify(textQualityMaterials.narration_style_guide, null, 2),
+      nav_full_spec: JSON.stringify(textQualityMaterials.nav_full_spec, null, 2),
+      character_speech_styles: JSON.stringify(textQualityMaterials.character_speech_styles, null, 2),
       pattern_id: pattern.id,
       pattern_name: pattern.name,
       pattern_description: pattern.description,
@@ -355,6 +457,9 @@ async function generateSingleHookProposal(args: {
       `- pattern.structure の panel 配置を骨格に、bible の主人公・世界観・visual_motifs を肉付け`,
       `- 既存の物語流れを参考にしつつ、より KU 読者を引き込む構成に最適化`,
       `- speech_distribution / narration_quota / first_speech_panel を厳守`,
+      `- materials の world_lexicon / narration_style_guide / nav_full_spec / character_speech_styles と systemContext の Text Quality Directives を strict に適用`,
+      `- forbidden_terms_global を proposal の dialogue / monologue / narration に含めない。p1_opening_directive_specific と anti_pattern_dialogue に反する文は出力しない`,
+      `- ナビ発話は canonical_disclosure_lines_vol_1 を anchor 例として、敬体・事務的な開示プロトコルに寄せる`,
       `- 1パターン分の提案 (HookProposalOutput 1件) を返却`,
     ].join("\n"),
     outputSchema: HOOK_OUTPUT_SCHEMA,
@@ -363,7 +468,7 @@ async function generateSingleHookProposal(args: {
     maxRetries: 2,
   });
 
-  return {
+  const proposal: HookProposal = {
     pattern_id: pattern.id,
     pattern_name: pattern.name,
     rationale: result.rationale,
@@ -386,6 +491,9 @@ async function generateSingleHookProposal(args: {
     })),
     warnings: result.warnings,
   };
+
+  warnTextQualityViolations(proposal, bible);
+  return proposal;
 }
 
 /**
