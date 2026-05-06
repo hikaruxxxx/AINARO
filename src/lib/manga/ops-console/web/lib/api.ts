@@ -191,3 +191,97 @@ export function apiPostAdopted(
     body
   );
 }
+
+export type LayerId =
+  | "L02"
+  | "L09"
+  | "L10"
+  | "L11"
+  | "L12"
+  | "L13"
+  | "kdp-dry-run"
+  | "scrape-bsr";
+
+export type JobScope = "work" | "episode" | "volume";
+
+export type JobEvent = {
+  seq: number;
+  ts: string;
+  channel: "stdout" | "stderr" | "system";
+  line: string;
+};
+
+export type JobState = "running" | "succeeded" | "failed" | "aborted";
+
+export type JobSummary = {
+  id: string;
+  layer: LayerId;
+  key: string;
+  scope: { slug: string; episode?: number; volume?: number };
+  state: JobState;
+  startedAt: string;
+  finishedAt?: string;
+  exitCode?: number;
+  events?: JobEvent[];
+};
+
+export type JobStartRequest = {
+  layer: LayerId;
+  slug: string;
+  episode?: number;
+  volume?: number;
+  args?: Record<string, string>;
+};
+
+export function apiPostJob(
+  req: JobStartRequest
+): Promise<{ job_id: string; layer: LayerId; key: string; state: JobState }> {
+  return postJson("/api/jobs", req);
+}
+
+export function apiGetJobs(filter?: {
+  slug?: string;
+  episode?: number;
+  volume?: number;
+  layer?: LayerId;
+}): Promise<{ jobs: JobSummary[] }> {
+  const params = new URLSearchParams();
+  if (filter?.slug) params.set("slug", filter.slug);
+  if (filter?.episode !== undefined) params.set("episode", String(filter.episode));
+  if (filter?.volume !== undefined) params.set("volume", String(filter.volume));
+  if (filter?.layer) params.set("layer", filter.layer);
+  const qs = params.toString();
+  return getJson<{ jobs: JobSummary[] }>(`/api/jobs${qs ? `?${qs}` : ""}`);
+}
+
+export function apiAbortJob(jobId: string): Promise<{ ok: true; state: JobState }> {
+  return postJson(`/api/jobs/${encodeURIComponent(jobId)}/abort`, {});
+}
+
+export function openJobStream(
+  jobId: string,
+  opts: {
+    onEvent: (e: JobEvent) => void;
+    onDone: (info: { state: JobState; exitCode: number | null }) => void;
+    onError?: (err: Error) => void;
+    lastEventId?: number;
+  }
+): { close: () => void } {
+  const qs = opts.lastEventId !== undefined ? `?lastEventId=${opts.lastEventId}` : "";
+  const source = new EventSource(`/api/jobs/${encodeURIComponent(jobId)}/stream${qs}`);
+  source.addEventListener("data", (event) => {
+    opts.onEvent(JSON.parse((event as MessageEvent).data) as JobEvent);
+  });
+  source.addEventListener("done", (event) => {
+    opts.onDone(JSON.parse((event as MessageEvent).data) as { state: JobState; exitCode: number | null });
+    source.close();
+  });
+  source.onerror = () => {
+    // EventSource は default で自動再接続するが、ジョブ完了済みや 503 (cap 超過) で
+    // 永続的にリトライされるとサーバ負荷とメモリリークの原因になる。
+    // ここで close して呼び出し側に通知し、必要なら refetch で復帰させる。
+    source.close();
+    opts.onError?.(new Error("job stream error"));
+  };
+  return { close: () => source.close() };
+}
