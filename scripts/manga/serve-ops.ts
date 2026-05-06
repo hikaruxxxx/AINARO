@@ -89,23 +89,28 @@ async function main() {
     console.error("[novelis-console] client build failed:", e);
     process.exit(1);
   }
-  if (!isValidSlug(args.slug)) {
-    throw new Error(`invalid slug "${args.slug}": must match /^[a-z0-9][a-z0-9_-]*$/`);
-  }
-  if (!isValidEpisode(args.episode)) {
-    throw new Error(`invalid episode ${args.episode}: must be positive integer`);
-  }
-  const scopedRoot = workDir(args.slug);
-  await fs.access(scopedRoot);
+  // scope 指定モード時のみ slug/episode を valid 形式チェック + 物理確認する。
+  // 一覧モード (slug/episode 共に null) では scope 検証を skip し、UI 上で選んでもらう。
+  let scopedRoot: string | null = null;
+  if (args.slug !== null && args.episode !== null) {
+    if (!isValidSlug(args.slug)) {
+      throw new Error(`invalid slug "${args.slug}": must match /^[a-z0-9][a-z0-9_-]*$/`);
+    }
+    if (!isValidEpisode(args.episode)) {
+      throw new Error(`invalid episode ${args.episode}: must be positive integer`);
+    }
+    scopedRoot = workDir(args.slug);
+    await fs.access(scopedRoot);
 
-  // L8.5 前置きチェック。Phase 2C 以降は index.html ではなく SPA が操作 UI。
-  const manifestP = nameManifestPath(args.slug, args.episode);
-  if (!(await fs.stat(manifestP).catch(() => null))) {
-    console.warn(
-      `[novelis-console] WARN: ${manifestP} not found. Run L8.5 first:\n` +
-        `  npx tsx scripts/manga/layers/L08-5-name-preview.ts --slug ${args.slug} --episode ${args.episode}\n` +
-        `  SPA URL: http://localhost:${args.port}/works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/#name-gate`
-    );
+    // L8.5 前置きチェック。Phase 2C 以降は index.html ではなく SPA が操作 UI。
+    const manifestP = nameManifestPath(args.slug, args.episode);
+    if (!(await fs.stat(manifestP).catch(() => null))) {
+      console.warn(
+        `[novelis-console] WARN: ${manifestP} not found. Run L8.5 first:\n` +
+          `  npx tsx scripts/manga/layers/L08-5-name-preview.ts --slug ${args.slug} --episode ${args.episode}\n` +
+          `  SPA URL: http://localhost:${args.port}/works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/#name-gate`
+      );
+    }
   }
 
   const opsShellHtml = renderOpsConsoleShellHtml();
@@ -119,9 +124,9 @@ async function main() {
     }
     const url = new URL(req.url, `http://localhost:${args.port}`);
 
-    // 旧 URL → SPA name-gate redirect。
+    // 旧 URL → SPA name-gate redirect。default scope が固定されている場合だけ機能する。
     const oldName = url.pathname.match(/^\/episodes\/ep(\d+)\/name\/index\.html$/);
-    if (oldName) {
+    if (oldName && args.slug) {
       const ep = oldName[1].padStart(2, "0");
       const location = `/works/${args.slug}/episodes/ep${ep}/#name-gate`;
       res.writeHead(302, { Location: location, "Cache-Control": "no-store" });
@@ -160,14 +165,16 @@ async function main() {
         }
         // Phase 1: /works/{slug}/episodes/epNN/path をサポート、default scope のみ通す
         const m = p.match(/^\/works\/([^/]+)\/episodes\/(ep\d+)(\/.*)?$/);
-        if (m) {
+        if (m && scopedRoot && args.slug) {
           const slug = m[1];
           const ep = m[2];
           const sub = m[3] ?? "/";
-          if (slug !== args.slug) return null; // Phase 1: default のみ
+          if (slug !== args.slug) return null;
           return { root: scopedRoot, subPath: path.posix.join("/episodes", ep, sub) };
         }
-        return { root: scopedRoot, subPath: p };
+        if (scopedRoot) return { root: scopedRoot, subPath: p };
+        // 一覧モードでは静的 fallback の root が無いので 404
+        return null;
       },
     });
   });
@@ -197,11 +204,15 @@ async function main() {
     const consoleUrl = `http://localhost:${args.port}/`;
     console.log(`[novelis-console] client bundle: ${clientBuild.outFile}`);
     console.log(`[novelis-console] listening: ${consoleUrl}`);
-    const scopedUrl = `http://localhost:${args.port}/works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/`;
-    console.log(`[novelis-console] mode: scope-fixed (slug=${args.slug} ep=${args.episode})`);
-    console.log(`[novelis-console] scope: ${scopedUrl}`);
-    console.log(`[novelis-console] name gate: ${scopedUrl}#name-gate`);
-    console.log(`[novelis-console] revision:  ${scopedUrl}#revision`);
+    if (args.slug && args.episode) {
+      const scopedUrl = `http://localhost:${args.port}/works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/`;
+      console.log(`[novelis-console] mode: scope-fixed (slug=${args.slug} ep=${args.episode})`);
+      console.log(`[novelis-console] scope: ${scopedUrl}`);
+      console.log(`[novelis-console] name gate: ${scopedUrl}#name-gate`);
+      console.log(`[novelis-console] revision:  ${scopedUrl}#revision`);
+    } else {
+      console.log(`[novelis-console] mode: index (作品一覧から scope を選択)`);
+    }
     if (args.openBrowser) maybeOpenBrowser(consoleUrl);
   });
 

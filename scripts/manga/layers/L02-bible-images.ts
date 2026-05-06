@@ -24,9 +24,32 @@ import {
 } from "../../../src/lib/manga/bible/v2-images";
 import type { BibleSnapshotV2 } from "../../../src/lib/manga/schemas-v2";
 
-async function findStylePlate(artStyle: string): Promise<string | null> {
-  const candidate = path.join(STYLE_PLATES_DIR, `${artStyle}.png`);
-  try { await fs.access(candidate); return candidate; } catch { return null; }
+/**
+ * style plate を解決する。
+ *   1) `{artStyle}/` ディレクトリがあれば中の全 PNG 配列を返す (L02 は全枚数を refs として使う)
+ *   2) ディレクトリ無しなら `{artStyle}.png` 単一ファイルを 1 要素配列で返す
+ *   3) どちらも無ければ空配列
+ */
+async function findStylePlates(artStyle: string): Promise<string[]> {
+  const dirCandidate = path.join(STYLE_PLATES_DIR, artStyle);
+  try {
+    const st = await fs.stat(dirCandidate);
+    if (st.isDirectory()) {
+      const entries = await fs.readdir(dirCandidate);
+      const pngs = entries
+        .filter((e) => e.toLowerCase().endsWith(".png"))
+        .sort()
+        .map((e) => path.join(dirCandidate, e));
+      if (pngs.length > 0) return pngs;
+    }
+  } catch {}
+  const fileCandidate = path.join(STYLE_PLATES_DIR, `${artStyle}.png`);
+  try {
+    await fs.access(fileCandidate);
+    return [fileCandidate];
+  } catch {
+    return [];
+  }
 }
 
 type Args = {
@@ -84,9 +107,9 @@ async function main() {
   const refsDir = bibleRefsDir(args.slug);
   await fs.mkdir(refsDir, { recursive: true });
 
-  const stylePlatePath = await findStylePlate(snapshot.meta.art_style);
-  if (stylePlatePath) {
-    console.log(`[L02] style plate: ${stylePlatePath}`);
+  const stylePlatePaths = await findStylePlates(snapshot.meta.art_style);
+  if (stylePlatePaths.length > 0) {
+    console.log(`[L02] style plates (${stylePlatePaths.length}): ${stylePlatePaths.map((p) => path.basename(p)).join(", ")}`);
   } else {
     console.warn(`[L02] WARN: style plate not found for art_style=${snapshot.meta.art_style}`);
   }
@@ -105,7 +128,7 @@ async function main() {
       characters: chars,
       concurrency: args.concurrency,
       skipExisting: args.skipExisting,
-      stylePlatePath,
+      stylePlatePaths,
       imageTimeoutMs: 15 * 60 * 1000,
     });
     console.log(`[L02] characters: gen=${r.generated} skip=${r.skipped} fail=${r.failed}`);
@@ -121,7 +144,7 @@ async function main() {
       refsDir,
       concurrency: args.concurrency,
       skipExisting: args.skipExisting,
-      stylePlatePath,
+      stylePlatePaths,
       imageTimeoutMs: 15 * 60 * 1000,
     });
     console.log(`[L02] locations: gen=${r.generated} skip=${r.skipped} fail=${r.failed}`);
@@ -137,7 +160,7 @@ async function main() {
       refsDir,
       concurrency: args.concurrency,
       skipExisting: args.skipExisting,
-      stylePlatePath,
+      stylePlatePaths,
       imageTimeoutMs: 15 * 60 * 1000,
     });
     console.log(`[L02] props: gen=${r.generated} skip=${r.skipped} fail=${r.failed}`);

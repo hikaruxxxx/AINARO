@@ -2,6 +2,7 @@ import { apiGetBootstrap } from "./lib/api";
 import { isViewName, store, type ViewName } from "./lib/store";
 import { mountSidebar } from "./sidebar";
 import { mountAssetsView } from "./views/assets";
+import { mountIndexView } from "./views/index";
 import { mountLayersView } from "./views/layers";
 import { mountNameGateView } from "./views/name-gate";
 import { mountRevisionView } from "./views/revision";
@@ -12,17 +13,14 @@ type Unmount = () => void;
 function parseRoute(): { slug: string | null; episode: number | null; view: ViewName } {
   const m = window.location.pathname.match(/^\/works\/([^/]+)\/episodes\/ep(\d+)\/?$/);
   const hashView = window.location.hash.replace(/^#/, "");
+  // / (or 不明 path) の場合は scope なし → index view を初期表示。
   if (!m) {
-    return {
-      slug: null,
-      episode: null,
-      view: isViewName(hashView) ? hashView : "name-gate",
-    };
+    return { slug: null, episode: null, view: "index" };
   }
   return {
     slug: decodeURIComponent(m[1]),
     episode: Number(m[2]),
-    view: isViewName(hashView) ? hashView : "name-gate",
+    view: isViewName(hashView) && hashView !== "index" ? hashView : "name-gate",
   };
 }
 
@@ -31,6 +29,14 @@ function routePath(slug: string, episode: number): string {
 }
 
 function syncRoute(slug: string, episode: number, view: ViewName): void {
+  // index view は scope を持たない (URL は "/")。
+  if (view === "index") {
+    const next = "/";
+    const current = `${window.location.pathname}${window.location.hash}`;
+    if (current === next) return;
+    history.pushState(null, "", next);
+    return;
+  }
   if (!slug || !episode) return;
   const next = `${routePath(slug, episode)}#${view}`;
   const current = `${window.location.pathname}${window.location.hash}`;
@@ -51,7 +57,8 @@ function mountCurrentView(main: HTMLElement): () => void {
     if (state.currentView === prevView) return;
     if (unmount) unmount();
     prevView = state.currentView;
-    if (state.currentView === "assets") unmount = mountAssetsView(main);
+    if (state.currentView === "index") unmount = mountIndexView(main);
+    else if (state.currentView === "assets") unmount = mountAssetsView(main);
     else if (state.currentView === "layers") unmount = mountLayersView(main);
     else if (state.currentView === "revision") unmount = mountRevisionView(main);
     else if (state.currentView === "works") unmount = mountWorksView(main);
@@ -67,7 +74,8 @@ function mountHeader(scopeEl: HTMLElement): () => void {
   let prev = "";
   return store.subscribe((state) => {
     let next: string;
-    if (state.currentSlug) {
+    if (state.currentView === "index") next = "Novelis Console";
+    else if (state.currentSlug) {
       const ep = `ep${String(state.currentEpisode).padStart(2, "0")}`;
       next = `${state.currentSlug} / ${ep}`;
     } else next = "loading...";
@@ -100,14 +108,16 @@ async function start(): Promise<void> {
 
   const boot = await loadBootstrap();
   const route = parseRoute();
-  const currentSlug = route.slug ?? boot.default_slug;
-  const currentEpisode = route.episode ?? boot.default_episode;
-  const currentView: ViewName = route.view;
+  // 一覧モード (server scope なし & URL /) なら currentSlug="" として scope なし表示。
+  // 各 view は currentSlug が空の間は呼ばれない (mountCurrentView は index へ)。
+  const currentSlug = route.slug ?? boot.default_slug ?? "";
+  const currentEpisode = route.episode ?? boot.default_episode ?? 0;
+  const currentView: ViewName = route.slug ? route.view : "index";
 
   store.update({
     works: boot.works,
-    defaultSlug: boot.default_slug,
-    defaultEpisode: boot.default_episode,
+    defaultSlug: boot.default_slug ?? "",
+    defaultEpisode: boot.default_episode ?? 0,
     currentSlug,
     currentEpisode,
     currentView,

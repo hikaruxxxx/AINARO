@@ -173,7 +173,7 @@ async function main() {
   };
   await fs.writeFile(nameManifestPath(args.slug, args.episode), JSON.stringify(manifest, null, 2), "utf-8");
 
-  // Phase 2C: 操作 UI は ops console SPA に統合済み。旧 index.html は redirect stub のみ残す。
+  // Phase 2C: 操作 UI は Novelis Console (SPA) に統合済み。旧 index.html は redirect stub のみ残す。
   await fs.writeFile(
     nameIndexHtmlPath(args.slug, args.episode),
     renderSpaRedirectStub(args.slug, args.episode),
@@ -212,7 +212,7 @@ function renderSpaRedirectStub(slug: string, episode: number): string {
   <title>name gate moved</title>
 </head>
 <body>
-  <p>name gate は ops console に移動しました。<a href="${escapeHtml(url)}">ops console を開く</a></p>
+  <p>name gate は Novelis Console に移動しました。<a href="${escapeHtml(url)}">Novelis Console を開く</a></p>
 </body>
 </html>
 `;

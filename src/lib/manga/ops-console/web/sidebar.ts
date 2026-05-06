@@ -31,8 +31,25 @@ function episodeLabel(n: number): string {
  *
  * URL hash の同期は main.ts の syncRoute に一元化。ここでは pushState を呼ばない。
  *
+ * 一覧モード (currentSlug が空) では scope select と MENU を出さず、案内だけ表示する。
  */
 function rerender(root: HTMLElement, state: AppState): void {
+  if (!state.currentSlug) {
+    root.innerHTML = `
+      <div class="scope-panel">
+        <p class="scope-note">作品を選択してください。</p>
+        <button type="button" class="menu-button${state.currentView === "index" ? " is-active" : ""}" data-view="index">作品一覧</button>
+      </div>
+    `;
+    root.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const view = button.dataset.view;
+        if (!isViewName(view)) return;
+        store.update({ currentView: view });
+      });
+    });
+    return;
+  }
   const currentWork = state.works.find((w) => w.slug === state.currentSlug);
   const episodes = currentWork?.episodes.length ? currentWork.episodes : [state.currentEpisode];
   const lockTitle = "Phase 2A は default scope 固定。Phase 2B/3 で切替を解禁予定。";
@@ -57,6 +74,7 @@ function rerender(root: HTMLElement, state: AppState): void {
         </select>
       </div>
       <p class="scope-note">Phase 2A は default scope 固定。切替は Phase 2B/3 で解禁予定。</p>
+      <button type="button" class="menu-button" data-view="index">← 作品一覧へ戻る</button>
     </div>
     <nav class="menu" aria-label="ops views">
       ${MENU.map(
@@ -70,6 +88,11 @@ function rerender(root: HTMLElement, state: AppState): void {
     button.addEventListener("click", () => {
       const view = button.dataset.view;
       if (!isViewName(view)) return;
+      // 「作品一覧へ戻る」を押したら currentSlug/Episode をクリアして scope 解除。
+      if (view === "index") {
+        store.update({ currentView: "index", currentSlug: "", currentEpisode: 0 });
+        return;
+      }
       store.update({ currentView: view });
       // URL 同期は main.ts:syncRoute (store.subscribe 経由) に一元化。
     });

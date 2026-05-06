@@ -28,22 +28,43 @@ import {
 // ============================================================
 
 export type CharacterVariantV2 =
+  // 顔3角度
   | "face_front"
+  | "face_three_quarter" // 旧 face_diagonal を rename (業界標準名)
   | "face_side"
-  | "face_diagonal"
+  // 全身3角度
   | "full_front"
+  | "full_three_quarter"
   | "full_back"
+  // 表情5
   | "expr_default"
-  | "expr_fatigue"
+  | "expr_smile"
   | "expr_focus"
-  | "expr_surprise";
+  | "expr_surprise"
+  | "expr_anger"
+  | "expr_fatigue" // 旧互換、DEFAULT には含めない
+  // LN コミカライズ特有のディテール参照
+  | "eye_closeup"
+  | "hair_detail";
 
 export const DEFAULT_CHARACTER_VARIANTS: CharacterVariantV2[] = [
+  // 顔3角度
   "face_front",
+  "face_three_quarter",
   "face_side",
+  // 全身3角度
   "full_front",
+  "full_three_quarter",
+  "full_back",
+  // 表情5
   "expr_default",
+  "expr_smile",
   "expr_focus",
+  "expr_surprise",
+  "expr_anger",
+  // LN特有2
+  "eye_closeup",
+  "hair_detail",
 ];
 
 export type LocationVariantV2 =
@@ -99,24 +120,38 @@ function buildCharacterRefPrompt(args: {
 
   const poseLine = (() => {
     switch (args.variant) {
+      // 顔3角度
       case "face_front":
         return "Pose: tight head-and-shoulders, FACING THE CAMERA directly. Neutral expression. NO background, plain off-white plate.";
+      case "face_three_quarter":
+        return "Pose: tight head-and-shoulders, EXACT 3/4 angle (45 degrees from front). Neutral expression. NO background.";
       case "face_side":
         return "Pose: tight head-and-shoulders, EXACT 90-degree side profile. Neutral expression. NO background.";
-      case "face_diagonal":
-        return "Pose: tight head-and-shoulders, 3/4 angle (45-degree). Neutral expression. NO background.";
+      // 全身3角度
       case "full_front":
         return "Pose: full body from head to toe, FACING THE CAMERA, arms relaxed, standing on plain off-white plate. NO background, NO props beyond what is part of the outfit.";
+      case "full_three_quarter":
+        return "Pose: full body from head to toe at 3/4 angle (45 degrees from front), arms relaxed, weight on one leg, standing on plain off-white plate. NO background, NO extra props.";
       case "full_back":
         return "Pose: full body from head to toe, BACK VIEW (camera behind the character), arms relaxed, standing on plain off-white plate. NO background.";
+      // 表情 (head-and-shoulders, neutral pose, 表情のみ変える)
       case "expr_default":
-        return "Framing: tight head-and-shoulders. Expression: the character's DEFAULT neutral resting face. NO background.";
-      case "expr_fatigue":
-        return "Framing: tight head-and-shoulders. Expression: tired, slight half-closed eyes, relaxed mouth. NO background.";
+        return "Framing: tight head-and-shoulders, front view. Expression: the character's DEFAULT neutral resting face, eyes relaxed and open, mouth slightly closed. NO background.";
+      case "expr_smile":
+        return "Framing: tight head-and-shoulders, front view. Expression: warm gentle SMILE, eyes slightly curved into crescents, soft cheek lift, mouth corners up. NO background.";
       case "expr_focus":
-        return "Framing: tight head-and-shoulders. Expression: sharp focused eyes, slightly tense brow, mouth firm. NO background.";
+        return "Framing: tight head-and-shoulders, front view. Expression: sharp FOCUSED eyes, slightly tense brow, mouth firm and determined. NO background.";
       case "expr_surprise":
-        return "Framing: tight head-and-shoulders. Expression: clear surprise, eyes wide, mouth slightly open. NO background.";
+        return "Framing: tight head-and-shoulders, front view. Expression: clear SURPRISE, eyes wide open with visible whites, eyebrows raised, mouth slightly open. NO background.";
+      case "expr_anger":
+        return "Framing: tight head-and-shoulders, front view. Expression: ANGER, brows pulled down and together, narrowed eyes, jaw set, mouth firm or slightly open with tension. NO background.";
+      case "expr_fatigue":
+        return "Framing: tight head-and-shoulders, front view. Expression: tired/fatigue, half-closed heavy eyes, slight bags under eyes, mouth relaxed. NO background.";
+      // LN コミカライズ特有のディテール参照
+      case "eye_closeup":
+        return "Framing: EXTREME close-up of EYES ONLY (forehead to upper cheek, both eyes visible). Show iris, pupil, eyelashes drawn one by one, and 2-3 distinct circular/star-shaped catchlight highlights per eye in the light novel comicalization convention. Neutral expression. NO background, plain off-white plate.";
+      case "hair_detail":
+        return "Framing: close-up of hair section (top of head and bangs, no full face needed). Show individual hair strands flowing, screentone gradient for color value, fine highlight reflections along the flow. NO background, plain off-white plate.";
     }
   })();
 
@@ -250,8 +285,9 @@ export type GenerateRefsOptions = {
   imageTimeoutMs?: number;
   /** 既に存在する PNG はスキップ */
   skipExisting?: boolean;
-  /** style plate PNG の絶対パス。指定時は generateMangaImage の referenceImagePaths に注入し、画風を一致させる */
-  stylePlatePath?: string | null;
+  /** style plate PNG 群の絶対パス配列。指定時は generateMangaImage の referenceImagePaths に注入し、画風を一致させる。
+   *  ディレクトリ運用 (data/manga/style-plates/{art_style}/*.png) の全枚数を渡せる */
+  stylePlatePaths?: string[];
 };
 
 async function existsAndNonEmpty(p: string, minBytes = 50_000): Promise<boolean> {
@@ -317,10 +353,13 @@ export async function generateCharacterRefsForBible(opts: GenerateRefsOptions & 
       styleDirectives: opts.snapshot.style_directives,
     });
 
+    // サイズ:
+    //   face_*/expr_*/eye_closeup/hair_detail → square (1024x1024)
+    //   full_*  (full_front, full_three_quarter, full_back) → character_ref (1024x1536)
     const size =
-      variant.startsWith("face_") || variant.startsWith("expr_")
-        ? MANGA_SIZE_PRESETS.panel_square
-        : MANGA_SIZE_PRESETS.character_ref;
+      variant.startsWith("full_")
+        ? MANGA_SIZE_PRESETS.character_ref
+        : MANGA_SIZE_PRESETS.panel_square;
 
     try {
       console.log(`[L02] gen ${char.id}/${variant}...`);
@@ -328,7 +367,7 @@ export async function generateCharacterRefsForBible(opts: GenerateRefsOptions & 
         prompt,
         outputPath: outPath,
         size,
-        referenceImagePaths: opts.stylePlatePath ? [opts.stylePlatePath] : undefined,
+        referenceImagePaths: opts.stylePlatePaths && opts.stylePlatePaths.length > 0 ? opts.stylePlatePaths : undefined,
         timeoutMs: opts.imageTimeoutMs ?? 5 * 60 * 1000,
         maxRetries: 1,
       });
@@ -390,7 +429,7 @@ export async function generateLocationRefsForBible(opts: GenerateRefsOptions & {
         prompt,
         outputPath: outPath,
         size,
-        referenceImagePaths: opts.stylePlatePath ? [opts.stylePlatePath] : undefined,
+        referenceImagePaths: opts.stylePlatePaths && opts.stylePlatePaths.length > 0 ? opts.stylePlatePaths : undefined,
         timeoutMs: opts.imageTimeoutMs ?? 5 * 60 * 1000,
         maxRetries: 1,
       });
@@ -450,7 +489,7 @@ export async function generatePropRefsForBible(opts: GenerateRefsOptions & {
         prompt,
         outputPath: outPath,
         size: MANGA_SIZE_PRESETS.panel_square,
-        referenceImagePaths: opts.stylePlatePath ? [opts.stylePlatePath] : undefined,
+        referenceImagePaths: opts.stylePlatePaths && opts.stylePlatePaths.length > 0 ? opts.stylePlatePaths : undefined,
         timeoutMs: opts.imageTimeoutMs ?? 5 * 60 * 1000,
         maxRetries: 1,
       });

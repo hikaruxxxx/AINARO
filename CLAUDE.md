@@ -85,6 +85,12 @@ AINARO の `src/` `scripts/` を編集する作業は、原則として以下の
 - 緊急修正: コミットメッセージに `[skip-review]` を含める
 - レビュー済み手動マーキング: `echo ok > /tmp/ainaro-codex-reviewed-$(git rev-parse HEAD)`
 
+## Novelis Console (漫画 ops UI)
+- 起動: `npm run console`（引数なしで作品一覧、`-- --slug X --episode N` で scope 固定起動）
+- URL: http://localhost:5174/  (health: `/api/health`)
+- ユーザが「Novelis Console 開いて」と言ったら `/novelis-console` slash command を実行（health check → 必要なら起動 → `open`）
+- launchd 常駐は Phase 2 で導入予定。現状は本コマンドが起動口
+
 ## ディレクトリ構成
 - docs/ — 事業計画・設計ドキュメント（strategy/, architecture/）
 - src/ — Next.js App Routerの標準構成
