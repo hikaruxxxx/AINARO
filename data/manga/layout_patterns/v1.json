@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
-  "page_dimensions": { "width": 1748, "height": 2480 },
+  "page_dimensions": {
+    "width": 1748,
+    "height": 2480
+  },
   "page_margin": 60,
   "page_gutter": 20,
   "generated_at": "2026-05-06",
@@ -11,20 +14,55 @@
       "id": "pat_001_3tier_dialogue_5",
       "name": "3段標準ダイアログ5コマ",
       "panel_count": 5,
-      "page_role_hints": ["dialogue", "buildup", "character_intro", "domestic"],
+      "page_role_hints": [
+        "dialogue",
+        "buildup",
+        "character_intro",
+        "domestic"
+      ],
       "subtype_hints": [],
       "purpose_summary": "情報密度一定の会話・関係性進展をテンポ良く流す3段rect安定形",
       "trigger_conditions": "page_role∈{dialogue,buildup,character_intro,domestic} かつ panel_count∈[3,5] かつ importance_max≤3 かつ no action/reveal beat",
       "frequency": "high",
-      "example_pages": [16, 21, 66, 67, 76, 99, 131, 141],
-      "features": ["bubble_breakout_常時", "size_hierarchy_medium", "全rect3段組"],
+      "example_pages": [
+        16,
+        21,
+        66,
+        67,
+        76,
+        99,
+        131,
+        141
+      ],
+      "features": [
+        "bubble_breakout_常時",
+        "size_hierarchy_medium",
+        "全rect3段組"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "establishing_conversation",
           "size_class": "medium",
-          "polygon": [[864, 60], [1688, 60], [1688, 740], [864, 740]],
+          "polygon": [
+            [
+              864,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              740
+            ],
+            [
+              864,
+              740
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -33,7 +71,24 @@
           "reading_order": 2,
           "role_hint": "dialogue_progression",
           "size_class": "medium",
-          "polygon": [[60, 60], [844, 60], [844, 740], [60, 740]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              844,
+              60
+            ],
+            [
+              844,
+              740
+            ],
+            [
+              60,
+              740
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -42,7 +97,24 @@
           "reading_order": 3,
           "role_hint": "establishing_object",
           "size_class": "large",
-          "polygon": [[60, 760], [1688, 760], [1688, 1540], [60, 1540]],
+          "polygon": [
+            [
+              60,
+              760
+            ],
+            [
+              1688,
+              760
+            ],
+            [
+              1688,
+              1540
+            ],
+            [
+              60,
+              1540
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -51,7 +123,24 @@
           "reading_order": 4,
           "role_hint": "dialogue_progression",
           "size_class": "medium",
-          "polygon": [[864, 1560], [1688, 1560], [1688, 2420], [864, 2420]],
+          "polygon": [
+            [
+              864,
+              1560
+            ],
+            [
+              1688,
+              1560
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              864,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -60,7 +149,24 @@
           "reading_order": 5,
           "role_hint": "reaction",
           "size_class": "medium",
-          "polygon": [[60, 1560], [844, 1560], [844, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1560
+            ],
+            [
+              844,
+              1560
+            ],
+            [
+              844,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -70,23 +176,60 @@
       "id": "pat_002_diag_split_two_shot_1",
       "name": "斜め分断ツーショット扉",
       "panel_count": 1,
-      "page_role_hints": ["iconic", "cliffhanger", "fated_meeting"],
+      "page_role_hints": [
+        "iconic",
+        "cliffhanger",
+        "fated_meeting"
+      ],
       "subtype_hints": [],
       "purpose_summary": "二者の関係性が決定的に変わる瞬間を1ページで象徴的に切り取る扉ページ",
       "trigger_conditions": "page_role∈{iconic,cliffhanger,fated_meeting} かつ character_count=2 かつ emotional_tension=high かつ chapter_boundary OR scene_pivot",
       "frequency": "rare",
-      "example_pages": [86],
-      "features": ["full_bleed", "斜め分断による2分割", "panel自体は1枚"],
+      "example_pages": [
+        86
+      ],
+      "features": [
+        "full_bleed",
+        "斜め分断による2分割",
+        "panel自体は1枚"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "relational_pivot",
           "size_class": "xx_large",
-          "polygon": [[0, 0], [1748, 0], [1748, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
           "bleed": true,
-          "internal_diagonal_split": [[0, 800], [1748, 1700]]
+          "internal_diagonal_split": [
+            [
+              0,
+              800
+            ],
+            [
+              1748,
+              1700
+            ]
+          ],
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -94,20 +237,51 @@
       "id": "pat_003_extreme_hero_action_2",
       "name": "ヒーローアクション縦長大コマ",
       "panel_count": 3,
-      "page_role_hints": ["action_attack", "hero_pose", "decisive_strike"],
+      "page_role_hints": [
+        "action_attack",
+        "hero_pose",
+        "decisive_strike"
+      ],
       "subtype_hints": [],
       "purpose_summary": "主人公の決定的アクション瞬間を atmospheric 大コマでページの主役に",
       "trigger_conditions": "page_role∈{action_attack,hero_pose,decisive_strike} かつ importance_max∈[4,5] かつ single_protagonist_focus かつ beat=impact_moment",
       "frequency": "medium-high",
-      "example_pages": [11, 12, 23, 152],
-      "features": ["強烈speedline", "SFX多用", "breakout頻発", "atmospheric_hero"],
+      "example_pages": [
+        11,
+        12,
+        23,
+        152
+      ],
+      "features": [
+        "強烈speedline",
+        "SFX多用",
+        "breakout頻発",
+        "atmospheric_hero"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "reaction_setup",
           "size_class": "small",
-          "polygon": [[60, 60], [560, 60], [560, 700], [60, 700]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              560,
+              60
+            ],
+            [
+              560,
+              700
+            ],
+            [
+              60,
+              700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -116,18 +290,54 @@
           "reading_order": 2,
           "role_hint": "action_buildup",
           "size_class": "medium",
-          "polygon": [[580, 60], [1688, 60], [1688, 1100], [580, 1100]],
+          "polygon": [
+            [
+              580,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              1100
+            ],
+            [
+              580,
+              1100
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "action_focus",
           "size_class": "extra_large",
-          "polygon": [[0, 1120], [1748, 1120], [1748, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              1120
+            ],
+            [
+              1748,
+              1120
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -135,29 +345,78 @@
       "id": "pat_004_atmospheric_establishing_2",
       "name": "アトモスフェリック・エスタブリッシング",
       "panel_count": 3,
-      "page_role_hints": ["establishing", "scene_transition", "chapter_opening", "world_reveal"],
+      "page_role_hints": [
+        "establishing",
+        "scene_transition",
+        "chapter_opening",
+        "world_reveal"
+      ],
       "subtype_hints": [],
       "purpose_summary": "新場所・新章の空間スケールをatmospheric+bleedで読者に浸す",
       "trigger_conditions": "page_role∈{establishing,scene_transition,chapter_opening} かつ new_location_or_time かつ panel_count∈[2,4]",
       "frequency": "medium",
-      "example_pages": [7, 36, 66, 136],
-      "features": ["上段atmospheric_bleed", "下段small_reactions", "境界線消失"],
+      "example_pages": [
+        7,
+        36,
+        66,
+        136
+      ],
+      "features": [
+        "上段atmospheric_bleed",
+        "下段small_reactions",
+        "境界線消失"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "establishing",
           "size_class": "extra_large",
-          "polygon": [[0, 0], [1748, 0], [1748, 1500], [0, 1500]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              1500
+            ],
+            [
+              0,
+              1500
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "reaction",
           "size_class": "small",
-          "polygon": [[864, 1520], [1688, 1520], [1688, 2420], [864, 2420]],
+          "polygon": [
+            [
+              864,
+              1520
+            ],
+            [
+              1688,
+              1520
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              864,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -166,9 +425,27 @@
           "reading_order": 3,
           "role_hint": "atmospheric_progression",
           "size_class": "small",
-          "polygon": [[60, 1520], [844, 1520], [844, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1520
+            ],
+            [
+              844,
+              1520
+            ],
+            [
+              844,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -176,22 +453,53 @@
       "id": "pat_005_full_bleed_single",
       "name": "フルブリード1コマ",
       "panel_count": 1,
-      "page_role_hints": ["cover", "chapter_door", "world_climax_reveal", "final_destination"],
+      "page_role_hints": [
+        "cover",
+        "chapter_door",
+        "world_climax_reveal",
+        "final_destination"
+      ],
       "subtype_hints": [],
       "purpose_summary": "物語スケールのclimaxまたは扉を画面いっぱいで提示",
       "trigger_conditions": "page_role∈{cover,chapter_door,world_climax_reveal} かつ scale=world_or_arena かつ no_dialogue_required",
       "frequency": "rare",
-      "example_pages": [1, 103, 150],
-      "features": ["full_bleed", "panel境界完全消失", "spectacle_reveal"],
+      "example_pages": [
+        1,
+        103,
+        150
+      ],
+      "features": [
+        "full_bleed",
+        "panel境界完全消失",
+        "spectacle_reveal"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "spectacle_reveal",
           "size_class": "xx_large",
-          "polygon": [[0, 0], [1748, 0], [1748, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -199,20 +507,50 @@
       "id": "pat_006_pure_dialogue_dump_3",
       "name": "純台詞ダンプ3段",
       "panel_count": 3,
-      "page_role_hints": ["dialogue_dump", "explanation", "rule_introduction", "mechanism_reveal"],
+      "page_role_hints": [
+        "dialogue_dump",
+        "explanation",
+        "rule_introduction",
+        "mechanism_reveal"
+      ],
       "subtype_hints": [],
       "purpose_summary": "世界観ルール・スキル説明を吹き出し主体で読み込ませる",
       "trigger_conditions": "page_role∈{dialogue_dump,explanation,rule_introduction} かつ text_volume=high かつ no_action_beat かつ speaker_count≤3",
       "frequency": "medium",
-      "example_pages": [17, 51, 121],
-      "features": ["bubble_breakout_5plus", "panel面積の大半が吹き出し", "size_hierarchy_medium"],
+      "example_pages": [
+        17,
+        51,
+        121
+      ],
+      "features": [
+        "bubble_breakout_5plus",
+        "panel面積の大半が吹き出し",
+        "size_hierarchy_medium"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "dialogue_setup",
           "size_class": "medium",
-          "polygon": [[60, 60], [1688, 60], [1688, 800], [60, 800]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              800
+            ],
+            [
+              60,
+              800
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -221,7 +559,24 @@
           "reading_order": 2,
           "role_hint": "dialogue_focus",
           "size_class": "large",
-          "polygon": [[60, 820], [1688, 820], [1688, 1600], [60, 1600]],
+          "polygon": [
+            [
+              60,
+              820
+            ],
+            [
+              1688,
+              820
+            ],
+            [
+              1688,
+              1600
+            ],
+            [
+              60,
+              1600
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -230,7 +585,24 @@
           "reading_order": 3,
           "role_hint": "dialogue_resolution",
           "size_class": "large",
-          "polygon": [[60, 1620], [1688, 1620], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1620
+            ],
+            [
+              1688,
+              1620
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -240,29 +612,80 @@
       "id": "pat_007_information_dense_complex",
       "name": "情報密集コンプレックス",
       "panel_count": 7,
-      "page_role_hints": ["information_briefing", "monster_index", "gear_catalog", "lore_summary"],
-      "subtype_hints": ["gacha_ui", "external_social", "hybrid"],
+      "page_role_hints": [
+        "information_briefing",
+        "monster_index",
+        "gear_catalog",
+        "lore_summary"
+      ],
+      "subtype_hints": [
+        "gacha_ui",
+        "external_social",
+        "hybrid"
+      ],
       "purpose_summary": "複数項目を両端縦長anchor + 中央dense rect群でカタログ的に提示",
       "trigger_conditions": "page_role∈{information_briefing,monster_index,gear_catalog} かつ item_count≥4 かつ panel_count∈[5,8]",
       "frequency": "medium",
-      "example_pages": [56, 99],
-      "features": ["両端縦長atmospheric", "中央小rect群", "size_hierarchy_extreme_dense"],
+      "example_pages": [
+        56,
+        99
+      ],
+      "features": [
+        "両端縦長atmospheric",
+        "中央小rect群",
+        "size_hierarchy_extreme_dense"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "atmospheric_anchor_right",
           "size_class": "large",
-          "polygon": [[1300, 0], [1748, 0], [1748, 2480], [1300, 2480]],
+          "polygon": [
+            [
+              1300,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              1300,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "info_tile",
           "size_class": "small",
-          "polygon": [[860, 60], [1280, 60], [1280, 600], [860, 600]],
+          "polygon": [
+            [
+              860,
+              60
+            ],
+            [
+              1280,
+              60
+            ],
+            [
+              1280,
+              600
+            ],
+            [
+              860,
+              600
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -271,7 +694,24 @@
           "reading_order": 3,
           "role_hint": "info_tile",
           "size_class": "small",
-          "polygon": [[440, 60], [840, 60], [840, 600], [440, 600]],
+          "polygon": [
+            [
+              440,
+              60
+            ],
+            [
+              840,
+              60
+            ],
+            [
+              840,
+              600
+            ],
+            [
+              440,
+              600
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -280,7 +720,24 @@
           "reading_order": 4,
           "role_hint": "info_tile",
           "size_class": "small",
-          "polygon": [[440, 620], [1280, 620], [1280, 1180], [440, 1180]],
+          "polygon": [
+            [
+              440,
+              620
+            ],
+            [
+              1280,
+              620
+            ],
+            [
+              1280,
+              1180
+            ],
+            [
+              440,
+              1180
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -289,7 +746,24 @@
           "reading_order": 5,
           "role_hint": "info_tile",
           "size_class": "small",
-          "polygon": [[440, 1200], [1280, 1200], [1280, 1760], [440, 1760]],
+          "polygon": [
+            [
+              440,
+              1200
+            ],
+            [
+              1280,
+              1200
+            ],
+            [
+              1280,
+              1760
+            ],
+            [
+              440,
+              1760
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -298,7 +772,24 @@
           "reading_order": 6,
           "role_hint": "info_tile",
           "size_class": "small",
-          "polygon": [[440, 1780], [1280, 1780], [1280, 2420], [440, 2420]],
+          "polygon": [
+            [
+              440,
+              1780
+            ],
+            [
+              1280,
+              1780
+            ],
+            [
+              1280,
+              2420
+            ],
+            [
+              440,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -307,9 +798,27 @@
           "reading_order": 7,
           "role_hint": "atmospheric_anchor_left",
           "size_class": "large",
-          "polygon": [[0, 0], [420, 0], [420, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              420,
+              0
+            ],
+            [
+              420,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -317,38 +826,108 @@
       "id": "pat_008_ui_overlay_status",
       "name": "UIステータスオーバーレイ",
       "panel_count": 4,
-      "page_role_hints": ["ui_information", "power_check", "status_check", "skill_acquisition"],
-      "subtype_hints": ["gacha_ui", "hybrid"],
+      "page_role_hints": [
+        "ui_information",
+        "power_check",
+        "status_check",
+        "skill_acquisition"
+      ],
+      "subtype_hints": [
+        "gacha_ui",
+        "hybrid"
+      ],
       "purpose_summary": "ステータス画面・メニューUIをそのままpanel化、subtype=gacha_uiの中核",
       "trigger_conditions": "bible.subtype∈{gacha_ui,hybrid} かつ beat∈{status_check,skill_acquisition,gacha_pull,level_up} かつ has_numeric_data",
       "frequency": "medium",
-      "example_pages": [26, 39, 40],
-      "features": ["UI_frame_panel", "zoom_panel", "reaction_panel", "SFXフォン"],
+      "example_pages": [
+        26,
+        39,
+        40
+      ],
+      "features": [
+        "UI_frame_panel",
+        "zoom_panel",
+        "reaction_panel",
+        "SFXフォン"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "ui_frame",
           "size_class": "large",
-          "polygon": [[140, 60], [1688, 60], [1688, 920], [140, 920]],
+          "polygon": [
+            [
+              140,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              920
+            ],
+            [
+              140,
+              920
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "floating_ui"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "atmospheric_zoom_text",
           "size_class": "large",
-          "polygon": [[0, 940], [1100, 940], [1100, 1700], [0, 1700]],
+          "polygon": [
+            [
+              0,
+              940
+            ],
+            [
+              1100,
+              940
+            ],
+            [
+              1100,
+              1700
+            ],
+            [
+              0,
+              1700
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "reaction",
           "size_class": "medium",
-          "polygon": [[1120, 940], [1688, 940], [1688, 1700], [1120, 1700]],
+          "polygon": [
+            [
+              1120,
+              940
+            ],
+            [
+              1688,
+              940
+            ],
+            [
+              1688,
+              1700
+            ],
+            [
+              1120,
+              1700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -357,7 +936,24 @@
           "reading_order": 4,
           "role_hint": "reaction_dialogue",
           "size_class": "medium",
-          "polygon": [[60, 1720], [1688, 1720], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1720
+            ],
+            [
+              1688,
+              1720
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -367,20 +963,52 @@
       "id": "pat_009_extreme_close_emotion_3",
       "name": "感情ピーク超クローズアップ",
       "panel_count": 4,
-      "page_role_hints": ["reveal", "emotion_internal", "shock", "awakening"],
+      "page_role_hints": [
+        "reveal",
+        "emotion_internal",
+        "shock",
+        "awakening"
+      ],
       "subtype_hints": [],
       "purpose_summary": "キャラの内的衝撃ピークを目・口の超アップで切り出す",
       "trigger_conditions": "page_role∈{reveal,emotion_internal,shock,awakening} かつ emotion_intensity≥4 かつ has_face_close_target かつ beat=internal_peak",
       "frequency": "medium-high",
-      "example_pages": [31, 46, 85, 96, 127],
-      "features": ["顔/目の局所close", "atmospheric_背景消失", "SFX大文字floating"],
+      "example_pages": [
+        31,
+        46,
+        85,
+        96,
+        127
+      ],
+      "features": [
+        "顔/目の局所close",
+        "atmospheric_背景消失",
+        "SFX大文字floating"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "dialogue_setup",
           "size_class": "medium",
-          "polygon": [[60, 60], [1688, 60], [1688, 720], [60, 720]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              720
+            ],
+            [
+              60,
+              720
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -389,25 +1017,78 @@
           "reading_order": 2,
           "role_hint": "emotion_close",
           "size_class": "large",
-          "polygon": [[864, 740], [1688, 740], [1688, 1620], [864, 1620]],
+          "polygon": [
+            [
+              864,
+              740
+            ],
+            [
+              1688,
+              740
+            ],
+            [
+              1688,
+              1620
+            ],
+            [
+              864,
+              1620
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "atmospheric_eye_close",
           "size_class": "large",
-          "polygon": [[60, 740], [844, 740], [844, 1620], [60, 1620]],
+          "polygon": [
+            [
+              60,
+              740
+            ],
+            [
+              844,
+              740
+            ],
+            [
+              844,
+              1620
+            ],
+            [
+              60,
+              1620
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s4",
           "reading_order": 4,
           "role_hint": "reaction_resolution",
           "size_class": "medium",
-          "polygon": [[60, 1640], [1688, 1640], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1640
+            ],
+            [
+              1688,
+              1640
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -417,20 +1098,49 @@
       "id": "pat_010_diag_speedline_combat_3",
       "name": "斜め速度線コンバット",
       "panel_count": 4,
-      "page_role_hints": ["action_combat", "chase", "brawl"],
+      "page_role_hints": [
+        "action_combat",
+        "chase",
+        "brawl"
+      ],
       "subtype_hints": [],
       "purpose_summary": "連続交戦・追跡を斜め speedline + reaction strip で1ページに圧縮",
       "trigger_conditions": "page_role∈{action_combat,chase,brawl} かつ duration_beats≥2 かつ multiple_actors_in_motion",
       "frequency": "medium",
-      "example_pages": [101, 111, 116],
-      "features": ["diagonal_effect_lines", "multi_SFX", "全方位breakout"],
+      "example_pages": [
+        101,
+        111,
+        116
+      ],
+      "features": [
+        "diagonal_effect_lines",
+        "multi_SFX",
+        "全方位breakout"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "reaction_strip",
           "size_class": "small",
-          "polygon": [[60, 60], [580, 60], [580, 700], [60, 700]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              580,
+              60
+            ],
+            [
+              580,
+              700
+            ],
+            [
+              60,
+              700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -439,27 +1149,81 @@
           "reading_order": 2,
           "role_hint": "action_setup",
           "size_class": "medium",
-          "polygon": [[600, 60], [1688, 60], [1688, 700], [600, 700]],
+          "polygon": [
+            [
+              600,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              700
+            ],
+            [
+              600,
+              700
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "atmospheric_micro",
           "size_class": "small",
-          "polygon": [[60, 720], [380, 720], [380, 1080], [60, 1080]],
+          "polygon": [
+            [
+              60,
+              720
+            ],
+            [
+              380,
+              720
+            ],
+            [
+              380,
+              1080
+            ],
+            [
+              60,
+              1080
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s4",
           "reading_order": 4,
           "role_hint": "action_focus",
           "size_class": "extra_large",
-          "polygon": [[0, 1100], [1748, 1100], [1748, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              1100
+            ],
+            [
+              1748,
+              1100
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -467,20 +1231,47 @@
       "id": "pat_011_l_shape_inset_5",
       "name": "L字嵌込インセット",
       "panel_count": 6,
-      "page_role_hints": ["action", "reaction_combo"],
+      "page_role_hints": [
+        "action",
+        "reaction_combo"
+      ],
       "subtype_hints": [],
       "purpose_summary": "大コマに小コマを嵌め込み、動作と同時反応を同一フレーム時間で描く",
       "trigger_conditions": "action_beat かつ simultaneous_reaction_beat かつ temporal_collapse_required かつ panel_count∈[5,7]",
       "frequency": "rare-medium",
-      "example_pages": [127, 145],
-      "features": ["L字_panel", "inset_rect", "大→小読み順"],
+      "example_pages": [
+        127,
+        145
+      ],
+      "features": [
+        "L字_panel",
+        "inset_rect",
+        "大→小読み順"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "establishing_dialogue",
           "size_class": "medium",
-          "polygon": [[864, 60], [1688, 60], [1688, 700], [864, 700]],
+          "polygon": [
+            [
+              864,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              700
+            ],
+            [
+              864,
+              700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -489,16 +1280,59 @@
           "reading_order": 2,
           "role_hint": "atmospheric_full_body",
           "size_class": "medium",
-          "polygon": [[60, 60], [844, 60], [844, 700], [60, 700]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              844,
+              60
+            ],
+            [
+              844,
+              700
+            ],
+            [
+              60,
+              700
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "main_action",
           "size_class": "large",
-          "polygon": [[60, 720], [1688, 720], [1688, 1560], [400, 1560], [400, 1240], [60, 1240]],
+          "polygon": [
+            [
+              60,
+              720
+            ],
+            [
+              1688,
+              720
+            ],
+            [
+              1688,
+              1560
+            ],
+            [
+              400,
+              1560
+            ],
+            [
+              400,
+              1240
+            ],
+            [
+              60,
+              1240
+            ]
+          ],
           "is_borderless": false,
           "bleed": false,
           "shape_type": "L_shape"
@@ -508,7 +1342,24 @@
           "reading_order": 4,
           "role_hint": "inset_reaction",
           "size_class": "small",
-          "polygon": [[60, 1260], [380, 1260], [380, 1560], [60, 1560]],
+          "polygon": [
+            [
+              60,
+              1260
+            ],
+            [
+              380,
+              1260
+            ],
+            [
+              380,
+              1560
+            ],
+            [
+              60,
+              1560
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -517,7 +1368,24 @@
           "reading_order": 5,
           "role_hint": "reaction_dialogue",
           "size_class": "small",
-          "polygon": [[60, 1580], [844, 1580], [844, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1580
+            ],
+            [
+              844,
+              1580
+            ],
+            [
+              844,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -526,7 +1394,24 @@
           "reading_order": 6,
           "role_hint": "result_focus",
           "size_class": "medium",
-          "polygon": [[864, 1580], [1688, 1580], [1688, 2420], [864, 2420]],
+          "polygon": [
+            [
+              864,
+              1580
+            ],
+            [
+              1688,
+              1580
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              864,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -536,40 +1421,104 @@
       "id": "pat_012_horizontal_strip_focus_3",
       "name": "横3並列ストリップ",
       "panel_count": 3,
-      "page_role_hints": ["reaction_trio", "focus_compression", "micro_montage"],
+      "page_role_hints": [
+        "reaction_trio",
+        "focus_compression",
+        "micro_montage"
+      ],
       "subtype_hints": [],
       "purpose_summary": "3キャラの同時反応または1キャラの連続3瞬間をflat並列で示す",
       "trigger_conditions": "page_role∈{reaction_trio,focus_compression,micro_montage} かつ (actor_count=3 OR same_actor_in_3_moments) かつ no_dominant_panel",
       "frequency": "rare",
-      "example_pages": [146],
-      "features": ["flat_size_hierarchy", "atmospheric_or_silhouette", "全panel等幅"],
+      "example_pages": [
+        146
+      ],
+      "features": [
+        "flat_size_hierarchy",
+        "atmospheric_or_silhouette",
+        "全panel等幅"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "parallel_reaction_a",
           "size_class": "medium",
-          "polygon": [[1162, 60], [1688, 60], [1688, 2420], [1162, 2420]],
+          "polygon": [
+            [
+              1162,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              1162,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "parallel_reaction_b",
           "size_class": "medium",
-          "polygon": [[612, 60], [1142, 60], [1142, 2420], [612, 2420]],
+          "polygon": [
+            [
+              612,
+              60
+            ],
+            [
+              1142,
+              60
+            ],
+            [
+              1142,
+              2420
+            ],
+            [
+              612,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "parallel_reaction_c",
           "size_class": "medium",
-          "polygon": [[60, 60], [592, 60], [592, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              592,
+              60
+            ],
+            [
+              592,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -577,31 +1526,78 @@
       "id": "pat_013_two_shot_iconic_2",
       "name": "ツーショット象徴並置",
       "panel_count": 2,
-      "page_role_hints": ["character_introduction", "heroine_reveal", "rival_appearance"],
+      "page_role_hints": [
+        "character_introduction",
+        "heroine_reveal",
+        "rival_appearance"
+      ],
       "subtype_hints": [],
       "purpose_summary": "重要キャラ初登場をclose-up顔+全身の対比で同時提示",
       "trigger_conditions": "page_role∈{character_introduction,heroine_reveal,rival_appearance} かつ first_appearance かつ role∈{main,supporting_critical}",
       "frequency": "medium",
-      "example_pages": [85, 87],
-      "features": ["balanced_extreme", "left_close+right_full_body", "iconic_reference"],
+      "example_pages": [
+        85,
+        87
+      ],
+      "features": [
+        "balanced_extreme",
+        "left_close+right_full_body",
+        "iconic_reference"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "presence_full_body",
           "size_class": "extra_large",
-          "polygon": [[884, 0], [1748, 0], [1748, 2480], [884, 2480]],
+          "polygon": [
+            [
+              884,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              884,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "emotion_close_up",
           "size_class": "extra_large",
-          "polygon": [[0, 0], [864, 0], [864, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              864,
+              0
+            ],
+            [
+              864,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -609,29 +1605,77 @@
       "id": "pat_014_atmospheric_text_background_4",
       "name": "巨大文字背景アトモスフェリック",
       "panel_count": 4,
-      "page_role_hints": ["emotional_revelation", "obsession", "status_realization"],
-      "subtype_hints": ["gacha_ui"],
+      "page_role_hints": [
+        "emotional_revelation",
+        "obsession",
+        "status_realization"
+      ],
+      "subtype_hints": [
+        "gacha_ui"
+      ],
       "purpose_summary": "特定の言葉・数字を panel 外までブリードさせ、内面執着を物理化",
       "trigger_conditions": "page_role∈{emotional_revelation,obsession,status_realization} かつ has_specific_word_or_number_to_emphasize かつ character_internal_focus",
       "frequency": "rare",
-      "example_pages": [26, 96],
-      "features": ["巨大背景文字_typography", "atmospheric_bleed", "通常rect+背景文字レイヤー"],
+      "example_pages": [
+        26,
+        96
+      ],
+      "features": [
+        "巨大背景文字_typography",
+        "atmospheric_bleed",
+        "通常rect+背景文字レイヤー"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "atmospheric_giant_text",
           "size_class": "extra_large",
-          "polygon": [[0, 0], [1748, 0], [1748, 1500], [0, 1500]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              1500
+            ],
+            [
+              0,
+              1500
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "dialogue_progression",
           "size_class": "medium",
-          "polygon": [[864, 1520], [1688, 1520], [1688, 1980], [864, 1980]],
+          "polygon": [
+            [
+              864,
+              1520
+            ],
+            [
+              1688,
+              1520
+            ],
+            [
+              1688,
+              1980
+            ],
+            [
+              864,
+              1980
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -640,7 +1684,24 @@
           "reading_order": 3,
           "role_hint": "reaction",
           "size_class": "medium",
-          "polygon": [[60, 1520], [844, 1520], [844, 1980], [60, 1980]],
+          "polygon": [
+            [
+              60,
+              1520
+            ],
+            [
+              844,
+              1520
+            ],
+            [
+              844,
+              1980
+            ],
+            [
+              60,
+              1980
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -649,7 +1710,24 @@
           "reading_order": 4,
           "role_hint": "internal_resolution",
           "size_class": "medium",
-          "polygon": [[60, 2000], [1688, 2000], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              2000
+            ],
+            [
+              1688,
+              2000
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -659,20 +1737,51 @@
       "id": "pat_015_label_strip_decor_4",
       "name": "看板/ロゴ装飾帯",
       "panel_count": 4,
-      "page_role_hints": ["dialogue", "domestic", "daily_life"],
-      "subtype_hints": ["external_social", "hybrid"],
+      "page_role_hints": [
+        "dialogue",
+        "domestic",
+        "daily_life"
+      ],
+      "subtype_hints": [
+        "external_social",
+        "hybrid"
+      ],
       "purpose_summary": "世界観装飾(ブランド名・看板)を細長帯panelとして挿入しreality底上げ",
       "trigger_conditions": "page_role∈{dialogue,domestic,daily_life} かつ has_world_texture_artifact かつ beat_intensity≤2",
       "frequency": "rare",
-      "example_pages": [67, 71],
-      "features": ["細長帯panel", "ロゴ/看板/データプレート", "通常rect+装飾帯混在"],
+      "example_pages": [
+        67,
+        71
+      ],
+      "features": [
+        "細長帯panel",
+        "ロゴ/看板/データプレート",
+        "通常rect+装飾帯混在"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "establishing_dialogue",
           "size_class": "medium",
-          "polygon": [[60, 60], [1688, 60], [1688, 720], [60, 720]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              720
+            ],
+            [
+              60,
+              720
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -681,7 +1790,24 @@
           "reading_order": 2,
           "role_hint": "label_strip_decor",
           "size_class": "small",
-          "polygon": [[60, 740], [1688, 740], [1688, 1020], [60, 1020]],
+          "polygon": [
+            [
+              60,
+              740
+            ],
+            [
+              1688,
+              740
+            ],
+            [
+              1688,
+              1020
+            ],
+            [
+              60,
+              1020
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -690,7 +1816,24 @@
           "reading_order": 3,
           "role_hint": "dialogue_progression",
           "size_class": "large",
-          "polygon": [[60, 1040], [1688, 1040], [1688, 1820], [60, 1820]],
+          "polygon": [
+            [
+              60,
+              1040
+            ],
+            [
+              1688,
+              1040
+            ],
+            [
+              1688,
+              1820
+            ],
+            [
+              60,
+              1820
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -699,7 +1842,24 @@
           "reading_order": 4,
           "role_hint": "reaction_focus",
           "size_class": "medium",
-          "polygon": [[60, 1840], [1688, 1840], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1840
+            ],
+            [
+              1688,
+              1840
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -709,29 +1869,78 @@
       "id": "pat_016_news_artifact_3",
       "name": "ニュース/書類アーティファクト",
       "panel_count": 4,
-      "page_role_hints": ["aftermath", "external_validation", "public_recognition"],
-      "subtype_hints": ["external_social", "hybrid"],
+      "page_role_hints": [
+        "aftermath",
+        "external_validation",
+        "public_recognition"
+      ],
+      "subtype_hints": [
+        "external_social",
+        "hybrid"
+      ],
       "purpose_summary": "ニュース記事・書類の diegetic artifact を panel 化し外部世界からの認知を示す",
       "trigger_conditions": "bible.subtype∈{external_social,hybrid} かつ beat∈{public_recognition,news_coverage,official_registration} かつ story_event_just_happened",
       "frequency": "rare",
-      "example_pages": [126, 131],
-      "features": ["Web/SNS_UI模写", "diegetic_artifact_panel", "通常rect_dialogue混在"],
+      "example_pages": [
+        126,
+        131
+      ],
+      "features": [
+        "Web/SNS_UI模写",
+        "diegetic_artifact_panel",
+        "通常rect_dialogue混在"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "news_artifact",
           "size_class": "large",
-          "polygon": [[60, 60], [1688, 60], [1688, 940], [60, 940]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              940
+            ],
+            [
+              60,
+              940
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "floating_ui"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "reaction_dialogue",
           "size_class": "small",
-          "polygon": [[1100, 200], [1500, 200], [1500, 460], [1100, 460]],
+          "polygon": [
+            [
+              1100,
+              200
+            ],
+            [
+              1500,
+              200
+            ],
+            [
+              1500,
+              460
+            ],
+            [
+              1100,
+              460
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -740,7 +1949,24 @@
           "reading_order": 3,
           "role_hint": "dialogue_progression",
           "size_class": "medium",
-          "polygon": [[60, 960], [1688, 960], [1688, 1640], [60, 1640]],
+          "polygon": [
+            [
+              60,
+              960
+            ],
+            [
+              1688,
+              960
+            ],
+            [
+              1688,
+              1640
+            ],
+            [
+              60,
+              1640
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -749,7 +1975,24 @@
           "reading_order": 4,
           "role_hint": "reaction_resolution",
           "size_class": "medium",
-          "polygon": [[60, 1660], [1688, 1660], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1660
+            ],
+            [
+              1688,
+              1660
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -759,32 +2002,121 @@
       "id": "pat_017_bubble_panel_power_2",
       "name": "バブル形状スキル発動panel",
       "panel_count": 2,
-      "page_role_hints": ["power_activation", "supernatural", "skill_signature"],
-      "subtype_hints": ["gacha_ui", "hybrid"],
+      "page_role_hints": [
+        "power_activation",
+        "supernatural",
+        "skill_signature"
+      ],
+      "subtype_hints": [
+        "gacha_ui",
+        "hybrid"
+      ],
       "purpose_summary": "スキル発動を panel 形状自体が変形するレベルで象徴化",
       "trigger_conditions": "page_role=power_activation かつ (skill.first_activation OR skill.is_signature) かつ visual_drama_priority=high",
       "frequency": "rare",
-      "example_pages": [40],
-      "features": ["楕円/雲形_bubble_panel", "panel形状_変形", "skill_name_typography"],
+      "example_pages": [
+        40
+      ],
+      "features": [
+        "楕円/雲形_bubble_panel",
+        "panel形状_変形",
+        "skill_name_typography"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "skill_buildup",
           "size_class": "large",
-          "polygon": [[60, 60], [1688, 60], [1688, 1340], [60, 1340]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              1340
+            ],
+            [
+              60,
+              1340
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "skill_activation_bubble",
           "size_class": "extra_large",
-          "polygon": [[40, 1380], [320, 1380], [580, 1440], [820, 1440], [1180, 1380], [1500, 1500], [1700, 1700], [1720, 2000], [1600, 2280], [1300, 2440], [900, 2460], [500, 2440], [180, 2280], [40, 2000]],
+          "polygon": [
+            [
+              40,
+              1380
+            ],
+            [
+              320,
+              1380
+            ],
+            [
+              580,
+              1440
+            ],
+            [
+              820,
+              1440
+            ],
+            [
+              1180,
+              1380
+            ],
+            [
+              1500,
+              1500
+            ],
+            [
+              1700,
+              1700
+            ],
+            [
+              1720,
+              2000
+            ],
+            [
+              1600,
+              2280
+            ],
+            [
+              1300,
+              2440
+            ],
+            [
+              900,
+              2460
+            ],
+            [
+              500,
+              2440
+            ],
+            [
+              180,
+              2280
+            ],
+            [
+              40,
+              2000
+            ]
+          ],
           "is_borderless": true,
           "bleed": false,
-          "shape_type": "bubble_oval"
+          "shape_type": "bubble_oval",
+          "background_treatment": "floating_ui"
         }
       ]
     },
@@ -792,32 +2124,81 @@
       "id": "pat_018_diagonal_skewed_panel_2",
       "name": "斜め歪み panel",
       "panel_count": 2,
-      "page_role_hints": ["reveal_supernatural", "dungeon_entry", "dimension_shift"],
-      "subtype_hints": ["gacha_ui", "hybrid"],
+      "page_role_hints": [
+        "reveal_supernatural",
+        "dungeon_entry",
+        "dimension_shift"
+      ],
+      "subtype_hints": [
+        "gacha_ui",
+        "hybrid"
+      ],
       "purpose_summary": "物理法則・空間の歪みを panel 形状の傾きで示す",
       "trigger_conditions": "page_role∈{reveal_supernatural,dungeon_entry,dimension_shift} かつ world_rule_violation かつ single_dramatic_moment",
       "frequency": "rare",
-      "example_pages": [41],
-      "features": ["panel_border_傾き", "atmospheric_背景", "ontological_disruption"],
+      "example_pages": [
+        41
+      ],
+      "features": [
+        "panel_border_傾き",
+        "atmospheric_背景",
+        "ontological_disruption"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "skewed_anomaly",
           "size_class": "extra_large",
-          "polygon": [[200, 60], [1500, 240], [1640, 1700], [80, 1500]],
+          "polygon": [
+            [
+              200,
+              60
+            ],
+            [
+              1500,
+              240
+            ],
+            [
+              1640,
+              1700
+            ],
+            [
+              80,
+              1500
+            ]
+          ],
           "is_borderless": true,
           "bleed": false,
-          "shape_type": "skewed_quad"
+          "shape_type": "skewed_quad",
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "reaction_close_up",
           "size_class": "medium",
-          "polygon": [[60, 1740], [1688, 1740], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1740
+            ],
+            [
+              1688,
+              1740
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -825,38 +2206,102 @@
       "id": "pat_019_monster_silhouette_bleed_3",
       "name": "モンスターシルエットブリード",
       "panel_count": 4,
-      "page_role_hints": ["cliffhanger", "boss_reveal", "threat_appearance"],
+      "page_role_hints": [
+        "cliffhanger",
+        "boss_reveal",
+        "threat_appearance"
+      ],
       "subtype_hints": [],
       "purpose_summary": "boss/脅威の存在を panel に収まらないサイズで silhouette+bleed 提示",
       "trigger_conditions": "page_role∈{cliffhanger,boss_reveal,threat_appearance} かつ (is_episode_end OR is_chapter_end) かつ threat.full_visual_should_be_hidden",
       "frequency": "medium",
-      "example_pages": [126, 151],
-      "features": ["silhouette_bleed", "速度線+縦線+SFX大文字", "下段reaction_rect"],
+      "example_pages": [
+        126,
+        151
+      ],
+      "features": [
+        "silhouette_bleed",
+        "速度線+縦線+SFX大文字",
+        "下段reaction_rect"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "monster_silhouette_top",
           "size_class": "large",
-          "polygon": [[0, 0], [1748, 0], [1748, 480], [0, 480]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              480
+            ],
+            [
+              0,
+              480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "monster_silhouette_focus",
           "size_class": "extra_large",
-          "polygon": [[0, 500], [1748, 500], [1748, 1620], [0, 1620]],
+          "polygon": [
+            [
+              0,
+              500
+            ],
+            [
+              1748,
+              500
+            ],
+            [
+              1748,
+              1620
+            ],
+            [
+              0,
+              1620
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "reaction_left",
           "size_class": "medium",
-          "polygon": [[60, 1640], [844, 1640], [844, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1640
+            ],
+            [
+              844,
+              1640
+            ],
+            [
+              844,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -865,7 +2310,24 @@
           "reading_order": 4,
           "role_hint": "reaction_right",
           "size_class": "medium",
-          "polygon": [[864, 1640], [1688, 1640], [1688, 2420], [864, 2420]],
+          "polygon": [
+            [
+              864,
+              1640
+            ],
+            [
+              1688,
+              1640
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              864,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -875,22 +2337,53 @@
       "id": "pat_020_radial_speedline_focus_3",
       "name": "放射状集中線フォーカス",
       "panel_count": 1,
-      "page_role_hints": ["climax_scale", "focal_moment", "all_eyes_on_hero", "maze_center"],
+      "page_role_hints": [
+        "climax_scale",
+        "focal_moment",
+        "all_eyes_on_hero",
+        "maze_center"
+      ],
       "subtype_hints": [],
       "purpose_summary": "全視線・力・関心が一点に集まる climax を放射状集中線で象徴",
       "trigger_conditions": "page_role∈{climax_scale,focal_moment,all_eyes_on_hero,maze_center} かつ single_focal_target かつ energy_convergence_required",
       "frequency": "medium",
-      "example_pages": [40, 103, 106],
-      "features": ["full_bleed_radial", "中央一点集中構図", "bird_eye_or_対峙"],
+      "example_pages": [
+        40,
+        103,
+        106
+      ],
+      "features": [
+        "full_bleed_radial",
+        "中央一点集中構図",
+        "bird_eye_or_対峙"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "focal_climax",
           "size_class": "xx_large",
-          "polygon": [[0, 0], [1748, 0], [1748, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -898,58 +2391,162 @@
       "id": "pat_021_screentone_info_anchor_5",
       "name": "スクリーントーン情報アンカー",
       "panel_count": 5,
-      "page_role_hints": ["information_dump", "lore_introduction", "single_topic_explanation"],
-      "subtype_hints": ["gacha_ui", "external_social"],
+      "page_role_hints": [
+        "information_dump",
+        "lore_introduction",
+        "single_topic_explanation"
+      ],
+      "subtype_hints": [
+        "gacha_ui",
+        "external_social"
+      ],
       "purpose_summary": "1テーマ解説をscreentone中央panel+周囲会話で物語に溶かして伝達",
       "trigger_conditions": "page_role∈{information_dump,lore_introduction,single_topic_explanation} かつ topic_count=1 かつ has_ambient_dialogue",
       "frequency": "medium",
-      "example_pages": [17, 121],
-      "features": ["網点トーン背景", "大caption_box", "周囲rect散在"],
+      "example_pages": [
+        17,
+        121
+      ],
+      "features": [
+        "網点トーン背景",
+        "大caption_box",
+        "周囲rect散在"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "establishing_dialogue",
           "size_class": "medium",
-          "polygon": [[60, 60], [1688, 60], [1688, 700], [60, 700]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              700
+            ],
+            [
+              60,
+              700
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "tone_back"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "screentone_info_anchor",
           "size_class": "large",
-          "polygon": [[60, 720], [1688, 720], [1688, 1500], [60, 1500]],
+          "polygon": [
+            [
+              60,
+              720
+            ],
+            [
+              1688,
+              720
+            ],
+            [
+              1688,
+              1500
+            ],
+            [
+              60,
+              1500
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "tone_back"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "ambient_reaction_left",
           "size_class": "small",
-          "polygon": [[60, 1520], [560, 1520], [560, 2000], [60, 2000]],
+          "polygon": [
+            [
+              60,
+              1520
+            ],
+            [
+              560,
+              1520
+            ],
+            [
+              560,
+              2000
+            ],
+            [
+              60,
+              2000
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "tone_back"
         },
         {
           "slot_id": "s4",
           "reading_order": 4,
           "role_hint": "ambient_reaction_right",
           "size_class": "medium",
-          "polygon": [[580, 1520], [1688, 1520], [1688, 2000], [580, 2000]],
+          "polygon": [
+            [
+              580,
+              1520
+            ],
+            [
+              1688,
+              1520
+            ],
+            [
+              1688,
+              2000
+            ],
+            [
+              580,
+              2000
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "tone_back"
         },
         {
           "slot_id": "s5",
           "reading_order": 5,
           "role_hint": "resolution_dialogue",
           "size_class": "medium",
-          "polygon": [[60, 2020], [1688, 2020], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              2020
+            ],
+            [
+              1688,
+              2020
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "tone_back"
         }
       ]
     },
@@ -957,29 +2554,74 @@
       "id": "pat_022_aftermath_triumph_5",
       "name": "勝利アフターマス",
       "panel_count": 5,
-      "page_role_hints": ["triumph", "aftermath", "victory"],
+      "page_role_hints": [
+        "triumph",
+        "aftermath",
+        "victory"
+      ],
       "subtype_hints": [],
       "purpose_summary": "勝利・解放の瞬間をhero縦長大コマ+周囲リアクション群で表現",
       "trigger_conditions": "page_role∈{triumph,aftermath,victory} かつ preceded_by_struggle_or_action かつ multiple_witnesses かつ emotion=release",
       "frequency": "rare",
-      "example_pages": [106],
-      "features": ["右hero縦長放射", "多数dialogue散在", "tension_release"],
+      "example_pages": [
+        106
+      ],
+      "features": [
+        "右hero縦長放射",
+        "多数dialogue散在",
+        "tension_release"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "hero_triumph",
           "size_class": "extra_large",
-          "polygon": [[864, 0], [1748, 0], [1748, 1500], [864, 1500]],
+          "polygon": [
+            [
+              864,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              1500
+            ],
+            [
+              864,
+              1500
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "witness_dialogue_top",
           "size_class": "small",
-          "polygon": [[60, 60], [844, 60], [844, 600], [60, 600]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              844,
+              60
+            ],
+            [
+              844,
+              600
+            ],
+            [
+              60,
+              600
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -988,7 +2630,24 @@
           "reading_order": 3,
           "role_hint": "witness_dialogue_mid",
           "size_class": "medium",
-          "polygon": [[60, 620], [844, 620], [844, 1500], [60, 1500]],
+          "polygon": [
+            [
+              60,
+              620
+            ],
+            [
+              844,
+              620
+            ],
+            [
+              844,
+              1500
+            ],
+            [
+              60,
+              1500
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -997,7 +2656,24 @@
           "reading_order": 4,
           "role_hint": "celebration_strip",
           "size_class": "medium",
-          "polygon": [[864, 1520], [1688, 1520], [1688, 1980], [864, 1980]],
+          "polygon": [
+            [
+              864,
+              1520
+            ],
+            [
+              1688,
+              1520
+            ],
+            [
+              1688,
+              1980
+            ],
+            [
+              864,
+              1980
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1006,7 +2682,24 @@
           "reading_order": 5,
           "role_hint": "resolution_focus",
           "size_class": "medium",
-          "polygon": [[60, 1520], [844, 1520], [844, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1520
+            ],
+            [
+              844,
+              1520
+            ],
+            [
+              844,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1016,22 +2709,54 @@
       "id": "pat_023_index_decoration",
       "name": "目次・章扉・奥付装飾ページ",
       "panel_count": 1,
-      "page_role_hints": ["table_of_contents", "chapter_door", "ending_door", "colophon"],
+      "page_role_hints": [
+        "table_of_contents",
+        "chapter_door",
+        "ending_door",
+        "colophon"
+      ],
       "subtype_hints": [],
       "purpose_summary": "テキスト組版主体+装飾的キャラ画像で物語境界を非物語ページとして示す",
       "trigger_conditions": "page_role∈{table_of_contents,chapter_door,ending_door,colophon} かつ not_part_of_main_narrative",
       "frequency": "rare",
-      "example_pages": [2, 3, 150, 155],
-      "features": ["panel分割なし", "テキスト組版主役", "装飾的キャラ画像"],
+      "example_pages": [
+        2,
+        3,
+        150,
+        155
+      ],
+      "features": [
+        "panel分割なし",
+        "テキスト組版主役",
+        "装飾的キャラ画像"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "structural_anchor_decoration",
           "size_class": "xx_large",
-          "polygon": [[0, 0], [1748, 0], [1748, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -1039,20 +2764,47 @@
       "id": "pat_024_temporal_compression_strip_4",
       "name": "時間圧縮ストリップ",
       "panel_count": 5,
-      "page_role_hints": ["time_compression", "montage", "trial_and_error_sequence"],
+      "page_role_hints": [
+        "time_compression",
+        "montage",
+        "trial_and_error_sequence"
+      ],
       "subtype_hints": [],
       "purpose_summary": "同キャラ連続行動を細い strip で連結しフィルムコマ送り感で時間圧縮",
       "trigger_conditions": "page_role∈{time_compression,montage,trial_and_error_sequence} かつ same_actor_repeated_action かつ time_passage≥several_minutes",
       "frequency": "rare",
-      "example_pages": [127],
-      "features": ["下段細rect_strip連続", "size_hierarchy_medium_flat", "SFX切替"],
+      "example_pages": [
+        127
+      ],
+      "features": [
+        "下段細rect_strip連続",
+        "size_hierarchy_medium_flat",
+        "SFX切替"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "scene_setup",
           "size_class": "medium",
-          "polygon": [[864, 60], [1688, 60], [1688, 720], [864, 720]],
+          "polygon": [
+            [
+              864,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              720
+            ],
+            [
+              864,
+              720
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1061,7 +2813,24 @@
           "reading_order": 2,
           "role_hint": "main_dialogue",
           "size_class": "medium",
-          "polygon": [[60, 60], [844, 60], [844, 720], [60, 720]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              844,
+              60
+            ],
+            [
+              844,
+              720
+            ],
+            [
+              60,
+              720
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1070,7 +2839,24 @@
           "reading_order": 3,
           "role_hint": "compression_t1",
           "size_class": "small",
-          "polygon": [[60, 740], [580, 740], [580, 1280], [60, 1280]],
+          "polygon": [
+            [
+              60,
+              740
+            ],
+            [
+              580,
+              740
+            ],
+            [
+              580,
+              1280
+            ],
+            [
+              60,
+              1280
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1079,16 +2865,51 @@
           "reading_order": 4,
           "role_hint": "atmospheric_progression",
           "size_class": "medium",
-          "polygon": [[60, 1300], [1688, 1300], [1688, 1860], [60, 1860]],
+          "polygon": [
+            [
+              60,
+              1300
+            ],
+            [
+              1688,
+              1300
+            ],
+            [
+              1688,
+              1860
+            ],
+            [
+              60,
+              1860
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s5",
           "reading_order": 5,
           "role_hint": "compression_t2",
           "size_class": "medium",
-          "polygon": [[60, 1880], [1688, 1880], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1880
+            ],
+            [
+              1688,
+              1880
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1098,20 +2919,52 @@
       "id": "pat_025_zigzag_dialogue_5",
       "name": "ジグザグ対話5コマ",
       "panel_count": 5,
-      "page_role_hints": ["dialogue", "buildup", "banter"],
+      "page_role_hints": [
+        "dialogue",
+        "buildup",
+        "banter"
+      ],
       "subtype_hints": [],
       "purpose_summary": "テンポ良いキャラ間の小ボケ・小ツッコミを zigzag 配列でリズム化する n=5 buildup",
       "trigger_conditions": "page_role∈{dialogue,buildup,banter} かつ panel_count=5 かつ speaker_count≥2 かつ rhythm=stichomythia (短文応酬)",
       "frequency": "medium",
-      "example_pages": [10, 14, 73, 94, 124],
-      "features": ["全rect", "段ごとに左右非対称", "短い吹き出しが panel 半分以下", "テンポ感"],
+      "example_pages": [
+        10,
+        14,
+        73,
+        94,
+        124
+      ],
+      "features": [
+        "全rect",
+        "段ごとに左右非対称",
+        "短い吹き出しが panel 半分以下",
+        "テンポ感"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "setup_question",
           "size_class": "medium",
-          "polygon": [[864, 60], [1688, 60], [1688, 700], [864, 700]],
+          "polygon": [
+            [
+              864,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              700
+            ],
+            [
+              864,
+              700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1120,7 +2973,24 @@
           "reading_order": 2,
           "role_hint": "reaction_quip",
           "size_class": "small",
-          "polygon": [[60, 60], [844, 60], [844, 700], [60, 700]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              844,
+              60
+            ],
+            [
+              844,
+              700
+            ],
+            [
+              60,
+              700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1129,7 +2999,24 @@
           "reading_order": 3,
           "role_hint": "rebuttal",
           "size_class": "medium",
-          "polygon": [[60, 720], [1100, 720], [1100, 1380], [60, 1380]],
+          "polygon": [
+            [
+              60,
+              720
+            ],
+            [
+              1100,
+              720
+            ],
+            [
+              1100,
+              1380
+            ],
+            [
+              60,
+              1380
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1138,7 +3025,24 @@
           "reading_order": 4,
           "role_hint": "punchline_visual",
           "size_class": "medium",
-          "polygon": [[1120, 720], [1688, 720], [1688, 1880], [1120, 1880]],
+          "polygon": [
+            [
+              1120,
+              720
+            ],
+            [
+              1688,
+              720
+            ],
+            [
+              1688,
+              1880
+            ],
+            [
+              1120,
+              1880
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1147,7 +3051,24 @@
           "reading_order": 5,
           "role_hint": "reaction_close",
           "size_class": "medium",
-          "polygon": [[60, 1400], [1100, 1400], [1100, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1400
+            ],
+            [
+              1100,
+              1400
+            ],
+            [
+              1100,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1157,29 +3078,76 @@
       "id": "pat_026_explosive_top_calm_bottom_5",
       "name": "爆発上段+静寂下段5コマ",
       "panel_count": 5,
-      "page_role_hints": ["action_attack", "buildup", "shock_release"],
+      "page_role_hints": [
+        "action_attack",
+        "buildup",
+        "shock_release"
+      ],
       "subtype_hints": [],
       "purpose_summary": "上段で爆発的アクション (atmospheric+SFX多用) → 下段に静寂dialogue で緩急を1ページに圧縮する n=5",
       "trigger_conditions": "page_role∈{action_attack,buildup} かつ panel_count=5 かつ has_explosive_top_beat かつ has_calm_dialogue_bottom",
       "frequency": "medium",
-      "example_pages": [13, 28, 64],
-      "features": ["上段atmospheric_explosive", "下段rect_calm", "緩急コントラスト"],
+      "example_pages": [
+        13,
+        28,
+        64
+      ],
+      "features": [
+        "上段atmospheric_explosive",
+        "下段rect_calm",
+        "緩急コントラスト"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "explosive_action",
           "size_class": "extra_large",
-          "polygon": [[0, 0], [1748, 0], [1748, 1100], [0, 1100]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              1100
+            ],
+            [
+              0,
+              1100
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "spectator_reaction",
           "size_class": "small",
-          "polygon": [[60, 1120], [560, 1120], [560, 1700], [60, 1700]],
+          "polygon": [
+            [
+              60,
+              1120
+            ],
+            [
+              560,
+              1120
+            ],
+            [
+              560,
+              1700
+            ],
+            [
+              60,
+              1700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1188,7 +3156,24 @@
           "reading_order": 3,
           "role_hint": "calm_dialogue",
           "size_class": "medium",
-          "polygon": [[580, 1120], [1688, 1120], [1688, 1700], [580, 1700]],
+          "polygon": [
+            [
+              580,
+              1120
+            ],
+            [
+              1688,
+              1120
+            ],
+            [
+              1688,
+              1700
+            ],
+            [
+              580,
+              1700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1197,7 +3182,24 @@
           "reading_order": 4,
           "role_hint": "calm_dialogue",
           "size_class": "medium",
-          "polygon": [[60, 1720], [864, 1720], [864, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1720
+            ],
+            [
+              864,
+              1720
+            ],
+            [
+              864,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1206,7 +3208,24 @@
           "reading_order": 5,
           "role_hint": "scene_close",
           "size_class": "medium",
-          "polygon": [[884, 1720], [1688, 1720], [1688, 2420], [884, 2420]],
+          "polygon": [
+            [
+              884,
+              1720
+            ],
+            [
+              1688,
+              1720
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              884,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1216,20 +3235,52 @@
       "id": "pat_027_item_spotlight_reveal_5",
       "name": "アイテム光輝スポットライト5コマ",
       "panel_count": 5,
-      "page_role_hints": ["reveal", "loot", "item_introduction"],
-      "subtype_hints": ["gacha_ui", "hybrid"],
+      "page_role_hints": [
+        "reveal",
+        "loot",
+        "item_introduction"
+      ],
+      "subtype_hints": [
+        "gacha_ui",
+        "hybrid"
+      ],
       "purpose_summary": "中央の獲得アイテム (D缶/魔石/結晶) を光輝放射で spotlighting し、周囲に reaction を散らす n=5 戦利品見せ",
       "trigger_conditions": "page_role∈{reveal,loot,item_introduction} かつ panel_count=5 かつ has_glowing_artifact_centerpiece",
       "frequency": "medium",
-      "example_pages": [18, 79, 123],
-      "features": ["中央item_atmospheric_burst", "放射状光線", "周囲small_reactions"],
+      "example_pages": [
+        18,
+        79,
+        123
+      ],
+      "features": [
+        "中央item_atmospheric_burst",
+        "放射状光線",
+        "周囲small_reactions"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "context_dialogue",
           "size_class": "small",
-          "polygon": [[60, 60], [864, 60], [864, 600], [60, 600]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              864,
+              60
+            ],
+            [
+              864,
+              600
+            ],
+            [
+              60,
+              600
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1238,16 +3289,51 @@
           "reading_order": 2,
           "role_hint": "item_spotlight",
           "size_class": "extra_large",
-          "polygon": [[884, 60], [1688, 60], [1688, 1500], [884, 1500]],
+          "polygon": [
+            [
+              884,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              1500
+            ],
+            [
+              884,
+              1500
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "discovery_reaction",
           "size_class": "medium",
-          "polygon": [[60, 620], [864, 620], [864, 1500], [60, 1500]],
+          "polygon": [
+            [
+              60,
+              620
+            ],
+            [
+              864,
+              620
+            ],
+            [
+              864,
+              1500
+            ],
+            [
+              60,
+              1500
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1256,7 +3342,24 @@
           "reading_order": 4,
           "role_hint": "explanation_dialogue",
           "size_class": "medium",
-          "polygon": [[60, 1520], [1100, 1520], [1100, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1520
+            ],
+            [
+              1100,
+              1520
+            ],
+            [
+              1100,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1265,7 +3368,24 @@
           "reading_order": 5,
           "role_hint": "character_response",
           "size_class": "medium",
-          "polygon": [[1120, 1520], [1688, 1520], [1688, 2420], [1120, 2420]],
+          "polygon": [
+            [
+              1120,
+              1520
+            ],
+            [
+              1688,
+              1520
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              1120,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1275,29 +3395,77 @@
       "id": "pat_028_status_inset_action_5",
       "name": "ステータス枠付きアクション5コマ",
       "panel_count": 5,
-      "page_role_hints": ["action_attack", "level_up", "power_check"],
-      "subtype_hints": ["gacha_ui"],
+      "page_role_hints": [
+        "action_attack",
+        "level_up",
+        "power_check"
+      ],
+      "subtype_hints": [
+        "gacha_ui"
+      ],
       "purpose_summary": "アクション中にステータス画面 inset を浮かせ、数値変動と動作を1ページに同居させる n=5 (gacha_ui 中核)",
       "trigger_conditions": "bible.subtype∈{gacha_ui,hybrid} かつ page_role∈{level_up,action_with_growth} かつ panel_count=5 かつ has_status_inset",
       "frequency": "medium",
-      "example_pages": [64, 119],
-      "features": ["上段status_overlay", "中段action_atmospheric", "下段reaction_grid"],
+      "example_pages": [
+        64,
+        119
+      ],
+      "features": [
+        "上段status_overlay",
+        "中段action_atmospheric",
+        "下段reaction_grid"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "status_overlay",
           "size_class": "medium",
-          "polygon": [[60, 60], [1688, 60], [1688, 600], [60, 600]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              600
+            ],
+            [
+              60,
+              600
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "floating_ui"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "growth_announcement",
           "size_class": "small",
-          "polygon": [[60, 620], [864, 620], [864, 1100], [60, 1100]],
+          "polygon": [
+            [
+              60,
+              620
+            ],
+            [
+              864,
+              620
+            ],
+            [
+              864,
+              1100
+            ],
+            [
+              60,
+              1100
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1306,16 +3474,51 @@
           "reading_order": 3,
           "role_hint": "weapon_close",
           "size_class": "medium",
-          "polygon": [[60, 1120], [864, 1120], [864, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1120
+            ],
+            [
+              864,
+              1120
+            ],
+            [
+              864,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s4",
           "reading_order": 4,
           "role_hint": "character_action",
           "size_class": "large",
-          "polygon": [[884, 620], [1688, 620], [1688, 1860], [884, 1860]],
+          "polygon": [
+            [
+              884,
+              620
+            ],
+            [
+              1688,
+              620
+            ],
+            [
+              1688,
+              1860
+            ],
+            [
+              884,
+              1860
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1324,7 +3527,24 @@
           "reading_order": 5,
           "role_hint": "dialogue_close",
           "size_class": "small",
-          "polygon": [[884, 1880], [1688, 1880], [1688, 2420], [884, 2420]],
+          "polygon": [
+            [
+              884,
+              1880
+            ],
+            [
+              1688,
+              1880
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              884,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1334,20 +3554,48 @@
       "id": "pat_029_memory_flashback_inset_5",
       "name": "記憶フラッシュバック挿入5コマ",
       "panel_count": 5,
-      "page_role_hints": ["flashback", "character_history", "relationship_reveal"],
+      "page_role_hints": [
+        "flashback",
+        "character_history",
+        "relationship_reveal"
+      ],
       "subtype_hints": [],
       "purpose_summary": "現在のdialogueの途中に記憶パネル (背景screenton+丸枠) を挿し、過去現在を1ページで往復させる n=5",
       "trigger_conditions": "page_role∈{flashback,character_history} かつ panel_count=5 かつ has_memory_panels (鍵: round_corner OR screentone_background)",
       "frequency": "medium",
-      "example_pages": [89, 31],
-      "features": ["丸角flashback_panels", "screentone背景", "現在panel_と区別"],
+      "example_pages": [
+        89,
+        31
+      ],
+      "features": [
+        "丸角flashback_panels",
+        "screentone背景",
+        "現在panel_と区別"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "current_dialogue",
           "size_class": "medium",
-          "polygon": [[60, 60], [1688, 60], [1688, 700], [60, 700]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              700
+            ],
+            [
+              60,
+              700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1356,7 +3604,24 @@
           "reading_order": 2,
           "role_hint": "memory_inset_left",
           "size_class": "small",
-          "polygon": [[60, 720], [580, 720], [580, 1280], [60, 1280]],
+          "polygon": [
+            [
+              60,
+              720
+            ],
+            [
+              580,
+              720
+            ],
+            [
+              580,
+              1280
+            ],
+            [
+              60,
+              1280
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1365,7 +3630,24 @@
           "reading_order": 3,
           "role_hint": "memory_inset_center",
           "size_class": "small",
-          "polygon": [[600, 720], [1140, 720], [1140, 1280], [600, 1280]],
+          "polygon": [
+            [
+              600,
+              720
+            ],
+            [
+              1140,
+              720
+            ],
+            [
+              1140,
+              1280
+            ],
+            [
+              600,
+              1280
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1374,16 +3656,51 @@
           "reading_order": 4,
           "role_hint": "current_eye_close",
           "size_class": "small",
-          "polygon": [[1160, 720], [1688, 720], [1688, 1280], [1160, 1280]],
+          "polygon": [
+            [
+              1160,
+              720
+            ],
+            [
+              1688,
+              720
+            ],
+            [
+              1688,
+              1280
+            ],
+            [
+              1160,
+              1280
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s5",
           "reading_order": 5,
           "role_hint": "current_resolution",
           "size_class": "large",
-          "polygon": [[60, 1300], [1688, 1300], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1300
+            ],
+            [
+              1688,
+              1300
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1393,49 +3710,136 @@
       "id": "pat_030_polygon_slash_combat_4",
       "name": "斜め切り欠きスラッシュ戦闘",
       "panel_count": 4,
-      "page_role_hints": ["action_combat", "decisive_strike", "blade_skill"],
+      "page_role_hints": [
+        "action_combat",
+        "decisive_strike",
+        "blade_skill"
+      ],
       "subtype_hints": [],
       "purpose_summary": "刃の軌跡で polygon (斜め切り欠き) を成すパネル分割。剣技/魔法剣 の決め技用",
       "trigger_conditions": "page_role∈{action_combat,decisive_strike,blade_skill} かつ panel_count∈[3,5] かつ shape_mix.has_polygon=true かつ effect_lines=dense",
       "frequency": "rare-medium",
-      "example_pages": [137, 154],
-      "features": ["polygon境界=刃の軌跡", "panel間が斜めに切り欠き", "強烈speedline+SFX"],
+      "example_pages": [
+        137,
+        154
+      ],
+      "features": [
+        "polygon境界=刃の軌跡",
+        "panel間が斜めに切り欠き",
+        "強烈speedline+SFX"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "blade_swing_top",
           "size_class": "large",
-          "polygon": [[0, 0], [1748, 0], [1748, 900], [1100, 1100], [0, 900]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              900
+            ],
+            [
+              1100,
+              1100
+            ],
+            [
+              0,
+              900
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "impact_diagonal",
           "size_class": "medium",
-          "polygon": [[1100, 1100], [1748, 920], [1748, 1700], [580, 1700]],
+          "polygon": [
+            [
+              1100,
+              1100
+            ],
+            [
+              1748,
+              920
+            ],
+            [
+              1748,
+              1700
+            ],
+            [
+              580,
+              1700
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "monster_silhouette_left",
           "size_class": "medium",
-          "polygon": [[0, 920], [1080, 1100], [580, 1700], [0, 1700]],
+          "polygon": [
+            [
+              0,
+              920
+            ],
+            [
+              1080,
+              1100
+            ],
+            [
+              580,
+              1700
+            ],
+            [
+              0,
+              1700
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s4",
           "reading_order": 4,
           "role_hint": "swordsman_caption_close",
           "size_class": "large",
-          "polygon": [[0, 1720], [1748, 1720], [1748, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              1720
+            ],
+            [
+              1748,
+              1720
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -1443,29 +3847,78 @@
       "id": "pat_031_sns_thread_artifact_4",
       "name": "SNS/掲示板スレッド artifact",
       "panel_count": 4,
-      "page_role_hints": ["external_validation", "research", "world_buzz"],
-      "subtype_hints": ["external_social", "hybrid"],
+      "page_role_hints": [
+        "external_validation",
+        "research",
+        "world_buzz"
+      ],
+      "subtype_hints": [
+        "external_social",
+        "hybrid"
+      ],
       "purpose_summary": "SNS投稿/掲示板スレッドのスクリーン UI を panel そのものに採用。subtype=external_social の中核 device",
       "trigger_conditions": "bible.subtype∈{external_social,hybrid} かつ page_role∈{external_validation,research} かつ has_thread_or_post_artifact",
       "frequency": "rare",
-      "example_pages": [34, 142],
-      "features": ["SNS_UI_as_panel", "post_text_は組版で合成", "周囲rect_dialogue"],
+      "example_pages": [
+        34,
+        142
+      ],
+      "features": [
+        "SNS_UI_as_panel",
+        "post_text_は組版で合成",
+        "周囲rect_dialogue"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "sns_thread_artifact",
           "size_class": "extra_large",
-          "polygon": [[60, 60], [1688, 60], [1688, 1240], [60, 1240]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              1240
+            ],
+            [
+              60,
+              1240
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "floating_ui"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "user_reaction",
           "size_class": "medium",
-          "polygon": [[60, 1260], [864, 1260], [864, 1860], [60, 1860]],
+          "polygon": [
+            [
+              60,
+              1260
+            ],
+            [
+              864,
+              1260
+            ],
+            [
+              864,
+              1860
+            ],
+            [
+              60,
+              1860
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1474,7 +3927,24 @@
           "reading_order": 3,
           "role_hint": "device_close",
           "size_class": "medium",
-          "polygon": [[884, 1260], [1688, 1260], [1688, 1860], [884, 1860]],
+          "polygon": [
+            [
+              884,
+              1260
+            ],
+            [
+              1688,
+              1260
+            ],
+            [
+              1688,
+              1860
+            ],
+            [
+              884,
+              1860
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1483,7 +3953,24 @@
           "reading_order": 4,
           "role_hint": "decision_dialogue",
           "size_class": "medium",
-          "polygon": [[60, 1880], [1688, 1880], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1880
+            ],
+            [
+              1688,
+              1880
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1493,23 +3980,51 @@
       "id": "pat_032_chapter_title_overlay_full_1",
       "name": "章タイトル載せフルブリードアクション",
       "panel_count": 1,
-      "page_role_hints": ["chapter_opening_action", "title_drop"],
+      "page_role_hints": [
+        "chapter_opening_action",
+        "title_drop"
+      ],
       "subtype_hints": [],
       "purpose_summary": "章タイトル plate を full bleed action panel に重ねる開幕。pat_005 (静的扉) より動的、 pat_004 (establishing) より宣言的",
       "trigger_conditions": "page_role∈{chapter_opening_action,title_drop} かつ panel_count=1 かつ has_chapter_title_plate かつ has_dynamic_action",
       "frequency": "rare",
-      "example_pages": [134, 86],
-      "features": ["full_bleed", "title_plate_floating", "panel内が動的構図"],
+      "example_pages": [
+        134,
+        86
+      ],
+      "features": [
+        "full_bleed",
+        "title_plate_floating",
+        "panel内が動的構図"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "chapter_opening_action",
           "size_class": "xx_large",
-          "polygon": [[0, 0], [1748, 0], [1748, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
           "bleed": true,
-          "has_floating_title_plate": true
+          "has_floating_title_plate": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -1517,22 +4032,51 @@
       "id": "pat_033_solitary_dread_isolation_1",
       "name": "孤独不安・誰もいない大空間",
       "panel_count": 1,
-      "page_role_hints": ["isolation_dread", "ominous_quiet", "supernatural_alone"],
+      "page_role_hints": [
+        "isolation_dread",
+        "ominous_quiet",
+        "supernatural_alone"
+      ],
       "subtype_hints": [],
       "purpose_summary": "巨大空間にキャラ1人が立つ full bleed。pat_005 (climax_reveal) と異なり、reveal ではなく「誰もいない」ことそのものを描く",
       "trigger_conditions": "page_role∈{isolation_dread,ominous_quiet} かつ panel_count=1 かつ scale=large_empty_space かつ no_dialogue",
       "frequency": "rare",
-      "example_pages": [47, 144],
-      "features": ["full_bleed", "巨大空間+小キャラ", "無音 (SFX/dialogue最小)"],
+      "example_pages": [
+        47,
+        144
+      ],
+      "features": [
+        "full_bleed",
+        "巨大空間+小キャラ",
+        "無音 (SFX/dialogue最小)"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "isolation_dread",
           "size_class": "xx_large",
-          "polygon": [[0, 0], [1748, 0], [1748, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -1540,40 +4084,105 @@
       "id": "pat_034_pillarbox_cinematic_3",
       "name": "ピラーボックス映画的establishing",
       "panel_count": 3,
-      "page_role_hints": ["establishing", "transition", "iconic_pose"],
+      "page_role_hints": [
+        "establishing",
+        "transition",
+        "iconic_pose"
+      ],
       "subtype_hints": [],
       "purpose_summary": "上下に黒帯 (または狭rect) を置き、中央に shinefilm aspect ratio の wide rect。電車/駅/通勤など現代横移動 establishing で典型",
       "trigger_conditions": "page_role∈{establishing,transition,iconic_pose} かつ panel_count∈[2,3] かつ aspect=cinematic_wide AND background_is_horizontal_motion",
       "frequency": "rare",
-      "example_pages": [49, 84],
-      "features": ["上下黒帯または小panel", "中央wide_cinematic", "movement_implied"],
+      "example_pages": [
+        49,
+        84
+      ],
+      "features": [
+        "上下黒帯または小panel",
+        "中央wide_cinematic",
+        "movement_implied"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "top_caption_strip",
           "size_class": "small",
-          "polygon": [[0, 0], [1748, 0], [1748, 240], [0, 240]],
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              240
+            ],
+            [
+              0,
+              240
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "cinematic_establishing",
           "size_class": "extra_large",
-          "polygon": [[0, 240], [1748, 240], [1748, 2240], [0, 2240]],
+          "polygon": [
+            [
+              0,
+              240
+            ],
+            [
+              1748,
+              240
+            ],
+            [
+              1748,
+              2240
+            ],
+            [
+              0,
+              2240
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "bottom_caption_strip",
           "size_class": "small",
-          "polygon": [[0, 2240], [1748, 2240], [1748, 2480], [0, 2480]],
+          "polygon": [
+            [
+              0,
+              2240
+            ],
+            [
+              1748,
+              2240
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -1581,29 +4190,79 @@
       "id": "pat_035_id_artifact_reaction_grid_5",
       "name": "ID証/書類アーティファクト + 反応グリッド5コマ",
       "panel_count": 5,
-      "page_role_hints": ["registration", "official_reveal", "system_acceptance"],
-      "subtype_hints": ["external_social", "gacha_ui", "hybrid"],
+      "page_role_hints": [
+        "registration",
+        "official_reveal",
+        "system_acceptance"
+      ],
+      "subtype_hints": [
+        "external_social",
+        "gacha_ui",
+        "hybrid"
+      ],
       "purpose_summary": "ID証/許可証/書類の diegetic artifact を上段に大きく置き、下段に reaction を grid で並べる",
       "trigger_conditions": "page_role∈{registration,official_reveal,system_acceptance} かつ panel_count=5 かつ has_official_document_artifact",
       "frequency": "rare-medium",
-      "example_pages": [98, 64],
-      "features": ["上段大ID証panel", "下段に小rect_reaction_x4", "system_validation_signal"],
+      "example_pages": [
+        98,
+        64
+      ],
+      "features": [
+        "上段大ID証panel",
+        "下段に小rect_reaction_x4",
+        "system_validation_signal"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "id_artifact",
           "size_class": "extra_large",
-          "polygon": [[60, 60], [1688, 60], [1688, 1240], [60, 1240]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              1240
+            ],
+            [
+              60,
+              1240
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "floating_ui"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "character_acceptance_close",
           "size_class": "medium",
-          "polygon": [[60, 1260], [1100, 1260], [1100, 1860], [60, 1860]],
+          "polygon": [
+            [
+              60,
+              1260
+            ],
+            [
+              1100,
+              1260
+            ],
+            [
+              1100,
+              1860
+            ],
+            [
+              60,
+              1860
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1612,7 +4271,24 @@
           "reading_order": 3,
           "role_hint": "reaction_inset",
           "size_class": "small",
-          "polygon": [[1120, 1260], [1688, 1260], [1688, 1860], [1120, 1860]],
+          "polygon": [
+            [
+              1120,
+              1260
+            ],
+            [
+              1688,
+              1260
+            ],
+            [
+              1688,
+              1860
+            ],
+            [
+              1120,
+              1860
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1621,7 +4297,24 @@
           "reading_order": 4,
           "role_hint": "establishing_walk",
           "size_class": "medium",
-          "polygon": [[60, 1880], [864, 1880], [864, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1880
+            ],
+            [
+              864,
+              1880
+            ],
+            [
+              864,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1630,7 +4323,24 @@
           "reading_order": 5,
           "role_hint": "decision_dialogue",
           "size_class": "medium",
-          "polygon": [[884, 1880], [1688, 1880], [1688, 2420], [884, 2420]],
+          "polygon": [
+            [
+              884,
+              1880
+            ],
+            [
+              1688,
+              1880
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              884,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1640,20 +4350,48 @@
       "id": "pat_036_emergency_action_walk_grid_5",
       "name": "緊急アクション+歩行+反応グリッド5コマ",
       "panel_count": 5,
-      "page_role_hints": ["action_emergency", "warning", "incident_unfolding"],
+      "page_role_hints": [
+        "action_emergency",
+        "warning",
+        "incident_unfolding"
+      ],
       "subtype_hints": [],
       "purpose_summary": "上段に緊急アクション (叫び/警告)、中段に通勤/歩行 establishing、下段に複数 reaction。緊急が日常に侵入するリズム",
       "trigger_conditions": "page_role∈{action_emergency,warning,incident_unfolding} かつ panel_count=5 かつ tonal_shift=daily_to_emergency",
       "frequency": "rare",
-      "example_pages": [44, 145],
-      "features": ["上段緊急叫び", "中段establishing_walk", "下段reaction_pair"],
+      "example_pages": [
+        44,
+        145
+      ],
+      "features": [
+        "上段緊急叫び",
+        "中段establishing_walk",
+        "下段reaction_pair"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "alert_close",
           "size_class": "medium",
-          "polygon": [[60, 60], [864, 60], [864, 600], [60, 600]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              864,
+              60
+            ],
+            [
+              864,
+              600
+            ],
+            [
+              60,
+              600
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1662,7 +4400,24 @@
           "reading_order": 2,
           "role_hint": "shouting_close",
           "size_class": "medium",
-          "polygon": [[884, 60], [1688, 60], [1688, 600], [884, 600]],
+          "polygon": [
+            [
+              884,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              600
+            ],
+            [
+              884,
+              600
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1671,7 +4426,24 @@
           "reading_order": 3,
           "role_hint": "establishing_walk",
           "size_class": "extra_large",
-          "polygon": [[60, 620], [1688, 620], [1688, 1860], [60, 1860]],
+          "polygon": [
+            [
+              60,
+              620
+            ],
+            [
+              1688,
+              620
+            ],
+            [
+              1688,
+              1860
+            ],
+            [
+              60,
+              1860
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1680,7 +4452,24 @@
           "reading_order": 4,
           "role_hint": "feet_close",
           "size_class": "small",
-          "polygon": [[60, 1880], [864, 1880], [864, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1880
+            ],
+            [
+              864,
+              1880
+            ],
+            [
+              864,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1689,7 +4478,24 @@
           "reading_order": 5,
           "role_hint": "dialogue_response",
           "size_class": "small",
-          "polygon": [[884, 1880], [1688, 1880], [1688, 2420], [884, 2420]],
+          "polygon": [
+            [
+              884,
+              1880
+            ],
+            [
+              1688,
+              1880
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              884,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1699,20 +4505,49 @@
       "id": "pat_037_zoom_burst_dialogue_5",
       "name": "ズームバースト中央キャラ+周囲対話5コマ",
       "panel_count": 5,
-      "page_role_hints": ["realization", "vow", "transformation"],
+      "page_role_hints": [
+        "realization",
+        "vow",
+        "transformation"
+      ],
       "subtype_hints": [],
       "purpose_summary": "中央に放射 burst 背景でキャラを配し、周囲に小rectで dialogue。pat_020 (radial focus) より intimate (1人にズームイン)",
       "trigger_conditions": "page_role∈{realization,vow,transformation} かつ panel_count=5 かつ central_burst_background かつ surrounding_dialogue_panels",
       "frequency": "rare-medium",
-      "example_pages": [28, 78, 117],
-      "features": ["中央キャラradial_burst", "周囲small_dialogue_panels", "personal_focus"],
+      "example_pages": [
+        28,
+        78,
+        117
+      ],
+      "features": [
+        "中央キャラradial_burst",
+        "周囲small_dialogue_panels",
+        "personal_focus"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "intro_dialogue",
           "size_class": "small",
-          "polygon": [[60, 60], [560, 60], [560, 700], [60, 700]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              560,
+              60
+            ],
+            [
+              560,
+              700
+            ],
+            [
+              60,
+              700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1721,16 +4556,51 @@
           "reading_order": 2,
           "role_hint": "burst_central_character",
           "size_class": "extra_large",
-          "polygon": [[580, 60], [1688, 60], [1688, 1500], [580, 1500]],
+          "polygon": [
+            [
+              580,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              1500
+            ],
+            [
+              580,
+              1500
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "side_witness",
           "size_class": "small",
-          "polygon": [[60, 720], [560, 720], [560, 1500], [60, 1500]],
+          "polygon": [
+            [
+              60,
+              720
+            ],
+            [
+              560,
+              720
+            ],
+            [
+              560,
+              1500
+            ],
+            [
+              60,
+              1500
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1739,7 +4609,24 @@
           "reading_order": 4,
           "role_hint": "vow_dialogue",
           "size_class": "medium",
-          "polygon": [[60, 1520], [1100, 1520], [1100, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1520
+            ],
+            [
+              1100,
+              1520
+            ],
+            [
+              1100,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1748,7 +4635,24 @@
           "reading_order": 5,
           "role_hint": "feet_or_hands_close",
           "size_class": "medium",
-          "polygon": [[1120, 1520], [1688, 1520], [1688, 2420], [1120, 2420]],
+          "polygon": [
+            [
+              1120,
+              1520
+            ],
+            [
+              1688,
+              1520
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              1120,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1758,20 +4662,51 @@
       "id": "pat_038_monster_bestiary_grid_5",
       "name": "モンスター図鑑グリッド5コマ",
       "panel_count": 5,
-      "page_role_hints": ["enemy_briefing", "bestiary", "encounter_intel"],
-      "subtype_hints": ["gacha_ui", "hybrid"],
+      "page_role_hints": [
+        "enemy_briefing",
+        "bestiary",
+        "encounter_intel"
+      ],
+      "subtype_hints": [
+        "gacha_ui",
+        "hybrid"
+      ],
       "purpose_summary": "敵モンスターの説明アイコン (ナンバリング+silhouette) を grid 配置し、下段で実物の establishing。pat_007 (info_dense) より階層性あり、pat_021 (info anchor) より複数項目",
       "trigger_conditions": "page_role∈{enemy_briefing,bestiary,encounter_intel} かつ panel_count=5 かつ has_numbered_monster_panels かつ has_real_monster_below",
       "frequency": "rare",
-      "example_pages": [124, 99],
-      "features": ["上段ナンバリングsilhouette_grid", "下段actual_monster_establishing", "情報→現実の流れ"],
+      "example_pages": [
+        124,
+        99
+      ],
+      "features": [
+        "上段ナンバリングsilhouette_grid",
+        "下段actual_monster_establishing",
+        "情報→現実の流れ"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "explorer_pose",
           "size_class": "medium",
-          "polygon": [[864, 60], [1688, 60], [1688, 900], [864, 900]],
+          "polygon": [
+            [
+              864,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              900
+            ],
+            [
+              864,
+              900
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1780,7 +4715,24 @@
           "reading_order": 2,
           "role_hint": "monster_entry_1",
           "size_class": "small",
-          "polygon": [[60, 60], [844, 60], [844, 480], [60, 480]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              844,
+              60
+            ],
+            [
+              844,
+              480
+            ],
+            [
+              60,
+              480
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1789,7 +4741,24 @@
           "reading_order": 3,
           "role_hint": "monster_entry_2",
           "size_class": "small",
-          "polygon": [[60, 500], [844, 500], [844, 900], [60, 900]],
+          "polygon": [
+            [
+              60,
+              500
+            ],
+            [
+              844,
+              500
+            ],
+            [
+              844,
+              900
+            ],
+            [
+              60,
+              900
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1798,16 +4767,51 @@
           "reading_order": 4,
           "role_hint": "monster_close_real",
           "size_class": "extra_large",
-          "polygon": [[60, 920], [1300, 920], [1300, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              920
+            ],
+            [
+              1300,
+              920
+            ],
+            [
+              1300,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s5",
           "reading_order": 5,
           "role_hint": "info_caption_strip",
           "size_class": "medium",
-          "polygon": [[1320, 920], [1688, 920], [1688, 2420], [1320, 2420]],
+          "polygon": [
+            [
+              1320,
+              920
+            ],
+            [
+              1688,
+              920
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              1320,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1817,40 +4821,108 @@
       "id": "pat_039_confirmation_modal_sidebar_3",
       "name": "確認ダイアログ＋ステータスサイドバー",
       "panel_count": 3,
-      "page_role_hints": ["confirmation_choice", "ui_decision_moment", "skill_use_prompt"],
-      "subtype_hints": ["gacha_ui"],
+      "page_role_hints": [
+        "confirmation_choice",
+        "ui_decision_moment",
+        "skill_use_prompt"
+      ],
+      "subtype_hints": [
+        "gacha_ui"
+      ],
       "purpose_summary": "「はい/いいえ」確認モーダルを画面中央に配置し、横にステータスパネルを並列で見せる『UIで意思決定する瞬間』専用archetype",
       "trigger_conditions": "page_role∈{confirmation_choice,ui_decision_moment,skill_use_prompt} かつ subtype∈{gacha_ui,hybrid} かつ has_yes_no_modal かつ has_status_sidebar",
       "frequency": "rare",
-      "example_pages": [50, 180],
-      "features": ["center_modal_panel", "sidebar_status_panel", "両端atmospheric_decoration", "ボタンUI"],
+      "example_pages": [
+        50,
+        180
+      ],
+      "features": [
+        "center_modal_panel",
+        "sidebar_status_panel",
+        "両端atmospheric_decoration",
+        "ボタンUI"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "ui_modal_dialog",
           "size_class": "extra_large",
-          "polygon": [[60, 60], [1180, 60], [1180, 1300], [60, 1300]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1180,
+              60
+            ],
+            [
+              1180,
+              1300
+            ],
+            [
+              60,
+              1300
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "floating_ui"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "status_sidebar",
           "size_class": "medium",
-          "polygon": [[1200, 60], [1688, 60], [1688, 1300], [1200, 1300]],
+          "polygon": [
+            [
+              1200,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              1300
+            ],
+            [
+              1200,
+              1300
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "floating_ui"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "decision_reaction",
           "size_class": "large",
-          "polygon": [[60, 1320], [1688, 1320], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1320
+            ],
+            [
+              1688,
+              1320
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -1858,29 +4930,78 @@
       "id": "pat_040_gacha_pull_triple_result_4",
       "name": "ガチャ結果カード3並列reveal",
       "panel_count": 4,
-      "page_role_hints": ["gacha_pull_result", "skill_acquisition_burst", "rare_drop_reveal"],
-      "subtype_hints": ["gacha_ui"],
+      "page_role_hints": [
+        "gacha_pull_result",
+        "skill_acquisition_burst",
+        "rare_drop_reveal"
+      ],
+      "subtype_hints": [
+        "gacha_ui"
+      ],
       "purpose_summary": "ガチャ獲得カード3枚を並列で reveal し、上段に光源SFX、下段に大喜びreaction。pat_008 (UI status) は単一画面、こちらは『3つ同時に来た』瞬間に特化",
       "trigger_conditions": "page_role∈{gacha_pull_result,skill_acquisition_burst,rare_drop_reveal} かつ subtype∈{gacha_ui,hybrid} かつ result_card_count=3 かつ beat=triple_burst",
       "frequency": "medium",
-      "example_pages": [70, 188],
-      "features": ["3並列_card_panel", "上段sfx_burst", "下段_explosive_reaction", "rarity_label_重畳"],
+      "example_pages": [
+        70,
+        188
+      ],
+      "features": [
+        "3並列_card_panel",
+        "上段sfx_burst",
+        "下段_explosive_reaction",
+        "rarity_label_重畳"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "burst_setup_reaction",
           "size_class": "large",
-          "polygon": [[60, 60], [1688, 60], [1688, 900], [60, 900]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              900
+            ],
+            [
+              60,
+              900
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "card_result_right",
           "size_class": "small",
-          "polygon": [[1200, 920], [1688, 920], [1688, 1660], [1200, 1660]],
+          "polygon": [
+            [
+              1200,
+              920
+            ],
+            [
+              1688,
+              920
+            ],
+            [
+              1688,
+              1660
+            ],
+            [
+              1200,
+              1660
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1889,7 +5010,24 @@
           "reading_order": 3,
           "role_hint": "card_result_center",
           "size_class": "small",
-          "polygon": [[640, 920], [1180, 920], [1180, 1660], [640, 1660]],
+          "polygon": [
+            [
+              640,
+              920
+            ],
+            [
+              1180,
+              920
+            ],
+            [
+              1180,
+              1660
+            ],
+            [
+              640,
+              1660
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -1898,9 +5036,27 @@
           "reading_order": 4,
           "role_hint": "card_result_left_or_burst_reaction",
           "size_class": "large",
-          "polygon": [[60, 920], [620, 920], [620, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              920
+            ],
+            [
+              620,
+              920
+            ],
+            [
+              620,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -1908,38 +5064,104 @@
       "id": "pat_041_vendor_option_select_3",
       "name": "ベンダーUIオプション選択",
       "panel_count": 3,
-      "page_role_hints": ["vendor_interaction", "purchase_decision", "ui_option_select"],
-      "subtype_hints": ["gacha_ui"],
+      "page_role_hints": [
+        "vendor_interaction",
+        "purchase_decision",
+        "ui_option_select"
+      ],
+      "subtype_hints": [
+        "gacha_ui"
+      ],
       "purpose_summary": "ガチャ装置などの『1回 / 10回』ボタン選択UIを上段に配置し、装置 establishing と主人公 reaction を続ける。pat_008 が status overlay、こちらは『買う/引く』選択肢提示専用",
       "trigger_conditions": "page_role∈{vendor_interaction,purchase_decision,ui_option_select} かつ subtype∈{gacha_ui,hybrid} かつ has_option_buttons かつ has_vendor_device",
       "frequency": "rare",
-      "example_pages": [55, 145],
-      "features": ["option_button_pair", "device_establishing", "atmospheric_reaction"],
+      "example_pages": [
+        55,
+        145
+      ],
+      "features": [
+        "option_button_pair",
+        "device_establishing",
+        "atmospheric_reaction"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "ui_option_buttons",
           "size_class": "large",
-          "polygon": [[60, 60], [1688, 60], [1688, 760], [60, 760]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              760
+            ],
+            [
+              60,
+              760
+            ]
+          ],
           "is_borderless": false,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "floating_ui"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "device_establishing",
           "size_class": "extra_large",
-          "polygon": [[60, 780], [1688, 780], [1688, 1700], [60, 1700]],
+          "polygon": [
+            [
+              60,
+              780
+            ],
+            [
+              1688,
+              780
+            ],
+            [
+              1688,
+              1700
+            ],
+            [
+              60,
+              1700
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "user_decision_reaction",
           "size_class": "medium",
-          "polygon": [[60, 1720], [1688, 1720], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1720
+            ],
+            [
+              1688,
+              1720
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1949,38 +5171,106 @@
       "id": "pat_042_bishoujo_full_body_intro_3",
       "name": "美少女立ち絵フルボディ初登場",
       "panel_count": 3,
-      "page_role_hints": ["heroine_introduction", "first_appearance_female", "love_interest_reveal"],
-      "subtype_hints": ["bishoujo_focus"],
+      "page_role_hints": [
+        "heroine_introduction",
+        "first_appearance_female",
+        "love_interest_reveal"
+      ],
+      "subtype_hints": [
+        "bishoujo_focus"
+      ],
       "purpose_summary": "ヒロイン (女性メインキャラ) の初登場を、花/sparkle装飾 + フルボディ立ち絵 + 表情close で印象づけるarchetype。pat_013 (two-shot iconic) は2人の対比、こちらは単独立ち絵での印象づけ",
       "trigger_conditions": "page_role∈{heroine_introduction,first_appearance_female,love_interest_reveal} かつ character_count=1_dominant かつ has_decorative_sfx (花/sparkle/heart) かつ first_appearance=true",
       "frequency": "medium",
-      "example_pages": [90, 115, 195],
-      "features": ["full_body_standing_portrait", "decorative_floral_sfx", "atmospheric_pattern_背景", "blush_face_close"],
+      "example_pages": [
+        90,
+        115,
+        195
+      ],
+      "features": [
+        "full_body_standing_portrait",
+        "decorative_floral_sfx",
+        "atmospheric_pattern_背景",
+        "blush_face_close"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "approach_dialogue_setup",
           "size_class": "medium",
-          "polygon": [[60, 60], [1100, 60], [1100, 800], [60, 800]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1100,
+              60
+            ],
+            [
+              1100,
+              800
+            ],
+            [
+              60,
+              800
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "heroine_full_body",
           "size_class": "extra_large",
-          "polygon": [[1120, 60], [1688, 60], [1688, 2200], [1120, 2200]],
+          "polygon": [
+            [
+              1120,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              2200
+            ],
+            [
+              1120,
+              2200
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "observer_reaction",
           "size_class": "medium",
-          "polygon": [[60, 820], [1100, 820], [1100, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              820
+            ],
+            [
+              1100,
+              820
+            ],
+            [
+              1100,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -1990,20 +5280,48 @@
       "id": "pat_043_encirclement_surround_3",
       "name": "中央キャラ多人数包囲reveal",
       "panel_count": 3,
-      "page_role_hints": ["surrounded_threat", "guard_encirclement", "unwanted_attention_reveal"],
+      "page_role_hints": [
+        "surrounded_threat",
+        "guard_encirclement",
+        "unwanted_attention_reveal"
+      ],
       "subtype_hints": [],
       "purpose_summary": "中央のキャラを周囲の多人数 (警備兵・群衆・敵集団) が囲んで威圧する瞬間を、上段dialogue→中段surround_panel→下段個別reactionで構成。pat_019 (silhouette bleed) は単一脅威、こちらは群集による圧",
       "trigger_conditions": "page_role∈{surrounded_threat,guard_encirclement,unwanted_attention_reveal} かつ surrounding_actor_count≥3 かつ central_character_count=1_2 かつ atmosphere=tension",
       "frequency": "rare",
-      "example_pages": [190],
-      "features": ["central_close_target", "周囲多人数_atmospheric_panel", "個別reaction_strip", "shield_helmet_motif"],
+      "example_pages": [
+        190
+      ],
+      "features": [
+        "central_close_target",
+        "周囲多人数_atmospheric_panel",
+        "個別reaction_strip",
+        "shield_helmet_motif"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "warning_dialogue_setup",
           "size_class": "medium",
-          "polygon": [[60, 60], [1688, 60], [1688, 600], [60, 600]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              600
+            ],
+            [
+              60,
+              600
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2012,16 +5330,51 @@
           "reading_order": 2,
           "role_hint": "encirclement_atmospheric",
           "size_class": "extra_large",
-          "polygon": [[60, 620], [1688, 620], [1688, 1700], [60, 1700]],
+          "polygon": [
+            [
+              60,
+              620
+            ],
+            [
+              1688,
+              620
+            ],
+            [
+              1688,
+              1700
+            ],
+            [
+              60,
+              1700
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "individual_reaction_strip",
           "size_class": "medium",
-          "polygon": [[60, 1720], [1688, 1720], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1720
+            ],
+            [
+              1688,
+              1720
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -2031,20 +5384,52 @@
       "id": "pat_044_bishoujo_chibi_observer_inset_5",
       "name": "美少女close+SDチビ反応insert",
       "panel_count": 5,
-      "page_role_hints": ["dialogue_intimate", "relationship_progress", "comedic_aside"],
-      "subtype_hints": ["bishoujo_focus"],
+      "page_role_hints": [
+        "dialogue_intimate",
+        "relationship_progress",
+        "comedic_aside"
+      ],
+      "subtype_hints": [
+        "bishoujo_focus"
+      ],
       "purpose_summary": "ヒロインの blush close-up を主軸に、SD/チビ化キャラの第三者reactionを inset で挟む。シリアスとコメディの緩急を1ページで作る『ラブコメ系』専用archetype",
       "trigger_conditions": "page_role∈{dialogue_intimate,relationship_progress,comedic_aside} かつ has_bishoujo_close_up かつ has_chibi_reaction_inset かつ atmosphere∈{tender,comedic}",
       "frequency": "medium",
-      "example_pages": [125, 210, 230],
-      "features": ["heroine_blush_close", "chibi_SD_inset", "heart_floral_decoration", "tone_shift_serious_to_comedic"],
+      "example_pages": [
+        125,
+        210,
+        230
+      ],
+      "features": [
+        "heroine_blush_close",
+        "chibi_SD_inset",
+        "heart_floral_decoration",
+        "tone_shift_serious_to_comedic"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "dialogue_setup",
           "size_class": "medium",
-          "polygon": [[60, 60], [1688, 60], [1688, 600], [60, 600]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              600
+            ],
+            [
+              60,
+              600
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2053,16 +5438,51 @@
           "reading_order": 2,
           "role_hint": "heroine_blush_close",
           "size_class": "large",
-          "polygon": [[60, 620], [1100, 620], [1100, 1500], [60, 1500]],
+          "polygon": [
+            [
+              60,
+              620
+            ],
+            [
+              1100,
+              620
+            ],
+            [
+              1100,
+              1500
+            ],
+            [
+              60,
+              1500
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "chibi_reaction_inset_top",
           "size_class": "small",
-          "polygon": [[1120, 620], [1688, 620], [1688, 1040], [1120, 1040]],
+          "polygon": [
+            [
+              1120,
+              620
+            ],
+            [
+              1688,
+              620
+            ],
+            [
+              1688,
+              1040
+            ],
+            [
+              1120,
+              1040
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2071,7 +5491,24 @@
           "reading_order": 4,
           "role_hint": "chibi_reaction_inset_bottom",
           "size_class": "small",
-          "polygon": [[1120, 1060], [1688, 1060], [1688, 1500], [1120, 1500]],
+          "polygon": [
+            [
+              1120,
+              1060
+            ],
+            [
+              1688,
+              1060
+            ],
+            [
+              1688,
+              1500
+            ],
+            [
+              1120,
+              1500
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2080,7 +5517,24 @@
           "reading_order": 5,
           "role_hint": "resolution_main_close",
           "size_class": "large",
-          "polygon": [[60, 1520], [1688, 1520], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1520
+            ],
+            [
+              1688,
+              1520
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -2090,20 +5544,50 @@
       "id": "pat_045_omake_4koma_grid_8",
       "name": "巻末おまけ4コマグリッド",
       "panel_count": 8,
-      "page_role_hints": ["omake_extra", "4koma_strip", "after_word_comedy"],
-      "subtype_hints": ["omake_4koma"],
+      "page_role_hints": [
+        "omake_extra",
+        "4koma_strip",
+        "after_word_comedy"
+      ],
+      "subtype_hints": [
+        "omake_4koma"
+      ],
       "purpose_summary": "巻末/章末に2x4または4x2の小サイズrect grid (4コマ漫画形式) を配置し、本編後のショート小ネタを展開。本編archetypeとは別系統のレイヤー",
       "trigger_conditions": "page_role∈{omake_extra,4koma_strip,after_word_comedy} かつ panel_count∈[6,8] かつ all_panels_small_uniform_rect かつ chapter_end_or_volume_end",
       "frequency": "rare",
-      "example_pages": [270],
-      "features": ["uniform_small_rect", "2x4_or_4x2_grid", "comedic_tone", "簡素な背景"],
+      "example_pages": [
+        270
+      ],
+      "features": [
+        "uniform_small_rect",
+        "2x4_or_4x2_grid",
+        "comedic_tone",
+        "簡素な背景"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "4koma_panel_1",
           "size_class": "small",
-          "polygon": [[864, 60], [1688, 60], [1688, 640], [864, 640]],
+          "polygon": [
+            [
+              864,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              640
+            ],
+            [
+              864,
+              640
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2112,7 +5596,24 @@
           "reading_order": 2,
           "role_hint": "4koma_panel_2",
           "size_class": "small",
-          "polygon": [[60, 60], [844, 60], [844, 640], [60, 640]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              844,
+              60
+            ],
+            [
+              844,
+              640
+            ],
+            [
+              60,
+              640
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2121,7 +5622,24 @@
           "reading_order": 3,
           "role_hint": "4koma_panel_3",
           "size_class": "small",
-          "polygon": [[864, 660], [1688, 660], [1688, 1240], [864, 1240]],
+          "polygon": [
+            [
+              864,
+              660
+            ],
+            [
+              1688,
+              660
+            ],
+            [
+              1688,
+              1240
+            ],
+            [
+              864,
+              1240
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2130,7 +5648,24 @@
           "reading_order": 4,
           "role_hint": "4koma_panel_4",
           "size_class": "small",
-          "polygon": [[60, 660], [844, 660], [844, 1240], [60, 1240]],
+          "polygon": [
+            [
+              60,
+              660
+            ],
+            [
+              844,
+              660
+            ],
+            [
+              844,
+              1240
+            ],
+            [
+              60,
+              1240
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2139,7 +5674,24 @@
           "reading_order": 5,
           "role_hint": "4koma_panel_5",
           "size_class": "small",
-          "polygon": [[864, 1260], [1688, 1260], [1688, 1840], [864, 1840]],
+          "polygon": [
+            [
+              864,
+              1260
+            ],
+            [
+              1688,
+              1260
+            ],
+            [
+              1688,
+              1840
+            ],
+            [
+              864,
+              1840
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2148,7 +5700,24 @@
           "reading_order": 6,
           "role_hint": "4koma_panel_6",
           "size_class": "small",
-          "polygon": [[60, 1260], [844, 1260], [844, 1840], [60, 1840]],
+          "polygon": [
+            [
+              60,
+              1260
+            ],
+            [
+              844,
+              1260
+            ],
+            [
+              844,
+              1840
+            ],
+            [
+              60,
+              1840
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2157,7 +5726,24 @@
           "reading_order": 7,
           "role_hint": "4koma_panel_7_punchline",
           "size_class": "small",
-          "polygon": [[864, 1860], [1688, 1860], [1688, 2420], [864, 2420]],
+          "polygon": [
+            [
+              864,
+              1860
+            ],
+            [
+              1688,
+              1860
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              864,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2166,7 +5752,24 @@
           "reading_order": 8,
           "role_hint": "4koma_panel_8_aftermath",
           "size_class": "small",
-          "polygon": [[60, 1860], [844, 1860], [844, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1860
+            ],
+            [
+              844,
+              1860
+            ],
+            [
+              844,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -2176,29 +5779,75 @@
       "id": "pat_046_pattern_tiled_background_dialogue_4",
       "name": "パターンタイル背景dialogue",
       "panel_count": 4,
-      "page_role_hints": ["dialogue_decorative", "tonal_levity", "monotony_compression"],
+      "page_role_hints": [
+        "dialogue_decorative",
+        "tonal_levity",
+        "monotony_compression"
+      ],
       "subtype_hints": [],
       "purpose_summary": "繰り返しパターン (スライム顔・花柄・ハート等) で panel 背景を埋め尽くし、dialogue panel をその上に乗せる。pat_001 (3tier dialogue) より装飾的で『退屈/コメディ/愛らしさ』を演出",
       "trigger_conditions": "page_role∈{dialogue_decorative,tonal_levity,monotony_compression} かつ has_repeating_pattern_background かつ panel_count∈[3,5] かつ atmosphere∈{comedic,tedious,cute}",
       "frequency": "rare",
-      "example_pages": [80],
-      "features": ["repeating_tiled_pattern", "decorative_panel_背景", "label_strip_見出し", "全rect"],
+      "example_pages": [
+        80
+      ],
+      "features": [
+        "repeating_tiled_pattern",
+        "decorative_panel_背景",
+        "label_strip_見出し",
+        "全rect"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "pattern_dialogue_setup",
           "size_class": "large",
-          "polygon": [[60, 60], [1688, 60], [1688, 900], [60, 900]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              900
+            ],
+            [
+              60,
+              900
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "label_strip_caption",
           "size_class": "medium",
-          "polygon": [[60, 920], [1100, 920], [1100, 1240], [60, 1240]],
+          "polygon": [
+            [
+              60,
+              920
+            ],
+            [
+              1100,
+              920
+            ],
+            [
+              1100,
+              1240
+            ],
+            [
+              60,
+              1240
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2207,7 +5856,24 @@
           "reading_order": 3,
           "role_hint": "pattern_action_break",
           "size_class": "medium",
-          "polygon": [[1120, 920], [1688, 920], [1688, 1700], [1120, 1700]],
+          "polygon": [
+            [
+              1120,
+              920
+            ],
+            [
+              1688,
+              920
+            ],
+            [
+              1688,
+              1700
+            ],
+            [
+              1120,
+              1700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2216,7 +5882,24 @@
           "reading_order": 4,
           "role_hint": "exit_resolution",
           "size_class": "large",
-          "polygon": [[60, 1260], [1100, 1260], [1100, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1260
+            ],
+            [
+              1100,
+              1260
+            ],
+            [
+              1100,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -2226,20 +5909,49 @@
       "id": "pat_047_vertical_location_journey_4",
       "name": "縦方向location journey",
       "panel_count": 4,
-      "page_role_hints": ["scene_transition_chain", "location_montage", "travel_compression"],
+      "page_role_hints": [
+        "scene_transition_chain",
+        "location_montage",
+        "travel_compression"
+      ],
       "subtype_hints": [],
       "purpose_summary": "上→中→下の3-4段で異なる場所を順に並べ、キャラの移動を1ページに圧縮。pat_024 (temporal compression strip) は同一場所の時間圧縮、こちらは異なる場所の空間移動",
       "trigger_conditions": "page_role∈{scene_transition_chain,location_montage,travel_compression} かつ location_count≥3 かつ same_actor_through_locations",
       "frequency": "medium",
-      "example_pages": [110, 260],
-      "features": ["異なる_location_per_panel", "縦方向_strip_配置", "transition_atmospheric", "actor_continuity"],
+      "example_pages": [
+        110,
+        260
+      ],
+      "features": [
+        "異なる_location_per_panel",
+        "縦方向_strip_配置",
+        "transition_atmospheric",
+        "actor_continuity"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "location_a_start",
           "size_class": "medium",
-          "polygon": [[60, 60], [1688, 60], [1688, 700], [60, 700]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              700
+            ],
+            [
+              60,
+              700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2248,7 +5960,24 @@
           "reading_order": 2,
           "role_hint": "location_b_transit",
           "size_class": "medium",
-          "polygon": [[60, 720], [1688, 720], [1688, 1300], [60, 1300]],
+          "polygon": [
+            [
+              60,
+              720
+            ],
+            [
+              1688,
+              720
+            ],
+            [
+              1688,
+              1300
+            ],
+            [
+              60,
+              1300
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2257,18 +5986,54 @@
           "reading_order": 3,
           "role_hint": "location_c_arrival",
           "size_class": "large",
-          "polygon": [[60, 1320], [1100, 1320], [1100, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1320
+            ],
+            [
+              1100,
+              1320
+            ],
+            [
+              1100,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s4",
           "reading_order": 4,
           "role_hint": "destination_landmark",
           "size_class": "large",
-          "polygon": [[1120, 1320], [1688, 1320], [1688, 2420], [1120, 2420]],
+          "polygon": [
+            [
+              1120,
+              1320
+            ],
+            [
+              1688,
+              1320
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              1120,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -2276,40 +6041,105 @@
       "id": "pat_048_diagonal_confrontation_3",
       "name": "斜め対峙confrontation",
       "panel_count": 3,
-      "page_role_hints": ["boss_confrontation", "duel_setup", "imminent_clash"],
+      "page_role_hints": [
+        "boss_confrontation",
+        "duel_setup",
+        "imminent_clash"
+      ],
       "subtype_hints": [],
       "purpose_summary": "主人公とボスを斜め対角線上に配置し、その間に SFX/breath で緊張を貯める archetype。pat_002 (diag split two-shot) は関係性ピボット、こちらは戦闘前 confrontation",
       "trigger_conditions": "page_role∈{boss_confrontation,duel_setup,imminent_clash} かつ character_count=2_opposing かつ tension=peak かつ no_strike_yet",
       "frequency": "rare",
-      "example_pages": [160],
-      "features": ["diagonal_axis_confrontation", "intermediate_breath_sfx", "atmospheric_浸食", "size_hierarchy_extreme"],
+      "example_pages": [
+        160
+      ],
+      "features": [
+        "diagonal_axis_confrontation",
+        "intermediate_breath_sfx",
+        "atmospheric_浸食",
+        "size_hierarchy_extreme"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "protagonist_close_pose",
           "size_class": "large",
-          "polygon": [[60, 60], [1100, 60], [1100, 900], [60, 900]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1100,
+              60
+            ],
+            [
+              1100,
+              900
+            ],
+            [
+              60,
+              900
+            ]
+          ],
           "is_borderless": true,
-          "bleed": false
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "intermediate_atmospheric_breath",
           "size_class": "extra_large",
-          "polygon": [[1120, 60], [1688, 60], [1688, 1700], [1120, 1700]],
+          "polygon": [
+            [
+              1120,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              1700
+            ],
+            [
+              1120,
+              1700
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "antagonist_emerging",
           "size_class": "large",
-          "polygon": [[60, 920], [1100, 920], [1100, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              920
+            ],
+            [
+              1100,
+              920
+            ],
+            [
+              1100,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -2317,20 +6147,52 @@
       "id": "pat_049_floral_emotion_focus_3",
       "name": "花/装飾SFX感情close",
       "panel_count": 3,
-      "page_role_hints": ["affection_peak", "tender_revelation", "positive_emotional_climax"],
-      "subtype_hints": ["bishoujo_focus"],
+      "page_role_hints": [
+        "affection_peak",
+        "tender_revelation",
+        "positive_emotional_climax"
+      ],
+      "subtype_hints": [
+        "bishoujo_focus"
+      ],
       "purpose_summary": "花柄/heart/sparkle の装飾SFXと共にヒロインの blush close を画面に置き、relationship 進展のpositive peakを示す。pat_009 (extreme close emotion) は shock peak、こちらは positive peak",
       "trigger_conditions": "page_role∈{affection_peak,tender_revelation,positive_emotional_climax} かつ has_floral_or_heart_sfx かつ emotion_valence=positive かつ has_bishoujo_close",
       "frequency": "medium",
-      "example_pages": [90, 195, 230],
-      "features": ["floral_decoration", "heart_or_sparkle_overlay", "soft_screentone_背景", "blush_face_close"],
+      "example_pages": [
+        90,
+        195,
+        230
+      ],
+      "features": [
+        "floral_decoration",
+        "heart_or_sparkle_overlay",
+        "soft_screentone_背景",
+        "blush_face_close"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "approach_setup",
           "size_class": "medium",
-          "polygon": [[60, 60], [1688, 60], [1688, 700], [60, 700]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              700
+            ],
+            [
+              60,
+              700
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2339,16 +6201,51 @@
           "reading_order": 2,
           "role_hint": "floral_emotion_close",
           "size_class": "extra_large",
-          "polygon": [[60, 720], [1688, 720], [1688, 1900], [60, 1900]],
+          "polygon": [
+            [
+              60,
+              720
+            ],
+            [
+              1688,
+              720
+            ],
+            [
+              1688,
+              1900
+            ],
+            [
+              60,
+              1900
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s3",
           "reading_order": 3,
           "role_hint": "observer_internal_reaction",
           "size_class": "medium",
-          "polygon": [[60, 1920], [1688, 1920], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1920
+            ],
+            [
+              1688,
+              1920
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -2358,20 +6255,51 @@
       "id": "pat_050_chapter_chat_artifact_opener_3",
       "name": "章扉_チャットUI artifact opener",
       "panel_count": 3,
-      "page_role_hints": ["chapter_opener_chat", "external_message_lead_in", "connected_world_establish"],
-      "subtype_hints": ["external_social", "hybrid"],
+      "page_role_hints": [
+        "chapter_opener_chat",
+        "external_message_lead_in",
+        "connected_world_establish"
+      ],
+      "subtype_hints": [
+        "external_social",
+        "hybrid"
+      ],
       "purpose_summary": "章タイトルplate + チャット画面 (LINE/messenger 風) artifact + 後半 establishing で章を始める。pat_032 (chapter title overlay) は本編action上に title、こちらは外部UI artifactを乗せる入り方",
       "trigger_conditions": "page_role∈{chapter_opener_chat,external_message_lead_in,connected_world_establish} かつ subtype∈{external_social,hybrid} かつ has_chat_ui_artifact かつ chapter_boundary",
       "frequency": "rare",
-      "example_pages": [110],
-      "features": ["chapter_title_plate", "chat_balloon_UI_overlay", "下段_location_establishing", "soft_transition"],
+      "example_pages": [
+        110
+      ],
+      "features": [
+        "chapter_title_plate",
+        "chat_balloon_UI_overlay",
+        "下段_location_establishing",
+        "soft_transition"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "chapter_title_plate",
           "size_class": "small",
-          "polygon": [[60, 60], [600, 60], [600, 200], [60, 200]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              600,
+              60
+            ],
+            [
+              600,
+              200
+            ],
+            [
+              60,
+              200
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2380,7 +6308,24 @@
           "reading_order": 2,
           "role_hint": "chat_artifact_panel",
           "size_class": "large",
-          "polygon": [[864, 60], [1688, 60], [1688, 900], [864, 900]],
+          "polygon": [
+            [
+              864,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              900
+            ],
+            [
+              864,
+              900
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2389,10 +6334,28 @@
           "reading_order": 3,
           "role_hint": "destination_establishing",
           "size_class": "extra_large",
-          "polygon": [[60, 220], [1688, 220], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              220
+            ],
+            [
+              1688,
+              220
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": true,
           "bleed": true,
-          "z_order": -1
+          "z_order": -1,
+          "background_treatment": "atmospheric_fade"
         }
       ]
     },
@@ -2400,29 +6363,78 @@
       "id": "pat_051_silhouette_loot_discovery_3",
       "name": "巨大silhouetteアイテム発見",
       "panel_count": 3,
-      "page_role_hints": ["loot_discovery", "rare_drop_recognition", "treasure_first_sight"],
-      "subtype_hints": ["gacha_ui"],
+      "page_role_hints": [
+        "loot_discovery",
+        "rare_drop_recognition",
+        "treasure_first_sight"
+      ],
+      "subtype_hints": [
+        "gacha_ui"
+      ],
       "purpose_summary": "巨大silhouetteのアイテム/レア素材を上段に置き、下段で主人公の認識shockを close で見せる。pat_019 (monster silhouette bleed) は脅威の reveal、こちらは positive な発見reveal",
       "trigger_conditions": "page_role∈{loot_discovery,rare_drop_recognition,treasure_first_sight} かつ has_silhouette_object かつ subject∈{item,loot,artifact} かつ emotion_valence=positive_shock",
       "frequency": "rare",
-      "example_pages": [35, 274],
-      "features": ["巨大object_silhouette", "sparkle_装飾", "下段_close_recognition", "shadow_白抜き"],
+      "example_pages": [
+        35,
+        274
+      ],
+      "features": [
+        "巨大object_silhouette",
+        "sparkle_装飾",
+        "下段_close_recognition",
+        "shadow_白抜き"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "loot_silhouette_reveal",
           "size_class": "extra_large",
-          "polygon": [[60, 60], [1688, 60], [1688, 1300], [60, 1300]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              1300
+            ],
+            [
+              60,
+              1300
+            ]
+          ],
           "is_borderless": true,
-          "bleed": true
+          "bleed": true,
+          "background_treatment": "atmospheric_fade"
         },
         {
           "slot_id": "s2",
           "reading_order": 2,
           "role_hint": "recognition_close",
           "size_class": "large",
-          "polygon": [[60, 1320], [1688, 1320], [1688, 2100], [60, 2100]],
+          "polygon": [
+            [
+              60,
+              1320
+            ],
+            [
+              1688,
+              1320
+            ],
+            [
+              1688,
+              2100
+            ],
+            [
+              60,
+              2100
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2431,7 +6443,24 @@
           "reading_order": 3,
           "role_hint": "value_judgment_caption",
           "size_class": "medium",
-          "polygon": [[60, 2120], [1688, 2120], [1688, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              2120
+            ],
+            [
+              1688,
+              2120
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }
@@ -2441,20 +6470,49 @@
       "id": "pat_052_explanation_pointer_presentation_5",
       "name": "ポインター提示explanation",
       "panel_count": 5,
-      "page_role_hints": ["explanation_lecture", "rules_briefing_active", "instruction_with_props"],
+      "page_role_hints": [
+        "explanation_lecture",
+        "rules_briefing_active",
+        "instruction_with_props"
+      ],
       "subtype_hints": [],
       "purpose_summary": "受付嬢/講師キャラがpointer/chart/iconを持って説明する scene。OK バルーン・矢印・チャートiconが panel 内に重畳。pat_007 (info dense) は無人カタログ、こちらは『説明する人物』が中心",
       "trigger_conditions": "page_role∈{explanation_lecture,rules_briefing_active,instruction_with_props} かつ has_explainer_character かつ has_pointer_or_chart_prop かつ panel_count∈[4,6]",
       "frequency": "medium",
-      "example_pages": [240, 245],
-      "features": ["pointer_pose_character", "OK_balloon_iconography", "chart_icon_重畳", "split_left_listener_right_explainer"],
+      "example_pages": [
+        240,
+        245
+      ],
+      "features": [
+        "pointer_pose_character",
+        "OK_balloon_iconography",
+        "chart_icon_重畳",
+        "split_left_listener_right_explainer"
+      ],
       "slots": [
         {
           "slot_id": "s1",
           "reading_order": 1,
           "role_hint": "explainer_pointer_pose",
           "size_class": "large",
-          "polygon": [[60, 60], [1688, 60], [1688, 900], [60, 900]],
+          "polygon": [
+            [
+              60,
+              60
+            ],
+            [
+              1688,
+              60
+            ],
+            [
+              1688,
+              900
+            ],
+            [
+              60,
+              900
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2463,7 +6521,24 @@
           "reading_order": 2,
           "role_hint": "chart_diagram_inset",
           "size_class": "small",
-          "polygon": [[60, 920], [600, 920], [600, 1500], [60, 1500]],
+          "polygon": [
+            [
+              60,
+              920
+            ],
+            [
+              600,
+              920
+            ],
+            [
+              600,
+              1500
+            ],
+            [
+              60,
+              1500
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2472,7 +6547,24 @@
           "reading_order": 3,
           "role_hint": "listener_reaction",
           "size_class": "medium",
-          "polygon": [[620, 920], [1688, 920], [1688, 1500], [620, 1500]],
+          "polygon": [
+            [
+              620,
+              920
+            ],
+            [
+              1688,
+              920
+            ],
+            [
+              1688,
+              1500
+            ],
+            [
+              620,
+              1500
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2481,7 +6573,24 @@
           "reading_order": 4,
           "role_hint": "explanation_continuation",
           "size_class": "medium",
-          "polygon": [[864, 1520], [1688, 1520], [1688, 2420], [864, 2420]],
+          "polygon": [
+            [
+              864,
+              1520
+            ],
+            [
+              1688,
+              1520
+            ],
+            [
+              1688,
+              2420
+            ],
+            [
+              864,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         },
@@ -2490,7 +6599,24 @@
           "reading_order": 5,
           "role_hint": "listener_resolution",
           "size_class": "medium",
-          "polygon": [[60, 1520], [844, 1520], [844, 2420], [60, 2420]],
+          "polygon": [
+            [
+              60,
+              1520
+            ],
+            [
+              844,
+              1520
+            ],
+            [
+              844,
+              2420
+            ],
+            [
+              60,
+              2420
+            ]
+          ],
           "is_borderless": false,
           "bleed": false
         }

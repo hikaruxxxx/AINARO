@@ -41,6 +41,7 @@ export function applyPattern(args: {
     };
     if (slot.is_borderless) newPanel.is_borderless = true;
     if (slot.bleed) newPanel.bleed_polygon = true;
+    if (slot.background_treatment) newPanel.background_treatment = slot.background_treatment;
     appliedByPanelId.set(panel.panel_id, newPanel);
   }
 

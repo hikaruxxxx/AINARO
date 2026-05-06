@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import { z } from "zod";
+import type { BackgroundTreatment } from "../schemas-v2";
 
 export type PatternFrequency = "high" | "medium-high" | "medium" | "rare-medium" | "low" | "rare";
 export type PatternSizeClass = "small" | "medium" | "large" | "extra_large" | "xx_large";
@@ -13,6 +14,8 @@ export type PatternSlot = {
   is_borderless?: boolean;
   bleed?: boolean;
   internal_diagonal_split?: [[number, number], [number, number]];
+  /** 2026-05-06 追加。reference pool 分離用の背景表現種別 */
+  background_treatment?: BackgroundTreatment;
 };
 
 export type Pattern = {
@@ -39,6 +42,16 @@ export type PatternDict = {
 
 const PointSchema = z.tuple([z.number(), z.number()]);
 
+const BackgroundTreatmentSchema = z.enum([
+  "detailed_bg",
+  "atmospheric_fade",
+  "tone_back",
+  "solid_white",
+  "solid_black",
+  "floating_ui",
+  "unspecified",
+]);
+
 const PatternSlotSchema = z.object({
   slot_id: z.string().min(1),
   reading_order: z.number().int().positive(),
@@ -48,6 +61,7 @@ const PatternSlotSchema = z.object({
   is_borderless: z.boolean().optional(),
   bleed: z.boolean().optional(),
   internal_diagonal_split: z.tuple([PointSchema, PointSchema]).optional(),
+  background_treatment: BackgroundTreatmentSchema.optional(),
 });
 
 const PatternSchema = z.object({

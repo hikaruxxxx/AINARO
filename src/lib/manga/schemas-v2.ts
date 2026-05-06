@@ -480,6 +480,8 @@ export type PagePlanPanel = {
   is_borderless?: boolean;
   /** Phase B3 v3: ページ縁まで延長する panel (枠線スキップ) */
   bleed_polygon?: boolean;
+  /** 2026-05-06 追加。pattern-applier が slot.background_treatment から伝播 */
+  background_treatment?: BackgroundTreatment;
   /** L6 で注入 */
   continuity_group_ids?: string[];
 };

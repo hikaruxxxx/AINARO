@@ -76,4 +76,27 @@ describe("applyPattern", () => {
     expect(result.planPanels[0].rect.w).toBe(Math.max(...polygon.map(([x]) => x)) - result.planPanels[0].rect.x);
     expect(result.planPanels[0].rect.h).toBe(Math.max(...polygon.map(([, y]) => y)) - result.planPanels[0].rect.y);
   });
+
+  it("slot.background_treatment が panel に伝播する (reference pool 分離用)", () => {
+    const base = pattern(2);
+    base.slots[0].background_treatment = "tone_back";
+    base.slots[1].background_treatment = "detailed_bg";
+
+    const result = applyPattern({
+      panels: [panel("p1", 1), panel("p2", 2)],
+      pattern: base,
+    });
+
+    expect(result.planPanels[0].background_treatment).toBe("tone_back");
+    expect(result.planPanels[1].background_treatment).toBe("detailed_bg");
+  });
+
+  it("slot.background_treatment 未指定なら panel 側にもセットされない", () => {
+    const result = applyPattern({
+      panels: [panel("p1", 1)],
+      pattern: pattern(1),
+    });
+
+    expect(result.planPanels[0].background_treatment).toBeUndefined();
+  });
 });
