@@ -53,7 +53,10 @@ function parseArgs(): Args {
 
 async function main() {
   const args = parseArgs();
-  const mapperVersion = parseMapperVersion(process.env.MANGA_MAPPER ?? args.mapperVersion ?? "v3", "MANGA_MAPPER");
+  // 2026-05-06: a07 ep01 で v4 (pattern dictionary + RULE 11 + BACKGROUND DIRECTIVE) の
+  // 実 render → vision audit が PASS したため default を v3 → v4 に変更。
+  // a08+ で問題が出たら `--mapper v3` または `MANGA_MAPPER=v3` で従前挙動に戻せる。
+  const mapperVersion = parseMapperVersion(process.env.MANGA_MAPPER ?? args.mapperVersion ?? "v4", "MANGA_MAPPER");
   console.log(`[L05] slug=${args.slug} ep=${args.episode} mapper=${mapperVersion}`);
 
   const storyboard = JSON.parse(await fs.readFile(storyboardPath(args.slug, args.episode), "utf-8")) as EpisodeStoryboardV2;
