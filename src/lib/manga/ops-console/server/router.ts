@@ -39,7 +39,7 @@ import {
 } from "./handlers/adopted-versions";
 import { handleBootstrap } from "./handlers/bootstrap";
 import { handleBible } from "./handlers/bible";
-import { handleVolumePlot } from "./handlers/volume-plot";
+import { handleVolumePlot, handleVolumePlotPut } from "./handlers/volume-plot";
 import { handleVolumesList } from "./handlers/volumes";
 import {
   handleWorkCreate,
@@ -305,13 +305,23 @@ export async function handleApi(
   {
     const m = p.match(/^\/api\/works\/([^/]+)\/volumes\/v(\d+)\/plot$/);
     if (m) {
-      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       const slug = m[1];
       const volume = Number(m[2]);
       if (!isValidSlug(slug) || !Number.isInteger(volume) || volume <= 0) {
         return send(res, 400, { error: "作品 ID または巻番号が不正です" });
       }
-      return handleVolumePlot(slug, volume, res);
+      if (req.method === "GET") return handleVolumePlot(slug, volume, res);
+      if (req.method === "PUT") {
+        // 既存の write 系と同じく scope-fixed mode に限定。
+        if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+          return send(res, 400, { error: "書き込みには scope 固定モードが必要です。`npm run console -- --slug <slug> --episode <NN>` で起動してください" });
+        }
+        if (slug !== defaults.defaultSlug) {
+          return send(res, 403, { error: "起動 scope と異なる作品です" });
+        }
+        return handleVolumePlotPut(slug, volume, req, res);
+      }
+      return send(res, 405, { error: "このメソッドは許可されていません" });
     }
   }
   // Phase X WX-5: trademark / IP 類似チェックの人間判定

@@ -433,6 +433,17 @@ export function apiGetVolumePlot(slug: string, volume: number): Promise<VolumePl
   );
 }
 
+export function apiPutVolumePlot(
+  slug: string,
+  volume: number,
+  plot: unknown
+): Promise<VolumePlot & { saved_at: string }> {
+  return putJson<VolumePlot & { saved_at: string }>(
+    `/api/works/${encodeURIComponent(slug)}/volumes/v${String(volume).padStart(2, "0")}/plot`,
+    { plot }
+  );
+}
+
 export type VolumeKdpFileStatus = {
   exists: boolean;
   mtime?: string;

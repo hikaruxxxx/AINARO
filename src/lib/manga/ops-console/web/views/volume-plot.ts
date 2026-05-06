@@ -2,6 +2,7 @@ import {
   ApiError,
   apiGetVolumePlot,
   apiPostJob,
+  apiPutVolumePlot,
   openJobStream,
   type JobEvent,
   type VolumePlot,
@@ -16,7 +17,7 @@ import {
 import { store } from "../lib/store";
 import { navigateToAiEdit } from "../lib/layer-actions";
 
-type DisplayMode = "reader" | "raw";
+type DisplayMode = "reader" | "edit" | "raw";
 
 type ViewState = {
   slug: string;
@@ -29,6 +30,9 @@ type ViewState = {
   running: boolean;
   log: string[];
   toast: { message: string; kind: "success" | "warning" | "danger" | "info" } | null;
+  /** edit モードで draft を保持。dirty 判定に使う。 */
+  editDraft: unknown | null;
+  saving: boolean;
 };
 
 const CSS = `
@@ -58,6 +62,15 @@ const CSS = `
 .vplot-modal-title { margin: 0; font-size: var(--fs-xl); }
 .vplot-actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
 .vplot-log { min-height: 160px; white-space: pre-wrap; }
+.vp-edit-form { display: grid; gap: var(--space-3); }
+.vp-edit-card { display: grid; gap: var(--space-2); }
+.vp-edit-row { display: grid; grid-template-columns: 110px 1fr; gap: var(--space-2); align-items: start; }
+.vp-edit-row > label { color: var(--text-secondary); font-size: var(--fs-sm); padding-top: 6px; }
+.vp-edit-beat { display: grid; gap: var(--space-1); padding: var(--space-2); border: 1px solid var(--border-default); border-radius: var(--radius-md); }
+.vp-edit-beat__head { display: flex; gap: var(--space-2); align-items: center; }
+.vp-edit-save-bar { position: sticky; top: 0; z-index: 5; padding: var(--space-2); background: var(--surface-elevated); border-bottom: 1px solid var(--border-default); display: flex; gap: var(--space-2); align-items: center; }
+.vp-edit-save-bar__hint { color: var(--text-tertiary); font-size: var(--fs-xs); margin-left: auto; }
+.vp-edit-dirty { color: var(--color-warning); font-weight: var(--fw-medium); }
 `;
 
 function ensureStyles(): void {
@@ -76,6 +89,7 @@ function errorText(error: unknown): string {
 function renderDisplayMode(active: DisplayMode): string {
   return `<div class="vplot-mode">
     <button type="button" class="nc-pill${active === "reader" ? " nc-pill--active" : ""}" data-display-mode="reader">Reader</button>
+    <button type="button" class="nc-pill${active === "edit" ? " nc-pill--active" : ""}" data-display-mode="edit" title="文言・emotional_intensity を inline 編集">編集</button>
     <button type="button" class="nc-pill${active === "raw" ? " nc-pill--active" : ""}" data-display-mode="raw">生 JSON</button>
   </div>`;
 }
@@ -155,6 +169,81 @@ function renderReader(plot: unknown): string {
     </div>`;
 }
 
+function escapeAttr(value: unknown): string {
+  return escapeHtml(String(value ?? ""));
+}
+
+/**
+ * Edit mode: 巻全体 + 各 episode の theme/title + beats (label/summary/intensity/key_visual) を
+ * inline で編集できる form。draft はクライアント側 state に保持し、保存ボタンで PUT する。
+ * 編集対象は文言と数値のみ。新規 beat 追加・削除は AI で修正 or 全体再生成に委ねる。
+ */
+function renderEditForm(plot: unknown): string {
+  const obj = asRecord(plot);
+  const episodes = Array.isArray(obj.episodes) ? obj.episodes : [];
+  const epForms = episodes
+    .map((ep, epIdx) => {
+      const epObj = asRecord(ep);
+      const epNo = Number(epObj.episode_no ?? epIdx + 1);
+      const beats = Array.isArray(epObj.beats) ? epObj.beats : [];
+      const beatForms = beats
+        .map((beat, beatIdx) => {
+          const b = asRecord(beat);
+          return `<div class="vp-edit-beat">
+            <div class="vp-edit-beat__head">
+              <span class="nc-code">#${escapeHtml(String(b.beat_idx ?? beatIdx))}</span>
+              <input class="nc-field__input" data-vp-path="episodes.${epIdx}.beats.${beatIdx}.label" value="${escapeAttr(b.label)}" placeholder="label" style="max-width: 200px;">
+            </div>
+            <textarea class="nc-field__textarea" data-vp-path="episodes.${epIdx}.beats.${beatIdx}.summary" rows="2" placeholder="summary">${escapeHtml(String(b.summary ?? ""))}</textarea>
+            <div class="vp-edit-row">
+              <label>emotional_intensity</label>
+              <input class="nc-field__input" type="number" min="0" max="1" step="0.05" data-vp-path="episodes.${epIdx}.beats.${beatIdx}.emotional_intensity" value="${escapeAttr(intensity(b.emotional_intensity))}">
+            </div>
+            <div class="vp-edit-row">
+              <label>key_visual</label>
+              <input class="nc-field__input" data-vp-path="episodes.${epIdx}.beats.${beatIdx}.key_visual" value="${escapeAttr(b.key_visual)}" placeholder="(任意)">
+            </div>
+          </div>`;
+        })
+        .join("");
+      return `<section class="nc-card vp-edit-card">
+        <h3 style="margin: 0;">ep${String(epNo).padStart(2, "0")}</h3>
+        <div class="vp-edit-row">
+          <label>title (working)</label>
+          <input class="nc-field__input" data-vp-path="episodes.${epIdx}.title_working" value="${escapeAttr(epObj.title_working)}">
+        </div>
+        <div class="vp-edit-row">
+          <label>テーマ</label>
+          <input class="nc-field__input" data-vp-path="episodes.${epIdx}.theme" value="${escapeAttr(epObj.theme)}">
+        </div>
+        <div class="vp-edit-row">
+          <label>cliffhanger_hook</label>
+          <input class="nc-field__input" data-vp-path="episodes.${epIdx}.cliffhanger_hook" value="${escapeAttr(epObj.cliffhanger_hook)}">
+        </div>
+        ${beats.length > 0 ? `<div style="margin-top: var(--space-2);">beats</div><div class="vp-edit-form">${beatForms}</div>` : ""}
+      </section>`;
+    })
+    .join("");
+  return `<div class="vp-edit-form">
+    <section class="nc-card vp-edit-card">
+      <h3 style="margin: 0;">巻全体</h3>
+      <div class="vp-edit-row">
+        <label>title (working)</label>
+        <input class="nc-field__input" data-vp-path="title_working" value="${escapeAttr(obj.title_working)}">
+      </div>
+      <div class="vp-edit-row">
+        <label>volume_theme</label>
+        <textarea class="nc-field__textarea" data-vp-path="volume_theme" rows="2">${escapeHtml(String(obj.volume_theme ?? ""))}</textarea>
+      </div>
+      <div class="vp-edit-row">
+        <label>estimated_pages</label>
+        <input class="nc-field__input" type="number" min="1" data-vp-path="estimated_pages" value="${escapeAttr(obj.estimated_pages)}">
+      </div>
+    </section>
+    ${epForms}
+  </div>`;
+}
+
 function renderModal(state: ViewState): string {
   if (!state.modalOpen) return "";
   const disabled = state.running ? " disabled" : "";
@@ -185,12 +274,21 @@ function renderModal(state: ViewState): string {
 
 function render(container: HTMLElement, state: ViewState): void {
   const scope = `${state.slug} / v${String(state.volume).padStart(2, "0")}`;
+  const dirty = state.editDraft !== null;
   const body = (() => {
     if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
     if (state.plot) {
-      return state.displayMode === "raw"
-        ? `<pre class="nc-code-block">${jsonHtml(state.plot.plot)}</pre>`
-        : renderReader(state.plot.plot);
+      if (state.displayMode === "raw") return `<pre class="nc-code-block">${jsonHtml(state.plot.plot)}</pre>`;
+      if (state.displayMode === "edit") {
+        const source = state.editDraft ?? state.plot.plot;
+        const saveBar = `<div class="vp-edit-save-bar">
+          <button type="button" class="nc-button nc-button--primary nc-button--sm" data-vp-save ${state.saving || !dirty ? "disabled" : ""}>${state.saving ? "保存中..." : "変更を保存"}</button>
+          <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-vp-revert ${state.saving || !dirty ? "disabled" : ""}>変更を破棄</button>
+          <span class="vp-edit-save-bar__hint">${dirty ? '<span class="vp-edit-dirty">未保存の変更があります</span>' : "編集なし"}</span>
+        </div>`;
+        return `${saveBar}${renderEditForm(source)}`;
+      }
+      return renderReader(state.plot.plot);
     }
     if (state.error) return `<div class="nc-empty">Volume Plot は未作成です。「Volume Plot を構築」ボタンから生成してください。</div>`;
     return `<div class="nc-empty">Volume Plot は未作成です。「Volume Plot を構築」ボタンから生成してください。</div>`;
@@ -251,6 +349,36 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
     running: false,
     log: [],
     toast: null,
+    editDraft: null,
+    saving: false,
+  };
+
+  /**
+   * data-vp-path で指定されたドット区切り path に基づき、editDraft の対応 field を更新する。
+   * draft が空なら現在の plot をディープコピーして起点にする。
+   */
+  const setDraftValue = (pathStr: string, raw: string, isNumber: boolean): void => {
+    if (state.editDraft === null && state.plot) {
+      state.editDraft = JSON.parse(JSON.stringify(state.plot.plot));
+    }
+    if (!state.editDraft) return;
+    const segments = pathStr.split(".").map((s) => (/^\d+$/.test(s) ? Number(s) : s));
+    let cursor: any = state.editDraft;
+    for (let i = 0; i < segments.length - 1; i++) {
+      const key = segments[i];
+      if (cursor[key] === undefined || cursor[key] === null) {
+        const nextKey = segments[i + 1];
+        cursor[key] = typeof nextKey === "number" ? [] : {};
+      }
+      cursor = cursor[key];
+    }
+    const lastKey = segments[segments.length - 1];
+    if (isNumber) {
+      const n = Number(raw);
+      cursor[lastKey] = Number.isFinite(n) ? n : raw;
+    } else {
+      cursor[lastKey] = raw;
+    }
   };
   let stream: { close: () => void } | null = null;
 
@@ -260,9 +388,36 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
     const mode = target.closest<HTMLButtonElement>("[data-display-mode]")?.dataset.displayMode as DisplayMode | undefined;
-    if (mode === "reader" || mode === "raw") {
+    if (mode === "reader" || mode === "edit" || mode === "raw") {
+      // 編集モードを離れる時、未保存変更があれば確認。
+      if (state.displayMode === "edit" && mode !== "edit" && state.editDraft !== null) {
+        if (!window.confirm("未保存の変更があります。破棄してモード切替えしますか？")) return;
+        state.editDraft = null;
+      }
       state.displayMode = mode;
       render(container, state);
+      return;
+    }
+    if (target.closest<HTMLButtonElement>("[data-vp-revert]")) {
+      state.editDraft = null;
+      render(container, state);
+      return;
+    }
+    if (target.closest<HTMLButtonElement>("[data-vp-save]")) {
+      if (!state.editDraft) return;
+      state.saving = true;
+      render(container, state);
+      void apiPutVolumePlot(state.slug, state.volume, state.editDraft)
+        .then((result) => {
+          state.plot = { slug: result.slug, volume: result.volume, plot: result.plot };
+          state.editDraft = null;
+          state.saving = false;
+          setToast(state, container, "Volume Plot を保存しました", "success");
+        })
+        .catch((error) => {
+          state.saving = false;
+          setToast(state, container, `保存に失敗: ${errorText(error)}`, "danger");
+        });
       return;
     }
     const aiLayer = target.closest<HTMLButtonElement>("[data-ai-edit-layer]")?.dataset.aiEditLayer;
@@ -282,6 +437,26 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
       render(container, state);
     }
   }, { signal: controller.signal });
+
+  // edit モードの input change を draft へ反映。再 render はせず draft state のみ書き換える
+  // (フォーカスが外れないように)。 dirty 表示は次回 render で更新される。
+  const onFieldInput = (event: Event): void => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLTextAreaElement)) return;
+    const path = target.dataset.vpPath;
+    if (!path) return;
+    const isNumber = target instanceof HTMLInputElement && target.type === "number";
+    setDraftValue(path, target.value, isNumber);
+    // 保存ボタンの disabled 状態だけ更新したいので局所的に DOM を触る。
+    const saveBtn = container.querySelector<HTMLButtonElement>("[data-vp-save]");
+    const revertBtn = container.querySelector<HTMLButtonElement>("[data-vp-revert]");
+    const hint = container.querySelector<HTMLElement>(".vp-edit-save-bar__hint");
+    if (saveBtn) saveBtn.disabled = state.saving === true;
+    if (revertBtn) revertBtn.disabled = state.saving === true;
+    if (hint) hint.innerHTML = '<span class="vp-edit-dirty">未保存の変更があります</span>';
+  };
+  container.addEventListener("input", onFieldInput, { signal: controller.signal });
+  container.addEventListener("change", onFieldInput, { signal: controller.signal });
 
   container.addEventListener("submit", (event) => {
     event.preventDefault();
