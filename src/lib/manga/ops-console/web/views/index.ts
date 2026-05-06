@@ -11,6 +11,7 @@
  * ただし bootstrap や enumerate は scope なしでも動くので、一覧 → 確認系 (manifest 読み取り等) までは可能。
  */
 import { ApiError, apiCreateWork, apiGetWorks } from "../lib/api";
+import { toggleFavorite } from "../lib/persistence";
 import { store, type WorkInfo } from "../lib/store";
 
 const CSS = `
@@ -18,13 +19,17 @@ const CSS = `
 .idx-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
 .idx-head h2 { margin:0; font-size:22px; }
 .idx-head p { margin:0; color:#526076; font-size:13px; }
+.idx-section { display:grid; gap:var(--space-2); }
+.idx-section-title { margin: 0 0 var(--space-2); font-size: var(--fs-lg); }
 .idx-grid { display:grid; gap:14px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-.idx-card { background:#fff; border:1px solid #dbe1ea; border-radius:10px; padding:14px; display:grid; gap:10px; }
+.idx-card { position:relative; background:#fff; border:1px solid #dbe1ea; border-radius:10px; padding:14px; display:grid; gap:10px; }
 .idx-card h3 { margin:0; font-size:16px; line-height:1.4; }
 .idx-card .idx-slug { color:#64748b; font-size:12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .idx-eps { display:flex; gap:6px; flex-wrap:wrap; }
 .idx-ep-btn { min-height:30px; border:1px solid #c7cfdb; border-radius:6px; background:#fff; color:#243044; padding:0 10px; font:inherit; font-size:13px; cursor:pointer; }
 .idx-ep-btn:hover { background:#1f5eff; border-color:#1f5eff; color:#fff; }
+.idx-fav-btn { position:absolute; top:8px; right:8px; background:transparent; border:0; cursor:pointer; font-size:18px; color:var(--text-tertiary); line-height:1; }
+.idx-fav-btn.is-favorited { color:var(--color-warning); }
 .idx-empty-eps { color:#64748b; font-size:12px; }
 .idx-empty { padding:32px; text-align:center; color:#526076; font-size:14px; background:#fff; border:1px dashed #c7cfdb; border-radius:10px; }
 .idx-spacer { flex: 1 1 auto; }
@@ -66,8 +71,23 @@ function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+function isFavorited(slug: string, episode: number): boolean {
+  return store.state.favorites.some((entry) => entry.slug === slug && entry.episode === episode);
+}
+
+function workTitle(slug: string): string {
+  const work = store.state.works.find((item) => item.slug === slug);
+  return work?.title || slug;
+}
+
+function favoriteButton(slug: string, episode: number, label?: string): string {
+  const active = isFavorited(slug, episode);
+  return `<button type="button" class="idx-fav-btn${active ? " is-favorited" : ""}" data-fav-toggle data-slug="${escapeHtml(slug)}" data-episode="${episode}" data-label="${escapeHtml(label ?? "")}" title="${active ? "お気に入り解除" : "お気に入りに追加"}">★</button>`;
+}
+
 function renderCard(work: WorkInfo): string {
   const title = work.title ? escapeHtml(work.title) : escapeHtml(work.slug);
+  const favEpisode = work.episodes[0] ?? 1;
   const eps = work.episodes.length
     ? `<div class="idx-eps">${work.episodes
         .map(
@@ -78,11 +98,31 @@ function renderCard(work: WorkInfo): string {
     : `<p class="idx-empty-eps">エピソードがまだありません。</p>`;
   return `
     <article class="idx-card">
+      ${favoriteButton(work.slug, favEpisode, work.title ?? work.slug)}
       <h3>${title}</h3>
       <div class="idx-slug">${escapeHtml(work.slug)}</div>
       ${eps}
     </article>
   `;
+}
+
+function renderScopeCard(slug: string, episode: number, label?: string, meta?: string): string {
+  const title = label || workTitle(slug);
+  return `
+    <article class="idx-card">
+      ${favoriteButton(slug, episode, title)}
+      <h3>${escapeHtml(title)}</h3>
+      <div class="idx-slug">${escapeHtml(slug)} / ${episodeLabel(episode)}${meta ? ` / ${escapeHtml(meta)}` : ""}</div>
+      <div class="idx-eps">
+        <button type="button" class="idx-ep-btn" data-slug="${escapeHtml(slug)}" data-episode="${episode}">${episodeLabel(episode)} を開く</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderSection(title: string, html: string): string {
+  if (!html) return "";
+  return `<section class="idx-section"><h3 class="idx-section-title">${escapeHtml(title)}</h3><div class="idx-grid">${html}</div></section>`;
 }
 
 function renderModal(state: ViewState): string {
@@ -124,6 +164,13 @@ function renderModal(state: ViewState): string {
 }
 
 function render(container: HTMLElement, works: WorkInfo[], state: ViewState): void {
+  const favorites = store.state.favorites
+    .map((entry) => renderScopeCard(entry.slug, entry.episode, entry.label || workTitle(entry.slug)))
+    .join("");
+  const recent = store.state.recent
+    .slice(0, 5)
+    .map((entry) => renderScopeCard(entry.slug, entry.episode, workTitle(entry.slug), new Date(entry.ts).toLocaleString()))
+    .join("");
   const head = `
     <div class="idx-head">
       <h2>作品一覧</h2>
@@ -147,9 +194,14 @@ function render(container: HTMLElement, works: WorkInfo[], state: ViewState): vo
       <div class="idx-head">
         <p>エピソードを選んで操作 view (name-gate / revision / layers) に遷移します。</p>
       </div>
-      <div class="idx-grid">
-        ${works.map(renderCard).join("")}
-      </div>
+      ${renderSection("お気に入り", favorites)}
+      ${renderSection("最近開いた", recent)}
+      <section class="idx-section">
+        <h3 class="idx-section-title">すべての作品</h3>
+        <div class="idx-grid">
+          ${works.map(renderCard).join("")}
+        </div>
+      </section>
     </div>
     ${renderModal(state)}
     ${state.toast ? `<div class="nc-toast nc-toast--${state.toast.kind}">${escapeHtml(state.toast.message)}</div>` : ""}
@@ -190,6 +242,14 @@ export function mountIndexView(container: HTMLElement): () => void {
       if (action === "close-new-work" && !state.creating) {
         state.modalOpen = false;
         renderFromState();
+        return;
+      }
+      const fav = target.closest<HTMLButtonElement>("[data-fav-toggle]");
+      if (fav) {
+        const slug = fav.dataset.slug;
+        const episode = Number(fav.dataset.episode);
+        if (!slug || !Number.isInteger(episode) || episode <= 0) return;
+        store.update({ favorites: toggleFavorite(slug, episode, fav.dataset.label || workTitle(slug)) });
         return;
       }
       const btn = target.closest<HTMLButtonElement>("[data-slug][data-episode]");

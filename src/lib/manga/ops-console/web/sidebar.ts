@@ -38,13 +38,8 @@ function groupedMenuHtml(currentView: ViewName): string {
 }
 
 /**
- * Phase 2A は起動時 default scope 固定。
- * 旧実装は scope select を enable していて変更すると後続 API が 403 になる導線になっていた。
- * Phase 2B/3 で複数 slug/episode 切替を解禁するまで、disabled で表示のみとする。
- *
- * URL hash の同期は main.ts の syncRoute に一元化。ここでは pushState を呼ばない。
- *
- * 一覧モード (currentSlug が空) では scope select と MENU を出さず、案内だけ表示する。
+ * scope select は閲覧対象の切替だけを行う。URL 同期は main.ts の syncRoute に一元化。
+ * 書き込み系 API は server 側で起動時 default scope に制限する。
  */
 function rerender(root: HTMLElement, state: AppState): void {
   if (!state.currentSlug) {
@@ -65,12 +60,12 @@ function rerender(root: HTMLElement, state: AppState): void {
   }
   const currentWork = state.works.find((w) => w.slug === state.currentSlug);
   const episodes = currentWork?.episodes.length ? currentWork.episodes : [state.currentEpisode];
-  const lockTitle = "Phase 2A は default scope 固定。Phase 2B/3 で切替を解禁予定。";
+  const scopeTitle = "scope 切替で別作品の閲覧ができます。書き込みは起動時 default scope に限定。";
   root.innerHTML = `
     <div class="nc-scope-panel">
       <div class="nc-field-legacy">
         <label for="scope-slug">work</label>
-        <select id="scope-slug" disabled aria-disabled="true" title="${escapeHtml(lockTitle)}">
+        <select id="scope-slug" title="${escapeHtml(scopeTitle)}">
           ${renderOptions(
             state.works.map((w) => ({ value: w.slug, label: w.title ? `${w.title} (${w.slug})` : w.slug })),
             state.currentSlug
@@ -79,14 +74,14 @@ function rerender(root: HTMLElement, state: AppState): void {
       </div>
       <div class="nc-field-legacy">
         <label for="scope-episode">episode</label>
-        <select id="scope-episode" disabled aria-disabled="true" title="${escapeHtml(lockTitle)}">
+        <select id="scope-episode" title="${escapeHtml(scopeTitle)}">
           ${renderOptions(
             episodes.map((n) => ({ value: String(n), label: episodeLabel(n) })),
             String(state.currentEpisode)
           )}
         </select>
       </div>
-      <p class="nc-scope-note">Phase 2A は default scope 固定。切替は Phase 2B/3 で解禁予定。</p>
+      <p class="nc-scope-note">scope 切替は閲覧専用 (read)。修正・採用・起動は起動時 default scope に限定。</p>
     </div>
     <nav class="menu" aria-label="ops views">
       ${groupedMenuHtml(state.currentView)}
@@ -105,6 +100,21 @@ function rerender(root: HTMLElement, state: AppState): void {
       store.update({ currentView: view });
       // URL 同期は main.ts:syncRoute (store.subscribe 経由) に一元化。
     });
+  });
+  const slugSelect = root.querySelector<HTMLSelectElement>("#scope-slug");
+  slugSelect?.addEventListener("change", () => {
+    const slug = slugSelect.value;
+    const work = state.works.find((w) => w.slug === slug);
+    const episode = work?.episodes.includes(state.currentEpisode)
+      ? state.currentEpisode
+      : work?.episodes[0] ?? 1;
+    store.update({ currentSlug: slug, currentEpisode: episode });
+  });
+  const episodeSelect = root.querySelector<HTMLSelectElement>("#scope-episode");
+  episodeSelect?.addEventListener("change", () => {
+    const episode = Number(episodeSelect.value);
+    if (!Number.isInteger(episode) || episode <= 0) return;
+    store.update({ currentEpisode: episode });
   });
 }
 

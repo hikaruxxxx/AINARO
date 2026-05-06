@@ -110,18 +110,17 @@ function parseScopedPath(
   return { slug, episode, tail };
 }
 
-/**
- * 新 path の scope check。モードによって挙動を変える:
- *  - scope 固定モード (default が non-null): default と一致しなければ 403
- *  - 一覧モード (default が null): SPA で選んだ任意の slug/episode を許可。
- *    一覧モードはユーザが明示的に scope なしで起動した想定なので、cross-scope の read/write を解禁する。
- */
-function checkScopedPath(
+/** new path の write scope check。GET は cross-scope read を許可し、write だけ default scope に固定する。 */
+function checkScopedWritePath(
   scoped: { slug: string; episode: number },
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
   if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-    return { ok: true };
+    return {
+      ok: false,
+      status: 400,
+      error: "書き込みには scope 固定モードが必要です。`npm run console -- --slug <slug> --episode <NN>` で起動してください",
+    };
   }
   if (scoped.slug !== defaults.defaultSlug || scoped.episode !== defaults.defaultEpisode) {
     return {
@@ -210,9 +209,6 @@ export async function handleApi(
       if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       const slug = m[1];
       if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
-      if (defaults.defaultSlug !== null && slug !== defaults.defaultSlug) {
-        return send(res, 403, { error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" });
-      }
       return handleWorkMetaGet(slug, res);
     }
   }
@@ -241,10 +237,6 @@ export async function handleApi(
       if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       const slug = m[1];
       if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
-      // 一覧モード (default null) は任意 slug を許可、scope 固定モードは default のみ。
-      if (defaults.defaultSlug !== null && slug !== defaults.defaultSlug) {
-        return send(res, 403, { error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" });
-      }
       return handleBible(slug, res);
     }
   }
@@ -256,10 +248,6 @@ export async function handleApi(
       const volume = Number(m[2]);
       if (!isValidSlug(slug) || !Number.isInteger(volume) || volume <= 0) {
         return send(res, 400, { error: "作品 ID または巻番号が不正です" });
-      }
-      // 一覧モード (default null) は任意 slug を許可、scope 固定モードは default のみ。
-      if (defaults.defaultSlug !== null && slug !== defaults.defaultSlug) {
-        return send(res, 403, { error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" });
       }
       return handleVolumePlot(slug, volume, res);
     }
@@ -283,13 +271,13 @@ export async function handleApi(
   }
   const scoped = parseScopedPath(p);
   if (scoped) {
-    const guard = checkScopedPath(scoped, defaults);
-    if (!guard.ok) return send(res, guard.status, { error: guard.error });
     const tail = scoped.tail;
 
     if (tail === "/name-approval") {
       if (req.method === "GET") return handleNameApprovalGet(scoped.slug, scoped.episode, res);
       if (req.method === "POST") {
+        const guard = checkScopedWritePath(scoped, defaults);
+        if (!guard.ok) return send(res, guard.status, { error: guard.error });
         let body: any;
         try {
           body = await readJsonBody(req);
@@ -315,6 +303,8 @@ export async function handleApi(
     if (tail === "/revision-queue") {
       if (req.method === "GET") return handleRevisionQueueGet(scoped.slug, scoped.episode, res);
       if (req.method === "POST") {
+        const guard = checkScopedWritePath(scoped, defaults);
+        if (!guard.ok) return send(res, guard.status, { error: guard.error });
         let body: any;
         try {
           body = await readJsonBody(req);
@@ -328,6 +318,8 @@ export async function handleApi(
     if (tail === "/adopted-versions") {
       if (req.method === "GET") return handleAdoptedGet(scoped.slug, scoped.episode, res);
       if (req.method === "POST") {
+        const guard = checkScopedWritePath(scoped, defaults);
+        if (!guard.ok) return send(res, guard.status, { error: guard.error });
         let body: any;
         try {
           body = await readJsonBody(req);

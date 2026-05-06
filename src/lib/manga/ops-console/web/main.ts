@@ -1,4 +1,5 @@
 import { apiGetBootstrap } from "./lib/api";
+import { loadFavorites, loadRecent, pushRecent } from "./lib/persistence";
 import { isViewName, store, type ViewName } from "./lib/store";
 import { mountBreadcrumb } from "./breadcrumb";
 import { mountSidebar } from "./sidebar";
@@ -53,17 +54,17 @@ function syncRoute(slug: string, episode: number, view: ViewName): void {
 
 /**
  * view の差分検知付き mount。
- * 旧実装は store.subscribe で全 state 変更時に unmount→remount していたため、
- * Phase 2B 以降に view 内で保持する状態 (フォーム入力、選択中ページ等) が毎更新で破棄されていた。
- * currentView が変わったときだけ remount するように変更。
+ * scope 切替時は各 view の read API を新 scope で取り直すため、view / slug / episode の
+ * いずれかが変わった場合に remount する。
  */
 function mountCurrentView(main: HTMLElement): () => void {
   let unmount: Unmount | null = null;
-  let prevView: ViewName | null = null;
+  let prevKey: string | null = null;
   return store.subscribe((state) => {
-    if (state.currentView === prevView) return;
+    const key = `${state.currentView}#${state.currentSlug}#${state.currentEpisode}`;
+    if (key === prevKey) return;
     if (unmount) unmount();
-    prevView = state.currentView;
+    prevKey = key;
     if (state.currentView === "index") unmount = mountIndexView(main);
     else if (state.currentView === "pipeline") unmount = mountPipelineView(main);
     else if (state.currentView === "storyboard") unmount = mountStoryboardView(main);
@@ -115,10 +116,25 @@ async function start(): Promise<void> {
     defaultEpisode: boot.default_episode ?? 0,
     currentSlug,
     currentEpisode,
-    currentView,
-  });
+      currentView,
+      recent: loadRecent(),
+      favorites: loadFavorites(),
+    });
   syncRoute(currentSlug, currentEpisode, currentView);
   store.subscribe((state) => syncRoute(state.currentSlug, state.currentEpisode, state.currentView));
+  let prevScopeKey = "";
+  store.subscribe((state) => {
+    const slug = state.currentSlug;
+    const episode = state.currentEpisode;
+    if (!slug || !episode) {
+      prevScopeKey = "";
+      return;
+    }
+    const key = `${slug}#${episode}`;
+    if (key === prevScopeKey) return;
+    prevScopeKey = key;
+    store.update({ recent: pushRecent(slug, episode) });
+  });
 
   window.addEventListener("popstate", () => {
     const next = parseRoute();

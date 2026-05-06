@@ -17,6 +17,18 @@ export type WorkInfo = {
   episodes: number[];
 };
 
+export type RecentEntry = {
+  slug: string;
+  episode: number;
+  ts: string;
+};
+
+export type FavoriteEntry = {
+  slug: string;
+  episode: number;
+  label?: string;
+};
+
 export type AppState = {
   currentView: ViewName;
   currentSlug: string;
@@ -24,6 +36,8 @@ export type AppState = {
   defaultSlug: string;
   defaultEpisode: number;
   works: WorkInfo[];
+  recent: RecentEntry[];
+  favorites: FavoriteEntry[];
 };
 
 type Subscriber = (state: AppState) => void;
@@ -35,6 +49,8 @@ const initialState: AppState = {
   defaultSlug: "",
   defaultEpisode: 1,
   works: [],
+  recent: [],
+  favorites: [],
 };
 
 const subscribers = new Set<Subscriber>();
