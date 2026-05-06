@@ -22,6 +22,7 @@ import type {
   CostumeEntryV2,
   CharacterRelationV2,
   ContinuitySeedV2,
+  CoreHookV2,
   StyleDirectivesV2,
   VisualMotifV2,
   WorldSpec,
@@ -39,6 +40,8 @@ export type V2Concept = {
   id: string;
   title: string;
   logline?: string;
+  /** 中核ギミック gateway。bible.meta.core_hook へ直接反映する */
+  core_hook?: CoreHookV2;
   synopsis?:
     | string
     | {
@@ -497,6 +500,9 @@ export function adaptV2ConceptToBibleSnapshot(
       target_pages_per_episode: args.targetPagesPerEpisode,
       target_audience: args.targetAudience,
       estimated_volumes: args.estimatedVolumes,
+      // V2企画書に core_hook が記入されていれば初期 snapshot に注入する。
+      // 未記入のときは L01c-bible-deepen の deep-extractor が後で補完する。
+      core_hook: concept.core_hook,
     },
     world: adaptWorld(concept.world),
     characters,
