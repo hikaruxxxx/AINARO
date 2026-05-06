@@ -19,7 +19,7 @@ function episodeLabel(n: number): string {
 }
 
 function groupedMenuHtml(currentView: ViewName): string {
-  const groups: MenuGroup[] = ["global", "judge", "view", "work", "exec"];
+  const groups: MenuGroup[] = ["global", "here", "judge", "view", "work", "exec"];
   return groups
     .map((group) => {
       const items = MENU.filter((item) => item.group === group);

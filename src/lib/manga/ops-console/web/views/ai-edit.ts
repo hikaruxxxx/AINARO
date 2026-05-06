@@ -206,10 +206,12 @@ async function runAiEdit(container: HTMLElement, state: ViewState): Promise<void
 export function mountAiEditView(container: HTMLElement): () => void {
   ensureStyles();
   const controller = new AbortController();
+  // pipeline / 各 layer view から渡された preset を消費する (1 回限り)。
+  const preset = store.state.aiEditPreset;
   const state: ViewState = {
-    scope: store.state.currentSlug || "_console",
-    target: "",
-    prompt: "",
+    scope: preset?.scope || store.state.currentSlug || "_console",
+    target: preset?.target ?? "",
+    prompt: preset?.prompt ?? "",
     running: false,
     jobId: null,
     state: null,
@@ -219,6 +221,10 @@ export function mountAiEditView(container: HTMLElement): () => void {
     confirm: null,
     toast: null,
   };
+  if (preset) {
+    // 再 mount で残り続けないよう即クリア。subscribe 通知はループしないよう非破壊的に直接書き換え。
+    store.state = { ...store.state, aiEditPreset: undefined };
+  }
   render(container, state);
 
   container.addEventListener("click", (event) => {

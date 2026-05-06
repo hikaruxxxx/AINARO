@@ -11,7 +11,8 @@ import {
   type PipelineStatusLayer,
 } from "../lib/api";
 import { isViewName, store } from "../lib/store";
-import { layerLabel } from "../labels";
+import { layerLabel, resolveAiEditHint } from "../labels";
+import { openLaunchModal, type LaunchArgSpec } from "../lib/launch-modal";
 
 type HintMap = Map<string, string>;
 
@@ -43,6 +44,8 @@ const CSS = `
 .pipe-info { color: var(--text-secondary); font-size: var(--fs-sm); }
 .pipe-spacer { flex: 1 1 auto; }
 .pipe-loading { margin-top: var(--space-3); }
+.pipe-step__actions .nc-button[disabled] { opacity: 0.45; cursor: not-allowed; }
+.pipe-step__actions .nc-button[data-locked="cli"] { color: var(--text-tertiary); border-style: dashed; }
 `;
 
 function ensureStyles(): void {
@@ -100,11 +103,35 @@ function isRunnableLayer(value: string | null | undefined): value is LayerId {
   return value === "L01" || value === "L02" || value === "L02b" || value === "L09" || value === "L10" || value === "L11" || value === "L12" || value === "L13";
 }
 
-function startRequest(layer: LayerId, slug: string, episode: number): JobStartRequest {
+function startRequest(layer: LayerId, slug: string, episode: number, extras?: Record<string, string>): JobStartRequest {
   const req: JobStartRequest = { layer, slug, args: {} };
   if (layer === "L02") return req;
-  if (layer === "L13") return { ...req, volume: 1 };
+  if (layer === "L13") {
+    const vol = Number(extras?.volume ?? 1);
+    return { ...req, volume: Number.isFinite(vol) && vol > 0 ? vol : 1 };
+  }
   return { ...req, episode };
+}
+
+/**
+ * layer ごとの追加引数定義。 Phase 8B 時点では L13 (--volume) のみ。
+ * L01/L02b は別 view へ delegate する (concept path 等の path picker が必要)。
+ */
+function launchArgsFor(layer: LayerId): LaunchArgSpec[] {
+  if (layer === "L13") {
+    return [
+      {
+        key: "volume",
+        label: "巻番号",
+        type: "number",
+        defaultValue: "1",
+        min: 1,
+        required: true,
+        hint: "data/manga/works/{slug}/volumes/v{NN}/ 配下に成果物が出ます",
+      },
+    ];
+  }
+  return [];
 }
 
 async function buildHints(status: PipelineStatus): Promise<HintMap> {
@@ -144,9 +171,22 @@ function renderLayer(layer: PipelineStatusLayer, state: ViewState): string {
   const hint = state.hints.get(layer.id);
   const current = hint ? " pipe-step--current" : "";
   const nextView = layer.next_view && isViewName(layer.next_view) ? layer.next_view : "";
-  const nextLayer = isRunnableLayer(layer.next_layer_id ?? null) ? layer.next_layer_id : "";
+  // server 側の next_layer_id は「同じ row の layer 自身」が runnable な場合のみ値を持つ。
+  // L03-L08 等は null なので、Console から再実行できず CLI へ案内する。
+  const runnable = isRunnableLayer(layer.next_layer_id ?? null) ? layer.next_layer_id : "";
   const ts = formatTs(layer.last_modified);
   const label = layerLabel(layer.id);
+  const aiHint = resolveAiEditHint(layer.id, { slug: state.slug, episode: state.episode });
+  const rerunLabel = layer.status === "ready" ? "再実行" : "生成";
+  const rerunBtn = runnable
+    ? `<button type="button" class="nc-button nc-button--primary nc-button--sm" data-rerun-layer="${escapeHtml(runnable)}" data-current-status="${escapeHtml(layer.status)}" ${running ? "disabled" : ""}>${running ? "起動中" : rerunLabel}</button>`
+    : `<button type="button" class="nc-button nc-button--sm" data-locked="cli" disabled title="${escapeHtml(`${layer.id} は CLI から起動してください (例: npx tsx scripts/manga/layers/${layer.id}-...ts --slug ${state.slug} --episode ${state.episode})`)}">CLI のみ</button>`;
+  const openBtn = nextView
+    ? `<button type="button" class="nc-button nc-button--secondary nc-button--sm" data-next-view="${escapeHtml(nextView)}">開く</button>`
+    : "";
+  const aiBtn = aiHint
+    ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ai-edit-layer="${escapeHtml(layer.id)}" title="AI 編集 view へ遷移し、${escapeHtml(layer.id)} の context を prefill します">AI で修正</button>`
+    : "";
   return `
     <li class="pipe-step${current}">
       <div class="pipe-step__head">
@@ -159,8 +199,9 @@ function renderLayer(layer: PipelineStatusLayer, state: ViewState): string {
         <span class="nc-badge ${badgeClass(layer, running)}">${escapeHtml(badgeLabel(layer, running))}</span>
         ${ts ? `<span class="pipe-step__ts">${escapeHtml(ts)}</span>` : `<span class="pipe-step__ts"></span>`}
         <div class="pipe-step__actions">
-          ${nextView ? `<button type="button" class="nc-button nc-button--sm" data-next-view="${escapeHtml(nextView)}">結果を見る</button>` : ""}
-          ${nextLayer ? `<button type="button" class="nc-button nc-button--primary nc-button--sm" data-start-layer="${escapeHtml(nextLayer)}" ${running ? "disabled" : ""}>${running ? "起動中" : "起動"}</button>` : ""}
+          ${rerunBtn}
+          ${openBtn}
+          ${aiBtn}
         </div>
       </div>
       ${hint ? `<div class="pipe-step__hint">${escapeHtml(hint)}</div>` : ""}
@@ -259,53 +300,93 @@ export function mountPipelineView(container: HTMLElement): () => void {
     });
   });
 
+  const handleRerun = async (layer: LayerId, status: PipelineStatusLayer["status"]): Promise<void> => {
+    // L01 / L02b は引数 (concept path / volume) が必要なので、再実行 UI は該当 view に委譲。
+    if (layer === "L01") {
+      store.update({ currentView: "bible" });
+      setToast(state, container, "L01 は世界観・設定 view から起動してください (concept 引数が必要)", "info");
+      return;
+    }
+    if (layer === "L02b") {
+      store.update({ currentView: "volume-plot" });
+      setToast(state, container, "L02b は巻プロット view から起動してください (volume 引数が必要)", "info");
+      return;
+    }
+    const label = layerLabel(layer);
+    const result = await openLaunchModal({
+      title: `${layer} ${label.title} を ${status === "ready" ? "再実行" : "生成"}`,
+      warning:
+        status === "ready"
+          ? "既に生成済みです。再実行すると現状の成果物が上書きされる可能性があります。"
+          : undefined,
+      description:
+        status === "ready"
+          ? "成果物のバックアップは取得しません (Phase 8C で対応予定)。続行する場合は git で diff を確認してください。"
+          : undefined,
+      args: launchArgsFor(layer),
+      confirmLabel: status === "ready" ? "再実行する" : "生成する",
+    });
+    if (!result) return;
+    state.running.add(layer);
+    render(container, state);
+    try {
+      const job = await apiPostJob(startRequest(layer, state.slug, state.episode, result));
+      const stream = openJobStream(job.job_id, {
+        onEvent: () => undefined,
+        onDone: () => {
+          state.streams.get(job.job_id)?.close();
+          state.streams.delete(job.job_id);
+          state.running.delete(layer);
+          void refresh(state, container).catch((error) => {
+            state.error = errorText(error);
+            render(container, state);
+          });
+        },
+        onError: (error) => {
+          state.streams.delete(job.job_id);
+          state.running.delete(layer);
+          setToast(state, container, error.message, "danger");
+        },
+      });
+      state.streams.set(job.job_id, stream);
+    } catch (error) {
+      state.running.delete(layer);
+      setToast(state, container, `起動に失敗: ${errorText(error)}`, "danger");
+    }
+  };
+
   container.addEventListener(
     "click",
     (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
+
+      // 「開く」: 関連 view へ遷移。
       const view = target.closest<HTMLButtonElement>("[data-next-view]")?.dataset.nextView;
       if (view && isViewName(view)) {
         store.update({ currentView: view });
         return;
       }
-      const layer = target.closest<HTMLButtonElement>("[data-start-layer]")?.dataset.startLayer;
-      if (!isRunnableLayer(layer)) return;
-      if (layer === "L01") {
-        store.update({ currentView: "bible" });
-        return;
-      }
-      if (layer === "L02b") {
-        store.update({ currentView: "volume-plot" });
-        return;
-      }
-      state.running.add(layer);
-      render(container, state);
-      void apiPostJob(startRequest(layer, state.slug, state.episode))
-        .then((result) => {
-          const stream = openJobStream(result.job_id, {
-            onEvent: () => undefined,
-            onDone: () => {
-              state.streams.get(result.job_id)?.close();
-              state.streams.delete(result.job_id);
-              state.running.delete(layer);
-              void refresh(state, container).catch((error) => {
-                state.error = errorText(error);
-                render(container, state);
-              });
-            },
-            onError: (error) => {
-              state.streams.delete(result.job_id);
-              state.running.delete(layer);
-              setToast(state, container, error.message, "danger");
-            },
+
+      // 「AI で修正」: per-layer hint を preset として ai-edit へ。
+      const aiLayer = target.closest<HTMLButtonElement>("[data-ai-edit-layer]")?.dataset.aiEditLayer;
+      if (aiLayer) {
+        const hint = resolveAiEditHint(aiLayer, { slug: state.slug, episode: state.episode });
+        if (hint) {
+          store.update({
+            aiEditPreset: { scope: state.slug, target: hint.target, prompt: hint.promptTemplate },
+            currentView: "ai-edit",
           });
-          state.streams.set(result.job_id, stream);
-        })
-        .catch((error) => {
-          state.running.delete(layer);
-          setToast(state, container, `起動に失敗: ${errorText(error)}`, "danger");
-        });
+        }
+        return;
+      }
+
+      // 「再実行」: 共通 launch modal を経由する。
+      const rerunBtn = target.closest<HTMLButtonElement>("[data-rerun-layer]");
+      const layer = rerunBtn?.dataset.rerunLayer;
+      if (!isRunnableLayer(layer)) return;
+      const status = (rerunBtn?.dataset.currentStatus ?? "missing") as PipelineStatusLayer["status"];
+      void handleRerun(layer, status);
     },
     { signal: controller.signal }
   );

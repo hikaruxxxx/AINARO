@@ -34,6 +34,16 @@ export type FavoriteEntry = {
   label?: string;
 };
 
+/**
+ * AI 編集 view へ pipeline / 各 view から context を渡すための一時 preset。
+ * ai-edit view が mount 時に読み取って form を prefill し、その場で undefined に戻す。
+ */
+export type AiEditPreset = {
+  scope?: string;
+  target?: string;
+  prompt?: string;
+};
+
 export type AppState = {
   currentView: ViewName;
   currentSlug: string;
@@ -43,6 +53,7 @@ export type AppState = {
   works: WorkInfo[];
   recent: RecentEntry[];
   favorites: FavoriteEntry[];
+  aiEditPreset?: AiEditPreset;
 };
 
 type Subscriber = (state: AppState) => void;
