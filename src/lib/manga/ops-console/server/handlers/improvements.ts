@@ -65,8 +65,15 @@ async function listFilesInDir(dir: string): Promise<string[]> {
   }
 }
 
+/**
+ * audit.json は 2 schema が混在している:
+ *   (旧) findings[] + counts_by_rule/severity (Phase X 期)
+ *   (新, L11 v2 が出力) panels_total/passed/failed + checks[{panel_id, check_kind, passed, detail}]
+ * どちらでも読めるように両 field を optional にし、normalize でまとめる。
+ */
 type AuditReport = {
   schema_version?: number;
+  // 旧 schema
   pages_total?: number;
   findings?: Array<{
     page_no: number;
@@ -78,7 +85,91 @@ type AuditReport = {
   }>;
   counts_by_rule?: Record<string, number>;
   counts_by_severity?: Record<string, number>;
+  // 新 schema (L11 v2)
+  panels_total?: number;
+  panels_passed?: number;
+  panels_failed?: number;
+  checks?: Array<{
+    panel_id: string;
+    check_kind: string;
+    passed: boolean;
+    detail?: string;
+  }>;
 };
+
+/** 旧 schema / 新 schema どちらでも統一形式に正規化する。 */
+function normalizeAudit(raw: AuditReport | null): {
+  pages_total: number;
+  findings_total: number;
+  counts_by_rule: Record<string, number>;
+  counts_by_severity: Record<string, number>;
+  findings_top10: Array<{
+    page_no: number;
+    panel_no?: number;
+    rule: string;
+    severity: string;
+    message: string;
+  }>;
+} | null {
+  if (!raw) return null;
+  // 新 schema (checks[]) → 旧 schema 形式に変換
+  if (Array.isArray(raw.checks) && raw.checks.length > 0) {
+    // severity 推定: "image missing" 系は L09 render 未実行が原因なのでパイプライン上の正常状態。
+    //   → severity = "info" 扱い (error として焦らせない)
+    // それ以外の regulation_violation や schema 違反は "error"
+    const classify = (c: { check_kind: string; detail?: string }): "info" | "warn" | "error" => {
+      const detail = c.detail ?? "";
+      if (
+        c.check_kind === "regulation_violation" &&
+        /rendered page image missing|ENOENT.*renders\//i.test(detail)
+      ) {
+        return "info";
+      }
+      return "error";
+    };
+
+    const failed = raw.checks.filter((c) => !c.passed);
+    const counts_by_rule: Record<string, number> = {};
+    const counts_by_severity: Record<string, number> = { error: 0, warn: 0, info: 0 };
+    for (const c of failed) {
+      counts_by_rule[c.check_kind] = (counts_by_rule[c.check_kind] ?? 0) + 1;
+      const sev = classify(c);
+      counts_by_severity[sev] = (counts_by_severity[sev] ?? 0) + 1;
+    }
+    const findings_top10 = failed.slice(0, 10).map((c) => {
+      // panel_id が "page_N" 形式なので page_no を抽出。それ以外は 0。
+      const m = /^page[_-]?(\d+)$/i.exec(c.panel_id);
+      const page_no = m ? Number(m[1]) : 0;
+      return {
+        page_no,
+        rule: c.check_kind,
+        severity: classify(c),
+        message: c.detail ?? "(no detail)",
+      };
+    });
+    return {
+      pages_total: raw.panels_total ?? 0,
+      findings_total: failed.length,
+      counts_by_rule,
+      counts_by_severity,
+      findings_top10,
+    };
+  }
+  // 旧 schema (findings[])
+  return {
+    pages_total: raw.pages_total ?? 0,
+    findings_total: raw.findings?.length ?? 0,
+    counts_by_rule: raw.counts_by_rule ?? {},
+    counts_by_severity: raw.counts_by_severity ?? {},
+    findings_top10: (raw.findings ?? []).slice(0, 10).map((f) => ({
+      page_no: f.page_no,
+      panel_no: f.panel_no,
+      rule: f.rule,
+      severity: f.severity,
+      message: f.message,
+    })),
+  };
+}
 
 export type ImprovementsResponse = {
   slug: string;
@@ -226,42 +317,23 @@ export async function handleImprovementsGet(
   try {
     const epDir = episodeDir(slug, episode);
 
-    // L11 audit (audit.json)
+    // L11 audit (audit.json) — 旧/新 schema 両対応で normalize
     const auditPath = path.join(epDir, "audit.json");
     const audit = await readJsonOrNull<AuditReport>(auditPath);
-    const auditSummary = audit
-      ? {
-          pages_total: audit.pages_total ?? 0,
-          findings_total: audit.findings?.length ?? 0,
-          counts_by_rule: audit.counts_by_rule ?? {},
-          counts_by_severity: audit.counts_by_severity ?? {},
-          findings_top10: (audit.findings ?? []).slice(0, 10).map((f) => ({
-            page_no: f.page_no,
-            panel_no: f.panel_no,
-            rule: f.rule,
-            severity: f.severity,
-            message: f.message,
-          })),
-        }
-      : null;
+    const auditSummary = normalizeAudit(audit);
 
     // Phase X audit-rules (name_audit.json) — L8.5 で書き出されている (実体は name/name_audit.json)
     const nameAudit = await readJsonOrNull<AuditReport>(nameAuditPath(slug, episode));
-    const nameAuditSummary = nameAudit
+    const nameAuditNormalized = normalizeAudit(nameAudit);
+    const nameAuditSummary = nameAuditNormalized
       ? {
-          pages_total: nameAudit.pages_total ?? 0,
-          findings_total: nameAudit.findings?.length ?? 0,
-          counts_by_rule: nameAudit.counts_by_rule ?? {},
-          counts_by_severity: nameAudit.counts_by_severity ?? {},
-          new_rules_findings: (nameAudit.findings ?? [])
-            .filter((f) => NEW_AUDIT_RULES.includes(f.rule))
-            .map((f) => ({
-              page_no: f.page_no,
-              panel_no: f.panel_no,
-              rule: f.rule,
-              severity: f.severity,
-              message: f.message,
-            })),
+          pages_total: nameAuditNormalized.pages_total,
+          findings_total: nameAuditNormalized.findings_total,
+          counts_by_rule: nameAuditNormalized.counts_by_rule,
+          counts_by_severity: nameAuditNormalized.counts_by_severity,
+          new_rules_findings: nameAuditNormalized.findings_top10.filter((f) =>
+            NEW_AUDIT_RULES.includes(f.rule),
+          ),
         }
       : null;
 
