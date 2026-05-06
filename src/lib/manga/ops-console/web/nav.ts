@@ -10,6 +10,7 @@ export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = 
   { view: "name-gate", label: "ネーム判定", group: "judge" },
   { view: "revision", label: "修正・採用", group: "judge" },
   { view: "quality", label: "品質監査", group: "judge" },
+  { view: "improvements", label: "品質改善 (Hook / Cliff)", group: "judge" },
   { view: "storyboard", label: "コンテ", group: "view" },
   { view: "work-overview", label: "作品概要", group: "work" },
   { view: "bible", label: "世界観・設定", group: "work" },

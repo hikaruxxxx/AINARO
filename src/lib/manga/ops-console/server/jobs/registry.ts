@@ -4,6 +4,8 @@ export type LayerId =
   | "L01c"
   | "L02"
   | "L02b"
+  | "L04_1"
+  | "L04_9"
   | "L09"
   | "L11"
   | "L12"
@@ -80,6 +82,25 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
       { name: "--concept", pattern: /^[\w./-]+\.json$/, isPath: true },
     ],
     timeoutMs: 10 * 60 * 1000,
+  },
+  L04_1: {
+    script: "scripts/manga/layers/L04-1-opening-hook.ts",
+    scope: "episode",
+    allowedFlags: [
+      { name: "--max-proposals", pattern: /^[1-9]$/ },
+      { name: "--apply-recommendation", pattern: /^$/ },
+    ],
+    timeoutMs: 30 * 60 * 1000,
+  },
+  L04_9: {
+    script: "scripts/manga/layers/L04-9-cliffhanger.ts",
+    scope: "episode",
+    allowedFlags: [
+      { name: "--max-proposals", pattern: /^[1-9]$/ },
+      { name: "--apply-recommendation", pattern: /^$/ },
+      { name: "--volume-position", pattern: /^(early|mid|late|volume_end)$/ },
+    ],
+    timeoutMs: 30 * 60 * 1000,
   },
   L09: {
     script: "scripts/manga/layers/L09-render.ts",

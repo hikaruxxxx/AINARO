@@ -15,6 +15,7 @@ import { mountPipelineView } from "./views/pipeline";
 import { mountQualityView } from "./views/quality";
 import { mountQualityHubView } from "./views/quality-hub";
 import { mountRevisionView } from "./views/revision";
+import { mountImprovementsView } from "./views/improvements";
 import { mountStoryboardView } from "./views/storyboard";
 import { mountTrademarkGateView } from "./views/trademark-gate";
 import { mountVolumePlotView } from "./views/volume-plot";
@@ -124,6 +125,7 @@ function mountCurrentView(main: HTMLElement): () => void {
     else if (state.currentView === "volume-plot") unmount = mountVolumePlotView(main);
     else if (state.currentView === "kdp-metadata") unmount = mountKdpMetadataView(main);
     else if (state.currentView === "trademark-gate") unmount = mountTrademarkGateView(main);
+    else if (state.currentView === "improvements") unmount = mountImprovementsView(main);
     else if (state.currentView === "volumes") unmount = mountVolumesView(main);
     else if (state.currentView === "layers") unmount = mountLayersView(main);
     else if (state.currentView === "revision") unmount = mountRevisionView(main);

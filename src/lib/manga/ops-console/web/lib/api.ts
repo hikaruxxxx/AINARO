@@ -596,3 +596,81 @@ export function apiPostTrademarkCheck(
     body,
   );
 }
+
+// ===== Phase Y WY-7: 品質改善 view =====
+
+export type ImprovementsAuditSummary = {
+  pages_total: number;
+  findings_total: number;
+  counts_by_rule: Record<string, number>;
+  counts_by_severity: Record<string, number>;
+  findings_top10: Array<{
+    page_no: number;
+    panel_no?: number;
+    rule: string;
+    severity: string;
+    message: string;
+  }>;
+};
+
+export type ImprovementsNameAuditSummary = {
+  pages_total: number;
+  findings_total: number;
+  counts_by_rule: Record<string, number>;
+  counts_by_severity: Record<string, number>;
+  new_rules_findings: Array<{
+    page_no: number;
+    panel_no?: number;
+    rule: string;
+    severity: string;
+    message: string;
+  }>;
+};
+
+export type ImprovementsResponse = {
+  slug: string;
+  episode: number;
+  audit_summary: ImprovementsAuditSummary | null;
+  name_audit_summary: ImprovementsNameAuditSummary | null;
+  opening_hook_proposals: {
+    available: boolean;
+    latest_file?: string;
+    proposals_count?: number;
+    candidate_patterns?: string[];
+    recommendation?: { pattern_id: string; rationale: string };
+  };
+  cliffhanger_proposals: {
+    available: boolean;
+    latest_file?: string;
+    proposals_count?: number;
+    candidate_patterns?: string[];
+    recommendation?: { pattern_id: string; rationale: string };
+    pull_link?: {
+      current_episode_cliff: string;
+      next_opening_hook_hint: string;
+      is_volume_end: boolean;
+    };
+  };
+  related_cards: Array<{
+    card_id: string;
+    title: string;
+    scope: string;
+    trigger: { layer?: string; flag?: string };
+    diagnosis: string;
+  }>;
+  next_actions: Array<{
+    label: string;
+    job_layer: string;
+    job_flags: Record<string, string | true>;
+    description: string;
+  }>;
+};
+
+export function apiGetImprovements(
+  slug: string,
+  episode: number,
+): Promise<ImprovementsResponse> {
+  return getJson<ImprovementsResponse>(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/improvements`,
+  );
+}
