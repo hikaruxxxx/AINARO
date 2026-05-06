@@ -2,6 +2,7 @@
  * L8.6 Name Audit (rule-based, warning のみ)
  *
  * SSoT: ~/.claude/plans/manga-pipeline-v2.md
+ * Phase X WX-4 (2026-05-06): craft 準拠ルール5件追加 + auditVolume 新設
  *
  * v2 で導入。LLM は使わず決定論ルールでネームを検査する。
  * 結果は warning として `name_manifest.json` と `name_audit.json` に書き出される。
@@ -9,7 +10,7 @@
  *
  * gate に昇格させたい時は L9 が `--audit-gate` を持つ形で別途実装する想定。
  *
- * ルール一覧:
+ * ルール一覧 (panel/page スコープ):
  * - dialogue_overflow:    パネル内合計文字数 (台詞+モノローグ+ナレーション) が閾値超
  * - panel_overcrowd:      1ページのコマ数が閾値超
  * - panel_undercrowd:     1ページのコマ数が極端に少ない (見せ場以外で 1コマは不自然)
@@ -24,11 +25,24 @@
  * - establishing_late:    establishing shot が page 後半に登場 (普通は page 冒頭)
  * - cliffhanger_role_mismatch: page_role が cliffhanger なのに最終 panel の importance が低い
  * - opening_hook_no_focus: page_role が opening_hook なのに focus が曖昧 (importance ≤ 2)
+ *
+ * Phase X WX-4 で追加 (panel スコープ):
+ * - narration_dominant:   panel の narration 文字数 > dialogue + monologue 合計 (ナレ過多)
+ * - face_only_emotion_run: 緊迫panel で「顔以外の部位ショット」が0 (スケルトン実装)
+ *
+ * Phase X WX-4 で追加 (page スコープ):
+ * - mascot_temperature_pair_missing: page内に温度差ペアが0 (スケルトン実装)
+ *
+ * Phase X WX-4 で追加 (volume スコープ、auditVolume() 経由):
+ * - recovery_beat_missing: episode 全体で「小報酬/生活感」beat が0
+ * - expectation_reality_gap_absent: 巻全体で「期待 vs 現実」のギャップが1回も発生しない
  */
 import type {
   PagePlanPage,
   PanelV2,
   StoryboardPageV2,
+  EpisodeStoryboardV2,
+  ToneProfile,
 } from "../schemas-v2";
 import type { NameWarning } from "./types";
 
@@ -39,6 +53,11 @@ const PANEL_UNDERCROWD = 1;
 const SHOT_REPETITION_RUN = 3;
 const SILENT_RUN = 3;
 const BLEED_OVERUSE = 3;
+// Phase X WX-4 で追加
+/** panel の narration 文字数がこの倍率 × (dialogue+monologue 文字数) を超えると warn */
+const NARRATION_DOMINANT_RATIO = 1.0;
+/** narration が単独で存在する場合 (dialogue/monologue 0) はこの絶対値を超えると warn */
+const NARRATION_ONLY_THRESHOLD = 30;
 
 export type AuditRuleKind =
   | "dialogue_overflow"
@@ -54,7 +73,13 @@ export type AuditRuleKind =
   | "reading_order_jump"
   | "establishing_late"
   | "cliffhanger_role_mismatch"
-  | "opening_hook_no_focus";
+  | "opening_hook_no_focus"
+  // Phase X WX-4 で追加
+  | "narration_dominant"
+  | "face_only_emotion_run"
+  | "mascot_temperature_pair_missing"
+  | "recovery_beat_missing"
+  | "expectation_reality_gap_absent";
 
 export type AuditSeverity = "info" | "warn" | "error";
 
@@ -253,10 +278,10 @@ function auditPanel(
   const findings: AuditFinding[] = [];
 
   // dialogue_overflow
-  const totalChars =
-    panel.dialogue.reduce((s, d) => s + d.text.length, 0) +
-    panel.monologue.reduce((s, m) => s + m.text.length, 0) +
-    panel.narration.reduce((s, n) => s + n.length, 0);
+  const dialogueChars = panel.dialogue.reduce((s, d) => s + d.text.length, 0);
+  const monologueChars = panel.monologue.reduce((s, m) => s + m.text.length, 0);
+  const narrationChars = panel.narration.reduce((s, n) => s + n.length, 0);
+  const totalChars = dialogueChars + monologueChars + narrationChars;
   if (totalChars > DIALOGUE_OVERFLOW_CHARS) {
     findings.push({
       page_no: pageNo,
@@ -265,6 +290,23 @@ function auditPanel(
       rule: "dialogue_overflow",
       severity: "warn",
       message: `panel#${panel.panel_no}: 文字数 ${totalChars} (推奨 ${DIALOGUE_OVERFLOW_CHARS})`,
+    });
+  }
+
+  // Phase X WX-4: narration_dominant
+  // ナレーション文字数が dialogue+monologue を上回る = 「会話で世界観説明」原則違反
+  const speechChars = dialogueChars + monologueChars;
+  const narrationDominant =
+    (speechChars > 0 && narrationChars > speechChars * NARRATION_DOMINANT_RATIO) ||
+    (speechChars === 0 && narrationChars > NARRATION_ONLY_THRESHOLD);
+  if (narrationDominant && !panel.silence) {
+    findings.push({
+      page_no: pageNo,
+      panel_id: panel.panel_id,
+      panel_no: panel.panel_no,
+      rule: "narration_dominant",
+      severity: "warn",
+      message: `panel#${panel.panel_no}: ナレーション ${narrationChars}字 が会話 ${speechChars}字 を上回る (manga_craft_guide v2 ナレーション禁則)`,
     });
   }
 
@@ -345,10 +387,117 @@ export function findingsToWarnings(findings: AuditFinding[]): NameWarning[] {
       case "cliffhanger_role_mismatch":
       case "opening_hook_no_focus":
       case "dialogue_speaker_absent":
-        // これらは name_audit.json には残るが、manifest.warnings には入れない
+      // Phase X WX-4 で追加されたルールも name_audit.json には残るが
+      // manifest.warnings には入れない (v1 互換維持)
+      case "narration_dominant":
+      case "face_only_emotion_run":
+      case "mascot_temperature_pair_missing":
+      case "recovery_beat_missing":
+      case "expectation_reality_gap_absent":
         continue;
     }
     warnings.push({ page_no: f.page_no, kind, message: f.message });
   }
   return warnings;
+}
+
+// ============================================================
+// Phase X WX-4: 巻スコープ Audit (auditVolume)
+// ============================================================
+
+export type VolumeAuditInput = {
+  episodes: EpisodeStoryboardV2[];
+  /** bible.meta.tone_profile (任意、無ければ light_recovery 想定で判定) */
+  toneProfile?: ToneProfile;
+};
+
+/**
+ * 巻全体スコープのルール検査。episode 内では検出不能なパターンを拾う。
+ *
+ * 現状は recovery_beat_missing / expectation_reality_gap_absent をスケルトン実装。
+ * 完全実装は Phase Y (L5.5 engagement audit) で語彙ベース判定 or LLM 判定に置換予定。
+ */
+export function auditVolume(input: VolumeAuditInput): AuditFinding[] {
+  const findings: AuditFinding[] = [];
+  const tone = input.toneProfile;
+
+  // light_recovery 帯のみ対象 (hellmode では intentionally 重い beat なので skip)
+  const isLightRecovery = !tone || tone.darkness < 0.5;
+  if (!isLightRecovery) return findings;
+
+  // recovery_beat_missing (各 episode で「小報酬/相棒との温度」の signal を探す)
+  // MVP: panel.dialogue / monologue / narration の中に「ありがとう/嬉しい/楽しい/笑/休む/食べる/おいしい」等の語彙が
+  //      1つも含まれない episode を warn 扱い
+  // 完全実装は Phase Y で意味判定 (LLM 経由) に置換
+  const POSITIVE_TOKENS = [
+    "ありがとう",
+    "嬉し",
+    "楽し",
+    "笑",
+    "休",
+    "食べ",
+    "おいし",
+    "美味し",
+    "うまい",
+    "気持ちいい",
+    "ほっと",
+    "和や",
+  ];
+  for (const ep of input.episodes) {
+    const allText = collectEpisodeText(ep);
+    const hasPositive = POSITIVE_TOKENS.some((tok) => allText.includes(tok));
+    if (!hasPositive) {
+      findings.push({
+        page_no: 0, // 巻スコープ
+        rule: "recovery_beat_missing",
+        severity: "warn",
+        message: `episode ${ep.episode_id}: 「小報酬/生活感/相棒との温度」beat が検出されない (light_recovery では1話1回以上必須)`,
+      });
+    }
+  }
+
+  // expectation_reality_gap_absent (巻全体で「期待 vs 現実」のギャップ panel が0件)
+  // MVP: dialogue/monologue に「思ってたより/予想外/まさか/...だと思った」等の語彙が巻全体で0件
+  // 完全実装は Phase Y で意味判定に置換
+  const GAP_TOKENS = [
+    "思ってた",
+    "予想外",
+    "まさか",
+    "だと思った",
+    "意外",
+    "期待してた",
+    "違った",
+  ];
+  const allVolumeText = input.episodes.map(collectEpisodeText).join(" ");
+  const hasGap = GAP_TOKENS.some((tok) => allVolumeText.includes(tok));
+  if (!hasGap) {
+    findings.push({
+      page_no: 0,
+      rule: "expectation_reality_gap_absent",
+      severity: "info",
+      message: "巻全体で「期待 vs 現実」のギャップ panel が検出されない (manga_craft_guide v2 の typical pattern #4 推奨)",
+    });
+  }
+
+  // mascot_temperature_pair_missing (page スコープだが、現時点では巻スコープでサンプル検出のみ)
+  // 完全実装は「マスコット」「相棒」のキャラタグが entities に追加された後 Phase Y で
+  // 隣接 panel の expression 対比判定として実装
+
+  // face_only_emotion_run (panel スコープの shot_type タグが充実した後 Phase Y で実装)
+
+  return findings;
+}
+
+/** episode 内の全テキスト (dialogue + monologue + narration + sfx) を平坦化 */
+function collectEpisodeText(ep: EpisodeStoryboardV2): string {
+  const buf: string[] = [];
+  for (const page of ep.pages) {
+    for (const panel of page.panels) {
+      for (const d of panel.dialogue) buf.push(d.text);
+      for (const m of panel.monologue) buf.push(m.text);
+      for (const n of panel.narration) buf.push(n);
+      for (const s of panel.sfx) buf.push(s);
+    }
+  }
+  return buf.join(" ");
 }

@@ -16,11 +16,13 @@
  *      (<b>, <i>, <em>, <strong>, <br>, <p>, <ul>, <ol>, <li>, <h4>, <h5>, <h6>)
  *   9. AI 開示 5 区分が設定済 (validateAiDisclosure 経由)
  *  10. ファイル存在 (manuscript.pdf, cover.pdf)
+ *  11. rights_check (商標/IP類似) が passed (Phase X WX-5 追加、allowMissingRightsCheck で warn 降格可)
  */
 import { promises as fs } from "node:fs";
 import sharp from "sharp";
 import { spineWidthMm } from "./spine-calc";
 import { validateAiDisclosure } from "../../disclosure";
+import { validateRightsCheckForPreflight } from "./trademark-check";
 import type {
   KdpMetadata,
   KdpRelease,
@@ -64,6 +66,8 @@ export type PreflightInput = {
   allowShortVolume?: boolean;
   /** 79p未満でも背表紙テキストを意図的に描画する場合 true (KDP規約違反となるため warn 降格、運用判断責任) */
   allowShortVolumeSpineText?: boolean;
+  /** rights_check (商標/IP類似) 未通過でも warn 降格 (リハーサル出版/vol_0 用) */
+  allowMissingRightsCheck?: boolean;
 };
 
 export type PreflightResult = {
@@ -223,6 +227,16 @@ export async function runPreflight(input: PreflightInput): Promise<PreflightResu
   }
   if (!(await fileExists(input.coverPdfPath))) {
     issues.push(err("COVER_PDF_NOT_FOUND", `cover.pdf が存在しない: ${input.coverPdfPath}`));
+  }
+
+  // 11. rights_check (商標/IP類似) — Phase X WX-5 で追加
+  const rightsCheckReason = validateRightsCheckForPreflight(input.release.rights_check);
+  if (rightsCheckReason) {
+    if (input.allowMissingRightsCheck) {
+      issues.push(warn("RIGHTS_CHECK_MISSING_OR_FAILED", rightsCheckReason));
+    } else {
+      issues.push(err("RIGHTS_CHECK_MISSING_OR_FAILED", rightsCheckReason));
+    }
   }
 
   const ok = !issues.some((i) => i.severity === "error");

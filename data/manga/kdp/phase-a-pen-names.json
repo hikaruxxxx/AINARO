@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "v1",
+  "createdAt": "2026-05-06",
+  "decision": "1 KDPアカウント + 1レーベル「Novelis」+ 3作品別ペンネーム",
+  "rationale": "Codex レビュー (2026-05-06) 採用案。トーン混線回避と将来の出版社OS化/EXIT時のIP価値最大化のため。詳細は docs/strategy/kdp_account_safety.md §1.2",
+  "label": {
+    "name": "Novelis",
+    "displayPosition": "表紙の帯または奥付",
+    "registeredAccountEmail": "(KDP登録メール、ledger参照)"
+  },
+  "kdpAccount": {
+    "policy": "single_account_strict",
+    "subAccountAllowed": false,
+    "rationale": "Amazon Author/Publisher Account Terms 遵守、規約違反による停止リスク回避"
+  },
+  "works": [
+    {
+      "slug": "a07r-modern-dungeon",
+      "title": "(タイトル仮: 現代ダンジョン系、再選定中)",
+      "penName": "(未確定)",
+      "penNameStatus": "pending_selection",
+      "genre": "modern_dungeon",
+      "art_style": "manga_bw_seinen_urban",
+      "publishOrder": 1,
+      "publishTargetWeek": "Week 9-16 (Phase Y 後半)",
+      "trademarkCheckStatus": "pending"
+    },
+    {
+      "slug": "phase-a-dungeon-explorer",
+      "title": "(タイトル仮: 底辺鑑定士の地下迷宮無双 / 追放された俺だけが知る、ダンジョンの正解)",
+      "protagonist": "シノザキ・カナデ (16-17歳男性)",
+      "penName": "(未確定、候補例: 篠崎 奏汰)",
+      "penNameStatus": "draft_candidate",
+      "genre": "battle_dungeon",
+      "art_style": "manga_bw_seinen_dark",
+      "publishOrder": 2,
+      "publishTargetWeek": "Week 17-21 (Phase Z 前半)",
+      "trademarkCheckStatus": "pending"
+    },
+    {
+      "slug": "phase-a-isekai-territory",
+      "title": "(タイトル仮: 辺境追放の三男ですが、前世の経営手腕で領地を救います)",
+      "protagonist": "アルベール・フォン・ハーゼンベルク (19歳男性)",
+      "penName": "(未確定、候補例: 葉月 リオ)",
+      "penNameStatus": "draft_candidate",
+      "genre": "isekai_tensei_cheat",
+      "art_style": "manga_bw_shoujo_classic",
+      "publishOrder": 3,
+      "publishTargetWeek": "Week 22-26 (Phase Z 後半)",
+      "trademarkCheckStatus": "pending"
+    }
+  ],
+  "openTasks": [
+    "3作品それぞれのペンネーム最終確定 (Phase X 中)",
+    "3作目「現代ダンジョン系」の主人公・タイトル選定 (Phase X 中)",
+    "trademark-check.ts (WX-5) が完成次第、各ペンネームと作品タイトルを自動チェック",
+    "Author Central のペンネーム別アカウント作成 (Phase Y 出版時)"
+  ],
+  "notes": [
+    "data/pen-names.json は外部参考データ集 (クローリング結果)。本ファイルは Phase A 3作品の確定情報を管理する別 SoT",
+    "ペンネーム決定時は trademark-check.ts で商標チェック必須",
+    "ペンネームは「実在の人物と紛らわしくない」「既存作家と被らない」「読みやすい」を基準に",
+    "決定後は disclosure.ts および preflight.ts の入稿データに紐付ける"
+  ]
+}

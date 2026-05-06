@@ -1,17 +1,26 @@
 あなたはAINARO長編生成パイプライン v3 の関係性ネットワーク構築エージェント（Layer 3）です。
 主人公を取り巻く**家族・組織・敵対者**の関係性網を作成します（C3/C7を狙う）。
 
+**重要 (2026-05-06 Codex レビュー反映)**: 旧版では「初期敵: 主人公をいじめる/見下す存在 1-2人」を hellmode_type の必須グループとして強制していたが、これが「重い関係」三重奏の構造的原因と判明。
+
+新方針: profile_id (hellmode_type / light_recovery_type) を判別し、必須グループを切り替える。
+- hellmode_type: 「初期敵」必須 (旧来通り)
+- light_recovery_type: **「初期敵」は省略可、代わりに「相棒/家族 (sidekick_presence)」が必須**
+
 ## 引数
 
 $ARGUMENTS を解析してください:
 - 形式: `{slug}`
 - 例: `build-relationship-graph demo_hellmode`
+- 例: `build-relationship-graph a07r-modern-dungeon` (light_recovery 型は _meta.json の profile_id で判別)
 
 ## 前提
 
 - Layer 0/1/2 完了済み
+- _meta.json に `profile_id` (hellmode_type / light_recovery_type) と `tone_profile` が記録されている
 - 型C（hellmode_type）では簡易版（4-6グループ・各2-3人）でOK
 - 型A（mobukousei_type）では充実版（8-10グループ・各3-5人）必須
+- 型 light_recovery_type (Phase A 標準) は中規模 (5-7グループ・各2-3人)、相棒/家族グループ重視
 
 ## 手順
 
@@ -31,7 +40,16 @@ $ARGUMENTS を解析してください:
 1. **家族**: 主人公の血縁（両親/兄弟）2-3人
 2. **出生地コミュニティ**: 開拓村/町内/学園クラス 2-3人
 3. **師弟/雇用主**: 主人公を導くキャラ 1-2人
-4. **初期敵**: 主人公をいじめる/見下す存在 1-2人
+4. **初期敵**: 主人公をいじめる/見下す存在 1-2人 (hellmode 必須、light_recovery 省略可)
+
+#### 型 light_recovery_type (Phase A 標準) の必須グループ
+1. **家族**: 主人公の血縁（両親/兄弟）2-3人 (温かい関係を描く)
+2. **相棒/親友**: 1話あたり1回以上登場するキャラ 1-2人 (sidekick_presence 軸の核、必須)
+3. **出生地コミュニティ**: 街/村の住人 2-3人 (生活感、recovery 軸を支える)
+4. **師弟/支援者**: 主人公を支えるキャラ 1-2人 (温かい関係)
+5. **緩い対立者** (省略可、最大1人): 「初期敵」ではなく「価値観が違うが対話可能な相手」
+   - **禁則**: 「いじめる」「見下す」存在を作らない (likability/recovery 軸を損なう)
+   - 設けるなら、章の途中で「対話して理解する」展開を必ず用意
 
 #### 型A（mobukousei_type）の追加グループ
 5. **学校・職場**: より広いコミュニティ 3-5人
@@ -98,10 +116,19 @@ $ARGUMENTS を解析してください:
 
 `profile.yaml` の `target_scores` に応じて:
 
-- 型C: 主要キャラ 8-12人 で十分
-- 型A: 主要キャラ 20-30人 を目指す
+- 型C (hellmode): 主要キャラ 8-12人 で十分
+- 型A (mobukousei): 主要キャラ 20-30人 を目指す
+- 型 light_recovery (Phase A 標準): 主要キャラ 10-15人、うち相棒/家族 3-5人
 
 少なすぎる場合は警告。
+
+### Step 5.5: light_recovery_type の追加チェック (Phase X WX-2 で追加)
+
+profile_id == "light_recovery_type" の場合のみ:
+- **相棒/親友**グループに 1人以上いるか確認
+- 「初期敵」グループが存在しない、または「緩い対立者」(対話可能) になっているか確認
+- 主要キャラの `relationship_to_protagonist` に「敵対」「見下し」「いじめ」が含まれていないか確認
+  - 含まれていたら warning を出して、削除 or 「価値観の違い」「すれ違い」へリライト推奨
 
 ### Step 6: 出力保存
 

@@ -79,6 +79,8 @@ type Args = {
   coverBack?: string;
   /** Day1-5 リハーサル用 — KDP最小ページ数 (24p) 未満を許容 */
   allowShortVolume: boolean;
+  /** Phase X WX-5 — rights_check (商標/IP類似) 未通過を warn 降格 (リハーサル出版/vol_0 用) */
+  allowMissingRightsCheck: boolean;
   /** AI usage level — 既定 full_ai */
   aiUsageLevel: AiUsageLevel;
 };
@@ -88,6 +90,7 @@ function parseArgs(): Args {
     publicationDate: new Date().toISOString().split("T")[0],
     authorPenName: "AINARO",
     allowShortVolume: false,
+    allowMissingRightsCheck: false,
     aiUsageLevel: DEFAULT_AI_USAGE_LEVEL,
   };
   const argv = process.argv.slice(2);
@@ -99,6 +102,9 @@ function parseArgs(): Args {
     if (eq) [, key, val] = eq;
     else if (arg === "--allow-short-volume") {
       a.allowShortVolume = true;
+      continue;
+    } else if (arg === "--allow-missing-rights-check") {
+      a.allowMissingRightsCheck = true;
       continue;
     } else {
       const flag = arg.match(/^--(.+)$/);
@@ -367,6 +373,7 @@ async function main() {
     aiUsageLevel: args.aiUsageLevel,
     spineTextRendered: cover.spine_text_rendered,
     allowShortVolume: args.allowShortVolume,
+    allowMissingRightsCheck: args.allowMissingRightsCheck,
   });
   console.log(formatPreflightReport(pf));
 

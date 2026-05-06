@@ -1,0 +1,199 @@
+{
+  "version": "v2",
+  "createdAt": "2026-04-08",
+  "description": "ジャンル別評価軸重み v2。共通5軸 + ジャンル特化3軸。20サブジャンル全てに定義。genre-taxonomy.json と対応。",
+  "commonAxes": ["hook", "character", "prose", "tension", "pull"],
+  "genres": {
+    "isekai_tensei_cheat": {
+      "majorGenre": "isekai",
+      "common": { "hook": 1.3, "character": 1.0, "prose": 1.0, "tension": 1.1, "pull": 1.1 },
+      "specific": {
+        "世界観構築力": 1.3,
+        "主人公の成長曲線": 1.2,
+        "知識/スキルチートの説得力": 1.2
+      }
+    },
+    "isekai_tsuiho_zamaa": {
+      "majorGenre": "isekai",
+      "common": { "hook": 1.5, "character": 0.8, "prose": 0.9, "tension": 1.3, "pull": 1.2 },
+      "specific": {
+        "ざまぁの痛快さ": 1.5,
+        "スキル説得力": 1.2,
+        "旧パーティ崩壊の必然性": 1.0
+      }
+    },
+    "isekai_slowlife": {
+      "majorGenre": "isekai",
+      "common": { "hook": 0.7, "character": 1.2, "prose": 1.3, "tension": 0.5, "pull": 0.8 },
+      "specific": {
+        "日常の温度感": 1.5,
+        "スキル/職業の魅力": 1.2,
+        "出会いの心地よさ": 1.3
+      }
+    },
+    "isekai_high_fantasy": {
+      "majorGenre": "isekai",
+      "common": { "hook": 1.2, "character": 1.1, "prose": 1.2, "tension": 1.2, "pull": 1.1 },
+      "specific": {
+        "世界観の重厚さ": 1.4,
+        "魔法/戦闘の説得力": 1.3,
+        "冒険の起伏": 1.2
+      }
+    },
+
+    "otome_akuyaku_zamaa": {
+      "majorGenre": "otome",
+      "common": { "hook": 1.2, "character": 1.5, "prose": 1.3, "tension": 0.7, "pull": 1.0 },
+      "specific": {
+        "貴族描写の品格": 1.3,
+        "ヒロインの聡明さ": 1.4,
+        "ざまぁのカタルシス": 1.2
+      }
+    },
+    "otome_konyaku_haki": {
+      "majorGenre": "otome",
+      "common": { "hook": 1.5, "character": 1.3, "prose": 1.1, "tension": 1.0, "pull": 1.0 },
+      "specific": {
+        "婚約破棄シーンの衝撃": 1.5,
+        "主人公の凛々しさ": 1.3,
+        "新たな出会いの納得感": 1.2
+      }
+    },
+    "otome_isekai_pure": {
+      "majorGenre": "otome",
+      "common": { "hook": 1.1, "character": 1.4, "prose": 1.2, "tension": 0.8, "pull": 1.0 },
+      "specific": {
+        "ヒーローの魅力": 1.5,
+        "距離感の機微": 1.3,
+        "純愛のリアリティ": 1.2
+      }
+    },
+    "otome_villain_fantasy": {
+      "majorGenre": "otome",
+      "common": { "hook": 1.2, "character": 1.3, "prose": 1.1, "tension": 1.0, "pull": 1.0 },
+      "specific": {
+        "悪役らしさと共感の両立": 1.4,
+        "戦闘・能力の見せ場": 1.2,
+        "立ち位置の独自性": 1.1
+      }
+    },
+
+    "battle_vrmmo": {
+      "majorGenre": "battle",
+      "common": { "hook": 1.3, "character": 1.0, "prose": 0.9, "tension": 1.4, "pull": 1.2 },
+      "specific": {
+        "ゲームシステムの面白さ": 1.4,
+        "戦闘の爽快感": 1.3,
+        "縛り/挑戦の独創性": 1.2
+      }
+    },
+    "battle_modern_power": {
+      "majorGenre": "battle",
+      "common": { "hook": 1.4, "character": 1.1, "prose": 1.0, "tension": 1.3, "pull": 1.2 },
+      "specific": {
+        "能力設定の独自性": 1.4,
+        "現代との接続感": 1.2,
+        "戦闘のスタイリッシュさ": 1.3
+      }
+    },
+    "battle_war_chronicle": {
+      "majorGenre": "battle",
+      "common": { "hook": 1.0, "character": 1.3, "prose": 1.3, "tension": 1.2, "pull": 1.0 },
+      "specific": {
+        "戦略/戦術の説得力": 1.4,
+        "群像のリアリティ": 1.3,
+        "歴史の重み": 1.2
+      }
+    },
+    "battle_dungeon": {
+      "majorGenre": "battle",
+      "common": { "hook": 1.2, "character": 1.0, "prose": 0.9, "tension": 1.3, "pull": 1.3 },
+      "specific": {
+        "ダンジョンの神秘性": 1.4,
+        "探索の発見": 1.3,
+        "魔物/罠の創造性": 1.2
+      }
+    },
+
+    "modern_romance": {
+      "majorGenre": "modern",
+      "common": { "hook": 1.3, "character": 1.5, "prose": 1.2, "tension": 0.8, "pull": 1.1 },
+      "specific": {
+        "ヒロイン/ヒーローの魅力": 1.5,
+        "心情の機微": 1.4,
+        "現代恋愛のリアリティ": 1.2
+      }
+    },
+    "modern_school": {
+      "majorGenre": "modern",
+      "common": { "hook": 1.2, "character": 1.4, "prose": 1.1, "tension": 0.9, "pull": 1.1 },
+      "specific": {
+        "青春の瑞々しさ": 1.4,
+        "キャラの関係性": 1.3,
+        "学園イベントの活用": 1.1
+      }
+    },
+    "modern_human_drama": {
+      "majorGenre": "modern",
+      "common": { "hook": 0.8, "character": 1.5, "prose": 1.5, "tension": 0.7, "pull": 0.9 },
+      "specific": {
+        "人間描写の深さ": 1.5,
+        "余韻の残し方": 1.4,
+        "テーマの普遍性": 1.3
+      }
+    },
+    "modern_history": {
+      "majorGenre": "modern",
+      "common": { "hook": 1.0, "character": 1.2, "prose": 1.4, "tension": 1.1, "pull": 1.0 },
+      "specific": {
+        "時代考証の説得力": 1.4,
+        "歴史的緊張感": 1.3,
+        "登場人物の人間味": 1.2
+      }
+    },
+
+    "mystery_detective": {
+      "majorGenre": "mystery",
+      "common": { "hook": 1.4, "character": 1.2, "prose": 1.2, "tension": 1.3, "pull": 1.4 },
+      "specific": {
+        "謎の魅力": 1.5,
+        "推理の論理性": 1.4,
+        "伏線回収の鮮やかさ": 1.4
+      }
+    },
+    "mystery_horror": {
+      "majorGenre": "mystery",
+      "common": { "hook": 1.5, "character": 0.9, "prose": 1.2, "tension": 1.5, "pull": 1.3 },
+      "specific": {
+        "恐怖の演出": 1.5,
+        "雰囲気作り": 1.4,
+        "予測不能性": 1.3
+      }
+    },
+    "mystery_sf": {
+      "majorGenre": "mystery",
+      "common": { "hook": 1.2, "character": 1.0, "prose": 1.2, "tension": 1.2, "pull": 1.1 },
+      "specific": {
+        "SF設定の独創性": 1.5,
+        "科学的整合性": 1.3,
+        "世界観の射程": 1.3
+      }
+    },
+    "mystery_action": {
+      "majorGenre": "mystery",
+      "common": { "hook": 1.4, "character": 1.1, "prose": 1.0, "tension": 1.5, "pull": 1.3 },
+      "specific": {
+        "アクションの躍動感": 1.4,
+        "展開のスピード": 1.4,
+        "緊迫感の持続": 1.3
+      }
+    }
+  },
+  "notes": [
+    "重みは1.0を中央値とし、0.5〜1.5のレンジで設定",
+    "ペアワイズ比較プロンプトで「特に重視する軸」として強調するために使う",
+    "ヒット予測モデルの選別閾値計算でも参照(将来)",
+    "majorGenre は genre-taxonomy.json の大ジャンルid と対応",
+    "13個の新規サブジャンルは batch_002 までのデータが無いため、Phase 1A の探索枠でデータ拡充が必要"
+  ]
+}

@@ -121,6 +121,26 @@ export type ContinuitySeedV2 = {
   invariant_description: string;
 };
 
+/**
+ * トーン制御パラメータ (Phase X WX-2 で追加、Codex レビュー反映 2026-05-06)
+ *
+ * 「重い入口・重い関係・重い引き」三重奏の解体のため、暗さ強制プロンプトを撤去し、
+ * 代わりに数値パラメータで制御する。各値は 0.0-1.0 の連続値:
+ *
+ *   - darkness:         0=軽快, 1=ヘルモード (light_recovery default 0.3, hellmode default 0.8)
+ *   - comedic_density:  ページあたりギャグ呼吸の頻度 (0=皆無, 1=ほぼ毎page)
+ *   - recovery_cadence: 小報酬/生活感 beat の頻度 (0=皆無, 1=高頻度)
+ *   - sidekick_presence: 相棒/家族の登場頻度 (0=皆無, 1=ほぼ毎話)
+ *
+ * ジャンル別 darkness floor は data/generation/profiles/light_recovery_type/profile.yaml 参照。
+ */
+export type ToneProfile = {
+  darkness: number;
+  comedic_density: number;
+  recovery_cadence: number;
+  sidekick_presence: number;
+};
+
 export type BibleSnapshotV2 = {
   schema_version: 2;
   generated_at: string;
@@ -141,6 +161,10 @@ export type BibleSnapshotV2 = {
     target_pages_per_episode: number;
     target_audience?: string;
     estimated_volumes?: number;
+    /** Phase X WX-2 で追加。後方互換 optional。未設定の bible は L01b bible-lint で warning */
+    tone_profile?: ToneProfile;
+    /** どのプロファイルから生成されたか (例: "light_recovery_type" | "hellmode_type") */
+    profile_id?: string;
   };
   world: WorldSpec;
   characters: CharacterEntryV2[];

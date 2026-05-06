@@ -5,10 +5,16 @@
  * 10話分の章構成 + 伏線蒔き/回収マップ + cliffhanger 設計
  *
  * 各 ep の brief は L3 入力として使う想定。
+ *
+ * Phase X WX-3 (2026-05-06) でジャンル非依存化:
+ *   - 旧版は「現代ダンジョン × システム音声」「コンビニ夜勤 or 装備値切り」をハードコード
+ *   - 新版は bible.meta.art_style から MangaGenrePreset を逆引きして prompt に注入
+ *   - tone_profile.recovery_cadence ≤ 0.3 の bible には「小報酬 beat 必須」を強制注入
  */
 import { runCodexText } from "../llm/codex-text";
 import type { BibleSnapshotV2 } from "../schemas-v2";
 import type { V2Concept } from "../bible/v2-adapter";
+import { findGenreByArtStyle } from "../storyboard/genre-presets";
 
 export type EpisodeBeat = {
   beat_idx: number;
@@ -84,9 +90,32 @@ export async function generateVolumePlot(args: {
   cwd?: string;
   timeoutMs?: number;
 }): Promise<VolumePlot> {
+  // Phase X WX-3: art_style から genre preset を逆引き
+  const genrePreset = findGenreByArtStyle(args.bible.meta.art_style);
+  const genreLabel = genrePreset
+    ? `${genrePreset.display_name} (${genrePreset.art_style})`
+    : `汎用 (${args.bible.meta.art_style ?? "art_style未設定"})`;
+
+  // Phase X WX-3: tone_profile.recovery_cadence が低い bible には小報酬 beat 必須を強制
+  const tone = args.bible.meta.tone_profile;
+  const recoveryRequired =
+    tone && tone.recovery_cadence <= 0.3
+      ? "- ⚠️ tone_profile.recovery_cadence ≤ 0.3 のため、各話に必ず『小報酬/生活感/相棒との温度』の beat を1個以上入れること (Phase X WX-3 強制)"
+      : tone && tone.recovery_cadence >= 0.7
+        ? "- tone_profile.recovery_cadence ≥ 0.7 のため、各話に『小報酬/生活感/相棒との温度』beat を 2-3 回入れることを推奨 (light_recovery 標準)"
+        : "";
+
+  // Phase X WX-3: ジャンル別の必須3要素 (旧版「機転 / ナビ / コンビニ」のハードコード置換)
+  const genreThreeElements = genrePreset
+    ? [
+        `must_have_volume_1_scenes より:`,
+        ...genrePreset.must_have_volume_1_scenes.slice(0, 5).map((s) => `  - ${s}`),
+      ].join("\n")
+    : "- ジャンル preset がないため、3 要素はストーリーのジャンル定石に従って自由に決定";
+
   const result = await runCodexText({
     task: [
-      "あなたは商業漫画 (なろう系コミカライズ、現代ダンジョン × システム音声 ジャンル) の編集者として、",
+      `あなたは商業漫画 (${genreLabel}) の編集者として、`,
       `1巻 (${args.episodesPerVolume}話 × ${args.pagesPerEpisode}ページ) の構成プロットを書いてください。`,
       "",
       "## ヒット作と並ぶ深さの条件",
@@ -94,7 +123,8 @@ export async function generateVolumePlot(args: {
       "- 巻全体に伏線蒔きと回収のマップ (foreshadow_map で対応関係を明示)",
       "- 主人公の感情曲線が 1 巻通して右肩上がりではなく揺れがある (5-7話で踏み外し、9-10話で立て直し)",
       "- 各話の cliffhanger が次話を読みたくなる強さ (turn_strength 4+)",
-      "- 1話に必ず『機転 (情報強者の証明)』『ナビとのやりとり (関係性ドラマ)』『コンビニ夜勤 or 装備値切り (地の質感)』の 3 要素を入れる",
+      `- 1巻必須シーン (このジャンルの定石): ${genreThreeElements}`,
+      recoveryRequired,
       "- 各話の brief_for_L3 は L3 Shotlist にそのまま流せる本文を 1000-2000字で書く (各シーンの場所/登場人物/出来事/モノローグ核ライン)",
       "",
       "## bible (登場人物 / 世界観 / 視覚モチーフ)",

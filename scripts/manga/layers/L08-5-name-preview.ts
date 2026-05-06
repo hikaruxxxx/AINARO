@@ -25,7 +25,7 @@ import {
   nameAuditPath,
 } from "./_paths";
 import { renderPageSvg } from "../../../src/lib/manga/name-preview/svg-renderer";
-import { auditPage, type AuditFinding } from "../../../src/lib/manga/name-preview/audit-rules";
+import { auditPage, auditVolume, type AuditFinding } from "../../../src/lib/manga/name-preview/audit-rules";
 import {
   pendingApproval,
   type NameManifest,
@@ -148,6 +148,16 @@ async function main() {
       })),
     });
   }
+
+  // Phase X WX-4: 巻スコープ audit (auditVolume) を呼ぶ
+  // L8.5 は1 episode 単位なので、当該 episode を VolumeAuditInput として渡し
+  // recovery_beat_missing / expectation_reality_gap_absent の signal を episode-level で取得する。
+  // bible.meta.tone_profile を渡せば light_recovery 帯のみで判定がかかる (hellmode は skip)。
+  const volumeFindings = auditVolume({
+    episodes: [storyboard],
+    toneProfile: bible.meta.tone_profile,
+  });
+  allFindings.push(...volumeFindings);
 
   // L8.6 audit 結果を name_audit.json に書き出す (manifest.warnings は subset)
   const auditReport = {

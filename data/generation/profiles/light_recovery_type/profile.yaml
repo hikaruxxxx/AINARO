@@ -1,0 +1,151 @@
+# light_recovery 型プロファイル (Phase A 標準、Codex レビュー反映 2026-05-06)
+#
+# 設計根拠:
+#   - Plan: /Users/hikarumori/.claude/plans/groovy-wishing-castle.md WX-2
+#   - 「重い入口・重い関係・重い引き」三重奏の解体が目的
+#   - KDP+KU 1巻10万円目標 (FCE 1000/月) に向けた完読率最適化
+#   - hellmode_type は温存 (高分散枠 / 大ヒット狙い保護)、Phase A 標準は本プロファイル
+#
+# 参考作品 (構造):
+#   - 「本好きの下剋上」(成長×日常×相棒)
+#   - 「薬屋のひとりごと」(軽い筆致×ちゃんとした構造)
+#   - 「転生したらスライムだった件」(回復感×温度×相棒)
+
+profile:
+  id: light_recovery_type
+  name: light_recovery 型 (Phase A 標準: 完読率最適化型)
+  reference_works:
+    - title: 本好きの下剋上
+      reason: 成長×日常×相棒、暗くなりすぎず読み進めやすい
+    - title: 薬屋のひとりごと
+      reason: 軽い筆致 × ちゃんとした構造、読者の回復感を維持
+    - title: 転生したらスライムだった件
+      reason: 回復感×温度×相棒の組み合わせで完読率を稼ぐ
+
+# tone_profile デフォルト値 (BibleSnapshotV2.meta.tone_profile に投入される)
+default_tone_profile:
+  darkness: 0.3            # 0=軽快, 1=ヘルモード
+  comedic_density: 0.8     # ページあたりギャグ呼吸の頻度
+  recovery_cadence: 0.9    # 小報酬の頻度
+  sidekick_presence: 0.9   # 相棒の登場頻度
+
+# ジャンル別 darkness floor (各ジャンルでこれより下げると違和感あり)
+genre_darkness_floor:
+  modern_dungeon: 0.3
+  battle_dungeon: 0.5
+  isekai_tensei_cheat: 0.2
+  isekai_slowlife: 0.1
+  isekai_tsuiho_zamaa: 0.7  # ザマァ系は暗さ前提、light_recovery には不向き
+  modern_school: 0.1
+  modern_romance: 0.2
+  mystery_horror: 0.7       # ホラーは light_recovery 不適 (contraindication)
+
+# 28軸の目標スコア (0-3、hellmode と同じスケール)
+target_scores:
+  # === 世界設定 W軸 ===
+  W1_geography: 1        # 中世西欧風で十分
+  W2_history: 1
+  W3_race: 1
+  W4_politics: 1
+  W5_economy: 2          # ★ 物価感覚が生活感を支える
+  W6_magic_theory: 2     # 重厚にしすぎない (hellmodeは3、こちらは2)
+  W7_dungeon_theory: 1
+  W8_religion: 1
+  W9_language: 0
+  W10_gamification: 2    # ステータス画面は活用するが、過度に振らない
+  W11_society: 2         # ★ 生活感のため社会制度は描く
+  W12_meta: 1
+
+  # === キャラ設定 C軸 ===
+  C1_protagonist: 3      # ★ 重点軸: 好感度の高い主人公造形 (likability 軸対応)
+  C2_heroine: 3          # ★ 重点軸: ヒロイン/相棒の魅力
+  C3_party: 3            # ★ 重点軸: 仲間との関係 (sidekick_presence 0.9)
+  C4_antagonist: 2
+  C5_mob: 2              # 街の住人にも温度をつける (生活感)
+  C6_past_trauma: 1      # ★ 低め (Codex指摘: 「重い三重奏」の解体)
+  C7_relationship: 3     # ★ 重点軸: 関係性の温度 (recovery 軸対応)
+  C8_growth: 3           # 成長は維持 (hellmodeと同じ)
+
+  # === 周辺設定 S軸 ===
+  S1_combat: 2           # 戦闘は軽め (hellmodeは3、こちらは2)
+  S2_equipment: 2
+  S3_food: 2             # ★ 食事描写で回復感 (recovery_cadence 0.9 を支える)
+  S4_fashion: 2          # ★ 服装描写で生活感
+  S5_currency: 2
+  S6_movement: 1
+  S7_architecture: 2     # ★ 街並み描写で生活感
+  S8_creatures: 1
+
+# 期待される総計スコア
+expected_total: 45
+# hellmode 43点よりやや高め (キャラ/関係性の重点配分)
+
+# 連載構造の目安 (KDP+KU 1巻160-200p / 10話×16-20p 想定)
+target_episodes: 80         # KDP 1巻=10話、8巻完結シリーズ
+target_chapters: 4          # 巻ごとに章替え
+words_per_episode: 3000-4000
+
+# エピソードパターン (recovery 軸を重視)
+episode_pattern_distribution:
+  P1_daily_warmth: 0.30        # 日常温度 (生活感、相棒との会話、食事)
+  P2_small_victory: 0.25       # 小報酬 (recovery_cadence 0.9 を支える)
+  P3_relationship_warmth: 0.25 # 関係性の温度 (相棒/家族/仲間との交流)
+  P4_world_unfold: 0.15        # 世界の謎の開示 (深掘りせず、生活密着)
+  P5_chapter_climax: 0.05      # 章替えクライマックス (頻度低め、引きで稼がない設計)
+
+# 主人公プロファイルの必須項目 (Codex レビュー: 「前世の不満・憎悪」「過去/トラウマ」必須化を撤回)
+protagonist_required_fields:
+  - 現世の名前/種族/出生環境
+  - 主動機 (何を達成したいか、ポジティブ系)
+  - 思考パターン (計算思考 OR 共感思考 OR 観察思考のいずれか)
+  - 座右の銘 (3-5個、温度を含む)
+  - 大切にしている記憶 (過去のトラウマではなく)
+  - 相棒/家族との関係性 (1人以上必須)
+
+protagonist_optional_fields:
+  - 前世 (任意、設定するなら職業/趣味のみ。「不満・憎悪」は light_recovery では空欄推奨)
+  - 過去/トラウマ (任意、最大1個まで)
+
+# 整合性監査の合格条件
+audit_pass_criteria:
+  recovery_beat_per_episode_min: 1      # 1話あたり「小報酬/生活感/相棒との温度」beat 1回以上必須
+  trauma_dominant_violations_max: 0     # 1話で「主人公の心の傷の独白」が3回超ならNG
+  sidekick_appearance_per_episode_min: 1 # 相棒/仲間が1話に1回は登場
+  comedic_relief_per_episode_min: 1     # 軽い場面/ギャグ呼吸が1話に1回以上
+
+# 既存資産との接続 (Phase A 3作品)
+related_works:
+  - slug: a07r-modern-dungeon
+    genre: battle_dungeon
+    note: Phase A 1作目、a07-modern-dungeon を fork (商用品質版)
+  - slug: phase-a-isekai-territory
+    genre: isekai_tensei_cheat
+    note: Phase A 3作目、転生貴族・領地経営系
+  # 注: phase-a-dungeon-explorer は hellmode_type で生成 (3作中1作残しの方針、Codex 採用案)
+
+# パイプライン実行順序 (hellmode と共通)
+pipeline_steps:
+  - layer: 0
+    command: /longform-init {slug} light_recovery_type
+    output: data/generation/works/{slug}/longform/_meta.json
+  - layer: 1
+    command: /build-world-bible {slug}
+    output: data/generation/works/{slug}/longform/world_bible/
+  - layer: 2
+    command: /build-protagonist {slug}
+    output: data/generation/works/{slug}/longform/protagonist.md
+  - layer: 3
+    command: /build-relationship-graph {slug}
+    output: data/generation/works/{slug}/longform/relationship_graph.json
+  - layer: 4
+    command: /build-story-arcs {slug}
+    output: data/generation/works/{slug}/longform/story_arcs.md
+  - layer: 5
+    command: /build-episode-patterns {slug}
+    output: data/generation/works/{slug}/longform/episode_patterns.yaml
+  - layer: 6
+    command: /generate-longform-episode {slug} {ep_number}
+    output: data/generation/works/{slug}/longform/episodes/ep####.md
+  - layer: 7
+    command: /audit-coherence {slug} {ep_number}
+    output: data/generation/works/{slug}/longform/episodes/ep####_audit.md

@@ -5,6 +5,7 @@
  * entity_id binding は L3 で確定済み、ここでは意味的な ネーム を補強する。
  */
 import { extractStructuredJson } from "../llm/codex-text";
+import { buildCraftGuideDirectives } from "./craft-guide-directives";
 import type {
   BibleSnapshotV2,
   EpisodeStoryboardV2,
@@ -78,6 +79,9 @@ export async function extractStoryboardFromShotlist(args: {
       "- silence=true の panel は dialogue/monologue/narration/sfx すべて空配列。",
       "- 22ページ目標なら 1ページあたり 4-6 panel を割り当てる。",
       "- ページ末 (cliffhanger / page_end_hook) は重要 panel を最後に置く。",
+      "",
+      // Phase X WX-3 で追加: craft 知見を tone_profile / genre に応じて注入
+      buildCraftGuideDirectives(bible.meta.tone_profile, bible.meta.genre),
     ].join("\n"),
     materials: {
       bible_meta: JSON.stringify(bible.meta, null, 2),

@@ -1,6 +1,8 @@
 あなたはAINAROのペアワイズ判定エージェント（Phase1パイプライン 評価層）です。
-ジャンル別の評価軸（共通5軸 ＋ ジャンル特化3軸）で2作品を比較し、勝者を判定して
+ジャンル別の評価軸（共通8軸 ＋ ジャンル特化3軸）で2作品を比較し、勝者を判定して
 `matches.jsonl` に記録、`ratings.json` のレーティングを更新します。
+
+**v3 (2026-05-06) 更新**: KDP+KU 1巻10万円目標(FCE 1000/月)に向け、共通軸が5軸 → 8軸に拡張(`recovery` / `comedic_relief` / `likability` 追加)。完読率最適化のため、tension/pull/hook 偏重の評価関数を是正。`axisDefinitions` を併記してLLMの誤解を防ぐ。
 
 ## 引数
 
@@ -41,13 +43,18 @@ $ARGUMENTS を解析してください:
 
 ### Step 2: 評価軸プロンプト構築
 
-`data/generation/eval-weights-by-genre.json` から該当 genre のエントリを取得:
+`data/generation/eval-weights-by-genre.json` (v3+) から該当 genre のエントリを取得:
 
-- **common 軸**: `hook` / `character` / `prose` / `tension` / `pull` の5軸（重み付き）
+- **common 軸**: 8軸（重み付き、v3で拡張）
+  - 旧5軸: `hook` / `character` / `prose` / `tension` / `pull`
+  - v3新軸: `recovery`(回復感) / `comedic_relief`(ギャグ呼吸) / `likability`(主人公好感度)
 - **specific 軸**: ジャンル別の3軸（重み付き）
+- **axisDefinitions** (v3で追加): 各軸の意味定義。LLMが軸名を誤解しないよう必ずプロンプトに併記する
 
-両者を**重みの大きい順**にソートし、`{軸名}(重み{数値})` 形式で列挙する。
+両者を**重みの大きい順**にソートし、`{軸名}={定義}(重み{数値})` 形式で列挙する。
 genre が weights ファイルに無ければ共通軸のみで進める（warning を出力）。
+
+**実装上の注意**: [llm-compare.ts](src/lib/screening/llm-compare.ts) の `buildAxesPrompt()` が JSON 駆動で自動的に新軸を反映する。axes 名のハードコードは禁止。
 
 ### Step 3: Position-Symmetric 比較（バイアス対策で2回比較）
 
