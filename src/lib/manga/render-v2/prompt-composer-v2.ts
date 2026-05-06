@@ -48,7 +48,13 @@ function backgroundDirective(t: BackgroundTreatment | undefined): string | null 
     case "detailed_bg":
       return "BACKGROUND DIRECTIVE: Draw the location/environment with clear, iconographic background detail (interior fixtures, dungeon walls, urban silhouettes, etc.). Match the screentone density of the location reference if provided.";
     case "atmospheric_fade":
-      return "BACKGROUND DIRECTIVE: Render only the immediate area around the subject. Fade or omit the background near panel edges. Use speedlines, screentone bursts, or negative white space rather than a fully drawn environment.";
+      return [
+        "BACKGROUND DIRECTIVE (atmospheric_fade — STRICT):",
+        "- DO NOT draw walls, ceilings, floors, room interiors, building exteriors, or distant scenery as a fully filled environment.",
+        "- The character/subject is the ONLY fully drawn element. Around it, leave white paper, sparse speedlines, screentone bursts, or simple radial focus lines.",
+        "- If you would normally draw a room or street, replace 80%+ of that area with WHITE/SCREENTONE NEGATIVE SPACE. Only suggest the location with 1-2 minimal silhouette hints touching the subject area, NOT a full background fill.",
+        "- This is a manga 'atmospheric fade' panel — like the inside of a dialogue close-up where the world drops away. Less is more.",
+      ].join("\n");
     case "tone_back":
       return "BACKGROUND DIRECTIVE: SOLID SCREENTONE ONLY. No drawn environment, no walls, no scenery, no horizon line. The entire background is a flat tone (uniform dot pattern or simple gradient) used to convey emotion or pause. The subject (character/object) is the only drawn element on top of the tone.";
     case "solid_white":

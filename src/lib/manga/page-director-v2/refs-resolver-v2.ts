@@ -37,18 +37,26 @@ import {
 } from "../bible/provenance";
 
 /**
- * RULE 11 (2026-05-06 追加): background_treatment による ref 抑制
+ * RULE 11 (2026-05-06 追加, 同日 atmospheric_fade も拡張): background_treatment による ref 抑制
  *
  * pattern dictionary 由来の panel.background_treatment を読んで、
  * 背景描画が不要なコマでは location ref を渡さない (LLM が背景を勝手に描かないように)。
  * floating_ui は UI が panel そのものなので character も渡さない。
+ *
+ * 2026-05-06 補強: atmospheric_fade も skip 対象に追加。
+ * 当初は weight 0.5 で残す設計だったが、capability ref_weighting=false の現環境では
+ * 実効 weight が 1.0 のままで location ref が支配的になり、
+ * 「フェードしろ」という prompt 指示が無視されて detailed_bg が生成された
+ * (a07 ep01 page 1 v3 vision audit で実証)。location ref を渡さず prompt 指示で
+ * 「主体の周囲だけ描け、それ以外は白/速度線で抜け」と強く言う方針に転換。
  */
 function shouldSkipLocationRef(bgt: BackgroundTreatment | undefined): boolean {
   return (
     bgt === "tone_back" ||
     bgt === "solid_white" ||
     bgt === "solid_black" ||
-    bgt === "floating_ui"
+    bgt === "floating_ui" ||
+    bgt === "atmospheric_fade"
   );
 }
 
