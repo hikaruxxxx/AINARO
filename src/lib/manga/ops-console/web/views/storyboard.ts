@@ -90,7 +90,12 @@ function renderStoryboard(manifest: Manifest): string {
             <article class="nc-card nc-card--sunken sb-panel">
               <h4>${escapeHtml(String(panel.panel_id ?? "-"))}</h4>
               <div class="sb-meta">順序=${escapeHtml(String(panel.reading_order ?? "-"))} / ショット=${escapeHtml(String(panel.shot_type ?? "-"))}</div>
-              <div class="sb-text">${escapeHtml([panel.dialogue, panel.monologue, panel.narration].filter(Boolean).join(" / ") || "(テキストなし)")}</div>
+              <div class="sb-text">${escapeHtml((() => {
+                const extract = (item: any): string => typeof item === "string" ? item : (item?.text ?? "");
+                const arr = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
+                return [...arr(panel.dialogue), ...arr(panel.monologue), ...arr(panel.narration)]
+                  .map(extract).filter(Boolean).join(" / ") || "(テキストなし)";
+              })())}</div>
             </article>`).join("")}
         </div>
         <details class="sb-details">

@@ -86,7 +86,7 @@ const NAME_GATE_CSS = `
 .name-gate-container .status-rejected { background: #fee2e2; color: #991b1b; }
 .name-gate-container .persist-error { margin-left: 6px; color: #991b1b; font-size: 11px; text-transform: none; }
 .name-gate-container .svg-wrap { aspect-ratio: 1748 / 2480; background: #fafafa; border: 1px solid #e5e7eb; }
-.name-gate-container .svg-wrap object { width: 100%; height: 100%; pointer-events: none; }
+.name-gate-container .svg-wrap img { display: block; width: 100%; height: 100%; pointer-events: none; }
 .name-gate-container .warnings { padding: 8px 0; font-size: 12px; line-height: 1.5; }
 .name-gate-container .warnings .ok { color: #16a34a; }
 .name-gate-container .warnings .warn { display: block; }
@@ -132,7 +132,9 @@ function epLabel(episode: number): string {
 
 function legacySvgPath(episode: number, svgFilename: string): string {
   if (svgFilename.startsWith("/")) return svgFilename;
-  return `/episodes/${epLabel(episode)}/name/${svgFilename}`;
+  // SPA URL `/works/<slug>/episodes/<epNN>/` から相対解決させる (絶対パスだと slug が抜けて 404)
+  void episode;
+  return `name/${svgFilename}`;
 }
 
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -179,7 +181,7 @@ function renderPageCards(manifest: NameManifest, episode: number): string {
     <span class="panel-count">${page.panel_count}コマ</span>
     <span class="status status-pending" data-page-status="${page.page_no}">pending</span>
   </header>
-  <div class="svg-wrap"><object data="${escapeHtml(legacySvgPath(episode, page.svg_filename))}" type="image/svg+xml" aria-label="page ${page.page_no} preview"></object></div>
+  <div class="svg-wrap"><img src="${escapeHtml(legacySvgPath(episode, page.svg_filename))}" alt="page ${page.page_no} preview"></div>
   <div class="warnings">${warningHtml(page.warnings ?? [], page.audit_findings ?? [])}</div>
   <div class="reasons" data-page-reasons="${page.page_no}">${reasons}</div>
   <textarea class="note" placeholder="(任意) note" data-page-note="${page.page_no}"></textarea>

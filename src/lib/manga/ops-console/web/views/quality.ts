@@ -28,7 +28,7 @@ const CSS = `
 .q-card { display: grid; gap: var(--space-2); }
 .q-card__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .q-card h3,.q-card h4 { margin: 0; }
-.q-meta { color: var(--text-tertiary); font-size: var(--fs-sm); overflow-wrap: anywhere; }
+.q-meta { color: var(--text-tertiary); font-size: var(--fs-sm); overflow-wrap: anywhere; word-break: break-all; min-width: 0; }
 .q-filters { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .q-findings { display: grid; gap: var(--space-2); }
 .q-finding { display: grid; gap: 4px; padding: var(--space-2); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-sunken); }

@@ -57,6 +57,16 @@ export function storyboardPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "storyboard.json");
 }
 
+/** L3.5 出力 (Phase β B2 で追加): scene-graph 中間表現 */
+export function sceneGraphPath(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "scene_graph.json");
+}
+
+/** episodes/epNN/_brief.v2.md (L02b 出力) */
+export function episodeBriefV2Path(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "_brief.v2.md");
+}
+
 export function pagePlanPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "page_plan.json");
 }
