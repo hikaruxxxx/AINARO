@@ -52,12 +52,20 @@ type ModalContext = {
   for_version: string;
 };
 
+type AdoptModalContext = {
+  panel_id: string;
+  chosen_version: string;
+  image_path: string;
+  current_note: string;
+};
+
 type ViewState = {
   manifest: Manifest | null;
   mode: Mode;
   layer: UiLayer;
   filters: Filters;
   modal: ModalContext | null;
+  adoptModal: AdoptModalContext | null;
 };
 
 const RV_CSS = `
@@ -154,6 +162,7 @@ const RV_CSS = `
 .rv-ver-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px; color: #6b7280; font-size: 11px; }
 .rv-ver-meta button { background: #2563eb; color: #fff; border: 0; border-radius: 3px; padding: 2px 8px; font-size: 10px; cursor: pointer; }
 .rv-ver-card.rv-adopted .rv-ver-meta button { background: #16a34a; }
+.rv-ver-note { margin-top: 4px; padding: 4px 6px; background: #f0fdf4; border: 1px solid #16a34a; border-radius: 3px; color: #166534; font-size: 11px; line-height: 1.4; }
 .rv-help { color: #64748b; font-size: 12px; line-height: 1.6; }
 .rv-help code { background: #eef2f6; padding: 1px 5px; border-radius: 3px; font-family: ui-monospace, monospace; }
 .rv-modal {
@@ -175,6 +184,9 @@ const RV_CSS = `
 .rv-tags { display: flex; flex-wrap: wrap; gap: 6px 10px; margin-bottom: 10px; font-size: 12px; }
 .rv-tags label { display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 3px 8px; border: 1px solid #d1d5db; border-radius: 4px; }
 .rv-modal-body textarea { width: 100%; min-height: 80px; padding: 8px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; font-family: inherit; resize: vertical; }
+.rv-adopt-note-label { display: grid; gap: 4px; margin-bottom: 10px; }
+.rv-adopt-note-label span { color: var(--text-secondary); font-size: 12px; font-weight: 700; }
+.rv-adopt-note-label textarea { width: 100%; min-height: 60px; padding: 8px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; font-family: inherit; resize: vertical; }
 .rv-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
 .rv-primary { background: #2563eb; color: #fff; border: 0; border-radius: 4px; padding: 7px 16px; font-size: 13px; cursor: pointer; font-weight: 700; }
 .rv-secondary { background: #fff; color: #374151; border: 1px solid #d1d5db; border-radius: 4px; padding: 7px 16px; font-size: 13px; cursor: pointer; }
@@ -296,6 +308,24 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
             <div class="rv-modal-actions">
               <button type="button" class="rv-secondary" id="rv-modal-cancel">キャンセル</button>
               <button type="button" class="rv-primary" id="rv-modal-submit">指示を送信</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="rv-modal" id="rv-adopt-modal" role="dialog" aria-modal="true" aria-labelledby="rv-adopt-title">
+        <div class="rv-modal-card">
+          <div class="rv-modal-body">
+            <h3 id="rv-adopt-title">採用版を選択</h3>
+            <div class="rv-modal-meta" id="rv-adopt-meta"></div>
+            <img id="rv-adopt-img" alt="adopt preview">
+            <label class="rv-adopt-note-label">
+              <span>採用理由メモ (任意、200 字以内)</span>
+              <textarea id="rv-adopt-note" maxlength="200" placeholder="例: 表情がより悲しげで V1 より物語の起点として強い"></textarea>
+            </label>
+            <div class="rv-message" id="rv-adopt-message"></div>
+            <div class="rv-modal-actions">
+              <button type="button" class="rv-secondary" id="rv-adopt-cancel">キャンセル</button>
+              <button type="button" class="rv-primary" id="rv-adopt-submit">採用する</button>
             </div>
           </div>
         </div>
@@ -561,6 +591,7 @@ function renderCompare(root: HTMLElement, state: ViewState): void {
               <span>${escapeHtml(version.version)} (${escapeHtml(version.origin ?? "initial")})</span>
               <button type="button" data-rv-adopt-panel="${escapeHtml(panelId)}" data-rv-adopt-version="${escapeHtml(version.version)}" data-rv-adopt-path="${escapeHtml(version.image_path)}">${isAdopted ? "採用中" : "採用"}</button>
             </div>
+            ${isAdopted && adopted[panelId]?.note ? `<div class="rv-ver-note">メモ: ${escapeHtml(adopted[panelId]!.note!)}</div>` : ""}
           </div>
         `;
       })
@@ -607,6 +638,23 @@ function openRevisionModal(root: HTMLElement, state: ViewState, context: ModalCo
 function closeRevisionModal(root: HTMLElement, state: ViewState): void {
   state.modal = null;
   root.querySelector<HTMLElement>("#rv-modal")?.classList.remove("is-open");
+}
+
+function openAdoptModal(root: HTMLElement, state: ViewState, context: AdoptModalContext): void {
+  state.adoptModal = context;
+  setText(root, "#rv-adopt-meta", `panel=${context.panel_id} / version=${context.chosen_version}`);
+  const image = root.querySelector<HTMLImageElement>("#rv-adopt-img");
+  if (image) image.src = assetUrl(context.image_path);
+  const note = root.querySelector<HTMLTextAreaElement>("#rv-adopt-note");
+  if (note) note.value = context.current_note;
+  setText(root, "#rv-adopt-message", "");
+  root.querySelector<HTMLElement>("#rv-adopt-modal")?.classList.add("is-open");
+  requestAnimationFrame(() => note?.focus());
+}
+
+function closeAdoptModal(root: HTMLElement, state: ViewState): void {
+  state.adoptModal = null;
+  root.querySelector<HTMLElement>("#rv-adopt-modal")?.classList.remove("is-open");
 }
 
 function toast(root: HTMLElement, message: string, kind: "ok" | "warn" | "error"): void {
@@ -710,6 +758,7 @@ function bindStaticListeners(
         event.preventDefault();
       } else if (event.key === "Escape") {
         closeRevisionModal(root, state);
+        closeAdoptModal(root, state);
         event.preventDefault();
       }
     },
@@ -724,6 +773,18 @@ function bindStaticListeners(
     "click",
     (event) => {
       if (event.target === event.currentTarget) closeRevisionModal(root, state);
+    },
+    { signal }
+  );
+  root.querySelector<HTMLButtonElement>("#rv-adopt-cancel")?.addEventListener(
+    "click",
+    () => closeAdoptModal(root, state),
+    { signal }
+  );
+  root.querySelector<HTMLElement>("#rv-adopt-modal")?.addEventListener(
+    "click",
+    (event) => {
+      if (event.target === event.currentTarget) closeAdoptModal(root, state);
     },
     { signal }
   );
@@ -762,6 +823,32 @@ function bindStaticListeners(
     },
     { signal }
   );
+  root.querySelector<HTMLButtonElement>("#rv-adopt-submit")?.addEventListener(
+    "click",
+    () => {
+      const context = state.adoptModal;
+      if (!context) return;
+      const note = root.querySelector<HTMLTextAreaElement>("#rv-adopt-note")?.value.trim().slice(0, 200) ?? "";
+      enqueue(chains, `adopted#${slug}#${episode}#${context.panel_id}`, async () => {
+        try {
+          await apiPostAdopted(slug, episode, {
+            panel_id: context.panel_id,
+            chosen_version: context.chosen_version,
+            image_path: context.image_path,
+            note: note || undefined,
+          });
+          closeAdoptModal(root, state);
+          toast(root, "採用版を更新しました", "ok");
+          await reloadManifest(state, slug, episode);
+          refresh(root, state, slug, episode);
+        } catch (error) {
+          setText(root, "#rv-adopt-message", `採用に失敗: ${errorText(error)}`);
+          console.warn("adopted submit failed", error);
+        }
+      });
+    },
+    { signal }
+  );
   root.addEventListener(
     "click",
     (event) => {
@@ -783,20 +870,12 @@ function bindStaticListeners(
       const panelId = button.dataset.rvAdoptPanel ?? "";
       const chosenVersion = button.dataset.rvAdoptVersion ?? "";
       const imagePath = button.dataset.rvAdoptPath ?? "";
-      enqueue(chains, `adopted#${slug}#${episode}#${panelId}`, async () => {
-        try {
-          await apiPostAdopted(slug, episode, {
-            panel_id: panelId,
-            chosen_version: chosenVersion,
-            image_path: imagePath,
-          });
-          toast(root, "採用版を更新しました", "ok");
-          await reloadManifest(state, slug, episode);
-          refresh(root, state, slug, episode);
-        } catch (error) {
-          toast(root, `採用に失敗: ${errorText(error)}`, "error");
-          console.warn("adopted submit failed", error);
-        }
+      const currentNote = state.manifest ? adoptedPanels(state.manifest)[panelId]?.note ?? "" : "";
+      openAdoptModal(root, state, {
+        panel_id: panelId,
+        chosen_version: chosenVersion,
+        image_path: imagePath,
+        current_note: currentNote,
       });
     },
     { signal }
@@ -821,6 +900,7 @@ async function loadRevision(
     layer: "renders",
     filters: { failed: false, revised: false, notAdopted: false },
     modal: null,
+    adoptModal: null,
   };
   bindStaticListeners(root, state, slug, episode, signal, chains);
   try {
