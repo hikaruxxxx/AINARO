@@ -12,9 +12,11 @@ import { mountLayersView } from "./views/layers";
 import { mountNameGateView } from "./views/name-gate";
 import { mountPipelineView } from "./views/pipeline";
 import { mountQualityView } from "./views/quality";
+import { mountQualityHubView } from "./views/quality-hub";
 import { mountRevisionView } from "./views/revision";
 import { mountStoryboardView } from "./views/storyboard";
 import { mountVolumePlotView } from "./views/volume-plot";
+import { mountWorkOverviewView } from "./views/work-overview";
 import { mountWorksView } from "./views/works";
 
 type Unmount = () => void;
@@ -22,6 +24,13 @@ type Unmount = () => void;
 function parseRoute(): { slug: string | null; episode: number | null; view: ViewName } {
   if (window.location.pathname === "/jobs") {
     return { slug: null, episode: null, view: "jobs-hub" };
+  }
+  if (window.location.pathname === "/quality") {
+    return { slug: null, episode: null, view: "quality-hub" };
+  }
+  const workMatch = window.location.pathname.match(/^\/works\/([^/]+)\/?$/);
+  if (workMatch) {
+    return { slug: decodeURIComponent(workMatch[1]), episode: 0, view: "work-overview" };
   }
   const m = window.location.pathname.match(/^\/works\/([^/]+)\/episodes\/ep(\d+)\/?$/);
   const hashView = window.location.hash.replace(/^#/, "");
@@ -56,6 +65,21 @@ function syncRoute(slug: string, episode: number, view: ViewName): void {
     history.pushState(null, "", next);
     return;
   }
+  if (view === "quality-hub") {
+    const next = "/quality";
+    const current = `${window.location.pathname}${window.location.hash}`;
+    if (current === next) return;
+    history.pushState(null, "", next);
+    return;
+  }
+  if (view === "work-overview") {
+    if (!slug) return;
+    const next = `/works/${encodeURIComponent(slug)}/`;
+    const current = `${window.location.pathname}${window.location.hash}`;
+    if (current === next) return;
+    history.pushState(null, "", next);
+    return;
+  }
   if (!slug || !episode) return;
   const next = `${routePath(slug, episode)}#${view}`;
   const current = `${window.location.pathname}${window.location.hash}`;
@@ -78,6 +102,8 @@ function mountCurrentView(main: HTMLElement): () => void {
     prevKey = key;
     if (state.currentView === "index") unmount = mountIndexView(main);
     else if (state.currentView === "jobs-hub") unmount = mountJobsHubView(main);
+    else if (state.currentView === "quality-hub") unmount = mountQualityHubView(main);
+    else if (state.currentView === "work-overview") unmount = mountWorkOverviewView(main);
     else if (state.currentView === "pipeline") unmount = mountPipelineView(main);
     else if (state.currentView === "storyboard") unmount = mountStoryboardView(main);
     else if (state.currentView === "quality") unmount = mountQualityView(main);
@@ -120,7 +146,11 @@ async function start(): Promise<void> {
   // 各 view は currentSlug が空の間は呼ばれない (mountCurrentView は index へ)。
   const currentSlug = route.slug ?? boot.default_slug ?? "";
   const currentEpisode = route.episode ?? boot.default_episode ?? 0;
-  const currentView: ViewName = route.view === "jobs-hub" ? "jobs-hub" : route.slug ? route.view : "index";
+  const currentView: ViewName = route.view === "jobs-hub" || route.view === "quality-hub"
+    ? route.view
+    : route.slug
+      ? route.view
+      : "index";
 
   store.update({
     works: boot.works,

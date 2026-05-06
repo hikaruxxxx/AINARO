@@ -19,6 +19,7 @@ import {
 import { handleNameManifest } from "./handlers/name-manifest";
 import { handleManifest } from "./handlers/manifest";
 import { handlePipelineStatus } from "./handlers/pipeline-status";
+import { handleQualityOverview } from "./handlers/quality";
 import {
   handleRevisionQueueGet,
   handleRevisionQueuePost,
@@ -149,6 +150,11 @@ export async function handleApi(
   if (p === "/api/bootstrap") {
     if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
     return handleBootstrap(defaults, res);
+  }
+
+  if (p === "/api/quality/overview") {
+    if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
+    return handleQualityOverview(res);
   }
 
   // jobs API の read は横断可。write/abort は default scope (slug+episode) が必須。

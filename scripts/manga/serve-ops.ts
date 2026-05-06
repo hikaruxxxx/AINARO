@@ -157,6 +157,7 @@ async function main() {
       rootIndex: (p) => {
         if (p === "/" || p === "") return opsShellHtml;
         if (p === "/jobs" || p === "/quality") return opsShellHtml;
+        if (p.match(/^\/works\/[^/]+\/?$/)) return opsShellHtml;
         if (p.match(/^\/works\/[^/]+\/episodes\/ep\d+\/?$/)) return opsShellHtml;
         return null;
       },

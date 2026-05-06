@@ -1,6 +1,7 @@
 export type ViewName =
   | "index"
   | "jobs-hub"
+  | "quality-hub"
   | "pipeline"
   | "name-gate"
   | "revision"
@@ -9,6 +10,7 @@ export type ViewName =
   | "bible"
   | "volume-plot"
   | "kdp-metadata"
+  | "work-overview"
   | "layers"
   | "works";
 
@@ -73,6 +75,7 @@ export function isViewName(value: string | null | undefined): value is ViewName 
   return (
     value === "index" ||
     value === "jobs-hub" ||
+    value === "quality-hub" ||
     value === "pipeline" ||
     value === "name-gate" ||
     value === "revision" ||
@@ -81,6 +84,7 @@ export function isViewName(value: string | null | undefined): value is ViewName 
     value === "bible" ||
     value === "volume-plot" ||
     value === "kdp-metadata" ||
+    value === "work-overview" ||
     value === "layers" ||
     value === "works"
   );

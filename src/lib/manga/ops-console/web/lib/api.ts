@@ -269,6 +269,33 @@ export type JobStartRequest = {
   args?: Record<string, string>;
 };
 
+export type WorkQualityOverview = {
+  slug: string;
+  title?: string;
+  episodes: Array<{
+    episode: number;
+    audit_failed_count: number;
+    audit_status: "ready" | "missing" | "stale";
+    revision_unresolved_count: number;
+    adopted_pending_count: number;
+    last_audit_at?: string;
+  }>;
+  totals: {
+    audit_failed: number;
+    revision_unresolved: number;
+    adopted_pending: number;
+  };
+};
+
+export type QualityOverview = {
+  works: WorkQualityOverview[];
+  generated_at: string;
+};
+
+export function apiGetQualityOverview(): Promise<QualityOverview> {
+  return getJson<QualityOverview>("/api/quality/overview");
+}
+
 export function apiPostJob(
   req: JobStartRequest
 ): Promise<{ job_id: string; layer: LayerId; key: string; state: JobState }> {

@@ -50,6 +50,7 @@ function rerender(root: HTMLElement, state: AppState): void {
           <h3 class="sidebar__group-title">全体</h3>
           <button type="button" class="sidebar__menu-item${state.currentView === "index" ? " is-active" : ""}" data-view="index">作品一覧</button>
           <button type="button" class="sidebar__menu-item${state.currentView === "jobs-hub" ? " is-active" : ""}" data-view="jobs-hub">全作品ジョブ</button>
+          <button type="button" class="sidebar__menu-item${state.currentView === "quality-hub" ? " is-active" : ""}" data-view="quality-hub">全作品品質</button>
         </div>
       </div>
     `;

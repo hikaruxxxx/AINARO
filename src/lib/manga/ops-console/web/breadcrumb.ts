@@ -23,6 +23,13 @@ function render(state: AppState): string {
     return `<span class="nc-breadcrumb__crumb nc-breadcrumb__crumb--current">Works</span>`;
   }
   const work = workLabel(state);
+  if (state.currentView === "work-overview") {
+    return `
+      <button type="button" class="nc-breadcrumb__crumb" data-crumb="works">Works</button>
+      <span class="nc-breadcrumb__sep">/</span>
+      <span class="nc-breadcrumb__crumb nc-breadcrumb__crumb--current">${escapeHtml(work)}</span>
+    `;
+  }
   const ep = episodeLabel(state.currentEpisode);
   return `
     <button type="button" class="nc-breadcrumb__crumb" data-crumb="works">Works</button>
