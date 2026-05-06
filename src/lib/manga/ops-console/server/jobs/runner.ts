@@ -1,8 +1,17 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { promises as fs, openSync, closeSync, statSync, openSync as fsOpenSync } from "node:fs";
 import path from "node:path";
 import { REPO_ROOT } from "../../../../../../scripts/manga/layers/_paths";
 import { LAYER_REGISTRY, type LayerId } from "./registry";
+import {
+  deleteRunning,
+  isProcessAlive,
+  listRunning,
+  persistRunning,
+  RUNNING_JOBS_DIR,
+  type RunningJobMeta,
+} from "./running-store";
 import { loadRecentJobs, persistJob, type StoredJob } from "./storage";
 import { validateJobRequest, type JobRequest } from "./validate";
 
@@ -32,6 +41,14 @@ export type JobRecord = {
   aborted: boolean;
   killTimer: NodeJS.Timeout | null;
   timeoutTimer: NodeJS.Timeout | null;
+  /** detached spawn された子プロセスの PID。abort や生存確認に使う。 */
+  pid?: number;
+  /** stdout+stderr が書き出されている log file path。再 attach 後の tail にも使用。 */
+  logPath?: string;
+  /** log polling 用 interval。close 時に clearInterval する。 */
+  logPoll?: NodeJS.Timeout;
+  /** log file 内で次に読むべき byte offset。 */
+  logOffset?: number;
 };
 
 const MAX_EVENTS = 5000;
@@ -96,34 +113,61 @@ export class JobRegistry {
     }
 
     const id = randomUUID();
+    const startedAt = new Date().toISOString();
+    const logPath = path.join(RUNNING_JOBS_DIR, `${id}.log`);
+
     const record: JobRecord = {
       id,
       key: validated.key,
       layer: req.layer,
       scope: { slug: req.slug, episode: req.episode, volume: req.volume },
       state: "running",
-      startedAt: new Date().toISOString(),
+      startedAt,
       events: [],
       subscribers: new Set(),
       abortFn: () => undefined,
       aborted: false,
       killTimer: null,
       timeoutTimer: null,
+      logPath,
+      logOffset: 0,
     };
     this.jobs.set(id, record);
     this.runningByKey.set(validated.key, id);
     this.eventBytes.set(id, 0);
 
-    let child: ChildProcessWithoutNullStreams;
     let abortRequested = false;
     const push = (channel: JobEvent["channel"], line: string) => this.pushEvent(record, channel, line);
+
+    // log file をあらかじめ open。stdout/stderr 両方をこの fd に流す (混在で行単位順序保持)。
+    let logFd: number;
+    try {
+      // 同期 mkdir + open。spawn より前に確実に存在させる必要がある。
+      require("node:fs").mkdirSync(RUNNING_JOBS_DIR, { recursive: true });
+      logFd = openSync(logPath, "a");
+    } catch (e) {
+      record.state = "failed";
+      record.finishedAt = new Date().toISOString();
+      this.runningByKey.delete(validated.key);
+      push("system", `log file open failed: ${String(e)}`);
+      this.persistFinal(record);
+      return record;
+    }
+
+    let child: import("node:child_process").ChildProcess;
     try {
       child = spawn(TSX_BIN, validated.argv, {
         cwd: validated.cwd,
         env: buildChildEnv(id),
         shell: false,
+        // detached + ignore stdin + stdout/stderr → log file fd
+        // → parent (Console) が exit しても child は独立 process group で生存
+        detached: true,
+        stdio: ["ignore", logFd, logFd],
       });
+      child.unref();
     } catch (e) {
+      closeSync(logFd);
       record.state = "failed";
       record.finishedAt = new Date().toISOString();
       this.runningByKey.delete(validated.key);
@@ -131,24 +175,52 @@ export class JobRegistry {
       this.persistFinal(record);
       return record;
     }
+    closeSync(logFd); // child が継承しているので parent 側は閉じてよい
+    record.pid = child.pid;
 
-    push("system", `spawn: ${TSX_BIN} ${validated.argv.join(" ")}`);
+    push("system", `spawn: ${TSX_BIN} ${validated.argv.join(" ")} (pid=${child.pid}, detached)`);
+
+    // running meta を永続化 (Console 再起動後の re-attach 用)
+    if (child.pid) {
+      void persistRunning({
+        schema_version: 1,
+        id,
+        pid: child.pid,
+        key: validated.key,
+        layer: req.layer,
+        scope: record.scope,
+        startedAt,
+        argv: [TSX_BIN, ...validated.argv],
+        cwd: validated.cwd,
+        log_path: logPath,
+        revision_id: record.revision_id,
+        panel_ids: record.panel_ids,
+      }).catch((e) => console.warn(`[ops-console] persistRunning failed for ${id}:`, e));
+    }
+
+    // abort: detached child でも process.kill(pid) で動く
     record.abortFn = () => {
       if (record.state !== "running" || record.aborted) return;
       record.aborted = true;
       abortRequested = true;
       push("system", "abort requested");
-      child.kill("SIGTERM");
+      try {
+        if (child.pid) process.kill(child.pid, "SIGTERM");
+      } catch (e) {
+        push("system", `kill SIGTERM failed: ${String(e)}`);
+      }
       record.killTimer = windowlessTimeout(() => {
-        if (record.state === "running") {
+        if (record.state === "running" && child.pid) {
           push("system", "SIGTERM timeout; sending SIGKILL");
-          child.kill("SIGKILL");
+          try {
+            process.kill(child.pid, "SIGKILL");
+          } catch {
+            /* already dead */
+          }
         }
       }, 5000);
     };
 
-    child.stdout.on("data", (buf) => this.pushLines(record, "stdout", buf));
-    child.stderr.on("data", (buf) => this.pushLines(record, "stderr", buf));
     child.on("error", (err) => push("system", `process error: ${err.message}`));
 
     record.timeoutTimer = windowlessTimeout(() => {
@@ -156,17 +228,35 @@ export class JobRegistry {
       record.aborted = true;
       abortRequested = true;
       push("system", "timeout");
-      child.kill("SIGTERM");
+      try {
+        if (child.pid) process.kill(child.pid, "SIGTERM");
+      } catch {
+        /* already dead */
+      }
       record.killTimer = windowlessTimeout(() => {
-        if (record.state === "running") child.kill("SIGKILL");
+        if (record.state === "running" && child.pid) {
+          try {
+            process.kill(child.pid, "SIGKILL");
+          } catch {
+            /* already dead */
+          }
+        }
       }, 5000);
     }, LAYER_REGISTRY[req.layer].timeoutMs);
+
+    // log file の tail polling: stdio が file fd 経由なので parent は data event を受けない。
+    // 200ms 毎に file size 差分を読み出して event 化する。
+    record.logPoll = windowlessInterval(() => this.pollLogFile(record), 200);
 
     child.on("close", (code) => {
       if (record.timeoutTimer) clearTimeout(record.timeoutTimer);
       if (record.killTimer) clearTimeout(record.killTimer);
+      if (record.logPoll) clearInterval(record.logPoll);
       record.timeoutTimer = null;
       record.killTimer = null;
+      record.logPoll = undefined;
+      // 最終 flush
+      this.pollLogFile(record);
       record.finishedAt = new Date().toISOString();
       record.exitCode = code ?? undefined;
       record.state = abortRequested ? "aborted" : code === 0 ? "succeeded" : "failed";
@@ -174,9 +264,41 @@ export class JobRegistry {
       push("system", `done: ${record.state}${code === null ? "" : ` exit=${code}`}`);
       this.persistFinal(record);
       this.scheduleExpire(record.id);
+      void deleteRunning(record.id).catch(() => {});
     });
 
     return record;
+  }
+
+  /** log file の新規追加分を読み出して event に変換 (in-memory + subscribers へ push)。 */
+  private pollLogFile(record: JobRecord): void {
+    if (!record.logPath) return;
+    let size: number;
+    try {
+      size = statSync(record.logPath).size;
+    } catch {
+      return; // file not yet exists or removed
+    }
+    const offset = record.logOffset ?? 0;
+    if (size <= offset) return;
+    let fd: number;
+    try {
+      fd = fsOpenSync(record.logPath, "r");
+    } catch {
+      return;
+    }
+    try {
+      const buf = Buffer.alloc(size - offset);
+      const fsSync = require("node:fs") as typeof import("node:fs");
+      fsSync.readSync(fd, buf, 0, buf.length, offset);
+      record.logOffset = size;
+      const text = buf.toString("utf-8");
+      for (const line of text.split(/\r?\n/)) {
+        if (line.length > 0) this.pushEvent(record, "stdout", line);
+      }
+    } finally {
+      closeSync(fd);
+    }
   }
 
   get(id: string): JobRecord | null {
@@ -201,6 +323,121 @@ export class JobRegistry {
     }
   }
 
+  /**
+   * Console 起動時に呼ぶ。`.jobs/.running/*.json` を scan し:
+   *   - PID が生きている → JobRecord を再構築して running 扱い、log tail を再開
+   *   - PID が死んでいる → aborted 扱いで final 化 + .running.json 削除
+   *
+   * これにより POST /api/restart で Console 自体を再起動しても、ジョブの実体は
+   * 殺されずに継続し、新 Console が SSE/log 経由で進捗を引き継ぐ。
+   */
+  async reattachRunning(): Promise<void> {
+    const metas = await listRunning();
+    for (const meta of metas) {
+      if (this.jobs.has(meta.id)) continue;
+      const alive = isProcessAlive(meta.pid);
+      if (!alive) {
+        // 死んでいるので aborted として final 化
+        const aborted: StoredJob = {
+          id: meta.id,
+          key: meta.key,
+          layer: meta.layer,
+          scope: meta.scope,
+          state: "aborted",
+          startedAt: meta.startedAt,
+          finishedAt: new Date().toISOString(),
+          exitCode: undefined,
+          events: [],
+          revision_id: meta.revision_id,
+          panel_ids: meta.panel_ids,
+        };
+        await persistJob(aborted).catch(() => {});
+        await deleteRunning(meta.id).catch(() => {});
+        const record = this.fromStored(aborted);
+        this.jobs.set(record.id, record);
+        continue;
+      }
+      // 生きてる → running として再登録 + log tail 再開
+      this.attachRunningRecord(meta);
+    }
+  }
+
+  private attachRunningRecord(meta: RunningJobMeta): void {
+    const record: JobRecord = {
+      id: meta.id,
+      key: meta.key,
+      layer: meta.layer as LayerId,
+      scope: meta.scope,
+      state: "running",
+      startedAt: meta.startedAt,
+      events: [],
+      revision_id: meta.revision_id,
+      panel_ids: meta.panel_ids,
+      subscribers: new Set(),
+      abortFn: () => undefined,
+      aborted: false,
+      killTimer: null,
+      timeoutTimer: null,
+      pid: meta.pid,
+      logPath: meta.log_path,
+      logOffset: 0,
+    };
+
+    // abort: stored PID に対して直接 SIGTERM/SIGKILL
+    record.abortFn = () => {
+      if (record.state !== "running" || record.aborted) return;
+      record.aborted = true;
+      this.pushEvent(record, "system", "abort requested (re-attached job)");
+      try {
+        process.kill(meta.pid, "SIGTERM");
+      } catch (e) {
+        this.pushEvent(record, "system", `kill failed (process gone): ${String(e)}`);
+      }
+      record.killTimer = windowlessTimeout(() => {
+        if (record.state === "running") {
+          try {
+            process.kill(meta.pid, "SIGKILL");
+          } catch {
+            /* already dead */
+          }
+        }
+      }, 5000);
+    };
+
+    this.jobs.set(record.id, record);
+    this.runningByKey.set(meta.key, record.id);
+    this.eventBytes.set(record.id, 0);
+    this.pushEvent(record, "system", `re-attached to running pid=${meta.pid}`);
+
+    // log tail polling 再開
+    record.logPoll = windowlessInterval(() => this.pollLogFile(record), 200);
+
+    // PID 死亡監視: 1秒毎に process.kill(pid, 0) で確認、死んでいれば close 相当処理
+    const liveCheck = windowlessInterval(() => {
+      if (record.state !== "running") {
+        clearInterval(liveCheck);
+        return;
+      }
+      if (!isProcessAlive(meta.pid)) {
+        clearInterval(liveCheck);
+        if (record.logPoll) clearInterval(record.logPoll);
+        record.logPoll = undefined;
+        // 最終 log flush
+        this.pollLogFile(record);
+        // exit code は不明 (我々が spawn したわけでないので waitpid できない)
+        // log の最後の数行から推測しないが、aborted/succeeded の判別は付かないので
+        // record.aborted フラグ (= ユーザーが abort を要求していたか) で決める。
+        record.finishedAt = new Date().toISOString();
+        record.state = record.aborted ? "aborted" : "succeeded";
+        this.runningByKey.delete(record.key);
+        this.pushEvent(record, "system", `re-attached job exited: ${record.state} (exit code unknown)`);
+        this.persistFinal(record);
+        this.scheduleExpire(record.id);
+        void deleteRunning(record.id).catch(() => {});
+      }
+    }, 1000);
+  }
+
   abort(id: string): void {
     const job = this.jobs.get(id);
     if (!job) throw new JobError("job not found", 404);
@@ -208,12 +445,8 @@ export class JobRegistry {
     job.abortFn();
   }
 
-  private pushLines(record: JobRecord, channel: "stdout" | "stderr", buf: Buffer): void {
-    const text = buf.toString("utf-8");
-    for (const line of text.split(/\r?\n/)) {
-      if (line.length > 0) this.pushEvent(record, channel, line);
-    }
-  }
+  // pushLines は detached spawn 化に伴い不要になった (log file polling に置換)。
+  // pollLogFile() が file からまとめて読んで pushEvent する。
 
   private persistFinal(record: JobRecord): void {
     if (record.state === "running") return;
@@ -314,7 +547,17 @@ function windowlessTimeout(fn: () => void, ms: number): NodeJS.Timeout {
   return timer;
 }
 
+function windowlessInterval(fn: () => void, ms: number): NodeJS.Timeout {
+  const timer = setInterval(fn, ms);
+  timer.unref();
+  return timer;
+}
+
 export const jobRegistry = new JobRegistry();
 void jobRegistry.loadPersisted(7).catch((error) => {
   console.warn("[ops-console] failed to load stored jobs:", error);
+});
+// Console 再起動でジョブが abort されないよう、起動時に running ジョブを再 attach する。
+void jobRegistry.reattachRunning().catch((error) => {
+  console.warn("[ops-console] failed to reattach running jobs:", error);
 });
