@@ -151,6 +151,21 @@ export type ImprovementsResponse = {
     scope: string;
     trigger: { layer?: string; flag?: string };
     diagnosis: string;
+    instruction: string;
+  }>;
+  /**
+   * Phase Y WY-11: Engagement Audit の rationale から抽出した EC suggestion。
+   * LLM が「EC-XXXX 型で再構成」と書いた場合の補助。AI 編集 view へ preset 送りで投げられる。
+   */
+  engagement_ec_suggestions: Array<{
+    card_id: string;
+    title: string;
+    instruction: string;
+    scope: string;
+    /** rationale または per_page_scores の comment 内、EC が言及された原文 (短く抜粋) */
+    source_text: string;
+    /** EC 言及が page-specific なら対応 page_no を入れる */
+    applies_to_pages: number[];
   }>;
   /** 提案生成のための起動コマンド (UI から jobs に投入する form ヒント) */
   next_actions: Array<{
@@ -335,6 +350,14 @@ export async function handleImprovementsGet(
     const cardFiles = (await listFilesInDir(EDITORIAL_CARDS_DIR)).filter(
       (f) => f.startsWith("EC-") && f.endsWith(".json"),
     );
+    const cardIndex = new Map<string, {
+      card_id: string;
+      title: string;
+      scope: string;
+      trigger?: { layer?: string; flag?: string };
+      diagnosis: string;
+      instruction?: string;
+    }>();
     const relatedCards: ImprovementsResponse["related_cards"] = [];
     for (const cf of cardFiles.slice(0, 20)) {
       const card = await readJsonOrNull<{
@@ -343,16 +366,60 @@ export async function handleImprovementsGet(
         scope: string;
         trigger?: { layer?: string; flag?: string };
         diagnosis: string;
+        instruction?: string;
       }>(path.join(EDITORIAL_CARDS_DIR, cf));
       if (!card) continue;
+      cardIndex.set(card.card_id, card);
       relatedCards.push({
         card_id: card.card_id,
         title: card.title,
         scope: card.scope,
         trigger: { layer: card.trigger?.layer, flag: card.trigger?.flag },
         diagnosis: card.diagnosis,
+        instruction: card.instruction ?? "",
       });
     }
+
+    // Phase Y WY-11: engagement_audit から EC-NNNN を抽出して suggestion を組み立てる。
+    // - rationale_summary を全体スコープで scan (applies_to_pages 不明 = 空)
+    // - per_page_scores[].comment に EC が言及されていれば applies_to_pages にその page を追加
+    const ecRegex = /EC-(\d{4})/g;
+    const ecSuggestions = new Map<string, ImprovementsResponse["engagement_ec_suggestions"][number]>();
+    function harvestEc(text: string | undefined, pageNo?: number): void {
+      if (!text) return;
+      const matches = text.matchAll(ecRegex);
+      for (const m of matches) {
+        const cardId = `EC-${m[1]}`;
+        const card = cardIndex.get(cardId);
+        if (!card) continue;
+        const existing = ecSuggestions.get(cardId);
+        if (existing) {
+          if (pageNo !== undefined && !existing.applies_to_pages.includes(pageNo)) {
+            existing.applies_to_pages.push(pageNo);
+          }
+        } else {
+          ecSuggestions.set(cardId, {
+            card_id: card.card_id,
+            title: card.title,
+            instruction: card.instruction ?? "",
+            scope: card.scope,
+            source_text: text.length > 200 ? `${text.slice(0, 200)}…` : text,
+            applies_to_pages: pageNo !== undefined ? [pageNo] : [],
+          });
+        }
+      }
+    }
+    if (engagement) {
+      harvestEc(engagement.rationale_summary);
+      const pps = (engagement as unknown as { per_page_scores?: Array<{ page_no: number; comment?: string }> })
+        .per_page_scores;
+      if (Array.isArray(pps)) {
+        for (const ps of pps) harvestEc(ps.comment, ps.page_no);
+      }
+    }
+    const engagementEcSuggestions: ImprovementsResponse["engagement_ec_suggestions"] = Array.from(
+      ecSuggestions.values(),
+    );
 
     // volume_position 推定: volumes/v01/plot.json (volume plot) から episodes 数を取得
     // 巻末判定: 当該 episode が plot.episodes の最後 (= 巻最終話)
@@ -422,6 +489,7 @@ export async function handleImprovementsGet(
       engagement_audit: engagementSummary,
       completion_risk: completionRisk,
       related_cards: relatedCards,
+      engagement_ec_suggestions: engagementEcSuggestions,
       next_actions: nextActions,
     };
 

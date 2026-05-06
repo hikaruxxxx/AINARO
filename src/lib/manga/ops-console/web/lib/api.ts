@@ -696,6 +696,16 @@ export type ImprovementsResponse = {
     scope: string;
     trigger: { layer?: string; flag?: string };
     diagnosis: string;
+    instruction: string;
+  }>;
+  /** Phase Y WY-11: Engagement Audit から抽出した EC 適用 suggestion */
+  engagement_ec_suggestions: Array<{
+    card_id: string;
+    title: string;
+    instruction: string;
+    scope: string;
+    source_text: string;
+    applies_to_pages: number[];
   }>;
   next_actions: Array<{
     label: string;

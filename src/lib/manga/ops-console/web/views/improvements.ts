@@ -23,6 +23,7 @@ import {
   type ImprovementsResponse,
 } from "../lib/api";
 import { store } from "../lib/store";
+// store 経由で view 遷移するので追加 import は不要
 
 type Toast = {
   message: string;
@@ -228,6 +229,24 @@ function renderCompletionRisk(data: ImprovementsResponse): string {
   `;
 }
 
+function renderEngagementEcSuggestions(data: ImprovementsResponse): string {
+  if (!data.engagement_ec_suggestions || data.engagement_ec_suggestions.length === 0) return "";
+  return `
+    <div class="imp-section">
+      <h3>EC 適用 suggestion (Engagement Audit より自動抽出)</h3>
+      <p class="imp-section-sub">LLM が rationale で言及した EC カード。「AI 編集に流す」を押すと該当 EC の instruction + page 範囲を Codex 編集 prompt に prefill します</p>
+      ${data.engagement_ec_suggestions.map((s) => `
+        <div class="imp-action-row">
+          <button type="button" class="nc-button nc-button--primary nc-button--sm" data-action="apply-ec" data-card-id="${escapeHtml(s.card_id)}">AI 編集に流す</button>
+          <strong>${escapeHtml(s.card_id)}</strong> ${escapeHtml(s.title)}
+          ${s.applies_to_pages.length > 0 ? `<span class="imp-info">(対象 page: ${s.applies_to_pages.join(", ")})</span>` : `<span class="imp-info">(全体)</span>`}
+          <span class="imp-action-desc">「${escapeHtml(s.source_text)}」</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderEngagementAudit(data: ImprovementsResponse): string {
   const e = data.engagement_audit;
   if (!e.available) {
@@ -342,6 +361,7 @@ function render(container: HTMLElement, state: ViewState): void {
         </div>
         ${renderCompletionRisk(state.data)}
         ${renderEngagementAudit(state.data)}
+        ${renderEngagementEcSuggestions(state.data)}
         ${renderRelatedCards(state.data)}
         ${renderNextActions(state.data, state)}
       `
@@ -477,6 +497,43 @@ export function mountImprovementsView(container: HTMLElement): () => void {
         }
         if (!layer || !label) return;
         void startJob(state, container, label, layer, flags);
+      }
+      if (action === "apply-ec") {
+        const cardId = btn.dataset.cardId ?? "";
+        if (!cardId || !state.data) return;
+        const suggestion = state.data.engagement_ec_suggestions.find((s) => s.card_id === cardId);
+        if (!suggestion) return;
+        // ai-edit view へ preset 送り。原則: scope = current slug, target は EC scope に応じて決める。
+        const pageRangeText = suggestion.applies_to_pages.length > 0
+          ? `対象 page: ${suggestion.applies_to_pages.join(", ")}`
+          : "対象 page: (全体スコープ — LLM の所見に基づき適切な page を判断)";
+        const prompt = [
+          `編集判断カード ${suggestion.card_id} (${suggestion.title}) を適用してください。`,
+          ``,
+          `■ instruction:`,
+          suggestion.instruction || "(instruction 未登録 — diagnosis を参照)",
+          ``,
+          `■ ${pageRangeText}`,
+          ``,
+          `■ Engagement Audit の所見 (このカードを suggest した根拠):`,
+          `「${suggestion.source_text}」`,
+          ``,
+          `■ 編集対象ファイル:`,
+          `data/manga/works/${state.slug}/episodes/ep${String(state.episode).padStart(2, "0")}/storyboard.json`,
+          ``,
+          `編集後は L11 audit を再実行して findings 解消を確認してください。`,
+        ].join("\n");
+        // store の preset を設定して ai-edit view へ遷移
+        store.update({
+          aiEditPreset: {
+            scope: state.slug,
+            target: `episodes/ep${String(state.episode).padStart(2, "0")}/storyboard.json`,
+            prompt,
+            originLayer: "L99",
+            originView: "improvements",
+          },
+          currentView: "ai-edit",
+        });
       }
     },
     { signal: controller.signal },
