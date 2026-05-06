@@ -156,6 +156,7 @@ async function main() {
     await serveStatic(req, res, url, {
       rootIndex: (p) => {
         if (p === "/" || p === "") return opsShellHtml;
+        if (p === "/jobs" || p === "/quality") return opsShellHtml;
         if (p.match(/^\/works\/[^/]+\/episodes\/ep\d+\/?$/)) return opsShellHtml;
         return null;
       },
