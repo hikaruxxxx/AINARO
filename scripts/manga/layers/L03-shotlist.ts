@@ -79,6 +79,7 @@ async function main() {
     episodeBrief: brief,
     targetPages,
     targetPanelsPerPage: 5,
+    panelsPerPageRange: { min: 4, max: 7 },
   });
 
   const validation = validateShotlistAgainstBible(shotlist, bible);

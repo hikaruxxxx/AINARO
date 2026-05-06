@@ -81,12 +81,18 @@ export async function extractShotlistFromBible(args: {
   episodeNo: number;
   episodeBrief: string;
   targetPages: number;
-  targetPanelsPerPage?: number; // default 5
+  /** 1ページあたりの平均パネル数。default 5 (商業漫画的には 5-6 が中央値) */
+  targetPanelsPerPage?: number;
+  /** 1ページあたりのパネル数許容レンジ。default {min:4,max:7}。
+   *  prompt で variation を促し、固定 N の monotonous な出力を避ける目的 */
+  panelsPerPageRange?: { min: number; max: number };
   cwd?: string;
   timeoutMs?: number;
 }): Promise<ShotlistV2> {
   const { bible, episodeNo, episodeBrief, targetPages } = args;
-  const targetPanels = Math.round(targetPages * (args.targetPanelsPerPage ?? 5));
+  const avgPanelsPerPage = args.targetPanelsPerPage ?? 5;
+  const range = args.panelsPerPageRange ?? { min: 4, max: 7 };
+  const targetPanels = Math.round(targetPages * avgPanelsPerPage);
 
   const charsBlock = bible.characters
     .map(
@@ -131,6 +137,8 @@ export async function extractShotlistFromBible(args: {
     instruction: [
       `第${episodeNo}話の shotlist を構築してください。`,
       `総ページ数 ${targetPages}、総コマ数 ${targetPanels} 前後。`,
+      `各ページの panel_count は ${range.min}〜${range.max} の範囲で variation を付けること。固定 ${avgPanelsPerPage} の monotonous な配分は商業漫画的に NG。`,
+      `配分目安: cliffhanger / 強い見せ場 = ${range.min}〜${avgPanelsPerPage-1} (大ゴマ多用), 対話・説明・密度ページ = ${avgPanelsPerPage+1}〜${range.max} (情報密度高め), 標準ページ = ${avgPanelsPerPage} 中心。`,
       "scenes は 4-7 個、各 scene の panel_idx_range が連続していて重複なく全 panel を覆うこと。",
       "panels は 1-indexed の panel_no で連続採番。最終 panel が cliffhanger に対応する。",
     ].join("\n"),
