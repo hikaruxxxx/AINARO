@@ -12,6 +12,12 @@ import {
   bibleSnapshotPath,
 } from "../../../../../../scripts/manga/layers/_paths";
 import type { BibleSnapshotV2 } from "../../../schemas-v2";
+import {
+  readAuditReport,
+  type BibleCharactersAuditReport,
+  type BibleImagesAuditReport,
+  type BiblePropsAuditReport,
+} from "../../../qa-v2/bible-image-audit";
 
 type RefGroup = { id: string; files: string[] };
 
@@ -21,6 +27,9 @@ type BibleWithRefs = BibleSnapshotV2 & {
     locations: RefGroup[];
     props: RefGroup[];
   };
+  image_audit?: BibleImagesAuditReport | null;
+  image_audit_characters?: BibleCharactersAuditReport | null;
+  image_audit_props?: BiblePropsAuditReport | null;
 };
 
 async function loadJson<T>(fp: string): Promise<T | null> {
@@ -66,15 +75,21 @@ export async function handleBible(slug: string, res: http.ServerResponse): Promi
   }
 
   const refsRoot = bibleRefsDir(slug);
-  const [characters, locations, props] = await Promise.all([
+  const [characters, locations, props, imageAudit, charactersAudit, propsAudit] = await Promise.all([
     listRefs(refsRoot, "characters", (bible.characters ?? []).map((item) => item.id)),
     listRefs(refsRoot, "locations", (bible.locations ?? []).map((item) => item.id)),
     listRefs(refsRoot, "props", (bible.props ?? []).map((item) => item.id)),
+    readAuditReport({ slug, refsDir: refsRoot }),
+    readAuditReport({ slug, refsDir: refsRoot, kind: "characters" }),
+    readAuditReport({ slug, refsDir: refsRoot, kind: "props" }),
   ]);
 
   const body: BibleWithRefs = {
     ...bible,
     refs: { characters, locations, props },
+    image_audit: imageAudit,
+    image_audit_characters: charactersAudit,
+    image_audit_props: propsAudit,
   };
 
   res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });

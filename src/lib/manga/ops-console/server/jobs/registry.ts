@@ -3,6 +3,7 @@ export type LayerId =
   | "L01b"
   | "L01c"
   | "L02"
+  | "L02_audit"
   | "L02b"
   | "L04_1"
   | "L04_9"
@@ -73,8 +74,26 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
       { name: "--only", pattern: /^[a-zA-Z0-9_,\-]+$/ },
       { name: "--kinds", pattern: /^(characters|locations|props)(,(characters|locations|props))*$/ },
       { name: "--concurrency", pattern: /^[1-9][0-9]?$/ },
+      { name: "--skip-existing", pattern: /^(true|false)$/ },
+      { name: "--character-ids", pattern: /^[a-zA-Z0-9_,]+$/ },
+      { name: "--variants", pattern: /^[a-zA-Z0-9_,]+$/ },
+      { name: "--location-ids", pattern: /^[a-zA-Z0-9_,]+$/ },
+      { name: "--location-variants", pattern: /^[a-zA-Z0-9_,]+$/ },
+      { name: "--prop-ids", pattern: /^[a-zA-Z0-9_,]+$/ },
+      { name: "--prop-variants", pattern: /^[a-zA-Z0-9_,]+$/ },
     ],
     timeoutMs: 60 * 60 * 1000,
+  },
+  L02_audit: {
+    script: "scripts/manga/layers/L02b-bible-images-audit.ts",
+    scope: "work",
+    allowedFlags: [
+      { name: "--kinds", pattern: /^(characters|locations|props)(,(characters|locations|props))*$/ },
+      { name: "--targets", pattern: /^[a-zA-Z0-9_,]+$/ },
+      { name: "--concurrency", pattern: /^[1-9][0-9]?$/ },
+      { name: "--model", pattern: /^[a-zA-Z0-9._-]+$/ },
+    ],
+    timeoutMs: 30 * 60 * 1000,
   },
   L02b: {
     script: "scripts/manga/layers/L02b-volume-plot.ts",

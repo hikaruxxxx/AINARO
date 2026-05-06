@@ -21,6 +21,7 @@ import {
   generateCharacterRefsForBible,
   generateLocationRefsForBible,
   generatePropRefsForBible,
+  type CharacterVariantV2,
 } from "../../../src/lib/manga/bible/v2-images";
 import type { BibleSnapshotV2 } from "../../../src/lib/manga/schemas-v2";
 
@@ -58,6 +59,16 @@ type Args = {
   only?: "protagonist" | "all";
   concurrency: number;
   skipExisting: boolean;
+  // 指定があれば、その variant のみ生成 (キャラ用)
+  characterVariants?: CharacterVariantV2[];
+  // 指定があれば、そのキャラ ID のみ生成
+  characterIds?: string[];
+  // location 用の絞り込み (Console regen ボタン経由で使う)
+  locationIds?: string[];
+  locationVariants?: string[]; // LocationVariantV2 だが loose に受ける
+  // prop 用の絞り込み
+  propIds?: string[];
+  propVariants?: string[];
 };
 
 function parseArgs(): Args {
@@ -89,6 +100,18 @@ function parseArgs(): Args {
     else if (key === "only") a.only = val as "protagonist" | "all";
     else if (key === "concurrency") a.concurrency = Number(val);
     else if (key === "skip-existing") a.skipExisting = val !== "false";
+    else if (key === "variants")
+      a.characterVariants = val.split(",").map((s) => s.trim() as CharacterVariantV2);
+    else if (key === "character-id" || key === "character-ids")
+      a.characterIds = val.split(",").map((s) => s.trim());
+    else if (key === "location-id" || key === "location-ids")
+      a.locationIds = val.split(",").map((s) => s.trim()).filter(Boolean);
+    else if (key === "location-variants")
+      a.locationVariants = val.split(",").map((s) => s.trim()).filter(Boolean);
+    else if (key === "prop-id" || key === "prop-ids")
+      a.propIds = val.split(",").map((s) => s.trim()).filter(Boolean);
+    else if (key === "prop-variants")
+      a.propVariants = val.split(",").map((s) => s.trim()).filter(Boolean);
   }
   if (!a.slug) throw new Error("--slug=<slug> required");
   return a as Args;
@@ -117,15 +140,20 @@ async function main() {
   const totals = { generated: 0, skipped: 0, failed: 0 };
 
   if (args.kinds.has("characters")) {
-    const chars =
+    let chars =
       args.only === "protagonist"
         ? snapshot.characters.filter((c) => c.role === "protagonist")
         : snapshot.characters;
-    console.log(`[L02] characters: ${chars.length} entries`);
+    if (args.characterIds && args.characterIds.length > 0) {
+      const idSet = new Set(args.characterIds);
+      chars = chars.filter((c) => idSet.has(c.id));
+    }
+    console.log(`[L02] characters: ${chars.length} entries${args.characterVariants ? ` variants=${args.characterVariants.join(",")}` : ""}`);
     const r = await generateCharacterRefsForBible({
       snapshot,
       refsDir,
       characters: chars,
+      variants: args.characterVariants,
       concurrency: args.concurrency,
       skipExisting: args.skipExisting,
       stylePlatePaths,
@@ -138,10 +166,22 @@ async function main() {
   }
 
   if (args.kinds.has("locations")) {
-    console.log(`[L02] locations: ${snapshot.locations.length} entries`);
+    let locs = snapshot.locations;
+    if (args.locationIds && args.locationIds.length > 0) {
+      const idSet = new Set(args.locationIds);
+      locs = locs.filter((l) => idSet.has(l.id));
+    }
+    const locVariants = args.locationVariants && args.locationVariants.length > 0
+      ? (args.locationVariants as Parameters<typeof generateLocationRefsForBible>[0]["variants"])
+      : undefined;
+    console.log(
+      `[L02] locations: ${locs.length} entries${locVariants ? ` variants=${locVariants.join(",")}` : ""}`
+    );
     const r = await generateLocationRefsForBible({
       snapshot,
       refsDir,
+      locations: locs,
+      variants: locVariants,
       concurrency: args.concurrency,
       skipExisting: args.skipExisting,
       stylePlatePaths,
@@ -154,10 +194,22 @@ async function main() {
   }
 
   if (args.kinds.has("props")) {
-    console.log(`[L02] props: ${snapshot.props.length} entries`);
+    let props = snapshot.props;
+    if (args.propIds && args.propIds.length > 0) {
+      const idSet = new Set(args.propIds);
+      props = props.filter((p) => idSet.has(p.id));
+    }
+    const propVariants = args.propVariants && args.propVariants.length > 0
+      ? (args.propVariants as Parameters<typeof generatePropRefsForBible>[0]["variants"])
+      : undefined;
+    console.log(
+      `[L02] props: ${props.length} entries${propVariants ? ` variants=${propVariants.join(",")}` : ""}`
+    );
     const r = await generatePropRefsForBible({
       snapshot,
       refsDir,
+      props,
+      variants: propVariants,
       concurrency: args.concurrency,
       skipExisting: args.skipExisting,
       stylePlatePaths,

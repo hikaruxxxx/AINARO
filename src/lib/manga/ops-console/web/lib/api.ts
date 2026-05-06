@@ -448,6 +448,38 @@ export type BibleAuditLocation = {
   error?: string;
 };
 
+export type BibleAuditCharacter = {
+  character_id: string;
+  character_name: string;
+  variants: BibleAuditVariant[];
+  cross_variant_notes: string;
+  audited_at: string;
+  error?: string;
+};
+
+export type BibleAuditProp = {
+  prop_id: string;
+  prop_name: string;
+  variants: BibleAuditVariant[];
+  cross_variant_notes: string;
+  audited_at: string;
+  error?: string;
+};
+
+type BibleAuditSummary<TPriorityIdKey extends string> = {
+  total_images: number;
+  by_severity: Record<BibleAuditSeverity, number>;
+  regen_priority: Array<
+    {
+      [K in TPriorityIdKey]: string;
+    } & {
+      variant: string;
+      severity: BibleAuditSeverity;
+      reason: string;
+    }
+  >;
+};
+
 export type BibleImagesAuditReport = {
   schema_version: 1;
   slug: string;
@@ -455,17 +487,27 @@ export type BibleImagesAuditReport = {
   audited_by: "L02b-bible-images-audit";
   model: string;
   locations: BibleAuditLocation[];
-  summary: {
-    total_locations: number;
-    total_images: number;
-    by_severity: Record<BibleAuditSeverity, number>;
-    regen_priority: Array<{
-      location_id: string;
-      variant: string;
-      severity: BibleAuditSeverity;
-      reason: string;
-    }>;
-  };
+  summary: BibleAuditSummary<"location_id"> & { total_locations: number };
+};
+
+export type BibleCharactersAuditReport = {
+  schema_version: 1;
+  slug: string;
+  audited_at: string;
+  audited_by: "L02b-bible-images-audit";
+  model: string;
+  characters: BibleAuditCharacter[];
+  summary: BibleAuditSummary<"character_id"> & { total_characters: number };
+};
+
+export type BiblePropsAuditReport = {
+  schema_version: 1;
+  slug: string;
+  audited_at: string;
+  audited_by: "L02b-bible-images-audit";
+  model: string;
+  props: BibleAuditProp[];
+  summary: BibleAuditSummary<"prop_id"> & { total_props: number };
 };
 
 export type BibleAssetView = {
@@ -489,6 +531,8 @@ export type BibleAssetView = {
     props: BibleCharacterRef[];
   };
   image_audit?: BibleImagesAuditReport | null;
+  image_audit_characters?: BibleCharactersAuditReport | null;
+  image_audit_props?: BiblePropsAuditReport | null;
 };
 
 export function apiGetBible(slug: string): Promise<BibleAssetView> {

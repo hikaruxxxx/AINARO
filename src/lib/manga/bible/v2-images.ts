@@ -43,6 +43,11 @@ export type CharacterVariantV2 =
   | "expr_surprise"
   | "expr_anger"
   | "expr_fatigue" // 旧互換、DEFAULT には含めない
+  // 明るい/柔らかい系 拡張表情 (DEFAULT には含めず、必要に応じて --variants で追加生成)
+  | "expr_grin"
+  | "expr_laugh"
+  | "expr_gentle"
+  | "expr_relaxed"
   // LN コミカライズ特有のディテール参照
   | "eye_closeup"
   | "hair_detail";
@@ -147,6 +152,15 @@ function buildCharacterRefPrompt(args: {
         return "Framing: tight head-and-shoulders, front view. Expression: ANGER, brows pulled down and together, narrowed eyes, jaw set, mouth firm or slightly open with tension. NO background.";
       case "expr_fatigue":
         return "Framing: tight head-and-shoulders, front view. Expression: tired/fatigue, half-closed heavy eyes, slight bags under eyes, mouth relaxed. NO background.";
+      // 明るい/柔らかい系 拡張表情
+      case "expr_grin":
+        return "Framing: tight head-and-shoulders, front view. Expression: confident playful GRIN, one corner of the mouth raised slightly higher than the other, eyes narrowed with mischief but not hostile, brows relaxed, exuding self-assured warmth. NO background.";
+      case "expr_laugh":
+        return "Framing: tight head-and-shoulders, front view. Expression: open natural LAUGH, eyes nearly closed and curved into upward crescents (笑い目), mouth wide open showing the natural shape of teeth, cheeks lifted, head slightly tilted back. Carefree and bright. NO background.";
+      case "expr_gentle":
+        return "Framing: tight head-and-shoulders, front view. Expression: GENTLE softened gaze, eyes calm and slightly half-lidded with a kind warmth, mouth corners turned up only a hair (almost imperceptible smile), brows low and relaxed. The look someone gives a person they care about. NO background.";
+      case "expr_relaxed":
+        return "Framing: tight head-and-shoulders, front view. Expression: RELAXED off-guard expression, eyes open but unfocused / soft, mouth slightly parted in an unguarded way, no tension in brows or jaw, the natural face one wears when no one is watching. NO background.";
       // LN コミカライズ特有のディテール参照
       case "eye_closeup":
         return "Framing: EXTREME close-up of EYES ONLY (forehead to upper cheek, both eyes visible). Show iris, pupil, eyelashes drawn one by one, and 2-3 distinct circular/star-shaped catchlight highlights per eye in the light novel comicalization convention. Neutral expression. NO background, plain off-white plate.";
