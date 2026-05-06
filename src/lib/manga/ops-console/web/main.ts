@@ -6,6 +6,7 @@ import { mountSidebar } from "./sidebar";
 import { mountThemeToggle } from "./theme-toggle";
 import { mountBibleView } from "./views/bible";
 import { mountIndexView } from "./views/index";
+import { mountJobsHubView } from "./views/jobs-hub";
 import { mountKdpMetadataView } from "./views/kdp-metadata";
 import { mountLayersView } from "./views/layers";
 import { mountNameGateView } from "./views/name-gate";
@@ -19,6 +20,9 @@ import { mountWorksView } from "./views/works";
 type Unmount = () => void;
 
 function parseRoute(): { slug: string | null; episode: number | null; view: ViewName } {
+  if (window.location.pathname === "/jobs") {
+    return { slug: null, episode: null, view: "jobs-hub" };
+  }
   const m = window.location.pathname.match(/^\/works\/([^/]+)\/episodes\/ep(\d+)\/?$/);
   const hashView = window.location.hash.replace(/^#/, "");
   // / (or 不明 path) の場合は scope なし → index view を初期表示。
@@ -45,6 +49,13 @@ function syncRoute(slug: string, episode: number, view: ViewName): void {
     history.pushState(null, "", next);
     return;
   }
+  if (view === "jobs-hub") {
+    const next = "/jobs";
+    const current = `${window.location.pathname}${window.location.hash}`;
+    if (current === next) return;
+    history.pushState(null, "", next);
+    return;
+  }
   if (!slug || !episode) return;
   const next = `${routePath(slug, episode)}#${view}`;
   const current = `${window.location.pathname}${window.location.hash}`;
@@ -66,6 +77,7 @@ function mountCurrentView(main: HTMLElement): () => void {
     if (unmount) unmount();
     prevKey = key;
     if (state.currentView === "index") unmount = mountIndexView(main);
+    else if (state.currentView === "jobs-hub") unmount = mountJobsHubView(main);
     else if (state.currentView === "pipeline") unmount = mountPipelineView(main);
     else if (state.currentView === "storyboard") unmount = mountStoryboardView(main);
     else if (state.currentView === "quality") unmount = mountQualityView(main);
@@ -108,7 +120,7 @@ async function start(): Promise<void> {
   // 各 view は currentSlug が空の間は呼ばれない (mountCurrentView は index へ)。
   const currentSlug = route.slug ?? boot.default_slug ?? "";
   const currentEpisode = route.episode ?? boot.default_episode ?? 0;
-  const currentView: ViewName = route.slug ? route.view : "index";
+  const currentView: ViewName = route.view === "jobs-hub" ? "jobs-hub" : route.slug ? route.view : "index";
 
   store.update({
     works: boot.works,

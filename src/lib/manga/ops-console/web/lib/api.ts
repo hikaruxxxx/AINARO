@@ -280,12 +280,14 @@ export function apiGetJobs(filter?: {
   episode?: number;
   volume?: number;
   layer?: LayerId;
+  all?: boolean;
 }): Promise<{ jobs: JobSummary[] }> {
   const params = new URLSearchParams();
   if (filter?.slug) params.set("slug", filter.slug);
   if (filter?.episode !== undefined) params.set("episode", String(filter.episode));
   if (filter?.volume !== undefined) params.set("volume", String(filter.volume));
   if (filter?.layer) params.set("layer", filter.layer);
+  if (filter?.all) params.set("all", "true");
   const qs = params.toString();
   return getJson<{ jobs: JobSummary[] }>(`/api/jobs${qs ? `?${qs}` : ""}`);
 }

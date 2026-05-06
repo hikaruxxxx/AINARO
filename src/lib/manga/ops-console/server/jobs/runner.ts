@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { REPO_ROOT } from "../../../../../../scripts/manga/layers/_paths";
 import { LAYER_REGISTRY, type LayerId } from "./registry";
+import { loadRecentJobs, persistJob, type StoredJob } from "./storage";
 import { validateJobRequest, type JobRequest } from "./validate";
 
 export type JobEvent = {
@@ -24,6 +25,8 @@ export type JobRecord = {
   finishedAt?: string;
   exitCode?: number;
   events: JobEvent[];
+  revision_id?: string;
+  panel_ids?: string[];
   subscribers: Set<(event: JobEvent) => void>;
   abortFn: () => void;
   aborted: boolean;
@@ -125,6 +128,7 @@ export class JobRegistry {
       record.finishedAt = new Date().toISOString();
       this.runningByKey.delete(validated.key);
       push("system", `spawn failed: ${String(e)}`);
+      this.persistFinal(record);
       return record;
     }
 
@@ -168,6 +172,7 @@ export class JobRegistry {
       record.state = abortRequested ? "aborted" : code === 0 ? "succeeded" : "failed";
       this.runningByKey.delete(validated.key);
       push("system", `done: ${record.state}${code === null ? "" : ` exit=${code}`}`);
+      this.persistFinal(record);
       this.scheduleExpire(record.id);
     });
 
@@ -188,6 +193,14 @@ export class JobRegistry {
     });
   }
 
+  async loadPersisted(days = 7): Promise<void> {
+    const stored = await loadRecentJobs(days);
+    for (const job of stored) {
+      if (this.jobs.has(job.id)) continue;
+      this.jobs.set(job.id, this.fromStored(job));
+    }
+  }
+
   abort(id: string): void {
     const job = this.jobs.get(id);
     if (!job) throw new JobError("job not found", 404);
@@ -200,6 +213,47 @@ export class JobRegistry {
     for (const line of text.split(/\r?\n/)) {
       if (line.length > 0) this.pushEvent(record, channel, line);
     }
+  }
+
+  private persistFinal(record: JobRecord): void {
+    if (record.state === "running") return;
+    const job: StoredJob = {
+      id: record.id,
+      key: record.key,
+      layer: record.layer,
+      scope: record.scope,
+      state: record.state,
+      startedAt: record.startedAt,
+      finishedAt: record.finishedAt,
+      exitCode: record.exitCode,
+      events: record.events.slice(-MAX_EVENTS),
+      revision_id: record.revision_id,
+      panel_ids: record.panel_ids,
+    };
+    void persistJob(job).catch((error) => {
+      console.warn(`[ops-console] failed to persist job ${record.id}:`, error);
+    });
+  }
+
+  private fromStored(job: StoredJob): JobRecord {
+    return {
+      id: job.id,
+      key: job.key,
+      layer: job.layer as LayerId,
+      scope: job.scope,
+      state: job.state,
+      startedAt: job.startedAt,
+      finishedAt: job.finishedAt,
+      exitCode: job.exitCode,
+      events: job.events.slice(-MAX_EVENTS),
+      revision_id: job.revision_id,
+      panel_ids: job.panel_ids,
+      subscribers: new Set(),
+      abortFn: () => undefined,
+      aborted: job.state === "aborted",
+      killTimer: null,
+      timeoutTimer: null,
+    };
   }
 
   private pushEvent(record: JobRecord, channel: JobEvent["channel"], line: string): void {
@@ -261,3 +315,6 @@ function windowlessTimeout(fn: () => void, ms: number): NodeJS.Timeout {
 }
 
 export const jobRegistry = new JobRegistry();
+void jobRegistry.loadPersisted(7).catch((error) => {
+  console.warn("[ops-console] failed to load stored jobs:", error);
+});

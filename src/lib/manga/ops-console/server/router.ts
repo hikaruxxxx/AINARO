@@ -151,19 +151,19 @@ export async function handleApi(
     return handleBootstrap(defaults, res);
   }
 
-  // jobs API は default scope (slug+episode) が必須。一覧モードでは scope を選ぶまで使えない。
+  // jobs API の read は横断可。write/abort は default scope (slug+episode) が必須。
   if (p === "/api/jobs" || p.match(/^\/api\/jobs\/[^/]+\/(stream|abort)$/)) {
-    if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-      return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
-    }
-    const scopedDefaults: ScopedRouterDefaults = {
-      defaultSlug: defaults.defaultSlug,
-      defaultEpisode: defaults.defaultEpisode,
-      allowCrossScopeRead: defaults.allowCrossScopeRead,
-    };
     if (p === "/api/jobs") {
-      if (req.method === "GET") return handleJobsList(req, res, url, scopedDefaults);
+      if (req.method === "GET") return handleJobsList(req, res, url, defaults);
       if (req.method === "POST") {
+        if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+          return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
+        }
+        const scopedDefaults: ScopedRouterDefaults = {
+          defaultSlug: defaults.defaultSlug,
+          defaultEpisode: defaults.defaultEpisode,
+          allowCrossScopeRead: defaults.allowCrossScopeRead,
+        };
         let body: any;
         try {
           body = await readJsonBody(req);
@@ -179,9 +179,25 @@ export async function handleApi(
       const jobId = m[1];
       const action = m[2];
       if (action === "stream" && req.method === "GET") {
+        if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+          return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
+        }
+        const scopedDefaults: ScopedRouterDefaults = {
+          defaultSlug: defaults.defaultSlug,
+          defaultEpisode: defaults.defaultEpisode,
+          allowCrossScopeRead: defaults.allowCrossScopeRead,
+        };
         return handleJobsStream(req, res, jobId, scopedDefaults);
       }
       if (action === "abort" && req.method === "POST") {
+        if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+          return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
+        }
+        const scopedDefaults: ScopedRouterDefaults = {
+          defaultSlug: defaults.defaultSlug,
+          defaultEpisode: defaults.defaultEpisode,
+          allowCrossScopeRead: defaults.allowCrossScopeRead,
+        };
         return handleJobsAbort(req, res, jobId, scopedDefaults);
       }
       return send(res, 405, { error: "このメソッドは許可されていません" });

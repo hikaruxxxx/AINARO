@@ -1,8 +1,9 @@
 import type { ViewName } from "./lib/store";
 
-export type MenuGroup = "judge" | "view" | "work" | "exec";
+export type MenuGroup = "global" | "judge" | "view" | "work" | "exec";
 
 export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = [
+  { view: "jobs-hub", label: "全作品ジョブ", group: "global" },
   { view: "pipeline", label: "パイプライン進捗", group: "judge" },
   { view: "name-gate", label: "ネーム判定", group: "judge" },
   { view: "revision", label: "修正・採用", group: "judge" },
@@ -16,6 +17,7 @@ export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = 
 ];
 
 export const GROUP_LABELS: Record<MenuGroup, string> = {
+  global: "全体",
   judge: "編集・判断",
   view: "閲覧",
   work: "作品設定",

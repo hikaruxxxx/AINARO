@@ -19,7 +19,7 @@ function episodeLabel(n: number): string {
 }
 
 function groupedMenuHtml(currentView: ViewName): string {
-  const groups: MenuGroup[] = ["judge", "view", "work", "exec"];
+  const groups: MenuGroup[] = ["global", "judge", "view", "work", "exec"];
   return groups
     .map((group) => {
       const items = MENU.filter((item) => item.group === group);
@@ -46,7 +46,11 @@ function rerender(root: HTMLElement, state: AppState): void {
     root.innerHTML = `
       <div class="nc-scope-panel">
         <p class="nc-scope-note">作品を選択してください。</p>
-        <button type="button" class="sidebar__menu-item${state.currentView === "index" ? " is-active" : ""}" data-view="index">作品一覧</button>
+        <div class="sidebar__group">
+          <h3 class="sidebar__group-title">全体</h3>
+          <button type="button" class="sidebar__menu-item${state.currentView === "index" ? " is-active" : ""}" data-view="index">作品一覧</button>
+          <button type="button" class="sidebar__menu-item${state.currentView === "jobs-hub" ? " is-active" : ""}" data-view="jobs-hub">全作品ジョブ</button>
+        </div>
       </div>
     `;
     root.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {

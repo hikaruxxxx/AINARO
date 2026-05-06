@@ -1,9 +1,10 @@
 import type http from "node:http";
 import { isValidEpisode, isValidSlug } from "../lib/path-guards";
-import type { ScopedRouterDefaults } from "../router";
+import type { RouterDefaults, ScopedRouterDefaults } from "../router";
 import { streamJob } from "../jobs/sse";
 import { isLayerId, type LayerId } from "../jobs/registry";
 import { JobError, jobRegistry, type JobRecord } from "../jobs/runner";
+import { loadRecentJobs, type StoredJob } from "../jobs/storage";
 import { validateJobRequest, type JobRequest } from "../jobs/validate";
 
 function send(res: http.ServerResponse, status: number, body: unknown): void {
@@ -11,7 +12,7 @@ function send(res: http.ServerResponse, status: number, body: unknown): void {
   res.end(JSON.stringify(body));
 }
 
-function summarize(job: JobRecord, eventLimit = 100): unknown {
+function summarize(job: JobRecord | StoredJob, eventLimit = 100): unknown {
   return {
     id: job.id,
     key: job.key,
@@ -23,6 +24,23 @@ function summarize(job: JobRecord, eventLimit = 100): unknown {
     exitCode: job.exitCode,
     events: job.events.slice(-eventLimit),
   };
+}
+
+function mergeJobs(jobs: Array<JobRecord | StoredJob>): Array<JobRecord | StoredJob> {
+  const byId = new Map<string, JobRecord | StoredJob>();
+  for (const job of jobs) byId.set(job.id, job);
+  return Array.from(byId.values()).sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt));
+}
+
+function matchesFilter(
+  job: JobRecord | StoredJob,
+  filter?: { slug?: string; episode?: number; volume?: number; layer?: LayerId }
+): boolean {
+  if (filter?.slug && job.scope.slug !== filter.slug) return false;
+  if (filter?.episode !== undefined && job.scope.episode !== filter.episode) return false;
+  if (filter?.volume !== undefined && job.scope.volume !== filter.volume) return false;
+  if (filter?.layer !== undefined && job.layer !== filter.layer) return false;
+  return true;
 }
 
 function statusForError(e: unknown): number {
@@ -38,9 +56,10 @@ export async function handleJobsList(
   req: http.IncomingMessage,
   res: http.ServerResponse,
   url: URL,
-  defaults: ScopedRouterDefaults
+  defaults: RouterDefaults
 ): Promise<void> {
   void req;
+  const all = url.searchParams.get("all") === "true";
   const slug = url.searchParams.get("slug") ?? undefined;
   const episodeRaw = url.searchParams.get("episode");
   const volumeRaw = url.searchParams.get("volume");
@@ -56,10 +75,12 @@ export async function handleJobsList(
   }
   const layer = layerRaw === null ? undefined : layerRaw;
   if (layer !== undefined && !isLayerId(layer)) return send(res, 400, { error: "invalid layer" });
-  const filterSlug = slug && slug === defaults.defaultSlug ? slug : defaults.defaultSlug;
-  const jobs = jobRegistry
-    .list({ slug: filterSlug, episode, volume, layer: layer as LayerId | undefined })
-    .map((job) => summarize(job));
+  const layerFilter = layer as LayerId | undefined;
+  const stored = await loadRecentJobs(7);
+  const filterSlug = all ? slug : slug ?? defaults.defaultSlug ?? undefined;
+  const filter = { slug: filterSlug, episode, volume, layer: layerFilter };
+  const memory = jobRegistry.list(all ? { slug, episode, volume, layer: layerFilter } : filter);
+  const jobs = mergeJobs([...memory, ...stored.filter((job) => matchesFilter(job, filter))]).map((job) => summarize(job));
   return send(res, 200, { jobs });
 }
 
@@ -118,8 +139,14 @@ export async function handleJobsAbort(
   defaults: ScopedRouterDefaults
 ): Promise<void> {
   void req;
-  void defaults;
   try {
+    const current = jobRegistry.get(jobId);
+    if (current && current.scope.slug !== defaults.defaultSlug) {
+      return send(res, 403, { error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" });
+    }
+    if (current?.scope.episode !== undefined && current.scope.episode !== defaults.defaultEpisode) {
+      return send(res, 403, { error: "起動 scope と異なる episode です" });
+    }
     jobRegistry.abort(jobId);
     const job = jobRegistry.get(jobId);
     return send(res, 200, { ok: true, state: job?.state ?? "aborted" });
