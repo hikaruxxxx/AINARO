@@ -246,7 +246,12 @@ export type ImprovementsResponse = {
   }>;
   /**
    * Phase Y WY-11: Engagement Audit の rationale から抽出した EC suggestion。
-   * LLM が「EC-XXXX 型で再構成」と書いた場合の補助。AI 編集 view へ preset 送りで投げられる。
+   * LLM が「EC-XXXX 型で再構成」と書いた場合の補助。
+   *
+   * Phase Y WY-14: 各 EC の trigger.flag から「専用 layer」を判定する。
+   * opening_hook_no_focus → L04_1、cliffhanger_role_mismatch → L04_9 など。
+   * UI は recommended_layer があれば「L04_1 で適用」を primary に、AI 編集 (L99) を fallback にする。
+   * これにより EC-0006 のような「Opening Hook 編集」を L99 (Codex 自由編集) に流して 16分沈黙する事故を防ぐ。
    */
   engagement_ec_suggestions: Array<{
     card_id: string;
@@ -257,6 +262,13 @@ export type ImprovementsResponse = {
     source_text: string;
     /** EC 言及が page-specific なら対応 page_no を入れる */
     applies_to_pages: number[];
+    /** 専用 layer がある場合の推奨実行先。null なら L99 (AI 編集) fallback。 */
+    recommended_layer?: {
+      layer: string;
+      flags: Record<string, string | true>;
+      label: string;
+      note: string;
+    };
   }>;
   /** 提案生成のための起動コマンド (UI から jobs に投入する form ヒント) */
   next_actions: Array<{
@@ -452,6 +464,46 @@ export async function handleImprovementsGet(
       });
     }
 
+    // volume_position 推定 (deriveRecommendedLayer 内の L04_9 マッピングで参照するため、ここで先に計算)
+    const volumePosition = await estimateVolumePosition(slug, episode);
+
+    // Phase Y WY-14: EC の trigger.flag から専用 layer を判定する mapping。
+    // 「EC-0006 を AI 編集に流す」のような誤誘導を避け、適切な layer (L04_1/L04_9 等) に dispatch する。
+    function deriveRecommendedLayer(card: {
+      card_id: string;
+      trigger?: { flag?: string };
+      scope: string;
+    }): {
+      layer: string;
+      flags: Record<string, string | true>;
+      label: string;
+      note: string;
+    } | undefined {
+      const flag = card.trigger?.flag;
+      if (flag === "opening_hook_no_focus") {
+        return {
+          layer: "L04_1",
+          flags: { "--max-proposals": "1", "--apply-recommendation": true },
+          label: "L04_1 で Opening Hook を適用 (推奨)",
+          note: "L04_1 は selection_guide で tone/genre から推奨パターンを自動選択。EC が指す具体パターン (P1_daily_anomaly 等) と完全一致しない場合あり",
+        };
+      }
+      if (flag === "cliffhanger_role_mismatch") {
+        return {
+          layer: "L04_9",
+          flags: {
+            "--max-proposals": "1",
+            "--apply-recommendation": true,
+            "--volume-position": volumePosition,
+          },
+          label: "L04_9 で Cliffhanger を適用 (推奨)",
+          note: `L04_9 は volume_position=${volumePosition} に応じてパターンを自動選択`,
+        };
+      }
+      // 上記以外 (panel-level EC, narration_dominant, volume scope EC 等) は L99 fallback
+      return undefined;
+    }
+
     // Phase Y WY-11: engagement_audit から EC-NNNN を抽出して suggestion を組み立てる。
     // - rationale_summary を全体スコープで scan (applies_to_pages 不明 = 空)
     // - per_page_scores[].comment に EC が言及されていれば applies_to_pages にその page を追加
@@ -477,6 +529,7 @@ export async function handleImprovementsGet(
             scope: card.scope,
             source_text: text.length > 200 ? `${text.slice(0, 200)}…` : text,
             applies_to_pages: pageNo !== undefined ? [pageNo] : [],
+            recommended_layer: deriveRecommendedLayer(card),
           });
         }
       }
@@ -493,9 +546,7 @@ export async function handleImprovementsGet(
       ecSuggestions.values(),
     );
 
-    // volume_position 推定: volumes/v01/plot.json (volume plot) から episodes 数を取得
-    // 巻末判定: 当該 episode が plot.episodes の最後 (= 巻最終話)
-    const volumePosition = await estimateVolumePosition(slug, episode);
+    // volumePosition は EC mapping ブロックで既に計算済 (deriveRecommendedLayer が参照するため前倒し)
 
     // next_actions: UI から起動可能なジョブ一覧 (form ヒント)
     const nextActions: ImprovementsResponse["next_actions"] = [

@@ -37,7 +37,14 @@ function parseArgs(argv: string[]): Args {
 
 function run(cmd: string, argv: string[]): Promise<number> {
   return new Promise((resolve) => {
-    const child = spawn(cmd, argv, { stdio: "inherit", cwd: REPO_ROOT });
+    // stdin を 'ignore' (= /dev/null) にしないと、Codex CLI が "Reading additional input from stdin"
+    // で永久に待機し、ジョブが何分も沈黙する (実測: 16分間 storyboard 編集ゼロ)。
+    // stdout/stderr は親 process (Console から spawn された L99) に inherit すれば、
+    // 親が file fd で受け取った log にそのまま流れる。
+    const child = spawn(cmd, argv, {
+      stdio: ["ignore", "inherit", "inherit"],
+      cwd: REPO_ROOT,
+    });
     child.on("exit", (code) => resolve(code ?? 1));
     child.on("error", (error) => {
       console.error(`[L99] ${cmd} failed:`, error);

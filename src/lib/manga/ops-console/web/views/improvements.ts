@@ -521,15 +521,25 @@ function renderEngagementEcSuggestions(data: ImprovementsResponse): string {
   return `
     <div class="imp-section">
       <h3><span class="imp-section-sub-num">⑥</span>EC (編集判断カード) 適用候補<span class="imp-section-techname">自動抽出</span></h3>
-      <p class="imp-section-sub">⑤ の LLM が「これを直そう」と言及したカード。クリックで AI 編集に流せる (instruction + 対象 page を Codex に prefill)</p>
-      ${data.engagement_ec_suggestions.map((s) => `
-        <div class="imp-action-row">
-          <button type="button" class="nc-button nc-button--primary nc-button--sm" data-action="apply-ec" data-card-id="${escapeHtml(s.card_id)}">AI 編集に流す</button>
-          <strong>${escapeHtml(s.card_id)}</strong> ${escapeHtml(s.title)}
-          ${s.applies_to_pages.length > 0 ? `<span class="imp-info">(対象 page: ${s.applies_to_pages.join(", ")})</span>` : `<span class="imp-info">(全体)</span>`}
-          <span class="imp-action-desc">「${escapeHtml(s.source_text)}」</span>
-        </div>
-      `).join("")}
+      <p class="imp-section-sub">⑤ の LLM が「これを直そう」と言及したカード。専用 layer がある EC は <strong>L04_1 / L04_9 を直接実行 (推奨)</strong>、汎用編集は AI 編集 (Codex) フォールバック</p>
+      ${data.engagement_ec_suggestions.map((s) => {
+        const rec = s.recommended_layer;
+        const primaryButton = rec
+          ? `<button type="button" class="nc-button nc-button--primary nc-button--sm" data-action="apply-ec-layer" data-card-id="${escapeHtml(s.card_id)}" title="${escapeHtml(rec.note)}">${escapeHtml(rec.label)}</button>`
+          : `<button type="button" class="nc-button nc-button--primary nc-button--sm" data-action="apply-ec" data-card-id="${escapeHtml(s.card_id)}">AI 編集に流す (Codex)</button>`;
+        const fallbackButton = rec
+          ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm" data-action="apply-ec" data-card-id="${escapeHtml(s.card_id)}" title="Codex CLI で自由編集 (時間がかかる場合あり)">AI 編集 (副)</button>`
+          : "";
+        return `
+          <div class="imp-action-row">
+            ${primaryButton}
+            ${fallbackButton}
+            <strong>${escapeHtml(s.card_id)}</strong> ${escapeHtml(s.title)}
+            ${s.applies_to_pages.length > 0 ? `<span class="imp-info">(対象 page: ${s.applies_to_pages.join(", ")})</span>` : `<span class="imp-info">(全体)</span>`}
+            <span class="imp-action-desc">「${escapeHtml(s.source_text)}」</span>
+          </div>
+        `;
+      }).join("")}
     </div>
   `;
 }
@@ -923,6 +933,16 @@ export function mountImprovementsView(container: HTMLElement): () => void {
         if (state.chainRunning) return;
         state.chainSteps = null;
         render(container, state);
+        return;
+      }
+      if (action === "apply-ec-layer") {
+        // Phase Y WY-14: 専用 layer (L04_1/L04_9 等) で適用 — 安定で高速
+        const cardId = btn.dataset.cardId ?? "";
+        if (!cardId || !state.data) return;
+        const suggestion = state.data.engagement_ec_suggestions.find((s) => s.card_id === cardId);
+        if (!suggestion || !suggestion.recommended_layer) return;
+        const rec = suggestion.recommended_layer;
+        void startJob(state, container, `${cardId} → ${rec.label}`, rec.layer, rec.flags);
         return;
       }
       if (action === "apply-ec") {

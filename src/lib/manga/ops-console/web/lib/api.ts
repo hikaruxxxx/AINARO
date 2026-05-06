@@ -765,6 +765,13 @@ export type ImprovementsResponse = {
     scope: string;
     source_text: string;
     applies_to_pages: number[];
+    /** Phase Y WY-14: 専用 layer (L04_1/L04_9 等) の推奨。なければ L99 fallback。 */
+    recommended_layer?: {
+      layer: string;
+      flags: Record<string, string | true>;
+      label: string;
+      note: string;
+    };
   }>;
   next_actions: Array<{
     label: string;

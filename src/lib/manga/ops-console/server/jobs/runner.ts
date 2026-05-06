@@ -198,24 +198,35 @@ export class JobRegistry {
       }).catch((e) => console.warn(`[ops-console] persistRunning failed for ${id}:`, e));
     }
 
-    // abort: detached child でも process.kill(pid) で動く
+    // abort: detached spawn だと child は新しい process group のリーダー (pgid = pid)。
+    // process.kill(-pid, sig) で **process group 全体** に signal を送る (codex 孫プロセスも含む)。
+    // 旧実装は child.kill() で immediate child のみだったため、孫の codex CLI が orphan で残る事があった。
     record.abortFn = () => {
       if (record.state !== "running" || record.aborted) return;
       record.aborted = true;
       abortRequested = true;
-      push("system", "abort requested");
+      push("system", "abort requested (kill process group)");
       try {
-        if (child.pid) process.kill(child.pid, "SIGTERM");
+        if (child.pid) process.kill(-child.pid, "SIGTERM");
       } catch (e) {
-        push("system", `kill SIGTERM failed: ${String(e)}`);
+        push("system", `kill -pgid SIGTERM failed: ${String(e)}; trying single pid`);
+        try {
+          if (child.pid) process.kill(child.pid, "SIGTERM");
+        } catch (e2) {
+          push("system", `kill SIGTERM failed: ${String(e2)}`);
+        }
       }
       record.killTimer = windowlessTimeout(() => {
         if (record.state === "running" && child.pid) {
-          push("system", "SIGTERM timeout; sending SIGKILL");
+          push("system", "SIGTERM timeout; sending SIGKILL to process group");
           try {
-            process.kill(child.pid, "SIGKILL");
+            process.kill(-child.pid, "SIGKILL");
           } catch {
-            /* already dead */
+            try {
+              process.kill(child.pid, "SIGKILL");
+            } catch {
+              /* already dead */
+            }
           }
         }
       }, 5000);
@@ -227,18 +238,26 @@ export class JobRegistry {
       if (record.state !== "running") return;
       record.aborted = true;
       abortRequested = true;
-      push("system", "timeout");
+      push("system", "timeout (kill process group)");
       try {
-        if (child.pid) process.kill(child.pid, "SIGTERM");
+        if (child.pid) process.kill(-child.pid, "SIGTERM");
       } catch {
-        /* already dead */
+        try {
+          if (child.pid) process.kill(child.pid, "SIGTERM");
+        } catch {
+          /* already dead */
+        }
       }
       record.killTimer = windowlessTimeout(() => {
         if (record.state === "running" && child.pid) {
           try {
-            process.kill(child.pid, "SIGKILL");
+            process.kill(-child.pid, "SIGKILL");
           } catch {
-            /* already dead */
+            try {
+              process.kill(child.pid, "SIGKILL");
+            } catch {
+              /* already dead */
+            }
           }
         }
       }, 5000);
@@ -383,22 +402,30 @@ export class JobRegistry {
       logOffset: 0,
     };
 
-    // abort: stored PID に対して直接 SIGTERM/SIGKILL
+    // abort: stored PID に対して process group kill (-pid) → 孫プロセス含めて kill
     record.abortFn = () => {
       if (record.state !== "running" || record.aborted) return;
       record.aborted = true;
-      this.pushEvent(record, "system", "abort requested (re-attached job)");
+      this.pushEvent(record, "system", "abort requested (re-attached job, kill process group)");
       try {
-        process.kill(meta.pid, "SIGTERM");
+        process.kill(-meta.pid, "SIGTERM");
       } catch (e) {
-        this.pushEvent(record, "system", `kill failed (process gone): ${String(e)}`);
+        try {
+          process.kill(meta.pid, "SIGTERM");
+        } catch (e2) {
+          this.pushEvent(record, "system", `kill failed (process gone): ${String(e2)}`);
+        }
       }
       record.killTimer = windowlessTimeout(() => {
         if (record.state === "running") {
           try {
-            process.kill(meta.pid, "SIGKILL");
+            process.kill(-meta.pid, "SIGKILL");
           } catch {
-            /* already dead */
+            try {
+              process.kill(meta.pid, "SIGKILL");
+            } catch {
+              /* already dead */
+            }
           }
         }
       }, 5000);
