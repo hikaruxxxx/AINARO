@@ -58,6 +58,7 @@ import {
   handleTrademarkCheckPost,
 } from "./handlers/trademark";
 import { handleImprovementsGet } from "./handlers/improvements";
+import { handleRestartPost } from "./handlers/restart";
 import { getScope, setScope } from "./scope-store";
 
 export type RouterDefaults = {
@@ -178,6 +179,12 @@ export async function handleApi(
   if (p === "/api/bootstrap") {
     if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
     return handleBootstrap(defaults, res);
+  }
+
+  // Console 自身の再起動 (UI ボタンから)。詳細は handlers/restart.ts 参照。
+  if (p === "/api/restart") {
+    if (req.method !== "POST") return send(res, 405, { error: "このメソッドは許可されていません" });
+    return handleRestartPost(res);
   }
 
   // scope 切替 (UI から POST)。GET は現在 scope を返すだけ。

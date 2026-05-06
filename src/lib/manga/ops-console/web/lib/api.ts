@@ -127,6 +127,10 @@ export function apiPostScope(scope: ConsoleScope): Promise<ConsoleScope> {
   return postJson<ConsoleScope>("/api/scope", scope);
 }
 
+export function apiPostRestart(): Promise<{ ok: true; restarting: true; eta_seconds: number }> {
+  return postJson("/api/restart", {});
+}
+
 export function apiGetWorks(): Promise<{ works: WorkInfo[] }> {
   return getJson<{ works: WorkInfo[] }>("/api/works");
 }

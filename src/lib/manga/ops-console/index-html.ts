@@ -67,6 +67,7 @@ export function renderOpsConsoleShellHtml(): string {
     <nav class="nc-breadcrumb nc-header__breadcrumb-slot" id="top-breadcrumb" aria-label="breadcrumb"></nav>
     <div class="nc-header__actions">
       <span id="nc-scope-switcher"></span>
+      <span id="nc-restart-button"></span>
       <span class="nc-header__env" id="nc-env-badge"></span>
       <span id="nc-theme-toggle"></span>
     </div>
