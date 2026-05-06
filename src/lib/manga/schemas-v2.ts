@@ -439,6 +439,11 @@ export type PagePlanPanel = {
   rect: { x: number; y: number; w: number; h: number };
   reading_order: number;
   importance: 1 | 2 | 3 | 4 | 5;
+  /** Phase 1 v3: 視覚的傾き（コマ枠の中心回転、単位:度、符号付き、外接rectは不変） */
+  tilt_deg?: number;
+  /** Phase B v3: 実際のコマ枠 polygon。頂点列 [[x,y],...] (時計回り)。未指定なら rect から派生。
+   *  polygon 指定時は tilt_deg は無視される。凹多角形可（隣接切り欠きで発生）*/
+  polygon?: [number, number][];
   /** L6 で注入 */
   continuity_group_ids?: string[];
 };

@@ -11,7 +11,7 @@
           "panel_id": "p01",
           "panel_no": 1,
           "reading_order": 1,
-          "shot_type": "establishing",
+          "shot_type": "wide",
           "camera": "high_angle",
           "bleed": true,
           "silence": false,
@@ -22,26 +22,31 @@
             "props": [],
             "focus_entity_id": "loc_shinjuku_night_skyline_v1"
           },
-          "action": "深夜の新宿にローソン看板だけが白く浮く。",
-          "key_visual": "墨色の空とビル群、白いコンビニ看板だけが浮く初回導入の大ゴマ。",
-          "dialogue": [],
+          "action": "巨大な黒鉄の階層主が崩れ落ちる直前、レンが下降階段の最下段から跳び込む。床には薄いナビ青光の導線と数値オーバーレイの空枠が走る。",
+          "key_visual": "黒フードのレンが巨大ボスの影に呑まれかけながら、青白い軌道だけを信じて刃を振り抜く大ゴマ。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "ナビ、最短ルートを出せ。"
+            }
+          ],
           "monologue": [],
           "narration": [
-            "午前二時。新宿西口。"
+            "これは、Fランクの俺が世界記録を塗り替える三十秒前。"
           ],
           "sfx": [
-            "ジジ…"
+            "ゴォッ"
           ]
         },
         {
           "panel_id": "p02",
           "panel_no": 2,
           "reading_order": 2,
-          "shot_type": "wide",
+          "shot_type": "close_up",
           "camera": "eye_level",
           "bleed": false,
           "silence": false,
-          "importance": 3,
+          "importance": 5,
           "entities": {
             "characters": [
               {
@@ -55,41 +60,84 @@
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "レンがレジに立ち、誰もいない通路を見る。",
-          "key_visual": "白い蛍光灯、黒パーカー、眠そうな目元の対比。",
+          "action": "レンの瞳に薄い青光が差し、ヒビ入りスマホの画面が視界の端で点滅する。口元は震えているが、視線だけは逸らさない。",
+          "key_visual": "前髪越しの目と、画面上に浮く空のHUD枠。",
           "dialogue": [],
           "monologue": [],
-          "narration": [
-            "夜勤だけが、俺の生活をつないでいた。"
-          ],
+          "narration": [],
           "sfx": [
-            "ピッ"
+            "キィン"
+          ]
+        }
+      ]
+    },
+    {
+      "page_no": 2,
+      "page_role": "opening_hook",
+      "panels": [
+        {
+          "panel_id": "p03_hook_P4_splash_pullback",
+          "panel_no": 3,
+          "reading_order": 1,
+          "shot_type": "establishing",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_白瀬_灯里_v1"
+          },
+          "action": "深夜の新宿西口、ローソン看板だけが白く浮く。さっきの激戦とは別世界のように、街路は湿って静まり返っている。",
+          "key_visual": "コンビニの白い光と、遠くのダンジョン公社ビルの赤い警告灯。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p04_hook_P4_splash_pullback",
+          "panel_no": 4,
+          "reading_order": 2,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_白瀬_灯里_v1"
+          },
+          "action": "レンが無人の通路を見ながらレジに立つ。黒のフードジャケットは制服の下に見え、袖口は少し擦り切れている。",
+          "key_visual": "蛍光灯に照らされた空の棚と、ひとりだけ立つレン。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ジー"
           ]
         },
         {
-          "panel_id": "p03",
-          "panel_no": 3,
+          "panel_id": "p05_hook_P4_splash_pullback",
+          "panel_no": 5,
           "reading_order": 3,
-          "shot_type": "close_up",
-          "camera": "high_angle",
+          "shot_type": "medium",
+          "camera": "eye_level",
           "bleed": false,
           "silence": false,
-          "importance": 2,
+          "importance": 3,
           "entities": {
-            "characters": [
-              {
-                "character_id": "char_桐生_レン_v1",
-                "role": "listener",
-                "on_screen_via": "in_person",
-                "expression": "隈の濃い疲労顔"
-              }
-            ],
+            "characters": [],
             "location_id": "loc_lawson_interior_v1",
             "props": [],
-            "focus_entity_id": "char_桐生_レン_v1"
+            "focus_entity_id": "char_白瀬_灯里_v1"
           },
-          "action": "前髪越しの目元が動かない。",
-          "key_visual": "前髪が目にかかり、眠気だけが表情に出る顔アップ。",
+          "action": "レンが期限前の商品を棚から下げ、半額シールの束を機械的に貼っていく。胸ポケットからFランクID証が少し覗く。",
+          "key_visual": "半額弁当、FランクID、ヒビ入りスマホが同じ高さに並ぶ。",
           "dialogue": [],
           "monologue": [
             {
@@ -101,88 +149,14 @@
           "sfx": []
         },
         {
-          "panel_id": "p04",
-          "panel_no": 4,
-          "reading_order": 4,
-          "shot_type": "medium",
-          "camera": "over_shoulder",
-          "bleed": false,
-          "silence": false,
-          "importance": 2,
-          "entities": {
-            "characters": [
-              {
-                "character_id": "char_桐生_レン_v1",
-                "role": "background",
-                "on_screen_via": "in_person",
-                "expression": "淡々"
-              }
-            ],
-            "location_id": "loc_lawson_interior_v1",
-            "props": [],
-            "focus_entity_id": "char_桐生_レン_v1"
-          },
-          "action": "半額弁当を袋へ詰める手だけが機械的に動く。",
-          "key_visual": "レジ袋、半額シール、擦れた袖口で生活感を出す。",
-          "dialogue": [],
-          "monologue": [],
-          "narration": [],
-          "sfx": [
-            "カサ"
-          ]
-        },
-        {
-          "panel_id": "p05",
-          "panel_no": 5,
-          "reading_order": 5,
-          "shot_type": "close_up",
-          "camera": "eye_level",
-          "bleed": false,
-          "silence": false,
-          "importance": 2,
-          "entities": {
-            "characters": [
-              {
-                "character_id": "char_桐生_レン_v1",
-                "role": "listener",
-                "on_screen_via": "in_person",
-                "expression": "無反応"
-              }
-            ],
-            "location_id": "loc_lawson_interior_v1",
-            "props": [
-              {
-                "prop_id": "prop_smartphone_cracked_v1"
-              }
-            ],
-            "focus_entity_id": "prop_smartphone_cracked_v1"
-          },
-          "action": "ヒビ入りスマホに公社ニュース通知が灯る。",
-          "key_visual": "上端に細かなヒビ、空の通知枠、指先の荒れ。",
-          "dialogue": [],
-          "monologue": [],
-          "narration": [
-            "その名前は、見ないようにしていた。"
-          ],
-          "sfx": [
-            "ピコン"
-          ]
-        }
-      ]
-    },
-    {
-      "page_no": 2,
-      "page_role": "opening_hook",
-      "panels": [
-        {
           "panel_id": "p06",
           "panel_no": 6,
-          "reading_order": 1,
-          "shot_type": "medium",
+          "reading_order": 4,
+          "shot_type": "close_up",
           "camera": "low_angle",
           "bleed": false,
           "silence": false,
-          "importance": 3,
+          "importance": 4,
           "entities": {
             "characters": [
               {
@@ -200,22 +174,23 @@
             ],
             "focus_entity_id": "char_白瀬_灯里_v1"
           },
-          "action": "店内テレビにSランク探索者として灯里が映る。",
-          "key_visual": "テレビ枠越しの灯里、左肩の朱部隊章、下部テロップ空枠。",
+          "action": "レンの目元だけを抜く。さっきの青光はなく、テレビの白い反射だけが瞳に映っている。",
+          "key_visual": "乾いた目元と、前髪の影。",
           "dialogue": [],
-          "monologue": [],
-          "narration": [
-            "Sランク探索者、白瀬灯里。単独討伐記録を更新。"
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "世界記録なんて、俺には一生関係ない。"
+            }
           ],
-          "sfx": [
-            "ザ…"
-          ]
+          "narration": [],
+          "sfx": []
         },
         {
           "panel_id": "p07",
           "panel_no": 7,
-          "reading_order": 2,
-          "shot_type": "close_up",
+          "reading_order": 5,
+          "shot_type": "medium",
           "camera": "eye_level",
           "bleed": false,
           "silence": false,
@@ -237,24 +212,27 @@
             ],
             "focus_entity_id": "prop_akane_badge_akari_v1"
           },
-          "action": "朱の部隊章と握り込む手袋が強調される。",
-          "key_visual": "朱の部隊章と握り込む手元、英雄の笑顔は画面端。",
-          "dialogue": [],
-          "monologue": [],
-          "narration": [
-            "朱の章は、選ばれた者だけが着ける。"
+          "action": "店内テレビに白瀬灯里が映り、朱色の部隊章がニュース画面で強調される。レンはレジ越しにそれを見上げる。",
+          "key_visual": "朱色の公的光を背負う灯里と、黒フードのレンの対比。",
+          "dialogue": [
+            {
+              "character_id": "char_白瀬_灯里_v1",
+              "text": "守れる人を、増やしたいんです。"
+            }
           ],
+          "monologue": [],
+          "narration": [],
           "sfx": []
         },
         {
           "panel_id": "p08",
           "panel_no": 8,
-          "reading_order": 3,
-          "shot_type": "medium",
+          "reading_order": 6,
+          "shot_type": "close_up",
           "camera": "over_shoulder",
           "bleed": false,
           "silence": false,
-          "importance": 3,
+          "importance": 4,
           "entities": {
             "characters": [
               {
@@ -274,78 +252,13 @@
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "レンがレジ越しにテレビを見る。",
-          "key_visual": "手前にレンの黒い背中、奥の小さな画面に白い英雄。",
+          "action": "レンがスマホを裏返そうとした瞬間、公社アプリの通知がヒビ割れた画面に灯る。通知欄の奥で、薄い青い枠だけが一瞬浮かぶ。",
+          "key_visual": "上部が割れたスマホ画面と、空白のHUD枠。",
           "dialogue": [],
           "monologue": [],
           "narration": [],
           "sfx": [
-            "ザザ"
-          ]
-        },
-        {
-          "panel_id": "p09",
-          "panel_no": 9,
-          "reading_order": 4,
-          "shot_type": "close_up",
-          "camera": "eye_level",
-          "bleed": false,
-          "silence": false,
-          "importance": 4,
-          "entities": {
-            "characters": [
-              {
-                "character_id": "char_桐生_レン_v1",
-                "role": "listener",
-                "on_screen_via": "in_person",
-                "expression": "揺れを隠した無表情"
-              }
-            ],
-            "location_id": "loc_lawson_interior_v1",
-            "props": [],
-            "focus_entity_id": "char_桐生_レン_v1"
-          },
-          "action": "レンの瞳にテレビの白い光が映る。",
-          "key_visual": "無表情だが瞳だけが揺れ、縦書きモノローグ用の白場を残す。",
-          "dialogue": [],
-          "monologue": [
-            {
-              "character_id": "char_桐生_レン_v1",
-              "text": "同じ場所から、ずいぶん遠くへ行ったな。"
-            }
-          ],
-          "narration": [],
-          "sfx": []
-        },
-        {
-          "panel_id": "p10",
-          "panel_no": 10,
-          "reading_order": 5,
-          "shot_type": "wide",
-          "camera": "birds_eye",
-          "bleed": false,
-          "silence": false,
-          "importance": 2,
-          "entities": {
-            "characters": [
-              {
-                "character_id": "char_桐生_レン_v1",
-                "role": "background",
-                "on_screen_via": "in_person",
-                "expression": "小さく孤立"
-              }
-            ],
-            "location_id": "loc_lawson_interior_v1",
-            "props": [],
-            "focus_entity_id": "loc_lawson_interior_v1"
-          },
-          "action": "無人の店内にニュース音だけが残る。",
-          "key_visual": "無人通路、蛍光灯、レジの小さなレン。",
-          "dialogue": [],
-          "monologue": [],
-          "narration": [],
-          "sfx": [
-            "ジー…"
+            "ピコン"
           ]
         }
       ]
@@ -355,14 +268,70 @@
       "page_role": "buildup",
       "panels": [
         {
+          "panel_id": "p09_hook_P4_splash_pullback",
+          "panel_no": 9,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "prop_dpc_rank_id_card_ren_v1"
+          },
+          "action": "コンビニの外で非常サイレンが鳴り、通行人が新宿地下ダンジョン入口のほうへ振り返る。公社アプリには低階層の異常警報が流れる。",
+          "key_visual": "夜の歩道に伸びる赤い警告灯と、地下へ降りる階段の黒い口。",
+          "dialogue": [
+            {
+              "character_id": "char_槇島_主任_v1",
+              "text": "西口第三入口、封鎖しろ！"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ウーッ"
+          ]
+        },
+        {
+          "panel_id": "p10_hook_P4_splash_pullback",
+          "panel_no": 10,
+          "reading_order": 2,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "prop_dpc_rank_id_card_ren_v1"
+          },
+          "action": "レンはレジを離れ、黒フードの前を握って店の出口へ向かう。手にはまだヒビ入りスマホを握っている。",
+          "key_visual": "自動ドアの白光へ踏み出すレンの背中。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "Fランクでも、近いなら動ける。"
+            }
+          ],
+          "narration": [],
+          "sfx": []
+        },
+        {
           "panel_id": "p11",
           "panel_no": 11,
-          "reading_order": 1,
+          "reading_order": 3,
           "shot_type": "close_up",
           "camera": "high_angle",
           "bleed": false,
           "silence": false,
-          "importance": 2,
+          "importance": 5,
           "entities": {
             "characters": [
               {
@@ -380,24 +349,24 @@
             ],
             "focus_entity_id": "prop_dpc_rank_id_card_ren_v1"
           },
-          "action": "財布の隙間からFランクID証が覗く。",
-          "key_visual": "擦れたカード、Fランク枠だけが視線を引く。",
+          "action": "スマホ画面のヒビの下で、通常の公社通知とは違う青い座標線が一瞬だけ走る。レンの瞳にも同じ青光が差す。",
+          "key_visual": "page 1 と同じナビ青光が、まだ弱く小さく点る。",
           "dialogue": [],
           "monologue": [],
-          "narration": [
-            "俺のほうは、Fランク。"
-          ],
-          "sfx": []
+          "narration": [],
+          "sfx": [
+            "キィン"
+          ]
         },
         {
           "panel_id": "p12",
           "panel_no": 12,
-          "reading_order": 2,
-          "shot_type": "medium",
+          "reading_order": 4,
+          "shot_type": "wide",
           "camera": "eye_level",
           "bleed": false,
           "silence": false,
-          "importance": 2,
+          "importance": 4,
           "entities": {
             "characters": [
               {
@@ -411,24 +380,29 @@
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "期限前の商品を棚から下げる。",
-          "key_visual": "機械的な手つきと黒パーカーの袖。",
-          "dialogue": [],
+          "action": "駆けつけた探索者たちが階段前で足を止め、FランクIDを下げたレンを見てざわつく。テレビ中継の灯里の映像だけが店内に残っている。",
+          "key_visual": "朱のニュース画面と、黒フードで階段へ向かうレンが画面奥で交差する。",
+          "dialogue": [
+            {
+              "character_id": "char_氷室_玲二_v1",
+              "text": "Fランクが前に出るな。死にたいのか。"
+            }
+          ],
           "monologue": [],
           "narration": [],
           "sfx": [
-            "スッ"
+            "ざわ"
           ]
         },
         {
           "panel_id": "p13",
           "panel_no": 13,
-          "reading_order": 3,
+          "reading_order": 5,
           "shot_type": "close_up",
           "camera": "eye_level",
           "bleed": false,
           "silence": false,
-          "importance": 3,
+          "importance": 5,
           "entities": {
             "characters": [
               {
@@ -446,87 +420,18 @@
             ],
             "focus_entity_id": "char_白瀬_灯里_v1"
           },
-          "action": "テレビの灯里がインタビューに応じる。",
-          "key_visual": "ノイズ線入りテレビ枠、氷青の瞳と朱色リボン。",
+          "action": "レンのスマホに、文字のない青い予定表の枠だけが浮かぶ。レンは階段の暗がりを見下ろし、page 1 と同じ目をする。",
+          "key_visual": "ヒビ入りスマホ越しの空白スケジュール枠と、下降階段の青い導線。",
           "dialogue": [
             {
-              "character_id": "char_白瀬_灯里_v1",
-              "text": "守れる人を、増やしたいんです。"
-            }
-          ],
-          "monologue": [],
-          "narration": [],
-          "sfx": [
-            "ザ…"
-          ]
-        },
-        {
-          "panel_id": "p14",
-          "panel_no": 14,
-          "reading_order": 4,
-          "shot_type": "close_up",
-          "camera": "eye_level",
-          "bleed": false,
-          "silence": false,
-          "importance": 3,
-          "entities": {
-            "characters": [
-              {
-                "character_id": "char_桐生_レン_v1",
-                "role": "listener",
-                "on_screen_via": "in_person",
-                "expression": "口元が固い"
-              }
-            ],
-            "location_id": "loc_lawson_interior_v1",
-            "props": [],
-            "focus_entity_id": "char_桐生_レン_v1"
-          },
-          "action": "レンの口元がわずかにこわばる。",
-          "key_visual": "笑わない口元、白場に過去へのモノローグを置く。",
-          "dialogue": [],
-          "monologue": [
-            {
               "character_id": "char_桐生_レン_v1",
-              "text": "昔から、あいつはそういう顔ができた。"
+              "text": "頼む。"
             }
           ],
-          "narration": [],
-          "sfx": []
-        },
-        {
-          "panel_id": "p15",
-          "panel_no": 15,
-          "reading_order": 5,
-          "shot_type": "medium",
-          "camera": "high_angle",
-          "bleed": false,
-          "silence": false,
-          "importance": 2,
-          "entities": {
-            "characters": [
-              {
-                "character_id": "char_桐生_レン_v1",
-                "role": "background",
-                "on_screen_via": "in_person",
-                "expression": "感情を伏せる"
-              }
-            ],
-            "location_id": "loc_lawson_interior_v1",
-            "props": [
-              {
-                "prop_id": "prop_smartphone_cracked_v1"
-              }
-            ],
-            "focus_entity_id": "char_桐生_レン_v1"
-          },
-          "action": "レンがスマホを裏返し通知を隠す。",
-          "key_visual": "ヒビ入りスマホの黒い画面、レジ台の白さ。",
-          "dialogue": [],
           "monologue": [],
           "narration": [],
           "sfx": [
-            "コト"
+            "ピ..."
           ]
         }
       ]
@@ -4038,22 +3943,22 @@
           "camera": "high_angle",
           "bleed": false,
           "silence": false,
-          "importance": 4,
+          "importance": 3,
           "entities": {
             "characters": [],
             "location_id": "loc_dpc_internal_audit_room_v1",
             "props": [],
             "focus_entity_id": "loc_dpc_internal_audit_room_v1"
           },
-          "action": "無人のDPC内部監査室でモニターだけが点いている。",
-          "key_visual": "窓のない解析室、壁一面の空ログ枠、椅子は空。",
+          "action": "無人のDPC新宿支部・内部監査室。暗い室内で、壁一面のモニターだけが冷たく点灯している。",
+          "key_visual": "朱色の公的光を帯びた監査モニター群。中央にだけ薄い青の異常枠が浮き始める。",
           "dialogue": [],
           "monologue": [],
           "narration": [
             "同時刻。DPC新宿支部、内部監査室。"
           ],
           "sfx": [
-            "ヴン"
+            "ピッ"
           ]
         },
         {
@@ -4064,7 +3969,7 @@
           "camera": "eye_level",
           "bleed": false,
           "silence": false,
-          "importance": 3,
+          "importance": 4,
           "entities": {
             "characters": [],
             "location_id": "loc_dpc_internal_audit_room_v1",
@@ -4075,15 +3980,16 @@
             ],
             "focus_entity_id": "prop_rank_app_status_screen_v1"
           },
-          "action": "監査室モニターにFランク一階限定入域者の戦闘ログが浮かぶ。",
-          "key_visual": "実名なしの空ログ行、異常値だけが枠で強調される。",
+          "action": "監査モニターに、Fランク一階限定入域者の戦闘ログが高速で巻き戻される。レンの黒フード姿だけが何度も停止表示される。",
+          "key_visual": "ひび割れた画面越しの世界を思わせるノイズ入りログ画面。空の数値オーバーレイ枠が急速に増殖する。",
           "dialogue": [],
           "monologue": [],
           "narration": [
             "制度は、異常値を見逃さない。"
           ],
           "sfx": [
-            "ピ"
+            "カチッ",
+            "カチッ"
           ]
         },
         {
@@ -4093,7 +3999,7 @@
           "shot_type": "medium",
           "camera": "birds_eye",
           "bleed": false,
-          "silence": false,
+          "silence": true,
           "importance": 3,
           "entities": {
             "characters": [],
@@ -4105,14 +4011,12 @@
             ],
             "focus_entity_id": "loc_dpc_internal_audit_room_v1"
           },
-          "action": "壁一面のモニターの一つだけが異常ログで点滅する。",
-          "key_visual": "人のいない部屋に制度の視線だけが迫る。",
+          "action": "監査室の全モニターが一瞬だけ白飛びし、異常ログの枠も警告文も消える。室内に人影はない。",
+          "key_visual": "沈黙の白コマ。中央モニターに薄い青光だけが残り、情報の欠落を大きな余白で見せる。",
           "dialogue": [],
           "monologue": [],
           "narration": [],
-          "sfx": [
-            "ピピ"
-          ]
+          "sfx": []
         },
         {
           "panel_id": "p109",
@@ -4121,8 +4025,8 @@
           "shot_type": "close_up",
           "camera": "eye_level",
           "bleed": false,
-          "silence": true,
-          "importance": 2,
+          "silence": false,
+          "importance": 4,
           "entities": {
             "characters": [],
             "location_id": "loc_dpc_internal_audit_room_v1",
@@ -4133,18 +4037,30 @@
             ],
             "focus_entity_id": "prop_rank_app_status_screen_v1"
           },
-          "action": "無人監視画面の異常枠だけが白く浮く。",
-          "key_visual": "完全無音の監視画面、空の矩形枠を中央に大きく。",
-          "dialogue": [],
-          "monologue": [],
+          "action": "ダンジョン内。レンのヒビ入りスマートフォンが震え、通常の公社アプリとは違う青いステータス枠が画面の奥からせり上がる。",
+          "key_visual": " cracked smartphone screen越しに、未入力のステータス画面とスキル欄が重なる。レンの瞳にナビ青光。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "隠し条件、達成。"
+            }
+          ],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "今の通知……公社アプリじゃない？"
+            }
+          ],
           "narration": [],
-          "sfx": []
+          "sfx": [
+            "ヴゥン"
+          ]
         },
         {
           "panel_id": "p110",
           "panel_no": 110,
           "reading_order": 5,
-          "shot_type": "establishing",
+          "shot_type": "close_up",
           "camera": "low_angle",
           "bleed": true,
           "silence": false,
@@ -4172,28 +4088,31 @@
             ],
             "focus_entity_id": "loc_shinjuku_third_1f_ne_corridor_v1"
           },
-          "action": "レンの背後で下降階段が暗く伸び、上向きの空HUDが浮かぶ。レンの指が鉄パイプを握り直す。",
-          "key_visual": "下降階段と上向きの数値枠、レンの耳元に薄い青光を入れた次回への見せゴマ。",
+          "action": "レンの目元とスマホ画面を極端な寄りで重ねる。画面のスキル欄に、通常ランク表記を押しのけて未知の能力名が浮かび上がる。",
+          "key_visual": "ステータス画面 panel。青白いHUDに『固有スキル：階層ナビゲート』の空枠演出、背後に暗く伸びる下降階段。",
           "dialogue": [
             {
               "character_id": "char_獅童_響_v1",
-              "text": "次の隠し条件を開示します。"
+              "text": "固有スキルを開示します。"
             }
           ],
           "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
-              "text": "まだ、行ける。"
+              "text": "これは……俺だけの？"
             }
           ],
-          "narration": [
-            "Fランクが、動き出す。"
-          ],
+          "narration": [],
           "sfx": [
-            "キン"
+            "ピロン"
           ]
         }
       ]
     }
-  ]
+  ],
+  "pull_link": {
+    "current_episode_cliff": "ability_or_identity_glimpse",
+    "next_opening_hook_hint": "次話冒頭は、レンが『階層ナビゲート』の表示を確認し、隠し通路や敵配置が見えるのかを一階層で検証する。同時にDPC監査ログ側でも彼の異常値が追跡対象へ切り替わる。",
+    "is_volume_end": false
+  }
 }

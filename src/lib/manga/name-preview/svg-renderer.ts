@@ -113,12 +113,23 @@ function characterFaceHref(
 
 // L8.6 audit-rules.ts に集約。本ファイルからは findings/warnings を受け取って描画するだけ。
 
+function rectToPolygonPoints(rect: { x: number; y: number; w: number; h: number }): string {
+  // SVG polygon points 文字列: "x1,y1 x2,y2 x3,y3 x4,y4"
+  return `${rect.x},${rect.y} ${rect.x + rect.w},${rect.y} ${rect.x + rect.w},${rect.y + rect.h} ${rect.x},${rect.y + rect.h}`;
+}
+
+function polygonToPointsStr(polygon: [number, number][]): string {
+  return polygon.map(([x, y]) => `${x},${y}`).join(" ");
+}
+
 function renderPanel(
   panel: PanelV2,
   rect: { x: number; y: number; w: number; h: number },
   blocking: EstimatedBlocking,
   bible: BibleSnapshotV2,
-  refsExists: (relPath: string) => boolean
+  refsExists: (relPath: string) => boolean,
+  tiltDeg?: number,
+  polygon?: [number, number][]
 ): string {
   const sw = importanceStrokeWidth(panel.importance);
   const fill = importanceFill(panel.importance);
@@ -126,17 +137,39 @@ function renderPanel(
   const labelCam = cameraLabel(panel.camera);
 
   const parts: string[] = [];
+  let clippedContentStart = 0;
 
   // panel rect
-  if (panel.bleed) {
-    // bleed: 裁ち落とし枠 (二重) を上に
+  if (polygon) {
+    const polygonPoints = polygonToPointsStr(polygon);
+    const clipId = `clip-${panel.panel_id}`;
     parts.push(
-      `<rect x="${rect.x - 12}" y="${rect.y - 12}" width="${rect.w + 24}" height="${rect.h + 24}" fill="none" stroke="#c33" stroke-width="3" stroke-dasharray="20 12" opacity="0.7"/>`
+      `<defs><clipPath id="${clipId}"><polygon points="${polygonPoints}"/></clipPath></defs>`
+    );
+    if (panel.bleed) {
+      parts.push(
+        `<!-- WARN: bleed + polygon is not supported in Phase B1; bleed guide falls back to rect. -->`
+      );
+      // bleed: 裁ち落とし枠 (二重) を上に
+      parts.push(
+        `<rect x="${rect.x - 12}" y="${rect.y - 12}" width="${rect.w + 24}" height="${rect.h + 24}" fill="none" stroke="#c33" stroke-width="3" stroke-dasharray="20 12" opacity="0.7"/>`
+      );
+    }
+    parts.push(
+      `<polygon points="${polygonPoints}" fill="${fill}" stroke="#111" stroke-width="${sw}"/>`
+    );
+    clippedContentStart = parts.length;
+  } else {
+    if (panel.bleed) {
+      // bleed: 裁ち落とし枠 (二重) を上に
+      parts.push(
+        `<rect x="${rect.x - 12}" y="${rect.y - 12}" width="${rect.w + 24}" height="${rect.h + 24}" fill="none" stroke="#c33" stroke-width="3" stroke-dasharray="20 12" opacity="0.7"/>`
+      );
+    }
+    parts.push(
+      `<rect x="${rect.x}" y="${rect.y}" width="${rect.w}" height="${rect.h}" fill="${fill}" stroke="#111" stroke-width="${sw}"/>`
     );
   }
-  parts.push(
-    `<rect x="${rect.x}" y="${rect.y}" width="${rect.w}" height="${rect.h}" fill="${fill}" stroke="#111" stroke-width="${sw}"/>`
-  );
 
   // 読順番号 (右綴じ前提: 各 panel の右上にバッジ)
   const badgeR = 38;
@@ -250,7 +283,20 @@ function renderPanel(
     );
   }
 
-  return parts.join("\n");
+  const body = polygon
+    ? [
+        ...parts.slice(0, clippedContentStart),
+        `<g clip-path="url(#clip-${panel.panel_id})">`,
+        ...parts.slice(clippedContentStart),
+        `</g>`,
+      ].join("\n")
+    : parts.join("\n");
+  if (polygon) return body;
+  if (tiltDeg === undefined) return body;
+
+  const cx = rect.x + rect.w / 2;
+  const cy = rect.y + rect.h / 2;
+  return `<g transform="rotate(${tiltDeg} ${cx} ${cy})">\n${body}\n</g>`;
 }
 
 function bubbleZoneRect(
@@ -283,7 +329,7 @@ export function renderPageSvg(input: RenderPageInput): RenderPageResult {
     const sbPanel = panelsByPanelId.get(planPanel.panel_id);
     if (!sbPanel) continue;
     const blocking = estimateBlocking(sbPanel);
-    panelSvg.push(renderPanel(sbPanel, planPanel.rect, blocking, input.bible, input.refsExists));
+    panelSvg.push(renderPanel(sbPanel, planPanel.rect, blocking, input.bible, input.refsExists, planPanel.tilt_deg, planPanel.polygon));
   }
 
   // ページヘッダ: ページ番号 + page_role
