@@ -18,6 +18,7 @@ import {
 } from "./handlers/name-approval";
 import { handleNameManifest } from "./handlers/name-manifest";
 import { handleManifest } from "./handlers/manifest";
+import { handlePipelineStatus } from "./handlers/pipeline-status";
 import {
   handleRevisionQueueGet,
   handleRevisionQueuePost,
@@ -211,6 +212,12 @@ export async function handleApi(
   }
 
   // ===== 新 path: /api/works/{slug}/episodes/{ep}/... (Phase 2 で解禁予定) =====
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/episodes\/ep(\d+)\/pipeline-status$/);
+    if (m && (!isValidSlug(m[1]) || !isValidEpisode(Number(m[2])))) {
+      return send(res, 400, { error: "invalid slug or episode" });
+    }
+  }
   const scoped = parseScopedPath(p);
   if (scoped) {
     const guard = checkScopedPath(scoped, defaults);
@@ -237,6 +244,10 @@ export async function handleApi(
     if (tail === "/manifest") {
       if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
       return handleManifest(scoped.slug, scoped.episode, res);
+    }
+    if (tail === "/pipeline-status") {
+      if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
+      return handlePipelineStatus(scoped.slug, scoped.episode, res);
     }
     if (tail === "/revision-queue") {
       if (req.method === "GET") return handleRevisionQueueGet(scoped.slug, scoped.episode, res);

@@ -1,11 +1,5 @@
 import { isViewName, store, type AppState, type ViewName } from "./lib/store";
-
-const MENU: Array<{ view: ViewName; label: string }> = [
-  { view: "name-gate", label: "ネーム gate" },
-  { view: "assets", label: "アセット" },
-  { view: "layers", label: "生成 layer" },
-  { view: "works", label: "作品管理" },
-];
+import { GROUP_LABELS, MENU, type MenuGroup } from "./nav";
 
 function renderOptions(values: Array<{ value: string; label: string }>, selected: string): string {
   return values
@@ -24,6 +18,25 @@ function episodeLabel(n: number): string {
   return `ep${String(n).padStart(2, "0")}`;
 }
 
+function groupedMenuHtml(currentView: ViewName): string {
+  const groups: MenuGroup[] = ["judge", "view", "exec"];
+  return groups
+    .map((group) => {
+      const items = MENU.filter((item) => item.group === group);
+      return `
+        <div class="sidebar__group">
+          <h3 class="sidebar__group-title">${escapeHtml(GROUP_LABELS[group])}</h3>
+          ${items
+            .map(
+              (item) =>
+                `<button type="button" class="sidebar__menu-item${item.view === currentView ? " is-active" : ""}" data-view="${item.view}">${escapeHtml(item.label)}</button>`
+            )
+            .join("")}
+        </div>`;
+    })
+    .join("");
+}
+
 /**
  * Phase 2A は起動時 default scope 固定。
  * 旧実装は scope select を enable していて変更すると後続 API が 403 になる導線になっていた。
@@ -38,7 +51,7 @@ function rerender(root: HTMLElement, state: AppState): void {
     root.innerHTML = `
       <div class="scope-panel">
         <p class="scope-note">作品を選択してください。</p>
-        <button type="button" class="menu-button${state.currentView === "index" ? " is-active" : ""}" data-view="index">作品一覧</button>
+        <button type="button" class="sidebar__menu-item${state.currentView === "index" ? " is-active" : ""}" data-view="index">作品一覧</button>
       </div>
     `;
     root.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {
@@ -74,13 +87,9 @@ function rerender(root: HTMLElement, state: AppState): void {
         </select>
       </div>
       <p class="scope-note">Phase 2A は default scope 固定。切替は Phase 2B/3 で解禁予定。</p>
-      <button type="button" class="menu-button" data-view="index">← 作品一覧へ戻る</button>
     </div>
     <nav class="menu" aria-label="ops views">
-      ${MENU.map(
-        (item) =>
-          `<button type="button" class="menu-button${item.view === state.currentView ? " is-active" : ""}" data-view="${item.view}">${escapeHtml(item.label)}</button>`
-      ).join("")}
+      ${groupedMenuHtml(state.currentView)}
     </nav>
   `;
 

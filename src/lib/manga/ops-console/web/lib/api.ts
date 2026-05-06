@@ -125,6 +125,29 @@ export function apiGetManifest(slug: string, episode: number): Promise<Manifest>
   );
 }
 
+export type PipelineStatusLayer = {
+  id: string;
+  label: string;
+  status: "missing" | "ready" | "stale";
+  artifacts: string[];
+  last_modified?: string;
+  next_view?: string;
+  next_layer_id?: string | null;
+};
+
+export type PipelineStatus = {
+  slug: string;
+  episode: number;
+  layers: PipelineStatusLayer[];
+  generated_at: string;
+};
+
+export function apiGetPipelineStatus(slug: string, episode: number): Promise<PipelineStatus> {
+  return getJson<PipelineStatus>(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/pipeline-status`
+  );
+}
+
 export function apiGetNameApproval(slug: string, episode: number): Promise<NameApproval> {
   return getJson<NameApproval>(
     `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/name-approval`

@@ -125,7 +125,7 @@ export function renderOpsConsoleShellHtml(): string {
 <body>
   <header class="top">
     <div class="top-title">Novelis Console</div>
-    <div class="top-scope" id="top-scope">loading...</div>
+    <nav class="nc-breadcrumb" id="top-breadcrumb" aria-label="breadcrumb"></nav>
   </header>
   <div class="app">
     <aside id="sidebar"></aside>

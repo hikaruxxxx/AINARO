@@ -1,10 +1,12 @@
 import { apiGetBootstrap } from "./lib/api";
 import { isViewName, store, type ViewName } from "./lib/store";
+import { mountBreadcrumb } from "./breadcrumb";
 import { mountSidebar } from "./sidebar";
 import { mountAssetsView } from "./views/assets";
 import { mountIndexView } from "./views/index";
 import { mountLayersView } from "./views/layers";
 import { mountNameGateView } from "./views/name-gate";
+import { mountPipelineView } from "./views/pipeline";
 import { mountRevisionView } from "./views/revision";
 import { mountWorksView } from "./views/works";
 
@@ -20,7 +22,7 @@ function parseRoute(): { slug: string | null; episode: number | null; view: View
   return {
     slug: decodeURIComponent(m[1]),
     episode: Number(m[2]),
-    view: isViewName(hashView) && hashView !== "index" ? hashView : "name-gate",
+    view: isViewName(hashView) && hashView !== "index" ? hashView : "pipeline",
   };
 }
 
@@ -58,30 +60,12 @@ function mountCurrentView(main: HTMLElement): () => void {
     if (unmount) unmount();
     prevView = state.currentView;
     if (state.currentView === "index") unmount = mountIndexView(main);
+    else if (state.currentView === "pipeline") unmount = mountPipelineView(main);
     else if (state.currentView === "assets") unmount = mountAssetsView(main);
     else if (state.currentView === "layers") unmount = mountLayersView(main);
     else if (state.currentView === "revision") unmount = mountRevisionView(main);
     else if (state.currentView === "works") unmount = mountWorksView(main);
     else unmount = mountNameGateView(main);
-  });
-}
-
-/**
- * 表示テキストが変わったときだけ DOM 更新する。
- * 全 state 変更で textContent を書き換えると、Phase 2B 以降の選択状態に影響する場合があるため。
- */
-function mountHeader(scopeEl: HTMLElement): () => void {
-  let prev = "";
-  return store.subscribe((state) => {
-    let next: string;
-    if (state.currentView === "index") next = "Novelis Console";
-    else if (state.currentSlug) {
-      const ep = `ep${String(state.currentEpisode).padStart(2, "0")}`;
-      next = `${state.currentSlug} / ${ep}`;
-    } else next = "loading...";
-    if (next === prev) return;
-    prev = next;
-    scopeEl.textContent = next;
   });
 }
 
@@ -99,12 +83,12 @@ async function loadBootstrap() {
 async function start(): Promise<void> {
   const sidebar = document.querySelector<HTMLElement>("#sidebar");
   const main = document.querySelector<HTMLElement>("#main");
-  const topScope = document.querySelector<HTMLElement>("#top-scope");
-  if (!sidebar || !main || !topScope) throw new Error("Novelis Console shell is incomplete");
+  const topBreadcrumb = document.querySelector<HTMLElement>("#top-breadcrumb");
+  if (!sidebar || !main || !topBreadcrumb) throw new Error("Novelis Console shell is incomplete");
 
   mountSidebar(sidebar);
   mountCurrentView(main);
-  mountHeader(topScope);
+  mountBreadcrumb(topBreadcrumb);
 
   const boot = await loadBootstrap();
   const route = parseRoute();
