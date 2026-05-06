@@ -8,10 +8,18 @@ import {
   type JobEvent,
   type LayerId,
 } from "../lib/api";
+import {
+  asKeyValueTable,
+  asList,
+  asRecord,
+  asText,
+  detailsRaw,
+} from "../lib/data-display";
 import { store } from "../lib/store";
 
 type BibleTab = "world" | "characters" | "locations" | "props" | "style" | "raw";
 type ActionLayer = "L01" | "L01b" | "L01c";
+type DisplayMode = "reader" | "raw";
 type AnyRecord = Record<string, unknown>;
 
 const BIBLE_TABS: Array<{ id: BibleTab; label: string }> = [
@@ -27,8 +35,13 @@ const CSS = `
 .bib-view { display: grid; gap: var(--space-3); }
 .bib-tabs { display: flex; gap: var(--space-1); flex-wrap: wrap; }
 .bib-content { display: grid; gap: var(--space-3); }
+.bib-reader { display: grid; gap: var(--space-3); max-width: 980px; }
+.bib-mode { display: flex; gap: var(--space-1); flex-wrap: wrap; }
 .bib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-2); }
 .bib-card { display: grid; gap: var(--space-2); }
+.bib-section { display: grid; gap: var(--space-2); }
+.bib-section h3 { margin: 0; font-size: var(--fs-lg); }
+.bib-factions,.bib-style-overrides { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-2); }
 .bib-card h3 { margin: 0; font-size: var(--fs-md); }
 .bib-meta { color: var(--text-tertiary); font-size: var(--fs-sm); overflow-wrap: anywhere; }
 .bib-summary { color: var(--text-secondary); font-size: var(--fs-base); line-height: 1.5; }
@@ -46,6 +59,7 @@ type ViewState = {
   slug: string;
   bible: BibleAssetView | null;
   tab: BibleTab;
+  displayMode: DisplayMode;
   loading: boolean;
   error: string | null;
   modal: ActionLayer | null;
@@ -73,10 +87,6 @@ function jsonHtml(value: unknown): string {
 function errorText(error: unknown): string {
   if (error instanceof ApiError) return `API ${error.status}: ${error.body}`;
   return error instanceof Error ? error.message : String(error);
-}
-
-function asRecord(value: unknown): AnyRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? value as AnyRecord : {};
 }
 
 function textField(item: unknown, keys: string[]): string {
@@ -140,6 +150,85 @@ function renderTabs(active: BibleTab): string {
   return `<div class="bib-tabs">${BIBLE_TABS.map((tab) => `<button type="button" class="nc-pill${tab.id === active ? " nc-pill--active" : ""}" data-bible-tab="${tab.id}">${escapeHtml(tab.label)}</button>`).join("")}</div>`;
 }
 
+function renderDisplayMode(active: DisplayMode): string {
+  return `<div class="bib-mode">
+    <button type="button" class="nc-pill${active === "reader" ? " nc-pill--active" : ""}" data-display-mode="reader">Reader</button>
+    <button type="button" class="nc-pill${active === "raw" ? " nc-pill--active" : ""}" data-display-mode="raw">生 JSON</button>
+  </div>`;
+}
+
+function renderWorldReader(world: unknown): string {
+  const obj = asRecord(world);
+  const factions = Array.isArray(obj.factions) ? obj.factions : [];
+  return `<div class="bib-reader">
+    <section class="nc-card bib-section">
+      <h3>前提 (Premise)</h3>
+      <p>${escapeHtml(asText(obj.premise))}</p>
+      ${detailsRaw("生 JSON", obj.premise)}
+    </section>
+    <section class="nc-card bib-section">
+      <h3>ルール (Rules)</h3>
+      ${asList(obj.rules)}
+      ${detailsRaw("生 JSON", obj.rules)}
+    </section>
+    <section class="nc-card bib-section">
+      <h3>システム (System)</h3>
+      ${typeof obj.system === "object" && obj.system !== null ? asKeyValueTable(asRecord(obj.system)) : `<p>${escapeHtml(asText(obj.system))}</p>`}
+      ${detailsRaw("生 JSON", obj.system)}
+    </section>
+    <section class="nc-card bib-section">
+      <h3>年表 (Timeline)</h3>
+      ${Array.isArray(obj.timeline) ? `<ol>${obj.timeline.map((item) => `<li>${escapeHtml(asText(item))}</li>`).join("")}</ol>` : `<p>${escapeHtml(asText(obj.timeline))}</p>`}
+      ${detailsRaw("生 JSON", obj.timeline)}
+    </section>
+    <section class="nc-card bib-section">
+      <h3>勢力 (Factions)</h3>
+      <div class="bib-factions">${factions.map((item) => {
+        const faction = asRecord(item);
+        return `<article class="nc-card nc-card--sunken bib-card">
+          <h3>${escapeHtml(asText(faction.name ?? "名称未設定"))}</h3>
+          <div class="bib-summary">${escapeHtml(asText(faction.summary ?? faction.description ?? item))}</div>
+        </article>`;
+      }).join("")}</div>
+      ${detailsRaw("生 JSON", obj.factions)}
+    </section>
+  </div>`;
+}
+
+function renderStyleReader(bible: BibleAssetView): string {
+  const directives = asRecord(bible.style_directives);
+  const overrides = asRecord(directives.scene_overrides);
+  return `<div class="bib-reader">
+    <section class="nc-card bib-section">
+      <h3>全体指示 (global)</h3>
+      ${typeof directives.global === "object" && directives.global !== null ? asKeyValueTable(asRecord(directives.global)) : `<p>${escapeHtml(asText(directives.global))}</p>`}
+      ${detailsRaw("生 JSON", directives.global)}
+    </section>
+    <section class="nc-card bib-section">
+      <h3>シーン別指示 (scene_overrides)</h3>
+      <div class="bib-style-overrides">${Object.entries(overrides).map(([key, value]) => `<article class="nc-card nc-card--sunken bib-card">
+        <h3>${escapeHtml(key)}</h3>
+        <div class="bib-summary">${escapeHtml(asText(value))}</div>
+      </article>`).join("")}</div>
+      ${detailsRaw("生 JSON", directives.scene_overrides)}
+    </section>
+    <section class="nc-card bib-section">
+      <h3>合成・オーバーレイ規則 (overlay_rules)</h3>
+      ${asList(directives.overlay_rules)}
+      ${detailsRaw("生 JSON", directives.overlay_rules)}
+    </section>
+    <section class="nc-card bib-section">
+      <h3>視覚モチーフ / 継続性 seed</h3>
+      ${asKeyValueTable({
+        "visual_motifs": Array.isArray(bible.visual_motifs) ? `${bible.visual_motifs.length} 件` : bible.visual_motifs,
+        "continuity_seeds": Array.isArray(bible.continuity_seeds) ? `${bible.continuity_seeds.length} 件` : bible.continuity_seeds,
+      })}
+      ${detailsRaw("visual_motifs", bible.visual_motifs)}
+      ${detailsRaw("continuity_seeds", bible.continuity_seeds)}
+    </section>
+  </div>`;
+}
+
 function renderBibleContent(state: ViewState): string {
   const bible = state.bible;
   if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
@@ -148,13 +237,16 @@ function renderBibleContent(state: ViewState): string {
   if (state.tab === "characters") return renderAssetCards(state.slug, "characters", bible.characters, bible.refs.characters);
   if (state.tab === "locations") return renderAssetCards(state.slug, "locations", bible.locations, bible.refs.locations);
   if (state.tab === "props") return renderAssetCards(state.slug, "props", bible.props, bible.refs.props);
-  if (state.tab === "world") return `<pre class="nc-code-block">${jsonHtml(bible.world)}</pre>`;
+  if (state.tab === "world") {
+    return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(bible.world)}</pre>` : renderWorldReader(bible.world)}`;
+  }
   if (state.tab === "style") {
-    return `<pre class="nc-code-block">${jsonHtml({
+    const raw = {
       style_directives: bible.style_directives,
       visual_motifs: bible.visual_motifs,
       continuity_seeds: bible.continuity_seeds,
-    })}</pre>`;
+    };
+    return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(raw)}</pre>` : renderStyleReader(bible)}`;
   }
   return `<pre class="nc-code-block">${jsonHtml(bible)}</pre>`;
 }
@@ -286,6 +378,7 @@ export function mountBibleView(container: HTMLElement): () => void {
     slug: app.currentSlug || app.defaultSlug,
     bible: null,
     tab: "world",
+    displayMode: "reader",
     loading: false,
     error: null,
     modal: null,
@@ -303,6 +396,13 @@ export function mountBibleView(container: HTMLElement): () => void {
     const tab = target.closest<HTMLButtonElement>("[data-bible-tab]")?.dataset.bibleTab as BibleTab | undefined;
     if (tab && BIBLE_TABS.some((item) => item.id === tab)) {
       state.tab = tab;
+      state.displayMode = "reader";
+      render(container, state);
+      return;
+    }
+    const mode = target.closest<HTMLButtonElement>("[data-display-mode]")?.dataset.displayMode as DisplayMode | undefined;
+    if (mode === "reader" || mode === "raw") {
+      state.displayMode = mode;
       render(container, state);
       return;
     }

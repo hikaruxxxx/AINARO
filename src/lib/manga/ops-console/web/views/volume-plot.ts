@@ -6,12 +6,22 @@ import {
   type JobEvent,
   type VolumePlot,
 } from "../lib/api";
+import {
+  asKeyValueTable,
+  asRecord,
+  detailsRaw,
+  escapeHtml,
+  jsonHtml,
+} from "../lib/data-display";
 import { store } from "../lib/store";
+
+type DisplayMode = "reader" | "raw";
 
 type ViewState = {
   slug: string;
   volume: number;
   plot: VolumePlot | null;
+  displayMode: DisplayMode;
   loading: boolean;
   error: string | null;
   modalOpen: boolean;
@@ -24,9 +34,24 @@ const CSS = `
 .vplot-view { display: grid; gap: var(--space-3); }
 .vplot-spacer { flex: 1 1 auto; }
 .vplot-info { color: var(--text-secondary); font-size: var(--fs-sm); }
-.vplot-body { display: grid; gap: var(--space-3); }
+.vplot-body { display: grid; gap: var(--space-3); max-width: 980px; }
 .vplot-section { display: grid; gap: var(--space-2); }
 .vplot-section h3 { margin: 0; font-size: var(--fs-lg); }
+.vplot-mode { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.vp-episodes { display: grid; gap: var(--space-3); }
+.vp-episode-card { display: grid; gap: var(--space-3); }
+.vp-episode-head { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
+.vp-episode-head h3 { margin: 0; font-size: var(--fs-lg); }
+.vp-arc { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+.vp-arc__step { border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: var(--space-2); background: var(--surface-sunken); }
+.vp-arc__label { display: block; color: var(--text-tertiary); font-size: var(--fs-sm); font-weight: var(--fw-bold); margin-bottom: var(--space-1); }
+.vp-beats { display: grid; gap: var(--space-2); }
+.vp-beat { display: grid; gap: var(--space-1); padding: var(--space-2); border: 1px solid var(--border-default); border-radius: var(--radius-md); }
+.vp-beat__head { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
+.vp-beat__summary { line-height: 1.6; color: var(--text-primary); }
+.vp-beat__visual { color: var(--text-secondary); font-size: var(--fs-sm); }
+.vp-intensity { height: 6px; border-radius: var(--radius-pill); background: var(--surface-sunken); overflow: hidden; }
+.vp-intensity__bar { height: 100%; border-radius: inherit; background: var(--color-primary); }
 .vplot-modal-body { display: grid; gap: var(--space-3); padding: var(--space-4); }
 .vplot-modal-head { display: flex; align-items: center; gap: var(--space-2); }
 .vplot-modal-title { margin: 0; font-size: var(--fs-xl); }
@@ -42,43 +67,90 @@ function ensureStyles(): void {
   document.head.appendChild(style);
 }
 
-function escapeHtml(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
-}
-
-function jsonHtml(value: unknown): string {
-  return escapeHtml(JSON.stringify(value, null, 2));
-}
-
 function errorText(error: unknown): string {
   if (error instanceof ApiError) return `API ${error.status}: ${error.body}`;
   return error instanceof Error ? error.message : String(error);
 }
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+function renderDisplayMode(active: DisplayMode): string {
+  return `<div class="vplot-mode">
+    <button type="button" class="nc-pill${active === "reader" ? " nc-pill--active" : ""}" data-display-mode="reader">Reader</button>
+    <button type="button" class="nc-pill${active === "raw" ? " nc-pill--active" : ""}" data-display-mode="raw">生 JSON</button>
+  </div>`;
 }
 
-function renderPlot(plot: unknown): string {
+function intensity(value: unknown): number {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(1, n));
+}
+
+function renderBeats(beats: unknown): string {
+  const items = Array.isArray(beats) ? beats : [];
+  if (items.length === 0) return `<div class="nc-empty">beat がありません。</div>`;
+  return `<div class="vp-beats">${items.map((beat) => {
+    const b = asRecord(beat);
+    const value = intensity(b.emotional_intensity);
+    return `<div class="vp-beat">
+      <div class="vp-beat__head">
+        <span class="nc-code">#${escapeHtml(String(b.beat_idx ?? "-"))}</span>
+        ${b.label ? `<span class="nc-badge nc-badge--info">${escapeHtml(String(b.label))}</span>` : ""}
+      </div>
+      <div class="vp-beat__summary">${escapeHtml(String(b.summary ?? ""))}</div>
+      <div class="vp-intensity" title="emotional_intensity ${value}"><div class="vp-intensity__bar" style="width:${Math.round(value * 100)}%"></div></div>
+      ${b.key_visual ? `<div class="vp-beat__visual">絵の核: ${escapeHtml(String(b.key_visual))}</div>` : ""}
+    </div>`;
+  }).join("")}</div>`;
+}
+
+function renderEpisode(ep: unknown): string {
+  const item = asRecord(ep);
+  const episodeNo = Number(item.episode_no);
+  const arc = asRecord(item.protagonist_arc);
+  return `<article class="nc-card vp-episode-card">
+    <div class="vp-episode-head">
+      <span class="nc-badge nc-badge--neutral">ep${String(Number.isInteger(episodeNo) ? episodeNo : 0).padStart(2, "0")}</span>
+      <h3>${escapeHtml(String(item.title_working ?? "タイトル未設定"))}</h3>
+    </div>
+    ${asKeyValueTable({
+      "テーマ": item.theme,
+      "ページ目安": item.page_target,
+    })}
+    <div class="vp-arc">
+      <div class="vp-arc__step"><span class="vp-arc__label">start</span>${escapeHtml(String(arc.start ?? ""))}</div>
+      <div class="vp-arc__step"><span class="vp-arc__label">turn</span>${escapeHtml(String(arc.turn ?? ""))}</div>
+      <div class="vp-arc__step"><span class="vp-arc__label">end</span>${escapeHtml(String(arc.end ?? ""))}</div>
+    </div>
+    ${renderBeats(item.beats)}
+    <details class="nc-card nc-card--sunken vplot-section">
+      <summary>詳細 (must_include_events / cliffhanger_hook / brief_for_L3)</summary>
+      ${asKeyValueTable({
+        "必須イベント": item.must_include_events,
+        "引き": item.cliffhanger_hook,
+        "L3 入力ブリーフ": item.brief_for_L3,
+      })}
+    </details>
+  </article>`;
+}
+
+function renderReader(plot: unknown): string {
   const obj = asRecord(plot);
+  const episodes = Array.isArray(obj.episodes) ? obj.episodes : [];
   return `
     <div class="vplot-body">
       <section class="nc-card vplot-section">
-        <h3>巻あらすじ</h3>
-        <pre class="nc-code-block">${jsonHtml(obj.synopsis ?? obj.volume_synopsis ?? null)}</pre>
+        <h3>巻全体</h3>
+        ${asKeyValueTable({
+          "title (working)": obj.title_working,
+          "テーマ": obj.volume_theme,
+          "推定ページ数": obj.estimated_pages,
+        })}
+        ${obj.foreshadow_map ? detailsRaw("foreshadow_map", obj.foreshadow_map) : ""}
       </section>
-      <section class="nc-card vplot-section">
-        <h3>章構成</h3>
-        <pre class="nc-code-block">${jsonHtml(obj.chapters ?? obj.episodes ?? [])}</pre>
+      <section class="vp-episodes">
+        <h3>エピソード一覧 (${episodes.length} 話)</h3>
+        ${episodes.map(renderEpisode).join("")}
       </section>
-      <section class="nc-card vplot-section">
-        <h3>キャラクター動線</h3>
-        <pre class="nc-code-block">${jsonHtml(obj.characters ?? obj.character_arcs ?? [])}</pre>
-      </section>
-      <details class="nc-card vplot-section">
-        <summary>生 JSON</summary>
-        <pre class="nc-code-block">${jsonHtml(plot)}</pre>
-      </details>
     </div>`;
 }
 
@@ -114,7 +186,11 @@ function render(container: HTMLElement, state: ViewState): void {
   const scope = `${state.slug} / v${String(state.volume).padStart(2, "0")}`;
   const body = (() => {
     if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
-    if (state.plot) return renderPlot(state.plot.plot);
+    if (state.plot) {
+      return state.displayMode === "raw"
+        ? `<pre class="nc-code-block">${jsonHtml(state.plot.plot)}</pre>`
+        : renderReader(state.plot.plot);
+    }
     if (state.error) return `<div class="nc-empty">Volume Plot は未作成です。「Volume Plot を構築」ボタンから生成してください。</div>`;
     return `<div class="nc-empty">Volume Plot は未作成です。「Volume Plot を構築」ボタンから生成してください。</div>`;
   })();
@@ -124,6 +200,7 @@ function render(container: HTMLElement, state: ViewState): void {
         <h2 class="nc-toolbar__title">巻あらすじ・章構成 (Volume Plot)</h2>
         <span class="vplot-info">${escapeHtml(scope)}</span>
         <span class="vplot-spacer"></span>
+        ${renderDisplayMode(state.displayMode)}
         <button type="button" class="nc-button nc-button--primary" data-open-modal>Volume Plot を構築</button>
       </div>
       ${body}
@@ -165,6 +242,7 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
     slug: app.currentSlug || app.defaultSlug,
     volume: 1,
     plot: null,
+    displayMode: "reader",
     loading: false,
     error: null,
     modalOpen: false,
@@ -179,6 +257,12 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
   container.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
+    const mode = target.closest<HTMLButtonElement>("[data-display-mode]")?.dataset.displayMode as DisplayMode | undefined;
+    if (mode === "reader" || mode === "raw") {
+      state.displayMode = mode;
+      render(container, state);
+      return;
+    }
     if (target.closest("[data-open-modal]")) {
       state.modalOpen = true;
       state.log = [];
