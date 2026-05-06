@@ -3,12 +3,12 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import {
   auditPath,
+  bibleDir,
   bibleRefsDir,
   bibleSnapshotPath,
   episodeDir,
   incrementalRefsDir,
   nameApprovalPath,
-  nameAuditPath,
   nameManifestPath,
   pagePlanPath,
   resolvedRefsPath,
@@ -20,23 +20,37 @@ import { isValidEpisode, isValidSlug } from "../lib/path-guards";
 
 type PipelineLayerId =
   | "L01"
+  | "L01b"
+  | "L01c"
   | "L02"
   | "L02b"
   | "L03"
   | "L04"
+  | "L04_1"
+  | "L04_9"
   | "L05"
   | "L06"
   | "L07"
   | "L08"
   | "L08.5"
-  | "L08.6"
   | "L08.7"
   | "L09"
   | "L11"
   | "L12"
   | "L13";
 
-type RunnableLayerId = "L01" | "L02" | "L02b" | "L09" | "L11" | "L12" | "L13";
+type RunnableLayerId =
+  | "L01"
+  | "L01b"
+  | "L01c"
+  | "L02"
+  | "L02b"
+  | "L04_1"
+  | "L04_9"
+  | "L09"
+  | "L11"
+  | "L12"
+  | "L13";
 
 type PipelineStatusLayer = {
   id: PipelineLayerId;
@@ -159,6 +173,20 @@ function specs(slug: string, episode: number): LayerSpec[] {
       next_layer_id: "L01",
     },
     {
+      id: "L01b",
+      label: "L01b Bible Lint",
+      artifacts: [artifact(path.join(bibleDir(slug), "lint_report.json"), "file")],
+      next_view: "bible",
+      next_layer_id: "L01b",
+    },
+    {
+      id: "L01c",
+      label: "L01c Bible Deepen",
+      artifacts: [artifact(bibleSnapshotPath(slug), "file")],
+      next_view: "bible",
+      next_layer_id: "L01c",
+    },
+    {
       id: "L02",
       label: "L02 Bible Images",
       artifacts: [artifact(bibleRefs, "image-in-dir")],
@@ -174,12 +202,26 @@ function specs(slug: string, episode: number): LayerSpec[] {
     },
     { id: "L03", label: "L03 Shotlist", artifacts: [artifact(shotlist, "file")], next_view: "storyboard", next_layer_id: null },
     { id: "L04", label: "L04 Storyboard", artifacts: [artifact(storyboardPath(slug, episode), "file")], next_view: "storyboard", next_layer_id: null },
+    {
+      id: "L04_1",
+      label: "L04.1 Opening Hook",
+      artifacts: [artifact(path.join(epDir, "_opening_alts"), "dir")],
+      next_view: "storyboard",
+      next_layer_id: "L04_1",
+    },
+    {
+      id: "L04_9",
+      label: "L04.9 Cliffhanger",
+      artifacts: [artifact(path.join(epDir, "_cliffhanger_alts"), "dir")],
+      next_view: "storyboard",
+      next_layer_id: "L04_9",
+    },
     { id: "L05", label: "L05 Page Director", artifacts: [artifact(pagePlanPath(slug, episode), "file")], next_view: "storyboard", next_layer_id: null },
     { id: "L06", label: "L06 Continuity", artifacts: [artifact(pagePlanPath(slug, episode), "file")], next_view: "storyboard", next_layer_id: null },
     { id: "L07", label: "L07 Refs Resolution", artifacts: [artifact(resolvedRefsPath(slug, episode), "file")], next_view: "storyboard", next_layer_id: null },
     { id: "L08", label: "L08 Incremental Refs", artifacts: [artifact(incrementalRefsDir(slug, episode), "dir")], next_view: "storyboard", next_layer_id: null },
-    { id: "L08.5", label: "L08.5 Name Preview", artifacts: [artifact(nameManifestPath(slug, episode), "file")], next_view: "name-gate", next_layer_id: null },
-    { id: "L08.6", label: "L08.6 Name Audit", artifacts: [artifact(nameAuditPath(slug, episode), "file")], next_view: "name-gate", next_layer_id: null },
+    // L08.5 は内部 audit を含む。pipeline 上は warning 表示のみで独立 row にしない。
+    { id: "L08.5", label: "L08.5 Name Preview + Audit", artifacts: [artifact(nameManifestPath(slug, episode), "file")], next_view: "name-gate", next_layer_id: null },
     { id: "L08.7", label: "L08.7 Name Approval", artifacts: [artifact(nameApprovalPath(slug, episode), "file")], next_view: "name-gate", next_layer_id: null },
     { id: "L09", label: "L09 Render", artifacts: [artifact(renders, "png-in-dir")], next_view: "revision", next_layer_id: "L09" },
     { id: "L11", label: "L11 Audit", artifacts: [artifact(auditPath(slug, episode), "file")], next_view: "quality", next_layer_id: "L11" },

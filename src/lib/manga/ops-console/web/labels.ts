@@ -4,16 +4,19 @@
  */
 export type LayerKey =
   | "L01"
+  | "L01b"
+  | "L01c"
   | "L02"
   | "L02b"
   | "L03"
   | "L04"
+  | "L04_1"
+  | "L04_9"
   | "L05"
   | "L06"
   | "L07"
   | "L08"
   | "L08.5"
-  | "L08.6"
   | "L08.7"
   | "L09"
   | "L11"
@@ -22,16 +25,19 @@ export type LayerKey =
 
 export const LAYER_LABELS: Record<LayerKey, { title: string; subtitle: string }> = {
   L01: { title: "世界観・キャラ設定 (Bible)", subtitle: "L01" },
-  L02: { title: "キャラ・背景の参考画像", subtitle: "L02 Bible Images" },
+  L01b: { title: "Bible 監査 (Lint)", subtitle: "L01b Bible Lint" },
+  L01c: { title: "Bible 深掘り (Deepen)", subtitle: "L01c Bible Deepen" },
+  L02: { title: "参考画像 (初回バッチ・キャラ/背景)", subtitle: "L02 Bible Images" },
   L02b: { title: "巻あらすじ・章構成 (Volume Plot)", subtitle: "L02b" },
   L03: { title: "シーン分割 (Shotlist)", subtitle: "L03" },
   L04: { title: "コンテ (Storyboard)", subtitle: "L04" },
+  L04_1: { title: "オープニングフック改善", subtitle: "L04.1 Opening Hook" },
+  L04_9: { title: "クリフハンガー改善", subtitle: "L04.9 Cliffhanger" },
   L05: { title: "ページ配置 (Page Plan)", subtitle: "L05" },
   L06: { title: "整合性チェック (Continuity)", subtitle: "L06" },
   L07: { title: "参照画像の自動選択 (Refs)", subtitle: "L07" },
-  L08: { title: "不足参照画像の追加生成", subtitle: "L08" },
-  "L08.5": { title: "ネーム (SVG プレビュー)", subtitle: "L08.5 Name Preview" },
-  "L08.6": { title: "ネーム監査 (ルール)", subtitle: "L08.6 Name Audit" },
+  L08: { title: "参考画像 (話別・不足分の追加生成)", subtitle: "L08 Incremental Refs" },
+  "L08.5": { title: "ネーム生成 + ルール監査", subtitle: "L08.5 Name Preview + Audit" },
   "L08.7": { title: "ネーム判定 (人間 a/r)", subtitle: "L08.7 Name Approval" },
   L09: { title: "本番画像生成 (Render)", subtitle: "L09" },
   L11: { title: "品質監査 (Audit)", subtitle: "L11" },
@@ -58,6 +64,16 @@ export const LAYER_AI_EDIT_HINTS: Partial<Record<LayerKey, LayerAiEditHint>> = {
     promptTemplate:
       "L01 Bible (世界観・キャラ設定) の {character|world|location|prop|style} を {変更内容} に修正してください。snapshot.json と該当 yaml を整合させてください。",
   },
+  L01b: {
+    target: "data/manga/works/{slug}/bible/lint_report.json",
+    promptTemplate:
+      "L01b Bible Lint で検出された違反 ({詳細}) を {変更内容} で解消してください。snapshot.json と整合させてください。",
+  },
+  L01c: {
+    target: "data/manga/works/{slug}/bible/snapshot.json",
+    promptTemplate:
+      "L01c Bible Deepen の結果のうち {character|world|location|prop|style} の {項目} を {変更内容} に再深掘りしてください。",
+  },
   L02: {
     target: "data/manga/works/{slug}/bible/refs/",
     promptTemplate:
@@ -77,6 +93,16 @@ export const LAYER_AI_EDIT_HINTS: Partial<Record<LayerKey, LayerAiEditHint>> = {
     target: "data/manga/works/{slug}/episodes/ep{ep}/storyboard.json",
     promptTemplate:
       "L04 Storyboard の panel #{N} の構図・動きを {変更内容} に変更してください。",
+  },
+  L04_1: {
+    target: "data/manga/works/{slug}/episodes/ep{ep}/_opening_alts/",
+    promptTemplate:
+      "L04.1 Opening Hook の提案 (pattern_id #{N}) を {変更内容} に修正、または新パターンを追加してください。",
+  },
+  L04_9: {
+    target: "data/manga/works/{slug}/episodes/ep{ep}/_cliffhanger_alts/",
+    promptTemplate:
+      "L04.9 Cliffhanger の提案 (pattern_id #{N}) を {変更内容} に修正、または新パターンを追加してください。",
   },
   L05: {
     target: "data/manga/works/{slug}/episodes/ep{ep}/page_plan.json",
@@ -101,12 +127,7 @@ export const LAYER_AI_EDIT_HINTS: Partial<Record<LayerKey, LayerAiEditHint>> = {
   "L08.5": {
     target: "data/manga/works/{slug}/episodes/ep{ep}/name/",
     promptTemplate:
-      "L08.5 Name Preview (SVG ネーム) の page {N} の {コマ割り|台詞|構図} を {変更内容} に修正してください。",
-  },
-  "L08.6": {
-    target: "data/manga/works/{slug}/episodes/ep{ep}/name_audit.json",
-    promptTemplate:
-      "L08.6 Name Audit で検出された違反 ({詳細}) を {変更内容} で解消してください。",
+      "L08.5 Name Preview/Audit (SVG ネームと name_audit.json) の page {N} の {コマ割り|台詞|構図|audit 違反} を {変更内容} に修正してください。",
   },
   L09: {
     target: "data/manga/works/{slug}/episodes/ep{ep}/renders/",

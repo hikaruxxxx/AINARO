@@ -9,7 +9,7 @@ import { store } from "./store";
 import { openLaunchModal, type LaunchArgSpec } from "./launch-modal";
 
 /** Console から spawn 可能な layer。 server LAYER_REGISTRY と同期させる。 */
-const RUNNABLE = new Set<string>(["L01", "L02", "L02b", "L09", "L11", "L12", "L13"]);
+const RUNNABLE = new Set<string>(["L01", "L01b", "L01c", "L02", "L02b", "L04_1", "L04_9", "L09", "L11", "L12", "L13"]);
 
 export function isRunnableLayer(value: string | null | undefined): value is LayerId {
   return typeof value === "string" && RUNNABLE.has(value);
@@ -40,7 +40,8 @@ export function startRequest(
   extras?: Record<string, string>
 ): JobStartRequest {
   const req: JobStartRequest = { layer, slug, args: {} };
-  if (layer === "L02") return req;
+  // work scope layer は episode を付けずに起動する。
+  if (layer === "L01b" || layer === "L01c" || layer === "L02") return req;
   if (layer === "L13") {
     const vol = Number(extras?.volume ?? 1);
     return { ...req, volume: Number.isFinite(vol) && vol > 0 ? vol : 1 };
