@@ -25,6 +25,7 @@ import {
 import { generateMangaImage } from "../../../src/lib/manga/generate/codex-image";
 import { composePagePrompt, composePanelPrompt } from "../../../src/lib/manga/render-v2/prompt-composer-v2";
 import { composePanelsIntoPage } from "../../../src/lib/manga/render-v2/page-composer";
+import { overlayEffectLinesOntoPage } from "../../../src/lib/manga/render/page-with-effect-lines";
 import { overlayBubblesOntoPage } from "../../../src/lib/manga/render/page-with-bubbles";
 import type {
   BibleSnapshotV2,
@@ -271,6 +272,14 @@ async function main() {
           .png()
           .toFile(outPath);
         try { await fs.unlink(tmpPath); } catch {}
+        const effectResult = await overlayEffectLinesOntoPage({
+          pageOutputPath: outPath,
+          pagePlanPage: page,
+          storyboardPage: sbPage,
+          pageWidth: 1748,
+          pageHeight: 2480,
+        });
+        if (effectResult.effectCount > 0) console.log(`[L09] effects p${page.page_no}: ${effectResult.effectCount}`);
         const bubbleResult = await overlayBubblesOntoPage({
           pagePngPath: outPath,
           outputPath: outPath,
@@ -348,6 +357,14 @@ async function main() {
         outputPath: outPath,
       });
       if (composed.missingPanels.length === 0) {
+        const effectResult = await overlayEffectLinesOntoPage({
+          pageOutputPath: outPath,
+          pagePlanPage: page,
+          storyboardPage: sbPage,
+          pageWidth: 1748,
+          pageHeight: 2480,
+        });
+        if (effectResult.effectCount > 0) console.log(`[L09] effects p${page.page_no}: ${effectResult.effectCount}`);
         const bubbleResult = await overlayBubblesOntoPage({
           pagePngPath: outPath,
           outputPath: outPath,
