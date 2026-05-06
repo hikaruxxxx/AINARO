@@ -16,6 +16,8 @@ export type MatchOptions = {
   storyboardSubtype?: string;
   history?: string[];
   historyPenaltyDepth?: number;
+  /** 直近 history に含まれる同 pattern 1 件あたりの減点係数。default 1.5 */
+  historyPenaltyIntensity?: number;
 };
 
 const FREQUENCY_RANK: Record<PatternFrequency, number> = {
@@ -69,8 +71,8 @@ function hasLargeSlot(pattern: Pattern): boolean {
   return maxSizeRank(pattern) >= SIZE_RANK.extra_large;
 }
 
-function historyPenalty(pattern: Pattern, history: string[], depth: number): number {
-  return history.slice(-depth).filter((id) => id === pattern.id).length;
+function historyPenalty(pattern: Pattern, history: string[], depth: number, intensity: number): number {
+  return history.slice(-depth).filter((id) => id === pattern.id).length * intensity;
 }
 
 function panelCountBonus(pattern: Pattern, targetPanelCount: number): number {
@@ -96,8 +98,9 @@ function scorePattern(args: {
   targetPanelCount: number;
   history: string[];
   historyPenaltyDepth: number;
+  historyPenaltyIntensity: number;
 }): ScoredPattern {
-  const penalty = historyPenalty(args.pattern, args.history, args.historyPenaltyDepth);
+  const penalty = historyPenalty(args.pattern, args.history, args.historyPenaltyDepth, args.historyPenaltyIntensity);
   const subtypeBonus = subtypeMatches(args.pattern, args.storyboardSubtype) ? 0.5 : 0;
   const importanceBonus = importanceMax(args.page) >= 4 && hasLargeSlot(args.pattern) ? 0.3 : 0;
   const score =
@@ -123,6 +126,7 @@ function pickPattern(args: {
   targetPanelCount: number;
   history: string[];
   historyPenaltyDepth: number;
+  historyPenaltyIntensity: number;
 }): ScoredPattern | undefined {
   return args.candidates
     .map((pattern) =>
@@ -134,6 +138,7 @@ function pickPattern(args: {
         targetPanelCount: args.targetPanelCount,
         history: args.history,
         historyPenaltyDepth: args.historyPenaltyDepth,
+        historyPenaltyIntensity: args.historyPenaltyIntensity,
       })
     )
     .sort((a, b) => b.score - a.score || a.pattern.id.localeCompare(b.pattern.id))[0];
@@ -147,6 +152,7 @@ function buildResult(args: {
   targetPanelCount: number;
   history: string[];
   historyPenaltyDepth: number;
+  historyPenaltyIntensity: number;
   warnings: string[];
 }): MatchResult {
   const alternatives = args.candidates
@@ -160,6 +166,7 @@ function buildResult(args: {
         targetPanelCount: args.targetPanelCount,
         history: args.history,
         historyPenaltyDepth: args.historyPenaltyDepth,
+        historyPenaltyIntensity: args.historyPenaltyIntensity,
       })
     )
     .sort((a, b) => b.score - a.score || a.pattern.id.localeCompare(b.pattern.id))
@@ -183,7 +190,8 @@ function buildResult(args: {
 export function matchPattern(args: MatchOptions): MatchResult {
   const panelCount = args.page.panels.length;
   const history = args.history ?? [];
-  const historyPenaltyDepth = args.historyPenaltyDepth ?? 3;
+  const historyPenaltyDepth = args.historyPenaltyDepth ?? 5;
+  const historyPenaltyIntensity = args.historyPenaltyIntensity ?? 1.5;
 
   const phase1Candidates = args.dict.patterns.filter((pattern) =>
     Math.abs(pattern.panel_count - panelCount) <= 1 &&
@@ -197,6 +205,7 @@ export function matchPattern(args: MatchOptions): MatchResult {
     targetPanelCount: panelCount,
     history,
     historyPenaltyDepth,
+    historyPenaltyIntensity,
   });
   if (phase1) {
     return buildResult({
@@ -207,6 +216,7 @@ export function matchPattern(args: MatchOptions): MatchResult {
       targetPanelCount: panelCount,
       history,
       historyPenaltyDepth,
+      historyPenaltyIntensity,
       warnings: [],
     });
   }
@@ -223,6 +233,7 @@ export function matchPattern(args: MatchOptions): MatchResult {
     targetPanelCount: panelCount,
     history,
     historyPenaltyDepth,
+    historyPenaltyIntensity,
   });
   if (phase2) {
     return buildResult({
@@ -233,6 +244,7 @@ export function matchPattern(args: MatchOptions): MatchResult {
       targetPanelCount: panelCount,
       history,
       historyPenaltyDepth,
+      historyPenaltyIntensity,
       warnings: [
         `phase=2 (panel_count mismatch): expected ${panelCount} got pattern of ${phase2.pattern.panel_count}`,
       ],
@@ -248,6 +260,7 @@ export function matchPattern(args: MatchOptions): MatchResult {
     targetPanelCount: panelCount,
     history,
     historyPenaltyDepth,
+    historyPenaltyIntensity,
   });
   if (phase3) {
     return buildResult({
@@ -258,6 +271,7 @@ export function matchPattern(args: MatchOptions): MatchResult {
       targetPanelCount: panelCount,
       history,
       historyPenaltyDepth,
+      historyPenaltyIntensity,
       warnings: [`phase=3 (role ignored): page_role=${args.page.page_role} pattern=${phase3.pattern.id}`],
     });
   }

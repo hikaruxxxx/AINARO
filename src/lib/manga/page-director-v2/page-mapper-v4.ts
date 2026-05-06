@@ -37,7 +37,8 @@ export function buildPagePlanFromStoryboardV4(args: {
       dict: args.dict,
       storyboardSubtype: args.storyboardSubtype,
       history,
-      historyPenaltyDepth: 3,
+      historyPenaltyDepth: 5,
+      historyPenaltyIntensity: 1.5,
     });
     if (!match) {
       console.warn(
