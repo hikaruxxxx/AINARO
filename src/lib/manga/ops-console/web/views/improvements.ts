@@ -126,6 +126,38 @@ const CSS = `
   font-size: var(--fs-xs);
 }
 .imp-next-step__nav-link:hover { background: var(--surface-sunken); }
+
+.imp-intro {
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-subtle);
+  border-radius: 8px;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  border-left: 4px solid var(--color-primary);
+}
+.imp-intro h3 { margin: 0 0 6px; font-size: var(--fs-md); color: var(--text-primary); }
+.imp-intro ol { margin: 4px 0 0; padding-left: 20px; }
+.imp-intro li { margin-bottom: 2px; }
+.imp-intro__goal { color: var(--text-primary); font-weight: 600; }
+
+.imp-section h3 .imp-section-sub-num { color: var(--color-primary); font-weight: 700; margin-right: 6px; }
+.imp-section h3 .imp-section-techname { color: var(--text-secondary); font-weight: 400; font-size: var(--fs-sm); margin-left: 8px; }
+
+details.imp-collapsible { background: var(--surface-base); border:1px solid var(--border-default); border-radius: 8px; padding: 0; }
+details.imp-collapsible > summary {
+  cursor: pointer;
+  padding: var(--space-3);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  list-style: none;
+  display: flex; align-items: center; gap: 8px;
+}
+details.imp-collapsible > summary::-webkit-details-marker { display: none; }
+details.imp-collapsible > summary::before { content: "▶"; font-size: 10px; color: var(--text-secondary); transition: transform 0.15s; }
+details.imp-collapsible[open] > summary::before { transform: rotate(90deg); }
+details.imp-collapsible[open] > summary { border-bottom: 1px solid var(--border-subtle); }
+details.imp-collapsible > summary .imp-collapsible-hint { font-weight: 400; font-size: var(--fs-xs); color: var(--text-secondary); margin-left: auto; }
+details.imp-collapsible__body { padding: var(--space-3); display: grid; gap: var(--space-2); }
 `;
 
 function ensureStyles(): void {
@@ -154,42 +186,50 @@ function renderAuditSummary(data: ImprovementsResponse): string {
   const parts: string[] = [];
   if (data.audit_summary) {
     const a = data.audit_summary;
+    const hasFindings = a.findings_top10.length > 0;
     parts.push(`
       <div class="imp-section">
-        <h3>L11 Audit (機械検査)</h3>
+        <h3><span class="imp-section-sub-num">①</span>機械検査の結果<span class="imp-section-techname">L11 audit</span></h3>
+        <p class="imp-section-sub">storyboard.json をルールベースで検査し、形式エラーや要修正点を検出した結果</p>
         <dl class="imp-stat-row">
-          <div><dt>pages</dt><dd>${a.pages_total}</dd></div>
-          <div><dt>findings</dt><dd>${a.findings_total}</dd></div>
+          <div><dt>ページ数</dt><dd>${a.pages_total}</dd></div>
+          <div><dt>検出件数</dt><dd>${a.findings_total}</dd></div>
           <div><dt>error</dt><dd>${a.counts_by_severity.error ?? 0}</dd></div>
           <div><dt>warn</dt><dd>${a.counts_by_severity.warn ?? 0}</dd></div>
           <div><dt>info</dt><dd>${a.counts_by_severity.info ?? 0}</dd></div>
         </dl>
-        ${a.findings_top10.length === 0 ? '<div class="imp-empty">audit findings なし</div>' : a.findings_top10.map((f) => `
-          <div class="imp-finding imp-finding--${f.severity}">
-            <div><strong>${escapeHtml(f.rule)}</strong> @ page ${f.page_no}${f.panel_no ? ` panel#${f.panel_no}` : ""}</div>
-            <div class="imp-finding-meta">${escapeHtml(f.message)}</div>
-          </div>
-        `).join("")}
+        ${!hasFindings ? '<div class="imp-empty">✅ 検出件数 0 件 (機械検査は通過)</div>' : `
+          <details class="imp-collapsible" ${a.findings_total > 5 ? "" : "open"}>
+            <summary>検出された findings (top 10)<span class="imp-collapsible-hint">クリックで展開</span></summary>
+            <div class="imp-collapsible__body">
+              ${a.findings_top10.map((f) => `
+                <div class="imp-finding imp-finding--${f.severity}">
+                  <div><strong>${escapeHtml(f.rule)}</strong> @ page ${f.page_no}${f.panel_no ? ` panel#${f.panel_no}` : ""}</div>
+                  <div class="imp-finding-meta">${escapeHtml(f.message)}</div>
+                </div>
+              `).join("")}
+            </div>
+          </details>
+        `}
       </div>
     `);
   }
-  if (data.name_audit_summary) {
+  if (data.name_audit_summary && data.name_audit_summary.new_rules_findings.length > 0) {
+    // 新ルール検出が 0 件なら details で見せない (初見ノイズになる)。検出があるときだけ展開可能で出す。
     const n = data.name_audit_summary;
     parts.push(`
-      <div class="imp-section">
-        <h3>Phase X 新ルール検出</h3>
-        <p class="imp-section-sub">narration_dominant / recovery_beat_missing / expectation_reality_gap_absent / mascot_temperature_pair_missing / face_only_emotion_run</p>
-        <dl class="imp-stat-row">
-          <div><dt>findings 総数</dt><dd>${n.findings_total}</dd></div>
-          <div><dt>新ルール検出</dt><dd>${n.new_rules_findings.length}</dd></div>
-        </dl>
-        ${n.new_rules_findings.length === 0 ? '<div class="imp-empty">新ルール検出なし (Phase X craft 反映済 or storyboard 未到達)</div>' : n.new_rules_findings.map((f) => `
-          <div class="imp-finding imp-finding--${f.severity}">
-            <div><strong>${escapeHtml(f.rule)}</strong> @ page ${f.page_no}${f.panel_no ? ` panel#${f.panel_no}` : ""}</div>
-            <div class="imp-finding-meta">${escapeHtml(f.message)}</div>
-          </div>
-        `).join("")}
-      </div>
+      <details class="imp-collapsible">
+        <summary>📋 上級向け: Phase X 新ルール検出 (${n.new_rules_findings.length} 件)<span class="imp-collapsible-hint">narration / recovery / expectation gap など</span></summary>
+        <div class="imp-collapsible__body">
+          <p class="imp-section-sub">narration_dominant / recovery_beat_missing / expectation_reality_gap_absent / mascot_temperature_pair_missing / face_only_emotion_run の 5 ルール</p>
+          ${n.new_rules_findings.map((f) => `
+            <div class="imp-finding imp-finding--${f.severity}">
+              <div><strong>${escapeHtml(f.rule)}</strong> @ page ${f.page_no}${f.panel_no ? ` panel#${f.panel_no}` : ""}</div>
+              <div class="imp-finding-meta">${escapeHtml(f.message)}</div>
+            </div>
+          `).join("")}
+        </div>
+      </details>
     `);
   }
   return parts.join("");
@@ -200,11 +240,12 @@ function renderProposalSection(
   description: string,
   proposals: ImprovementsResponse["opening_hook_proposals"] | ImprovementsResponse["cliffhanger_proposals"],
   pullLink?: ImprovementsResponse["cliffhanger_proposals"]["pull_link"],
+  techname?: string,
 ): string {
   const lines: string[] = [];
   lines.push(`
     <div class="imp-section">
-      <h3>${escapeHtml(title)}</h3>
+      <h3>${escapeHtml(title)}${techname ? `<span class="imp-section-techname">${escapeHtml(techname)}</span>` : ""}</h3>
       <p class="imp-section-sub">${escapeHtml(description)}</p>
   `);
   if (!proposals.available) {
@@ -253,7 +294,7 @@ function renderCompletionRisk(data: ImprovementsResponse): string {
   const levelLabel = r.level === "high" ? "高リスク" : r.level === "medium" ? "中リスク" : "低リスク";
   return `
     <div class="imp-section">
-      <h3>KU 完読率リスク (v0、ヒューリスティック)</h3>
+      <h3><span class="imp-section-sub-num">④</span>KU 完読率リスク (推定)<span class="imp-section-techname">v0 ヒューリスティック</span></h3>
       <p class="imp-section-sub">audit findings + engagement_audit + 編集判断カード適用数 から自動算出。実 KENP データ取得後 (Phase Z) で v1 学習予定</p>
       <div class="imp-finding imp-finding--${levelClass}">
         <strong>${escapeHtml(levelLabel)}</strong> (penalty: ${r.total_penalty})
@@ -281,6 +322,22 @@ function renderCompletionRisk(data: ImprovementsResponse): string {
           </ul>
         </div>
       ` : ""}
+    </div>
+  `;
+}
+
+function renderIntro(): string {
+  return `
+    <div class="imp-intro">
+      <h3>このページについて</h3>
+      <div><span class="imp-intro__goal">目的:</span> 漫画の冒頭3ページ (Hook = 掴み) と最終ページ (Cliff = 引き) を改善し、KU 読者が離脱せずに次話へ進む流れを作る</div>
+      <div style="margin-top: 6px;"><span class="imp-intro__goal">使い方:</span></div>
+      <ol>
+        <li>下の <strong>「次の一手」</strong>パネルが現在地に応じた 1 アクションを提示。基本これに従う</li>
+        <li>「品質改善チェーン実行」 1 ボタンで「audit → Hook 適用 → Cliff 適用 → 再 audit」を一気通貫</li>
+        <li>細かく走らせたいときだけ最下段の「個別実行」を開く (上級者向け)</li>
+        <li>用語: <strong>Hook</strong>=最初の3p で読者の興味を掴む、<strong>Cliff</strong>=末尾で次話を読みたくさせる、<strong>EC</strong>=編集判断カード (修正の処方箋)</li>
+      </ol>
     </div>
   `;
 }
@@ -433,8 +490,8 @@ function renderChain(state: ViewState): string {
 
   return `
     <div class="imp-chain">
-      <h3>品質改善チェーン実行 (audit → Hook 適用 → Cliff 適用 → 再audit)</h3>
-      <p class="imp-section-sub">L11 audit で現状確認 → 既存提案を storyboard に直接適用 → 再 audit で findings 解消を検証 を 1 ボタンで実行</p>
+      <h3>🚀 品質改善チェーン実行 (おすすめ)</h3>
+      <p class="imp-section-sub">「機械検査 → Hook 推奨適用 → Cliff 推奨適用 → 再検査」を 1 ボタンで一気通貫実行。既に提案 (②③) が揃っている場合の最短ルート</p>
       <div class="imp-chain-controls">
         <button type="button" class="nc-button nc-button--primary" data-action="chain-start" ${(!canChain || state.chainRunning) ? "disabled" : ""}>
           ${state.chainRunning ? "実行中…" : "チェーンを実行"}
@@ -463,8 +520,8 @@ function renderEngagementEcSuggestions(data: ImprovementsResponse): string {
   if (!data.engagement_ec_suggestions || data.engagement_ec_suggestions.length === 0) return "";
   return `
     <div class="imp-section">
-      <h3>EC 適用 suggestion (Engagement Audit より自動抽出)</h3>
-      <p class="imp-section-sub">LLM が rationale で言及した EC カード。「AI 編集に流す」を押すと該当 EC の instruction + page 範囲を Codex 編集 prompt に prefill します</p>
+      <h3><span class="imp-section-sub-num">⑥</span>EC (編集判断カード) 適用候補<span class="imp-section-techname">自動抽出</span></h3>
+      <p class="imp-section-sub">⑤ の LLM が「これを直そう」と言及したカード。クリックで AI 編集に流せる (instruction + 対象 page を Codex に prefill)</p>
       ${data.engagement_ec_suggestions.map((s) => `
         <div class="imp-action-row">
           <button type="button" class="nc-button nc-button--primary nc-button--sm" data-action="apply-ec" data-card-id="${escapeHtml(s.card_id)}">AI 編集に流す</button>
@@ -482,7 +539,7 @@ function renderEngagementAudit(data: ImprovementsResponse): string {
   if (!e.available) {
     return `
       <div class="imp-section">
-        <h3>L5.5 Engagement Audit (LLM 判定)</h3>
+        <h3><span class="imp-section-sub-num">⑤</span>読者離脱リスク (LLM 判定)<span class="imp-section-techname">L5.5 Engagement Audit</span></h3>
         <p class="imp-section-sub">storyboard を claude opus で「読者離脱リスク」採点。下の next_actions から実行</p>
         <div class="imp-empty">未生成。「Engagement Audit を実行 (LLM)」ボタンから起動してください (12-20分)</div>
       </div>
@@ -514,32 +571,37 @@ function renderEngagementAudit(data: ImprovementsResponse): string {
 }
 
 function renderRelatedCards(data: ImprovementsResponse): string {
+  // 初見にとって 11 枚のカード一覧はノイズ。⑥の自動抽出で必要なものは出るので、
+  // 全カタログは details で折り畳んで「参考資料」扱いにする。
   return `
-    <div class="imp-section">
-      <h3>編集判断カードDB シード (Phase X で蓄積)</h3>
-      <p class="imp-section-sub">findings に対応する修正パターンの蓄積。Phase Y WY-6 で本格 schema 化予定</p>
-      ${data.related_cards.length === 0 ? '<div class="imp-empty">カードなし</div>' : `
-        <div class="imp-card-list">
-          ${data.related_cards.map((c) => `
-            <div class="imp-card-row">
-              <span class="imp-card-id">${escapeHtml(c.card_id)}</span> ${escapeHtml(c.title)}
-              <span class="imp-info"> (scope=${escapeHtml(c.scope)}${c.trigger.flag ? `, trigger=${escapeHtml(c.trigger.flag)}` : ""})</span>
-              <br>
-              <span class="imp-info">${escapeHtml(c.diagnosis)}</span>
-            </div>
-          `).join("")}
-        </div>
-      `}
-    </div>
+    <details class="imp-collapsible">
+      <summary>📚 参考: 編集判断カード (EC) カタログ全 ${data.related_cards.length} 枚<span class="imp-collapsible-hint">findings に対応する修正パターン辞書</span></summary>
+      <div class="imp-collapsible__body">
+        <p class="imp-section-sub">audit findings や engagement_audit で問題が出たときに自動 / 手動で適用される修正パターンの蓄積。⑥ で必要なものは自動抽出されているので、初見はここを開く必要はありません</p>
+        ${data.related_cards.length === 0 ? '<div class="imp-empty">カードなし</div>' : `
+          <div class="imp-card-list">
+            ${data.related_cards.map((c) => `
+              <div class="imp-card-row">
+                <span class="imp-card-id">${escapeHtml(c.card_id)}</span> ${escapeHtml(c.title)}
+                <span class="imp-info"> (scope=${escapeHtml(c.scope)}${c.trigger.flag ? `, trigger=${escapeHtml(c.trigger.flag)}` : ""})</span>
+                <br>
+                <span class="imp-info">${escapeHtml(c.diagnosis)}</span>
+              </div>
+            `).join("")}
+          </div>
+        `}
+      </div>
+    </details>
   `;
 }
 
 function renderNextActions(data: ImprovementsResponse, state: ViewState): string {
   return `
-    <div class="imp-section">
-      <h3>次のアクション</h3>
-      <p class="imp-section-sub">クリックで /api/jobs に投入 (Codex 経由で proposals 生成)。完了後は自動で再読込</p>
-      ${data.next_actions.map((a) => {
+    <details class="imp-collapsible">
+      <summary>🛠 上級者向け: 個別実行 (細かく走らせたい場合)<span class="imp-collapsible-hint">${data.next_actions.length} 個のジョブを個別投入</span></summary>
+      <div class="imp-collapsible__body">
+        <p class="imp-section-sub">通常は上の「🚀 品質改善チェーン実行」で OK。個別に「Opening だけ生成」「Engagement Audit だけ走らせる」等したいときはここから:</p>
+        ${data.next_actions.map((a) => {
         const flagsStr = Object.entries(a.job_flags)
           .map(([k, v]) => (v === true ? k : `${k}=${v}`))
           .join(" ");
@@ -555,7 +617,8 @@ function renderNextActions(data: ImprovementsResponse, state: ViewState): string
           </div>
         `;
       }).join("")}
-    </div>
+      </div>
+    </details>
   `;
 }
 
@@ -575,19 +638,23 @@ function render(container: HTMLElement, state: ViewState): void {
     ? `<div class="imp-error">${escapeHtml(state.error)}</div>`
     : state.data
       ? `
+        ${renderIntro()}
         ${renderNextStep(state.data, state)}
         ${renderAuditSummary(state.data)}
         <div class="imp-grid">
           ${renderProposalSection(
-            "L4.1 Opening Hook proposals",
-            "pages[0..2] を掴みパターン辞書 (7種) に従って再生成 — KU 棚で開いた最初の3pの品質向上",
+            "②冒頭3p (Hook) の提案",
+            "最初の 3 ページを掴みパターン辞書 (7種) に従って再生成 — KU 棚で開いた最初の3pの品質向上",
             state.data.opening_hook_proposals,
+            undefined,
+            "L4.1 Opening Hook",
           )}
           ${renderProposalSection(
-            "L4.9 Cliffhanger proposals",
-            "last_page を引きパターン辞書 (7種) に従って再設計 + pull_link 注入 — 次話/次巻 read-through 最大化",
+            "③末尾ページ (Cliff) の提案",
+            "末尾ページを引きパターン辞書 (7種) に従って再設計 + 次話冒頭との接続 — 次話/次巻 read-through 最大化",
             state.data.cliffhanger_proposals,
             state.data.cliffhanger_proposals.pull_link,
+            "L4.9 Cliffhanger",
           )}
         </div>
         ${renderCompletionRisk(state.data)}

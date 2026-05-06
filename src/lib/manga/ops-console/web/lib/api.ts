@@ -410,6 +410,64 @@ export function openJobStream(
 
 export type BibleCharacterRef = { id: string; files: string[] };
 
+export type BibleAuditSeverity = "ok" | "minor" | "major" | "critical";
+
+export type BibleAuditIssueCategory =
+  | "photoreal_residue"
+  | "style_drift"
+  | "cultural_mismatch"
+  | "iconography_mismatch"
+  | "continuity_anchor_missed"
+  | "variant_drift"
+  | "cross_variant_inconsistency"
+  | "text_artifact"
+  | "density"
+  | "physics_break";
+
+export type BibleAuditIssue = {
+  category: BibleAuditIssueCategory;
+  anchor_id?: string;
+  description: string;
+};
+
+export type BibleAuditVariant = {
+  variant: string;
+  image_relpath: string;
+  severity: BibleAuditSeverity;
+  issues: BibleAuditIssue[];
+  strengths: string;
+  suggested_fix: string;
+};
+
+export type BibleAuditLocation = {
+  location_id: string;
+  location_name: string;
+  variants: BibleAuditVariant[];
+  cross_variant_notes: string;
+  audited_at: string;
+  error?: string;
+};
+
+export type BibleImagesAuditReport = {
+  schema_version: 1;
+  slug: string;
+  audited_at: string;
+  audited_by: "L02b-bible-images-audit";
+  model: string;
+  locations: BibleAuditLocation[];
+  summary: {
+    total_locations: number;
+    total_images: number;
+    by_severity: Record<BibleAuditSeverity, number>;
+    regen_priority: Array<{
+      location_id: string;
+      variant: string;
+      severity: BibleAuditSeverity;
+      reason: string;
+    }>;
+  };
+};
+
 export type BibleAssetView = {
   schema_version: number;
   generated_at?: string;
@@ -430,6 +488,7 @@ export type BibleAssetView = {
     locations: BibleCharacterRef[];
     props: BibleCharacterRef[];
   };
+  image_audit?: BibleImagesAuditReport | null;
 };
 
 export function apiGetBible(slug: string): Promise<BibleAssetView> {
