@@ -6,6 +6,7 @@ import {
   type NameManifest,
 } from "../lib/api";
 import { store } from "../lib/store";
+import { navigateToAiEdit } from "../lib/layer-actions";
 import type {
   NameAuditFindingLite,
   NamePageDecision,
@@ -203,6 +204,12 @@ function renderShell(
         <h2>ネーム gate</h2>
         <span class="info">${escapeHtml(slug)} / ${epLabel(episode)} (${escapeHtml(manifest.episode_id)})</span>
         <span class="summary ng-kpi">pending <strong id="ng-cnt-pending">${manifest.pages.length}</strong> / approved <strong id="ng-cnt-approved">0</strong> / rejected <strong id="ng-cnt-rejected">0</strong> / total <strong id="ng-cnt-total">${manifest.pages.length}</strong></span>
+        <select class="nc-field__select" data-ng-ai-layer aria-label="AI 編集対象 layer" style="margin-left: 12px;">
+          <option value="L08.5" selected>L08.5 Name Preview</option>
+          <option value="L08.6">L08.6 Name Audit</option>
+          <option value="L08.7">L08.7 Name Approval</option>
+        </select>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-ai-edit title="選択した layer を AI 編集 view へ">AI で修正</button>
       </div>
       <div class="name-gate-help">
         <code>a</code> approve <code>r</code> reject <code>p</code> pending
@@ -442,6 +449,20 @@ async function loadNameGate(
           { signal }
         );
     });
+
+    // toolbar の「AI で修正」ボタン: 選択中の L08.5/L08.6/L08.7 を ai-edit へ。
+    container.addEventListener(
+      "click",
+      (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (!target.closest("[data-ng-ai-edit]")) return;
+        const select = container.querySelector<HTMLSelectElement>("[data-ng-ai-layer]");
+        const layer = select?.value || "L08.5";
+        navigateToAiEdit(layer, { slug, episode });
+      },
+      { signal }
+    );
 
     container.addEventListener(
       "keydown",

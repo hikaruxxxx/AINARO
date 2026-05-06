@@ -4,6 +4,7 @@ import {
   type Manifest,
 } from "../lib/api";
 import { store } from "../lib/store";
+import { navigateToAiEdit } from "../lib/layer-actions";
 
 type StoryboardTab = "storyboard" | "page-plan" | "resolved-refs" | "raw";
 type AnyRecord = Record<string, unknown>;
@@ -165,6 +166,15 @@ function render(container: HTMLElement, state: ViewState): void {
         <h2 class="nc-toolbar__title">コンテ・ページ配置</h2>
         <span class="sb-info">${escapeHtml(scope)}</span>
         <span class="sb-spacer"></span>
+        <select class="nc-field__select" data-sb-ai-layer aria-label="AI 編集対象 layer">
+          <option value="L03">L03 Shotlist</option>
+          <option value="L04">L04 Storyboard</option>
+          <option value="L05" selected>L05 Page Plan</option>
+          <option value="L06">L06 Continuity</option>
+          <option value="L07">L07 Refs Resolution</option>
+          <option value="L08">L08 Incremental Refs</option>
+        </select>
+        <button type="button" class="nc-button nc-button--ghost" data-sb-ai-edit title="選択した layer を AI 編集 view へ">AI で修正</button>
       </div>
       ${renderTabs(state.tab)}
       <div class="sb-content">${renderContent(state)}</div>
@@ -209,6 +219,12 @@ export function mountStoryboardView(container: HTMLElement): () => void {
       state.tab = tab;
       state.copied = null;
       render(container, state);
+      return;
+    }
+    if (target.closest<HTMLButtonElement>("[data-sb-ai-edit]")) {
+      const select = container.querySelector<HTMLSelectElement>("[data-sb-ai-layer]");
+      const layer = select?.value || "L05";
+      navigateToAiEdit(layer, { slug: state.slug, episode: state.episode });
       return;
     }
     const copyId = target.closest<HTMLButtonElement>("[data-copy-raw]")?.dataset.copyRaw;

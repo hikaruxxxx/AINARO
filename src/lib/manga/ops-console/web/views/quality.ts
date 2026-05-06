@@ -4,6 +4,7 @@ import {
   type Manifest,
 } from "../lib/api";
 import { store } from "../lib/store";
+import { navigateToAiEdit, spawnLayerWithModal } from "../lib/layer-actions";
 
 type AnyRecord = Record<string, unknown>;
 type AuditFinding = {
@@ -206,6 +207,8 @@ function render(container: HTMLElement, state: ViewState): void {
         <span class="q-info">${escapeHtml(scope)}</span>
         <span class="q-spacer"></span>
         <button type="button" class="nc-button nc-button--secondary" data-action="reload" ${state.loading ? "disabled" : ""}>再読込</button>
+        <button type="button" class="nc-button nc-button--secondary" data-action="rerun-L11" title="L11 Audit を再実行">L11 を再実行</button>
+        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L11" title="AI 編集 view へ遷移し、L11 Audit の context を prefill します">L11 を AI で修正</button>
       </div>
       <div class="q-content">${body}</div>
     </div>`;
@@ -244,6 +247,24 @@ export function mountQualityView(container: HTMLElement): () => void {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
     if (target.closest("[data-action='reload']")) void refresh(state, container);
+    const aiLayer = target.closest<HTMLButtonElement>("[data-ai-edit-layer]")?.dataset.aiEditLayer;
+    if (aiLayer) {
+      navigateToAiEdit(aiLayer, { slug: state.slug, episode: state.episode });
+      return;
+    }
+    if (target.closest("[data-action='rerun-L11']")) {
+      void spawnLayerWithModal({
+        layer: "L11",
+        status: state.manifest?.audit ? "ready" : "missing",
+        slug: state.slug,
+        episode: state.episode,
+        callbacks: {
+          onSuccess: () => void refresh(state, container),
+          onError: (msg) => alert(msg),
+        },
+      });
+      return;
+    }
     const kind = target.closest<HTMLElement>("[data-q-kind]")?.dataset.qKind;
     if (kind) {
       if (state.selectedKinds.has(kind)) state.selectedKinds.delete(kind);

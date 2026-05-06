@@ -8,6 +8,7 @@ import {
   type RevisionEntry,
 } from "../lib/api";
 import { store } from "../lib/store";
+import { isRunnableLayer, navigateToAiEdit, spawnLayerWithModal } from "../lib/layer-actions";
 import {
   REVISION_TAGS,
   isRevisionTag,
@@ -310,6 +311,12 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
           <button type="button" class="rv-button" data-rv-mode="effects">Effects</button>
           <button type="button" class="rv-button" data-rv-layer="renders">Renders</button>
           <button type="button" class="rv-button" data-rv-layer="bubbles">Bubbles</button>
+          <span style="width: 1px; height: 20px; background: var(--border-default); margin: 0 4px;"></span>
+          <button type="button" class="rv-button" data-rv-rerun="L09" title="L09 Render を再実行">L09 再実行</button>
+          <button type="button" class="rv-button" data-rv-rerun="L10" title="L10 Bubble Overlay を再実行">L10 再実行</button>
+          <button type="button" class="rv-button" data-rv-rerun="L12" title="L12 Repair で revision_queue を適用">L12 適用</button>
+          <button type="button" class="rv-button" data-rv-ai-edit="L09" title="L09 を AI 編集 view へ">L09 AI</button>
+          <button type="button" class="rv-button" data-rv-ai-edit="L10" title="L10 を AI 編集 view へ">L10 AI</button>
         </div>
       </div>
       <div class="rv-filters">
@@ -894,6 +901,36 @@ function bindStaticListeners(
           state.layer = layer;
           refresh(root, state, slug, episode);
         }
+      },
+      { signal }
+    );
+  });
+  root.querySelectorAll<HTMLButtonElement>("[data-rv-rerun]").forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const layer = button.dataset.rvRerun;
+        if (!isRunnableLayer(layer)) return;
+        void spawnLayerWithModal({
+          layer,
+          status: "ready",
+          slug,
+          episode,
+          callbacks: {
+            onSuccess: () => refresh(root, state, slug, episode),
+            onError: (msg) => alert(msg),
+          },
+        });
+      },
+      { signal }
+    );
+  });
+  root.querySelectorAll<HTMLButtonElement>("[data-rv-ai-edit]").forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const layer = button.dataset.rvAiEdit;
+        if (layer) navigateToAiEdit(layer, { slug, episode });
       },
       { signal }
     );

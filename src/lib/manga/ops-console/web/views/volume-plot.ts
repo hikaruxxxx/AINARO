@@ -14,6 +14,7 @@ import {
   jsonHtml,
 } from "../lib/data-display";
 import { store } from "../lib/store";
+import { navigateToAiEdit } from "../lib/layer-actions";
 
 type DisplayMode = "reader" | "raw";
 
@@ -201,7 +202,8 @@ function render(container: HTMLElement, state: ViewState): void {
         <span class="vplot-info">${escapeHtml(scope)}</span>
         <span class="vplot-spacer"></span>
         ${renderDisplayMode(state.displayMode)}
-        <button type="button" class="nc-button nc-button--primary" data-open-modal>Volume Plot を構築</button>
+        <button type="button" class="nc-button nc-button--primary" data-open-modal>Volume Plot を構築 (再生成)</button>
+        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L02b" title="AI 編集 view へ遷移し、L02b Volume Plot の context を prefill します">L02b を AI で修正</button>
       </div>
       ${body}
     </div>
@@ -261,6 +263,11 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
     if (mode === "reader" || mode === "raw") {
       state.displayMode = mode;
       render(container, state);
+      return;
+    }
+    const aiLayer = target.closest<HTMLButtonElement>("[data-ai-edit-layer]")?.dataset.aiEditLayer;
+    if (aiLayer) {
+      navigateToAiEdit(aiLayer, { slug: state.slug, episode: store.state.currentEpisode || 1, volume: state.volume });
       return;
     }
     if (target.closest("[data-open-modal]")) {

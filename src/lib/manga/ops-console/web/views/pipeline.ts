@@ -3,16 +3,13 @@ import {
   apiGetManifest,
   apiGetNameApproval,
   apiGetPipelineStatus,
-  apiPostJob,
-  openJobStream,
-  type JobStartRequest,
   type LayerId,
   type PipelineStatus,
   type PipelineStatusLayer,
 } from "../lib/api";
 import { isViewName, store } from "../lib/store";
 import { layerLabel, resolveAiEditHint } from "../labels";
-import { openLaunchModal, type LaunchArgSpec } from "../lib/launch-modal";
+import { isRunnableLayer, navigateToAiEdit, spawnLayerWithModal } from "../lib/layer-actions";
 
 type HintMap = Map<string, string>;
 
@@ -99,40 +96,6 @@ function badgeLabel(layer: PipelineStatusLayer, running: boolean): string {
   return "未生成";
 }
 
-function isRunnableLayer(value: string | null | undefined): value is LayerId {
-  return value === "L01" || value === "L02" || value === "L02b" || value === "L09" || value === "L10" || value === "L11" || value === "L12" || value === "L13";
-}
-
-function startRequest(layer: LayerId, slug: string, episode: number, extras?: Record<string, string>): JobStartRequest {
-  const req: JobStartRequest = { layer, slug, args: {} };
-  if (layer === "L02") return req;
-  if (layer === "L13") {
-    const vol = Number(extras?.volume ?? 1);
-    return { ...req, volume: Number.isFinite(vol) && vol > 0 ? vol : 1 };
-  }
-  return { ...req, episode };
-}
-
-/**
- * layer ごとの追加引数定義。 Phase 8B 時点では L13 (--volume) のみ。
- * L01/L02b は別 view へ delegate する (concept path 等の path picker が必要)。
- */
-function launchArgsFor(layer: LayerId): LaunchArgSpec[] {
-  if (layer === "L13") {
-    return [
-      {
-        key: "volume",
-        label: "巻番号",
-        type: "number",
-        defaultValue: "1",
-        min: 1,
-        required: true,
-        hint: "data/manga/works/{slug}/volumes/v{NN}/ 配下に成果物が出ます",
-      },
-    ];
-  }
-  return [];
-}
 
 async function buildHints(status: PipelineStatus): Promise<HintMap> {
   const hints = new Map<string, string>();
@@ -300,61 +263,6 @@ export function mountPipelineView(container: HTMLElement): () => void {
     });
   });
 
-  const handleRerun = async (layer: LayerId, status: PipelineStatusLayer["status"]): Promise<void> => {
-    // L01 / L02b は引数 (concept path / volume) が必要なので、再実行 UI は該当 view に委譲。
-    if (layer === "L01") {
-      store.update({ currentView: "bible" });
-      setToast(state, container, "L01 は世界観・設定 view から起動してください (concept 引数が必要)", "info");
-      return;
-    }
-    if (layer === "L02b") {
-      store.update({ currentView: "volume-plot" });
-      setToast(state, container, "L02b は巻プロット view から起動してください (volume 引数が必要)", "info");
-      return;
-    }
-    const label = layerLabel(layer);
-    const result = await openLaunchModal({
-      title: `${layer} ${label.title} を ${status === "ready" ? "再実行" : "生成"}`,
-      warning:
-        status === "ready"
-          ? "既に生成済みです。再実行すると現状の成果物が上書きされる可能性があります。"
-          : undefined,
-      description:
-        status === "ready"
-          ? "成果物のバックアップは取得しません (Phase 8C で対応予定)。続行する場合は git で diff を確認してください。"
-          : undefined,
-      args: launchArgsFor(layer),
-      confirmLabel: status === "ready" ? "再実行する" : "生成する",
-    });
-    if (!result) return;
-    state.running.add(layer);
-    render(container, state);
-    try {
-      const job = await apiPostJob(startRequest(layer, state.slug, state.episode, result));
-      const stream = openJobStream(job.job_id, {
-        onEvent: () => undefined,
-        onDone: () => {
-          state.streams.get(job.job_id)?.close();
-          state.streams.delete(job.job_id);
-          state.running.delete(layer);
-          void refresh(state, container).catch((error) => {
-            state.error = errorText(error);
-            render(container, state);
-          });
-        },
-        onError: (error) => {
-          state.streams.delete(job.job_id);
-          state.running.delete(layer);
-          setToast(state, container, error.message, "danger");
-        },
-      });
-      state.streams.set(job.job_id, stream);
-    } catch (error) {
-      state.running.delete(layer);
-      setToast(state, container, `起動に失敗: ${errorText(error)}`, "danger");
-    }
-  };
-
   container.addEventListener(
     "click",
     (event) => {
@@ -371,13 +279,7 @@ export function mountPipelineView(container: HTMLElement): () => void {
       // 「AI で修正」: per-layer hint を preset として ai-edit へ。
       const aiLayer = target.closest<HTMLButtonElement>("[data-ai-edit-layer]")?.dataset.aiEditLayer;
       if (aiLayer) {
-        const hint = resolveAiEditHint(aiLayer, { slug: state.slug, episode: state.episode });
-        if (hint) {
-          store.update({
-            aiEditPreset: { scope: state.slug, target: hint.target, prompt: hint.promptTemplate },
-            currentView: "ai-edit",
-          });
-        }
+        navigateToAiEdit(aiLayer, { slug: state.slug, episode: state.episode });
         return;
       }
 
@@ -386,7 +288,26 @@ export function mountPipelineView(container: HTMLElement): () => void {
       const layer = rerunBtn?.dataset.rerunLayer;
       if (!isRunnableLayer(layer)) return;
       const status = (rerunBtn?.dataset.currentStatus ?? "missing") as PipelineStatusLayer["status"];
-      void handleRerun(layer, status);
+      void spawnLayerWithModal({
+        layer,
+        status,
+        slug: state.slug,
+        episode: state.episode,
+        callbacks: {
+          onProgress: (running) => {
+            if (running) state.running.add(layer);
+            else state.running.delete(layer);
+            render(container, state);
+          },
+          onSuccess: () => {
+            void refresh(state, container).catch((error) => {
+              state.error = errorText(error);
+              render(container, state);
+            });
+          },
+          onError: (msg) => setToast(state, container, msg, "danger"),
+        },
+      });
     },
     { signal: controller.signal }
   );

@@ -8,6 +8,7 @@ import {
   type WorkMeta,
 } from "../lib/api";
 import { store } from "../lib/store";
+import { navigateToAiEdit, spawnLayerWithModal } from "../lib/layer-actions";
 
 type Toast = { message: string; kind: "success" | "warning" | "danger" | "info" };
 
@@ -148,6 +149,8 @@ function render(container: HTMLElement, state: ViewState): void {
         <span class="kdp-spacer"></span>
         <button type="button" class="nc-button nc-button--secondary" data-action="reload" ${state.loading || state.saving ? "disabled" : ""}>再読込</button>
         <button type="button" class="nc-button nc-button--primary" data-action="save" ${state.loading || state.saving ? "disabled" : ""}>${state.saving ? "保存中" : "保存"}</button>
+        <button type="button" class="nc-button nc-button--secondary" data-action="rerun-L13" title="L13 KDP package を再生成 (manuscript.pdf / cover.pdf)">L13 を再実行</button>
+        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L13" title="AI 編集 view へ遷移し、L13 KDP の context を prefill します">L13 を AI で修正</button>
       </div>
       ${body}
     </div>
@@ -223,9 +226,30 @@ export function mountKdpMetadataView(container: HTMLElement): () => void {
   container.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
+    const aiLayer = target.closest<HTMLButtonElement>("[data-ai-edit-layer]")?.dataset.aiEditLayer;
+    if (aiLayer) {
+      navigateToAiEdit(aiLayer, { slug: state.slug, episode: store.state.currentEpisode || 1 });
+      return;
+    }
     const action = target.closest<HTMLButtonElement>("[data-action]")?.dataset.action;
     if (action === "reload") {
       void load(state, container);
+      return;
+    }
+    if (action === "rerun-L13") {
+      void spawnLayerWithModal({
+        layer: "L13",
+        status: state.meta?.kdp_metadata ? "ready" : "missing",
+        slug: state.slug,
+        episode: store.state.currentEpisode || 1,
+        callbacks: {
+          onSuccess: () => {
+            setToast(state, container, "L13 KDP package 完了", "success");
+            void load(state, container);
+          },
+          onError: (msg) => setToast(state, container, msg, "danger"),
+        },
+      });
       return;
     }
     if (action !== "save") return;

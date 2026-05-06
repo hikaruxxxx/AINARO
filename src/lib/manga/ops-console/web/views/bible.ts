@@ -16,6 +16,7 @@ import {
   detailsRaw,
 } from "../lib/data-display";
 import { store } from "../lib/store";
+import { navigateToAiEdit } from "../lib/layer-actions";
 
 type BibleTab = "world" | "characters" | "locations" | "props" | "style" | "raw";
 type ActionLayer = "L01" | "L01b" | "L01c";
@@ -315,9 +316,10 @@ function render(container: HTMLElement, state: ViewState): void {
         <h2 class="nc-toolbar__title">世界観・設定 (Bible)</h2>
         <span class="bib-info">${escapeHtml(state.slug)}</span>
         <span class="bib-spacer"></span>
-        <button type="button" class="nc-button nc-button--primary" data-action="L01">Bible 全体構築</button>
+        <button type="button" class="nc-button nc-button--primary" data-action="L01">Bible 全体構築 (再生成)</button>
         <button type="button" class="nc-button nc-button--secondary" data-action="L01b">文法チェック (Lint)</button>
         <button type="button" class="nc-button nc-button--secondary" data-action="L01c">深掘り (Deepen)</button>
+        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L01" title="AI 編集 view へ遷移し、L01 Bible の context を prefill します">L01 を AI で修正</button>
       </div>
       ${renderTabs(state.tab)}
       <div class="bib-content">${renderBibleContent(state)}</div>
@@ -411,6 +413,11 @@ export function mountBibleView(container: HTMLElement): () => void {
       state.modal = action;
       state.log = [];
       render(container, state);
+      return;
+    }
+    const aiLayer = target.closest<HTMLButtonElement>("[data-ai-edit-layer]")?.dataset.aiEditLayer;
+    if (aiLayer) {
+      navigateToAiEdit(aiLayer, { slug: state.slug, episode: store.state.currentEpisode || 1 });
       return;
     }
     if (target.closest("[data-close-modal]") && !state.runningLayer) {
