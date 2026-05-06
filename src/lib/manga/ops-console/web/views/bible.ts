@@ -58,8 +58,8 @@ const CSS = `
 .bib-thumb[data-bib-lightbox], .bib-ref-count[data-bib-lightbox] { cursor: zoom-in; }
 .bib-ref-count[data-bib-lightbox] { border: 0; padding: 0; background: transparent; color: var(--text-tertiary); font-family: inherit; font-size: var(--fs-sm); text-align: left; }
 .bib-ref-count[data-bib-lightbox]:hover { color: var(--color-primary); text-decoration: underline; }
-.bib-lightbox { align-items: center; justify-content: center; padding: var(--space-3); }
-.bib-lightbox__card { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: var(--space-2); width: min(96vw, 1120px); height: min(94vh, 960px); padding: var(--space-3) var(--space-4); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--surface-elevated); box-shadow: var(--shadow-3); box-sizing: border-box; }
+.bib-lightbox { align-items: center; justify-content: center; padding: 0; }
+.bib-lightbox__card { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: var(--space-2); width: min(96vw, 1120px); height: calc(100vh - 32px); max-height: 960px; padding: var(--space-3) var(--space-4); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--surface-elevated); box-shadow: var(--shadow-3); box-sizing: border-box; }
 .bib-lightbox__head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
 .bib-lightbox__title { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-lg); }
 .bib-lightbox__stage { position: relative; display: flex; align-items: center; justify-content: center; min-height: 0; min-width: 0; overflow: hidden; border-radius: var(--radius-md); background: #111318; padding: var(--space-2); }
@@ -72,8 +72,8 @@ const CSS = `
 .bib-lightbox__nav:hover { background: var(--surface-elevated); }
 .bib-lightbox__nav--prev { left: var(--space-2); }
 .bib-lightbox__nav--next { right: var(--space-2); }
-.bib-lightbox__thumbs { display: flex; gap: var(--space-1); overflow-x: auto; padding-bottom: var(--space-1); flex: 0 0 auto; }
-.bib-lightbox__thumb { flex: 0 0 auto; width: 56px; height: 56px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 2px; background: var(--surface-sunken); cursor: pointer; }
+.bib-lightbox__thumbs { display: flex; gap: var(--space-1); overflow-x: auto; min-height: 64px; flex: 0 0 auto; }
+.bib-lightbox__thumb { flex: 0 0 auto; width: 56px; height: 56px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 2px; background: var(--surface-sunken); cursor: pointer; box-sizing: border-box; }
 .bib-lightbox__thumb.is-active { border: 2px solid var(--color-primary); padding: 1px; }
 .bib-lightbox__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--radius-sm) - 2px); }
 `;
@@ -99,11 +99,13 @@ type ViewState = {
 };
 
 function ensureStyles(): void {
-  if (document.getElementById("bib-styles")) return;
-  const style = document.createElement("style");
-  style.id = "bib-styles";
-  style.textContent = CSS;
-  document.head.appendChild(style);
+  let style = document.getElementById("bib-styles") as HTMLStyleElement | null;
+  if (!style) {
+    style = document.createElement("style");
+    style.id = "bib-styles";
+    document.head.appendChild(style);
+  }
+  if (style.textContent !== CSS) style.textContent = CSS;
 }
 
 function escapeHtml(value: string): string {
