@@ -55,8 +55,16 @@ export function navigateToAiEdit(
 ): boolean {
   const hint = resolveAiEditHint(layerId, ctx);
   if (!hint) return false;
+  // 編集完了後に「元の view に戻る」できるよう、現在の view も併せて記録する。
+  const originView = store.state.currentView;
   store.update({
-    aiEditPreset: { scope: ctx.slug, target: hint.target, prompt: hint.promptTemplate },
+    aiEditPreset: {
+      scope: ctx.slug,
+      target: hint.target,
+      prompt: hint.promptTemplate,
+      originLayer: layerId,
+      originView,
+    },
     currentView: "ai-edit",
   });
   return true;

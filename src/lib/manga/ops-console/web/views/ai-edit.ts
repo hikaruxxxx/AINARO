@@ -8,7 +8,8 @@ import {
   type JobEvent,
   type JobState,
 } from "../lib/api";
-import { store } from "../lib/store";
+import { isViewName, store, type ViewName } from "../lib/store";
+import { layerLabel } from "../labels";
 
 const CSS = `
 .ai-view { display: grid; gap: var(--space-3); }
@@ -39,6 +40,9 @@ type ViewState = {
   diff: string;
   confirm: ConfirmAction | null;
   toast: { message: string; kind: "success" | "warning" | "danger" | "info" } | null;
+  /** preset 由来の出発点情報。完了後の「元の view へ戻る」用 */
+  originLayer: string | null;
+  originView: ViewName | null;
 };
 
 function ensureStyles(): void {
@@ -80,10 +84,18 @@ function render(container: HTMLElement, state: ViewState): void {
     const label = work.title ? `${work.title} (${work.slug})` : work.slug;
     return `<option value="${escapeHtml(work.slug)}"${selected}>作品: ${escapeHtml(label)}</option>`;
   }).join("");
+  const layerBadge = state.originLayer
+    ? `<span class="nc-badge nc-badge--info" title="${escapeHtml(layerLabel(state.originLayer).title)} の context が prefill されています">${escapeHtml(state.originLayer)} ${escapeHtml(layerLabel(state.originLayer).title)}</span>`
+    : "";
+  const backLink = state.originView
+    ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm" data-action="back-origin" title="prefill 元の view に戻ります (preset は破棄)">← 元の view に戻る</button>`
+    : "";
   container.innerHTML = `
     <div class="ai-view">
       <div class="nc-toolbar">
         <h2 class="nc-toolbar__title">AI 編集</h2>
+        ${layerBadge}
+        ${backLink}
         <span class="ai-spacer"></span>
         <span class="ai-info">Codex CLI 経由でリポジトリ全体を編集します</span>
       </div>
@@ -220,6 +232,8 @@ export function mountAiEditView(container: HTMLElement): () => void {
     diff: "",
     confirm: null,
     toast: null,
+    originLayer: preset?.originLayer ?? null,
+    originView: preset?.originView && isViewName(preset.originView) ? preset.originView : null,
   };
   if (preset) {
     // 再 mount で残り続けないよう即クリア。subscribe 通知はループしないよう非破壊的に直接書き換え。
@@ -233,6 +247,9 @@ export function mountAiEditView(container: HTMLElement): () => void {
     const action = target.closest<HTMLElement>("[data-action]")?.dataset.action;
     if (!action) return;
     if (action === "run") void runAiEdit(container, state);
+    else if (action === "back-origin") {
+      if (state.originView) store.update({ currentView: state.originView });
+    }
     else if (action === "jobs") store.update({ currentView: "jobs-hub", currentSlug: "", currentEpisode: 0 });
     else if (action === "commit") {
       state.confirm = "commit";
