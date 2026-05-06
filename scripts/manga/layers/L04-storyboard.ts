@@ -23,7 +23,7 @@ import {
   extractStoryboardFromShotlist,
   validateStoryboardEntityBinding,
 } from "../../../src/lib/manga/storyboard-v2/storyboard-extractor";
-import { buildStoryboardFromSceneGraph } from "../../../src/lib/manga/scene-graph/storyboard-from-scenes";
+import { buildStoryboardFromSceneGraph, enrichStoryboardWithLLM } from "../../../src/lib/manga/scene-graph/storyboard-from-scenes";
 import {
   validatePanelSceneInheritance,
   isSceneGraphV1,
@@ -38,15 +38,17 @@ type Args = {
   episode: number;
   fromSceneGraph: boolean;
   dryRun: boolean;
+  enrich: boolean;
 };
 
 function parseArgs(): Args {
-  const a: Partial<Args> = { fromSceneGraph: false, dryRun: false };
+  const a: Partial<Args> = { fromSceneGraph: false, dryRun: false, enrich: false };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--from-scene-graph") { a.fromSceneGraph = true; continue; }
     if (arg === "--dry-run") { a.dryRun = true; continue; }
+    if (arg === "--enrich") { a.enrich = true; continue; }
     let key: string | null = null;
     let val: string | null = null;
     const eq = arg.match(/^--([^=]+)=(.*)$/);
@@ -85,6 +87,14 @@ async function main() {
     if (!inheritance.ok) {
       console.error(`[L04] panel-scene inheritance FAILED:\n${inheritance.errors.join("\n")}`);
       process.exit(2);
+    }
+
+    // B5-5b: --enrich で Codex CLI 経由で panel 詳細を本番文化
+    if (args.enrich) {
+      console.log(`[L04] enriching panel details via Codex CLI (${sceneGraph.scenes.length} scenes)...`);
+      const enrichStart = Date.now();
+      storyboard = await enrichStoryboardWithLLM(storyboard, sceneGraph);
+      console.log(`[L04] enrich done in ${((Date.now() - enrichStart) / 1000).toFixed(1)}s`);
     }
   } else {
     // 従来: shotlist + LLM 抽出

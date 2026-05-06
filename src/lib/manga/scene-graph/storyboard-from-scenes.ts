@@ -31,6 +31,7 @@ import type {
   PullLink as PullLinkV2,
 } from "../schemas-v2";
 import type { Scene, SceneGraphV1, CastEntry, KeyLine, SceneMode } from "./schema";
+import { runCodexText } from "../llm/codex-text";
 
 // ============================================================================
 // Top-level entry
@@ -334,4 +335,159 @@ function buildPlaceholderAction(scene: Scene, idx: number, total: number): strin
   // B5-5a placeholder。B5-5b の LLM pass で書き換え予定。
   const head = `${scene.scene_id} (${scene.beat_type}/${scene.mode}) panel ${idx + 1}/${total}: ${scene.key_visual_intent}`;
   return head;
+}
+
+// ============================================================================
+// B5-5b: panel 詳細化 LLM pass
+// ============================================================================
+
+export type EnrichedPanelDetail = {
+  panel_no: number;
+  action?: string;
+  key_visual?: string;
+  shot_type?: ShotType;
+  camera?: CameraType;
+  dialogue?: Array<{ character_id: string; text: string }>;
+  monologue?: Array<{ character_id: string; text: string }>;
+};
+
+/**
+ * B5-5a で生成された storyboard の placeholder panel を Codex CLI 経由で本番文に書き換える。
+ *
+ * 処理単位は scene。1 scene = 1 Codex call (panel 数分の詳細を一度に返してもらう)。
+ *
+ * 入力 storyboard は buildStoryboardFromSceneGraph 出力を想定。panel.entities (location/cast/
+ * focus_entity_id) と panel_no / panel_id / scene 由来構造は維持し、action / key_visual /
+ * dialogue / monologue を Codex 出力で置換する。
+ */
+export async function enrichStoryboardWithLLM(
+  storyboard: EpisodeStoryboardV2,
+  sceneGraph: SceneGraphV1,
+  options?: { timeoutMsPerScene?: number; cwd?: string }
+): Promise<EpisodeStoryboardV2> {
+  const cwd = options?.cwd ?? process.env.AINARO_REPO_ROOT ?? process.cwd();
+  const timeoutMs = options?.timeoutMsPerScene ?? 5 * 60 * 1000;
+
+  // panel_no -> Scene の逆引き
+  const panelToScene = new Map<number, Scene>();
+  for (const scene of sceneGraph.scenes) {
+    for (
+      let p = scene.panel_range.start_panel_no;
+      p <= scene.panel_range.end_panel_no;
+      p++
+    ) {
+      panelToScene.set(p, scene);
+    }
+  }
+
+  // 各 panel の詳細を集めるバケツ
+  const enriched = new Map<number, EnrichedPanelDetail>();
+
+  // scene ごとに Codex 呼び出し
+  for (const scene of sceneGraph.scenes) {
+    const start = scene.panel_range.start_panel_no;
+    const end = scene.panel_range.end_panel_no;
+    const count = end - start + 1;
+    if (count <= 0) continue;
+
+    const task = buildPanelDetailPrompt(scene, count);
+    const result = await runCodexText<{ panels: EnrichedPanelDetail[] }>({
+      task,
+      format: "json",
+      cwd,
+      timeoutMs,
+      maxRetries: 1,
+    });
+    if (!result.parsed || !Array.isArray(result.parsed.panels)) {
+      throw new Error(
+        `[storyboard-from-scenes] enrichStoryboardWithLLM: Codex returned unparseable JSON for scene ${scene.scene_id}. stdout head: ${result.stdout.slice(0, 300)}`
+      );
+    }
+    // panel_no を 0-indexed offset から実 panel_no に正規化
+    for (let i = 0; i < result.parsed.panels.length; i++) {
+      const detail = result.parsed.panels[i];
+      // Codex が panel_no を相対値 (1..N) や絶対値で返すケース両対応:
+      // 範囲内なら絶対値、それ以外なら start からのオフセットとみなす
+      const panelNo =
+        detail.panel_no >= start && detail.panel_no <= end
+          ? detail.panel_no
+          : start + i;
+      enriched.set(panelNo, { ...detail, panel_no: panelNo });
+    }
+  }
+
+  // storyboard を enriched で上書き (mutate せずに新しいオブジェクトを返す)
+  return {
+    ...storyboard,
+    pages: storyboard.pages.map((page) => ({
+      ...page,
+      panels: page.panels.map((panel): PanelV2 => {
+        const e = enriched.get(panel.panel_no);
+        if (!e) return panel;
+        return {
+          ...panel,
+          action: e.action ?? panel.action,
+          key_visual: e.key_visual ?? panel.key_visual,
+          shot_type: e.shot_type ?? panel.shot_type,
+          camera: e.camera ?? panel.camera,
+          dialogue: e.dialogue ?? panel.dialogue,
+          monologue: e.monologue ?? panel.monologue,
+        };
+      }),
+    })),
+  };
+}
+
+/**
+ * 1 scene 分の panel 詳細を Codex に書かせるプロンプト。
+ * scene の文脈 (key_visual_intent / beat / mode / dialogue_plan / protagonist_arc_state) を渡し、
+ * 各 panel の action / key_visual / shot_type / camera / dialogue / monologue を返してもらう。
+ */
+export function buildPanelDetailPrompt(scene: Scene, panelCount: number): string {
+  const startNo = scene.panel_range.start_panel_no;
+  const lines: string[] = [];
+  lines.push(`あなたは AINARO 漫画 v2 の panel 詳細化エージェントです。`);
+  lines.push(
+    `1 つの scene について ${panelCount} 個の panel を詳細化し、各 panel の action / key_visual / shot_type / camera / dialogue / monologue を JSON で返してください。`
+  );
+  lines.push("");
+  lines.push(`## scene 文脈`);
+  lines.push(`- scene_id: ${scene.scene_id}`);
+  lines.push(`- beat: ${scene.beat_type}, mode: ${scene.mode}`);
+  lines.push(`- location_id: ${scene.location_id}` + (scene.sub_locations ? `, sub: ${scene.sub_locations.join(", ")}` : ""));
+  lines.push(`- key_visual_intent: ${scene.key_visual_intent}`);
+  lines.push(
+    `- protagonist: belief="${scene.protagonist_arc_state.belief}" / goal="${scene.protagonist_arc_state.goal}" / emotion=${scene.protagonist_arc_state.emotion}`
+  );
+  lines.push(`- panel_range: panel#${startNo}-${scene.panel_range.end_panel_no} (${panelCount} panels)`);
+  lines.push("");
+  lines.push(`## cast (panel.entities.characters と一致)`);
+  for (const c of scene.cast) {
+    lines.push(`- ${c.character_id} (${c.presence})`);
+  }
+  lines.push("");
+  if (scene.dialogue_plan.key_lines.length > 0) {
+    lines.push(`## key_lines (これらを panel に分配)`);
+    for (const kl of scene.dialogue_plan.key_lines) {
+      lines.push(`- [${kl.speaker}] 「${kl.text}」 (${kl.intent}, ${kl.uniqueness})`);
+    }
+    lines.push("");
+  }
+  lines.push(`## 制約`);
+  lines.push(`1. panel_no は ${startNo} から ${scene.panel_range.end_panel_no} まで連番で必ず ${panelCount} 個。`);
+  lines.push(`2. action は 1 文 (50 字程度) で具体的な動作・視点を記述。`);
+  lines.push(`3. key_visual は 1 行で「読者が最も覚える絵」を伝える。`);
+  lines.push(`4. shot_type は close_up / medium / wide / establishing から選択。`);
+  lines.push(`5. camera は eye_level / low_angle / high_angle / over_shoulder / birds_eye から選択。`);
+  lines.push(`6. dialogue / monologue の character_id は cast 内のもの限定。key_lines を panel に分配し、新規台詞を増やさない。`);
+  lines.push(`7. scene_exclusive uniqueness の text は他 scene で使われていないため、この scene 内 panel でのみ書ける。`);
+  lines.push("");
+  lines.push(`## 出力形式`);
+  lines.push("```json");
+  lines.push(`{ "panels": [`);
+  lines.push(`  { "panel_no": ${startNo}, "action": "...", "key_visual": "...", "shot_type": "...", "camera": "...", "dialogue": [], "monologue": [] }`);
+  lines.push(`  /* ${panelCount} 個 */`);
+  lines.push(`]}`);
+  lines.push("```");
+  return lines.join("\n");
 }
