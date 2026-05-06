@@ -24,6 +24,8 @@ import { promises as fs } from "fs";
 
 import { PAGE_DIMENSIONS } from "../page-director/types";
 import type { PanelRect } from "../page-director/types";
+import { polygonSvgFrame, polygonToSvgMask } from "./polygon-utils";
+import type { Polygon } from "./polygon-utils";
 
 export type PanelCompositeInput = {
   /** ページ内 0-indexed */
@@ -32,6 +34,12 @@ export type PanelCompositeInput = {
   rect: PanelRect;
   /** 生成済 panel PNG の絶対パス */
   source_image_path: string;
+  /** Phase B v3: 実際のコマ枠 polygon */
+  polygon?: Polygon;
+  /** Phase B3 v3: 枠線描画スキップ */
+  is_borderless?: boolean;
+  /** Phase B3 v3: ページ縁まで延長する panel */
+  bleed_polygon?: boolean;
   /** 読み順 (デバッグ用、合成には不要) */
   reading_order?: number;
 };
@@ -89,25 +97,48 @@ export async function composeMangaPage(
   const overlays: sharp.OverlayOptions[] = [];
 
   for (const panel of options.panels) {
-    const { x, y, w, h } = panel.rect;
+    const { rect, polygon } = panel;
+    const { x, y, w, h } = rect;
+    const usePolygon = polygon && polygon.length >= 3;
 
     // panel 画像を slot 矩形の中身サイズ (border 内側) に cover リサイズ
-    const innerW = Math.max(1, Math.round(w - borderWidth * 2));
-    const innerH = Math.max(1, Math.round(h - borderWidth * 2));
+    const resizeW = usePolygon ? Math.max(1, Math.round(w)) : Math.max(1, Math.round(w - borderWidth * 2));
+    const resizeH = usePolygon ? Math.max(1, Math.round(h)) : Math.max(1, Math.round(h - borderWidth * 2));
 
     const resizedBuffer = await sharp(panel.source_image_path)
-      .resize(innerW, innerH, {
+      .resize(resizeW, resizeH, {
         fit: "cover",
         position: "center",
       })
       .png()
       .toBuffer();
 
-    overlays.push({
-      input: resizedBuffer,
-      top: Math.round(y + borderWidth),
-      left: Math.round(x + borderWidth),
-    });
+    if (usePolygon) {
+      const mask = polygonToSvgMask(
+        polygon,
+        Math.round(w),
+        Math.round(h),
+        -Math.round(x),
+        -Math.round(y)
+      );
+      const clippedBuffer = await sharp(resizedBuffer)
+        .ensureAlpha()
+        .composite([{ input: Buffer.from(mask), blend: "dest-in" }])
+        .png()
+        .toBuffer();
+
+      overlays.push({
+        input: clippedBuffer,
+        top: Math.round(y),
+        left: Math.round(x),
+      });
+    } else {
+      overlays.push({
+        input: resizedBuffer,
+        top: Math.round(y + borderWidth),
+        left: Math.round(x + borderWidth),
+      });
+    }
   }
 
   // 3. 黒コマ枠を SVG で描画 (各 panel の rect に矩形を描く)
@@ -152,6 +183,11 @@ function buildBorderSvg(opts: {
 
   const rects = panels
     .map((p) => {
+      if (p.is_borderless || p.bleed_polygon) return "";
+      if (p.polygon && p.polygon.length >= 3) {
+        return polygonSvgFrame(p.polygon, { borderWidth, borderColor });
+      }
+
       const { x, y, w, h } = p.rect;
       // stroke は中央基準なので、矩形を borderWidth/2 だけ内側に置く
       const halfBorder = borderWidth / 2;

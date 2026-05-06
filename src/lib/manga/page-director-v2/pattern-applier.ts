@@ -33,16 +33,15 @@ export function applyPattern(args: {
     const slot = slotsByOrder[i];
     const polygon = slot.polygon.map(([x, y]) => [x, y] as Point);
 
-    // Keep slot borderless/bleed semantics local to v4 for now. PagePlanPanel does not expose fields yet.
-    void slot.is_borderless;
-    void slot.bleed;
-
-    appliedByPanelId.set(panel.panel_id, {
+    const newPanel: PagePlanPanel = {
       ...panel,
       slot_id: slot.slot_id,
       polygon,
       rect: polygonBbox(polygon),
-    });
+    };
+    if (slot.is_borderless) newPanel.is_borderless = true;
+    if (slot.bleed) newPanel.bleed_polygon = true;
+    appliedByPanelId.set(panel.panel_id, newPanel);
   }
 
   return {

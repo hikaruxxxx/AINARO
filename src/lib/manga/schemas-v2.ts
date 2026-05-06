@@ -433,6 +433,38 @@ export type PullLink = {
 
 export type RenderStrategy = "panel_composite" | "page_one_shot" | "hybrid";
 
+/**
+ * パネル内側の背景表現種別 (2026-05-06 追加、reference pool 分離用)
+ *
+ * 「コマの中身が背景としてどう描かれるか」の分類。L02 bible-images の背景生成
+ * reference (描き込み背景の学習) と L05 page-director の構図 reference (トーンバック
+ * 含む全 panel) を取り違えないために必要。
+ *
+ *   - detailed_bg:       描き込まれた背景。L02 の背景 reference になる
+ *   - atmospheric_fade:  境界がフェード/抜け、背景一部のみ描き込み
+ *   - tone_back:         全面スクリーントーン (背景描写ゼロ、心情/間用途)
+ *   - solid_white:       全面白 (背景描写ゼロ、衝撃/フラッシュ)
+ *   - solid_black:       全面黒 (背景描写ゼロ、暗転/不在)
+ *   - floating_ui:       UI/HUD/ステータス画面が panel そのもの
+ *   - unspecified:       未指定 (bootstrap 未実施 or learner 待ち)
+ */
+export type BackgroundTreatment =
+  | "detailed_bg"
+  | "atmospheric_fade"
+  | "tone_back"
+  | "solid_white"
+  | "solid_black"
+  | "floating_ui"
+  | "unspecified";
+
+/**
+ * background_treatment が L02 の「背景描き込み reference」として使えるか?
+ * detailed_bg のみ true。atmospheric_fade はフェードで形が読み取れず除外。
+ */
+export function isBackgroundReferenceCandidate(t: BackgroundTreatment | undefined): boolean {
+  return t === "detailed_bg";
+}
+
 export type PagePlanPanel = {
   panel_id: string;
   slot_id: string;
@@ -444,6 +476,10 @@ export type PagePlanPanel = {
   /** Phase B v3: 実際のコマ枠 polygon。頂点列 [[x,y],...] (時計回り)。未指定なら rect から派生。
    *  polygon 指定時は tilt_deg は無視される。凹多角形可（隣接切り欠きで発生）*/
   polygon?: [number, number][];
+  /** Phase B3 v3: 枠線描画スキップ (atmospheric panel 用) */
+  is_borderless?: boolean;
+  /** Phase B3 v3: ページ縁まで延長する panel (枠線スキップ) */
+  bleed_polygon?: boolean;
   /** L6 で注入 */
   continuity_group_ids?: string[];
 };
