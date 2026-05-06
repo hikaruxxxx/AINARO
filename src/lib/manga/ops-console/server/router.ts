@@ -27,6 +27,12 @@ import {
   handleAdoptedPost,
 } from "./handlers/adopted-versions";
 import { handleBootstrap } from "./handlers/bootstrap";
+import {
+  handleJobsAbort,
+  handleJobsList,
+  handleJobsStart,
+  handleJobsStream,
+} from "./handlers/jobs";
 import { handleWorkEpisodes, handleWorksList } from "./handlers/works";
 
 export type RouterDefaults = {
@@ -105,6 +111,34 @@ export async function handleApi(
   if (p === "/api/bootstrap") {
     if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
     return handleBootstrap(defaults, res);
+  }
+
+  if (p === "/api/jobs") {
+    if (req.method === "GET") return handleJobsList(req, res, url, defaults);
+    if (req.method === "POST") {
+      let body: any;
+      try {
+        body = await readJsonBody(req);
+      } catch (e) {
+        return send(res, 400, { error: String(e) });
+      }
+      return handleJobsStart(req, res, body, defaults);
+    }
+    return send(res, 405, { error: "method not allowed" });
+  }
+  {
+    const m = p.match(/^\/api\/jobs\/([^/]+)\/(stream|abort)$/);
+    if (m) {
+      const jobId = m[1];
+      const action = m[2];
+      if (action === "stream" && req.method === "GET") {
+        return handleJobsStream(req, res, jobId, defaults);
+      }
+      if (action === "abort" && req.method === "POST") {
+        return handleJobsAbort(req, res, jobId, defaults);
+      }
+      return send(res, 405, { error: "method not allowed" });
+    }
   }
 
   // ===== works enumerate (Phase 1 で新規追加、scope check 不要) =====

@@ -86,6 +86,9 @@ const ALL_LAYERS = [
 ] as const;
 type LayerId = (typeof ALL_LAYERS)[number];
 
+// SSoT: scripts/manga/pipeline.ts:LAYER_SCRIPT と
+// src/lib/manga/ops-console/server/jobs/registry.ts:LAYER_REGISTRY は
+// 同じ script path を持つ。一方を更新したらもう一方も同期すること。
 const LAYER_SCRIPT: Record<LayerId, string> = {
   L01: "scripts/manga/layers/L01-bible.ts",
   L01b: "scripts/manga/layers/L01b-bible-lint.ts",
