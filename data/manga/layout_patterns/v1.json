@@ -266,7 +266,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 2,
           "role_hint": "reaction_setup",
           "size_class": "small",
           "polygon": [
@@ -293,7 +293,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "action_buildup",
           "size_class": "medium",
           "polygon": [
@@ -702,7 +702,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 6,
           "role_hint": "info_tile",
           "size_class": "small",
           "polygon": [
@@ -729,7 +729,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 3,
           "role_hint": "info_tile",
           "size_class": "small",
           "polygon": [
@@ -756,7 +756,7 @@
         },
         {
           "slot_id": "s5",
-          "reading_order": 5,
+          "reading_order": 4,
           "role_hint": "info_tile",
           "size_class": "small",
           "polygon": [
@@ -783,7 +783,7 @@
         },
         {
           "slot_id": "s6",
-          "reading_order": 6,
+          "reading_order": 5,
           "role_hint": "info_tile",
           "size_class": "small",
           "polygon": [
@@ -895,7 +895,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 3,
           "role_hint": "atmospheric_zoom_text",
           "size_class": "large",
           "polygon": [
@@ -922,7 +922,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 2,
           "role_hint": "reaction",
           "size_class": "medium",
           "polygon": [
@@ -1139,7 +1139,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 2,
           "role_hint": "reaction_strip",
           "size_class": "small",
           "polygon": [
@@ -1166,7 +1166,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "action_setup",
           "size_class": "medium",
           "polygon": [
@@ -1388,7 +1388,7 @@
         },
         {
           "slot_id": "s5",
-          "reading_order": 5,
+          "reading_order": 6,
           "role_hint": "reaction_dialogue",
           "size_class": "small",
           "polygon": [
@@ -1415,7 +1415,7 @@
         },
         {
           "slot_id": "s6",
-          "reading_order": 6,
+          "reading_order": 5,
           "role_hint": "result_focus",
           "size_class": "medium",
           "polygon": [
@@ -1925,7 +1925,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 2,
           "role_hint": "news_artifact",
           "size_class": "large",
           "polygon": [
@@ -1952,7 +1952,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "reaction_dialogue",
           "size_class": "small",
           "polygon": [
@@ -2316,7 +2316,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 4,
           "role_hint": "reaction_left",
           "size_class": "medium",
           "polygon": [
@@ -2343,7 +2343,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 3,
           "role_hint": "reaction_right",
           "size_class": "medium",
           "polygon": [
@@ -2506,7 +2506,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 4,
           "role_hint": "ambient_reaction_left",
           "size_class": "small",
           "polygon": [
@@ -2533,7 +2533,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 3,
           "role_hint": "ambient_reaction_right",
           "size_class": "medium",
           "polygon": [
@@ -3043,7 +3043,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 4,
           "role_hint": "rebuttal",
           "size_class": "medium",
           "polygon": [
@@ -3070,7 +3070,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 3,
           "role_hint": "punchline_visual",
           "size_class": "medium",
           "polygon": [
@@ -3177,7 +3177,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 3,
           "role_hint": "spectator_reaction",
           "size_class": "small",
           "polygon": [
@@ -3204,7 +3204,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 2,
           "role_hint": "calm_dialogue",
           "size_class": "medium",
           "polygon": [
@@ -3231,7 +3231,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 5,
           "role_hint": "calm_dialogue",
           "size_class": "medium",
           "polygon": [
@@ -3258,7 +3258,7 @@
         },
         {
           "slot_id": "s5",
-          "reading_order": 5,
+          "reading_order": 4,
           "role_hint": "scene_close",
           "size_class": "medium",
           "polygon": [
@@ -3314,7 +3314,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 2,
           "role_hint": "context_dialogue",
           "size_class": "small",
           "polygon": [
@@ -3341,7 +3341,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "item_spotlight",
           "size_class": "extra_large",
           "polygon": [
@@ -3395,7 +3395,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 5,
           "role_hint": "explanation_dialogue",
           "size_class": "medium",
           "polygon": [
@@ -3422,7 +3422,7 @@
         },
         {
           "slot_id": "s5",
-          "reading_order": 5,
+          "reading_order": 4,
           "role_hint": "character_response",
           "size_class": "medium",
           "polygon": [
@@ -3503,7 +3503,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 4,
           "role_hint": "growth_announcement",
           "size_class": "small",
           "polygon": [
@@ -3530,7 +3530,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 5,
           "role_hint": "weapon_close",
           "size_class": "medium",
           "polygon": [
@@ -3557,7 +3557,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 2,
           "role_hint": "character_action",
           "size_class": "large",
           "polygon": [
@@ -3584,7 +3584,7 @@
         },
         {
           "slot_id": "s5",
-          "reading_order": 5,
+          "reading_order": 3,
           "role_hint": "dialogue_close",
           "size_class": "small",
           "polygon": [
@@ -3663,7 +3663,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 4,
           "role_hint": "memory_inset_left",
           "size_class": "small",
           "polygon": [
@@ -3717,7 +3717,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 2,
           "role_hint": "current_eye_close",
           "size_class": "small",
           "polygon": [
@@ -3796,7 +3796,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 2,
           "role_hint": "blade_swing_top",
           "size_class": "large",
           "polygon": [
@@ -3827,7 +3827,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "impact_diagonal",
           "size_class": "medium",
           "polygon": [
@@ -3963,7 +3963,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 3,
           "role_hint": "user_reaction",
           "size_class": "medium",
           "polygon": [
@@ -3990,7 +3990,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 2,
           "role_hint": "device_close",
           "size_class": "medium",
           "polygon": [
@@ -4310,7 +4310,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 3,
           "role_hint": "character_acceptance_close",
           "size_class": "medium",
           "polygon": [
@@ -4337,7 +4337,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 2,
           "role_hint": "reaction_inset",
           "size_class": "small",
           "polygon": [
@@ -4364,7 +4364,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 5,
           "role_hint": "establishing_walk",
           "size_class": "medium",
           "polygon": [
@@ -4391,7 +4391,7 @@
         },
         {
           "slot_id": "s5",
-          "reading_order": 5,
+          "reading_order": 4,
           "role_hint": "decision_dialogue",
           "size_class": "medium",
           "polygon": [
@@ -4443,7 +4443,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 2,
           "role_hint": "alert_close",
           "size_class": "medium",
           "polygon": [
@@ -4470,7 +4470,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "shouting_close",
           "size_class": "medium",
           "polygon": [
@@ -4524,7 +4524,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 5,
           "role_hint": "feet_close",
           "size_class": "small",
           "polygon": [
@@ -4551,7 +4551,7 @@
         },
         {
           "slot_id": "s5",
-          "reading_order": 5,
+          "reading_order": 4,
           "role_hint": "dialogue_response",
           "size_class": "small",
           "polygon": [
@@ -4604,7 +4604,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 2,
           "role_hint": "intro_dialogue",
           "size_class": "small",
           "polygon": [
@@ -4631,7 +4631,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "burst_central_character",
           "size_class": "extra_large",
           "polygon": [
@@ -4685,7 +4685,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 5,
           "role_hint": "vow_dialogue",
           "size_class": "medium",
           "polygon": [
@@ -4712,7 +4712,7 @@
         },
         {
           "slot_id": "s5",
-          "reading_order": 5,
+          "reading_order": 4,
           "role_hint": "feet_or_hands_close",
           "size_class": "medium",
           "polygon": [
@@ -4848,7 +4848,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 5,
           "role_hint": "monster_close_real",
           "size_class": "extra_large",
           "polygon": [
@@ -4875,7 +4875,7 @@
         },
         {
           "slot_id": "s5",
-          "reading_order": 5,
+          "reading_order": 4,
           "role_hint": "info_caption_strip",
           "size_class": "medium",
           "polygon": [
@@ -4930,7 +4930,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 2,
           "role_hint": "ui_modal_dialog",
           "size_class": "extra_large",
           "polygon": [
@@ -4957,7 +4957,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "status_sidebar",
           "size_class": "medium",
           "polygon": [
@@ -5284,7 +5284,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 2,
           "role_hint": "approach_dialogue_setup",
           "size_class": "medium",
           "polygon": [
@@ -5311,7 +5311,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "heroine_full_body",
           "size_class": "extra_large",
           "polygon": [
@@ -5525,7 +5525,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 4,
           "role_hint": "heroine_blush_close",
           "size_class": "large",
           "polygon": [
@@ -5552,7 +5552,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 2,
           "role_hint": "chibi_reaction_inset_top",
           "size_class": "small",
           "polygon": [
@@ -5579,7 +5579,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 3,
           "role_hint": "chibi_reaction_inset_bottom",
           "size_class": "small",
           "polygon": [
@@ -5920,7 +5920,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 3,
           "role_hint": "label_strip_caption",
           "size_class": "medium",
           "polygon": [
@@ -5947,7 +5947,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 2,
           "role_hint": "pattern_action_break",
           "size_class": "medium",
           "polygon": [
@@ -6081,7 +6081,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 4,
           "role_hint": "location_c_arrival",
           "size_class": "large",
           "polygon": [
@@ -6108,7 +6108,7 @@
         },
         {
           "slot_id": "s4",
-          "reading_order": 4,
+          "reading_order": 3,
           "role_hint": "destination_landmark",
           "size_class": "large",
           "polygon": [
@@ -6160,7 +6160,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 2,
           "role_hint": "protagonist_close_pose",
           "size_class": "large",
           "polygon": [
@@ -6187,7 +6187,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "intermediate_atmospheric_breath",
           "size_class": "extra_large",
           "polygon": [
@@ -6379,7 +6379,7 @@
       "slots": [
         {
           "slot_id": "s1",
-          "reading_order": 1,
+          "reading_order": 3,
           "role_hint": "chapter_title_plate",
           "size_class": "small",
           "polygon": [
@@ -6406,7 +6406,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 1,
           "role_hint": "chat_artifact_panel",
           "size_class": "large",
           "polygon": [
@@ -6433,7 +6433,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 2,
           "role_hint": "destination_establishing",
           "size_class": "extra_large",
           "polygon": [
@@ -6622,7 +6622,7 @@
         },
         {
           "slot_id": "s2",
-          "reading_order": 2,
+          "reading_order": 3,
           "role_hint": "chart_diagram_inset",
           "size_class": "small",
           "polygon": [
@@ -6648,7 +6648,7 @@
         },
         {
           "slot_id": "s3",
-          "reading_order": 3,
+          "reading_order": 2,
           "role_hint": "listener_reaction",
           "size_class": "medium",
           "polygon": [
