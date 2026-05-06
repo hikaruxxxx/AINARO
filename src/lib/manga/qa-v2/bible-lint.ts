@@ -8,7 +8,7 @@
  * 出力: BibleLintReport (致命/警告/情報の3レベル)
  */
 import { runCodexText } from "../llm/codex-text";
-import type { BibleSnapshotV2, CharacterEntryV2, LocationEntryV2 } from "../schemas-v2";
+import type { BibleSnapshotV2 } from "../schemas-v2";
 
 export type LintSeverity = "fatal" | "warn" | "info";
 
@@ -38,6 +38,7 @@ export type BibleLintReport = {
 
 const TEMPLATE_TEXTS = ["TODO_post_bible_review", "TODO", "TBD", "未定", "後で書く"];
 const DUNGEON_MODERN_SUBTYPES = new Set(["external_social", "gacha_ui", "hybrid"]);
+const CORE_HOOK_TYPES = new Set(["A", "B", "C"]);
 
 function isModernDungeonGenre(genre: string | undefined): boolean {
   return genre === "modern_dungeon" || genre === "modern-dungeon" || genre === "dungeon-modern";
@@ -45,6 +46,66 @@ function isModernDungeonGenre(genre: string | undefined): boolean {
 
 function staticLint(bible: BibleSnapshotV2): LintFinding[] {
   const f: LintFinding[] = [];
+
+  // core_hook はメガヒット下層狙いの gateway。未設定時は missing のみ出し、詳細検証は飛ばす。
+  if (!bible.meta.core_hook) {
+    f.push({
+      severity: "fatal",
+      scope: "global",
+      rule: "core_hook_missing",
+      message: "bible.meta.core_hook が未設定です。中核ギミック1文、類型、参照ヒット作を明示してください。",
+    });
+  } else {
+    const coreHook = bible.meta.core_hook as {
+      one_liner?: unknown;
+      type?: unknown;
+      hit_references?: unknown;
+    };
+    const oneLiner = typeof coreHook.one_liner === "string" ? coreHook.one_liner : "";
+    const oneLinerLength = Array.from(oneLiner).length;
+    const hitReferences = Array.isArray(coreHook.hit_references) ? coreHook.hit_references : [];
+
+    if (oneLinerLength > 30) {
+      f.push({
+        severity: "fatal",
+        scope: "global",
+        rule: "core_hook_one_liner_too_long",
+        message: `meta.core_hook.one_liner が ${oneLinerLength}字です (30字以内必須)`,
+      });
+    }
+    if (oneLinerLength < 5) {
+      f.push({
+        severity: "warn",
+        scope: "global",
+        rule: "core_hook_one_liner_too_short",
+        message: `meta.core_hook.one_liner が ${oneLinerLength}字です (最低5字推奨)`,
+      });
+    }
+    if (!CORE_HOOK_TYPES.has(String(coreHook.type))) {
+      f.push({
+        severity: "fatal",
+        scope: "global",
+        rule: "core_hook_type_invalid",
+        message: `meta.core_hook.type="${String(coreHook.type)}" は未定義です。A/B/C から選んでください。`,
+      });
+    }
+    if (hitReferences.length === 0) {
+      f.push({
+        severity: "fatal",
+        scope: "global",
+        rule: "core_hook_hit_references_empty",
+        message: "meta.core_hook.hit_references が空です。同類の既存ヒット作を1-3作入れてください。",
+      });
+    }
+    if (hitReferences.length > 3) {
+      f.push({
+        severity: "warn",
+        scope: "global",
+        rule: "core_hook_hit_references_too_many",
+        message: `meta.core_hook.hit_references が ${hitReferences.length}作です (最大3作推奨)`,
+      });
+    }
+  }
 
   if (isModernDungeonGenre(bible.meta.genre)) {
     if (!bible.meta.subtype) {
@@ -166,9 +227,17 @@ type LlmJudgeOutput = {
   rationale: string;          // 200字以内
   shallowness_findings: Array<{
     severity: "fatal" | "warn" | "info";
-    scope: "world" | "character" | "location" | "prop" | "costume" | "motif" | "synopsis";
+    scope: "world" | "character" | "location" | "prop" | "costume" | "relation" | "motif" | "continuity_seed" | "volume_synopsis" | "global";
     target_id?: string;
-    rule: string;             // "generic_personality" | "no_unique_motif" | "world_rule_lacks_edge_cases" | etc
+    rule:
+      | "generic_personality"
+      | "no_unique_motif"
+      | "world_rule_lacks_edge_cases"
+      | "core_hook_one_liner_blurry"
+      | "core_hook_type_misclassified"
+      | "core_hook_differentiation_unclear"
+      | "core_hook_long_term_viability"
+      | string;
     message: string;          // 何が浅いか具体的に
     hint?: string;            // どう改善するか
   }>;
@@ -207,6 +276,13 @@ export async function llmLintBible(args: {
       "8. プレースホルダ (TODO, 後で書く) が放置",
       "9. 同じ役割のキャラが似た spec で書かれている",
       "10. 主人公の信念・トラウマ・矛盾が言語化されていない",
+      "",
+      "## core_hook gateway",
+      "bible.meta.core_hook が存在する場合は、次の4観点も必ず評価し、問題があれば shallowness_findings に該当 rule を追加してください。",
+      "- core_hook_one_liner_blurry (warn): one_liner が凡庸/ぼやけ。具体的な異常性が見えない",
+      "- core_hook_type_misclassified (warn): type タグ (A:反復蓄積 / B:接続媒介 / C:視点ずらし) と one_liner の中身が整合しない",
+      "- core_hook_differentiation_unclear (fatal): hit_references との差分が one_liner から伝わらない",
+      "- core_hook_long_term_viability (warn): 15巻続けられる構造がなく、短命ギミックに見える",
       "",
       "## 入力 (bible 全文)",
       "```json",

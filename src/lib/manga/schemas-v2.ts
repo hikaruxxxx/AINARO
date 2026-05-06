@@ -195,6 +195,15 @@ export type ToneProfile = {
 
 export type DungeonModernSubtype = "external_social" | "gacha_ui" | "hybrid";
 
+export type CoreHookV2 = {
+  /** 中核ギミック1文。bible-lint で30字以内を必須検証する */
+  one_liner: string;
+  /** A:反復蓄積 / B:接続媒介 / C:視点ずらし */
+  type: "A" | "B" | "C";
+  /** 既存ヒット作との差分確認用。bible-lint で1-3作を検証する */
+  hit_references: string[];
+};
+
 export type BibleSnapshotV2 = {
   schema_version: 2;
   generated_at: string;
@@ -221,6 +230,8 @@ export type BibleSnapshotV2 = {
     profile_id?: string;
     /** ジャンル内サブタイプ (現状 modern_dungeon でのみ使用) */
     subtype?: DungeonModernSubtype;
+    /** 中核ギミック1点突破。後方互換のため optional、必須化は bible-lint で担保する */
+    core_hook?: CoreHookV2;
   };
   world: WorldSpec;
   characters: CharacterEntryV2[];

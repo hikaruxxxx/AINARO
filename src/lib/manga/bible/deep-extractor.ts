@@ -18,6 +18,7 @@
 import { runCodexText } from "../llm/codex-text";
 import type {
   BibleSnapshotV2,
+  CoreHookV2,
   NavFullSpecV2,
   NarrationStyleGuideV2,
   TextQualityLexiconV2,
@@ -27,6 +28,11 @@ import type { BibleLintReport } from "../qa-v2/bible-lint";
 
 const ENHANCEMENT_SCHEMA = `
 type DeepExtractorOutput = {
+  core_hook_patch?: {
+    one_liner: string;              // 中核ギミック1文。30字以内
+    type: "A" | "B" | "C";          // A:反復蓄積 / B:接続媒介 / C:視点ずらし
+    hit_references: string[];       // 同類の既存ヒット作 1-3作
+  } | null;
   characters_patch: Array<{
     id: string;                    // 既存 character.id を指定
     spec_overrides?: {
@@ -101,6 +107,7 @@ type DeepExtractorOutput = {
 `;
 
 export type DeepExtractionPatch = {
+  core_hook_patch?: CoreHookV2 | null;
   characters_patch?: Array<{
     id: string;
     spec_overrides?: Partial<BibleSnapshotV2["characters"][number]["spec"]>;
@@ -142,6 +149,9 @@ export async function runDeepExtractor(args: {
     "- 画風は『なろう系コミカライズ ライト青年漫画』(下記参考フレーム) に合わせる: 線細め / 大きめ瞳 / 黒髪はベタ + 軽いトーン / 背景は establishing 以外ミニマル / 縦書き吹き出し",
     "- 浅さ (lint findings 参照) を全部埋める",
     "- ジャンル特性 (現代ダンジョン × システム音声) を活かした唯一性を入れる",
+    "- 中核ギミックを30字以内の1文に圧縮し meta.core_hook.one_liner に格納する patch を返す",
+    "- A/B/C類型 (A:反復蓄積 / B:接続媒介 / C:視点ずらし) のいずれかを判別し meta.core_hook.type に格納する",
+    "- 同類のヒット作を1-3作挙げて meta.core_hook.hit_references に配列で格納し、差分が one_liner から読み取れることを確認する",
     "",
     "## 画風参考",
     args.styleReferenceNote,
@@ -220,6 +230,11 @@ export function applyDeepEnhancements(args: {
   patch: DeepExtractionPatch;
 }): BibleSnapshotV2 {
   const out: BibleSnapshotV2 = JSON.parse(JSON.stringify(args.bible));
+
+  // 既存の中核ギミックがある bible は作者指定を優先し、未設定時だけ deep patch を採用する。
+  if (args.patch.core_hook_patch && !out.meta.core_hook) {
+    out.meta.core_hook = args.patch.core_hook_patch;
+  }
 
   if (args.patch.characters_patch) {
     for (const cp of args.patch.characters_patch) {
