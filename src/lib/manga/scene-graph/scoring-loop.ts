@@ -25,6 +25,7 @@ import type {
   SceneSelection,
   PayoffEpisodeHint,
 } from "./schema";
+import { runCodexText } from "../llm/codex-text";
 
 // ============================================================================
 // Configuration
@@ -105,10 +106,91 @@ export async function generateSceneCandidates(
       stubCandidate(slot, i)
     );
   }
-  // B3 中盤で実装: agent invocation で N 候補を生成
-  throw new Error(
-    "[scoring-loop] generateSceneCandidates: live LLM mode not implemented (B3 mid). Use config.dry_run = true."
-  );
+  const task = buildSceneCandidatePrompt(slot, context, config.candidatesPerScene);
+  const result = await runCodexText<{ candidates: Partial<Scene>[] }>({
+    task,
+    format: "json",
+    cwd: process.env.AINARO_REPO_ROOT ?? process.cwd(),
+    timeoutMs: 8 * 60 * 1000,
+    maxRetries: 1,
+  });
+  if (!result.parsed || !Array.isArray(result.parsed.candidates)) {
+    throw new Error(
+      `[scoring-loop] generateSceneCandidates: codex returned unparseable JSON for ${slot.scene_id}. stdout head: ${result.stdout.slice(0, 300)}`
+    );
+  }
+  // codex 出力は scene のうち A 系・B 系フィールドを埋める想定。
+  // 識別フィールド (scene_id / scene_no / panel_range / arc_position 等) は slot から継承。
+  return result.parsed.candidates.slice(0, config.candidatesPerScene).map((c) => ({
+    ...stubCandidate(slot, 0),
+    ...c,
+    scene_id: slot.scene_id,
+    scene_no: slot.scene_no,
+    prev_scene_id: slot.prev_scene_id,
+    next_scene_id: slot.next_scene_id,
+    page_range: slot.page_range,
+    panel_range: slot.panel_range,
+    arc_position: slot.arc_position,
+    location_id: slot.location_id,
+    sub_locations: slot.sub_locations,
+  }));
+}
+
+/**
+ * scene 候補生成用の Codex prompt を構築する。
+ *
+ * 入力: slot (識別 + arc_position + location 確定済み)、context (bible / brief / 周辺 scene)
+ * 出力 (期待 JSON):
+ *   { candidates: [{ beat_type, cast, dialogue_plan, foreshadow_setup, foreshadow_payoff,
+ *                     protagonist_arc_state, relationship_state_delta, time_axis,
+ *                     mode, turn_anchor, layout_pattern_id, subtype_directive,
+ *                     render_strategy, key_visual_intent }, ...] }
+ */
+export function buildSceneCandidatePrompt(
+  slot: SceneSlot,
+  context: GenerationContext,
+  candidates: number
+): string {
+  const finalized = context.finalizedScenes
+    .map(
+      (s) =>
+        `  - ${s.scene_id} (${s.beat_type}, ${s.location_id}): "${s.protagonist_arc_state.belief}" → "${s.protagonist_arc_state.goal}"`
+    )
+    .join("\n");
+  return [
+    `あなたは AINARO 漫画 v2 scene-graph の scene 候補生成エージェントです。`,
+    `slug=${context.slug}, episode=${context.episode}, scene=${slot.scene_id}`,
+    `bible: ${context.bibleSnapshotPath}`,
+    `brief: ${context.briefPath}`,
+    `volume_plot: ${context.volumePlotPath ?? "(none)"}`,
+    "",
+    `## scene slot (固定フィールド)`,
+    `- scene_id: ${slot.scene_id} / scene_no: ${slot.scene_no}`,
+    `- page_range: P${slot.page_range.start}-P${slot.page_range.end}`,
+    `- panel_range: panel#${slot.panel_range.start_panel_no}-${slot.panel_range.end_panel_no}`,
+    `- arc_position: vol${slot.arc_position.volume} ep${slot.arc_position.episode_in_volume} / phase=${slot.arc_position.arc_phase} / norm=${slot.arc_position.arc_position_normalized}`,
+    `- location_id: ${slot.location_id}`,
+    slot.sub_locations && slot.sub_locations.length > 0
+      ? `- sub_locations: ${slot.sub_locations.join(", ")}`
+      : "- sub_locations: (none)",
+    "",
+    `## 周辺シーン (採用済み、prev → ...)`,
+    finalized || "  (no prev scenes yet)",
+    "",
+    `## 指示`,
+    `1. 上記 slot に対して ${candidates} 個の scene 候補を生成してください。`,
+    `2. 各候補は scene-graph schema の A 系 (beat_type / cast / dialogue_plan / foreshadow / protagonist_arc_state / relationship_state_delta / time_axis) と B 系 (mode / turn_anchor / layout_pattern_id / subtype_directive / render_strategy / key_visual_intent) を埋めてください。`,
+    `3. cast は brief.cast の subset とし、bible.characters に存在する character_id のみを使用してください。`,
+    `4. dialogue_plan.key_lines の uniqueness は cliffhanger 等の決め台詞のみ "scene_exclusive" とし、それ以外は "may_repeat" としてください。`,
+    `5. foreshadow_setup の payoff_episode_hint は "this_episode" / "next_episode" / "later_in_volume" / "cross_volume" から選んでください。`,
+    `6. 候補間で beat 解釈・演出 mode・key_visual_intent を変えて多様性を確保してください。`,
+    `7. 仕様詳細: docs/plans/manga/scene-graph-l3-5.md`,
+    "",
+    `## 出力形式`,
+    `\`\`\`json`,
+    `{ "candidates": [ /* ${candidates} 個 */ ] }`,
+    `\`\`\``,
+  ].join("\n");
 }
 
 function stubCandidate(slot: SceneSlot, idx: number): Scene {
@@ -171,9 +253,91 @@ export async function runPairwiseTournament(
       win_rate: (candidates.length - 1 - i) / Math.max(1, candidates.length - 1),
     }));
   }
-  throw new Error(
-    "[scoring-loop] runPairwiseTournament: live LLM mode not implemented (B3 mid)."
+  // 総当たり C(N,2) マッチを Codex に並列実行させる。
+  // 1 マッチ = 2 候補のテキスト + scene 文脈 → 勝者を返す。
+  const wins = new Array<number>(candidates.length).fill(0);
+  const losses = new Array<number>(candidates.length).fill(0);
+  const pairs: Array<[number, number]> = [];
+  for (let i = 0; i < candidates.length; i++) {
+    for (let j = i + 1; j < candidates.length; j++) {
+      pairs.push([i, j]);
+    }
+  }
+  const results = await Promise.all(
+    pairs.map(async ([i, j]) => {
+      const task = buildPairwisePrompt(candidates[i], candidates[j], i, j);
+      const r = await runCodexText<{ winner: "a" | "b"; reason?: string }>({
+        task,
+        format: "json",
+        cwd: process.env.AINARO_REPO_ROOT ?? process.cwd(),
+        timeoutMs: 5 * 60 * 1000,
+        maxRetries: 1,
+      });
+      const winner = r.parsed?.winner ?? "a";
+      return { i, j, winner };
+    })
   );
+  for (const { i, j, winner } of results) {
+    if (winner === "a") {
+      wins[i]++;
+      losses[j]++;
+    } else {
+      wins[j]++;
+      losses[i]++;
+    }
+  }
+  const total = candidates.length - 1;
+  return candidates.map((_, i) => ({
+    candidate_id: `c${i}`,
+    wins: wins[i],
+    losses: losses[i],
+    win_rate: total > 0 ? wins[i] / total : 0,
+  }));
+}
+
+/**
+ * pairwise-judge 用の prompt を構築する。a 候補と b 候補のテキスト + 共通 scene 文脈を渡し、
+ * 勝者を JSON で返してもらう。
+ */
+export function buildPairwisePrompt(
+  a: Scene,
+  b: Scene,
+  iA: number,
+  iB: number
+): string {
+  return [
+    `あなたは AINARO 漫画 v2 scene 候補の pairwise judge です。`,
+    `同じ scene slot (${a.scene_id}) に対する 2 候補のうち、より「商業漫画として面白い」方を選んでください。`,
+    "",
+    `## 候補 a (idx=${iA})`,
+    `beat: ${a.beat_type} / mode: ${a.mode}`,
+    `key_visual: ${a.key_visual_intent}`,
+    `protagonist: belief="${a.protagonist_arc_state.belief}" / goal="${a.protagonist_arc_state.goal}" / emotion=${a.protagonist_arc_state.emotion}`,
+    `dialogue:`,
+    a.dialogue_plan.key_lines
+      .map((kl) => `  - [${kl.speaker}] 「${kl.text}」 (${kl.intent})`)
+      .join("\n") || "  (none)",
+    "",
+    `## 候補 b (idx=${iB})`,
+    `beat: ${b.beat_type} / mode: ${b.mode}`,
+    `key_visual: ${b.key_visual_intent}`,
+    `protagonist: belief="${b.protagonist_arc_state.belief}" / goal="${b.protagonist_arc_state.goal}" / emotion=${b.protagonist_arc_state.emotion}`,
+    `dialogue:`,
+    b.dialogue_plan.key_lines
+      .map((kl) => `  - [${kl.speaker}] 「${kl.text}」 (${kl.intent})`)
+      .join("\n") || "  (none)",
+    "",
+    `## 評価軸 (重要度順)`,
+    `1. 物語論理: 主人公の信念遷移 / 関係性 delta / 伏線の整合と読者期待のコントロール`,
+    `2. 商業漫画品質: 「読める」B- ではなく「商業作家として通用する」A-`,
+    `3. 演出: 1 ページめくり位置 / silence panel / 緊張ピークでのコマ形状`,
+    `4. 独自性ではなく「ヒット型を質高く実行」`,
+    "",
+    `## 出力形式`,
+    `\`\`\`json`,
+    `{ "winner": "a" | "b", "reason": "1-2 行" }`,
+    `\`\`\``,
+  ].join("\n");
 }
 
 // ============================================================================
@@ -538,9 +702,88 @@ export async function compareToAnchorPool(
       llm_score: round2(0.5 + ((seed >> 4) % 50) / 100),
     };
   }
-  throw new Error(
-    "[scoring-loop] compareToAnchorPool: live mode requires sub-genre resolution + embedding wire (B3 mid). loadAnchorPool / loadAnchorLayer3 / loadAnchorLayer5 are available as building blocks."
+
+  // live mode: sub-genre 解決 → anchor pool 読み込み → Codex に top-3 と llm_score を判定させる
+  const subGenreId = resolveSubGenreId(context.slug);
+  const pool = await loadAnchorPool(subGenreId, { band: "hit" });
+  const anchorsWithText = await Promise.all(
+    pool.anchors.slice(0, 12).map(async (a) => ({
+      anchor: a,
+      layer3: await loadAnchorLayer3(subGenreId, a),
+    }))
   );
+  const usable = anchorsWithText.filter((x) => x.layer3 != null);
+  if (usable.length === 0) {
+    throw new Error(
+      `[scoring-loop] compareToAnchorPool: no anchor with Layer3 found for sub-genre ${subGenreId}.`
+    );
+  }
+  const task = buildAnchorComparePrompt(candidate, subGenreId, usable);
+  const r = await runCodexText<{
+    top3_anchor_ids: string[];
+    cosine_avg?: number;
+    llm_score: number;
+  }>({
+    task,
+    format: "json",
+    cwd: process.env.AINARO_REPO_ROOT ?? process.cwd(),
+    timeoutMs: 5 * 60 * 1000,
+    maxRetries: 1,
+  });
+  if (!r.parsed) {
+    throw new Error(
+      `[scoring-loop] compareToAnchorPool: codex returned unparseable JSON for ${candidate.scene_id}. stdout head: ${r.stdout.slice(0, 300)}`
+    );
+  }
+  return {
+    top3_anchor_ids: r.parsed.top3_anchor_ids ?? [],
+    cosine_avg: round2(r.parsed.cosine_avg ?? 0),
+    llm_score: round2(Math.max(0, Math.min(1, r.parsed.llm_score ?? 0))),
+  };
+}
+
+/**
+ * anchor 比較用の Codex prompt を構築する。scene 候補と top-N anchor を渡し、
+ * top-3 anchor と llm_score を JSON で返してもらう。
+ */
+export function buildAnchorComparePrompt(
+  candidate: Scene,
+  subGenreId: string,
+  anchors: Array<{ anchor: AnchorEntry; layer3: string | null }>
+): string {
+  const anchorBlocks = anchors
+    .map(
+      (x, idx) =>
+        `### anchor ${idx} (${x.anchor.anchorId}, GP=${x.anchor.globalPoint})\n${(x.layer3 ?? "").slice(0, 1500)}`
+    )
+    .join("\n\n");
+  return [
+    `あなたは AINARO 漫画 v2 anchor pool 比較エージェントです。`,
+    `sub-genre: ${subGenreId}`,
+    `候補 scene が同 sub-genre の hit anchor 群と比べて「商業漫画として通用する絶対品質」を 0..1 で採点します。`,
+    "",
+    `## 候補 scene (${candidate.scene_id}, ${candidate.beat_type}, ${candidate.mode}, ${candidate.location_id})`,
+    `key_visual: ${candidate.key_visual_intent}`,
+    `protagonist: belief="${candidate.protagonist_arc_state.belief}" / goal="${candidate.protagonist_arc_state.goal}" / emotion=${candidate.protagonist_arc_state.emotion}`,
+    `dialogue:`,
+    candidate.dialogue_plan.key_lines
+      .map((kl) => `  - [${kl.speaker}] 「${kl.text}」 (${kl.intent})`)
+      .join("\n") || "  (none)",
+    "",
+    `## 同 sub-genre hit anchors (Layer3 あらすじ抜粋)`,
+    anchorBlocks,
+    "",
+    `## 評価ルール`,
+    `1. anchor pool は「ヒット作」のサンプル。anchor との類似度ではなく「同等品質か」を採点する (通過率ではなく絶対品質、feedback_quality_over_pass_rate)`,
+    `2. 「漫画として読める」B- ではなく「商業作家として通用する」A- を 0.7 以上の基準とする (feedback_commercial_vs_readable)`,
+    `3. 独自性は 0.0 〜 0.2 の補正に留め、「ヒット型を質高く実行」を主軸とする (feedback_quality_over_novelty)`,
+    "",
+    `## 出力形式`,
+    `\`\`\`json`,
+    `{ "top3_anchor_ids": ["...", "...", "..."], "cosine_avg": 0.0, "llm_score": 0.0 }`,
+    `\`\`\``,
+    `※ cosine_avg は embedding 比較を実装していないため 0 でよい。llm_score を主指標とする。`,
+  ].join("\n");
 }
 
 // ============================================================================
