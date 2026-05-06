@@ -29,6 +29,10 @@ import {
   type EpisodeBriefMinimal,
   type StoryboardLikeShape,
 } from "../../../src/lib/manga/scene-graph/schema";
+import {
+  computeEpisodeMetrics,
+  formatMetricsReport,
+} from "../../../src/lib/manga/scene-graph/episode-metrics";
 import type { BibleSnapshotV2 } from "../../../src/lib/manga/schemas-v2";
 
 type Mode = "validate" | "generate";
@@ -236,6 +240,12 @@ async function modeValidate(args: Args): Promise<void> {
       console.log(`  ${p.token} → ${p.expected_in}`);
     }
   }
+
+  // B4: episode-level metrics
+  const metrics = computeEpisodeMetrics(sceneGraph);
+  console.log("");
+  console.log("=== Episode Metrics (B4) ===");
+  console.log(formatMetricsReport(metrics));
 
   if (!result.ok || (inheritance && !inheritance.ok)) process.exit(2);
 }
