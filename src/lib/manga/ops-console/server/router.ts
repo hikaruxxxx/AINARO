@@ -103,13 +103,18 @@ function parseScopedPath(
   return { slug, episode, tail };
 }
 
-/** Phase 1: 新 path の scope は default と一致しなければ 403。 */
+/**
+ * 新 path の scope check。モードによって挙動を変える:
+ *  - scope 固定モード (default が non-null): default と一致しなければ 403
+ *  - 一覧モード (default が null): SPA で選んだ任意の slug/episode を許可。
+ *    一覧モードはユーザが明示的に scope なしで起動した想定なので、cross-scope の read/write を解禁する。
+ */
 function checkScopedPath(
   scoped: { slug: string; episode: number },
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
   if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-    return { ok: false, status: 400, error: "no active scope; pick a work from /" };
+    return { ok: true };
   }
   if (scoped.slug !== defaults.defaultSlug || scoped.episode !== defaults.defaultEpisode) {
     return {
@@ -188,10 +193,10 @@ export async function handleApi(
       if (req.method !== "GET") return send(res, 405, { error: "method not allowed" });
       const slug = m[1];
       if (!isValidSlug(slug)) return send(res, 400, { error: "invalid slug" });
-      if (defaults.defaultSlug === null) {
-        return send(res, 400, { error: "no active scope; pick a work from /" });
+      // 一覧モード (default null) は任意 slug を許可、scope 固定モードは default のみ。
+      if (defaults.defaultSlug !== null && slug !== defaults.defaultSlug) {
+        return send(res, 403, { error: "scope mismatch" });
       }
-      if (slug !== defaults.defaultSlug) return send(res, 403, { error: "scope mismatch" });
       return handleBible(slug, res);
     }
   }

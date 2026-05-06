@@ -136,8 +136,10 @@ function refMap(refs: BibleCharacterRef[]): Map<string, string[]> {
   return new Map(refs.map((ref) => [ref.id, ref.files]));
 }
 
-function refUrl(kind: "characters" | "locations" | "props", id: string, file: string): string {
-  return `/bible/refs/${kind}/${encodeURIComponent(id)}/${encodeURIComponent(file)}`;
+function refUrl(slug: string, kind: "characters" | "locations" | "props", id: string, file: string): string {
+  // path scoped: serve-ops は path 内 slug から workDir を引いて配信。
+  // 一覧モードでも作品選択後にこの URL で画像取得できる。
+  return `/works/${encodeURIComponent(slug)}/bible/refs/${kind}/${encodeURIComponent(id)}/${encodeURIComponent(file)}`;
 }
 
 function renderTopTabs(active: TopTab): string {
@@ -149,6 +151,7 @@ function renderBibleTabs(active: BibleTab): string {
 }
 
 function renderAssetCards(
+  slug: string,
   kind: "characters" | "locations" | "props",
   items: unknown[],
   refs: BibleCharacterRef[]
@@ -158,7 +161,7 @@ function renderAssetCards(
   return `<div class="ast-grid">${items.map((item) => {
     const id = idOf(item);
     const files = byId.get(id) ?? [];
-    const thumb = files[0] ? refUrl(kind, id, files[0]) : "";
+    const thumb = files[0] ? refUrl(slug, kind, id, files[0]) : "";
     const caption = `${nameOf(item)} / ${id}`;
     return `
       <article class="ast-card">
@@ -175,9 +178,9 @@ function renderBible(state: ViewState): string {
   const bible = state.bible;
   if (!bible) return `<div class="ast-empty">Bible snapshot is not loaded.</div>`;
   const body = (() => {
-    if (state.bibleTab === "characters") return renderAssetCards("characters", bible.characters, bible.refs.characters);
-    if (state.bibleTab === "locations") return renderAssetCards("locations", bible.locations, bible.refs.locations);
-    if (state.bibleTab === "props") return renderAssetCards("props", bible.props, bible.refs.props);
+    if (state.bibleTab === "characters") return renderAssetCards(state.slug, "characters", bible.characters, bible.refs.characters);
+    if (state.bibleTab === "locations") return renderAssetCards(state.slug, "locations", bible.locations, bible.refs.locations);
+    if (state.bibleTab === "props") return renderAssetCards(state.slug, "props", bible.props, bible.refs.props);
     if (state.bibleTab === "world") return `<pre class="ast-pre">${jsonHtml(bible.world)}</pre>`;
     if (state.bibleTab === "style") {
       return `<pre class="ast-pre">${jsonHtml({

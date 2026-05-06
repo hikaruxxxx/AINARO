@@ -163,17 +163,28 @@ async function main() {
         if (p.startsWith("/_ops/")) {
           return { root: opsDistRoot, subPath: p.slice("/_ops".length) };
         }
-        // Phase 1: /works/{slug}/episodes/epNN/path をサポート、default scope のみ通す
+        // /works/{slug}/episodes/epNN/path: scope 固定モードは default のみ、一覧モードは任意 slug。
+        // path から slug を取って workDir(slug) に解決するので、両モードで動く。
         const m = p.match(/^\/works\/([^/]+)\/episodes\/(ep\d+)(\/.*)?$/);
-        if (m && scopedRoot && args.slug) {
+        if (m) {
           const slug = m[1];
+          if (!isValidSlug(slug)) return null;
+          if (args.slug && slug !== args.slug) return null; // scope 固定モードは default のみ
           const ep = m[2];
           const sub = m[3] ?? "/";
-          if (slug !== args.slug) return null;
-          return { root: scopedRoot, subPath: path.posix.join("/episodes", ep, sub) };
+          return { root: workDir(slug), subPath: path.posix.join("/episodes", ep, sub) };
         }
+        // /works/{slug}/bible/refs/{kind}/{id}/{file}: assets view が一覧モードでも参照できるよう、
+        // path 経由で slug を取る。scope 固定モードは default のみ。
+        const refMatch = p.match(/^\/works\/([^/]+)\/bible\/refs\/(.+)$/);
+        if (refMatch) {
+          const slug = refMatch[1];
+          if (!isValidSlug(slug)) return null;
+          if (args.slug && slug !== args.slug) return null;
+          return { root: workDir(slug), subPath: `/bible/refs/${refMatch[2]}` };
+        }
+        // scope 固定モードの旧 path (/bible/refs/..., /episodes/...) は scopedRoot にフォールバック。
         if (scopedRoot) return { root: scopedRoot, subPath: p };
-        // 一覧モードでは静的 fallback の root が無いので 404
         return null;
       },
     });
