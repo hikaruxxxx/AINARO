@@ -2,6 +2,7 @@ import { apiGetBootstrap } from "./lib/api";
 import { loadFavorites, loadRecent, pushRecent } from "./lib/persistence";
 import { isViewName, store, type ViewName } from "./lib/store";
 import { mountBreadcrumb } from "./breadcrumb";
+import { mountScopeSwitcher } from "./scope-switcher";
 import { mountSidebar } from "./sidebar";
 import { mountThemeToggle } from "./theme-toggle";
 import { mountAiEditView } from "./views/ai-edit";
@@ -149,12 +150,16 @@ async function start(): Promise<void> {
   const main = document.querySelector<HTMLElement>("#main");
   const topBreadcrumb = document.querySelector<HTMLElement>("#top-breadcrumb");
   const themeToggle = document.querySelector<HTMLElement>("#nc-theme-toggle");
-  if (!sidebar || !main || !topBreadcrumb || !themeToggle) throw new Error("Novelis Console shell is incomplete");
+  const scopeSwitcher = document.querySelector<HTMLElement>("#nc-scope-switcher");
+  if (!sidebar || !main || !topBreadcrumb || !themeToggle || !scopeSwitcher) {
+    throw new Error("Novelis Console shell is incomplete");
+  }
 
   mountSidebar(sidebar);
   mountCurrentView(main);
   mountBreadcrumb(topBreadcrumb);
   mountThemeToggle(themeToggle);
+  mountScopeSwitcher(scopeSwitcher);
 
   const boot = await loadBootstrap();
   const route = parseRoute();

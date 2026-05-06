@@ -25,6 +25,7 @@ import { serveStatic } from "../../src/lib/manga/ops-console/server/static";
 import { renderOpsConsoleShellHtml } from "../../src/lib/manga/ops-console/index-html";
 import { buildOpsConsoleClient } from "../../src/lib/manga/ops-console/web/build";
 import { isValidEpisode, isValidSlug } from "../../src/lib/manga/ops-console/server/lib/path-guards";
+import { initScopeFromArgs, loadPersistedScope } from "../../src/lib/manga/ops-console/server/scope-store";
 
 type Args = {
   slug: string | null;
@@ -89,6 +90,14 @@ async function main() {
     console.error("[novelis-console] client build failed:", e);
     process.exit(1);
   }
+
+  // scope 初期化:
+  //   1. 永続化された .console-scope.json があればそれを load (前回の UI 切替を復元)
+  //   2. CLI 引数 --slug/--episode が指定されていればそれで上書き (CLI は明示の意図と解釈)
+  // どちらも無ければ scope は null/null のまま (UI 起動後に scope switcher で選んでもらう)。
+  await loadPersistedScope();
+  initScopeFromArgs(args.slug, args.episode);
+
   // scope 指定モード時のみ slug/episode を valid 形式チェック + 物理確認する。
   // 一覧モード (slug/episode 共に null) では scope 検証を skip し、UI 上で選んでもらう。
   let scopedRoot: string | null = null;

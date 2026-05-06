@@ -58,15 +58,19 @@ import {
   handleTrademarkCheckPost,
 } from "./handlers/trademark";
 import { handleImprovementsGet } from "./handlers/improvements";
+import { getScope, setScope } from "./scope-store";
 
 export type RouterDefaults = {
   /**
-   * 起動引数で固定された slug。Phase 1 では cross-scope 書き込みを許さない。
-   * 一覧モード (`npm run console` 引数なし) では null。null の間は scope 固定の handler は
-   * すべて 400 を返し、SPA 側は作品一覧 (index view) から scope を選んでもらう。
+   * 「現在の操作対象 slug」。書き込みはこの値と body/path の slug が一致する場合のみ許可。
+   * null の間は scope 固定の handler はすべて 400 を返し、SPA は scope switcher で
+   * 作品+話を選ぶよう促す。
+   *
+   * 過去 (旧設計): CLI 引数 `--slug` でしか pin できなかった。
+   * 現在: scope-store (UI から `POST /api/scope` で動的更新可) を毎リクエスト読み込む。
    */
   defaultSlug: string | null;
-  /** 起動引数で固定された episode。一覧モードでは null。 */
+  /** 「現在の操作対象 episode」。null = 未選択。 */
   defaultEpisode: number | null;
   /** Phase 2 以降で `true` にすると複数 slug 横断 read を許可する (write は引き続き default-only)。 */
   allowCrossScopeRead?: boolean;
@@ -90,12 +94,12 @@ function checkLegacyScope(
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
   if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-    return { ok: false, status: 400, error: "操作対象の作品が未選択です。作品一覧から選択してください" };
+    return { ok: false, status: 400, error: "操作対象の作品が未選択です。ヘッダーの「scope 切替」から作品+話を選んでください" };
   }
   const slug = url.searchParams.get("slug");
   const ep = Number(url.searchParams.get("episode"));
   if (slug !== defaults.defaultSlug || ep !== defaults.defaultEpisode) {
-    return { ok: false, status: 403, error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" };
+    return { ok: false, status: 403, error: "現在の scope と異なる作品です。ヘッダーの「scope 切替」で対象を変更してください" };
   }
   return { ok: true };
 }
@@ -105,10 +109,10 @@ function checkLegacyBodyScope(
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
   if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-    return { ok: false, status: 400, error: "操作対象の作品が未選択です。作品一覧から選択してください" };
+    return { ok: false, status: 400, error: "操作対象の作品が未選択です。ヘッダーの「scope 切替」から作品+話を選んでください" };
   }
   if (body?.slug !== defaults.defaultSlug || Number(body?.episode) !== defaults.defaultEpisode) {
-    return { ok: false, status: 403, error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" };
+    return { ok: false, status: 403, error: "現在の scope と異なる作品です。ヘッダーの「scope 切替」で対象を変更してください" };
   }
   return { ok: true };
 }
@@ -135,14 +139,14 @@ function checkScopedWritePath(
     return {
       ok: false,
       status: 400,
-      error: "書き込みには scope 固定モードが必要です。`npm run console -- --slug <slug> --episode <NN>` で起動してください",
+      error: "書き込みには scope (作品+話) の固定が必要です。ヘッダーの「scope 切替」から選択してください",
     };
   }
   if (scoped.slug !== defaults.defaultSlug || scoped.episode !== defaults.defaultEpisode) {
     return {
       ok: false,
       status: 403,
-      error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)",
+      error: "現在の scope と異なる作品です。ヘッダーの「scope 切替」で対象を変更してください",
     };
   }
   return { ok: true };
@@ -156,6 +160,15 @@ export async function handleApi(
 ): Promise<void> {
   const p = url.pathname;
 
+  // 「現在の scope」は CLI 引数ではなく scope-store (UI 切替対応) を毎リクエスト読み込む。
+  // 起動時 defaults は allowCrossScopeRead など scope 以外の設定だけ受け継ぐ。
+  const liveScope = getScope();
+  defaults = {
+    defaultSlug: liveScope.slug,
+    defaultEpisode: liveScope.episode,
+    allowCrossScopeRead: defaults.allowCrossScopeRead,
+  };
+
   // health probe (slash command / launchd の生死確認用)。fs アクセスを伴わない最薄 endpoint。
   if (p === "/api/health") {
     if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
@@ -165,6 +178,32 @@ export async function handleApi(
   if (p === "/api/bootstrap") {
     if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
     return handleBootstrap(defaults, res);
+  }
+
+  // scope 切替 (UI から POST)。GET は現在 scope を返すだけ。
+  if (p === "/api/scope") {
+    if (req.method === "GET") {
+      return send(res, 200, { slug: liveScope.slug, episode: liveScope.episode });
+    }
+    if (req.method === "POST") {
+      let body: any;
+      try {
+        body = await readJsonBody(req);
+      } catch (e) {
+        return send(res, 400, { error: String(e) });
+      }
+      // body.slug/episode が両方 null/undefined なら scope 解除。それ以外は両方必須。
+      const wantClear = body?.slug == null && body?.episode == null;
+      const slug = wantClear ? null : (typeof body?.slug === "string" ? body.slug : null);
+      const episode = wantClear ? null : (typeof body?.episode === "number" ? body.episode : Number(body?.episode));
+      try {
+        const next = await setScope(slug, wantClear ? null : episode);
+        return send(res, 200, next);
+      } catch (e) {
+        return send(res, 400, { error: (e as Error).message });
+      }
+    }
+    return send(res, 405, { error: "このメソッドは許可されていません" });
   }
 
   if (p === "/api/quality/overview") {
@@ -216,7 +255,7 @@ export async function handleApi(
           !isAiEditWorkInListMode &&
           (defaults.defaultSlug === null || defaults.defaultEpisode === null)
         ) {
-          return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
+          return send(res, 400, { error: "操作対象の作品が未選択です。ヘッダーの「scope 切替」から作品+話を選んでください" });
         }
         const scopedDefaults: ScopedRouterDefaults = isAiEditConsole
           ? { defaultSlug: "_console", defaultEpisode: 0, allowCrossScopeRead: defaults.allowCrossScopeRead }
@@ -245,7 +284,7 @@ export async function handleApi(
       }
       if (action === "abort" && req.method === "POST") {
         if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-          return send(res, 400, { error: "操作対象の作品が未選択です。作品一覧から選択してください" });
+          return send(res, 400, { error: "操作対象の作品が未選択です。ヘッダーの「scope 切替」から作品+話を選んでください" });
         }
         const scopedDefaults: ScopedRouterDefaults = {
           defaultSlug: defaults.defaultSlug,

@@ -117,6 +117,16 @@ export function apiGetBootstrap(): Promise<Bootstrap> {
   return getJson<Bootstrap>("/api/bootstrap");
 }
 
+export type ConsoleScope = { slug: string | null; episode: number | null };
+
+export function apiGetScope(): Promise<ConsoleScope> {
+  return getJson<ConsoleScope>("/api/scope");
+}
+
+export function apiPostScope(scope: ConsoleScope): Promise<ConsoleScope> {
+  return postJson<ConsoleScope>("/api/scope", scope);
+}
+
 export function apiGetWorks(): Promise<{ works: WorkInfo[] }> {
   return getJson<{ works: WorkInfo[] }>("/api/works");
 }
