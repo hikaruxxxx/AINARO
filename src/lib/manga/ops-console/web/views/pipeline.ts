@@ -182,7 +182,7 @@ function render(container: HTMLElement, state: ViewState): void {
       <h2 class="nc-toolbar__title">パイプライン進捗</h2>
       <span class="pipe-info">${escapeHtml(scope)}</span>
       <span class="pipe-spacer"></span>
-      <button type="button" class="nc-button nc-button--primary" disabled title="Wave 6 で実装予定 — 全 layer を順次起動">全自動 run</button>
+      <button type="button" class="nc-button nc-button--ghost nc-button--sm" disabled title="L01 (--concept パス) や L02b (--volume + --concept) は引数指定が必要なため、各 layer の「起動」ボタンから個別に起動してください。完全自動化は将来対応 (作品の auto_run_args 定義が前提)">全自動 run は未対応</button>
     </div>
     ${body}
     ${state.toast ? `<div class="nc-toast nc-toast--${state.toast.kind}">${escapeHtml(state.toast.message)}</div>` : ""}
