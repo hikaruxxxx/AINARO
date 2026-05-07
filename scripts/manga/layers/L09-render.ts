@@ -267,6 +267,7 @@ async function main() {
         page: sbPage, packet, bible, pageDimensions: { width: 1748, height: 2480 },
         userInstructions,
         pageBackgroundTreatments: pageBgMap.size > 0 ? pageBgMap : undefined,
+        pagePlanPage: page,
       });
       try {
         console.log(`[L09] gen p${page.page_no} (page_one_shot, refs=${refImagePaths.length})`);

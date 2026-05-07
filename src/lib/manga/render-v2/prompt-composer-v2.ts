@@ -13,10 +13,15 @@
 import type {
   BackgroundTreatment,
   PanelV2,
+  PagePlanPage,
+  PagePlanPanel,
   ResolvedRefPacket,
   StoryboardPageV2,
   BibleSnapshotV2,
 } from "../schemas-v2";
+
+const PAGE_W = 1748;
+const PAGE_H = 2480;
 
 type ComposeArgs = {
   panel?: PanelV2;            // panel スコープ
@@ -37,6 +42,8 @@ type ComposeArgs = {
    */
   backgroundTreatment?: BackgroundTreatment;
   pageBackgroundTreatments?: Map<string, BackgroundTreatment>;
+  /** page_one_shot 用。指定時は LAYOUT GEOMETRY セクションをプロンプトに注入 */
+  pagePlanPage?: PagePlanPage;
 };
 
 /**
@@ -169,6 +176,129 @@ function panelTextValidationWarning(
 }
 
 /**
+ * page_plan の rect / polygon 情報を page_one_shot prompt に注入する。
+ * panel#N は Storyboard 側の panel_no と一致させる。
+ */
+function buildLayoutGeometryBlock(
+  pagePlanPage: PagePlanPage,
+  panelNoByPanelId: Map<string, number>,
+): string {
+  type Slot = {
+    ro: number;
+    panelNo: number;
+    col: string;
+    row: string;
+    wPct: number;
+    hPct: number;
+    areaPct: number;
+    poly: number;
+    bleed: boolean;
+    imp: number;
+    bg: string | undefined;
+    isHero: boolean;
+    tilt: number | undefined;
+    borderless: boolean;
+    bleedPoly: boolean;
+  };
+
+  const slots: Slot[] = pagePlanPage.panels.map((pp: PagePlanPanel) => {
+    const wPct = (pp.rect.w / PAGE_W) * 100;
+    const hPct = (pp.rect.h / PAGE_H) * 100;
+    const areaPct = ((pp.rect.w * pp.rect.h) / (PAGE_W * PAGE_H)) * 100;
+    const cx = pp.rect.x + pp.rect.w / 2;
+    const cy = pp.rect.y + pp.rect.h / 2;
+    const col = wPct >= 85
+      ? "FULL_WIDTH"
+      : cx < PAGE_W * 0.4
+        ? "LEFT"
+        : cx > PAGE_W * 0.6
+          ? "RIGHT"
+          : "CENTER";
+    const row = cy < PAGE_H * 0.33
+      ? "TOP"
+      : cy < PAGE_H * 0.66
+        ? "MIDDLE"
+        : "BOTTOM";
+    const poly = pp.polygon?.length ?? 4;
+    const bleed =
+      pp.rect.x < 30 ||
+      pp.rect.y < 30 ||
+      pp.rect.x + pp.rect.w > PAGE_W - 30 ||
+      pp.rect.y + pp.rect.h > PAGE_H - 30;
+    return {
+      ro: pp.reading_order,
+      panelNo: panelNoByPanelId.get(pp.panel_id) ?? pp.reading_order,
+      col,
+      row,
+      wPct: Math.round(wPct),
+      hPct: Math.round(hPct),
+      areaPct: Math.round(areaPct),
+      poly,
+      bleed,
+      imp: pp.importance,
+      bg: pp.background_treatment,
+      isHero: false,
+      tilt: pp.tilt_deg,
+      borderless: !!pp.is_borderless,
+      bleedPoly: !!pp.bleed_polygon,
+    };
+  }).sort((a, b) => a.ro - b.ro);
+
+  // hero 判定: importance + areaPct 上位1コマ
+  const sortedByPriority = [...slots].sort(
+    (a, b) => (b.imp * 10 + b.areaPct) - (a.imp * 10 + a.areaPct),
+  );
+  if (sortedByPriority[0]) {
+    const hero = slots.find((s) => s.ro === sortedByPriority[0].ro);
+    if (hero) hero.isHero = true;
+  }
+
+  const panelLabel = (s: Slot) => `panel#${s.panelNo}`;
+  const lines: string[] = [
+    "## LAYOUT GEOMETRY (CRITICAL — page is NOT a uniform grid):",
+    "",
+  ];
+
+  for (const s of slots) {
+    const polyTag = s.poly > 4 ? `, IRREGULAR ${s.poly}-SIDED POLYGON edge` : "";
+    const bleedTag = (s.bleed || s.bleedPoly) ? ", BLEEDS to page edge (no margin)" : "";
+    const tiltTag = (s.tilt && Math.abs(s.tilt) >= 1) ? `, TILTED ${s.tilt > 0 ? "+" : ""}${s.tilt}° (slanted frame)` : "";
+    const borderlessTag = s.borderless ? ", BORDERLESS (no frame line)" : "";
+    const heroTag = s.isHero ? " ← HERO PANEL (largest, most prominent)" : "";
+    const sizeWord = s.areaPct >= 50
+      ? "FULL-PAGE SPLASH"
+      : s.areaPct >= 25
+        ? "LARGE"
+        : s.areaPct >= 12
+          ? "medium"
+          : "SMALL inset";
+    lines.push(
+      `- ${panelLabel(s)} (importance ${s.imp}/5${heroTag}): ${s.row} ${s.col}, ${sizeWord} (${s.wPct}% width × ${s.hPct}% height)${polyTag}${tiltTag}${bleedTag}${borderlessTag}.${s.bg ? ` bg_treatment=${s.bg}.` : ""}`,
+    );
+  }
+
+  const flow = slots.map(panelLabel).join(" → ");
+  lines.push("");
+  lines.push(`READING FLOW (RTL, top→bottom): ${flow}.`);
+  lines.push("");
+  lines.push("STRICT LAYOUT CONSTRAINTS:");
+  lines.push("- Panel SIZES vary deliberately. Reproduce the relative widths/heights above. Do NOT default to a regular 2x3 or 3x2 grid.");
+  lines.push("- HERO panel must visibly dominate the page (largest area, most rendered detail).");
+  lines.push("- SMALL insets must stay small — they are beat/reaction frames, not equal-weight panels.");
+  const polyPanels = slots.filter((s) => s.poly > 4);
+  if (polyPanels.length > 0) {
+    lines.push(`- Panels with IRREGULAR POLYGON edges (${polyPanels.map(panelLabel).join(", ")}) should have non-rectangular borders (angled cut, slanted edge, or bleeding into adjacent panel).`);
+  }
+  const bleedPanels = slots.filter((s) => s.bleed || s.bleedPoly);
+  if (bleedPanels.length > 0) {
+    lines.push(`- BLEED panels (${bleedPanels.map(panelLabel).join(", ")}) extend artwork to the page edge with no white margin on the bleed side.`);
+  }
+  lines.push("- Maintain consistent gutter (white space) of ~3-5% page width between non-bleed panels.");
+
+  return lines.join("\n");
+}
+
+/**
  * panel.dialogue / monologue / narration / sfx を「画像内に直接描く」指示文に変換。
  * 吹き出し・ナレーション枠・擬音を AI 側で typeset させる方針 (旧 SVG overlay は撤回)。
  */
@@ -262,6 +392,12 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
 export function composePagePrompt(args: ComposeArgs): { prompt: string; refImagePaths: string[] } {
   if (!args.page) throw new Error("composePagePrompt requires page");
   const page = args.page;
+  const geometryBlock: string | null = args.pagePlanPage
+    ? buildLayoutGeometryBlock(
+      args.pagePlanPage,
+      new Map(page.panels.map((p) => [p.panel_id, p.panel_no])),
+    )
+    : null;
   const inlineLabels = args.packet.refs
     .map((r, i) => `<ref#${i + 1}> (${r.role}${r.target_entity_id ? ` for ${r.target_entity_id}` : ""}, weight ${r.weight.toFixed(2)})`)
     .join("\n");
@@ -315,6 +451,8 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     inlineLabels,
     "",
     `PAGE LAYOUT: ${page.panels.length} panels, RTL reading order, page_role=${page.page_role}.`,
+    "",
+    geometryBlock,
     "",
     panelLines,
     "",

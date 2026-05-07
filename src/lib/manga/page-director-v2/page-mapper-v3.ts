@@ -153,11 +153,12 @@ function chooseRenderStrategy(
   bleedCount: number,
   capability: CapabilityProfile
 ): RenderStrategy {
+  void panelCount;
+  void bleedCount;
   if (capability.recommended_strategy === "panel_composite") return "panel_composite";
-  if (capability.recommended_strategy === "page_one_shot") return "page_one_shot";
-  // hybrid: panel_count <= 4 もしくは bleed あり → page_one_shot
-  if (panelCount <= 4 || bleedCount >= 1) return "page_one_shot";
-  return "panel_composite";
+  // 2026-05-07: page_one_shot を既定化。LAYOUT GEOMETRY 注入で複雑コマ割も再現可能なことを
+  // scripts/manga/_oneoff-pageshot-p2-3.ts で 25 patterns + 5 variants 検証済み。
+  return "page_one_shot";
 }
 
 function templateId(panelCount: number, role: PageRoleV2, hasHero: boolean): string {
