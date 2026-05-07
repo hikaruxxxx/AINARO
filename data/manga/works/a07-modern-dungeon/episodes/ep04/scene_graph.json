@@ -1,0 +1,617 @@
+{
+  "schema_version": 1,
+  "episode_id": "a07-modern-dungeon-ep04",
+  "generated_at": "2026-05-07T04:00:00+09:00",
+  "source": {
+    "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep04/_brief.v2.md",
+    "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep04/shotlist.json",
+    "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
+  },
+  "_note": "Phase β B5-5 ep04 - 4F→5F バトル回、固有スキル覚醒、DPC 監査検知 cliff",
+  "scenes": [
+    {
+      "scene_id": "S01",
+      "scene_no": 1,
+      "prev_scene_id": null,
+      "next_scene_id": "S02",
+      "page_range": {
+        "start": 1,
+        "end": 3
+      },
+      "panel_range": {
+        "start_panel_no": 1,
+        "end_panel_no": 15
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 4,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.30
+      },
+      "beat_type": "setup",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "店主の在庫処分日と価格交渉、傷ありヘルメットを最安で。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "情報で、貧しさを埋める。",
+            "uniqueness": "scene_exclusive",
+            "intent": "callback"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_ren_equipment_v2_helmet",
+          "payoff_episode_hint": "this_episode"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "情報で貧困を埋め、装備の差を縮める",
+        "goal": "型落ちヘルメットを傷あり価格で買い、4F→5F の安全マージンを上げる",
+        "emotion": "determination",
+        "delta_from_prev": "ep03 末のナビ沈黙からの緊張を一旦置き、装備調達で実務に戻る"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "四日目朝、新宿西の中古装備店前",
+        "order": 1,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_lawson_exterior_night_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "dialogue",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "中古装備店の擦れた棚、傷ありヘルメットの値札、レンの値切り交渉"
+    },
+    {
+      "scene_id": "S02",
+      "scene_no": 2,
+      "prev_scene_id": "S01",
+      "next_scene_id": "S03",
+      "page_range": {
+        "start": 4,
+        "end": 5
+      },
+      "panel_range": {
+        "start_panel_no": 16,
+        "end_panel_no": 25
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 4,
+        "arc_phase": "rising",
+        "arc_position_normalized": 0.40
+      },
+      "beat_type": "transition",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "段ボールでも防具の隙間は埋まる、生活の質感が探索装備に変わる",
+        "goal": "コンビニバックヤードで防具補強を仕込む",
+        "emotion": "calm",
+        "delta_from_prev": "装備店からの帰り、夜勤前の落ち着いた準備時間"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "四日目夕方、コンビニバックヤード",
+        "order": 2,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_lawson_interior_v1",
+      "page_budget": {
+        "min": 2,
+        "max": 2,
+        "preferred": 2
+      },
+      "mode": "transition_montage",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "段ボールを切り出してヘルメットの隙間に詰める手元、廃棄弁当の匂い"
+    },
+    {
+      "scene_id": "S03",
+      "scene_no": 3,
+      "prev_scene_id": "S02",
+      "next_scene_id": "S04",
+      "page_range": {
+        "start": 6,
+        "end": 9
+      },
+      "panel_range": {
+        "start_panel_no": 26,
+        "end_panel_no": 45
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 4,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.55
+      },
+      "beat_type": "reveal",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "この条件は、開示してはいけない可能性が高いです。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "だったら聞かなかったことにするか? できるわけない。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "強くなったんじゃない。正解の中に、俺の身体が押し込まれた。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "名称推定、ナビ最適解。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_unique_skill_navi_optimum",
+          "payoff_episode_hint": "this_episode"
+        },
+        {
+          "token": "F_navi_disclosure_taboo_warning",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "正解の中に身体を押し込めば、Fでも届く",
+        "goal": "4F→5F の隠し踏み順を実行し、固有スキルを覚醒させる",
+        "emotion": "tension",
+        "delta_from_prev": "準備の落ち着きから一転、開示禁止級の条件を踏む決断へ"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "ナビが規約境界を一時越えてレンに踏み順を渡す"
+        }
+      ],
+      "time_axis": {
+        "label": "四日目深夜、新宿第三 4F→5F の階段",
+        "order": 3,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
+      "mode": "action",
+      "turn_anchor": {
+        "at_panel_no": 45,
+        "type": "reveal_turn"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "三段目で息を止めるレン、五段目で壁の亀裂を見る、体に走る熱、HUD に『固有スキル：未分類』"
+    },
+    {
+      "scene_id": "S04",
+      "scene_no": 4,
+      "prev_scene_id": "S03",
+      "next_scene_id": "S05",
+      "page_range": {
+        "start": 10,
+        "end": 13
+      },
+      "panel_range": {
+        "start_panel_no": 46,
+        "end_panel_no": 65
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 4,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.65
+      },
+      "beat_type": "setup",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "柱の傷、床の傾斜、右肩の古傷。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
+        ]
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "ナビの提示と俺の読みを重ねれば、Aランク級に跳ねる",
+        "goal": "オーガの右肩古傷を急所と特定し、行動順をナビと共有",
+        "emotion": "determination",
+        "delta_from_prev": "覚醒の高揚から、戦術の計算モードへ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "四日目深夜、5F オーガの間 (対峙)",
+        "order": 4,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
+      "mode": "action",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "オーガの巨体と古傷をなぞるレンの視線、HUD の行動順表示"
+    },
+    {
+      "scene_id": "S05",
+      "scene_no": 5,
+      "prev_scene_id": "S04",
+      "next_scene_id": "S06",
+      "page_range": {
+        "start": 14,
+        "end": 17
+      },
+      "panel_range": {
+        "start_panel_no": 66,
+        "end_panel_no": 85
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 4,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.80
+      },
+      "beat_type": "payoff",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "右肩、半呼吸。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
+        ]
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [
+        "F_unique_skill_navi_optimum",
+        "F_ren_equipment_v2_helmet"
+      ],
+      "protagonist_arc_state": {
+        "belief": "正解の中なら、Fの身体でもオーガに届く",
+        "goal": "オーガを単独討伐する",
+        "emotion": "tension",
+        "delta_from_prev": "戦術計算から実行へ、紙一重の回避と急所打撃"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 2,
+          "trigger": "ナビ最適解の補正下で完全連携、オーガ討伐成功"
+        }
+      ],
+      "time_axis": {
+        "label": "四日目深夜、5F オーガとの戦闘",
+        "order": 5,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
+      "mode": "action",
+      "turn_anchor": {
+        "at_panel_no": 85,
+        "type": "reveal_turn"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "大ゴマでオーガの腕を紙一重で避け、鉄パイプを急所へ叩き込むレン"
+    },
+    {
+      "scene_id": "S06",
+      "scene_no": 6,
+      "prev_scene_id": "S05",
+      "next_scene_id": "S07",
+      "page_range": {
+        "start": 18,
+        "end": 19
+      },
+      "panel_range": {
+        "start_panel_no": 86,
+        "end_panel_no": 95
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 4,
+        "arc_phase": "falling",
+        "arc_position_normalized": 0.90
+      },
+      "beat_type": "aftermath",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "実行手順外では、補正は維持されません。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_navi_optimum_temporary_buff",
+          "payoff_episode_hint": "next_episode"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "補正は永続ではない、外に出れば俺はまた F だ",
+        "goal": "倒れた身体で公社アプリの記録を確認",
+        "emotion": "fear",
+        "delta_from_prev": "勝利の高揚から、補正切れの脆さへ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "四日目深夜、5F 討伐直後",
+        "order": 6,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
+      "page_budget": {
+        "min": 2,
+        "max": 2,
+        "preferred": 2
+      },
+      "mode": "introspection",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "床に膝をつき鉄パイプで身体を支えるレン、震える指、ナビ声の微かな震え"
+    },
+    {
+      "scene_id": "S07",
+      "scene_no": 7,
+      "prev_scene_id": "S06",
+      "next_scene_id": null,
+      "page_range": {
+        "start": 20,
+        "end": 22
+      },
+      "panel_range": {
+        "start_panel_no": 96,
+        "end_panel_no": 110
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 4,
+        "arc_phase": "climax",
+        "arc_position_normalized": 1.0
+      },
+      "beat_type": "cliff",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "log_visual"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "単独討伐記録、更新…匿名 ID。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_dpc_anonymous_id_pinned",
+          "payoff_episode_hint": "next_episode"
+        },
+        {
+          "token": "F_dpc_pursuit_planned",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "勝った、しかし制度の側はもう俺の影を掴んでいる",
+        "goal": "DPC 監視がどこまで来ているか把握",
+        "emotion": "fear",
+        "delta_from_prev": "補正切れの脆さから、外部監視の圧力へ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "四日目深夜→明け方、DPC 本部 モニター管制室",
+        "order": 7,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_dpc_monitor_room_v1",
+      "sub_locations": [
+        "loc_shinjuku_third_5f_boss_room_v1"
+      ],
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "dialogue",
+      "turn_anchor": {
+        "at_panel_no": 110,
+        "type": "cliff_turn"
+      },
+      "layout_pattern_id": "P_cliff_cross_cut_with_authority",
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "DPC モニター管制室の映像にレンの匿名 ID 記録、担当官の冷えた指令"
+    }
+  ],
+  "pull_link": {
+    "current_episode_cliff": "ability_or_identity_glimpse",
+    "next_opening_hook_hint": "次話冒頭は、勝利の高揚と監視への怯えが同居する朝。レンが匿名 ID の自分が誰かに気づかれていないか、コンビニで無事に夜勤に立てるかを確かめる。",
+    "is_volume_end": false
+  }
+}

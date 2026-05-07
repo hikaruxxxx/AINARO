@@ -1,0 +1,3859 @@
+{
+  "schema_version": 2,
+  "episode_id": "a07-modern-dungeon-ep09",
+  "total_pages": 22,
+  "pages": [
+    {
+      "page_no": 1,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p01",
+          "panel_no": 1,
+          "reading_order": 1,
+          "shot_type": "establishing",
+          "camera": "high_angle",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "薄暗い部屋でレンが机上のヒビ入りスマホを見下ろす。",
+          "key_visual": "暗いワンルームの中央で光るヒビ入りスマホ",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p02",
+          "panel_no": 2,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "スマホ画面にナナミの通話アイコンとSNS通知が並ぶ。",
+          "key_visual": "ナナミのアイコン横で増え始める通知数字",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p03",
+          "panel_no": 3,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの指が通話中画面の端を押さえ、亀裂が光を割る。",
+          "key_visual": "指先と画面の亀裂に歪むナナミのアイコン",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p04",
+          "panel_no": 4,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "通知数が一つ跳ね上がり、レンの目元だけが硬く映る。",
+          "key_visual": "増える通知数とレンの鋭い片目",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p05",
+          "panel_no": 5,
+          "reading_order": 5,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "スピーカー越しのナナミの声に、レンは息を止めて聞く。",
+          "key_visual": "通話画面の波形と固まるレンの横顔",
+          "dialogue": [
+            {
+              "character_id": "char_九条_ナナミ_v1",
+              "text": "「F 級単独、新宿第三 20F 挑戦。配信は明日夜 21 時。」"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 2,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p06",
+          "panel_no": 6,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはスマホを握り直し、机の準備物へ視線を移す。",
+          "key_visual": "スマホの光から装備へ伸びるレンの視線",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p07",
+          "panel_no": 7,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "机上のメモ、包帯、古い装備が通知光で交互に照らされる。",
+          "key_visual": "準備物の上を赤い通知光が走る",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p08",
+          "panel_no": 8,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは通知欄を開かず、画面を伏せずに真正面へ置く。",
+          "key_visual": "開かれない通知欄を映したまま置かれるスマホ",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p09",
+          "panel_no": 9,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ナナミのアイコンの背後で通知数字だけがさらに膨らむ。",
+          "key_visual": "ナナミの笑顔アイコンを飲み込む通知数字",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p10",
+          "panel_no": 10,
+          "reading_order": 5,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは椅子から立ち上がり、壁の予定表を見据える。",
+          "key_visual": "明日夜の予定に向き合うレンの背中",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 3,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p11",
+          "panel_no": 11,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "予定表の赤丸とスマホ画面が同じ構図で重なって見える。",
+          "key_visual": "赤丸の予定と通話画面が重なる視界",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p12",
+          "panel_no": 12,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは拳を握り、散らばる不安を沈めるように目を閉じる。",
+          "key_visual": "通知光の中で固く握られた拳",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "「もう、後ろには下がれない。」"
+            }
+          ],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p13",
+          "panel_no": 13,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "彼はスマホを横目に、装備を一つずつバッグへ詰める。",
+          "key_visual": "増える通知を無視して詰め込まれる装備",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p14",
+          "panel_no": 14,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "通話画面のナナミのアイコンが暗転寸前まで淡く光る。",
+          "key_visual": "暗転する直前のナナミの通話アイコン",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p15",
+          "panel_no": 15,
+          "reading_order": 5,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_九条_ナナミ_v1",
+                "role": "background",
+                "on_screen_via": "phone",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはバッグを背負い、鳴り続けるスマホを机に残して立つ。",
+          "key_visual": "机に残る通知まみれのスマホと出発するレン",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 4,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p16",
+          "panel_no": 16,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "暗い部屋でレンがベッド端に座り、膝上のスマホを見下ろす。",
+          "key_visual": "夜の室内に、ヒビ入りスマホの光だけがレンの顔を照らす。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p17",
+          "panel_no": 17,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "割れた画面にSNS通知が重なり、コメント欄が滝のように流れる。",
+          "key_visual": "ヒビの走るスマホ画面を埋め尽くす、読めないほど密なコメント濁流。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p18",
+          "panel_no": 18,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの瞳が画面の文字を追い、反射した罵声だけが揺れて見える。",
+          "key_visual": "レンの瞳の中で、SNSの文字列が炎のようにちらつく。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p19",
+          "panel_no": 19,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは親指を止め、流れ続ける画面の上で息を浅く吐く。",
+          "key_visual": "スクロールをやめた親指の下で、コメントだけが勝手に流れ続ける。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p20",
+          "panel_no": 20,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "机の上の小物が震えるほど、レンの握るスマホに力が入る。",
+          "key_visual": "白くなる指先と、さらに目立つスマホ画面の亀裂。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 5,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p21",
+          "panel_no": 21,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは画面から視線を外し、暗い窓に映る自分の顔を見る。",
+          "key_visual": "窓ガラスに映るレンの顔と、手元で光るSNS画面。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p22",
+          "panel_no": 22,
+          "reading_order": 2,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "通知の光がまた跳ね、レンは戻されるように画面へ視線を落とす。",
+          "key_visual": "黒い部屋に浮かぶ通知の白い発光と、固まるレンの横顔。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p23",
+          "panel_no": 23,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの親指がSNSアプリを閉じる位置へ、迷いなく滑っていく。",
+          "key_visual": "コメント濁流を断ち切るように、親指が画面中央を横切る。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p24",
+          "panel_no": 24,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "画面が黒く落ち、レンの表情だけが暗い反射の中に残る。",
+          "key_visual": "消えたスマホ画面に映る、緊張を飲み込んだレンの顔。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p25",
+          "panel_no": 25,
+          "reading_order": 5,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはスマホを伏せ、静かな部屋で前だけを見据える。",
+          "key_visual": "伏せられたヒビ入りスマホと、覚悟を固めたレンのまっすぐな視線。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 6,
+      "page_role": "establishing",
+      "panels": [
+        {
+          "panel_id": "p26",
+          "panel_no": 26,
+          "reading_order": 1,
+          "shot_type": "establishing",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが深夜のローソン前で息を整え、自動ドアの光へ歩き出す。",
+          "key_visual": "雨上がりの夜道に浮かぶ青白いローソン看板とレンの背中。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p27",
+          "panel_no": 27,
+          "reading_order": 2,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "制服姿のレンが事務所のシフト表を見上げ、空いた欄を探す。",
+          "key_visual": "夜勤シフト表に並ぶ同僚の名前と赤ペンの交代メモ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p28",
+          "panel_no": 28,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの指がシフト表の名前をなぞり、交代可能な時間帯で止まる。",
+          "key_visual": "指先の下で重なる同僚名、深夜帯、細い空白。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p29",
+          "panel_no": 29,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンがスマホ画面とシフト表を交互に見て、予定を頭で組み替える。",
+          "key_visual": "スマホのカレンダーと紙のシフト表が机上で交差する。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p30",
+          "panel_no": 30,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "バックヤードでレンが廃棄予定のゼリー箱を確認し、期限表示を見る。",
+          "key_visual": "廃棄シールの貼られた透明ゼリーが蛍光灯を反射する。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 7,
+      "page_role": "establishing",
+      "panels": [
+        {
+          "panel_id": "p31",
+          "panel_no": 31,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが許可済みの廃棄ゼリーをバッグへ静かに詰めていく。",
+          "key_visual": "黒いバッグの中へ沈む色違いのゼリーパック。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p32",
+          "panel_no": 32,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レジ横でレンが小銭を数え、装備購入に回せる残額を確かめる。",
+          "key_visual": "掌の小銭、レシート裏の計算、締まったレンの口元。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p33",
+          "panel_no": 33,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "休憩室の鏡に映るレンが、眠気を押し殺して制服の襟を直す。",
+          "key_visual": "くすんだ鏡越しの目だけが強いレンの表情。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p34",
+          "panel_no": 34,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが退勤打刻を済ませ、バッグを肩に掛けて裏口へ向かう。",
+          "key_visual": "打刻機の時刻表示と重そうなバッグを背負う肩。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p35",
+          "panel_no": 35,
+          "reading_order": 5,
+          "shot_type": "wide",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "夜明け前の歩道でレンが中古装備店の地図をスマホで開く。",
+          "key_visual": "暗い歩道に浮かぶ地図アプリの青い経路線。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 8,
+      "page_role": "establishing",
+      "panels": [
+        {
+          "panel_id": "p36",
+          "panel_no": 36,
+          "reading_order": 1,
+          "shot_type": "establishing",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "中古装備店の前でレンが財布を握り、ショーケースを覗き込む。",
+          "key_visual": "シャッター半開きの店先に並ぶ傷だらけの装備群。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p37",
+          "panel_no": 37,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが傷ありヘルメットを手に取り、替えバイザーの歪みを確認する。",
+          "key_visual": "ひびの入ったヘルメットと光を曲げる中古バイザー。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p38",
+          "panel_no": 38,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが値札と傷の位置を見比べ、店員へ静かに値引きの根拠を示す。",
+          "key_visual": "値札、傷跡、レンの指先が一直線に並ぶ交渉の瞬間。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p39",
+          "panel_no": 39,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "カウンター越しにレンが小銭を置き、足りない額を表情で粘る。",
+          "key_visual": "カウンター上の小銭の山と動かないレンの目。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p40",
+          "panel_no": 40,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "店の奥でレンが装着した替えバイザーの視界を左右に試す。",
+          "key_visual": "傷越しの蛍光灯がバイザー内で細く歪む。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 9,
+      "page_role": "establishing",
+      "panels": [
+        {
+          "panel_id": "p41",
+          "panel_no": 41,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンがゼリー入りバッグとヘルメットを並べ、遠征の重量を測る。",
+          "key_visual": "安物の装備一式と廃棄ゼリーが床に整列する。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p42",
+          "panel_no": 42,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンがレシート裏の数字に線を引き、残りの不足を読み替える。",
+          "key_visual": "赤線で消された不足額と、その横に書かれた代替案。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "足りない分は、読む。"
+            }
+          ],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p43",
+          "panel_no": 43,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが店外でヘルメットをバッグに固定し、夜明けの空を見上げる。",
+          "key_visual": "バッグに括られた傷ありヘルメットと薄青い空。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p44",
+          "panel_no": 44,
+          "reading_order": 4,
+          "shot_type": "wide",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "始発前の道をレンが歩き、シフト表の写真をもう一度確認する。",
+          "key_visual": "スマホ画面のシフト表と遠くのコンビニ灯が重なる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p45",
+          "panel_no": 45,
+          "reading_order": 5,
+          "shot_type": "establishing",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_interior_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが装備と食料を抱えて駅へ向かい、次の局面へ踏み出す。",
+          "key_visual": "夜勤明けの光の中、安い装備を背負って進むレン。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 10,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_id": "p46",
+          "panel_no": 46,
+          "reading_order": 1,
+          "shot_type": "establishing",
+          "camera": "high_angle",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "モニター室の巨大画面に20F到達表示が点灯し、席がざわつく。",
+          "key_visual": "暗い監視室に浮かぶ赤い「20F」の警告表示",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p47",
+          "panel_no": 47,
+          "reading_order": 2,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "氷室が報道用ライトの前へ進み、無表情に画面を見上げる。",
+          "key_visual": "強い白光を浴びる氷室の横顔",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p48",
+          "panel_no": 48,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "灯里はモニター席で身を固くし、表示から目を離せない。",
+          "key_visual": "画面光だけに照らされた灯里のこわばった瞳",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p49",
+          "panel_no": 49,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "記者席のマイク群が氷室へ向けられ、場の音が絞られる。",
+          "key_visual": "黒いマイクの束が氷室の胸元へ突き出る",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p50",
+          "panel_no": 50,
+          "reading_order": 5,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "氷室は片手を上げて周囲を制し、冷えた視線を正面へ向ける。",
+          "key_visual": "沈黙を命じる氷室の上げた手",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 11,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_id": "p51",
+          "panel_no": 51,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "灯里の指が卓上の端末を握りしめ、関節だけが白くなる。",
+          "key_visual": "端末を押し潰すように握る灯里の白い指",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p52",
+          "panel_no": 52,
+          "reading_order": 2,
+          "shot_type": "wide",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "巨大モニターに氷室の顔が映り、監視室全体を支配する。",
+          "key_visual": "壁一面に拡大された氷室の冷たい顔",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p53",
+          "panel_no": 53,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "氷室は一拍置いて口を開き、断定の言葉を放つ。",
+          "key_visual": "影の落ちた口元だけが動く氷室",
+          "dialogue": [
+            {
+              "character_id": "char_氷室_玲二_v1",
+              "text": "F 級が 20F を踏むなど、不正以外にあり得ない。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p54",
+          "panel_no": 54,
+          "reading_order": 4,
+          "shot_type": "wide",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "その宣言に、モニター室の職員たちが一斉に息をのむ。",
+          "key_visual": "凍りついた監視席の列",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p55",
+          "panel_no": 55,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "灯里は唇を噛み、氷室の映像をにらむように見つめる。",
+          "key_visual": "涙をこらえた灯里の鋭い横顔",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 12,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_id": "p56",
+          "panel_no": 56,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "氷室の背後で報道カメラの赤ランプが次々に点灯する。",
+          "key_visual": "赤い録画ランプに囲まれる氷室の背中",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p57",
+          "panel_no": 57,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "画面下の速報帯が流れ、氷室の断定だけが文字で残る。",
+          "key_visual": "速報テロップに刻まれる「不正」の二文字",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p58",
+          "panel_no": 58,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "灯里は椅子の背に沈み込み、胸元で小さく手を握る。",
+          "key_visual": "モニター光の中で祈るように握られた灯里の手",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p59",
+          "panel_no": 59,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "氷室は記者の気配を無視し、画面越しの観客へ視線を刺す。",
+          "key_visual": "レンズをまっすぐ射抜く氷室の瞳",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p60",
+          "panel_no": 60,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "監視画面の20F表示が明滅し、灯里の顔に影を走らせる。",
+          "key_visual": "点滅する20F表示と灯里の半分だけ暗い顔",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 13,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_id": "p61",
+          "panel_no": 61,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "灯里は誰にも聞こえないほど小さく、画面へ向けて息を漏らす。",
+          "key_visual": "震える唇からこぼれる灯里の祈り",
+          "dialogue": [
+            {
+              "character_id": "char_白瀬_灯里_v1",
+              "text": "……来てよ、お願い。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p62",
+          "panel_no": 62,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "祈りの直後、灯里は周囲に悟られまいと視線を落とす。",
+          "key_visual": "涙を隠すように伏せられた灯里のまつげ",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p63",
+          "panel_no": 63,
+          "reading_order": 3,
+          "shot_type": "wide",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "氷室の映像と灯里の座席が同じ画面内で冷たく対比される。",
+          "key_visual": "巨大な氷室の顔の下に小さく座る灯里",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p64",
+          "panel_no": 64,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "灯里の端末に20Fの波形が揺れ、彼女は息を止めて見つめる。",
+          "key_visual": "端末上でかすかに跳ねる生体反応の線",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p65",
+          "panel_no": 65,
+          "reading_order": 5,
+          "shot_type": "establishing",
+          "camera": "high_angle",
+          "bleed": true,
+          "silence": false,
+          "importance": 5,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_氷室_玲二_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_白瀬_灯里_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_dpc_monitor_room_v1",
+            "props": [],
+            "focus_entity_id": "char_氷室_玲二_v1"
+          },
+          "action": "モニター室全体が沈黙し、氷室の断定と灯里の祈りだけが残る。",
+          "key_visual": "氷室の巨大映像と祈る灯里を隔てる無数のモニター",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 14,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p66",
+          "panel_no": 66,
+          "reading_order": 1,
+          "shot_type": "establishing",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが暗い部屋の中央に立ち、壁一面のメモを見上げる。",
+          "key_visual": "壁を埋める付箋と赤糸、机上に光る配信ログ画面",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p67",
+          "panel_no": 67,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはノートPCを開き、配信ログの時刻欄へ指を滑らせる。",
+          "key_visual": "暗い画面に並ぶ配信ログのスクリーンショットと時刻印",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p68",
+          "panel_no": 68,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが灯里の撤退時刻を赤ペンで囲み、横に線を引く。",
+          "key_visual": "赤丸で囲まれた撤退時刻と走り書きの疑問符",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p69",
+          "panel_no": 69,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは天気予報の月高度表を印刷し、壁の中央へ貼る。",
+          "key_visual": "月高度表の紙が付箋群の中心に重ねられる瞬間",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p70",
+          "panel_no": 70,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが地下水位公告をめくり、数値の跳ね上がりに目を止める。",
+          "key_visual": "地下水位グラフの急上昇部分を押さえるレンの指",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 15,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p71",
+          "panel_no": 71,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは心拍ログを透明シートに写し、二つの表へ重ねる。",
+          "key_visual": "透明シートの心拍線が月高度と水位の線に重なる",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "月高度、地下水位、心拍。三つを重ねる。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p72",
+          "panel_no": 72,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは三色のペンを持ち替え、同じ時刻の点を結び始める。",
+          "key_visual": "青赤黒の三本線が一点で交差する手描きグラフ",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p73",
+          "panel_no": 73,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが壁から一歩退き、交差点の連なりを無言で追う。",
+          "key_visual": "レンの視線の先で三つのグラフが星座のようにつながる",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p74",
+          "panel_no": 74,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "スマホのスピーカーから響の通話音だけが漏れ、レンは反応しない。",
+          "key_visual": "机上のスマホに表示された響の名前と無視される通話波形",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p75",
+          "panel_no": 75,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは番人の発言ログを切り抜き、余白へ第一仮説と書く。",
+          "key_visual": "『第一仮説』の文字と番人発言のスクリーンショット",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 16,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p76",
+          "panel_no": 76,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが月高度のピークと番人出現時刻を一本の糸で結ぶ。",
+          "key_visual": "月高度ピークから番人ログへ張られた赤い糸",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p77",
+          "panel_no": 77,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは地下水位の公告番号を読み返し、第二仮説を追記する。",
+          "key_visual": "公告番号の列に重なる『第二仮説』の太い文字",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p78",
+          "panel_no": 78,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが水位上昇の時刻へ黒いピンを刺し、唇を強く結ぶ。",
+          "key_visual": "水位グラフの山に刺さる黒ピンと険しいレンの横顔",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p79",
+          "panel_no": 79,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは灯里撤退時刻の紙片を三つの線の交点へ重ねる。",
+          "key_visual": "撤退時刻の紙片が三線の交点を覆う決定的な重なり",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p80",
+          "panel_no": 80,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが第三仮説の見出しを書き、ペン先を止めて息を吐く。",
+          "key_visual": "空白の下に置かれた『第三仮説』と震えのないペン先",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 17,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p81",
+          "panel_no": 81,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはナビの空欄表示を見つめ、画面を伏せて壁へ向き直る。",
+          "key_visual": "答えを返さないナビ画面と、それを伏せるレンの手",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p82",
+          "panel_no": 82,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが三つの仮説カードを横一列に並べ、矛盾点を消す。",
+          "key_visual": "三枚の仮説カードを横断する訂正線と残った一点",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p83",
+          "panel_no": 83,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは配信ログのスクリーンショットを拡大し、背景の影を確認する。",
+          "key_visual": "拡大された配信画面の隅に映る水面反射のような影",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p84",
+          "panel_no": 84,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが壁全体を写真に収め、三つの仮説へ番号を振る。",
+          "key_visual": "スマホ越しに収まるメモ壁と番号付きの三仮説",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p85",
+          "panel_no": 85,
+          "reading_order": 5,
+          "shot_type": "wide",
+          "camera": "low_angle",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_ren_apartment_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは夜明け前の窓辺で鞄を掴み、メモ壁に背を向ける。",
+          "key_visual": "青白い窓光の中、背後に残る三重グラフと出発するレン",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 18,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p86",
+          "panel_no": 86,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが新宿第三ダンジョンゲート前の入域端末に手を伸ばす。",
+          "key_visual": "黒いゲートと無機質な入域端末の前で、レンの指が止まる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p87",
+          "panel_no": 87,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "端末の認証光がレンの掌を走り、青いナビ光が浮かび上がる。",
+          "key_visual": "レンの手の上で、青い光の輪郭が小さく震えている。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p88",
+          "panel_no": 88,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは青光を見下ろしたまま、呼吸だけを浅く整える。",
+          "key_visual": "掌の青光に照らされるレンの硬い目元。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p89",
+          "panel_no": 89,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ゲートの警告表示が背後で点滅し、レンの影を赤く裂く。",
+          "key_visual": "青いナビ光と赤い警告光がレンの身体を二色に分ける。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p90",
+          "panel_no": 90,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "響の声だけが端末越しに落ち、レンの指がわずかに強張る。",
+          "key_visual": "無人の端末スピーカーと、動かないレンの指先。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "今日の最適解、一手だけ、私の規約違反になります。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 19,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p91",
+          "panel_no": 91,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは顔を上げ、閉じたゲートの奥にある暗闇を見据える。",
+          "key_visual": "巨大なゲートの裂け目を見上げるレンの横顔。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p92",
+          "panel_no": 92,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "青光がレンの掌からこぼれそうに揺れ、端末画面が選択を迫る。",
+          "key_visual": "掌の青光の下に、入域端末の承認ボタンが光る。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "踏むかどうかは、あなたが選んでください。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p93",
+          "panel_no": 93,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの親指が承認寸前で止まり、青光が指先を照らし返す。",
+          "key_visual": "押されない承認ボタンと、その上で止まった親指。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p94",
+          "panel_no": 94,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは端末から目を離さず、掌の青光を握り込むように曲げる。",
+          "key_visual": "青い光を潰さないように包む、緊張したレンの手。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p95",
+          "panel_no": 95,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ゲート前の静寂の中、レンの指が選択ボタンへ影を落とす。",
+          "key_visual": "レンの指影が承認ボタンに重なり、青光だけが揺れている。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 20,
+      "page_role": "cliffhanger",
+      "panels": [
+        {
+          "panel_id": "p96",
+          "panel_no": 96,
+          "reading_order": 1,
+          "shot_type": "establishing",
+          "camera": "low_angle",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが第三ダンジョンゲート前の規制線を踏み越え、黒い扉を見上げる。",
+          "key_visual": "新宿の夜に沈む巨大な20Fゲートと、足元に立つレンの背中。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p97",
+          "panel_no": 97,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "配信用端末の赤ランプが点灯し、レンの頬に警告色を落とす。",
+          "key_visual": "赤い配信ランプがレンの片目だけを鋭く照らす。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p98",
+          "panel_no": 98,
+          "reading_order": 3,
+          "shot_type": "wide",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "足元から青いナビ光が走り、ゲート中央の封印紋へ伸びていく。",
+          "key_visual": "アスファルトを裂くように伸びる青い光の導線。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p99",
+          "panel_no": 99,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは拳を握り、赤い配信光と青いナビ光の交点へ進む。",
+          "key_visual": "赤と青の光がレンの胸元で十字に重なる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p100",
+          "panel_no": 100,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ゲートの縁が唸り、黒い石板の継ぎ目から白い蒸気が噴く。",
+          "key_visual": "20Fの刻印が蒸気の中で熱を帯びて浮かび上がる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 21,
+      "page_role": "cliffhanger",
+      "panels": [
+        {
+          "panel_id": "p101",
+          "panel_no": 101,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが端末を掲げ、配信画面の開始表示を無言で確認する。",
+          "key_visual": "配信開始の赤い点と、画面奥に映り込む青いゲート光。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p102",
+          "panel_no": 102,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "青いナビ光がレンの腕に絡み、皮膚の下へ沈むように脈打つ。",
+          "key_visual": "腕の血管のように走る青い光と、食いしばるレンの口元。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p103",
+          "panel_no": 103,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは痛みに膝を折りかけるが、地面を踏み鳴らして耐える。",
+          "key_visual": "ひび割れた路面に踏み込まれた靴と、跳ねる青い火花。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p104",
+          "panel_no": 104,
+          "reading_order": 4,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ゲートの隙間から20Fの暗闇が覗き、街のネオンを吸い込む。",
+          "key_visual": "新宿の光を飲み込む、縦に開いた黒い裂け目。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p105",
+          "panel_no": 105,
+          "reading_order": 5,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは振り返らず、背後の喧騒と配信コメントの光を置き去る。",
+          "key_visual": "背中側に流れる赤いコメント光と、前方の青い入口。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 22,
+      "page_role": "cliffhanger",
+      "panels": [
+        {
+          "panel_id": "p106",
+          "panel_no": 106,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "頭上のゲートリングが回転し、20Fの数字がレンの影に重なる。",
+          "key_visual": "レンの影の中心に焼き付く巨大な20Fの数字。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p107",
+          "panel_no": 107,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは青い光の先を睨み、喉の奥から決意を押し出す。",
+          "key_visual": "赤いランプと青い瞳孔反射が同時に宿るレンの顔。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "言ってくれ。俺はもう、底辺の側にいない。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p108",
+          "panel_no": 108,
+          "reading_order": 3,
+          "shot_type": "wide",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "言葉に応じるように、ゲート内部の闇が階段状にほどけていく。",
+          "key_visual": "闇の中へ沈む青い階段と、赤い配信光の反射。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p109",
+          "panel_no": 109,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが片足を20F側へ入れ、現実の街灯が背後で細く歪む。",
+          "key_visual": "片足だけが闇に消え、残る身体を赤青の光が裂く。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p110",
+          "panel_no": 110,
+          "reading_order": 5,
+          "shot_type": "establishing",
+          "camera": "low_angle",
+          "bleed": true,
+          "silence": false,
+          "importance": 5,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ゲートが大きく開き、レンの輪郭を飲み込みながら配信だけが残る。",
+          "key_visual": "空の入口に赤い配信ランプと青いナビ光だけが重なる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    }
+  ],
+  "pull_link": {
+    "current_episode_cliff": "protagonist_resolve_monologue",
+    "next_opening_hook_hint": "次話冒頭は、20F に入ったレンが番人と対峙する。配信画面の数値が乱れ、灯里・玲二の視線が緊張を高める。",
+    "is_volume_end": false
+  }
+}

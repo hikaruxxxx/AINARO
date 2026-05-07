@@ -1,0 +1,3649 @@
+{
+  "schema_version": 2,
+  "episode_id": "a07-modern-dungeon-ep08",
+  "total_pages": 22,
+  "pages": [
+    {
+      "page_no": 1,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p01",
+          "panel_no": 1,
+          "reading_order": 1,
+          "shot_type": "establishing",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "夜のローソン外観を白い店舗光だけが浮かび上がらせる。",
+          "key_visual": "暗い街路に浮く白いローソンの光。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p02",
+          "panel_no": 2,
+          "reading_order": 2,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは店内から自動ドア越しに外の気配へ目を向ける。",
+          "key_visual": "ガラス越しに外をうかがうレンの横顔。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p03",
+          "panel_no": 3,
+          "reading_order": 3,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "自動ドアの向こう、黒服の三人が店舗光の外縁に立つ。",
+          "key_visual": "白い光の端に並ぶ黒い三つの影。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p04",
+          "panel_no": 4,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの瞳がわずかに細まり、三人の輪郭を追い始める。",
+          "key_visual": "警戒で細くなるレンの目元。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p05",
+          "panel_no": 5,
+          "reading_order": 5,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服三人は動かず、店の白光に背を切り抜かれている。",
+          "key_visual": "顔の見えない三人の硬いシルエット。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 2,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p06",
+          "panel_no": 6,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "自動ドアの反射がレンの顔と三人の影を重ねる。",
+          "key_visual": "レンの顔に重なる黒服三人の反射。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p07",
+          "panel_no": 7,
+          "reading_order": 2,
+          "shot_type": "medium",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはレジ脇で足を止め、出口までの距離を測る。",
+          "key_visual": "明るい店内で出口を見据えるレン。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p08",
+          "panel_no": 8,
+          "reading_order": 3,
+          "shot_type": "wide",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "自動ドアのセンサーが反応せず、ガラスだけが静かに隔てる。",
+          "key_visual": "閉じた自動ドアを挟む内側のレンと外側の影。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p09",
+          "panel_no": 9,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "三人のうち中央の影だけがわずかに顔を上げる。",
+          "key_visual": "中央の黒い影がレンへ向く瞬間。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p10",
+          "panel_no": 10,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの指先が制服の裾をつかみ、緊張で固まる。",
+          "key_visual": "制服の布を握り込むレンの指。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 3,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p11",
+          "panel_no": 11,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "白い蛍光灯の下で、レンは視線だけを外から逸らさない。",
+          "key_visual": "店内の白光に照らされる無言のレン。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p12",
+          "panel_no": 12,
+          "reading_order": 2,
+          "shot_type": "wide",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "外の三人は会話も動作もなく、ただ入口を塞ぐように並ぶ。",
+          "key_visual": "入口前に壁のように並ぶ黒服三人。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p13",
+          "panel_no": 13,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは一歩だけ出口へ寄り、自動ドアの銀枠に映り込む。",
+          "key_visual": "ドア枠の銀色に映るレンの緊張した姿。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p14",
+          "panel_no": 14,
+          "reading_order": 4,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "自動ドア越しにレンと三人の視線が無音でぶつかる。",
+          "key_visual": "ガラス一枚を挟んで向き合うレンと黒い影。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p15",
+          "panel_no": 15,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは息を詰め、見覚えのない三人の正体を探ろうとする。",
+          "key_visual": "白い店舗光の内側で動けず見据えるレン。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 4,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p16",
+          "panel_no": 16,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはローソンの明かりを背に、黒服の足元へ視線を落とす。",
+          "key_visual": "白い店舗光の縁で浮く、黒服の靴底とレンの静かな目。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p17",
+          "panel_no": 17,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "靴底の減り方と泥の筋を、レンの視線が端から端へなぞる。",
+          "key_visual": "アスファルトに接した靴底の削れ跡を追う細い視線。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p18",
+          "panel_no": 18,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは黒服の右手の位置を見て、握り癖と重心を読む。",
+          "key_visual": "黒服の右手だけが街灯の下で硬く浮かび上がる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p19",
+          "panel_no": 19,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服の肩越しに、レンは歩道の先の逃げ道を確認する。",
+          "key_visual": "黒い肩越しに伸びる、街灯の少ない夜道。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p20",
+          "panel_no": 20,
+          "reading_order": 5,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの目は街灯の間隔を数え、暗がりの切れ目を拾う。",
+          "key_visual": "等間隔でない街灯が、逃走経路を点で区切っている。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 5,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p21",
+          "panel_no": 21,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは店舗ガラスの反射から、背後の防犯カメラを探す。",
+          "key_visual": "ガラス反射の中に小さく映る防犯カメラとレンの片目。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p22",
+          "panel_no": 22,
+          "reading_order": 2,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "看板下の影を見上げ、レンはカメラの死角を頭に置く。",
+          "key_visual": "青白い看板の下、監視カメラの向きだけが鋭く見える。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p23",
+          "panel_no": 23,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは一歩だけ横へずれ、黒服との距離と角度を測る。",
+          "key_visual": "レンの靴先が白線を半歩越え、間合いが静かに変わる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p24",
+          "panel_no": 24,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服の利き手側に荷重が寄る瞬間を、レンは瞬きせず見る。",
+          "key_visual": "拳の影と片足の沈み込みが同時に強調される。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p25",
+          "panel_no": 25,
+          "reading_order": 5,
+          "shot_type": "wide",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは交差点までの灯りを目で結び、走れる線を組み立てる。",
+          "key_visual": "街灯の点がレンの視線で一本の逃走線に変わる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 6,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p26",
+          "panel_no": 26,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "自販機の影を確認し、レンは遮蔽物までの歩数を数える。",
+          "key_visual": "赤い自販機の影が、夜道に細い退路を作っている。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p27",
+          "panel_no": 27,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは視線を戻し、靴底、手、道、カメラを一息で照合する。",
+          "key_visual": "レンの瞳に靴底、右手、街灯、防犯カメラが重なる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p28",
+          "panel_no": 28,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは息を殺したまま、黒服の次の一歩の向きを待つ。",
+          "key_visual": "止まったレンと、踏み出す寸前の黒い靴。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p29",
+          "panel_no": 29,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは視線だけで盤面を固定し、答えの到着を待たない。",
+          "key_visual": "夜のコンビニ前で、レンの目だけが冷静に盤面を押さえる。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "最適解が来る前に、盤面だけは自分で数えろ。"
+            }
+          ],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p30",
+          "panel_no": 30,
+          "reading_order": 5,
+          "shot_type": "establishing",
+          "camera": "high_angle",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは最後に防犯カメラを見上げ、退路へ静かに体を向ける。",
+          "key_visual": "監視カメラの下で、レンの体が街灯の薄い道へ向く。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 7,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_id": "p31",
+          "panel_no": 31,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはローソンの白い看板下で立ち止まり、割れたスマホを耳に当てる。",
+          "key_visual": "夜のコンビニ前、白い光だけがレンの輪郭を薄く切り抜く。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p32",
+          "panel_no": 32,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "スマホ画面の青光がヒビの線に沿って弱まり、レンの指先が震える。",
+          "key_visual": "蜘蛛の巣状に割れた画面の青だけが掌を照らす。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p33",
+          "panel_no": 33,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは返答を待って口を開きかけるが、白い息だけが夜気に溶ける。",
+          "key_visual": "空白の吹き出しがレンの口元から浮かび、何も入らない。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p34",
+          "panel_no": 34,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "響の声だけが途切れ途切れに届き、レンの瞳が焦点を失う。",
+          "key_visual": "白い背景に、割れたスマホとレンの片目だけが残る。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "彼らに対しては、開示権限がありません。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p35",
+          "panel_no": 35,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは耳からスマホを離し、画面を見下ろして通信表示を探す。",
+          "key_visual": "無音の画面に、通信アイコンだけが灰色に沈んでいる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 8,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_id": "p36",
+          "panel_no": 36,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "画面の青光が一段暗くなり、レンの顔から頼る先の色が抜ける。",
+          "key_visual": "レンの頬に映っていた青が消え、白い沈黙だけが残る。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p37",
+          "panel_no": 37,
+          "reading_order": 2,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは背後を振り返り、駐車場の死角とガラスの反射を読む。",
+          "key_visual": "コンビニ窓に映るレンと、背後の暗い余白が重なる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p38",
+          "panel_no": 38,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "白いコマの中でレンの手だけがスマホを握り直し、爪が食い込む。",
+          "key_visual": "余白に浮かぶ拳とヒビ入りスマホ、青光はほとんどない。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p39",
+          "panel_no": 39,
+          "reading_order": 4,
+          "shot_type": "wide",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは一歩だけ後退し、自動ドアと車止めの距離を目で測る。",
+          "key_visual": "床の白線とレンの靴先が、逃げ道の盤面のように並ぶ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p40",
+          "panel_no": 40,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "スマホの画面が完全に暗転し、レンの親指が空のガラスをなぞる。",
+          "key_visual": "真っ黒な画面に、割れ目だけが街灯を細く反射する。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 9,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_id": "p41",
+          "panel_no": 41,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは息を止め、コンビニの冷たい白光の中で肩をすくめる。",
+          "key_visual": "巨大な白い余白の中央に、小さく縮むレンの背中。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p42",
+          "panel_no": 42,
+          "reading_order": 2,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "空白の吹き出しだけが連続し、レンは誰もいない耳元を見つめる。",
+          "key_visual": "三つの空白吹き出しが、夜の壁面に白く貼りつく。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p43",
+          "panel_no": 43,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはスマホをポケットに沈め、両手を空けて足幅を整える。",
+          "key_visual": "ポケットへ消えるスマホと、代わりに開かれる震えた両手。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p44",
+          "panel_no": 44,
+          "reading_order": 4,
+          "shot_type": "establishing",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは駐車場全体を見渡し、入口、影、車間を順に確認する。",
+          "key_visual": "白線で区切られた駐車場が、無言の盤面として広がる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p45",
+          "panel_no": 45,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": true,
+          "importance": 5,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_響_v1",
+                "role": "speaker",
+                "on_screen_via": "voice_off",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは恐怖を飲み込み、ローソンの白光を背にして前を向く。",
+          "key_visual": "青を失った夜に、レンの目だけが盤面を読み始める。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 10,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p46",
+          "panel_no": 46,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは自動ドアの前で半身だけ店内へ向け、黒服の列を見据える。",
+          "key_visual": "青白い看板光の下、制服姿のレンと黒服たちが向かい合う。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p47",
+          "panel_no": 47,
+          "reading_order": 2,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服の先頭が一歩だけ近づき、レンは笑顔の形を崩さず距離を測る。",
+          "key_visual": "営業スマイルのレンの背後で、自動ドアが半開きに光る。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p48",
+          "panel_no": 48,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはレジ応対の姿勢で両手を前にそろえ、声を低く整える。",
+          "key_visual": "コンビニ店員の丁寧なお辞儀が、夜の異様な対峙をずらす。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "所属、代表者、法的根拠を確認させてください。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p49",
+          "panel_no": 49,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服たちは同時に首を傾け、祈るような手つきで沈黙を返す。",
+          "key_visual": "黒い袖の群れが、レシートを受け取る手のように差し出される。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p50",
+          "panel_no": 50,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは視線だけを横へ流し、店内通路までの歩数を数える。",
+          "key_visual": "レンの瞳に、店内の蛍光灯と避難できる通路が映る。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 11,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p51",
+          "panel_no": 51,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服の影が駐車場の白線を越え、レンの靴先へ伸びてくる。",
+          "key_visual": "白線を侵食する黒い影と、動かないレンのスニーカー。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p52",
+          "panel_no": 52,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは名札に触れ、接客中の癖で軽く会釈して時間を稼ぐ。",
+          "key_visual": "名札を押さえる指先だけが、わずかに震えている。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p53",
+          "panel_no": 53,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服の一人が看板を仰ぎ、神託を読むように口元を動かす。",
+          "key_visual": "LAWSONの光を聖像のように見上げる黒服の横顔。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p54",
+          "panel_no": 54,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは自動ドアのセンサー範囲へ、かかとだけを静かに戻す。",
+          "key_visual": "センサー下に入るかかとと、まだ外に残るレンの身体。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p55",
+          "panel_no": 55,
+          "reading_order": 5,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ドアが小さく反応し、レンは表情を固定したまま息を止める。",
+          "key_visual": "開きかけた自動ドアの隙間に、冷たい店内光が差す。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 12,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p56",
+          "panel_no": 56,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服の列は歩幅をそろえ、レンの逃げ道を礼拝の列のように塞ぐ。",
+          "key_visual": "整列した黒服が、駐車場を不気味な儀式の場に変える。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p57",
+          "panel_no": 57,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは制服の袖口を握り、レジ前で鍛えた無表情を貼りつける。",
+          "key_visual": "作り笑いの口元と、袖を握り潰す指の対比。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p58",
+          "panel_no": 58,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服の先頭が深く頭を下げ、レンの言葉を別の儀礼に変える。",
+          "key_visual": "問い合わせ対応の空気が、黒服の礼拝姿勢に飲まれる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p59",
+          "panel_no": 59,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは背後の棚ガラスに映る配置を見て、最短の退路を探す。",
+          "key_visual": "棚ガラスの反射に、黒服の数と店内の退路が重なる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p60",
+          "panel_no": 60,
+          "reading_order": 5,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "自動ドアが再び閉じかけ、レンは肩だけを内側へ滑らせる。",
+          "key_visual": "透明なドアに挟まれるように、レンの肩が店内光へ入る。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 13,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p61",
+          "panel_no": 61,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服の手が伸びる直前、レンは一歩引いて足音を消す。",
+          "key_visual": "宙に残る黒い手袋と、後退するレンの靴底。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p62",
+          "panel_no": 62,
+          "reading_order": 2,
+          "shot_type": "wide",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンはレジ方向へ視線を投げ、助けを呼ばずに動線だけ確認する。",
+          "key_visual": "無人のレジカウンターが、遠い避難所のように白く光る。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p63",
+          "panel_no": 63,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服たちは入口の外で止まり、店の境界線を踏まないまま揺れる。",
+          "key_visual": "敷居を越えない黒服の靴先が、一本の見えない線を示す。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p64",
+          "panel_no": 64,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは境界に気づき、笑顔の奥で緊張を押し込みながら身を引く。",
+          "key_visual": "営業スマイルのまま、レンの目だけが勝機を捉える。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p65",
+          "panel_no": 65,
+          "reading_order": 5,
+          "shot_type": "establishing",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "自動ドアがレンの前で閉まり、黒服の姿をガラス越しに歪ませる。",
+          "key_visual": "閉じた自動ドア越しに、黒服の祈る影が滲む。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 14,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_id": "p66",
+          "panel_no": 66,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ローソンの灯りを背に、レンが黒服の手元へ視線を落とす。",
+          "key_visual": "青白い看板光の下で、黒服の指がナイフの柄を握る瞬間。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p67",
+          "panel_no": 67,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服のリーダーが無言で刃を抜き、レンの喉元へ向ける。",
+          "key_visual": "街灯を裂くように現れる、細い銀色のナイフ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p68",
+          "panel_no": 68,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの瞳が刃の反射を捉え、呼吸だけが硬く止まる。",
+          "key_visual": "レンの瞳に映り込む、逆さのナイフの白い線。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "ナイフが抜かれた。"
+            }
+          ],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p69",
+          "panel_no": 69,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが一歩退くより早く、黒服の肩が前へ沈み込む。",
+          "key_visual": "黒いスーツの肩が獣のように低く入り、刃先が消える。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p70",
+          "panel_no": 70,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ナイフが横薙ぎに走り、レンの黒フードへ白い軌道を描く。",
+          "key_visual": "黒フードの目前を、銀の斬線がコンビニ光を引いて走る。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 15,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_id": "p71",
+          "panel_no": 71,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは首を引き、刃がフードの端だけを浅く掠める。",
+          "key_visual": "裂けた黒い布片が、刃の後ろで夜気に跳ねる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p72",
+          "panel_no": 72,
+          "reading_order": 2,
+          "shot_type": "wide",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "遅れて体勢を崩したレンが、駐車場の白線上によろめく。",
+          "key_visual": "白線に片足を滑らせるレンと、迫る黒服の影。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "Fランクの身体ではここまで。"
+            }
+          ],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p73",
+          "panel_no": 73,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服のリーダーが踏み込み直し、刃を逆手に構える。",
+          "key_visual": "コンビニ入口の光を塞ぐ黒い背広と、逆手の刃。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p74",
+          "panel_no": 74,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは肩越しに自動ドアを見て、逃げ道だけを測る。",
+          "key_visual": "レンの背後で、ローソンの自動ドアが淡く開きかける。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p75",
+          "panel_no": 75,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服の二撃目が斜めに落ち、レンの袖口を鋭く裂く。",
+          "key_visual": "黒い袖を掠める刃と、舞い上がる細い繊維の束。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 16,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_id": "p76",
+          "panel_no": 76,
+          "reading_order": 1,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが痛みに顔を歪めながら、反射で腕を胸へ引く。",
+          "key_visual": "袖の裂け目を押さえるレンの指先と、震える手首。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p77",
+          "panel_no": 77,
+          "reading_order": 2,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは恐怖を飲み込み、踵を返して入口へ全力で走る。",
+          "key_visual": "黒フードの背中が、白い店内光へ飛び込むように傾く。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "店内へ逃げる。"
+            }
+          ],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p78",
+          "panel_no": 78,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "背後から伸びた刃が、閉じかけた自動ドアの光を横切る。",
+          "key_visual": "ガラス扉の反射に重なる、追撃の銀線とレンの黒い影。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p79",
+          "panel_no": 79,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは身体をねじり、肩を削られる寸前で店内へ滑り込む。",
+          "key_visual": "自動ドアの隙間をすり抜けるレンと、外に残る刃先。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p80",
+          "panel_no": 80,
+          "reading_order": 5,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 5,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ガラス越しに黒服の刃が止まり、レンは棚影で息を殺す。",
+          "key_visual": "店内の明るさと夜の闇を分けるガラス、その外のナイフ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 17,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p81",
+          "panel_no": 81,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "ローソンの青白い灯りの下、レンが黒服三人の包囲を静かに測る。",
+          "key_visual": "夜のコンビニ前で、レンを囲む黒服三人の影が長く伸びる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p82",
+          "panel_no": 82,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "杖の石突きが濡れた歩道を叩き、黒服たちの注意が横へ流れる。",
+          "key_visual": "水たまりに映る杖の先端と、揺れる老人の影。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p83",
+          "panel_no": 83,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "玄蔵が背を丸めたまま間合いに入り、黒服の肩越しにレンを見る。",
+          "key_visual": "黒服の隙間に、杖を突く玄蔵の片目だけが光る。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p84",
+          "panel_no": 84,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは身構えず、老人の歩幅と呼吸だけを目で追い続ける。",
+          "key_visual": "レンの瞳に、ゆっくり近づく玄蔵の影が映る。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "20 年前の世界初 Sランク鑑定者・獅童玄蔵が現れた、何者だ"
+            }
+          ],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p85",
+          "panel_no": 85,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "先頭の黒服が腕を伸ばした瞬間、玄蔵の手首が小さく返る。",
+          "key_visual": "老人の枯れた手首が、黒服の腕の内側を一閃する。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 18,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p86",
+          "panel_no": 86,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "黒服の肘が逆へ折れかけ、声を出す前に膝から崩れ落ちる。",
+          "key_visual": "大柄な黒服が、杖の老人の前で音もなく沈む。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p87",
+          "panel_no": 87,
+          "reading_order": 2,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "二人目が踏み込むが、玄蔵は半歩ずれて杖で足首を払う。",
+          "key_visual": "杖の水平線が黒服の足をさらい、身体が宙に傾く。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p88",
+          "panel_no": 88,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "玄蔵は倒れ込む男の袖をつまみ、勢いを三人目へ流す。",
+          "key_visual": "倒れる黒服が盾のように振られ、三人目の視界を塞ぐ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p89",
+          "panel_no": 89,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "三人目の拳が空を切り、玄蔵の指がその手首に絡みつく。",
+          "key_visual": "しわだらけの指が、黒革手袋の手首を完全に捕らえる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p90",
+          "panel_no": 90,
+          "reading_order": 5,
+          "shot_type": "wide",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "玄蔵が腰を落として手首を捻り、黒服の巨体を地面へ落とす。",
+          "key_visual": "老人の小さな背中の前で、黒服の巨体が弧を描く。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 19,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_id": "p91",
+          "panel_no": 91,
+          "reading_order": 1,
+          "shot_type": "establishing",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "三人の黒服が舗道に伏し、玄蔵だけが杖を立てて息を整える。",
+          "key_visual": "倒れた三つの黒い影の中心に、杖の老人が静かに立つ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p92",
+          "panel_no": 92,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは瞬きもせず、制圧までの最短の動線を頭の中でなぞる。",
+          "key_visual": "レンの横顔に、倒れた黒服たちの姿が重なって映る。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "玄蔵の意図を読み、信頼できるか判断"
+            }
+          ],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p93",
+          "panel_no": 93,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "玄蔵が杖を一度鳴らし、レンへ向き直って距離を残す。",
+          "key_visual": "玄蔵とレンの間に、倒れた黒服たちが境界線のように横たわる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p94",
+          "panel_no": 94,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": false,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは一歩も退かず、玄蔵の手元から視線を外さない。",
+          "key_visual": "レンの静かな視線と、玄蔵の杖を握る手が真正面で対峙する。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p95",
+          "panel_no": 95,
+          "reading_order": 5,
+          "shot_type": "wide",
+          "camera": "low_angle",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "コンビニの自動ドアが開き、白い光が二人の間を切り裂く。",
+          "key_visual": "青白い店内光を挟み、レンと玄蔵の影が向かい合う。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 20,
+      "page_role": "cliffhanger",
+      "panels": [
+        {
+          "panel_id": "p96",
+          "panel_no": 96,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": true,
+          "silence": false,
+          "importance": 4,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "夜のローソン前で、レンが自動ドアの光を背に立ち尽くす。",
+          "key_visual": "白い蛍光灯に切り抜かれたレンの孤独な背中",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p97",
+          "panel_no": 97,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの足元で、濡れたアスファルトに看板の青が揺れる。",
+          "key_visual": "水たまりに歪んで映る青い光",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p98",
+          "panel_no": 98,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "玄蔵が画面端から杖を突き、乾いた音だけを夜に置く。",
+          "key_visual": "黒い地面を叩く玄蔵の杖先",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p99",
+          "panel_no": 99,
+          "reading_order": 4,
+          "shot_type": "medium",
+          "camera": "over_shoulder",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが振り返れず、肩だけを小さく強張らせる。",
+          "key_visual": "返事を失ったレンの固い肩",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p100",
+          "panel_no": 100,
+          "reading_order": 5,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "玄蔵は距離を詰めず、冷えた目でレンの背中を測る。",
+          "key_visual": "暗がりに浮く玄蔵の冷たい眼差し",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 21,
+      "page_role": "cliffhanger",
+      "panels": [
+        {
+          "panel_id": "p101",
+          "panel_no": 101,
+          "reading_order": 1,
+          "shot_type": "wide",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの背後の空白に、青い少女の輪郭が薄く滲み出る。",
+          "key_visual": "何もない空間に置かれた青い少女の輪郭",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p102",
+          "panel_no": 102,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの目が揺れ、少女の輪郭を見ないまま呼吸を止める。",
+          "key_visual": "青を映さず震えるレンの瞳",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p103",
+          "panel_no": 103,
+          "reading_order": 3,
+          "shot_type": "close_up",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "玄蔵の手が杖の柄を握り直し、皺の影が深く刻まれる。",
+          "key_visual": "杖を握る玄蔵の骨ばった手",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p104",
+          "panel_no": 104,
+          "reading_order": 4,
+          "shot_type": "wide",
+          "camera": "birds_eye",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "二人の間に車止めと影だけが並び、会話の隙間が伸びる。",
+          "key_visual": "レンと玄蔵を隔てる無言の駐車場",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p105",
+          "panel_no": 105,
+          "reading_order": 5,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンが唇を開きかけるが、声は喉の奥で潰れる。",
+          "key_visual": "言葉にならず閉じるレンの口元",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    },
+    {
+      "page_no": 22,
+      "page_role": "cliffhanger",
+      "panels": [
+        {
+          "panel_id": "p106",
+          "panel_no": 106,
+          "reading_order": 1,
+          "shot_type": "medium",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "青い少女の輪郭がレンの背に重ならず、空白に残り続ける。",
+          "key_visual": "レンから離れて立つ名のない青い影",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p107",
+          "panel_no": 107,
+          "reading_order": 2,
+          "shot_type": "close_up",
+          "camera": "high_angle",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンの指が震え、握っていた手の力が静かに抜ける。",
+          "key_visual": "ほどけていくレンの震える拳",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p108",
+          "panel_no": 108,
+          "reading_order": 3,
+          "shot_type": "medium",
+          "camera": "low_angle",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "玄蔵が一歩も動かず、杖だけをレンへ向けてわずかに傾ける。",
+          "key_visual": "問いのように傾く玄蔵の杖",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p109",
+          "panel_no": 109,
+          "reading_order": 4,
+          "shot_type": "close_up",
+          "camera": "eye_level",
+          "bleed": false,
+          "silence": true,
+          "importance": 3,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "玄蔵の顔が暗く沈み、眼差しだけが鋭くレンを射抜く。",
+          "key_visual": "闇の中で光る玄蔵の冷徹な目",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_玄蔵_v1",
+              "text": "若いの、お前の声は誰のものだ。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        },
+        {
+          "panel_id": "p110",
+          "panel_no": 110,
+          "reading_order": 5,
+          "shot_type": "wide",
+          "camera": "high_angle",
+          "bleed": true,
+          "silence": true,
+          "importance": 5,
+          "entities": {
+            "characters": [
+              {
+                "character_id": "char_桐生_レン_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              },
+              {
+                "character_id": "char_獅童_玄蔵_v1",
+                "role": "speaker",
+                "on_screen_via": "in_person",
+                "expression": ""
+              }
+            ],
+            "location_id": "loc_lawson_exterior_night_v1",
+            "props": [],
+            "focus_entity_id": "char_桐生_レン_v1"
+          },
+          "action": "レンは答えられず、背後の青い輪郭ごと白い余白に沈む。",
+          "key_visual": "レンの背後に残る青い少女の輪郭と完全な沈黙",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": []
+        }
+      ]
+    }
+  ],
+  "pull_link": {
+    "current_episode_cliff": "ability_or_identity_glimpse",
+    "next_opening_hook_hint": "次話冒頭は、ナビの正体を問われたレンが自室で考え込む。20F 挑戦の準備と並行して、ナビとの関係を自分で再定義する。",
+    "is_volume_end": false
+  }
+}

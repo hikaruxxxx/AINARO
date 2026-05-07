@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "episode_id": "a07-modern-dungeon-ep06",
+  "generated_at": "2026-05-07T05:00:00+09:00",
+  "source": {
+    "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep06/_brief.v2.md",
+    "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep06/shotlist.json",
+    "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
+  },
+  "_note": "Phase β B5-5 ep06 - DPC 出頭、槇島再会、再鑑定拒否、追跡許可申請 cliff",
+  "scenes": [
+    {
+      "scene_id": "S01",
+      "scene_no": 1,
+      "prev_scene_id": null,
+      "next_scene_id": "S02",
+      "page_range": { "start": 1, "end": 3 },
+      "panel_range": { "start_panel_no": 1, "end_panel_no": 15 },
+      "arc_position": { "volume": 1, "episode_in_volume": 6, "arc_phase": "introduce", "arc_position_normalized": 0.50 },
+      "beat_type": "introduce",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_獅童_響_v1", "presence": "voice_off" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_獅童_響_v1", "text": "任意形式ですが、拒否時の不利益が大きいです。", "uniqueness": "scene_exclusive", "intent": "establish" },
+          { "speaker": "char_桐生_レン_v1", "text": "任意って言葉ほど、断らせる気がない。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_dpc_subpoena_received", "payoff_episode_hint": "this_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "任意の参考人聴取という名の召喚状、断れる仕掛けではない",
+        "goal": "封書の意図を読み解き、出頭の準備に入る",
+        "emotion": "tension",
+        "delta_from_prev": "ep05 末の共犯成立から、公的圧力の正面衝突へ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "六日目朝、ローソン休憩室、夜勤明け", "order": 1, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "location_id": "loc_lawson_interior_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "introspection",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "廃棄弁当の横に開いた DPC 封書、参考人として出頭を求めるの一行"
+    },
+    {
+      "scene_id": "S02",
+      "scene_no": 2,
+      "prev_scene_id": "S01",
+      "next_scene_id": "S03",
+      "page_range": { "start": 4, "end": 5 },
+      "panel_range": { "start_panel_no": 16, "end_panel_no": 25 },
+      "arc_position": { "volume": 1, "episode_in_volume": 6, "arc_phase": "rising", "arc_position_normalized": 0.55 },
+      "beat_type": "setup",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_九条_ナナミ_v1", "presence": "phone_screen" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_九条_ナナミ_v1", "text": "嘘を作るな。事実を短く区切って、推測を渡すな。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_ren_audit_response_protocol", "payoff_episode_hint": "this_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "嘘ではなく、短く区切った事実で答える",
+        "goal": "ナナミと想定問答を整理、答える範囲・沈黙する範囲を決める",
+        "emotion": "calm",
+        "delta_from_prev": "圧力への怯えから、共犯と組んだ準備モードへ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "六日目午前、ローソン休憩室で通話", "order": 2, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "location_id": "loc_lawson_interior_v1",
+      "page_budget": { "min": 2, "max": 2, "preferred": 2 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "ヒビ入りスマホでナナミとの通話、シフト表コピーを手に持つレン"
+    },
+    {
+      "scene_id": "S03",
+      "scene_no": 3,
+      "prev_scene_id": "S02",
+      "next_scene_id": "S04",
+      "page_range": { "start": 6, "end": 9 },
+      "panel_range": { "start_panel_no": 26, "end_panel_no": 45 },
+      "arc_position": { "volume": 1, "episode_in_volume": 6, "arc_phase": "rising", "arc_position_normalized": 0.65 },
+      "beat_type": "transition",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_槇島_主任_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_槇島_主任_v1", "text": "Fランクは入口を磨いてればいい、が口癖だったよな。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "元上司の槇島がここで呼び出す、過去の判定の延長で潰しに来ている",
+        "goal": "槇島の意図を冷静に観察",
+        "emotion": "tension",
+        "delta_from_prev": "想定問答準備から、対面の緊張へ"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_桐生_レン_v1", "char_槇島_主任_v1"], "direction": "tense", "intensity": -1, "trigger": "再鑑定却下の過去から続く力関係、再会で再び距離が開く" }
+      ],
+      "time_axis": { "label": "六日目午後、DPC 新宿支部 窓口フロア", "order": 3, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "location_id": "loc_dpc_public_counter_v1",
+      "page_budget": { "min": 4, "max": 4, "preferred": 4 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "白く明るい行政空間、番号札、Fランク窓口の端で立つレンと冷たい槇島"
+    },
+    {
+      "scene_id": "S04",
+      "scene_no": 4,
+      "prev_scene_id": "S03",
+      "next_scene_id": "S05",
+      "page_range": { "start": 10, "end": 13 },
+      "panel_range": { "start_panel_no": 46, "end_panel_no": 65 },
+      "arc_position": { "volume": 1, "episode_in_volume": 6, "arc_phase": "climax", "arc_position_normalized": 0.75 },
+      "beat_type": "setup",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_槇島_主任_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_槇島_主任_v1", "text": "匿名 ID の異常加算、お前のはずがないよな。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": ["F_ren_audit_response_protocol"],
+      "protagonist_arc_state": {
+        "belief": "嘘ではなく、短い事実だけで返す",
+        "goal": "想定問答に従い、最低限の事実だけ提示",
+        "emotion": "calm",
+        "delta_from_prev": "対面の緊張下で、共犯と組んだ準備が機能"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "六日目午後、Fランク窓口で参考人聴取", "order": 4, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "location_id": "loc_dpc_public_counter_v1",
+      "page_budget": { "min": 4, "max": 4, "preferred": 4 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "シフト表コピーを差し出すレンの手と、入域履歴と買取記録を並べる槇島"
+    },
+    {
+      "scene_id": "S05",
+      "scene_no": 5,
+      "prev_scene_id": "S04",
+      "next_scene_id": "S06",
+      "page_range": { "start": 14, "end": 17 },
+      "panel_range": { "start_panel_no": 66, "end_panel_no": 85 },
+      "arc_position": { "volume": 1, "episode_in_volume": 6, "arc_phase": "climax", "arc_position_normalized": 0.85 },
+      "beat_type": "reveal",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_槇島_主任_v1", "presence": "in_person" },
+        { "character_id": "char_獅童_響_v1", "presence": "voice_off" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_獅童_響_v1", "text": "再鑑定は受けないでください。あれは、私の声を消すための装置です。", "uniqueness": "scene_exclusive", "intent": "reveal" },
+          { "speaker": "char_桐生_レン_v1", "text": "ここで名前を書いたら、俺じゃなくて、この声が消される。", "uniqueness": "scene_exclusive", "intent": "reveal" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_reappraisal_silences_navi", "payoff_episode_hint": "later_in_volume" }],
+      "foreshadow_payoff": ["F_dpc_subpoena_received"],
+      "protagonist_arc_state": {
+        "belief": "再鑑定はナビを消す装置、署名は俺の声の自殺",
+        "goal": "再鑑定同意書を拒否する",
+        "emotion": "fear",
+        "delta_from_prev": "想定通りの聴取から、ナビ消失を賭けた最大の選択へ"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_桐生_レン_v1", "char_獅童_響_v1"], "direction": "trust+", "intensity": 2, "trigger": "ナビが規約境界で警告、レンが署名を止める信頼" }
+      ],
+      "time_axis": { "label": "六日目午後、再鑑定同意書を突きつけられる瞬間", "order": 5, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_dpc_public_counter_v1",
+      "page_budget": { "min": 4, "max": 4, "preferred": 4 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": 85, "type": "reveal_turn" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "署名欄の大ゴマと、止まったレンの指、ナビ青光が手の上に走る"
+    },
+    {
+      "scene_id": "S06",
+      "scene_no": 6,
+      "prev_scene_id": "S05",
+      "next_scene_id": "S07",
+      "page_range": { "start": 18, "end": 19 },
+      "panel_range": { "start_panel_no": 86, "end_panel_no": 95 },
+      "arc_position": { "volume": 1, "episode_in_volume": 6, "arc_phase": "falling", "arc_position_normalized": 0.92 },
+      "beat_type": "turn",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_槇島_主任_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_槇島_主任_v1", "text": "お前は底辺で終わる側の人間だ。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "侮蔑を真正面で受け止め、目を逸らさない、初めて拒否で立つ",
+        "goal": "署名を拒否し退出",
+        "emotion": "determination",
+        "delta_from_prev": "署名を止める瞬間から、初めての公的拒否を成立させる"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_桐生_レン_v1", "char_槇島_主任_v1"], "direction": "tense", "intensity": -1, "trigger": "拒否退出後にエレベーターホールで侮蔑、レンは目を逸らさない" }
+      ],
+      "time_axis": { "label": "六日目午後、エレベーターホール", "order": 6, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_dpc_public_counter_v1",
+      "page_budget": { "min": 2, "max": 2, "preferred": 2 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "閉じかけるエレベーター扉とレンの背中、追ってくる槇島の冷たい目"
+    },
+    {
+      "scene_id": "S07",
+      "scene_no": 7,
+      "prev_scene_id": "S06",
+      "next_scene_id": null,
+      "page_range": { "start": 20, "end": 22 },
+      "panel_range": { "start_panel_no": 96, "end_panel_no": 110 },
+      "arc_position": { "volume": 1, "episode_in_volume": 6, "arc_phase": "climax", "arc_position_normalized": 1.0 },
+      "beat_type": "cliff",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "log_visual" },
+        { "character_id": "char_槇島_主任_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_槇島_主任_v1", "text": "追跡許可申請。", "uniqueness": "scene_exclusive", "intent": "cliff" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_dpc_pursuit_authorization", "payoff_episode_hint": "next_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "拒否したが、制度はもう個人を潰しに動き始めた",
+        "goal": "次の段階の対処を組み立てる",
+        "emotion": "fear",
+        "delta_from_prev": "拒否成功の余韻から、追跡発動の圧迫感へ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "六日目夕方、DPC 本部 モニター管制室", "order": 7, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_dpc_monitor_room_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": 110, "type": "cliff_turn" },
+      "layout_pattern_id": "P_cliff_cross_cut_with_authority",
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "監視カメラ映像のレンの背中に重なる照準枠、槇島の指が送信ボタンを押す"
+    }
+  ],
+  "pull_link": {
+    "current_episode_cliff": "unknown_threat_silhouette",
+    "next_opening_hook_hint": "次話冒頭は、追跡許可下のレンが街中の視線を意識しながら次の動きを組む。灯里の 20F 中継が同時に流れる対比で展開を起動。",
+    "is_volume_end": false
+  }
+}

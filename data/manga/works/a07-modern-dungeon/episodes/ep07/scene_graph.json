@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "episode_id": "a07-modern-dungeon-ep07",
+  "generated_at": "2026-05-07T05:30:00+09:00",
+  "source": {
+    "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep07/_brief.v2.md",
+    "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep07/shotlist.json",
+    "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
+  },
+  "_note": "Phase β B5-5 ep07 - 灯里 20F 撤退中継、5 年ぶりメッセージ、感情で 20F 挑戦決意 cliff",
+  "scenes": [
+    {
+      "scene_id": "S01",
+      "scene_no": 1,
+      "prev_scene_id": null,
+      "next_scene_id": "S02",
+      "page_range": { "start": 1, "end": 3 },
+      "panel_range": { "start_panel_no": 1, "end_panel_no": 15 },
+      "arc_position": { "volume": 1, "episode_in_volume": 7, "arc_phase": "introduce", "arc_position_normalized": 0.55 },
+      "beat_type": "introduce",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_白瀬_灯里_v1", "presence": "tv" },
+        { "character_id": "char_獅童_響_v1", "presence": "voice_off" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_獅童_響_v1", "text": "現在のあなたの到達推奨階層ではありません。", "uniqueness": "scene_exclusive", "intent": "establish" },
+          { "speaker": "char_桐生_レン_v1", "text": "分かってる。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_akari_20f_live_broadcast", "payoff_episode_hint": "this_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "幼馴染が同じダンジョンの深部で戦っている、目を逸らせない",
+        "goal": "品出ししながら中継を追う",
+        "emotion": "tension",
+        "delta_from_prev": "ep06 末の追跡発動から、店内で身を低くしつつ画面の朱色を追う"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "七日目深夜、ローソン店内、灯里 20F 中継開始", "order": 1, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "location_id": "loc_lawson_interior_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "introspection",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "店内テレビの朱色の公的光と、品出し棚のレンの黒フードの対比"
+    },
+    {
+      "scene_id": "S02",
+      "scene_no": 2,
+      "prev_scene_id": "S01",
+      "next_scene_id": "S03",
+      "page_range": { "start": 4, "end": 6 },
+      "panel_range": { "start_panel_no": 16, "end_panel_no": 30 },
+      "arc_position": { "volume": 1, "episode_in_volume": 7, "arc_phase": "rising", "arc_position_normalized": 0.62 },
+      "beat_type": "reveal",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_白瀬_灯里_v1", "presence": "tv" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_白瀬_灯里_v1", "text": "ごめん、撤退する。", "uniqueness": "scene_exclusive", "intent": "reveal" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_record_keeper_unbeatable_for_akari", "payoff_episode_hint": "later_in_volume" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "S ランクの灯里でも通らない攻撃、20F は別物だ",
+        "goal": "番人の動きと撤退タイミングを覚える",
+        "emotion": "fear",
+        "delta_from_prev": "灯里の連続成功イメージが砕け、未踏破の壁を直視"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "七日目深夜、20F 規格外個体『記録の番人』出現、灯里撤退", "order": 2, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_lawson_interior_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "action",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "中継画面の番人の輪郭と、攻撃が通らない灯里の朱色の動き"
+    },
+    {
+      "scene_id": "S03",
+      "scene_no": 3,
+      "prev_scene_id": "S02",
+      "next_scene_id": "S04",
+      "page_range": { "start": 7, "end": 9 },
+      "panel_range": { "start_panel_no": 31, "end_panel_no": 45 },
+      "arc_position": { "volume": 1, "episode_in_volume": 7, "arc_phase": "rising", "arc_position_normalized": 0.68 },
+      "beat_type": "setup",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_白瀬_灯里_v1", "presence": "tv" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_桐生_レン_v1", "text": "負けた顔じゃない。あれは、置いてきたものを思い出した顔だ。", "uniqueness": "scene_exclusive", "intent": "reveal" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_akari_remembers_someone", "payoff_episode_hint": "this_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "灯里の撤退は悔しさじゃない、誰かを思い出した顔だ",
+        "goal": "灯里の表情を読む",
+        "emotion": "tension",
+        "delta_from_prev": "番人の壁から、灯里個人の感情へ視線が移る"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_白瀬_灯里_v1", "char_桐生_レン_v1"], "direction": "closer", "intensity": 1, "trigger": "灯里の撤退時の表情を、レンが「置いてきたもの」と読み取る" }
+      ],
+      "time_axis": { "label": "七日目深夜、配信画面の灯里の謝る顔", "order": 3, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_lawson_interior_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "introspection",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "テレビ画面に映る灯里の表情アップ、レンの瞳に映る朱色"
+    },
+    {
+      "scene_id": "S04",
+      "scene_no": 4,
+      "prev_scene_id": "S03",
+      "next_scene_id": "S05",
+      "page_range": { "start": 10, "end": 13 },
+      "panel_range": { "start_panel_no": 46, "end_panel_no": 65 },
+      "arc_position": { "volume": 1, "episode_in_volume": 7, "arc_phase": "rising", "arc_position_normalized": 0.78 },
+      "beat_type": "setup",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_白瀬_灯里_v1", "presence": "phone_screen" }
+      ],
+      "dialogue_plan": { "key_lines": [] },
+      "foreshadow_setup": [{ "token": "F_record_keeper_three_hidden_rules", "payoff_episode_hint": "later_in_volume" }],
+      "foreshadow_payoff": ["F_akari_20f_live_broadcast"],
+      "protagonist_arc_state": {
+        "belief": "中継アーカイブをコマ送りで読めば、攻撃が通らない条件が見える",
+        "goal": "番人の攻撃周期、灯里の撤退タイミング、床の水反射、月光を確認",
+        "emotion": "determination",
+        "delta_from_prev": "店内での観察から、自室での解析モードへ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "七日目夜勤後、自室で配信アーカイブ解析", "order": 4, "is_flashback": false, "is_flashforward": false, "duration_hint": "hours" },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": { "min": 4, "max": 4, "preferred": 4 },
+      "mode": "introspection",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "ヒビ入りスマホの中継アーカイブのコマ送り、床の水反射と月光をなぞるレン"
+    },
+    {
+      "scene_id": "S05",
+      "scene_no": 5,
+      "prev_scene_id": "S04",
+      "next_scene_id": "S06",
+      "page_range": { "start": 14, "end": 16 },
+      "panel_range": { "start_panel_no": 66, "end_panel_no": 80 },
+      "arc_position": { "volume": 1, "episode_in_volume": 7, "arc_phase": "climax", "arc_position_normalized": 0.85 },
+      "beat_type": "reveal",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_獅童_響_v1", "presence": "voice_off" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_獅童_響_v1", "text": "あの番人、隠しルールが三つ重なっています。", "uniqueness": "scene_exclusive", "intent": "reveal" }
+        ]
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "ナビが詳細を渡さない、自分で仮説を立てるしかない",
+        "goal": "床環境と灯里の動きから、攻撃が通らない条件を仮説化",
+        "emotion": "determination",
+        "delta_from_prev": "ナビの開示制限を受けつつ、情報強者として裏取りする"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "七日目深夜、自室での仮説立て", "order": 5, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "ヒビ入りスマホに浮かぶ仮説メモ、ナビ青光がページ端で点滅"
+    },
+    {
+      "scene_id": "S06",
+      "scene_no": 6,
+      "prev_scene_id": "S05",
+      "next_scene_id": "S07",
+      "page_range": { "start": 17, "end": 19 },
+      "panel_range": { "start_panel_no": 81, "end_panel_no": 95 },
+      "arc_position": { "volume": 1, "episode_in_volume": 7, "arc_phase": "climax", "arc_position_normalized": 0.92 },
+      "beat_type": "turn",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_白瀬_灯里_v1", "presence": "phone_screen" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_白瀬_灯里_v1", "text": "ねえ、最近の匿名記録、見てる?", "uniqueness": "scene_exclusive", "intent": "cliff" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_akari_messages_ren_after_5_years", "payoff_episode_hint": "this_episode" }],
+      "foreshadow_payoff": ["F_akari_remembers_someone"],
+      "protagonist_arc_state": {
+        "belief": "5 年ぶりに灯里から声、知られたい・知られたくない・助けたい・追いつきたいが混ざる",
+        "goal": "返信欄に文字を打つが消す、感情を整理できない",
+        "emotion": "tension",
+        "delta_from_prev": "情報強者の冷静モードが、5 年ぶりの一文で揺らぐ"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_白瀬_灯里_v1", "char_桐生_レン_v1"], "direction": "closer", "intensity": 2, "trigger": "5 年ぶりの個別メッセージで距離が一気に縮む" }
+      ],
+      "time_axis": { "label": "七日目深夜、灯里からのメッセージ受信", "order": 6, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "introspection",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": true, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "ヒビ入りスマホの通知に表示される白瀬灯里の名前と一文、レンの指が止まる"
+    },
+    {
+      "scene_id": "S07",
+      "scene_no": 7,
+      "prev_scene_id": "S06",
+      "next_scene_id": null,
+      "page_range": { "start": 20, "end": 22 },
+      "panel_range": { "start_panel_no": 96, "end_panel_no": 110 },
+      "arc_position": { "volume": 1, "episode_in_volume": 7, "arc_phase": "climax", "arc_position_normalized": 1.0 },
+      "beat_type": "cliff",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_獅童_響_v1", "presence": "voice_off" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_獅童_響_v1", "text": "感情による階層選択は、推奨しません。", "uniqueness": "scene_exclusive", "intent": "establish" },
+          { "speaker": "char_桐生_レン_v1", "text": "──20F、行く。", "uniqueness": "scene_exclusive", "intent": "cliff" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_ren_decides_20f_emotionally", "payoff_episode_hint": "next_episode" }],
+      "foreshadow_payoff": ["F_akari_messages_ren_after_5_years"],
+      "protagonist_arc_state": {
+        "belief": "冷静な最適化ではなく、感情で 20F を選ぶ。踏み外しを承知の上で行く",
+        "goal": "夜勤シフトを 1 日交代し、20F 挑戦準備日を作る",
+        "emotion": "determination",
+        "delta_from_prev": "感情の混乱から、踏み外しの覚悟へ"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_桐生_レン_v1", "char_獅童_響_v1"], "direction": "tense", "intensity": -1, "trigger": "ナビの推奨を聞きながら逆らうレン、依存と独立の境界" }
+      ],
+      "time_axis": { "label": "七日目深夜、自室の暗闇で 20F 行く決意", "order": 7, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "silence",
+      "turn_anchor": { "at_panel_no": 110, "type": "cliff_turn" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "暗い自室、青光が消えかけたスマホ、レンの『20F、行く』の口元、ナビの白い沈黙コマ"
+    }
+  ],
+  "pull_link": {
+    "current_episode_cliff": "protagonist_resolve_monologue",
+    "next_opening_hook_hint": "次話冒頭は、踏み外しを決めたレンが街中で「沈黙の声」と接触する。ナビが沈黙する状況下で、Fランクの身体だけで対処できるかが試される。",
+    "is_volume_end": false
+  }
+}

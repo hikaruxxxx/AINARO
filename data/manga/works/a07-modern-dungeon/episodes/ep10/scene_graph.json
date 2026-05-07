@@ -1,0 +1,627 @@
+{
+  "schema_version": 1,
+  "episode_id": "a07-modern-dungeon-ep10",
+  "generated_at": "2026-05-07T07:00:00+09:00",
+  "source": {
+    "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep10/_brief.v2.md",
+    "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep10/shotlist.json",
+    "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
+  },
+  "_note": "Phase β B5-5 ep10 巻クライマックス - 20F 番人、0.4秒窓、規約違反左半歩、世界記録更新、灯里気づく、ナビ少女声",
+  "scenes": [
+    {
+      "scene_id": "S01",
+      "scene_no": 1,
+      "prev_scene_id": null,
+      "next_scene_id": "S02",
+      "page_range": {
+        "start": 1,
+        "end": 3
+      },
+      "panel_range": {
+        "start_panel_no": 1,
+        "end_panel_no": 15
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 10,
+        "arc_phase": "rising",
+        "arc_position_normalized": 0.85
+      },
+      "beat_type": "introduce",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_arena_record_keeper_appearance",
+          "payoff_episode_hint": "this_episode"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "20F、番人と対峙、配信画面の匿名 ID として歴史に立つ",
+        "goal": "番人の輪郭と HUD の歪みを読む",
+        "emotion": "tension",
+        "delta_from_prev": "ep09 末の覚悟から、配信開始下での実戦へ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "十日目夜、20F 最深部、入場直後",
+        "order": 1,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "action",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "ヘルメットで顔を隠した黒フードのレンと、ログ束のように歪む番人の輪郭"
+    },
+    {
+      "scene_id": "S02",
+      "scene_no": 2,
+      "prev_scene_id": "S01",
+      "next_scene_id": "S03",
+      "page_range": {
+        "start": 4,
+        "end": 6
+      },
+      "panel_range": {
+        "start_panel_no": 16,
+        "end_panel_no": 30
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 10,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.88
+      },
+      "beat_type": "reveal",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "月高度、地下水位、あなた自身の心拍。この三つが一致した 0.4 秒だけ、致命判定が通ります。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          }
+        ]
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "前話の仮説と一致した、三つの隠しルールが俺の準備に重なる",
+        "goal": "0.4 秒の致命判定窓を取りに行く",
+        "emotion": "tension",
+        "delta_from_prev": "番人との対峙から、戦術の核心へ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "十日目夜、HUD に三つのルールが重なる瞬間",
+        "order": 2,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "action",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "HUD に重なる月高度・水位・心拍の三つの曲線、0.4 秒の窓"
+    },
+    {
+      "scene_id": "S03",
+      "scene_no": 3,
+      "prev_scene_id": "S02",
+      "next_scene_id": "S04",
+      "page_range": {
+        "start": 7,
+        "end": 10
+      },
+      "panel_range": {
+        "start_panel_no": 31,
+        "end_panel_no": 50
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 10,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.92
+      },
+      "beat_type": "setup",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "底辺で覚えたことまで、俺の足場だ。",
+            "uniqueness": "scene_exclusive",
+            "intent": "callback"
+          }
+        ]
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "コンビニ搬入で学んだ重い物の運び方、夜勤で覚えた呼吸、装備値切りで読んだ間。全部が今の足場",
+        "goal": "床の水音と月光を読み、心拍を整える",
+        "emotion": "determination",
+        "delta_from_prev": "戦術ルール把握から、生活の体感を戦闘に重ねる"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "十日目夜、戦闘中の短い回想 (コンビニ搬入・夜勤・装備値切り)",
+        "order": 3,
+        "is_flashback": true,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
+      "sub_locations": [
+        "loc_lawson_interior_v1",
+        "loc_lawson_exterior_night_v1"
+      ],
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
+      "mode": "introspection",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "戦闘中の床の水音と月光、回想で重なる搬入のケースと夜勤の蛍光灯と値切りの棚"
+    },
+    {
+      "scene_id": "S04",
+      "scene_no": 4,
+      "prev_scene_id": "S03",
+      "next_scene_id": "S05",
+      "page_range": {
+        "start": 11,
+        "end": 14
+      },
+      "panel_range": {
+        "start_panel_no": 51,
+        "end_panel_no": 70
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 10,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.95
+      },
+      "beat_type": "setup",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_氷室_玲二_v1",
+          "presence": "log_visual"
+        },
+        {
+          "character_id": "char_白瀬_灯里_v1",
+          "presence": "log_visual"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_氷室_玲二_v1",
+            "text": "ほら見ろ、F の動きだ。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_akari_notices_left_half_step_rhythm",
+          "payoff_episode_hint": "this_episode"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "予定手順が崩れた、ナビ最適解の補正が外れかける",
+        "goal": "番人の次の一撃を凌ぎ、致命窓まで耐える",
+        "emotion": "fear",
+        "delta_from_prev": "回想で足場を確認した直後、戦闘の歯車が一つズレる"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "十日目夜、戦闘中盤、番人の一撃で予定崩れ",
+        "order": 4,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
+      "sub_locations": [
+        "loc_dpc_monitor_room_v1"
+      ],
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
+      "mode": "action",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "番人の一撃でレンの体勢が崩れる、DPC モニターで腕を組む玲二と、左半歩のリズムを目に止める灯里"
+    },
+    {
+      "scene_id": "S05",
+      "scene_no": 5,
+      "prev_scene_id": "S04",
+      "next_scene_id": "S06",
+      "page_range": {
+        "start": 15,
+        "end": 17
+      },
+      "panel_range": {
+        "start_panel_no": 71,
+        "end_panel_no": 85
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 10,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.98
+      },
+      "beat_type": "payoff",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "桐生レン、左に半歩、踏み込みを早めて。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_navi_voice_shifts_to_girl",
+          "payoff_episode_hint": "this_episode"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "ナビが規約違反の一手を渡した、声が一瞬少女のように揺れた、踏み込む",
+        "goal": "致命窓で番人の急所へ鉄パイプを通す",
+        "emotion": "determination",
+        "delta_from_prev": "崩れた手順から、規約違反の最後の一手で立て直す"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "closer",
+          "intensity": 2,
+          "trigger": "ナビが少女の声色で名前を呼び、規約違反を渡す"
+        }
+      ],
+      "time_axis": {
+        "label": "十日目夜、致命判定窓直前、規約違反の一手",
+        "order": 5,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "action",
+      "turn_anchor": {
+        "at_panel_no": 85,
+        "type": "reveal_turn"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "番人の咆哮の風圧の下、レンの左半歩と鉄パイプ、ナビの少女声色"
+    },
+    {
+      "scene_id": "S06",
+      "scene_no": 6,
+      "prev_scene_id": "S05",
+      "next_scene_id": "S07",
+      "page_range": {
+        "start": 18,
+        "end": 20
+      },
+      "panel_range": {
+        "start_panel_no": 86,
+        "end_panel_no": 100
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 10,
+        "arc_phase": "falling",
+        "arc_position_normalized": 0.99
+      },
+      "beat_type": "aftermath",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        },
+        {
+          "character_id": "char_白瀬_灯里_v1",
+          "presence": "log_visual"
+        },
+        {
+          "character_id": "char_氷室_玲二_v1",
+          "presence": "log_visual"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "……ありがとう。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_白瀬_灯里_v1",
+            "text": "レン、なの?",
+            "uniqueness": "scene_exclusive",
+            "intent": "cliff"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_akari_recognizes_ren",
+          "payoff_episode_hint": "cross_volume"
+        }
+      ],
+      "foreshadow_payoff": [
+        "F_arena_record_keeper_appearance",
+        "F_akari_notices_left_half_step_rhythm"
+      ],
+      "protagonist_arc_state": {
+        "belief": "F のまま S の天井を踏み抜いた、ナビの「ありがとう」と灯里の気づきが同時に走る",
+        "goal": "勝利の余韻と、正体露見の予兆を引き受ける",
+        "emotion": "elation",
+        "delta_from_prev": "致命窓の集中から、世界記録更新と関係性転換の波"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_白瀬_灯里_v1",
+            "char_桐生_レン_v1"
+          ],
+          "direction": "closer",
+          "intensity": 1,
+          "trigger": "灯里が左半歩のリズムからレンを認識"
+        }
+      ],
+      "time_axis": {
+        "label": "十日目夜、世界記録更新通知、ナビ沈黙、灯里の気づき",
+        "order": 6,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
+      "sub_locations": [
+        "loc_dpc_monitor_room_v1"
+      ],
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "silence",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "番人崩落の大ゴマ、世界最速レベルアップ通知、白い沈黙コマ、モニター席の灯里の口元"
+    },
+    {
+      "scene_id": "S07",
+      "scene_no": 7,
+      "prev_scene_id": "S06",
+      "next_scene_id": null,
+      "page_range": {
+        "start": 21,
+        "end": 22
+      },
+      "panel_range": {
+        "start_panel_no": 101,
+        "end_panel_no": 110
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 10,
+        "arc_phase": "resolution",
+        "arc_position_normalized": 1.0
+      },
+      "beat_type": "cliff",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "桐生レン。私が誰なのか、第 2 巻で、私自身に聞いてもらえますか。",
+            "uniqueness": "scene_exclusive",
+            "intent": "cliff"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_navi_self_reveal_in_volume_2",
+          "payoff_episode_hint": "cross_volume"
+        }
+      ],
+      "foreshadow_payoff": [
+        "F_navi_voice_shifts_to_girl"
+      ],
+      "protagonist_arc_state": {
+        "belief": "勝ったが、ナビの正体・灯里の気づき・DPC 監視・声の所有者が次巻に持ち越される",
+        "goal": "次巻でナビ自身に問う準備",
+        "emotion": "calm",
+        "delta_from_prev": "勝利の高揚から、新たな問いを引き受ける静けさへ"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "closer",
+          "intensity": 1,
+          "trigger": "ナビの少女声で次巻への約束、対等な相手として認識"
+        }
+      ],
+      "time_axis": {
+        "label": "十一日目朝、レンの自室、戻ったナビの柔らかい声",
+        "order": 7,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": {
+        "min": 2,
+        "max": 2,
+        "preferred": 2
+      },
+      "mode": "dialogue",
+      "turn_anchor": {
+        "at_panel_no": 110,
+        "type": "cliff_turn"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "朝の自室、ナビの少女声色を表す柔らかい青光、レンの瞳が次巻を予感する"
+    }
+  ],
+  "pull_link": {
+    "current_episode_cliff": "ability_or_identity_glimpse",
+    "next_opening_hook_hint": "第 2 巻冒頭は、ナビの正体に向き合うレン、灯里との 5 年ぶり対面、DPC からの本格追跡を同時に始動する。",
+    "is_volume_end": true
+  }
+}

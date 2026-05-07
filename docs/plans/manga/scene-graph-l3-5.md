@@ -368,6 +368,40 @@ ep01 / ep02 / ep03 を `--from-scene-graph --enrich` で連続生成、scene-gra
 - 各 episode の scene 数 6-10 が安定範囲
 - panel.action / key_visual の品質は Codex 出力で十分 (key_visual_intent と key_lines を context として渡せば schema 制約を守って生成)
 - panel renumber 警告は新方式の決定的採番で全 episode 自動解消
+
+### 2026-05-07: a07 1 巻全 10 episode を新方式で完成
+
+ep01-10 を新方式 (`--from-scene-graph --enrich`) で連続生成、第 1 巻完成。
+
+| episode | scene | 所要 | total_panels |
+|---|---|---|---|
+| ep01 | 10 | 281s | 110 |
+| ep02 | 6 | 229s | 110 |
+| ep03 | 7 | 247s | 110 |
+| ep04 | 7 | 241s | 110 |
+| ep05 | 7 | 243s | 110 |
+| ep06 | 7 | 236s | 110 |
+| ep07 | 7 | 244s | 110 |
+| ep08 | 7 | 258s | 110 |
+| ep09 | 7 | 247s | 110 |
+| ep10 | 7 | 244s | 110 |
+| **合計** | **72** | **2470s = 41 分** | **1100** |
+
+**実測サマリー**:
+- 1 巻 10 episode sequential 実走: **41 分** (試算 42 分とほぼ一致)
+- 平均 247s/episode、平均 7.2 scene/episode
+- API 課金ゼロ (Codex CLI subscription 内、ChatGPT Pro $200/月)
+- 全 episode で validation 全 pass (Scene-Graph + Panel-Scene Inheritance)
+
+**cross-episode payoff の手作業**:
+- ep04 / ep10 で「前 episode setup → 当 episode payoff」が validateSceneGraph Rule 5 に引っかかる
+- 暫定対応: 該当 payoff を当 episode から削除 (cross-episode は保留 token)
+- 根本対応は Phase γ で巻全体 cross-episode validator を実装予定
+
+**1 巻完成の意義**:
+- 「設計図 → コマ割り」往路がエンドツーエンドで 10 episode 連続動作
+- 新方式パイプラインの量産耐性を実証
+- KDP 出版動線 (memory: project_kdp_strategy) の B6 判 1 巻 160-200 page (現状 22page × 10ep = 220 page) が射程内
 - **time_axis.order の値域**: flashforward は 999 のような大値、flashback は -1, -2 等の負値で表現可能。整数で十分。
 - **sub_locations の使い所**: S07 (gate→corridor 連続通過) と S10 (corridor + DPC cross-cut) のような演出。1 scene に複数 location を許すが、主軸は 1 つ。
 - **cast.presence**: in_person (8), voice_off (5), tv (1), memory (1) を a07-ep01 で使用。phone_screen と log_visual は ep01 では未使用 (将来 episode で出る想定)。

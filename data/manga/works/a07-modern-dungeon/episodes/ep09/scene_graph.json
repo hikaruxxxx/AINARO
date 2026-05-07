@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "episode_id": "a07-modern-dungeon-ep09",
+  "generated_at": "2026-05-07T06:30:00+09:00",
+  "source": {
+    "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep09/_brief.v2.md",
+    "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep09/shotlist.json",
+    "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
+  },
+  "_note": "Phase β B5-5 ep09 - 最終決戦前夜、ナナミ予告、氷室公開検証、灯里席、ナビ規約違反提案 cliff",
+  "scenes": [
+    {
+      "scene_id": "S01",
+      "scene_no": 1,
+      "prev_scene_id": null,
+      "next_scene_id": "S02",
+      "page_range": { "start": 1, "end": 3 },
+      "panel_range": { "start_panel_no": 1, "end_panel_no": 15 },
+      "arc_position": { "volume": 1, "episode_in_volume": 9, "arc_phase": "introduce", "arc_position_normalized": 0.75 },
+      "beat_type": "introduce",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_九条_ナナミ_v1", "presence": "phone_screen" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_九条_ナナミ_v1", "text": "F 級単独、新宿第三 20F 挑戦。配信は明日夜 21 時。", "uniqueness": "scene_exclusive", "intent": "establish" },
+          { "speaker": "char_桐生_レン_v1", "text": "もう、後ろには下がれない。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_anonymous_20f_announcement", "payoff_episode_hint": "this_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "予告は出た、後戻りはできない、踏み外しを公的検証の場へ持っていく",
+        "goal": "明日の挑戦への準備に集中",
+        "emotion": "determination",
+        "delta_from_prev": "ep08 末の声の正体不明から、踏み外しを公開で実行する覚悟へ"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_桐生_レン_v1", "char_九条_ナナミ_v1"], "direction": "trust+", "intensity": 1, "trigger": "ナナミが匿名予告を打ち、共犯の本格運用が始まる" }
+      ],
+      "time_axis": { "label": "九日目朝、自室、ナナミとの通話", "order": 1, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": true, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "ヒビ入りスマホの通話画面とナナミのアイコン、SNS 通知の数字が増え続ける"
+    },
+    {
+      "scene_id": "S02",
+      "scene_no": 2,
+      "prev_scene_id": "S01",
+      "next_scene_id": "S03",
+      "page_range": { "start": 4, "end": 5 },
+      "panel_range": { "start_panel_no": 16, "end_panel_no": 25 },
+      "arc_position": { "volume": 1, "episode_in_volume": 9, "arc_phase": "rising", "arc_position_normalized": 0.78 },
+      "beat_type": "setup",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": { "key_lines": [] },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "炎上、嘲笑、期待。全てを画面の向こうに置く",
+        "goal": "SNS を閉じ、覚悟を固める",
+        "emotion": "tension",
+        "delta_from_prev": "予告の覚悟から、外部反応の暴風を直視"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "九日目午前、自室で SNS 炎上を見る", "order": 2, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": { "min": 2, "max": 2, "preferred": 2 },
+      "mode": "introspection",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": true, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "ヒビ入りスマホに流れる SNS のコメント濁流、レンの指が画面を閉じる"
+    },
+    {
+      "scene_id": "S03",
+      "scene_no": 3,
+      "prev_scene_id": "S02",
+      "next_scene_id": "S04",
+      "page_range": { "start": 6, "end": 9 },
+      "panel_range": { "start_panel_no": 26, "end_panel_no": 45 },
+      "arc_position": { "volume": 1, "episode_in_volume": 9, "arc_phase": "rising", "arc_position_normalized": 0.83 },
+      "beat_type": "transition",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_桐生_レン_v1", "text": "足りない分は、読む。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_helmet_visor_replacement", "payoff_episode_hint": "next_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "数字が足りなくても、読みで埋める",
+        "goal": "夜勤シフト交代と装備の最終調整、廃棄ゼリー確保、傷ありヘルメット替えバイザー購入",
+        "emotion": "determination",
+        "delta_from_prev": "炎上の暴風を閉じ、生活実務での最終準備へ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "九日目午後、コンビニと中古装備店の往復", "order": 3, "is_flashback": false, "is_flashforward": false, "duration_hint": "hours" },
+      "location_id": "loc_lawson_interior_v1",
+      "sub_locations": ["loc_lawson_exterior_night_v1"],
+      "page_budget": { "min": 4, "max": 4, "preferred": 4 },
+      "mode": "transition_montage",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "夜勤シフト表に同僚の名前、廃棄ゼリーをバッグに入れ、中古装備店の値切り交渉"
+    },
+    {
+      "scene_id": "S04",
+      "scene_no": 4,
+      "prev_scene_id": "S03",
+      "next_scene_id": "S05",
+      "page_range": { "start": 10, "end": 13 },
+      "panel_range": { "start_panel_no": 46, "end_panel_no": 65 },
+      "arc_position": { "volume": 1, "episode_in_volume": 9, "arc_phase": "rising", "arc_position_normalized": 0.88 },
+      "beat_type": "reveal",
+      "cast": [
+        { "character_id": "char_氷室_玲二_v1", "presence": "in_person" },
+        { "character_id": "char_白瀬_灯里_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_氷室_玲二_v1", "text": "F 級が 20F を踏むなど、不正以外にあり得ない。", "uniqueness": "scene_exclusive", "intent": "reveal" },
+          { "speaker": "char_白瀬_灯里_v1", "text": "……来てよ、お願い。", "uniqueness": "scene_exclusive", "intent": "reveal" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_hyomuro_public_audit_declared", "payoff_episode_hint": "next_episode" }],
+      "foreshadow_payoff": ["F_anonymous_20f_announcement"],
+      "protagonist_arc_state": {
+        "belief": "(本 scene にレンは出ないが、外部状況として: 不正と決めつける氷室、矛盾する灯里の願い)",
+        "goal": "(scene 単位なし、cross-cut で外部圧力を読者に提示)",
+        "emotion": "tension",
+        "delta_from_prev": "レンは並行で準備、観衆と監視は集まる"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_氷室_玲二_v1", "char_白瀬_灯里_v1"], "direction": "tense", "intensity": -1, "trigger": "氷室の不正断定と灯里の矛盾した願い、モニター席で温度差" }
+      ],
+      "time_axis": { "label": "九日目夕方、DPC 本部 モニター管制室", "order": 4, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "location_id": "loc_dpc_monitor_room_v1",
+      "page_budget": { "min": 4, "max": 4, "preferred": 4 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "氷室のメディア宣言と、モニター席で小さく漏らす灯里の祈り"
+    },
+    {
+      "scene_id": "S05",
+      "scene_no": 5,
+      "prev_scene_id": "S04",
+      "next_scene_id": "S06",
+      "page_range": { "start": 14, "end": 17 },
+      "panel_range": { "start_panel_no": 66, "end_panel_no": 85 },
+      "arc_position": { "volume": 1, "episode_in_volume": 9, "arc_phase": "climax", "arc_position_normalized": 0.92 },
+      "beat_type": "setup",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_獅童_響_v1", "presence": "voice_off" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_桐生_レン_v1", "text": "月高度、地下水位、心拍。三つを重ねる。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_three_hidden_rules_hypothesis", "payoff_episode_hint": "next_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "ナビが渡さない最後の一手は、自分で仮説を立てる",
+        "goal": "番人の隠しルールを 3 つ仮説化、配信ログ・天気予報・地下水位公告・灯里撤退時刻を突き合わせる",
+        "emotion": "determination",
+        "delta_from_prev": "実務準備から、戦術解析の最深部へ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "九日目夜、自室で作戦整理", "order": 5, "is_flashback": false, "is_flashforward": false, "duration_hint": "hours" },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": { "min": 4, "max": 4, "preferred": 4 },
+      "mode": "introspection",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "壁に貼ったメモと配信ログのスクリーンショット、月高度と水位のグラフが重なる"
+    },
+    {
+      "scene_id": "S06",
+      "scene_no": 6,
+      "prev_scene_id": "S05",
+      "next_scene_id": "S07",
+      "page_range": { "start": 18, "end": 19 },
+      "panel_range": { "start_panel_no": 86, "end_panel_no": 95 },
+      "arc_position": { "volume": 1, "episode_in_volume": 9, "arc_phase": "climax", "arc_position_normalized": 0.96 },
+      "beat_type": "turn",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_獅童_響_v1", "presence": "voice_off" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_獅童_響_v1", "text": "今日の最適解、一手だけ、私の規約違反になります。踏むかどうかは、あなたが選んでください。", "uniqueness": "scene_exclusive", "intent": "reveal" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_navi_offers_rule_violation_choice", "payoff_episode_hint": "next_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "ナビに代償を払わせる選択肢が今、自分に渡された",
+        "goal": "規約違反を踏むかどうかの決断",
+        "emotion": "tension",
+        "delta_from_prev": "戦術整理から、ナビ自身に責任を伴う最大の選択へ"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_桐生_レン_v1", "char_獅童_響_v1"], "direction": "closer", "intensity": 1, "trigger": "ナビが規約違反の選択権をレンに委ねる、対等な関係への一歩" }
+      ],
+      "time_axis": { "label": "九日目夜、入域ゲート前", "order": 6, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+      "page_budget": { "min": 2, "max": 2, "preferred": 2 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "ゲート前の入域端末と、ナビ青光が手の上で揺れるレン"
+    },
+    {
+      "scene_id": "S07",
+      "scene_no": 7,
+      "prev_scene_id": "S06",
+      "next_scene_id": null,
+      "page_range": { "start": 20, "end": 22 },
+      "panel_range": { "start_panel_no": 96, "end_panel_no": 110 },
+      "arc_position": { "volume": 1, "episode_in_volume": 9, "arc_phase": "climax", "arc_position_normalized": 1.0 },
+      "beat_type": "cliff",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_獅童_響_v1", "presence": "voice_off" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_桐生_レン_v1", "text": "言ってくれ。俺はもう、底辺の側にいない。", "uniqueness": "scene_exclusive", "intent": "cliff" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_ren_accepts_navi_violation_cost", "payoff_episode_hint": "next_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "ナビに代償を払わせる責任は俺が負う、底辺から逃げるためじゃなく戻らないために",
+        "goal": "20F へ入る",
+        "emotion": "determination",
+        "delta_from_prev": "決断の揺らぎから、責任を引き受ける覚悟へ"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_桐生_レン_v1", "char_獅童_響_v1"], "direction": "trust+", "intensity": 2, "trigger": "規約違反の選択をレンが自分の責任として引き受ける" }
+      ],
+      "time_axis": { "label": "九日目夜、20F ゲート開、配信開始", "order": 7, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "action",
+      "turn_anchor": { "at_panel_no": 110, "type": "cliff_turn" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "20F ゲートが開く、配信開始の赤ランプと青いナビ光が同じコマで重なる"
+    }
+  ],
+  "pull_link": {
+    "current_episode_cliff": "protagonist_resolve_monologue",
+    "next_opening_hook_hint": "次話冒頭は、20F に入ったレンが番人と対峙する。配信画面の数値が乱れ、灯里・玲二の視線が緊張を高める。",
+    "is_volume_end": false
+  }
+}

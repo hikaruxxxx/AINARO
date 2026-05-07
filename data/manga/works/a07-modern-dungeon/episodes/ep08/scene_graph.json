@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "episode_id": "a07-modern-dungeon-ep08",
+  "generated_at": "2026-05-07T06:00:00+09:00",
+  "source": {
+    "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep08/_brief.v2.md",
+    "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep08/shotlist.json",
+    "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
+  },
+  "_note": "Phase β B5-5 ep08 - 沈黙の声接触、玄蔵登場、お前の声は誰のものだ cliff",
+  "scenes": [
+    {
+      "scene_id": "S01",
+      "scene_no": 1,
+      "prev_scene_id": null,
+      "next_scene_id": "S02",
+      "page_range": { "start": 1, "end": 3 },
+      "panel_range": { "start_panel_no": 1, "end_panel_no": 15 },
+      "arc_position": { "volume": 1, "episode_in_volume": 8, "arc_phase": "introduce", "arc_position_normalized": 0.65 },
+      "beat_type": "introduce",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": { "key_lines": [] },
+      "foreshadow_setup": [{ "token": "F_silent_voice_contact", "payoff_episode_hint": "this_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "夜勤明けの自動ドアの外に、見覚えのない三人が立つ",
+        "goal": "脅威の正体を見極める",
+        "emotion": "tension",
+        "delta_from_prev": "ep07 末の 20F 行く決意から、想定外の外敵接触へ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "八日目深夜3時半、ローソン新宿西外観、自動ドアの外", "order": 1, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_lawson_exterior_night_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "introspection",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "白い店舗光の外側に並ぶ黒服三人のシルエット、レンの自動ドア越しの視線"
+    },
+    {
+      "scene_id": "S02",
+      "scene_no": 2,
+      "prev_scene_id": "S01",
+      "next_scene_id": "S03",
+      "page_range": { "start": 4, "end": 6 },
+      "panel_range": { "start_panel_no": 16, "end_panel_no": 30 },
+      "arc_position": { "volume": 1, "episode_in_volume": 8, "arc_phase": "rising", "arc_position_normalized": 0.70 },
+      "beat_type": "setup",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_桐生_レン_v1", "text": "最適解が来る前に、盤面だけは自分で数えろ。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "ナビが来る前に、自分の目で盤面を数えるしかない",
+        "goal": "靴底・利き手・逃走経路・防犯カメラを確認",
+        "emotion": "calm",
+        "delta_from_prev": "脅威の登場から、情報強者の冷静観察モードへ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "八日目深夜、自動ドアの内側で観察", "order": 2, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_lawson_exterior_night_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "introspection",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "黒服の靴底と利き手、逃走経路の街灯密度を視線でなぞるレン"
+    },
+    {
+      "scene_id": "S03",
+      "scene_no": 3,
+      "prev_scene_id": "S02",
+      "next_scene_id": "S04",
+      "page_range": { "start": 7, "end": 9 },
+      "panel_range": { "start_panel_no": 31, "end_panel_no": 45 },
+      "arc_position": { "volume": 1, "episode_in_volume": 8, "arc_phase": "rising", "arc_position_normalized": 0.75 },
+      "beat_type": "reveal",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_獅童_響_v1", "presence": "voice_off" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_獅童_響_v1", "text": "彼らに対しては、開示権限がありません。", "uniqueness": "scene_exclusive", "intent": "reveal" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_navi_no_disclosure_for_silent_voice", "payoff_episode_hint": "later_in_volume" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "頼っていた声が消える、Fランクの身体だけで対処するしかない",
+        "goal": "ナビ沈黙下で、自分の盤面読みだけで生き残る",
+        "emotion": "fear",
+        "delta_from_prev": "観察モードから、ナビ消失の怖さへ"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_桐生_レン_v1", "char_獅童_響_v1"], "direction": "tense", "intensity": -2, "trigger": "ナビが開示権限なしと答え、以後沈黙、レンの恐怖が増す" }
+      ],
+      "time_axis": { "label": "八日目深夜、ナビへ心中で助けを求める瞬間", "order": 3, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_lawson_exterior_night_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "silence",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "白い沈黙コマの連続、空白の吹き出し、ヒビ入りスマホの青光が消える"
+    },
+    {
+      "scene_id": "S04",
+      "scene_no": 4,
+      "prev_scene_id": "S03",
+      "next_scene_id": "S05",
+      "page_range": { "start": 10, "end": 13 },
+      "panel_range": { "start_panel_no": 46, "end_panel_no": 65 },
+      "arc_position": { "volume": 1, "episode_in_volume": 8, "arc_phase": "rising", "arc_position_normalized": 0.82 },
+      "beat_type": "setup",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_桐生_レン_v1", "text": "所属、代表者、法的根拠を確認させてください。", "uniqueness": "scene_exclusive", "intent": "establish" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_silent_voice_cult_origin", "payoff_episode_hint": "later_in_volume" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "宗教的論理は通じない、コンビニ接客の口調で時間を稼ぐ",
+        "goal": "店内へ戻るタイミングを探る",
+        "emotion": "tension",
+        "delta_from_prev": "ナビ沈黙下で、生活の口調だけが残った武器"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "八日目深夜、黒服との対峙、論理交渉が通じない", "order": 4, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "location_id": "loc_lawson_exterior_night_v1",
+      "page_budget": { "min": 4, "max": 4, "preferred": 4 },
+      "mode": "dialogue",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "コンビニ接客の口調で答えるレンと、宗教的言葉を返す黒服"
+    },
+    {
+      "scene_id": "S05",
+      "scene_no": 5,
+      "prev_scene_id": "S04",
+      "next_scene_id": "S06",
+      "page_range": { "start": 14, "end": 16 },
+      "panel_range": { "start_panel_no": 66, "end_panel_no": 80 },
+      "arc_position": { "volume": 1, "episode_in_volume": 8, "arc_phase": "climax", "arc_position_normalized": 0.88 },
+      "beat_type": "reveal",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": { "key_lines": [] },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "ナイフが抜かれた、Fランクの身体ではここまで",
+        "goal": "袖を掠められても店内へ逃れる",
+        "emotion": "fear",
+        "delta_from_prev": "口調の時間稼ぎから、物理的な強制連行の局面へ"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "八日目深夜、黒服のリーダーがナイフを抜く瞬間", "order": 5, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_lawson_exterior_night_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "action",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "黒服のリーダーのナイフ、レンの黒フードが掠められる軌道"
+    },
+    {
+      "scene_id": "S06",
+      "scene_no": 6,
+      "prev_scene_id": "S05",
+      "next_scene_id": "S07",
+      "page_range": { "start": 17, "end": 19 },
+      "panel_range": { "start_panel_no": 81, "end_panel_no": 95 },
+      "arc_position": { "volume": 1, "episode_in_volume": 8, "arc_phase": "climax", "arc_position_normalized": 0.94 },
+      "beat_type": "turn",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_獅童_玄蔵_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": { "key_lines": [] },
+      "foreshadow_setup": [{ "token": "F_genzo_master_appears", "payoff_episode_hint": "later_in_volume" }],
+      "foreshadow_payoff": ["F_silent_voice_contact"],
+      "protagonist_arc_state": {
+        "belief": "20 年前の世界初 Sランク鑑定者・獅童玄蔵が現れた、何者だ",
+        "goal": "玄蔵の意図を読み、信頼できるか判断",
+        "emotion": "calm",
+        "delta_from_prev": "ナイフの恐怖から、想定外の救援への混乱と安堵"
+      },
+      "relationship_state_delta": [
+        { "pair": ["char_桐生_レン_v1", "char_獅童_玄蔵_v1"], "direction": "trust+", "intensity": 1, "trigger": "黒服三人を一瞬で制圧、レンを助けた行動" }
+      ],
+      "time_axis": { "label": "八日目深夜、玄蔵が杖と手首だけで黒服を制圧", "order": 6, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_lawson_exterior_night_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "action",
+      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "杖を突く老人の影が黒服三人の間合いに踏み込み、手首一閃で制圧"
+    },
+    {
+      "scene_id": "S07",
+      "scene_no": 7,
+      "prev_scene_id": "S06",
+      "next_scene_id": null,
+      "page_range": { "start": 20, "end": 22 },
+      "panel_range": { "start_panel_no": 96, "end_panel_no": 110 },
+      "arc_position": { "volume": 1, "episode_in_volume": 8, "arc_phase": "climax", "arc_position_normalized": 1.0 },
+      "beat_type": "cliff",
+      "cast": [
+        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
+        { "character_id": "char_獅童_玄蔵_v1", "presence": "in_person" }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          { "speaker": "char_獅童_玄蔵_v1", "text": "若いの、お前の声は誰のものだ。", "uniqueness": "scene_exclusive", "intent": "cliff" }
+        ]
+      },
+      "foreshadow_setup": [{ "token": "F_navi_true_owner_question", "payoff_episode_hint": "next_episode" }],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "ナビという呼び名が本名ではないかもしれない、自分は誰の声に頼っていた?",
+        "goal": "玄蔵の問いに答えられない自分を直視",
+        "emotion": "despair",
+        "delta_from_prev": "玄蔵への安堵から、声の所有権という根本問題へ引き戻される"
+      },
+      "relationship_state_delta": [],
+      "time_axis": { "label": "八日目深夜、玄蔵の問いに答えられないレン", "order": 7, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "location_id": "loc_lawson_exterior_night_v1",
+      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "mode": "silence",
+      "turn_anchor": { "at_panel_no": 110, "type": "cliff_turn" },
+      "layout_pattern_id": null,
+      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "レンの背後に空白で置かれた青い少女の輪郭、玄蔵の杖と冷たい眼差し"
+    }
+  ],
+  "pull_link": {
+    "current_episode_cliff": "ability_or_identity_glimpse",
+    "next_opening_hook_hint": "次話冒頭は、ナビの正体を問われたレンが自室で考え込む。20F 挑戦の準備と並行して、ナビとの関係を自分で再定義する。",
+    "is_volume_end": false
+  }
+}
