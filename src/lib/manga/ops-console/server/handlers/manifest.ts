@@ -14,6 +14,7 @@ import {
   storyboardPath,
   pagePlanPath,
   auditPath,
+  engagementAuditPath,
   renderManifestPath,
   revisionQueuePath,
   adoptedVersionsPath,
@@ -23,6 +24,7 @@ import { readJsonl } from "../../../revision-ui/manifest";
 import {
   emptyAdoptedVersions,
   type AdoptedVersions,
+  type EngagementAudit,
   type RenderManifestEntry,
   type RevisionEntry,
 } from "../../../revision-ui/types";
@@ -73,16 +75,25 @@ export async function handleManifest(
   episode: number,
   res: http.ServerResponse
 ): Promise<void> {
-  const [bible, storyboard, pagePlan, audit, renderManifest, revisionQueueRaw, resolvedMap] =
-    await Promise.all([
-      loadJsonOpt<BibleSnapshotV2>(bibleSnapshotPath(slug)),
-      loadJsonOpt<EpisodeStoryboardV2>(storyboardPath(slug, episode)),
-      loadJsonOpt<PagePlanV2>(pagePlanPath(slug, episode)),
-      loadJsonOpt<AuditReport>(auditPath(slug, episode)),
-      readJsonl<RenderManifestEntry>(renderManifestPath(slug, episode)),
-      readJsonl<RevisionEntry>(revisionQueuePath(slug, episode)),
-      loadRevisionResolvedMap(slug, episode),
-    ]);
+  const [
+    bible,
+    storyboard,
+    pagePlan,
+    audit,
+    engagementAudit,
+    renderManifest,
+    revisionQueueRaw,
+    resolvedMap,
+  ] = await Promise.all([
+    loadJsonOpt<BibleSnapshotV2>(bibleSnapshotPath(slug)),
+    loadJsonOpt<EpisodeStoryboardV2>(storyboardPath(slug, episode)),
+    loadJsonOpt<PagePlanV2>(pagePlanPath(slug, episode)),
+    loadJsonOpt<AuditReport>(auditPath(slug, episode)),
+    loadJsonOpt<EngagementAudit>(engagementAuditPath(slug, episode)),
+    readJsonl<RenderManifestEntry>(renderManifestPath(slug, episode)),
+    readJsonl<RevisionEntry>(revisionQueuePath(slug, episode)),
+    loadRevisionResolvedMap(slug, episode),
+  ]);
   if (!storyboard || !pagePlan) {
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "storyboard or page_plan missing" }));
@@ -105,6 +116,7 @@ export async function handleManifest(
       page_plan: pagePlan,
       storyboard,
       audit,
+      engagement_audit: engagementAudit,
       render_manifest: renderManifest,
       revision_queue: revisionQueue,
       adopted,

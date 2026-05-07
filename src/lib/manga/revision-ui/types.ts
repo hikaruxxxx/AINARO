@@ -116,6 +116,32 @@ export function emptyAdoptedVersions(slug: string, episode: number, episodeId: s
   };
 }
 
+/**
+ * Engagement Audit (Phase Y WY-11): 退屈ページ・離脱リスクの監査結果。
+ * Console revision view が page_no と突き合わせて badge / 警告色に使う。
+ */
+export type EngagementAuditPageScore = {
+  page_no: number;
+  page_role?: string;
+  drop_off_risk: number;
+  boring_flagged: boolean;
+  boring_reason?: string;
+  protagonist_likability?: number;
+  comment?: string;
+};
+
+export type EngagementAudit = {
+  schema_version: number;
+  generated_at?: string;
+  slug?: string;
+  episode_id?: string;
+  total_pages?: number;
+  overall_drop_off_risk?: number;
+  boring_pages?: number[];
+  worst_page?: { page_no: number; drop_off_risk: number; reason: string } | null;
+  per_page_scores: EngagementAuditPageScore[];
+};
+
 export const REVISION_TAGS: ReadonlyArray<RevisionTag> = [
   "face",
   "composition",

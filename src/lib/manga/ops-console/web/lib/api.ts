@@ -5,6 +5,7 @@ import type {
 } from "../../../name-preview/types";
 import type {
   AdoptedVersions,
+  EngagementAudit,
   RenderManifestEntry,
   RevisionEntry,
   RevisionTag,
@@ -41,6 +42,7 @@ export type Manifest = {
   page_plan: PagePlanV2;
   storyboard: EpisodeStoryboardV2;
   audit: AuditReport | null;
+  engagement_audit?: EngagementAudit | null;
   render_manifest: RenderManifestEntry[];
   revision_queue: RevisionEntry[];
   adopted: AdoptedVersions;
@@ -52,6 +54,8 @@ export type NameApproval = SourceNameApproval;
 export type {
   AdoptedPanelChoice,
   AdoptedVersions,
+  EngagementAudit,
+  EngagementAuditPageScore,
   RenderManifestEntry,
   RevisionEntry,
   RevisionTag,

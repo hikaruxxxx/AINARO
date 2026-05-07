@@ -129,6 +129,11 @@ export function auditPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "audit.json");
 }
 
+/** Phase Y WY-11: 退屈ページ・ドロップオフリスク監査 */
+export function engagementAuditPath(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "engagement_audit.json");
+}
+
 export function repairLogPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "repair_log.json");
 }
