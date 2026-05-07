@@ -47,13 +47,5 @@ export function detectEffectLines(panel: PanelV2): EffectLineSpec | null {
     };
   }
 
-  if (
-    panel.importance >= 4 &&
-    (panel.shot_type === "medium" || panel.shot_type === "wide") &&
-    (panel.camera === "low_angle" || panel.camera === "high_angle" || panel.camera === "birds_eye")
-  ) {
-    return { type: "speed", intensity: "normal", direction: 0 };
-  }
-
   return null;
 }

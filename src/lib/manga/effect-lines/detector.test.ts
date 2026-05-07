@@ -101,23 +101,7 @@ describe("detectEffectLines", () => {
     }))).toBeNull();
   });
 
-  it("rule 5: 見せゴマ条件は speed normal", () => {
-    expect(detectEffectLines(panel({
-      importance: 4,
-      shot_type: "wide",
-      camera: "low_angle",
-    }))).toEqual({ type: "speed", intensity: "normal", direction: 0 });
-  });
-
-  it("rule 5 miss: camera が eye_level の場合は null", () => {
-    expect(detectEffectLines(panel({
-      importance: 4,
-      shot_type: "wide",
-      camera: "eye_level",
-    }))).toBeNull();
-  });
-
-  it("rule 6: どの条件にも当たらない panel は null", () => {
+  it("どの条件にも当たらない panel は null", () => {
     expect(detectEffectLines(panel())).toBeNull();
   });
 });
