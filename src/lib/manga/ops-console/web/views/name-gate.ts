@@ -48,7 +48,11 @@ const NAME_GATE_CSS = `
 .name-gate-toolbar h2 { margin: 0; font-size: 18px; letter-spacing: 0; }
 .name-gate-toolbar .info { color: #64748b; font-size: 13px; }
 .name-gate-toolbar .summary { margin-left: auto; color: #334155; font-size: 13px; }
-.ng-kpi { color: var(--text-secondary); font-size: var(--fs-sm); margin-left: auto; }
+.ng-kpis { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.ng-kpi { display: inline-flex; align-items: center; min-height: 24px; padding: 0 9px; border-radius: 999px; font-size: var(--fs-sm); font-weight: 700; }
+.ng-kpi--pending { background: #fef3c7; color: #92400e; }
+.ng-kpi--approved { background: #d1fae5; color: #065f46; }
+.ng-kpi--rejected { background: #fee2e2; color: #991b1b; }
 .name-gate-toolbar strong { font-weight: 700; }
 .name-gate-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px; }
 .name-gate-container .page-card {
@@ -60,6 +64,7 @@ const NAME_GATE_CSS = `
   transition: border-color .12s, box-shadow .12s;
 }
 .name-gate-container .page-card:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.18); }
+.name-gate-container .page-card.ng-page--focused { outline: 2px solid var(--color-primary); outline-offset: 3px; }
 .name-gate-container .page-card.approved { border-color: #16a34a; }
 .name-gate-container .page-card.rejected { border-color: #dc2626; }
 .name-gate-container .page-card header {
@@ -95,6 +100,7 @@ const NAME_GATE_CSS = `
 .name-gate-container .warnings .sev-info { color: #6b7280; }
 .name-gate-container .reasons { display: flex; flex-wrap: wrap; gap: 8px 12px; padding: 6px 0; font-size: 12px; }
 .name-gate-container .reasons label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.name-gate-container .page-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0 0; }
 .name-gate-container textarea.note {
   width: 100%;
   min-height: 36px;
@@ -107,6 +113,18 @@ const NAME_GATE_CSS = `
 }
 .name-gate-help { color: #64748b; font-size: 12px; line-height: 1.6; }
 .name-gate-help code { background: #eef2f6; padding: 1px 5px; border-radius: 3px; font-family: ui-monospace, monospace; }
+.ng-modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 18px; background: rgba(15, 23, 42, .38); }
+.ng-modal { width: min(520px, 100%); display: grid; gap: 12px; padding: 16px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-elevated); box-shadow: var(--shadow-3); }
+.ng-modal h3 { margin: 0; font-size: 18px; }
+.ng-modal .reasons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ng-modal .reasons label { display: flex; align-items: center; gap: 6px; padding: 8px; border: 1px solid var(--border-subtle); border-radius: 6px; cursor: pointer; }
+.ng-modal textarea { width: 100%; min-height: 72px; padding: 8px; border: 1px solid var(--border-default); border-radius: 6px; font-family: inherit; }
+.ng-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.ng-help-panel { position: fixed; right: 18px; top: 76px; z-index: 31; width: min(360px, calc(100vw - 36px)); padding: 14px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-elevated); box-shadow: var(--shadow-2); }
+.ng-help-panel h3 { margin: 0 0 8px; font-size: 16px; }
+.ng-help-panel dl { margin: 0; display: grid; grid-template-columns: 76px 1fr; gap: 6px 10px; font-size: 13px; }
+.ng-help-panel dt { font-family: ui-monospace, monospace; font-weight: 700; color: var(--text-primary); }
+.ng-help-panel dd { margin: 0; color: var(--text-secondary); }
 `;
 
 function ensureStyles(): void {
@@ -185,6 +203,11 @@ function renderPageCards(manifest: NameManifest, episode: number): string {
   <div class="warnings">${warningHtml(page.warnings ?? [], page.audit_findings ?? [])}</div>
   <div class="reasons" data-page-reasons="${page.page_no}">${reasons}</div>
   <textarea class="note" placeholder="(任意) note" data-page-note="${page.page_no}"></textarea>
+  <div class="page-actions">
+    <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-status="approved" data-page="${page.page_no}">承認</button>
+    <button type="button" class="nc-button nc-button--danger nc-button--sm" data-ng-status="rejected" data-page="${page.page_no}">却下</button>
+    <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-status="pending" data-page="${page.page_no}">未判定</button>
+  </div>
 </article>`;
     })
     .join("");
@@ -205,7 +228,11 @@ function renderShell(
       <div class="name-gate-toolbar">
         <h2>ネーム gate</h2>
         <span class="info">${escapeHtml(slug)} / ${epLabel(episode)} (${escapeHtml(manifest.episode_id)})</span>
-        <span class="summary ng-kpi">pending <strong id="ng-cnt-pending">${manifest.pages.length}</strong> / approved <strong id="ng-cnt-approved">0</strong> / rejected <strong id="ng-cnt-rejected">0</strong> / total <strong id="ng-cnt-total">${manifest.pages.length}</strong></span>
+        <span class="ng-kpis" aria-label="name gate KPI">
+          <span class="ng-kpi ng-kpi--pending">未判定 <strong id="ng-cnt-pending">${manifest.pages.length}</strong></span>
+          <span class="ng-kpi ng-kpi--approved">承認 <strong id="ng-cnt-approved">0</strong></span>
+          <span class="ng-kpi ng-kpi--rejected">却下 <strong id="ng-cnt-rejected">0</strong></span>
+        </span>
         <select class="nc-field__select" data-ng-ai-layer aria-label="AI 編集対象 layer" style="margin-left: 12px;">
           <option value="L08.5" selected>L08.5 Name Preview</option>
           <option value="L08.6">L08.6 Name Audit</option>
@@ -218,6 +245,7 @@ function renderShell(
         <code>↑/k</code> 前ページ <code>↓/j</code> 次ページ <code>1..6</code> reject 理由
       </div>
       <div class="name-gate-grid" id="ng-grid">${renderPageCards(manifest, episode)}</div>
+      <div id="ng-overlay-root"></div>
     </div>
   `;
 }
@@ -280,13 +308,100 @@ function readNote(container: HTMLElement, pageNo: number): string {
   return container.querySelector<HTMLTextAreaElement>(`[data-page-note="${pageNo}"]`)?.value ?? "";
 }
 
+function overlayRoot(container: HTMLElement): HTMLElement | null {
+  return container.querySelector<HTMLElement>("#ng-overlay-root");
+}
+
+function renderHelp(container: HTMLElement, open: boolean): void {
+  const root = overlayRoot(container);
+  if (!root) return;
+  root.querySelector("[data-ng-help]")?.remove();
+  if (!open) return;
+  root.insertAdjacentHTML(
+    "beforeend",
+    `<aside class="ng-help-panel" data-ng-help>
+      <h3>キー操作</h3>
+      <dl>
+        <dt>a</dt><dd>承認</dd>
+        <dt>r</dt><dd>却下 (理由を選ぶ)</dd>
+        <dt>p</dt><dd>未判定に戻す</dd>
+        <dt>j / k</dt><dd>次 / 前のページ</dd>
+        <dt>Enter</dt><dd>次の未判定ページへ</dd>
+        <dt>?</dt><dd>このヘルプ</dd>
+      </dl>
+    </aside>`
+  );
+}
+
+function renderRejectModal(
+  container: HTMLElement,
+  pageNo: number,
+  reasons: NameRejectReason[],
+  note: string
+): void {
+  const root = overlayRoot(container);
+  if (!root) return;
+  root.querySelector("[data-ng-reject-modal]")?.remove();
+  const reasonHtml = REASONS.map((reason, index) => {
+    const checked = reasons.includes(reason.key) ? " checked" : "";
+    const label = reason.label.replace(/^\[\d+\]\s*/, "");
+    return `<label><input type="checkbox" data-ng-modal-reason="${reason.key}"${checked}> ${index + 1}. ${escapeHtml(label)}</label>`;
+  }).join("");
+  root.insertAdjacentHTML(
+    "beforeend",
+    `<div class="ng-modal-backdrop" data-ng-reject-modal>
+      <div class="ng-modal" role="dialog" aria-modal="true" aria-labelledby="ng-reject-title">
+        <h3 id="ng-reject-title">却下理由 - P.${pageNo}</h3>
+        <div class="reasons">${reasonHtml}</div>
+        <textarea data-ng-modal-note placeholder="(任意) note">${escapeHtml(note)}</textarea>
+        <div class="ng-modal-actions">
+          <button type="button" class="nc-button nc-button--ghost" data-ng-modal-cancel>Esc 閉じる</button>
+          <button type="button" class="nc-button nc-button--danger" data-ng-modal-confirm>Enter 確定</button>
+        </div>
+      </div>
+    </div>`
+  );
+}
+
+function closeRejectModal(container: HTMLElement): void {
+  overlayRoot(container)?.querySelector("[data-ng-reject-modal]")?.remove();
+}
+
+function modalReasons(container: HTMLElement): NameRejectReason[] {
+  return Array.from(container.querySelectorAll<HTMLInputElement>("[data-ng-modal-reason]:checked"))
+    .map((input) => input.dataset.ngModalReason)
+    .filter(isRejectReason);
+}
+
+function modalNote(container: HTMLElement): string {
+  return container.querySelector<HTMLTextAreaElement>("[data-ng-modal-note]")?.value ?? "";
+}
+
 function setFocus(cards: HTMLElement[], pageNo: number): number {
+  cards.forEach((card) => card.classList.toggle("ng-page--focused", Number(card.dataset.pageNo) === pageNo));
   const index = cards.findIndex((card) => Number(card.dataset.pageNo) === pageNo);
   if (index < 0) return pageNo;
   const card = cards[index];
   card.focus({ preventScroll: false });
   card.scrollIntoView({ behavior: "smooth", block: "center" });
   return pageNo;
+}
+
+function firstPendingOrFirst(manifest: NameManifest, decisions: Map<number, DecisionDraft>): number {
+  return manifest.pages.find((page) => decisions.get(page.page_no)?.status === "pending")?.page_no
+    ?? manifest.pages[0]?.page_no
+    ?? 1;
+}
+
+function nextPendingPage(cards: HTMLElement[], currentPageNo: number, decisions: Map<number, DecisionDraft>): number {
+  const pageNos = cards.map((card) => Number(card.dataset.pageNo)).filter((pageNo) => Number.isInteger(pageNo));
+  const currentIndex = pageNos.indexOf(currentPageNo);
+  if (currentIndex < 0) return currentPageNo;
+  for (let offset = 1; offset < pageNos.length; offset++) {
+    const pageNo = pageNos[(currentIndex + offset) % pageNos.length];
+    if (decisions.get(pageNo)?.status === "pending") return pageNo;
+  }
+  return currentPageNo;
 }
 
 function adjacentPage(cards: HTMLElement[], currentPageNo: number, delta: number): number {
@@ -406,15 +521,79 @@ async function loadNameGate(
     for (const page of manifest.pages) decisions.set(page.page_no, emptyDecision());
     const cards = Array.from(container.querySelectorAll<HTMLElement>("article.page-card"));
     let focusedPageNo = cards[0] ? Number(cards[0].dataset.pageNo) : 1;
+    let helpOpen = false;
+    let rejectPageNo: number | null = null;
 
     applyApproval(container, decisions, approval.pages ?? {});
     refreshSummary(container, decisions);
+
+    const focusPage = (pageNo: number): void => {
+      focusedPageNo = setFocus(cards, pageNo);
+    };
+
+    const advanceToNextPending = (): void => {
+      const next = nextPendingPage(cards, focusedPageNo, decisions);
+      if (next !== focusedPageNo) focusPage(next);
+    };
+
+    const persistAndAdvance = (pageNo: number): void => {
+      const decision = decisions.get(pageNo);
+      if (!decision) return;
+      refreshCard(container, pageNo, decision);
+      refreshSummary(container, decisions);
+      void persistDecision(container, slug, episode, pageNo, decisions);
+      advanceToNextPending();
+    };
+
+    const setStatus = (pageNo: number, status: NamePageStatus): void => {
+      const decision = decisions.get(pageNo);
+      if (!decision) return;
+      decision.status = status;
+      if (status !== "rejected") decision.reasons = [];
+      decision.persistFailed = false;
+      applyDecisionToInputs(container, pageNo, decision);
+      persistAndAdvance(pageNo);
+    };
+
+    const openRejectModal = (pageNo: number): void => {
+      const decision = decisions.get(pageNo);
+      if (!decision) return;
+      rejectPageNo = pageNo;
+      focusPage(pageNo);
+      renderRejectModal(container, pageNo, decision.reasons, decision.note);
+    };
+
+    const confirmRejectModal = (): void => {
+      if (rejectPageNo === null) return;
+      const pageNo = rejectPageNo;
+      const decision = decisions.get(pageNo);
+      if (!decision) return;
+      decision.status = "rejected";
+      decision.reasons = modalReasons(container);
+      decision.note = modalNote(container);
+      decision.persistFailed = false;
+      applyDecisionToInputs(container, pageNo, decision);
+      closeRejectModal(container);
+      rejectPageNo = null;
+      persistAndAdvance(pageNo);
+    };
+
+    const cancelRejectModal = (): void => {
+      closeRejectModal(container);
+      rejectPageNo = null;
+    };
+
+    const toggleHelp = (): void => {
+      helpOpen = !helpOpen;
+      renderHelp(container, helpOpen);
+    };
 
     cards.forEach((card) => {
       card.addEventListener(
         "focus",
         () => {
           focusedPageNo = Number(card.dataset.pageNo);
+          cards.forEach((row) => row.classList.toggle("ng-page--focused", row === card));
         },
         { signal }
       );
@@ -458,69 +637,96 @@ async function loadNameGate(
       (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
-        if (!target.closest("[data-ng-ai-edit]")) return;
-        const select = container.querySelector<HTMLSelectElement>("[data-ng-ai-layer]");
-        const layer = select?.value || "L08.5";
-        navigateToAiEdit(layer, { slug, episode });
+        const modalReason = target.closest<HTMLInputElement>("[data-ng-modal-reason]");
+        if (modalReason) return;
+        if (target.closest("[data-ng-modal-confirm]")) {
+          confirmRejectModal();
+          return;
+        }
+        if (target.closest("[data-ng-modal-cancel]")) {
+          cancelRejectModal();
+          return;
+        }
+        const statusButton = target.closest<HTMLButtonElement>("[data-ng-status]");
+        if (statusButton) {
+          const pageNo = Number(statusButton.dataset.page);
+          const status = statusButton.dataset.ngStatus as NamePageStatus | undefined;
+          if (!Number.isInteger(pageNo) || !status) return;
+          if (status === "rejected") openRejectModal(pageNo);
+          else setStatus(pageNo, status);
+          return;
+        }
+        if (target.closest("[data-ng-ai-edit]")) {
+          const select = container.querySelector<HTMLSelectElement>("[data-ng-ai-layer]");
+          const layer = select?.value || "L08.5";
+          navigateToAiEdit(layer, { slug, episode });
+        }
       },
       { signal }
     );
 
-    container.addEventListener(
+    document.addEventListener(
       "keydown",
       (event) => {
+        if (rejectPageNo !== null) {
+          if (/^[1-6]$/.test(event.key)) {
+            const input = container.querySelectorAll<HTMLInputElement>("[data-ng-modal-reason]")[Number(event.key) - 1];
+            if (input) input.checked = !input.checked;
+            event.preventDefault();
+            return;
+          }
+          if (event.key === "Enter") {
+            confirmRejectModal();
+            event.preventDefault();
+            return;
+          }
+          if (event.key === "Escape") {
+            cancelRejectModal();
+            event.preventDefault();
+            return;
+          }
+          return;
+        }
+        if (event.key === "?") {
+          toggleHelp();
+          event.preventDefault();
+          return;
+        }
         if (isEditableTarget(event.target)) return;
         if (!decisions.has(focusedPageNo)) return;
-        const decision = decisions.get(focusedPageNo);
-        if (!decision) return;
 
         if (event.key === "a" || event.key === "A") {
-          decision.status = "approved";
-          void persistDecision(container, slug, episode, focusedPageNo, decisions);
+          setStatus(focusedPageNo, "approved");
           event.preventDefault();
         } else if (event.key === "r" || event.key === "R") {
-          decision.status = "rejected";
-          void persistDecision(container, slug, episode, focusedPageNo, decisions);
+          openRejectModal(focusedPageNo);
           event.preventDefault();
         } else if (event.key === "p" || event.key === "P") {
-          decision.status = "pending";
-          void persistDecision(container, slug, episode, focusedPageNo, decisions);
+          setStatus(focusedPageNo, "pending");
           event.preventDefault();
         } else if (event.key === "ArrowDown" || event.key === "j") {
-          focusedPageNo = setFocus(cards, adjacentPage(cards, focusedPageNo, 1));
+          focusPage(adjacentPage(cards, focusedPageNo, 1));
           event.preventDefault();
-          // focus 移動だけなので、共通経路の refreshCard は走らせない。
-          // (旧実装は decision = old focusedPageNo の値を新ページに描画する bug があった)
           return;
         } else if (event.key === "ArrowUp" || event.key === "k") {
-          focusedPageNo = setFocus(cards, adjacentPage(cards, focusedPageNo, -1));
+          focusPage(adjacentPage(cards, focusedPageNo, -1));
           event.preventDefault();
           return;
-        } else if (/^[1-6]$/.test(event.key)) {
-          const index = Number(event.key) - 1;
-          const input = container.querySelectorAll<HTMLInputElement>(
-            `[data-page-reasons="${focusedPageNo}"] input`
-          )[index];
-          if (input) {
-            input.checked = !input.checked;
-            input.dispatchEvent(new Event("change", { bubbles: true }));
-          }
+        } else if (event.key === "Enter") {
+          advanceToNextPending();
           event.preventDefault();
-          // checkbox の change handler 側で refreshCard/refreshSummary が走るので共通経路は skip。
           return;
         } else {
           return;
         }
-
-        refreshCard(container, focusedPageNo, decision);
-        refreshSummary(container, decisions);
       },
       { signal }
     );
 
+    focusedPageNo = firstPendingOrFirst(manifest, decisions);
     if (cards[0]) {
       requestAnimationFrame(() => {
-        if (!signal.aborted) cards[0].focus();
+        if (!signal.aborted) focusPage(focusedPageNo);
       });
     }
   } catch (e) {
