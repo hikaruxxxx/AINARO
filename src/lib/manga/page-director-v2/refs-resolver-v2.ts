@@ -240,10 +240,15 @@ function buildPanelPacket(args: {
     // focus キャラのみ強い ref
     const focusChar = visibleChars.find((c) => c.character_id === focus);
     if (focusChar) {
+      const hasFocusExpression = !!focusChar.expression && focusChar.expression !== "";
       const variants = isCloseUp
-        ? ["face_front", "face_diagonal"]
+        ? hasFocusExpression
+          ? [`expr_${focusChar.expression}`, "face_front", "face_diagonal"]
+          : ["face_front", "face_diagonal"]
         : isMedium
-        ? ["full_front", "face_front"]
+        ? hasFocusExpression
+          ? ["full_front", `expr_${focusChar.expression}`, "face_front"]
+          : ["full_front", "face_front"]
         : ["full_front"];
       const f = findVariantPrefer(lookup, focusChar.character_id, variants);
       if (f && !refs.some((r) => r.asset_id === f.asset_id)) {
@@ -254,7 +259,9 @@ function buildPanelPacket(args: {
           role: isCloseUp ? "character_face" : "character_full",
           target_entity_id: focusChar.character_id,
           source: "deterministic",
-          rationale: `RULE 9: multi-char (n=${numCharacters}) focus=${focus}`,
+          rationale: hasFocusExpression
+            ? `RULE 9+expr: multi-char (n=${numCharacters}) focus=${focus} (expression=${focusChar.expression})`
+            : `RULE 9: multi-char (n=${numCharacters}) focus=${focus}`,
         });
       }
     }
@@ -297,12 +304,19 @@ function buildPanelPacket(args: {
       }
       // close_up
       if (isCloseUp) {
-        const f = findVariantPrefer(lookup, ch.character_id, ["face_front", "face_diagonal"]);
+        // 2026-05-07 追加: expression が指定されていれば expr_{expression}.png を最優先
+        const exprVariants: string[] = ch.expression && ch.expression !== ""
+          ? [`expr_${ch.expression}`, "face_front", "face_diagonal"]
+          : ["face_front", "face_diagonal"];
+        const f = findVariantPrefer(lookup, ch.character_id, exprVariants);
         if (f && !refs.some((r) => r.asset_id === f.asset_id)) {
           refs.push({
             asset_id: f.asset_id, path: f.path, weight: W(1.0),
             role: "character_face", target_entity_id: ch.character_id,
-            source: "deterministic", rationale: "RULE 2: close_up face",
+            source: "deterministic",
+            rationale: ch.expression && ch.expression !== ""
+              ? `RULE 2+expr: close_up face (expression=${ch.expression})`
+              : "RULE 2: close_up face",
           });
         }
         // diagonal を 0.5 で補強
@@ -323,21 +337,37 @@ function buildPanelPacket(args: {
             source: "deterministic", rationale: "RULE 3: medium full",
           });
         }
-        const face = findVariantPrefer(lookup, ch.character_id, ["face_front"]);
+        // face supplement (expression-aware)
+        const exprVariants: string[] = ch.expression && ch.expression !== ""
+          ? [`expr_${ch.expression}`, "face_front"]
+          : ["face_front"];
+        const face = findVariantPrefer(lookup, ch.character_id, exprVariants);
         if (face && !refs.some((r) => r.asset_id === face.asset_id)) {
           refs.push({
             asset_id: face.asset_id, path: face.path, weight: W(0.5),
             role: "character_face", target_entity_id: ch.character_id,
-            source: "deterministic", rationale: "RULE 3: medium face supplement",
+            source: "deterministic",
+            rationale: ch.expression && ch.expression !== ""
+              ? `RULE 3+expr: medium face (expression=${ch.expression})`
+              : "RULE 3: medium face supplement",
           });
         }
       } else if (isOverShoulder) {
-        const back = findVariantPrefer(lookup, ch.character_id, ["full_back", "full_front"]);
+        // 2026-05-07 追加: 表情指定がある肩越しカットでは表情 ref を優先
+        const exprVariants: string[] = ch.expression && ch.expression !== ""
+          ? [`expr_${ch.expression}`, "full_back", "full_front"]
+          : ["full_back", "full_front"];
+        const back = findVariantPrefer(lookup, ch.character_id, exprVariants);
         if (back && !refs.some((r) => r.asset_id === back.asset_id)) {
+          const isExpressionRef = back.variant.startsWith("expr_");
           refs.push({
             asset_id: back.asset_id, path: back.path, weight: W(0.5),
-            role: "character_back", target_entity_id: ch.character_id,
-            source: "deterministic", rationale: "RULE 5: over_shoulder",
+            role: isExpressionRef ? "character_face" : "character_back",
+            target_entity_id: ch.character_id,
+            source: "deterministic",
+            rationale: isExpressionRef
+              ? `RULE 5+expr: over_shoulder face (expression=${ch.expression})`
+              : "RULE 5: over_shoulder",
           });
         }
       } else if (isWide) {
