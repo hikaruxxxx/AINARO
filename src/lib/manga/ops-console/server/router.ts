@@ -24,6 +24,7 @@ import {
 import { handleNameManifest } from "./handlers/name-manifest";
 import { handleManifest } from "./handlers/manifest";
 import { handlePipelineStatus } from "./handlers/pipeline-status";
+import { handleDashboardNextActions } from "./handlers/dashboard";
 import { handleQualityOverview } from "./handlers/quality";
 import {
   handleGetAuditOverrides,
@@ -225,6 +226,11 @@ export async function handleApi(
   if (p === "/api/quality/overview") {
     if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
     return handleQualityOverview(res);
+  }
+
+  if (p === "/api/dashboard/next-actions") {
+    if (req.method === "GET") return handleDashboardNextActions(req, res, url);
+    return send(res, 405, { error: "method not allowed" });
   }
 
   if (p === "/api/ai-edit/diff") {
