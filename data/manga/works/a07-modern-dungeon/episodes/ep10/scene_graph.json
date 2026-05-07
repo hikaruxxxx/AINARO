@@ -48,7 +48,9 @@
           "payoff_episode_hint": "this_episode"
         }
       ],
-      "foreshadow_payoff": [],
+      "foreshadow_payoff": [
+        "F_ren_decides_20f_emotionally"
+      ],
       "protagonist_arc_state": {
         "belief": "20F、番人と対峙、配信画面の匿名 ID として歴史に立つ",
         "goal": "番人の輪郭と HUD の歪みを読む",
@@ -124,7 +126,10 @@
         ]
       },
       "foreshadow_setup": [],
-      "foreshadow_payoff": [],
+      "foreshadow_payoff": [
+        "F_three_hidden_rules_hypothesis",
+        "F_record_keeper_three_hidden_rules"
+      ],
       "protagonist_arc_state": {
         "belief": "前話の仮説と一致した、三つの隠しルールが俺の準備に重なる",
         "goal": "0.4 秒の致命判定窓を取りに行く",
@@ -285,7 +290,10 @@
           "payoff_episode_hint": "this_episode"
         }
       ],
-      "foreshadow_payoff": [],
+      "foreshadow_payoff": [
+        "F_helmet_visor_replacement",
+        "F_hyomuro_public_audit_declared"
+      ],
       "protagonist_arc_state": {
         "belief": "予定手順が崩れた、ナビ最適解の補正が外れかける",
         "goal": "番人の次の一撃を凌ぎ、致命窓まで耐える",
@@ -369,7 +377,10 @@
           "payoff_episode_hint": "this_episode"
         }
       ],
-      "foreshadow_payoff": [],
+      "foreshadow_payoff": [
+        "F_navi_offers_rule_violation_choice",
+        "F_ren_accepts_navi_violation_cost"
+      ],
       "protagonist_arc_state": {
         "belief": "ナビが規約違反の一手を渡した、声が一瞬少女のように揺れた、踏み込む",
         "goal": "致命窓で番人の急所へ鉄パイプを通す",
@@ -476,7 +487,8 @@
       ],
       "foreshadow_payoff": [
         "F_arena_record_keeper_appearance",
-        "F_akari_notices_left_half_step_rhythm"
+        "F_akari_notices_left_half_step_rhythm",
+        "F_record_keeper_unbeatable_for_akari"
       ],
       "protagonist_arc_state": {
         "belief": "F のまま S の天井を踏み抜いた、ナビの「ありがとう」と灯里の気づきが同時に走る",
@@ -572,7 +584,8 @@
         }
       ],
       "foreshadow_payoff": [
-        "F_navi_voice_shifts_to_girl"
+        "F_navi_voice_shifts_to_girl",
+        "F_navi_true_owner_question"
       ],
       "protagonist_arc_state": {
         "belief": "勝ったが、ナビの正体・灯里の気づき・DPC 監視・声の所有者が次巻に持ち越される",

@@ -229,7 +229,9 @@
           "payoff_episode_hint": "later_in_volume"
         }
       ],
-      "foreshadow_payoff": [],
+      "foreshadow_payoff": [
+        "F_unique_skill_layer_navigate"
+      ],
       "protagonist_arc_state": {
         "belief": "正解の中に身体を押し込めば、Fでも届く",
         "goal": "4F→5F の隠し踏み順を実行し、固有スキルを覚醒させる",

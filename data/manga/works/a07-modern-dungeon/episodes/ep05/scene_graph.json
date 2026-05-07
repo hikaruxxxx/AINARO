@@ -14,20 +14,47 @@
       "scene_no": 1,
       "prev_scene_id": null,
       "next_scene_id": "S02",
-      "page_range": { "start": 1, "end": 3 },
-      "panel_range": { "start_panel_no": 1, "end_panel_no": 15 },
-      "arc_position": { "volume": 1, "episode_in_volume": 5, "arc_phase": "introduce", "arc_position_normalized": 0.40 },
+      "page_range": {
+        "start": 1,
+        "end": 3
+      },
+      "panel_range": {
+        "start_panel_no": 1,
+        "end_panel_no": 15
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 5,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.40
+      },
       "beat_type": "introduce",
       "cast": [
-        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
-        { "character_id": "char_九条_ナナミ_v1", "presence": "in_person" }
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "presence": "in_person"
+        }
       ],
       "dialogue_plan": {
         "key_lines": [
-          { "speaker": "char_九条_ナナミ_v1", "text": "Nm です。私が、あなたの翻訳を読んでいた人間です。", "uniqueness": "scene_exclusive", "intent": "reveal" }
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "Nm です。私が、あなたの翻訳を読んでいた人間です。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          }
         ]
       },
-      "foreshadow_setup": [{ "token": "F_nanami_reveals_nm_identity", "payoff_episode_hint": "this_episode" }],
+      "foreshadow_setup": [
+        {
+          "token": "F_nanami_reveals_nm_identity",
+          "payoff_episode_hint": "this_episode"
+        }
+      ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
         "belief": "ナナミは三日に一回の常連客、突然の Nm 名乗りで警戒モードへ",
@@ -36,15 +63,40 @@
         "delta_from_prev": "ep04 末の DPC 監視への怯えから、店内に現れた予期せぬ情報強者へ"
       },
       "relationship_state_delta": [
-        { "pair": ["char_九条_ナナミ_v1", "char_桐生_レン_v1"], "direction": "tense", "intensity": -1, "trigger": "Nm 名乗りで距離が縮まりつつ警戒される" }
+        {
+          "pair": [
+            "char_九条_ナナミ_v1",
+            "char_桐生_レン_v1"
+          ],
+          "direction": "tense",
+          "intensity": -1,
+          "trigger": "Nm 名乗りで距離が縮まりつつ警戒される"
+        }
       ],
-      "time_axis": { "label": "五日目深夜2時、ローソン新宿西店内レジ", "order": 1, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "time_axis": {
+        "label": "五日目深夜2時、ローソン新宿西店内レジ",
+        "order": 1,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
       "location_id": "loc_lawson_interior_v1",
-      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
       "mode": "dialogue",
-      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
       "layout_pattern_id": null,
-      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
       "render_strategy": "page_one_shot",
       "key_visual_intent": "深夜のレジ越しに釣り銭を渡す手と、小声で囁く女性の口元"
     },
@@ -53,16 +105,35 @@
       "scene_no": 2,
       "prev_scene_id": "S01",
       "next_scene_id": "S03",
-      "page_range": { "start": 4, "end": 5 },
-      "panel_range": { "start_panel_no": 16, "end_panel_no": 25 },
-      "arc_position": { "volume": 1, "episode_in_volume": 5, "arc_phase": "rising", "arc_position_normalized": 0.45 },
+      "page_range": {
+        "start": 4,
+        "end": 5
+      },
+      "panel_range": {
+        "start_panel_no": 16,
+        "end_panel_no": 25
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 5,
+        "arc_phase": "rising",
+        "arc_position_normalized": 0.45
+      },
       "beat_type": "setup",
       "cast": [
-        { "character_id": "char_桐生_レン_v1", "presence": "in_person" }
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        }
       ],
       "dialogue_plan": {
         "key_lines": [
-          { "speaker": "char_桐生_レン_v1", "text": "驚くのは後だ。まず、どこまで見られているかを数えろ。", "uniqueness": "scene_exclusive", "intent": "establish" }
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "驚くのは後だ。まず、どこまで見られているかを数えろ。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
         ]
       },
       "foreshadow_setup": [],
@@ -74,13 +145,30 @@
         "delta_from_prev": "驚きを後回しにし、情報強者の核ラインで自分を立て直す"
       },
       "relationship_state_delta": [],
-      "time_axis": { "label": "五日目深夜、ローソン店内 (盤面確認)", "order": 2, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "time_axis": {
+        "label": "五日目深夜、ローソン店内 (盤面確認)",
+        "order": 2,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
       "location_id": "loc_lawson_interior_v1",
-      "page_budget": { "min": 2, "max": 2, "preferred": 2 },
+      "page_budget": {
+        "min": 2,
+        "max": 2,
+        "preferred": 2
+      },
       "mode": "introspection",
-      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
       "layout_pattern_id": null,
-      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
       "render_strategy": "page_one_shot",
       "key_visual_intent": "防犯カメラの位置、客の頭数、店長の影を視線で数えるレン"
     },
@@ -89,16 +177,40 @@
       "scene_no": 3,
       "prev_scene_id": "S02",
       "next_scene_id": "S04",
-      "page_range": { "start": 6, "end": 8 },
-      "panel_range": { "start_panel_no": 26, "end_panel_no": 40 },
-      "arc_position": { "volume": 1, "episode_in_volume": 5, "arc_phase": "rising", "arc_position_normalized": 0.50 },
+      "page_range": {
+        "start": 6,
+        "end": 8
+      },
+      "panel_range": {
+        "start_panel_no": 26,
+        "end_panel_no": 40
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 5,
+        "arc_phase": "rising",
+        "arc_position_normalized": 0.50
+      },
       "beat_type": "transition",
       "cast": [
-        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
-        { "character_id": "char_九条_ナナミ_v1", "presence": "in_person" }
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "presence": "in_person"
+        }
       ],
-      "dialogue_plan": { "key_lines": [] },
-      "foreshadow_setup": [{ "token": "F_nanami_backdoor_meeting_arranged", "payoff_episode_hint": "this_episode" }],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_nanami_backdoor_meeting_arranged",
+          "payoff_episode_hint": "this_episode"
+        }
+      ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
         "belief": "ナナミはレシート裏で会う時刻を指定、無言の合意で次の段へ進む",
@@ -107,13 +219,30 @@
         "delta_from_prev": "盤面確認を経て、ナナミの提案を受ける段取りへ"
       },
       "relationship_state_delta": [],
-      "time_axis": { "label": "五日目深夜、ナナミ去り際", "order": 3, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "time_axis": {
+        "label": "五日目深夜、ナナミ去り際",
+        "order": 3,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
       "location_id": "loc_lawson_interior_v1",
-      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
       "mode": "transition_montage",
-      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
       "layout_pattern_id": null,
-      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
       "render_strategy": "page_one_shot",
       "key_visual_intent": "レシート裏に小さく書かれた時刻、ナナミの後ろ姿が自動ドアを抜ける"
     },
@@ -122,22 +251,57 @@
       "scene_no": 4,
       "prev_scene_id": "S03",
       "next_scene_id": "S05",
-      "page_range": { "start": 9, "end": 12 },
-      "panel_range": { "start_panel_no": 41, "end_panel_no": 60 },
-      "arc_position": { "volume": 1, "episode_in_volume": 5, "arc_phase": "rising", "arc_position_normalized": 0.60 },
+      "page_range": {
+        "start": 9,
+        "end": 12
+      },
+      "panel_range": {
+        "start_panel_no": 41,
+        "end_panel_no": 60
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 5,
+        "arc_phase": "rising",
+        "arc_position_normalized": 0.60
+      },
       "beat_type": "reveal",
       "cast": [
-        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
-        { "character_id": "char_九条_ナナミ_v1", "presence": "in_person" }
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "presence": "in_person"
+        }
       ],
       "dialogue_plan": {
         "key_lines": [
-          { "speaker": "char_九条_ナナミ_v1", "text": "私、元 DPC 職員。今は攻略 wiki 裏管理人 Nm。", "uniqueness": "scene_exclusive", "intent": "reveal" },
-          { "speaker": "char_九条_ナナミ_v1", "text": "匿名ログ、加算時刻、入域者数、買取素材の偏り。あなたが新宿第三の更新者だと、絞れた。", "uniqueness": "scene_exclusive", "intent": "reveal" }
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "私、元 DPC 職員。今は攻略 wiki 裏管理人 Nm。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "匿名ログ、加算時刻、入域者数、買取素材の偏り。あなたが新宿第三の更新者だと、絞れた。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          }
         ]
       },
-      "foreshadow_setup": [{ "token": "F_nanami_dpc_ex_employee", "payoff_episode_hint": "later_in_volume" }],
-      "foreshadow_payoff": ["F_nanami_reveals_nm_identity", "F_nanami_backdoor_meeting_arranged"],
+      "foreshadow_setup": [
+        {
+          "token": "F_nanami_dpc_ex_employee",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
+      "foreshadow_payoff": [
+        "F_nanami_reveals_nm_identity",
+        "F_nanami_backdoor_meeting_arranged"
+      ],
       "protagonist_arc_state": {
         "belief": "ナナミは元 DPC 職員、内側を知っている、即信用は危険",
         "goal": "ナナミの素性と意図を確認",
@@ -145,13 +309,30 @@
         "delta_from_prev": "店内の警戒モードから、裏口での対面・聞き取りへ"
       },
       "relationship_state_delta": [],
-      "time_axis": { "label": "五日目夜勤明け、ローソン外観バックヤード裏口", "order": 4, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "time_axis": {
+        "label": "五日目夜勤明け、ローソン外観バックヤード裏口",
+        "order": 4,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
       "location_id": "loc_lawson_exterior_night_v1",
-      "page_budget": { "min": 4, "max": 4, "preferred": 4 },
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
       "mode": "dialogue",
-      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
       "layout_pattern_id": null,
-      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
       "render_strategy": "page_one_shot",
       "key_visual_intent": "室外機の音、薄い街灯、深夜の湿気、レンとナナミの距離"
     },
@@ -160,22 +341,57 @@
       "scene_no": 5,
       "prev_scene_id": "S04",
       "next_scene_id": "S06",
-      "page_range": { "start": 13, "end": 16 },
-      "panel_range": { "start_panel_no": 61, "end_panel_no": 80 },
-      "arc_position": { "volume": 1, "episode_in_volume": 5, "arc_phase": "climax", "arc_position_normalized": 0.70 },
+      "page_range": {
+        "start": 13,
+        "end": 16
+      },
+      "panel_range": {
+        "start_panel_no": 61,
+        "end_panel_no": 80
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 5,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.70
+      },
       "beat_type": "setup",
       "cast": [
-        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
-        { "character_id": "char_九条_ナナミ_v1", "presence": "in_person" },
-        { "character_id": "char_獅童_響_v1", "presence": "voice_off" }
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
       ],
       "dialogue_plan": {
         "key_lines": [
-          { "speaker": "char_九条_ナナミ_v1", "text": "内部監査室はもう、新宿第三 F 級枠まで来ている。", "uniqueness": "scene_exclusive", "intent": "reveal" },
-          { "speaker": "char_獅童_響_v1", "text": "情報開示対象の拡大は危険です。", "uniqueness": "scene_exclusive", "intent": "establish" }
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "内部監査室はもう、新宿第三 F 級枠まで来ている。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "情報開示対象の拡大は危険です。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
         ]
       },
-      "foreshadow_setup": [{ "token": "F_dpc_audit_pinpointed_f_class", "payoff_episode_hint": "next_episode" }],
+      "foreshadow_setup": [
+        {
+          "token": "F_dpc_audit_pinpointed_f_class",
+          "payoff_episode_hint": "next_episode"
+        }
+      ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
         "belief": "ナナミは正確に内側を知っている、信用しないと潰される",
@@ -184,15 +400,40 @@
         "delta_from_prev": "情報を測り始め、共犯の輪郭が見え始める"
       },
       "relationship_state_delta": [
-        { "pair": ["char_桐生_レン_v1", "char_九条_ナナミ_v1"], "direction": "trust+", "intensity": 1, "trigger": "ナナミが素材買取改定情報・DPC 監査の動きを正確に答え、真偽が立った" }
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_九条_ナナミ_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "ナナミが素材買取改定情報・DPC 監査の動きを正確に答え、真偽が立った"
+        }
       ],
-      "time_axis": { "label": "五日目深夜、裏口で素性確認", "order": 5, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "time_axis": {
+        "label": "五日目深夜、裏口で素性確認",
+        "order": 5,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
       "location_id": "loc_lawson_exterior_night_v1",
-      "page_budget": { "min": 4, "max": 4, "preferred": 4 },
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
       "mode": "dialogue",
-      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
       "layout_pattern_id": null,
-      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
       "render_strategy": "page_one_shot",
       "key_visual_intent": "ナナミのタブレット光、レンの瞳の青光、二人の情報強者の対峙"
     },
@@ -201,21 +442,53 @@
       "scene_no": 6,
       "prev_scene_id": "S05",
       "next_scene_id": "S07",
-      "page_range": { "start": 17, "end": 19 },
-      "panel_range": { "start_panel_no": 81, "end_panel_no": 95 },
-      "arc_position": { "volume": 1, "episode_in_volume": 5, "arc_phase": "climax", "arc_position_normalized": 0.85 },
+      "page_range": {
+        "start": 17,
+        "end": 19
+      },
+      "panel_range": {
+        "start_panel_no": 81,
+        "end_panel_no": 95
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 5,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.85
+      },
       "beat_type": "turn",
       "cast": [
-        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
-        { "character_id": "char_九条_ナナミ_v1", "presence": "in_person" }
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "presence": "in_person"
+        }
       ],
       "dialogue_plan": {
         "key_lines": [
-          { "speaker": "char_九条_ナナミ_v1", "text": "顔は隠す、ログは改竄しない。F のまま記録を更新する事実だけ、世に流す。", "uniqueness": "scene_exclusive", "intent": "establish" },
-          { "speaker": "char_桐生_レン_v1", "text": "一人で黙ってたら、制度に消される。", "uniqueness": "scene_exclusive", "intent": "establish" }
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "顔は隠す、ログは改竄しない。F のまま記録を更新する事実だけ、世に流す。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "一人で黙ってたら、制度に消される。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
         ]
       },
-      "foreshadow_setup": [{ "token": "F_anonymous_record_strategy", "payoff_episode_hint": "later_in_volume" }],
+      "foreshadow_setup": [
+        {
+          "token": "F_anonymous_record_strategy",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
         "belief": "防御から仕掛けへ、匿名 ID を武器に世界へ出る",
@@ -224,15 +497,40 @@
         "delta_from_prev": "警戒から戦略合意へ、孤独から共犯へ"
       },
       "relationship_state_delta": [
-        { "pair": ["char_桐生_レン_v1", "char_九条_ナナミ_v1"], "direction": "closer", "intensity": 1, "trigger": "匿名 ID を物語として流す戦略で利害が一致" }
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_九条_ナナミ_v1"
+          ],
+          "direction": "closer",
+          "intensity": 1,
+          "trigger": "匿名 ID を物語として流す戦略で利害が一致"
+        }
       ],
-      "time_axis": { "label": "五日目深夜、裏口で戦略合意", "order": 6, "is_flashback": false, "is_flashforward": false, "duration_hint": "minutes" },
+      "time_axis": {
+        "label": "五日目深夜、裏口で戦略合意",
+        "order": 6,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
       "location_id": "loc_lawson_exterior_night_v1",
-      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
       "mode": "dialogue",
-      "turn_anchor": { "at_panel_no": null, "type": "none" },
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
       "layout_pattern_id": null,
-      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
       "render_strategy": "page_one_shot",
       "key_visual_intent": "ナナミがタブレットに戦略案を書く手と、レンの目に走る決意"
     },
@@ -241,23 +539,65 @@
       "scene_no": 7,
       "prev_scene_id": "S06",
       "next_scene_id": null,
-      "page_range": { "start": 20, "end": 22 },
-      "panel_range": { "start_panel_no": 96, "end_panel_no": 110 },
-      "arc_position": { "volume": 1, "episode_in_volume": 5, "arc_phase": "climax", "arc_position_normalized": 1.0 },
+      "page_range": {
+        "start": 20,
+        "end": 22
+      },
+      "panel_range": {
+        "start_panel_no": 96,
+        "end_panel_no": 110
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 5,
+        "arc_phase": "climax",
+        "arc_position_normalized": 1.0
+      },
       "beat_type": "cliff",
       "cast": [
-        { "character_id": "char_桐生_レン_v1", "presence": "in_person" },
-        { "character_id": "char_九条_ナナミ_v1", "presence": "in_person" }
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "presence": "in_person"
+        }
       ],
       "dialogue_plan": {
         "key_lines": [
-          { "speaker": "char_桐生_レン_v1", "text": "俺の頭の中に、声がする。", "uniqueness": "scene_exclusive", "intent": "reveal" },
-          { "speaker": "char_九条_ナナミ_v1", "text": "20 年で 3 例。あなたは 4 例目かもしれない。", "uniqueness": "scene_exclusive", "intent": "reveal" },
-          { "speaker": "char_九条_ナナミ_v1", "text": "面白い。あなた、F 級のまま S を踏み抜く気でしょ。", "uniqueness": "scene_exclusive", "intent": "cliff" },
-          { "speaker": "char_桐生_レン_v1", "text": "──やる。", "uniqueness": "scene_exclusive", "intent": "cliff" }
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "俺の頭の中に、声がする。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "20 年で 3 例。あなたは 4 例目かもしれない。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "面白い。あなた、F 級のまま S を踏み抜く気でしょ。",
+            "uniqueness": "scene_exclusive",
+            "intent": "cliff"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "──やる。",
+            "uniqueness": "scene_exclusive",
+            "intent": "cliff"
+          }
         ]
       },
-      "foreshadow_setup": [{ "token": "F_ren_navi_half_disclosed", "payoff_episode_hint": "later_in_volume" }],
+      "foreshadow_setup": [
+        {
+          "token": "F_ren_navi_half_disclosed",
+          "payoff_episode_hint": "cross_volume"
+        }
+      ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
         "belief": "孤独な最適化が共犯関係に変わる、F のまま S を踏み抜く",
@@ -266,15 +606,40 @@
         "delta_from_prev": "戦略合意から、声を半分明かしての本格共犯へ"
       },
       "relationship_state_delta": [
-        { "pair": ["char_桐生_レン_v1", "char_九条_ナナミ_v1"], "direction": "trust+", "intensity": 2, "trigger": "ナビ存在を半分明かし、ナナミも正面から受け止める" }
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_九条_ナナミ_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 2,
+          "trigger": "ナビ存在を半分明かし、ナナミも正面から受け止める"
+        }
       ],
-      "time_axis": { "label": "五日目深夜、共犯成立の瞬間", "order": 7, "is_flashback": false, "is_flashforward": false, "duration_hint": "moments" },
+      "time_axis": {
+        "label": "五日目深夜、共犯成立の瞬間",
+        "order": 7,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
       "location_id": "loc_lawson_exterior_night_v1",
-      "page_budget": { "min": 3, "max": 3, "preferred": 3 },
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
       "mode": "dialogue",
-      "turn_anchor": { "at_panel_no": 110, "type": "cliff_turn" },
+      "turn_anchor": {
+        "at_panel_no": 110,
+        "type": "cliff_turn"
+      },
       "layout_pattern_id": null,
-      "subtype_directive": { "external_social": false, "gacha_ui": false, "hybrid": false },
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
       "render_strategy": "page_one_shot",
       "key_visual_intent": "青光とタブレット光が同じコマで並び、レンの「やる」と二人の輪郭"
     }

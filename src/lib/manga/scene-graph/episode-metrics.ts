@@ -16,6 +16,7 @@ import type {
   Scene,
   EpisodeMetrics,
   ForeshadowDag,
+  PayoffEpisodeHint,
 } from "./schema";
 import { buildForeshadowDag } from "./schema";
 
@@ -172,6 +173,209 @@ function pairKey(pair: [string, string]): string {
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
+}
+
+// ============================================================================
+// Volume-level Cross-Episode Foreshadow DAG (Phase γ)
+// ============================================================================
+
+export type VolumeForeshadowItem = {
+  token: string;
+  /** setup 位置 (episode_id, scene_id) */
+  setup_at: { episode_id: string; scene_id: string; hint: PayoffEpisodeHint } | null;
+  /** payoff 位置 (episode_id, scene_id) */
+  payoff_at: { episode_id: string; scene_id: string } | null;
+};
+
+export type VolumeForeshadowDag = {
+  /** 全 setup token -> entry */
+  items: VolumeForeshadowItem[];
+  /** 巻内で setup されたが、巻内のいずれの episode でも payoff されていない token */
+  unresolved_in_volume: VolumeForeshadowItem[];
+  /** setup 無しで payoff だけが現れる token (異常) */
+  payoff_without_setup: VolumeForeshadowItem[];
+  /** payoff_episode_hint と実際の payoff 位置が矛盾する token (例: this_episode hint なのに次話で payoff) */
+  hint_violations: Array<{ item: VolumeForeshadowItem; expected: PayoffEpisodeHint; actual: string }>;
+};
+
+export type VolumeValidationResult = {
+  ok: boolean;
+  errors: string[];
+  warnings: string[];
+  dag: VolumeForeshadowDag;
+};
+
+/**
+ * 巻全体 (volume = N episode) の foreshadow DAG を検査する。
+ *
+ * 入力: episode 番号順に並んだ SceneGraphV1[]。
+ *   - episode_in_volume は scene.arc_position.episode_in_volume から自動推定
+ *
+ * 検査項目:
+ *   1. setup された全 token が、payoff_episode_hint の指定範囲内で payoff されているか
+ *      - this_episode: 同 episode 内で payoff
+ *      - next_episode: setup_episode + 1 で payoff
+ *      - later_in_volume: setup_episode 以降の任意の episode で payoff
+ *      - cross_volume: 当 volume 内の payoff は不要、unresolved_in_volume に積む
+ *   2. setup 無しで現れる payoff は error
+ *   3. 同 volume 内で payoff されていない this_episode/next_episode hint は error
+ *   4. later_in_volume/cross_volume は warning として扱い、巻末に達した時点で解決の有無を集計
+ */
+export function computeVolumeForeshadowDag(
+  volume_episodes: SceneGraphV1[]
+): VolumeValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // setup の登録: token -> { episode_id, scene_id, hint }
+  const setups = new Map<
+    string,
+    { episode_id: string; scene_id: string; episode_index: number; hint: PayoffEpisodeHint }
+  >();
+  // payoff の登録: token -> [{ episode_id, scene_id, episode_index }]
+  const payoffs = new Map<
+    string,
+    Array<{ episode_id: string; scene_id: string; episode_index: number }>
+  >();
+
+  for (let epIdx = 0; epIdx < volume_episodes.length; epIdx++) {
+    const ep = volume_episodes[epIdx];
+    for (const scene of ep.scenes) {
+      for (const f of scene.foreshadow_setup) {
+        if (setups.has(f.token)) {
+          warnings.push(
+            `setup duplicated: "${f.token}" first at ${setups.get(f.token)!.episode_id}/${setups.get(f.token)!.scene_id}, also at ${ep.episode_id}/${scene.scene_id}`
+          );
+          continue;
+        }
+        setups.set(f.token, {
+          episode_id: ep.episode_id,
+          scene_id: scene.scene_id,
+          episode_index: epIdx,
+          hint: f.payoff_episode_hint,
+        });
+      }
+      for (const p of scene.foreshadow_payoff) {
+        const arr = payoffs.get(p) ?? [];
+        arr.push({ episode_id: ep.episode_id, scene_id: scene.scene_id, episode_index: epIdx });
+        payoffs.set(p, arr);
+      }
+    }
+  }
+
+  const items: VolumeForeshadowItem[] = [];
+  const unresolved_in_volume: VolumeForeshadowItem[] = [];
+  const payoff_without_setup: VolumeForeshadowItem[] = [];
+  const hint_violations: VolumeValidationResult["dag"]["hint_violations"] = [];
+
+  // setup 側の処理
+  for (const [token, s] of setups) {
+    const payoffArr = payoffs.get(token) ?? [];
+    const firstPayoff = payoffArr[0]; // 最初の payoff を採用 (setup 後の最初の出現)
+    const item: VolumeForeshadowItem = {
+      token,
+      setup_at: { episode_id: s.episode_id, scene_id: s.scene_id, hint: s.hint },
+      payoff_at: firstPayoff
+        ? { episode_id: firstPayoff.episode_id, scene_id: firstPayoff.scene_id }
+        : null,
+    };
+    items.push(item);
+
+    if (!firstPayoff) {
+      if (s.hint === "this_episode" || s.hint === "next_episode") {
+        errors.push(
+          `${s.episode_id}/${s.scene_id}: foreshadow_setup "${token}" hint=${s.hint} but no payoff in volume`
+        );
+      } else if (s.hint === "later_in_volume") {
+        errors.push(
+          `${s.episode_id}/${s.scene_id}: foreshadow_setup "${token}" hint=later_in_volume but no payoff anywhere in volume`
+        );
+      } else {
+        // cross_volume: 当 volume 内の payoff は不要、保留
+        unresolved_in_volume.push(item);
+      }
+      continue;
+    }
+
+    // payoff_episode_hint と実際の位置を照合
+    const epDiff = firstPayoff.episode_index - s.episode_index;
+    if (s.hint === "this_episode" && epDiff !== 0) {
+      hint_violations.push({
+        item,
+        expected: "this_episode",
+        actual: `payoff at ep_index ${firstPayoff.episode_index}, setup at ${s.episode_index}`,
+      });
+      errors.push(
+        `${s.episode_id}/${s.scene_id}: foreshadow_setup "${token}" hint=this_episode but payoff is in ${firstPayoff.episode_id}`
+      );
+    } else if (s.hint === "next_episode" && epDiff !== 1) {
+      hint_violations.push({
+        item,
+        expected: "next_episode",
+        actual: `payoff at ep_index ${firstPayoff.episode_index}, setup at ${s.episode_index} (diff ${epDiff})`,
+      });
+      warnings.push(
+        `${s.episode_id}/${s.scene_id}: foreshadow_setup "${token}" hint=next_episode but payoff diff ${epDiff} (${firstPayoff.episode_id})`
+      );
+    } else if (s.hint === "later_in_volume" && epDiff <= 0) {
+      hint_violations.push({
+        item,
+        expected: "later_in_volume",
+        actual: `payoff before setup (diff ${epDiff})`,
+      });
+      errors.push(
+        `${s.episode_id}/${s.scene_id}: foreshadow_setup "${token}" hint=later_in_volume but payoff is at or before setup`
+      );
+    }
+  }
+
+  // setup 無しで payoff のみ存在する token
+  for (const [token, payoffArr] of payoffs) {
+    if (setups.has(token)) continue;
+    const first = payoffArr[0];
+    const item: VolumeForeshadowItem = {
+      token,
+      setup_at: null,
+      payoff_at: { episode_id: first.episode_id, scene_id: first.scene_id },
+    };
+    items.push(item);
+    payoff_without_setup.push(item);
+    errors.push(
+      `${first.episode_id}/${first.scene_id}: payoff "${token}" has no setup in volume`
+    );
+  }
+
+  return {
+    ok: errors.length === 0,
+    errors,
+    warnings,
+    dag: { items, unresolved_in_volume, payoff_without_setup, hint_violations },
+  };
+}
+
+export function formatVolumeDagReport(dag: VolumeForeshadowDag): string {
+  const lines: string[] = [];
+  lines.push(`total foreshadow items: ${dag.items.length}`);
+  lines.push(
+    `resolved in volume: ${dag.items.filter((i) => i.payoff_at).length}, unresolved (cross_volume): ${dag.unresolved_in_volume.length}, payoff_without_setup: ${dag.payoff_without_setup.length}, hint_violations: ${dag.hint_violations.length}`
+  );
+  if (dag.unresolved_in_volume.length > 0) {
+    lines.push("");
+    lines.push("=== unresolved in volume (cross_volume hint) ===");
+    for (const i of dag.unresolved_in_volume) {
+      lines.push(
+        `  ${i.token}: setup at ${i.setup_at?.episode_id}/${i.setup_at?.scene_id} (hint=${i.setup_at?.hint})`
+      );
+    }
+  }
+  if (dag.hint_violations.length > 0) {
+    lines.push("");
+    lines.push("=== hint violations ===");
+    for (const v of dag.hint_violations) {
+      lines.push(`  ${v.item.token}: expected=${v.expected}, ${v.actual}`);
+    }
+  }
+  return lines.join("\n");
 }
 
 // ============================================================================

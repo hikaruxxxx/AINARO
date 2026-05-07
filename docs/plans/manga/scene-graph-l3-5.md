@@ -402,6 +402,41 @@ ep01-10 を新方式 (`--from-scene-graph --enrich`) で連続生成、第 1 巻
 - 「設計図 → コマ割り」往路がエンドツーエンドで 10 episode 連続動作
 - 新方式パイプラインの量産耐性を実証
 - KDP 出版動線 (memory: project_kdp_strategy) の B6 判 1 巻 160-200 page (現状 22page × 10ep = 220 page) が射程内
+
+### 2026-05-07: Phase γ 巻全体 cross-episode validator 完成
+
+`computeVolumeForeshadowDag` を [episode-metrics.ts](src/lib/manga/scene-graph/episode-metrics.ts) に追加、
+[_volume-foreshadow-validate.ts](scripts/manga/layers/_volume-foreshadow-validate.ts) を CLI として新設。
+
+**検査内容**:
+- volume 内の全 episode から foreshadow_setup / foreshadow_payoff を集計
+- 各 setup の `payoff_episode_hint` (this_episode / next_episode / later_in_volume / cross_volume) と
+  実際の payoff 位置の整合検査
+- payoff_without_setup / hint_violations / unresolved_in_volume の集計
+- a07-ep04 / a07-ep10 で削除した cross-episode payoff を復元しても、巻全体検査で errors=0 を達成
+
+**a07 第 1 巻 最終結果**:
+- total foreshadow items: 67
+- resolved in volume: 33 (this_episode / next_episode / later_in_volume の payoff 完結)
+- unresolved (cross_volume): 8 (第 2 巻持ち越し)
+- payoff_without_setup: 0
+- hint_violations: 0
+- **errors: 0 / warnings: 0**
+
+**第 2 巻持ち越し 8 件の cross_volume foreshadow**:
+- F_akari_concern_protect_others (灯里の「守りたい」テーマ)
+- F_ren_navi_half_disclosed (ナビ半開示)
+- F_reappraisal_silences_navi (再鑑定とナビ消失)
+- F_navi_no_disclosure_for_silent_voice (沈黙の声に対する開示制限)
+- F_silent_voice_cult_origin (沈黙の声の宗教的起源)
+- F_genzo_master_appears (玄蔵の本格指導)
+- F_akari_recognizes_ren (灯里 → レン認識)
+- F_navi_self_reveal_in_volume_2 (ナビ自身の正体)
+
+**設計効果**:
+- 各 episode の foreshadow_payoff 書き忘れや `payoff_episode_hint` の誤指定を機械的に検出
+- 第 2 巻持ち越しシード (cross_volume token) を明示的に管理、続巻設計時の参照ソースに
+- Phase β B5-5 (scene-graph 中心パイプライン) と組み合わせて、巻完成後の最終整合チェックが自動化
 - **time_axis.order の値域**: flashforward は 999 のような大値、flashback は -1, -2 等の負値で表現可能。整数で十分。
 - **sub_locations の使い所**: S07 (gate→corridor 連続通過) と S10 (corridor + DPC cross-cut) のような演出。1 scene に複数 location を許すが、主軸は 1 つ。
 - **cast.presence**: in_person (8), voice_off (5), tv (1), memory (1) を a07-ep01 で使用。phone_screen と log_visual は ep01 では未使用 (将来 episode で出る想定)。
