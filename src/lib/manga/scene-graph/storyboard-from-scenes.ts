@@ -166,8 +166,16 @@ function buildPanelsForScene(
     const bleed = i === 0 || i === count - 1; // scene 境界は誌面端見せの可能性が高い
     const silence = scene.mode === "silence" && lineSlots[i].dialogue.length === 0 && lineSlots[i].monologue.length === 0;
 
+    // 2026-05-07 追加: panel-specific expression を埋める。
+    // bible の expr_*.png variant (anger / default / focus / gentle / grin / laugh / relaxed / smile / surprise)
+    // から scene.mode + panel index に応じて決定論的に選ぶ。
+    const panelCharacters = characters.map((ch) => ({
+      ...ch,
+      expression: inferExpression(scene.mode, i, count, ch.role),
+    }));
+
     const entities: PanelEntities = {
-      characters,
+      characters: panelCharacters,
       location_id: scene.location_id,
       props: [],
       focus_entity_id: focusEntityId,
@@ -278,6 +286,52 @@ function mapCastEntryToPanelChar(cast: CastEntry): PanelEntities["characters"][n
     on_screen_via: onScreenVia,
     expression: "",
   };
+}
+
+/**
+ * 2026-05-07 追加: scene.mode + panel position から expression を決定論的に選ぶ。
+ * bible の expr_*.png variant 9 種を返す:
+ *   anger / default / focus / gentle / grin / laugh / relaxed / smile / surprise
+ *
+ * background ロール (画面後方の脇役) は default 固定。speaker は scene.mode で振り分け。
+ */
+function inferExpression(
+  mode: SceneMode,
+  idx: number,
+  total: number,
+  role: CharacterPanelRole
+): string {
+  // background キャラは表情強調しない (脇役として default)
+  if (role === "background") return "default";
+
+  const isLast = idx === total - 1;
+  const isFirst = idx === 0;
+
+  switch (mode) {
+    case "action":
+      // 戦闘・追跡: 後半ほど鋭く
+      return isLast ? "anger" : "focus";
+    case "silence":
+      // 沈黙シーン: 集中 (silent close-up は感情の溜め)
+      return isLast ? "focus" : "default";
+    case "introspection":
+      // 内省: 集中 or デフォルト
+      return idx % 2 === 0 ? "focus" : "default";
+    case "establishing":
+      // 場所紹介: 主人公はまだ無感情
+      return "default";
+    case "dialogue":
+      // 対話: 落ち着き → やや表情豊か
+      return isFirst ? "default" : "gentle";
+    case "external_social":
+      // 群衆・SNS: 周囲のリアクションが入る、主人公は集中 or default
+      return isLast ? "focus" : "default";
+    case "transition_montage":
+      // モンタージュ: 中性的
+      return "default";
+    default:
+      return "default";
+  }
 }
 
 function pickShotForPanel(idx: number, total: number, mode: SceneMode): ShotType {
