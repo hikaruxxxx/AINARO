@@ -76,7 +76,7 @@ function renderWork(work: WorkQualityOverview): string {
       <td>${escapeHtml(fmtDate(ep.last_audit_at))}</td>
       <td><div class="qh-actions">
         <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-goto-view="name-gate" data-slug="${escapeHtml(work.slug)}" data-episode="${ep.episode}">ネーム判定</button>
-        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-goto-view="revision" data-slug="${escapeHtml(work.slug)}" data-episode="${ep.episode}">ページ承認</button>
+        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-goto-view="revision" data-slug="${escapeHtml(work.slug)}" data-episode="${ep.episode}">ページ修正</button>
         <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-goto-view="quality" data-slug="${escapeHtml(work.slug)}" data-episode="${ep.episode}">品質監査</button>
       </div></td>
     </tr>`)

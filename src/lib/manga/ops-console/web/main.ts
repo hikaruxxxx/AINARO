@@ -16,7 +16,6 @@ import { mountNameGateView } from "./views/name-gate";
 import { mountPipelineView } from "./views/pipeline";
 import { mountQualityView } from "./views/quality";
 import { mountQualityHubView } from "./views/quality-hub";
-import { mountRevisionEffectsView } from "./views/revision-effects";
 import { mountRevisionView } from "./views/revision";
 import { mountImprovementsView } from "./views/improvements";
 import { mountTrademarkGateView } from "./views/trademark-gate";
@@ -46,6 +45,10 @@ function parseRoute(): { slug: string | null; episode: number | null; view: View
   }
   const m = window.location.pathname.match(/^\/works\/([^/]+)\/episodes\/ep(\d+)\/?$/);
   let hashView = window.location.hash.replace(/^#/, "");
+  if (hashView === "revision-effects") {
+    hashView = "revision";
+    history.replaceState(null, "", `${window.location.pathname}#revision`);
+  }
   if (hashView === "storyboard") {
     hashView = "name-gate";
     history.replaceState(null, "", `${window.location.pathname}#name-gate`);
@@ -132,7 +135,6 @@ function mountCurrentView(main: HTMLElement): () => void {
     else if (state.currentView === "volumes") unmount = mountVolumesView(main);
     else if (state.currentView === "layers") unmount = mountLayersView(main);
     else if (state.currentView === "revision") unmount = mountRevisionView(main);
-    else if (state.currentView === "revision-effects") unmount = mountRevisionEffectsView(main);
     else unmount = mountNameGateView(main);
   });
 }
@@ -215,6 +217,11 @@ async function start(): Promise<void> {
 
   window.addEventListener("hashchange", () => {
     const hashView = window.location.hash.replace(/^#/, "");
+    if (hashView === "revision-effects") {
+      const route = parseRoute();
+      store.update({ currentSlug: route.slug ?? store.state.currentSlug, currentEpisode: route.episode ?? store.state.currentEpisode, currentView: route.view });
+      return;
+    }
     if (hashView === "storyboard") {
       const route = parseRoute();
       store.update({ currentSlug: route.slug ?? store.state.currentSlug, currentEpisode: route.episode ?? store.state.currentEpisode, currentView: route.view });

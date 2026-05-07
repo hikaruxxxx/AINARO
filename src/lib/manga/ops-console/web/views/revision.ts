@@ -23,6 +23,18 @@ type Filters = {
   notAdopted: boolean;
 };
 
+type RevisionTab = "adoption" | "effects";
+
+type EffectsStats = {
+  totalQueued: number;
+  resolved: number;
+  adoptedNonV1: number;
+  resolutionRate: number;
+  adoptionRate: number;
+  byTag: Map<RevisionTag, { queued: number; resolved: number; adopted: number }>;
+  panelStats: Array<{ panel_id: string; instructionCount: number; adoptedVersion: string | null; rounds: number }>;
+};
+
 type PanelView = {
   pageNo: number;
   pageRole: string;
@@ -77,6 +89,7 @@ type VersionsModalContext = {
 
 type ViewState = {
   manifest: Manifest | null;
+  tab: RevisionTab;
   filters: Filters;
   modal: ModalContext | null;
   adoptModal: AdoptModalContext | null;
@@ -85,6 +98,8 @@ type ViewState = {
 
 const RV_CSS = `
 .rv-container { display: grid; gap: 12px; }
+.rv-tabs { display: flex; gap: var(--space-1, 4px); flex-wrap: wrap; }
+.rv-tab-panel[hidden] { display: none; }
 .rv-toolbar {
   position: sticky;
   top: 0;
@@ -396,6 +411,27 @@ const RV_CSS = `
 .rv-versions-thumb.rv-viewing { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.22); }
 .rv-versions-thumb.rv-adopted { background: #f0fdf4; border-color: #16a34a; }
 .rv-versions-thumb.rv-adopted span { color: #166534; }
+.rv-effects { display: grid; gap: 14px; }
+.rv-effects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.rv-effects-card {
+  border: 1px solid var(--border-default, #e5e7eb);
+  border-radius: 8px;
+  background: var(--surface-elevated, #fff);
+  padding: 12px;
+}
+.rv-effects-card span { display: block; color: var(--text-secondary, #64748b); font-size: 12px; font-weight: 700; }
+.rv-effects-card strong { display: block; margin-top: 4px; color: var(--text-default, #111827); font-size: 26px; line-height: 1; }
+.rv-effects-section {
+  border: 1px solid var(--border-default, #e5e7eb);
+  border-radius: 8px;
+  background: var(--surface-elevated, #fff);
+  padding: 12px;
+}
+.rv-effects-section h3 { margin: 0 0 10px; font-size: 14px; }
+.rv-effects-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rv-effects-table th, .rv-effects-table td { border-top: 1px solid var(--border-default, #e5e7eb); padding: 7px 8px; text-align: left; }
+.rv-effects-table th { color: var(--text-secondary, #64748b); font-weight: 700; background: var(--surface-sunken, #f8fafc); }
+.rv-effects-empty { padding: 40px; text-align: center; color: var(--text-secondary, #6b7280); font-size: 14px; }
 `;
 
 const TAG_LABELS: Record<RevisionTag, string> = {
@@ -478,7 +514,7 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
   container.innerHTML = `
     <div class="rv-container" tabindex="-1">
       <div class="rv-toolbar">
-        <h2>Revision</h2>
+        <h2>ページ修正</h2>
         <span class="rv-info">${escapeHtml(slug)} / ${epLabel(episode)}</span>
         <span class="rv-summary">
           修正待ち <strong id="rv-cnt-queue">0</strong> / 採用済 <strong id="rv-cnt-adopted">0</strong> / 監査NG <strong id="rv-cnt-failed">0</strong>
@@ -491,14 +527,23 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
         </div>
         <div class="rv-progress" id="rv-progress"></div>
       </div>
-      <div class="rv-filters">
-        <label class="rv-filter-check"><input type="checkbox" data-rv-filter="failed"> 監査NGのみ</label>
-        <label class="rv-filter-check"><input type="checkbox" data-rv-filter="revised"> 修正済のみ</label>
-        <label class="rv-filter-check"><input type="checkbox" data-rv-filter="notAdopted"> 採用済を隠す</label>
-        <span id="rv-filter-summary"></span>
+      <div class="rv-tabs" role="tablist" aria-label="ページ修正">
+        <button type="button" class="nc-pill nc-pill--active" data-rv-tab="adoption" role="tab" aria-selected="true">採択</button>
+        <button type="button" class="nc-pill" data-rv-tab="effects" role="tab" aria-selected="false">効果分析</button>
       </div>
-      <div class="rv-help"><code>j/k</code> panel 移動 <code>Tab</code> page 移動 <code>esc</code> close</div>
-      <div class="rv-main" id="rv-main"><div class="rv-empty">読み込み中...</div></div>
+      <section class="rv-tab-panel" id="rv-tab-adoption" data-rv-tab-panel="adoption" role="tabpanel">
+        <div class="rv-filters">
+          <label class="rv-filter-check"><input type="checkbox" data-rv-filter="failed"> 監査NGのみ</label>
+          <label class="rv-filter-check"><input type="checkbox" data-rv-filter="revised"> 修正済のみ</label>
+          <label class="rv-filter-check"><input type="checkbox" data-rv-filter="notAdopted"> 採用済を隠す</label>
+          <span id="rv-filter-summary"></span>
+        </div>
+        <div class="rv-help"><code>j/k</code> panel 移動 <code>Tab</code> page 移動 <code>esc</code> close</div>
+        <div class="rv-main" id="rv-main"><div class="rv-empty">読み込み中...</div></div>
+      </section>
+      <section class="rv-tab-panel" id="rv-tab-effects" data-rv-tab-panel="effects" role="tabpanel" hidden>
+        <div id="rv-effects-main"><div class="rv-effects-empty">読み込み中...</div></div>
+      </section>
       <div class="rv-modal" id="rv-modal" role="dialog" aria-modal="true" aria-labelledby="rv-modal-title">
         <div class="rv-modal-card">
           <div class="rv-modal-body">
@@ -691,6 +736,108 @@ function lastUnresolvedByPanel(manifest: Manifest): Map<string, RevisionEntry> {
 
 function adoptedPanels(manifest: Manifest): AdoptedVersions["panels"] {
   return manifest.adopted?.panels ?? {};
+}
+
+function formatPct(value: number): string {
+  return `${Math.round(value * 100)}%`;
+}
+
+function computeEffects(manifest: Manifest): EffectsStats {
+  const queue = manifest.revision_queue ?? [];
+  const adopted = adoptedPanels(manifest);
+  const totalQueued = queue.length;
+  const resolved = queue.filter((entry) => Boolean(entry.resolved_version)).length;
+  const adoptedNonV1 = Object.values(adopted).filter((choice) => choice?.chosen && choice.chosen !== "v1").length;
+  const byTag = new Map<RevisionTag, { queued: number; resolved: number; adopted: number }>();
+  for (const tag of REVISION_TAGS) byTag.set(tag, { queued: 0, resolved: 0, adopted: 0 });
+
+  const panelStats = new Map<string, { panel_id: string; instructionCount: number; adoptedVersion: string | null; rounds: number }>();
+  for (const entry of queue) {
+    const tags = (entry.checked_tags ?? []).filter(isRevisionTag);
+    const resolvedVersion = entry.resolved_version ?? null;
+    for (const tag of tags) {
+      const row = byTag.get(tag);
+      if (!row) continue;
+      row.queued++;
+      if (resolvedVersion) row.resolved++;
+      if (resolvedVersion && adopted[entry.panel_id]?.chosen === resolvedVersion) row.adopted++;
+    }
+
+    const stat = panelStats.get(entry.panel_id) ?? {
+      panel_id: entry.panel_id,
+      instructionCount: 0,
+      adoptedVersion: adopted[entry.panel_id]?.chosen ?? null,
+      rounds: 0,
+    };
+    stat.instructionCount++;
+    stat.adoptedVersion = adopted[entry.panel_id]?.chosen ?? stat.adoptedVersion;
+    stat.rounds = Math.max(
+      stat.rounds,
+      parseVersion(stat.adoptedVersion ?? ""),
+      parseVersion(entry.resolved_version ?? ""),
+      parseVersion(entry.for_version ?? "")
+    );
+    panelStats.set(entry.panel_id, stat);
+  }
+
+  return {
+    totalQueued,
+    resolved,
+    adoptedNonV1,
+    resolutionRate: totalQueued > 0 ? resolved / totalQueued : 0,
+    adoptionRate: resolved > 0 ? adoptedNonV1 / resolved : 0,
+    byTag,
+    panelStats: Array.from(panelStats.values()).sort((a, b) => b.instructionCount - a.instructionCount),
+  };
+}
+
+function renderEffects(manifest: Manifest): string {
+  const stats = computeEffects(manifest);
+  const unresolved = stats.totalQueued - stats.resolved;
+  const tagRows = REVISION_TAGS.map((tag) => {
+    const row = stats.byTag.get(tag) ?? { queued: 0, resolved: 0, adopted: 0 };
+    const conv = row.resolved > 0 ? row.adopted / row.resolved : 0;
+    return `<tr>
+      <td>${escapeHtml(TAG_LABELS[tag])}</td>
+      <td>${row.queued}</td>
+      <td>${row.resolved}</td>
+      <td>${row.adopted}</td>
+      <td>${formatPct(conv)}</td>
+    </tr>`;
+  }).join("");
+  const hardRows = stats.panelStats
+    .filter((panel) => panel.instructionCount >= 3)
+    .map((panel) => `<tr>
+      <td>${escapeHtml(panel.panel_id)}</td>
+      <td>${panel.instructionCount}</td>
+      <td>${escapeHtml(panel.adoptedVersion ?? "-")}</td>
+      <td>${panel.rounds || "-"}</td>
+    </tr>`)
+    .join("");
+
+  return `
+    <div class="rv-effects">
+      <div class="rv-effects-grid">
+        <section class="rv-effects-card"><span>総指示数</span><strong>${stats.totalQueued}</strong></section>
+        <section class="rv-effects-card"><span>解消率</span><strong>${formatPct(stats.resolutionRate)}</strong></section>
+        <section class="rv-effects-card"><span>採用率</span><strong>${formatPct(stats.adoptionRate)}</strong></section>
+        <section class="rv-effects-card"><span>未解消</span><strong>${unresolved}</strong></section>
+      </div>
+      <section class="rv-effects-section">
+        <h3>タグ別の効果</h3>
+        <table class="rv-effects-table">
+          <thead><tr><th>タグ</th><th>指示</th><th>解消</th><th>採用</th><th>採用率</th></tr></thead>
+          <tbody>${tagRows}</tbody>
+        </table>
+      </section>
+      <section class="rv-effects-section">
+        <h3>困難 panel ランキング</h3>
+        ${hardRows ? `<table class="rv-effects-table">
+          <thead><tr><th>panel_id</th><th>指示回数</th><th>採用版</th><th>rounds</th></tr></thead>
+          <tbody>${hardRows}</tbody>
+        </table>` : '<div class="rv-effects-empty">指示回数 3 回以上の panel はありません。</div>'}
+      </section>
+    </div>`;
 }
 
 function matchingVersions(versions: Map<string, VersionView[]>, panel: PanelView): VersionView[] {
@@ -981,9 +1128,28 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
   void slug;
 }
 
+function renderEffectsPanel(root: HTMLElement, state: ViewState): void {
+  const main = root.querySelector<HTMLElement>("#rv-effects-main");
+  if (!main) return;
+  main.innerHTML = state.manifest ? renderEffects(state.manifest) : '<div class="rv-effects-empty">読み込み中...</div>';
+}
+
+function renderTabState(root: HTMLElement, state: ViewState, slug: string, episode: number): void {
+  root.querySelectorAll<HTMLButtonElement>("[data-rv-tab]").forEach((button) => {
+    const active = button.dataset.rvTab === state.tab;
+    button.classList.toggle("nc-pill--active", active);
+    button.setAttribute("aria-selected", active ? "true" : "false");
+  });
+  root.querySelectorAll<HTMLElement>("[data-rv-tab-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.rvTabPanel !== state.tab;
+  });
+  if (state.tab === "adoption") renderGrid(root, state, slug, episode);
+  else renderEffectsPanel(root, state);
+}
+
 function refresh(root: HTMLElement, state: ViewState, slug: string, episode: number): void {
   renderSummary(root, state);
-  renderGrid(root, state, slug, episode);
+  renderTabState(root, state, slug, episode);
 }
 
 function selectedTags(root: HTMLElement): RevisionTag[] {
@@ -1318,6 +1484,18 @@ function bindStaticListeners(
       { signal }
     );
   });
+  root.querySelectorAll<HTMLButtonElement>("[data-rv-tab]").forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const tab = button.dataset.rvTab as RevisionTab | undefined;
+        if (tab !== "adoption" && tab !== "effects") return;
+        state.tab = tab;
+        refresh(root, state, slug, episode);
+      },
+      { signal }
+    );
+  });
   root.querySelectorAll<HTMLInputElement>("[data-rv-filter]").forEach((input) => {
     input.addEventListener(
       "change",
@@ -1589,6 +1767,7 @@ async function loadRevision(
 
   const state: ViewState = {
     manifest: null,
+    tab: "adoption",
     filters: { failed: false, revised: false, notAdopted: false },
     modal: null,
     adoptModal: null,
