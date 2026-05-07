@@ -28,7 +28,9 @@ L3.5 Scene-Graph           bible + shotlist + brief + volume_plot → episodes/e
                            物語論理 (arc/beat/cast/dialogue_plan/foreshadow/protagonist/relationship/time)
                            × 頁演出 (page_budget/mode/turn_anchor/layout_pattern/subtype/render_strategy)
                            × 選別ループ (candidates×5 → pairwise → predict-hit → anchor 比較 → 採用)
-                           Phase β B1-B3 で実装予定。詳細: docs/plans/manga/scene-graph-l3-5.md
+                           Phase β B1-B5-1 + γ 巻全体 cross-episode validator まで完成 (2026-05-07)。
+                           a07 第 1 巻 10 episode を新方式で生成済み (sequential 実走 41 分、errors=0)。
+                           詳細: docs/plans/manga/scene-graph-l3-5.md
 L4   Storyboard            scene_graph + bible → storyboard.json (panel は scene_id を継承、entity_id binding hard required)
 L5  Page Director          storyboard + capability → page_plan.json
 L6  Continuity Resolve     page_plan + bible → page_plan + continuity_group_ids
