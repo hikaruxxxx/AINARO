@@ -349,7 +349,7 @@ function renderIntro(): string {
 function deriveNextStep(data: ImprovementsResponse): {
   title: string;
   hint: string;
-  primary?: { label: string; layer?: string; flags?: Record<string, string | true>; action: "run" | "chain" | "nav-pipeline" | "nav-layers"; nav?: string };
+  primary?: { label: string; layer?: string; flags?: Record<string, string | true>; action: "run" | "chain" | "nav-pipeline" | "nav-layers" | "open-edit-modal"; nav?: string };
   secondary?: Array<{ label: string; nav: string }>;
 } {
   const errs = data.audit_summary?.counts_by_severity?.error ?? 0;
@@ -365,7 +365,7 @@ function deriveNextStep(data: ImprovementsResponse): {
     return {
       title: "❌ まず L11 audit の error を解消",
       hint: `audit findings に error が ${errs} 件残っています。下の「audit findings」一覧を見て、AI 編集で個別修正するか、再度 L04_1/L04_9 で生成しなおしてください。`,
-      primary: { label: "AI 編集を開く", action: "nav-layers", nav: "ai-edit" },
+      primary: { label: "AI 編集を開く", action: "open-edit-modal" },
     };
   }
 
@@ -451,6 +451,9 @@ function renderNextStep(data: ImprovementsResponse, state: ViewState): string {
     }
     if (primary.action === "nav-layers") {
       return `data-action="nav-view" data-view="${escapeHtml(primary.nav ?? "layers")}"`;
+    }
+    if (primary.action === "open-edit-modal") {
+      return `data-action="open-ai-edit"`;
     }
     return "";
   })();
@@ -916,16 +919,16 @@ export function mountImprovementsView(container: HTMLElement): () => void {
       if (action === "nav-view") {
         const view = btn.dataset.view;
         if (view) {
-          if (view === "ai-edit") {
-            void openAiEditModal({ scope: state.slug || "_console", originView: "improvements" });
-            return;
-          }
           // store の ViewName 型に合致するもののみ受理。安全側で許容リスト方式。
-          const allowed = ["pipeline", "layers", "ai-edit", "improvements", "storyboard", "quality"];
+          const allowed = ["pipeline", "layers", "improvements", "storyboard", "quality"];
           if (allowed.includes(view)) {
             store.update({ currentView: view as Parameters<typeof store.update>[0]["currentView"] });
           }
         }
+        return;
+      }
+      if (action === "open-ai-edit") {
+        void openAiEditModal({ scope: state.slug || "_console", originView: "improvements" });
         return;
       }
       if (action === "chain-start") {

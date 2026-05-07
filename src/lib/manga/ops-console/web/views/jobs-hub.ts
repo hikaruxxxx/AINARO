@@ -124,7 +124,6 @@ function failureGroupFor(job: JobSummary): { key: string; reason: FailureReason;
 function viewLabel(view: ViewName): string {
   const labels: Record<ViewName, string> = {
     index: "ホーム",
-    "ai-edit": "AI 編集",
     "jobs-hub": "ジョブ",
     "quality-hub": "全作品品質",
     pipeline: "パイプライン",

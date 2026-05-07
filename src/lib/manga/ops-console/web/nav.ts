@@ -20,7 +20,6 @@ export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = 
   { view: "quality", label: "品質監査", group: "episode" },
   { view: "improvements", label: "読者維持改善", group: "episode" },
   { view: "layers", label: "個別 layer 起動", group: "utility" },
-  { view: "ai-edit", label: "AI 編集", group: "utility" },
 ];
 
 export const GROUP_LABELS: Record<MenuGroup, string> = {
@@ -45,7 +44,6 @@ export const NO_SCOPE_VIEWS = new Set<ViewName>([
   "index",
   "jobs-hub",
   "quality-hub",
-  "ai-edit",
 ]);
 
 /** episode-scope の view か (それ以外は work-scope または scope なし)。 */

@@ -34,8 +34,8 @@ function menuButtonHtml(item: { view: ViewName; label: string }, currentView: Vi
   return `<button type="button" class="sidebar__menu-item${item.view === currentView ? " is-active" : ""}" data-view="${item.view}">${escapeHtml(item.label)}</button>`;
 }
 
-function groupItems(group: MenuGroup, includeAiEdit = false): Array<{ view: ViewName; label: string; group: MenuGroup }> {
-  return MENU.filter((item) => item.group === group && (includeAiEdit || item.view !== "ai-edit"));
+function groupItems(group: MenuGroup): Array<{ view: ViewName; label: string; group: MenuGroup }> {
+  return MENU.filter((item) => item.group === group);
 }
 
 function menuSectionHtml(group: MenuGroup, state: AppState): string {
@@ -63,13 +63,6 @@ function groupedMenuHtml(state: AppState): string {
     state.currentSlug && state.currentEpisode ? menuSectionHtml("episode", state) : "",
     state.currentSlug ? menuSectionHtml("utility", state) : "",
   ];
-  const aiEdit = MENU.find((item) => item.view === "ai-edit");
-  if (aiEdit) {
-    sections.push(`
-      <div class="sidebar__group sidebar__group--tail">
-        ${menuButtonHtml(aiEdit, state.currentView)}
-      </div>`);
-  }
   return sections.join("");
 }
 
