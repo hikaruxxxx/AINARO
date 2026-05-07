@@ -423,8 +423,22 @@ export type PanelV2 = {
   entities: PanelEntities;
   action: string;
   key_visual: string;
-  dialogue: Array<{ character_id: string; text: string }>;
-  monologue: Array<{ character_id: string; text: string }>;
+  dialogue: Array<{
+    character_id: string;
+    text: string;
+    /** 2026-05-07 追加: 吹き出し形状 */
+    bubble_shape?: "oval" | "rounded_square" | "thought_cloud" | "narration_box";
+    /** 2026-05-07 追加: tail 方向 (引き出し線の出る方向、speaker から panel 中心への方向) */
+    tail_direction?: "left" | "right" | "up" | "down";
+  }>;
+  monologue: Array<{
+    character_id: string;
+    text: string;
+    /** 2026-05-07 追加: 吹き出し形状 */
+    bubble_shape?: "oval" | "rounded_square" | "thought_cloud" | "narration_box";
+    /** 2026-05-07 追加: tail 方向 (引き出し線の出る方向、speaker から panel 中心への方向) */
+    tail_direction?: "left" | "right" | "up" | "down";
+  }>;
   narration: string[];
   /**
    * Phase Y WY-2 で追加 (後方互換 optional)。narration[i] と同じ index で対応する種別。
@@ -435,6 +449,8 @@ export type PanelV2 = {
   sfx: string[];
   /** L6 Continuity Resolve で注入される */
   continuity_group_ids?: string[];
+  /** 2026-05-07 追加: panel-level screentone 濃度。L9 prompt が反映 */
+  screentone_intensity?: "light" | "medium" | "dark";
 };
 
 export type StoryboardPageV2 = {
