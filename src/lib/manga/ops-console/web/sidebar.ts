@@ -19,14 +19,18 @@ function episodeLabel(n: number): string {
 }
 
 function groupedMenuHtml(currentView: ViewName): string {
-  const groups: MenuGroup[] = ["global", "here", "judge", "view", "work", "exec"];
+  const groups: MenuGroup[] = ["home", "inventory", "judge", "browse", "publish"];
   return groups
     .map((group) => {
       const items = MENU.filter((item) => item.group === group);
+      const homeButton =
+        group === "home"
+          ? `<button type="button" class="sidebar__menu-item${currentView === "index" ? " is-active" : ""}" data-view="index">ホーム</button>`
+          : "";
       return `
         <div class="sidebar__group">
           <h3 class="sidebar__group-title">${escapeHtml(GROUP_LABELS[group])}</h3>
-          ${items
+          ${homeButton}${items
             .map(
               (item) =>
                 `<button type="button" class="sidebar__menu-item${item.view === currentView ? " is-active" : ""}" data-view="${item.view}">${escapeHtml(item.label)}</button>`
