@@ -103,11 +103,20 @@ function scorePattern(args: {
   const penalty = historyPenalty(args.pattern, args.history, args.historyPenaltyDepth, args.historyPenaltyIntensity);
   const subtypeBonus = subtypeMatches(args.pattern, args.storyboardSubtype) ? 0.5 : 0;
   const importanceBonus = importanceMax(args.page) >= 4 && hasLargeSlot(args.pattern) ? 0.3 : 0;
+  // shot_type 多様性 bonus: 単調 page ペナルティではなく「shot 変化のある page」を優先する形で実装。
+  // 結果として shot 単調 page では小さい bonus が出ず、かつ 全 pattern 中で diversity-friendly な pattern (mixed shot 想定) が相対的に上位に来る。
+  // 2026-05-07 追加: shot_type 多様性 bonus
+  // 単調な構図 (同じ shot 連続) を避けるため、distinct shot_type / panel_count 比に応じて加点
+  const distinctShotTypes = new Set(args.page.panels.map((panel) => panel.shot_type)).size;
+  const diversityRatio = args.page.panels.length > 0 ? distinctShotTypes / args.page.panels.length : 0;
+  const diversityBonus =
+    diversityRatio >= 0.6 ? 0.5 : diversityRatio >= 0.4 ? 0.3 : diversityRatio >= 0.25 ? 0.1 : 0;
   const score =
     FREQUENCY_RANK[args.pattern.frequency] -
     penalty +
     subtypeBonus +
     importanceBonus +
+    diversityBonus +
     panelCountBonus(args.pattern, args.targetPanelCount);
 
   return {
