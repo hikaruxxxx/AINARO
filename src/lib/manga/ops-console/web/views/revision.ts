@@ -391,7 +391,15 @@ function parseVersion(version: string): number {
 }
 
 function assetUrl(path: string): string {
-  return path.startsWith("/") ? path : `/${path}`;
+  if (!path) return "";
+  if (path.startsWith("/")) return path;
+  // SPA モード (URL に /works/{slug}/... が含まれる) では画像も /works/{slug}/ プレフィックスが必要。
+  // scope 固定モードでは currentSlug が空 or default と一致 / server 側が default_slug 解決を担う。
+  const slug = store.state.currentSlug;
+  if (slug && !path.startsWith("works/")) {
+    return `/works/${encodeURIComponent(slug)}/${path}`;
+  }
+  return `/${path}`;
 }
 
 function defaultImagePath(layer: UiLayer, episode: number, pageNo: number): string {
