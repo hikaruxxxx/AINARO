@@ -12,6 +12,7 @@ import {
   REVISION_TAGS,
   isRevisionTag,
   type AdoptedVersions,
+  type EngagementAuditPageScore,
   type RevisionTag,
 } from "../../../revision-ui/types";
 import type { PagePlanPage, PanelV2 } from "../../../schemas-v2";
@@ -34,6 +35,14 @@ type PanelView = {
   readingOrder: number;
   importance?: number;
   shotType?: string;
+  /** page_one_shot 用 overlay 描画情報 (page_plan.panels[].rect) */
+  rect?: { x: number; y: number; w: number; h: number };
+  /** hover tooltip 用 (storyboard 由来) */
+  dialogue?: string[];
+  monologue?: string[];
+  narration?: string[];
+  sfx?: string[];
+  silence?: boolean;
 };
 
 type VersionView = {
@@ -218,6 +227,127 @@ const RV_CSS = `
 .rv-toast-ok { background: #16a34a; }
 .rv-toast-warn { background: #f59e0b; }
 .rv-toast-error { background: #dc2626; }
+/* --- page_one_shot: page-level view + overlay --- */
+.rv-page-card--shot { padding: 8px; }
+.rv-page-card--shot h3 { margin: 0 0 6px; padding: 0 4px; }
+.rv-page-shot {
+  position: relative;
+  width: 100%;
+  background: #f1f5f9;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.rv-page-shot-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #fff;
+}
+.rv-overlay-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.rv-overlay-rect {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  /* halo: 白縁背面 + 黒線前面 (写実画像に埋もれない 2 段重ね) */
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.85), inset 0 0 0 1px rgba(17,24,39,0.65);
+  border-radius: 1px;
+  transition: box-shadow 120ms ease-out, background 120ms ease-out;
+  overflow: visible;
+}
+.rv-overlay-rect:hover,
+.rv-overlay-rect:focus {
+  outline: none;
+  background: rgba(37,99,235,0.10);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.95), inset 0 0 0 2px rgba(37,99,235,0.85);
+}
+.rv-overlay-rect.rv-failed {
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.85), inset 0 0 0 2px rgba(220,38,38,0.85);
+}
+.rv-overlay-rect.rv-failed:hover {
+  background: rgba(220,38,38,0.12);
+}
+.rv-overlay-rect.rv-has-revision {
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.85), inset 0 0 0 2px rgba(245,158,11,0.85);
+}
+.rv-overlay-rect.rv-adopted-v2plus {
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.85), inset 0 0 0 2px rgba(22,163,74,0.85);
+}
+.rv-overlay-label {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(31,41,55,0.86);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.rv-overlay-rect .rv-rev-badge {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  min-width: 18px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: rgba(245,158,11,0.95);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  pointer-events: none;
+}
+.rv-page-version-badge {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(37,99,235,0.92);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+.rv-page-risk {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+.rv-page-risk-ok { background: #ecfdf5; color: #047857; border: 1px solid #6ee7b7; }
+.rv-page-risk-warn { background: #fff7ed; color: #b45309; border: 1px solid #fdba74; }
+.rv-page-risk-critical { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+.rv-page-boring {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 4px;
+}
 `;
 
 const TAG_LABELS: Record<RevisionTag, string> = {
@@ -388,12 +518,67 @@ function panelLookup(manifest: Manifest): Map<number, PanelView[]> {
         readingOrder: sb?.reading_order ?? planned.reading_order,
         importance: sb?.importance ?? planned.importance,
         shotType: sb?.shot_type,
+        rect: planned.rect,
+        dialogue: sb?.dialogue?.map((d) => d.text).filter((t): t is string => typeof t === "string" && t.length > 0),
+        monologue: sb?.monologue?.map((m) => m.text).filter((t): t is string => typeof t === "string" && t.length > 0),
+        narration: sb?.narration?.filter((t): t is string => typeof t === "string" && t.length > 0),
+        sfx: sb?.sfx?.filter((t): t is string => typeof t === "string" && t.length > 0),
+        silence: sb?.silence,
       };
     });
     panels.sort((a, b) => a.readingOrder - b.readingOrder);
     result.set(page.page_no, panels);
   }
   return result;
+}
+
+/**
+ * page_one_shot overlay 用キャンバスサイズを episode 全体から推定する。
+ * page_plan.panels[].rect は px (x+w, y+h の最大が紙面サイズ近似)。
+ */
+function computeCanvasSize(manifest: Manifest): { w: number; h: number } {
+  let w = 0;
+  let h = 0;
+  for (const page of manifest.page_plan.pages) {
+    for (const panel of page.panels) {
+      if (!panel.rect) continue;
+      w = Math.max(w, panel.rect.x + panel.rect.w);
+      h = Math.max(h, panel.rect.y + panel.rect.h);
+    }
+  }
+  // フォールバック: B6 縦比 1748x2480 (a07 capability profile 既定)
+  if (!Number.isFinite(w) || w <= 0) w = 1748;
+  if (!Number.isFinite(h) || h <= 0) h = 2480;
+  return { w, h };
+}
+
+/** engagement_audit.per_page_scores を page_no で引ける Map に */
+function engagementByPage(manifest: Manifest): Map<number, EngagementAuditPageScore> {
+  const result = new Map<number, EngagementAuditPageScore>();
+  for (const score of manifest.engagement_audit?.per_page_scores ?? []) {
+    if (typeof score.page_no === "number") result.set(score.page_no, score);
+  }
+  return result;
+}
+
+/** panel hover で出すツールチップテキスト (改行区切り、80 字 cap × 行) */
+function buildPanelTooltip(panel: PanelView): string {
+  const lines: string[] = [];
+  const head = `#${panel.readingOrder}${panel.shotType ? ` ${panel.shotType}` : ""}${panel.silence ? " (silence)" : ""}`;
+  lines.push(head);
+  if (panel.dialogue && panel.dialogue.length > 0) {
+    for (const t of panel.dialogue) lines.push(`「${t.slice(0, 80)}」`);
+  }
+  if (panel.monologue && panel.monologue.length > 0) {
+    for (const t of panel.monologue) lines.push(`(M) ${t.slice(0, 80)}`);
+  }
+  if (panel.narration && panel.narration.length > 0) {
+    for (const t of panel.narration) lines.push(`(N) ${t.slice(0, 80)}`);
+  }
+  if (panel.sfx && panel.sfx.length > 0) {
+    lines.push(`SFX: ${panel.sfx.join(" / ").slice(0, 80)}`);
+  }
+  return lines.join("\n");
 }
 
 function versionMap(manifest: Manifest, layer: UiLayer): Map<string, VersionView[]> {
@@ -612,6 +797,8 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
   const unresolved = unresolvedCountByPanel(manifest);
   const lastEntries = lastUnresolvedByPanel(manifest);
   const adopted = adoptedPanels(manifest);
+  const canvas = computeCanvasSize(manifest);
+  const engagement = engagementByPage(manifest);
   let total = 0;
   let shown = 0;
 
@@ -620,7 +807,10 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
   for (const page of pages) {
     const panels = lookup.get(page.page_no) ?? [];
     const pageFailedCount = panels.filter((panel) => failed.has(panel.queueKey)).length;
+    const isPageShot = page.render_strategy === "page_one_shot";
     const panelHtml: string[] = [];
+    let pageImagePath: string | null = null;
+    let pageShowVersion: string = "v1";
     for (const panel of panels) {
       total++;
       if (!passesFilter(state.filters, panel, failed, revised, adopted)) continue;
@@ -633,36 +823,105 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
         adoptedChoice?.image_path ?? latest?.image_path ?? defaultImagePath(state.layer, episode, panel.pageNo);
       const revisionCount = unresolvedCount(unresolved, panel);
       const lastEntry = lastInstruction(lastEntries, panel);
-      const tooltip = lastEntry
-        ? `指示 ${revisionCount} 件 / 最新: ${lastEntry.instruction.slice(0, 80)}`
+      const baseTooltip = isPageShot
+        ? buildPanelTooltip(panel)
+        : `#${panel.readingOrder} ${panel.shotType ?? ""}`.trim();
+      const stateTooltip = lastEntry
+        ? `\n指示 ${revisionCount} 件 / 最新: ${lastEntry.instruction.slice(0, 80)}`
         : failed.has(panel.queueKey)
-          ? "監査失敗 panel"
+          ? "\n監査失敗 panel"
           : "";
+      const tooltip = `${baseTooltip}${stateTooltip}`;
       const classes = ["rv-panel"];
+      if (isPageShot) classes.push("rv-overlay-rect");
       if (failed.has(panel.queueKey)) classes.push("rv-failed");
       if (hasRevision(revised, panel)) classes.push("rv-has-revision");
       if (showVersion !== "v1") classes.push("rv-adopted-v2plus");
       const panelNoAttr = panel.panelNo !== undefined ? ` data-panel-no="${panel.panelNo}"` : "";
-      panelHtml.push(`
-        <button type="button" class="${classes.join(" ")}"
-          data-panel-id="${escapeHtml(panel.queueKey)}"
-          data-page-no="${panel.pageNo}"
-          ${panelNoAttr}
-          data-image-path="${escapeHtml(imagePath)}"
-          data-for-version="${escapeHtml(showVersion)}"
-          title="${escapeHtml(tooltip)}">
-          <span class="rv-label">#${panel.readingOrder} ${escapeHtml(panel.shotType ?? "")}</span>
-          <span class="rv-version">${escapeHtml(showVersion)}</span>
-          ${revisionCount > 0 ? `<span class="rv-rev-badge">${revisionCount}</span>` : ""}
-          <img src="${escapeHtml(assetUrl(imagePath))}" loading="lazy" alt="${escapeHtml(panel.queueKey)}">
-        </button>
-      `);
+
+      if (isPageShot) {
+        // page_one_shot: overlay button (画像なし、% 配置)
+        pageImagePath = imagePath;
+        pageShowVersion = showVersion;
+        const rect = panel.rect;
+        if (!rect) continue;
+        const leftPct = (rect.x / canvas.w) * 100;
+        const topPct = (rect.y / canvas.h) * 100;
+        const widthPct = (rect.w / canvas.w) * 100;
+        const heightPct = (rect.h / canvas.h) * 100;
+        const styleAttr = `left:${leftPct.toFixed(3)}%;top:${topPct.toFixed(3)}%;width:${widthPct.toFixed(3)}%;height:${heightPct.toFixed(3)}%;`;
+        panelHtml.push(`
+          <button type="button" class="${classes.join(" ")}"
+            data-panel-id="${escapeHtml(panel.queueKey)}"
+            data-page-no="${panel.pageNo}"
+            ${panelNoAttr}
+            data-image-path="${escapeHtml(imagePath)}"
+            data-for-version="${escapeHtml(showVersion)}"
+            style="${styleAttr}"
+            title="${escapeHtml(tooltip)}"
+            aria-label="${escapeHtml(`page ${panel.pageNo} panel ${panel.readingOrder}`)}">
+            <span class="rv-overlay-label">#${panel.readingOrder}</span>
+            ${revisionCount > 0 ? `<span class="rv-rev-badge">${revisionCount}</span>` : ""}
+          </button>
+        `);
+      } else {
+        // panel_composite: 既存 panel grid
+        panelHtml.push(`
+          <button type="button" class="${classes.join(" ")}"
+            data-panel-id="${escapeHtml(panel.queueKey)}"
+            data-page-no="${panel.pageNo}"
+            ${panelNoAttr}
+            data-image-path="${escapeHtml(imagePath)}"
+            data-for-version="${escapeHtml(showVersion)}"
+            title="${escapeHtml(tooltip)}">
+            <span class="rv-label">#${panel.readingOrder} ${escapeHtml(panel.shotType ?? "")}</span>
+            <span class="rv-version">${escapeHtml(showVersion)}</span>
+            ${revisionCount > 0 ? `<span class="rv-rev-badge">${revisionCount}</span>` : ""}
+            <img src="${escapeHtml(assetUrl(imagePath))}" loading="lazy" alt="${escapeHtml(panel.queueKey)}">
+          </button>
+        `);
+      }
     }
     if (panelHtml.length === 0) continue;
+
+    const score = engagement.get(page.page_no);
+    const headerBadges: string[] = [];
+    if (score) {
+      const riskClass =
+        score.drop_off_risk >= 70
+          ? "rv-page-risk-critical"
+          : score.drop_off_risk >= 50
+            ? "rv-page-risk-warn"
+            : "rv-page-risk-ok";
+      headerBadges.push(
+        `<span class="rv-page-risk ${riskClass}" title="${escapeHtml(score.comment ?? "")}">risk ${score.drop_off_risk}</span>`
+      );
+      if (score.boring_flagged) {
+        headerBadges.push(
+          `<span class="rv-page-boring" title="${escapeHtml(score.boring_reason ?? "boring flagged")}">⚠ boring</span>`
+        );
+      }
+    }
+    if (pageFailedCount > 0) {
+      headerBadges.push(`<span class="rv-audit-fail">audit failed: ${pageFailedCount}</span>`);
+    }
+
+    let body: string;
+    if (isPageShot && pageImagePath) {
+      const aspect = `${canvas.w}/${canvas.h}`;
+      body = `<div class="rv-page-shot" style="aspect-ratio:${aspect};">
+        <img class="rv-page-shot-img" src="${escapeHtml(assetUrl(pageImagePath))}" loading="lazy" alt="${escapeHtml(`page_${page.page_no} ${pageShowVersion}`)}">
+        <div class="rv-overlay-layer">${panelHtml.join("")}</div>
+        <span class="rv-page-version-badge">${escapeHtml(pageShowVersion)}</span>
+      </div>`;
+    } else {
+      body = `<div class="rv-panel-grid">${panelHtml.join("")}</div>`;
+    }
+
     pageHtml.push(`
-      <section class="rv-page-card">
-        <h3>P.${page.page_no} <span class="rv-page-role">[${escapeHtml(String(page.page_role))}]</span>${pageFailedCount > 0 ? `<span class="rv-audit-fail">audit failed: ${pageFailedCount}</span>` : ""}</h3>
-        <div class="rv-panel-grid">${panelHtml.join("")}</div>
+      <section class="rv-page-card${isPageShot ? " rv-page-card--shot" : ""}">
+        <h3>P.${page.page_no} <span class="rv-page-role">[${escapeHtml(String(page.page_role))}]</span>${headerBadges.join("")}</h3>
+        ${body}
       </section>
     `);
   }
