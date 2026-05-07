@@ -11,21 +11,21 @@ const ICONS: Record<ThemeMode, string> = {
 };
 
 const NEXT: Record<ThemeMode, ThemeMode> = {
-  light: "system",
-  dark: "light",
-  system: "dark",
+  light: "dark",
+  dark: "system",
+  system: "light",
 };
 
 const TITLES: Record<ThemeMode, string> = {
-  light: "ライトモード",
-  dark: "ダークモード",
-  system: "システム連動",
+  light: "ダークに切替",
+  dark: "システムに合わせる",
+  system: "ライトに切替",
 };
 
 export function mountThemeToggle(root: HTMLElement): () => void {
   const render = (): void => {
     const cur = getTheme();
-    root.innerHTML = `<button type="button" class="nc-theme-toggle nc-button nc-button--ghost nc-button--sm" title="${TITLES[cur]} (クリックで切替)" aria-label="theme: ${cur}">${ICONS[cur]}</button>`;
+    root.innerHTML = `<button type="button" class="nc-theme-toggle nc-button nc-button--ghost nc-button--sm" title="${TITLES[cur]}" aria-label="theme: ${cur}">${ICONS[cur]}</button>`;
   };
 
   const handler = (): void => {

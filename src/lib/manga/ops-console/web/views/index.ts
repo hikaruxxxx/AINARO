@@ -26,12 +26,12 @@ const CSS = `
 .idx-view { display:grid; gap:18px; max-width: 1100px; }
 .idx-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
 .idx-head h2 { margin:0; font-size:22px; }
-.idx-head p { margin:0; color:#526076; font-size:13px; }
+.idx-head p { margin:0; color:var(--text-secondary); font-size:13px; }
 .idx-section { display:grid; gap:var(--space-2); }
 .idx-section-title { margin: 0 0 var(--space-2); font-size: var(--fs-lg); }
 .idx-grid { display:grid; gap:14px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-.idx-card { position:relative; background:#fff; border:1px solid #dbe1ea; border-radius:10px; padding:14px; display:grid; gap:10px; }
-.idx-card h3 { margin:0; font-size:16px; line-height:1.4; }
+.idx-card { position:relative; background:var(--surface-elevated); border:1px solid var(--border-default); border-radius:10px; padding:14px; display:grid; gap:10px; }
+.idx-card h3 { margin:0; font-size:16px; line-height:1.4; color:var(--text-primary); }
 .idx-card .idx-slug { color:#64748b; font-size:12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .idx-eps { display:flex; gap:6px; flex-wrap:wrap; }
 .idx-ep-btn { min-height:30px; border:1px solid #c7cfdb; border-radius:6px; background:#fff; color:#243044; padding:0 10px; font:inherit; font-size:13px; cursor:pointer; }
@@ -39,11 +39,13 @@ const CSS = `
 .idx-fav-btn { position:absolute; top:8px; right:8px; background:transparent; border:0; cursor:pointer; font-size:18px; color:var(--text-tertiary); line-height:1; }
 .idx-fav-btn.is-favorited { color:var(--color-warning); }
 .idx-empty-eps { color:#64748b; font-size:12px; }
-.idx-empty { padding:32px; text-align:center; color:#526076; font-size:14px; background:#fff; border:1px dashed #c7cfdb; border-radius:10px; }
+.idx-empty { padding:32px; text-align:center; color:var(--text-secondary); font-size:14px; background:var(--surface-elevated); border:1px dashed var(--border-strong); border-radius:10px; }
 .idx-spacer { flex: 1 1 auto; }
 .idx-modal-body { display:grid; gap:var(--space-3); padding:var(--space-4); }
 .idx-modal-head { display:flex; align-items:center; gap:var(--space-2); }
 .idx-modal-title { margin:0; font-size:var(--fs-xl); }
+.idx-modal-close { min-width:32px; padding:0; font-size:18px; line-height:1; }
+.idx-field-error { min-height:18px; color:var(--color-danger); font-size:var(--fs-sm); }
 .idx-actions { display:flex; justify-content:flex-end; gap:var(--space-2); }
 .idx-help-btn { min-width:32px; min-height:32px; padding:0; border-radius:999px; }
 .idx-glossary dl { display:grid; gap:10px; margin:0; }
@@ -86,6 +88,8 @@ type ViewState = {
   dashboardLoading: boolean;
   toast: { message: string; kind: "success" | "warning" | "danger" | "info" } | null;
 };
+
+const SLUG_REGEX = /^[a-z0-9][a-z0-9_-]*$/;
 
 function ensureStyles(): void {
   if (document.getElementById("idx-styles")) return;
@@ -321,16 +325,17 @@ function renderModal(state: ViewState): string {
   if (!state.modalOpen) return "";
   const disabled = state.creating ? " disabled" : "";
   return `
-    <div class="nc-modal is-open" id="idx-new-work-modal">
+    <div class="nc-modal is-open" id="idx-new-work-modal" data-action="close-new-work">
       <form class="nc-modal__card nc-modal__card--md idx-modal-body" data-new-work-form="1">
         <div class="idx-modal-head">
           <h3 class="idx-modal-title">新規作品</h3>
           <span class="idx-spacer"></span>
-          <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-action="close-new-work"${disabled}>閉じる</button>
+          <button type="button" class="nc-button nc-button--ghost nc-button--sm idx-modal-close" data-action="close-new-work" aria-label="閉じる"${disabled}>×</button>
         </div>
         <label class="nc-field">
           <span class="nc-field__label">slug</span>
-          <input class="nc-field__input" name="slug" required pattern="[a-z0-9][a-z0-9_-]*" placeholder="my-new-work">
+          <input class="nc-field__input" name="slug" required pattern="[a-z0-9][a-z0-9_-]*" placeholder="my-new-work" data-slug-input>
+          <span class="idx-field-error" data-slug-error></span>
         </label>
         <label class="nc-field">
           <span class="nc-field__label">title</span>
@@ -442,6 +447,19 @@ function setToast(state: ViewState, container: HTMLElement, message: string, kin
   }, 3000);
 }
 
+function validateSlugInput(container: HTMLElement): boolean {
+  const input = container.querySelector<HTMLInputElement>("[data-slug-input]");
+  const error = container.querySelector<HTMLElement>("[data-slug-error]");
+  if (!input) return true;
+  const value = input.value.trim();
+  const ok = SLUG_REGEX.test(value);
+  const message = value && !ok ? "小文字英数字で開始し、小文字英数字・-・_ のみ使用できます。" : "";
+  input.setCustomValidity(message);
+  input.toggleAttribute("aria-invalid", Boolean(message));
+  if (error) error.textContent = message;
+  return ok;
+}
+
 export function mountIndexView(container: HTMLElement): () => void {
   ensureStyles();
   const controller = new AbortController();
@@ -516,6 +534,8 @@ export function mountIndexView(container: HTMLElement): () => void {
         return;
       }
       if (action === "close-new-work" && !state.creating) {
+        const card = target.closest(".nc-modal__card");
+        if (card && !target.closest<HTMLButtonElement>("[data-action='close-new-work']")) return;
         state.modalOpen = false;
         renderFromState();
         return;
@@ -557,11 +577,31 @@ export function mountIndexView(container: HTMLElement): () => void {
   );
 
   container.addEventListener(
+    "input",
+    (event) => {
+      const target = event.target;
+      if (target instanceof HTMLInputElement && target.matches("[data-slug-input]")) validateSlugInput(container);
+    },
+    { signal: controller.signal }
+  );
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.key !== "Escape" || !state.modalOpen || state.creating) return;
+      state.modalOpen = false;
+      renderFromState();
+    },
+    { signal: controller.signal }
+  );
+
+  container.addEventListener(
     "submit",
     (event) => {
       event.preventDefault();
       const form = event.target;
       if (!(form instanceof HTMLFormElement) || !form.dataset.newWorkForm) return;
+      if (!validateSlugInput(container)) return;
       if (!form.reportValidity()) return;
       const data = new FormData(form);
       state.creating = true;

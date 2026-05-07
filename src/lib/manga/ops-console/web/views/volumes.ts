@@ -25,6 +25,8 @@ const CSS = `
 .vol-preview { display: grid; gap: var(--space-3); grid-template-columns: minmax(180px, 240px) minmax(280px, 520px); align-items: start; }
 .vol-preview embed { width: 100%; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-elevated); }
 .vol-preview__links { grid-column: 1 / -1; display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.vol-kdp-meta { display: grid; gap: var(--space-2); padding: var(--space-2); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-sunken); }
+.vol-kdp-meta summary { cursor: pointer; font-weight: var(--fw-bold); }
 .vol-log { max-height: 420px; }
 .vol-modal-body { display: grid; gap: var(--space-3); padding: var(--space-4); }
 .vol-modal-body h3 { margin: 0; }
@@ -109,8 +111,8 @@ function renderPreview(slug: string, volume: VolumeInfo): string {
     ${cover ? `<embed src="${escapeHtml(pdfUrl(slug, volume.volume, "cover.pdf"))}#toolbar=0" type="application/pdf" height="320">` : ""}
     ${manuscript ? `<embed src="${escapeHtml(pdfUrl(slug, volume.volume, "manuscript.pdf"))}#toolbar=0" type="application/pdf" height="520">` : ""}
     <div class="vol-preview__links">
-      ${manuscript ? `<a class="nc-button nc-button--secondary nc-button--sm" href="${escapeHtml(pdfUrl(slug, volume.volume, "manuscript.pdf"))}" target="_blank" rel="noreferrer">manuscript.pdf を新規タブで開く</a>` : ""}
-      ${cover ? `<a class="nc-button nc-button--secondary nc-button--sm" href="${escapeHtml(pdfUrl(slug, volume.volume, "cover.pdf"))}" target="_blank" rel="noreferrer">cover.pdf を新規タブで開く</a>` : ""}
+      ${manuscript ? `<a class="nc-button nc-button--primary" href="${escapeHtml(pdfUrl(slug, volume.volume, "manuscript.pdf"))}" target="_blank" rel="noreferrer">manuscript.pdf を新規タブで開く</a>` : ""}
+      ${cover ? `<a class="nc-button nc-button--primary" href="${escapeHtml(pdfUrl(slug, volume.volume, "cover.pdf"))}" target="_blank" rel="noreferrer">cover.pdf を新規タブで開く</a>` : ""}
     </div>
   </div>`;
 }
@@ -149,10 +151,15 @@ function renderVolume(slug: string, volume: VolumeInfo, running: boolean): strin
       ${fileCard("kdp-input.md", volume.kdp_status.kdp_input_md)}
     </div>
     <div class="vol-actions">
-      <button type="button" class="nc-button nc-button--primary" data-l13-volume="${volume.volume}" ${running ? "disabled" : ""}>L13 起動 (production)</button>
-      <button type="button" class="nc-button nc-button--secondary" data-start-layer="kdp-dry-run" data-volume="${volume.volume}" ${running ? "disabled" : ""}>dry-run</button>
+      <button type="button" class="nc-button nc-button--primary" data-l13-volume="${volume.volume}" title="production は実際に manuscript.pdf / cover.pdf を出力" ${running ? "disabled" : ""}>L13 起動 (production)</button>
+      <button type="button" class="nc-button nc-button--secondary" data-start-layer="kdp-dry-run" data-volume="${volume.volume}" title="dry-run は L13 を起動するが PDF は捨てる、production は実際に出力" ${running ? "disabled" : ""}>dry-run</button>
       <button type="button" class="nc-button nc-button--secondary" data-start-layer="scrape-bsr" data-volume="${volume.volume}" ${running ? "disabled" : ""}>BSR 取得</button>
     </div>
+    <details class="vol-kdp-meta">
+      <summary>KDP メタを編集</summary>
+      <div class="vol-meta">KDP メタ view でタイトル・キーワード・カテゴリを編集します。</div>
+      <button type="button" class="nc-button nc-button--primary nc-button--sm" data-open-kdp-meta>KDP メタ view を開く</button>
+    </details>
     ${renderPreview(slug, volume)}
   </section>`;
 }
@@ -253,6 +260,10 @@ export function mountVolumesView(container: HTMLElement): () => void {
     if (target.closest("[data-action='close-modal']")) {
       state.modal = null;
       render(container, state);
+      return;
+    }
+    if (target.closest("[data-open-kdp-meta]")) {
+      store.update({ currentView: "kdp-metadata" });
       return;
     }
     const l13 = target.closest<HTMLButtonElement>("[data-l13-volume]");

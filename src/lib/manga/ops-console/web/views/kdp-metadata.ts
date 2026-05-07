@@ -34,6 +34,10 @@ const CSS = `
 .kdp-keyword-issue { margin: 0; font-size: var(--fs-sm); line-height: 1.45; }
 .kdp-keyword-issue--error { color: var(--color-danger); }
 .kdp-keyword-issue--warning { color: var(--color-warning); }
+.kdp-keyword-state { font-size: var(--fs-sm); font-weight: var(--fw-bold); }
+.kdp-keyword-state--ok { color: var(--color-success); }
+.kdp-keyword-state--warn { color: var(--color-warning); }
+.kdp-keyword-state--danger { color: var(--color-danger); }
 .kdp-keywords__summary { color: var(--text-secondary); font-size: var(--fs-sm); }
 `;
 
@@ -72,16 +76,32 @@ function issueClass(validation: KeywordValidationResult, issue: KeywordValidatio
   return validation.errors.includes(issue) ? "kdp-keyword-issue--error" : "kdp-keyword-issue--warning";
 }
 
+function localKeywordState(keyword: string, all: string[]): { kind: "ok" | "warn" | "danger"; label: string } {
+  const text = keyword.trim();
+  if (!text) return { kind: "warn", label: "未入力" };
+  if (/kindle unlimited|ku|無料|ランキング1位/i.test(text)) return { kind: "danger", label: "NG語の可能性" };
+  if (/\s{2,}/.test(text)) return { kind: "warn", label: "空白が連続" };
+  if (all.filter((item) => item.trim() === text).length > 1) return { kind: "warn", label: "重複" };
+  return { kind: "ok", label: "OK" };
+}
+
 function renderKeywords(kdp: WorkKdpMetadataBlock, validation: KeywordValidationResult | null): string {
   const picks = kdp.keyword_picks_7 ?? [];
   const rows = Array.from({ length: 7 }, (_, i) => {
     const issues = keywordIssues(validation, i);
+    const state = localKeywordState(picks[i] ?? "", picks);
+    const kind = issues.some((issue) => validation?.errors.includes(issue))
+      ? "danger"
+      : issues.length > 0
+        ? "warn"
+        : state.kind;
     return `
       <div class="kdp-keyword-row">
         <label class="nc-field">
           <span class="nc-field__label">検索キーワード ${i + 1}</span>
-          <input class="nc-field__input" name="keyword_${i}" value="${escapeHtml(picks[i] ?? "")}">
+          <input class="nc-field__input" name="keyword_${i}" value="${escapeHtml(picks[i] ?? "")}" data-keyword-index="${i}">
         </label>
+        <span class="kdp-keyword-state kdp-keyword-state--${kind}" data-keyword-state="${i}">${escapeHtml(kind === "danger" ? "NG" : kind === "warn" ? state.label : "OK")}</span>
         ${validation ? issues.map((issue) => `<p class="kdp-keyword-issue ${issueClass(validation, issue)}">${escapeHtml(issue.message)}</p>`).join("") : ""}
       </div>`;
   }).join("");
@@ -102,7 +122,7 @@ function renderCategories(kdp: WorkKdpMetadataBlock): string {
   return `<div class="kdp-categories">${Array.from({ length: 3 }, (_, i) => `
     <label class="nc-field">
       <span class="nc-field__label">カテゴリ ${i + 1}</span>
-      <input class="nc-field__input" name="category_${i}" value="${escapeHtml(categories[i] ?? "")}">
+      <input class="nc-field__input" name="category_${i}" value="${escapeHtml(categories[i] ?? "")}" placeholder="Kindleストア > マンガ・コミックス > 異世界ファンタジー (2026 仕様 = 3 枠まで、追加申請廃止)">
     </label>`).join("")}</div>`;
 }
 
@@ -191,6 +211,19 @@ function inputList(form: HTMLFormElement, prefix: string, count: number): string
   return Array.from({ length: count }, (_, i) => String(data.get(`${prefix}_${i}`) ?? "").trim()).filter(Boolean);
 }
 
+function updateKeywordStates(container: HTMLElement): void {
+  const inputs = Array.from(container.querySelectorAll<HTMLInputElement>("[data-keyword-index]"));
+  const values = inputs.map((input) => input.value);
+  for (const input of inputs) {
+    const index = Number(input.dataset.keywordIndex);
+    const el = container.querySelector<HTMLElement>(`[data-keyword-state="${index}"]`);
+    if (!el) continue;
+    const state = localKeywordState(input.value, values);
+    el.className = `kdp-keyword-state kdp-keyword-state--${state.kind}`;
+    el.textContent = state.kind === "danger" ? "NG" : state.kind === "warn" ? state.label : "OK";
+  }
+}
+
 function draftFromForm(form: HTMLFormElement): WorkKdpMetadataBlock {
   const data = new FormData(form);
   const descriptionRaw = String(data.get("description_seed") ?? "").trim();
@@ -222,6 +255,11 @@ export function mountKdpMetadataView(container: HTMLElement): () => void {
   };
 
   void load(state, container);
+
+  container.addEventListener("input", (event) => {
+    const target = event.target;
+    if (target instanceof HTMLInputElement && target.matches("[data-keyword-index]")) updateKeywordStates(container);
+  }, { signal: controller.signal });
 
   container.addEventListener("click", (event) => {
     const target = event.target;

@@ -140,7 +140,7 @@ const RV_CSS = `
 .rv-filter-check:has(input:checked) { background: #2563eb; border-color: #2563eb; color: #fff; }
 .rv-main { min-height: 240px; }
 .rv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px; }
-.rv-page-card { background: #fff; border: 2px solid #e5e7eb; border-radius: 8px; padding: 10px; }
+.rv-page-card { background: var(--surface-elevated); border: 2px solid var(--border-subtle); border-radius: 8px; padding: 10px; }
 .rv-page-card h3 { margin: 0 0 8px; font-size: 14px; display: flex; gap: 8px; align-items: center; }
 .rv-page-role { color: #6b7280; font-weight: 400; font-size: 12px; }
 .rv-audit-fail { color: #dc2626; font-size: 11px; font-weight: 700; margin-left: auto; }
@@ -151,7 +151,7 @@ const RV_CSS = `
   border-radius: 4px;
   overflow: hidden;
   cursor: pointer;
-  background: #fafafa;
+  background: var(--surface-sunken);
   aspect-ratio: 1;
 }
 .rv-panel:focus { outline: 3px solid rgba(37,99,235,0.22); border-color: #2563eb; }

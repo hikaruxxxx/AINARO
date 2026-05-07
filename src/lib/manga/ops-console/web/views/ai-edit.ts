@@ -22,11 +22,14 @@ const CSS = `
 .ai-diff h3 { margin: 0; font-size: var(--fs-lg); }
 .ai-modal-body { display: grid; gap: var(--space-3); padding: var(--space-4); }
 .ai-modal-body h3 { margin: 0; }
+.ai-history-list { display: grid; gap: var(--space-2); max-height: 70vh; overflow: auto; }
+.ai-history-item { display: grid; gap: var(--space-1); padding: var(--space-2); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-sunken); }
 .ai-warning { color: var(--color-danger); font-weight: var(--fw-bold); }
 .ai-toast { position: fixed; top: 64px; right: 18px; z-index: 50; }
 `;
 
 type ConfirmAction = "commit" | "discard";
+type HistoryItem = { ts: string; scope: string; target: string; prompt: string; diffStat: string };
 
 type ViewState = {
   scope: string;
@@ -39,11 +42,16 @@ type ViewState = {
   diffStat: string;
   diff: string;
   confirm: ConfirmAction | null;
+  historyOpen: boolean;
+  history: HistoryItem[];
   toast: { message: string; kind: "success" | "warning" | "danger" | "info" } | null;
   /** preset 由来の出発点情報。完了後の「元の view へ戻る」用 */
   originLayer: string | null;
   originView: ViewName | null;
 };
+
+const STORAGE_KEY = "novelis.ai-edit.draft";
+const HISTORY_KEY = "novelis.ai-edit.history";
 
 function ensureStyles(): void {
   if (document.getElementById("ai-edit-styles")) return;
@@ -74,6 +82,64 @@ function renderConfirm(state: ViewState): string {
         <button type="button" class="nc-button nc-button--secondary" data-action="cancel-confirm">キャンセル</button>
         <button type="button" class="nc-button ${isDiscard ? "nc-button--danger" : "nc-button--primary"}" data-action="${isDiscard ? "confirm-discard" : "confirm-commit"}">${isDiscard ? "破棄する" : "コミットする"}</button>
       </div>
+    </div>
+  </div>`;
+}
+
+function loadDraft(): Partial<Pick<ViewState, "scope" | "target" | "prompt">> {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}") as Partial<Pick<ViewState, "scope" | "target" | "prompt">>;
+  } catch {
+    return {};
+  }
+}
+
+function saveDraft(state: ViewState): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ scope: state.scope, target: state.target, prompt: state.prompt }));
+  } catch {
+    // localStorage が使えない環境では復元なしで動かす。
+  }
+}
+
+function loadHistory(): HistoryItem[] {
+  try {
+    const value = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? "[]") as HistoryItem[];
+    return Array.isArray(value) ? value.slice(0, 12) : [];
+  } catch {
+    return [];
+  }
+}
+
+function pushHistory(state: ViewState): void {
+  const item: HistoryItem = {
+    ts: new Date().toISOString(),
+    scope: state.scope,
+    target: state.target,
+    prompt: state.prompt,
+    diffStat: state.diffStat,
+  };
+  state.history = [item, ...state.history].slice(0, 12);
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(state.history));
+  } catch {
+    // TODO: server-side history source ができたら置き換える。
+  }
+}
+
+function renderHistory(state: ViewState): string {
+  if (!state.historyOpen) return "";
+  return `<div class="nc-modal is-open" data-action="close-history">
+    <div class="nc-modal__card nc-modal__card--md ai-modal-body">
+      <h3>AI 編集履歴</h3>
+      <div class="ai-history-list">
+        ${state.history.map((item) => `<article class="ai-history-item">
+          <div class="ai-info">${escapeHtml(new Date(item.ts).toLocaleString())} / ${escapeHtml(item.scope)}${item.target ? ` / ${escapeHtml(item.target)}` : ""}</div>
+          <pre class="nc-code-block">${escapeHtml(item.prompt)}</pre>
+          ${item.diffStat ? `<pre class="nc-code-block">${escapeHtml(item.diffStat)}</pre>` : ""}
+        </article>`).join("") || '<div class="nc-empty">履歴はまだありません。</div>'}
+      </div>
+      <div class="ai-actions"><button type="button" class="nc-button nc-button--secondary" data-action="close-history">閉じる</button></div>
     </div>
   </div>`;
 }
@@ -117,11 +183,15 @@ function render(container: HTMLElement, state: ViewState): void {
         </label>
         <div class="ai-actions">
           <button type="button" class="nc-button nc-button--primary" data-action="run" ${state.running ? "disabled" : ""}>実行 (Codex を起動)</button>
-          <button type="button" class="nc-button nc-button--secondary" data-action="jobs">履歴を見る</button>
+          <button type="button" class="nc-button nc-button--secondary" data-action="history">履歴を見る</button>
+          <button type="button" class="nc-button nc-button--ghost" data-action="jobs">Jobs Hub</button>
         </div>
       </section>
       <section class="ai-progress">
-        <pre class="nc-code-block">${escapeHtml(state.logs.join("\n") || "log はここに表示されます")}</pre>
+        <details ${state.running || state.logs.length ? "open" : ""}>
+          <summary>ログ</summary>
+          <pre class="nc-code-block">${escapeHtml(state.logs.join("\n") || "log はここに表示されます")}</pre>
+        </details>
         ${state.diffStat || state.diff ? `<div class="ai-diff">
           <h3>変更差分</h3>
           <pre class="nc-code-block">${escapeHtml(state.diffStat || "(diff stat なし)")}</pre>
@@ -134,6 +204,7 @@ function render(container: HTMLElement, state: ViewState): void {
       </section>
     </div>
     ${renderConfirm(state)}
+    ${renderHistory(state)}
     ${state.toast ? `<div class="ai-toast nc-toast nc-toast--${state.toast.kind}">${escapeHtml(state.toast.message)}</div>` : ""}
   `;
 }
@@ -142,6 +213,7 @@ function syncForm(container: HTMLElement, state: ViewState): void {
   state.scope = container.querySelector<HTMLSelectElement>("#ai-scope")?.value || "_console";
   state.target = container.querySelector<HTMLInputElement>("#ai-target")?.value.trim() ?? "";
   state.prompt = container.querySelector<HTMLTextAreaElement>("#ai-prompt")?.value ?? "";
+  saveDraft(state);
 }
 
 function toast(container: HTMLElement, state: ViewState, message: string, kind: NonNullable<ViewState["toast"]>["kind"]): void {
@@ -220,10 +292,11 @@ export function mountAiEditView(container: HTMLElement): () => void {
   const controller = new AbortController();
   // pipeline / 各 layer view から渡された preset を消費する (1 回限り)。
   const preset = store.state.aiEditPreset;
+  const draft = loadDraft();
   const state: ViewState = {
-    scope: preset?.scope || store.state.currentSlug || "_console",
-    target: preset?.target ?? "",
-    prompt: preset?.prompt ?? "",
+    scope: preset?.scope || draft.scope || store.state.currentSlug || "_console",
+    target: preset?.target ?? draft.target ?? "",
+    prompt: preset?.prompt ?? draft.prompt ?? "",
     running: false,
     jobId: null,
     state: null,
@@ -231,6 +304,8 @@ export function mountAiEditView(container: HTMLElement): () => void {
     diffStat: "",
     diff: "",
     confirm: null,
+    historyOpen: false,
+    history: loadHistory(),
     toast: null,
     originLayer: preset?.originLayer ?? null,
     originView: preset?.originView && isViewName(preset.originView) ? preset.originView : null,
@@ -250,6 +325,16 @@ export function mountAiEditView(container: HTMLElement): () => void {
     else if (action === "back-origin") {
       if (state.originView) store.update({ currentView: state.originView });
     }
+    else if (action === "history") {
+      state.historyOpen = true;
+      render(container, state);
+    }
+    else if (action === "close-history") {
+      const card = target.closest(".nc-modal__card");
+      if (card && !target.closest<HTMLElement>("[data-action='close-history']")) return;
+      state.historyOpen = false;
+      render(container, state);
+    }
     else if (action === "jobs") store.update({ currentView: "jobs-hub", currentSlug: "", currentEpisode: 0 });
     else if (action === "commit") {
       state.confirm = "commit";
@@ -265,6 +350,7 @@ export function mountAiEditView(container: HTMLElement): () => void {
       void apiAiEditCommit(message)
         .then((result) => {
           state.confirm = null;
+          pushHistory(state);
           state.diff = "";
           state.diffStat = "";
           toast(container, state, `commit 完了: ${result.sha.slice(0, 8)}`, "success");

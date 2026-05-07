@@ -70,7 +70,7 @@ const LAYERS: LayerCard[] = [
 const CSS = `
 .lyr-view { display:grid; grid-template-columns:minmax(360px, 0.9fr) minmax(420px, 1.1fr); gap:16px; align-items:start; }
 .lyr-cards { display:grid; gap:10px; }
-.lyr-card { background:#fff; border:1px solid #dbe1ea; border-radius:8px; padding:12px; display:grid; gap:10px; }
+.lyr-card { background:var(--surface-elevated); border:1px solid var(--border-default); border-radius:8px; padding:12px; display:grid; gap:10px; }
 .lyr-card-head { display:flex; align-items:center; gap:8px; }
 .lyr-card h3 { margin:0; font-size:15px; }
 .lyr-scope { color:#64748b; font-size:12px; margin-left:auto; }
@@ -86,7 +86,7 @@ const CSS = `
 .lyr-badge.running { background:#dbeafe; color:#1d4ed8; }
 .lyr-badge.succeeded { background:#dcfce7; color:#166534; }
 .lyr-badge.failed,.lyr-badge.aborted { background:#fee2e2; color:#991b1b; }
-.lyr-side { background:#fff; border:1px solid #dbe1ea; border-radius:8px; min-height:520px; display:grid; grid-template-rows:auto auto minmax(0,1fr); }
+.lyr-side { background:var(--surface-base); border:1px solid var(--border-default); border-radius:8px; min-height:520px; display:grid; grid-template-rows:auto auto minmax(0,1fr); }
 .lyr-side-head { padding:12px; border-bottom:1px solid #e5e7eb; display:flex; gap:8px; align-items:center; }
 .lyr-side-head h3 { margin:0; font-size:15px; }
 .lyr-jobs { display:flex; gap:6px; padding:10px 12px; border-bottom:1px solid #e5e7eb; overflow:auto; }
