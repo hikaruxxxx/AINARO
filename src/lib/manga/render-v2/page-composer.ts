@@ -7,6 +7,11 @@
  * - 余白白で塗りつぶし
  * - 各 panel の rect に panel PNG を fit (cover) で貼り付け、枠線 2px を描画
  * - 出力は renders/p{NN}.png に上書き
+ *
+ * @deprecated 2026-05-07: render_strategy 既定が page_one_shot に切り替わったため
+ *   通常経路では使用しない。capability.recommended_strategy=panel_composite override
+ *   時の fallback としてのみ残置。新規ページの実装には composePagePrompt 経由の
+ *   page_one_shot 経路を使うこと。詳細: docs/plans/manga/pipeline-v2.md "render_strategy 既定"
  */
 import sharp from "sharp";
 import { promises as fs } from "node:fs";
@@ -19,6 +24,9 @@ const PAGE_W = 1748;
 const PAGE_H = 2480;
 const FRAME_BORDER = 4; // px
 
+/**
+ * @deprecated 2026-05-07: panel_composite fallback 専用。新規呼び出し禁止。
+ */
 export async function composePanelsIntoPage(args: {
   pageNo: number;
   rendersDir: string;

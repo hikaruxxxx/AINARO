@@ -321,8 +321,9 @@ async function main() {
         failed++;
       }
     } else {
-      // panel_composite: 各パネルを生成 → 後で合成 (本 MVP では先に panels 生成だけ実施、合成は別 layer 想定)
-      console.warn(`[L09] panel_composite scope: page ${page.page_no} – panels generated separately, composition not yet implemented in v2 MVP`);
+      // panel_composite: 各パネルを生成 → 後で合成 (capability override 時の fallback)
+      // 2026-05-07: 既定は page_one_shot。panel_composite 経路は @deprecated 扱い。
+      console.warn(`[L09] DEPRECATED: panel_composite branch hit for page ${page.page_no}. Default render_strategy is page_one_shot. Check capability.recommended_strategy override or page_plan migration.`);
       // revisionEntry が特定 panel を狙う場合、その panel のみ生成
       const targetPanels = revisionEntry && revisionEntry.panel_id !== `page_${page.page_no}`
         ? page.panels.filter((pp) => pp.panel_id === revisionEntry!.panel_id)

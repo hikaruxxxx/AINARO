@@ -49,12 +49,24 @@ L8.7 Name Approval        serve-ops.ts の ops console SPA で a/r 操作 → na
 ═══ PHASE 3: RENDER (per ep) ═══
 L9  Render                 page_plan + resolved_refs + name_approval (gate) → renders/p{NN}.png (吹き出し・ナレーション・擬音を画像内に焼き込み)
                           ※ approved 以外のページは skip / hard fail (--skip-name-gate で回避可)
+                          ※ 2026-05-07〜 render_strategy=page_one_shot 既定 (1ページ 1 codex コール + LAYOUT GEOMETRY 注入)
 L11 Audit                  renders + bible → audit.json
 L12 Repair                 audit.failed → re-run L7-L9 for failed panels
 
 ═══ PHASE 4: PUBLISH (per volume) ═══
 L13 KDP Package            volumes/vNN/episodes 全部 → kdp/{manuscript,cover}.pdf
 ```
+
+## render_strategy 既定 (2026-05-07 〜)
+
+L9 の既定 render_strategy は **`page_one_shot`** (1 ページ = 1 codex 画像生成コール)。
+
+- L5 page-mapper-v3 の `chooseRenderStrategy` は capability.recommended_strategy=`panel_composite` の場合のみ panel_composite を返し、それ以外は常に `page_one_shot`。
+- L7 refs-resolver-v2 は `page_one_shot` ページに対して `page_${N}` packet (panel-level refs を union+dedupe) を生成。
+- L9 は `composePagePrompt` に `pagePlanPage` を渡し、rect / polygon / importance / bg_treatment 情報を **LAYOUT GEOMETRY** セクションに整形してプロンプト末尾の `PAGE LAYOUT:` 行直後に注入。複雑コマ割 (HERO splash / 縦長スリット / L字嵌込 / 巨大文字背景 / 時間圧縮ストリップ など) を 1 コールで成立させる。
+- panel_composite 経路 (L9 内 `panel_composite` 分岐 + `composePanelsIntoPage` + `L09b-page-compose.ts`) は capability override 時の fallback として残置。新規ページは原則使わない。
+
+検証根拠: `_archive/scripts-deprecated/_oneoff-pageshot-p2-3.ts` で a07 ep01 を題材に 25 patterns + 5 variants を生成、約 76% 強再現 / 24% 部分再現 / 失敗ゼロ。詳細は `~/.claude/.../memory/project_manga_render_pageshot_pivot.md`。
 
 ## ディレクトリ構造
 

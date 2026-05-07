@@ -7,6 +7,10 @@
  * Usage:
  *   npx tsx scripts/manga/layers/L09b-page-compose.ts --slug a07-modern-dungeon --episode 1
  *   --pages 2,3 で対象ページを限定
+ *
+ * @deprecated 2026-05-07: render_strategy 既定が page_one_shot に切り替わったため
+ *   通常経路では使用しない。capability.recommended_strategy=panel_composite override
+ *   時の fallback としてのみ残置。詳細: docs/plans/manga/pipeline-v2.md "render_strategy 既定"
  */
 import "../_env";
 import { promises as fs } from "node:fs";
