@@ -1,5 +1,6 @@
 import { ApiError, apiGetManifest, apiGetWorkEpisodes, apiGetWorkMeta, type Manifest, type WorkMeta } from "../lib/api";
 import { store, type ViewName } from "../lib/store";
+import { openAiEditModal } from "../components/ai-edit-modal";
 
 const CSS = `
 .wo-view { display: grid; gap: var(--space-3); }
@@ -160,6 +161,7 @@ function render(container: HTMLElement, state: ViewState): void {
       <div class="nc-toolbar">
         <h2 class="nc-toolbar__title">${escapeHtml(title)}</h2>
         <span class="wo-spacer"></span>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI 編集</button>
         <span class="nc-badge nc-badge--neutral">phase: ${escapeHtml(metaText(state.meta, "phase"))}</span>
       </div>
       ${body}
@@ -197,6 +199,10 @@ export function mountWorkOverviewView(container: HTMLElement): () => void {
   container.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
+    if (target.closest<HTMLButtonElement>("[data-open-ai-edit]")) {
+      void openAiEditModal({ scope: state.slug ?? "_console" });
+      return;
+    }
     const button = target.closest<HTMLButtonElement>("[data-view]");
     if (!button) return;
     const view = button.dataset.view as ViewName | undefined;

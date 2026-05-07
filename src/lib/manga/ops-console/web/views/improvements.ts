@@ -25,7 +25,7 @@ import {
   type JobState,
 } from "../lib/api";
 import { store } from "../lib/store";
-// store 経由で view 遷移するので追加 import は不要
+import { openAiEditModal } from "../components/ai-edit-modal";
 
 type Toast = {
   message: string;
@@ -364,8 +364,8 @@ function deriveNextStep(data: ImprovementsResponse): {
   if (errs > 0) {
     return {
       title: "❌ まず L11 audit の error を解消",
-      hint: `audit findings に error が ${errs} 件残っています。下の「audit findings」一覧を見て、AI 編集 view で個別修正するか、再度 L04_1/L04_9 で生成しなおしてください。`,
-      primary: { label: "AI 編集 view を開く", action: "nav-layers", nav: "ai-edit" },
+      hint: `audit findings に error が ${errs} 件残っています。下の「audit findings」一覧を見て、AI 編集で個別修正するか、再度 L04_1/L04_9 で生成しなおしてください。`,
+      primary: { label: "AI 編集を開く", action: "nav-layers", nav: "ai-edit" },
     };
   }
 
@@ -916,6 +916,10 @@ export function mountImprovementsView(container: HTMLElement): () => void {
       if (action === "nav-view") {
         const view = btn.dataset.view;
         if (view) {
+          if (view === "ai-edit") {
+            void openAiEditModal({ scope: state.slug || "_console", originView: "improvements" });
+            return;
+          }
           // store の ViewName 型に合致するもののみ受理。安全側で許容リスト方式。
           const allowed = ["pipeline", "layers", "ai-edit", "improvements", "storyboard", "quality"];
           if (allowed.includes(view)) {
@@ -970,16 +974,12 @@ export function mountImprovementsView(container: HTMLElement): () => void {
           ``,
           `編集後は L11 audit を再実行して findings 解消を確認してください。`,
         ].join("\n");
-        // store の preset を設定して ai-edit view へ遷移
-        store.update({
-          aiEditPreset: {
-            scope: state.slug,
-            target: `episodes/ep${String(state.episode).padStart(2, "0")}/storyboard.json`,
-            prompt,
-            originLayer: "L99",
-            originView: "improvements",
-          },
-          currentView: "ai-edit",
+        void openAiEditModal({
+          scope: state.slug,
+          initialTarget: `episodes/ep${String(state.episode).padStart(2, "0")}/storyboard.json`,
+          initialPrompt: prompt,
+          originLayer: "L99",
+          originView: "improvements",
         });
       }
     },

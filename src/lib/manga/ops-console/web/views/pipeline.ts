@@ -12,6 +12,7 @@ import {
 import { isViewName, store } from "../lib/store";
 import { layerHint, layerLabel, resolveAiEditHint } from "../labels";
 import { isRunnableLayer, navigateToAiEdit, spawnLayerWithModal } from "../lib/layer-actions";
+import { openAiEditModal } from "../components/ai-edit-modal";
 
 type HintMap = Map<string, string>;
 
@@ -204,6 +205,7 @@ function render(container: HTMLElement, state: ViewState): void {
       <h2 class="nc-toolbar__title">パイプライン進捗</h2>
       <span class="pipe-info">${escapeHtml(scope)}</span>
       <span class="pipe-spacer"></span>
+      <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI 編集</button>
       <button type="button" class="nc-button nc-button--ghost nc-button--sm" disabled title="L01 (--concept パス) や L02b (--volume + --concept) は引数指定が必要なため、各 layer の「起動」ボタンから個別に起動してください。完全自動化は将来対応 (作品の auto_run_args 定義が前提)">全自動 run は未対応</button>
     </div>
     ${renderNextActionBanner(state.nextAction)}
@@ -297,6 +299,11 @@ export function mountPipelineView(container: HTMLElement): () => void {
     (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
+
+      if (target.closest<HTMLButtonElement>("[data-open-ai-edit]")) {
+        void openAiEditModal({ scope: state.slug ?? "_console" });
+        return;
+      }
 
       if (target.closest("[data-pipe-next-action]")) {
         const action = state.nextAction;

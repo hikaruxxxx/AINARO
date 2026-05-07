@@ -7,6 +7,7 @@ import { apiPostJob, openJobStream, type JobStartRequest, type LayerId } from ".
 import { layerLabel, resolveAiEditHint, type LayerKey } from "../labels";
 import { store } from "./store";
 import { openLaunchModal, type LaunchArgSpec } from "./launch-modal";
+import { openAiEditModal } from "../components/ai-edit-modal";
 
 /** Console から spawn 可能な layer。 server LAYER_REGISTRY と同期させる。 */
 const RUNNABLE = new Set<string>(["L01", "L01b", "L01c", "L02", "L02b", "L04_1", "L04_9", "L09", "L11", "L12", "L13"]);
@@ -49,24 +50,19 @@ export function startRequest(
   return { ...req, episode };
 }
 
-/** 「AI で修正」ボタン共通動作: per-layer hint を preset に詰めて ai-edit へ遷移。 */
+/** 「AI で修正」ボタン共通動作: per-layer hint を prefill して AI 編集 modal を開く。 */
 export function navigateToAiEdit(
   layerId: string,
   ctx: { slug: string; episode: number; volume?: number }
 ): boolean {
   const hint = resolveAiEditHint(layerId, ctx);
   if (!hint) return false;
-  // 編集完了後に「元の view に戻る」できるよう、現在の view も併せて記録する。
-  const originView = store.state.currentView;
-  store.update({
-    aiEditPreset: {
-      scope: ctx.slug,
-      target: hint.target,
-      prompt: hint.promptTemplate,
-      originLayer: layerId,
-      originView,
-    },
-    currentView: "ai-edit",
+  void openAiEditModal({
+    scope: ctx.slug,
+    initialTarget: hint.target,
+    initialPrompt: hint.promptTemplate,
+    originLayer: layerId,
+    originView: store.state.currentView,
   });
   return true;
 }

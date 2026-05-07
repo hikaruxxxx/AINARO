@@ -31,6 +31,7 @@ import {
 } from "../lib/data-display";
 import { store } from "../lib/store";
 import { navigateToAiEdit } from "../lib/layer-actions";
+import { openAiEditModal } from "../components/ai-edit-modal";
 
 type AuditEntity = BibleAuditLocation | BibleAuditCharacter | BibleAuditProp;
 type AnyAuditReport = BibleImagesAuditReport | BibleCharactersAuditReport | BiblePropsAuditReport;
@@ -1350,6 +1351,7 @@ function render(container: HTMLElement, state: ViewState): void {
         <button type="button" class="nc-button nc-button--primary" data-action="L01">Bible 全体構築 (再生成)</button>
         <button type="button" class="nc-button nc-button--secondary" data-action="L01b">文法チェック (Lint)</button>
         <button type="button" class="nc-button nc-button--secondary" data-action="L01c">深掘り (Deepen)</button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI 編集</button>
         <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L01" title="AI 編集 view へ遷移し、L01 Bible の context を prefill します">L01 を AI で修正</button>
       </div>
       ${renderTabs(state.tab)}
@@ -1486,6 +1488,10 @@ export function mountBibleView(container: HTMLElement): () => void {
   container.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
+    if (target.closest<HTMLButtonElement>("[data-open-ai-edit]")) {
+      void openAiEditModal({ scope: state.slug ?? "_console" });
+      return;
+    }
     if (target.closest("[data-bib-lightbox-close]")) {
       closeLightbox();
       return;

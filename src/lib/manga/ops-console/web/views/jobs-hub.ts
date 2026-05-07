@@ -7,6 +7,7 @@ import {
 } from "../lib/failure-recipes";
 import { store, type ViewName } from "../lib/store";
 import { layerLabel } from "../labels";
+import { openAiEditModal } from "../components/ai-edit-modal";
 
 const CSS = `
 .jobs-view { display: grid; gap: var(--space-3); }
@@ -251,17 +252,12 @@ function openJobView(job: JobSummary, view: ViewName): void {
 }
 
 function openAiEdit(job: JobSummary, cta: Extract<FailureCta, { kind: "ai-edit" }>): void {
-  store.update({
-    currentSlug: job.scope.slug,
-    currentEpisode: job.scope.episode ?? store.state.currentEpisode,
-    currentView: "ai-edit",
-    aiEditPreset: {
-      scope: job.scope.slug,
-      target: cta.target ?? "",
-      prompt: `${cta.prompt}\n\njob: ${job.id}\nkey: ${job.key}\nlast log: ${lastLog(job)}`,
-      originLayer: job.layer,
-      originView: "jobs-hub",
-    },
+  void openAiEditModal({
+    scope: job.scope.slug,
+    initialTarget: cta.target ?? "",
+    initialPrompt: `${cta.prompt}\n\njob: ${job.id}\nkey: ${job.key}\nlast log: ${lastLog(job)}`,
+    originLayer: job.layer,
+    originView: "jobs-hub",
   });
 }
 
