@@ -43,6 +43,13 @@ const CSS = `
 .vplot-section { display: grid; gap: var(--space-2); }
 .vplot-section h3 { margin: 0; font-size: var(--fs-lg); }
 .vplot-mode { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.vp-volume-card { display: grid; gap: var(--space-3); }
+.vp-volume-head { display: flex; gap: var(--space-2); align-items: baseline; flex-wrap: wrap; }
+.vp-volume-head h3 { margin: 0; font-size: var(--fs-xl); }
+.vp-chapters { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-2); }
+.vp-chapter { display: grid; gap: var(--space-1); padding: var(--space-2); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-sunken); }
+.vp-chapter__label { font-weight: var(--fw-bold); color: var(--text-primary); }
+.vp-chapter__summary { color: var(--text-secondary); line-height: 1.5; }
 .vp-episodes { display: grid; gap: var(--space-3); }
 .vp-episode-card { display: grid; gap: var(--space-3); }
 .vp-episode-head { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
@@ -55,6 +62,7 @@ const CSS = `
 .vp-beat__head { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
 .vp-beat__summary { line-height: 1.6; color: var(--text-primary); }
 .vp-beat__visual { color: var(--text-secondary); font-size: var(--fs-sm); }
+.vp-beat__episodes { color: var(--text-tertiary); font-size: var(--fs-sm); }
 .vp-intensity { height: 6px; border-radius: var(--radius-pill); background: var(--surface-sunken); overflow: hidden; }
 .vp-intensity__bar { height: 100%; border-radius: inherit; background: var(--color-primary); }
 .vplot-modal-body { display: grid; gap: var(--space-3); padding: var(--space-4); }
@@ -106,16 +114,37 @@ function renderBeats(beats: unknown): string {
   return `<div class="vp-beats">${items.map((beat) => {
     const b = asRecord(beat);
     const value = intensity(b.emotional_intensity);
+    const related = Array.isArray(b.episodes) ? b.episodes : Array.isArray(b.related_episodes) ? b.related_episodes : [];
     return `<div class="vp-beat">
       <div class="vp-beat__head">
         <span class="nc-code">#${escapeHtml(String(b.beat_idx ?? "-"))}</span>
         ${b.label ? `<span class="nc-badge nc-badge--info">${escapeHtml(String(b.label))}</span>` : ""}
       </div>
       <div class="vp-beat__summary">${escapeHtml(String(b.summary ?? ""))}</div>
+      ${related.length > 0 ? `<div class="vp-beat__episodes">関連 episode: ${escapeHtml(related.map(String).join(", "))}</div>` : ""}
       <div class="vp-intensity" title="emotional_intensity ${value}"><div class="vp-intensity__bar" style="width:${Math.round(value * 100)}%"></div></div>
       ${b.key_visual ? `<div class="vp-beat__visual">絵の核: ${escapeHtml(String(b.key_visual))}</div>` : ""}
+      <details><summary>raw</summary><pre class="nc-code-block">${jsonHtml(beat)}</pre></details>
     </div>`;
   }).join("")}</div>`;
+}
+
+function renderChapters(value: unknown): string {
+  const chapters = Array.isArray(value) ? value : [];
+  if (chapters.length === 0) return "";
+  return `<section class="vplot-section">
+    <h3>章構成</h3>
+    <div class="vp-chapters">${chapters.map((chapter, index) => {
+      const c = asRecord(chapter);
+      const label = c.label ?? c.title ?? c.name ?? `chapter ${index + 1}`;
+      const summary = c.summary ?? c.description ?? c.role ?? "";
+      return `<article class="vp-chapter">
+        <div class="vp-chapter__label">${escapeHtml(String(label))}</div>
+        ${summary ? `<div class="vp-chapter__summary">${escapeHtml(String(summary))}</div>` : ""}
+        <details><summary>raw</summary><pre class="nc-code-block">${jsonHtml(chapter)}</pre></details>
+      </article>`;
+    }).join("")}</div>
+  </section>`;
 }
 
 function renderEpisode(ep: unknown): string {
@@ -151,20 +180,30 @@ function renderEpisode(ep: unknown): string {
 function renderReader(plot: unknown): string {
   const obj = asRecord(plot);
   const episodes = Array.isArray(obj.episodes) ? obj.episodes : [];
+  const chapters = obj.chapter_structure ?? obj.chapters ?? obj.acts;
+  const summary = obj.summary ?? obj.volume_summary ?? obj.synopsis ?? obj.volume_theme;
   return `
     <div class="vplot-body">
-      <section class="nc-card vplot-section">
-        <h3>巻全体</h3>
+      <section class="nc-card vp-volume-card">
+        <div class="vp-volume-head">
+          <span class="nc-badge nc-badge--neutral">v${String(Number(obj.volume_no ?? obj.volume ?? 1)).padStart(2, "0")}</span>
+          <h3>${escapeHtml(String(obj.title_working ?? "巻プロット"))}</h3>
+          <span class="nc-badge nc-badge--info">${episodes.length} episodes</span>
+        </div>
         ${asKeyValueTable({
-          "title (working)": obj.title_working,
+          "巻あらすじ": summary,
           "テーマ": obj.volume_theme,
           "推定ページ数": obj.estimated_pages,
         })}
-        ${obj.foreshadow_map ? detailsRaw("foreshadow_map", obj.foreshadow_map) : ""}
-      </section>
-      <section class="vp-episodes">
-        <h3>エピソード一覧 (${episodes.length} 話)</h3>
-        ${episodes.map(renderEpisode).join("")}
+        ${renderChapters(chapters)}
+        <section class="vp-episodes">
+          <h3>beat list / エピソード一覧</h3>
+          ${episodes.map(renderEpisode).join("") || '<div class="nc-empty">episode がありません。</div>'}
+        </section>
+        <details class="vplot-section">
+          <summary>巻プロット raw</summary>
+          <pre class="nc-code-block">${jsonHtml(plot)}</pre>
+        </details>
       </section>
     </div>`;
 }

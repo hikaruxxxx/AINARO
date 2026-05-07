@@ -1223,7 +1223,7 @@ function render(container: HTMLElement, state: ViewState): void {
         <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L01" title="AI 編集 view へ遷移し、L01 Bible の context を prefill します">L01 を AI で修正</button>
       </div>
       ${renderTabs(state.tab)}
-      <div class="bib-content">${renderBibleContent(state)}</div>
+      <div class="bib-content" data-tab="${escapeHtml(state.tab)}">${renderBibleContent(state)}</div>
     </div>
     ${renderModal(state)}
     ${renderLightbox(state)}

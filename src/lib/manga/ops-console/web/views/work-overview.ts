@@ -21,6 +21,7 @@ type EpisodeRow = {
   episode: number;
   title_working?: string;
   audit_failed: number;
+  audit_status: "ready" | "missing" | "stale";
   revision_unresolved: number;
   adopted_count: number;
 };
@@ -68,11 +69,12 @@ function episodeTitle(manifest: Manifest): string | undefined {
 }
 
 function toEpisodeRow(episode: number, manifest: Manifest | null): EpisodeRow {
-  if (!manifest) return { episode, audit_failed: 0, revision_unresolved: 0, adopted_count: 0 };
+  if (!manifest) return { episode, audit_failed: 0, audit_status: "missing", revision_unresolved: 0, adopted_count: 0 };
   return {
     episode,
     title_working: episodeTitle(manifest),
     audit_failed: manifest.audit?.failed_panel_ids?.length ?? 0,
+    audit_status: manifest.audit ? "ready" : "missing",
     revision_unresolved: (manifest.revision_queue ?? []).filter((entry) => !entry.resolved_version).length,
     adopted_count: Object.keys(manifest.adopted?.panels ?? {}).length,
   };
@@ -88,6 +90,13 @@ async function loadEpisodeRow(slug: string, episode: number): Promise<EpisodeRow
 
 function goto(slug: string, episode: number, view: ViewName): void {
   store.update({ currentSlug: slug, currentEpisode: episode, currentView: view });
+}
+
+function auditBadge(row: EpisodeRow): string {
+  if (row.audit_status === "missing") return `<span class="nc-badge nc-badge--neutral">未実行</span>`;
+  if (row.audit_status === "stale") return `<span class="nc-badge nc-badge--warning">${row.audit_failed} stale</span>`;
+  if (row.audit_failed > 0) return `<span class="nc-badge nc-badge--danger">${row.audit_failed}</span>`;
+  return `<span class="nc-badge nc-badge--success">0</span>`;
 }
 
 function render(container: HTMLElement, state: ViewState): void {
@@ -124,7 +133,7 @@ function render(container: HTMLElement, state: ViewState): void {
             <tbody>${state.episodes.map((row) => `<tr>
               <td>${epLabel(row.episode)}</td>
               <td>${escapeHtml(row.title_working ?? "-")}</td>
-              <td>${row.audit_failed}</td>
+              <td>${auditBadge(row)}</td>
               <td>${row.revision_unresolved}</td>
               <td>${row.adopted_count}</td>
               <td><div class="wo-actions">

@@ -1,9 +1,11 @@
 import {
   ApiError,
+  apiGetDashboard,
   apiGetManifest,
   apiGetNameApproval,
   apiGetPipelineStatus,
   type LayerId,
+  type NextActionItem,
   type PipelineStatus,
   type PipelineStatusLayer,
 } from "../lib/api";
@@ -21,6 +23,7 @@ type ViewState = {
   running: Set<string>;
   streams: Map<string, { close: () => void }>;
   toast: { message: string; kind: "success" | "warning" | "danger" | "info" } | null;
+  nextAction: NextActionItem | null;
   loading: boolean;
   error: string | null;
   scopeKey: string;
@@ -43,6 +46,10 @@ const CSS = `
 .pipe-loading { margin-top: var(--space-3); }
 .pipe-step__actions .nc-button[disabled] { opacity: 0.45; cursor: not-allowed; }
 .pipe-step__actions .nc-button[data-locked="cli"] { color: var(--text-tertiary); border-style: dashed; }
+.pipe-next { position: sticky; top: 0; z-index: 4; display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-elevated); box-shadow: var(--shadow-1); }
+.pipe-next__label { font-weight: var(--fw-bold); color: var(--text-primary); }
+.pipe-next__message { color: var(--text-secondary); overflow-wrap: anywhere; }
+.pipe-next__spacer { flex: 1 1 auto; }
 `;
 
 function ensureStyles(): void {
@@ -173,6 +180,16 @@ function renderLayer(layer: PipelineStatusLayer, state: ViewState): string {
   `;
 }
 
+function renderNextActionBanner(action: NextActionItem | null): string {
+  if (!action) return "";
+  return `<div class="pipe-next">
+    <span class="pipe-next__label">次の一手</span>
+    <span class="pipe-next__message">${escapeHtml(action.message)}</span>
+    <span class="pipe-next__spacer"></span>
+    <button type="button" class="nc-button nc-button--primary nc-button--sm" data-pipe-next-action>${escapeHtml(action.cta_label)}</button>
+  </div>`;
+}
+
 function render(container: HTMLElement, state: ViewState): void {
   if (state.error && !state.status) {
     container.innerHTML = `<div class="view-placeholder"><h2>パイプライン進捗</h2><p>${escapeHtml(state.error)}</p></div>`;
@@ -189,6 +206,7 @@ function render(container: HTMLElement, state: ViewState): void {
       <span class="pipe-spacer"></span>
       <button type="button" class="nc-button nc-button--ghost nc-button--sm" disabled title="L01 (--concept パス) や L02b (--volume + --concept) は引数指定が必要なため、各 layer の「起動」ボタンから個別に起動してください。完全自動化は将来対応 (作品の auto_run_args 定義が前提)">全自動 run は未対応</button>
     </div>
+    ${renderNextActionBanner(state.nextAction)}
     ${body}
     ${state.toast ? `<div class="nc-toast nc-toast--${state.toast.kind}">${escapeHtml(state.toast.message)}</div>` : ""}
   `;
@@ -201,6 +219,14 @@ async function refresh(state: ViewState, container: HTMLElement): Promise<void> 
   const status = await apiGetPipelineStatus(state.slug, state.episode);
   state.status = status;
   state.hints = await buildHints(status);
+  try {
+    const dashboard = await apiGetDashboard(1);
+    state.nextAction = dashboard.next_actions.find((item) => item.slug === state.slug && item.episode === state.episode)
+      ?? dashboard.next_actions[0]
+      ?? null;
+  } catch {
+    state.nextAction = null;
+  }
   state.loading = false;
   render(container, state);
 }
@@ -232,6 +258,7 @@ export function mountPipelineView(container: HTMLElement): () => void {
     running: new Set(),
     streams: new Map(),
     toast: null,
+    nextAction: null,
     loading: false,
     error: null,
     scopeKey: `${app.currentSlug || app.defaultSlug}:${app.currentEpisode || app.defaultEpisode}`,
@@ -254,6 +281,7 @@ export function mountPipelineView(container: HTMLElement): () => void {
     state.status = null;
     state.hints = new Map();
     state.error = null;
+    state.nextAction = null;
     for (const stream of state.streams.values()) stream.close();
     state.streams.clear();
     state.running.clear();
@@ -269,6 +297,22 @@ export function mountPipelineView(container: HTMLElement): () => void {
     (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
+
+      if (target.closest("[data-pipe-next-action]")) {
+        const action = state.nextAction;
+        if (!action) return;
+        if (action.kind === "new_work") {
+          store.update({ currentView: "index" });
+          return;
+        }
+        if (!action.slug) return;
+        store.update({
+          currentSlug: action.slug,
+          currentEpisode: action.episode ?? state.episode,
+          currentView: action.cta_view && isViewName(action.cta_view) ? action.cta_view : "pipeline",
+        });
+        return;
+      }
 
       // 「開く」: 関連 view へ遷移。
       const view = target.closest<HTMLButtonElement>("[data-next-view]")?.dataset.nextView;

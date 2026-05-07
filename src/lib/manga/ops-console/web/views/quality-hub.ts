@@ -54,6 +54,13 @@ function gotoEpisode(slug: string, episode: number, view: ViewName): void {
   store.update({ currentSlug: slug, currentEpisode: episode, currentView: view });
 }
 
+function auditBadge(ep: WorkQualityOverview["episodes"][number]): string {
+  if (ep.audit_status === "missing") return `<span class="nc-badge nc-badge--neutral">未実行</span>`;
+  if (ep.audit_status === "stale") return `<span class="nc-badge nc-badge--warning">${ep.audit_failed_count} (stale)</span>`;
+  if (ep.audit_failed_count > 0) return `<span class="nc-badge nc-badge--danger">${ep.audit_failed_count}</span>`;
+  return `<span class="nc-badge nc-badge--success">0</span>`;
+}
+
 function renderWork(work: WorkQualityOverview): string {
   const rows = work.episodes
     .slice()
@@ -63,7 +70,7 @@ function renderWork(work: WorkQualityOverview): string {
     )
     .map((ep) => `<tr>
       <td>${epLabel(ep.episode)}</td>
-      <td><span class="nc-badge ${ep.audit_failed_count > 0 ? "nc-badge--danger" : "nc-badge--success"}">${ep.audit_failed_count}</span></td>
+      <td>${auditBadge(ep)}</td>
       <td>${ep.revision_unresolved_count}</td>
       <td>${ep.adopted_pending_count}</td>
       <td>${escapeHtml(fmtDate(ep.last_audit_at))}</td>

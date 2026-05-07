@@ -30,6 +30,7 @@ const CSS = `
 .q-card h3,.q-card h4 { margin: 0; }
 .q-meta { color: var(--text-tertiary); font-size: var(--fs-sm); overflow-wrap: anywhere; word-break: break-all; min-width: 0; }
 .q-filters { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.q-summary-pre { white-space: pre-wrap; overflow-x: auto; }
 .q-findings { display: grid; gap: var(--space-2); }
 .q-finding { display: grid; gap: 4px; padding: var(--space-2); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-sunken); }
 .q-finding--override { opacity: 0.55; border-style: dashed; }
@@ -47,6 +48,7 @@ type ViewState = {
   /** panel_id + check_kind 単位の最新 override (append-only JSONL を reduce した結果) */
   overrides: Map<string, AuditOverrideEntry>;
   selectedKinds: Set<string>;
+  failedOnly: boolean;
   loading: boolean;
   error: string | null;
   /** override 入力中の対象 (panel_id, check_kind, action) */
@@ -140,11 +142,17 @@ function collectFindings(audit: unknown): AuditFinding[] {
   return result;
 }
 
-function renderKindFilters(findings: AuditFinding[], selectedKinds: Set<string>): string {
-  const kinds = Array.from(new Set(findings.map((finding) => finding.check_kind))).sort();
-  if (kinds.length === 0) return "";
+const FILTER_KINDS = ["face_consistency", "bubble_overlap", "continuity_anchor", "background_invariant", "regulation_violation"];
+
+function isFailedFinding(finding: AuditFinding): boolean {
+  const sev = finding.severity.toLowerCase();
+  return finding.passed === false || sev === "failed" || sev === "error" || sev === "critical";
+}
+
+function renderKindFilters(selectedKinds: Set<string>, failedOnly: boolean): string {
   return `<div class="q-filters">
-    ${kinds.map((kind) => {
+    <button type="button" class="nc-pill${failedOnly ? " nc-pill--active" : ""}" data-q-failed-only="1">failed only</button>
+    ${FILTER_KINDS.map((kind) => {
       const active = selectedKinds.has(kind);
       return `<button type="button" class="nc-pill${active ? " nc-pill--active" : ""}" data-q-kind="${escapeHtml(kind)}">${escapeHtml(kind)}</button>`;
     }).join("")}
@@ -154,7 +162,8 @@ function renderKindFilters(findings: AuditFinding[], selectedKinds: Set<string>)
 function renderAudit(
   manifest: Manifest,
   selectedKinds: Set<string>,
-  overrides: Map<string, AuditOverrideEntry>
+  overrides: Map<string, AuditOverrideEntry>,
+  failedOnly: boolean
 ): string {
   const audit = manifest.audit;
   if (!audit) return `<div class="nc-empty">audit.json はまだ生成されていません</div>`;
@@ -162,7 +171,10 @@ function renderAudit(
   const panels = Array.isArray(obj.panels) ? obj.panels : [];
   const failed = Array.isArray(obj.failed_panel_ids) ? obj.failed_panel_ids : [];
   const findings = collectFindings(audit);
-  const visibleFindings = findings.filter((finding) => selectedKinds.size === 0 || selectedKinds.has(finding.check_kind));
+  const visibleFindings = findings.filter((finding) =>
+    (selectedKinds.size === 0 || selectedKinds.has(finding.check_kind)) &&
+    (!failedOnly || isFailedFinding(finding))
+  );
   const byPanel = new Map<string, AuditFinding[]>();
   for (const finding of visibleFindings) {
     const list = byPanel.get(finding.panel_id) ?? [];
@@ -225,10 +237,10 @@ function renderAudit(
           <span class="nc-badge ${failed.length > 0 ? "nc-badge--danger" : "nc-badge--success"}">失敗 ${failed.length} 件</span>
           ${overriddenCount > 0 ? `<span class="nc-badge nc-badge--neutral">override 済 ${overriddenCount} 件</span>` : ""}
         </div>
-        <pre class="nc-code-block">${jsonHtml(obj.summary ?? {})}</pre>
+        <pre class="nc-code-block q-summary-pre">${jsonHtml(obj.summary ?? {})}</pre>
         <div class="q-meta">失敗 panel ID 一覧: ${escapeHtml(JSON.stringify(failed))}</div>
       </section>
-      ${renderKindFilters(findings, selectedKinds)}
+      ${renderKindFilters(selectedKinds, failedOnly)}
       <div class="q-list">
         ${drilldown || '<div class="nc-empty">選択中の check_kind に該当する所見はありません。</div>'}
       </div>
@@ -259,7 +271,7 @@ function render(container: HTMLElement, state: ViewState): void {
     if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
     if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>品質監査 (Audit)</h2><p>${escapeHtml(state.error)}</p></div>`;
     if (!state.manifest) return `<div class="nc-empty">manifest が読み込まれていません。</div>`;
-    return renderAudit(state.manifest, state.selectedKinds, state.overrides);
+    return renderAudit(state.manifest, state.selectedKinds, state.overrides, state.failedOnly);
   })();
   const promptModal = state.overridePrompt
     ? `<div class="nc-modal is-open"><div class="nc-modal__card nc-modal__card--sm" style="padding: var(--space-4); display: grid; gap: var(--space-3);">
@@ -319,6 +331,7 @@ export function mountQualityView(container: HTMLElement): () => void {
     manifest: null,
     overrides: new Map(),
     selectedKinds: new Set(),
+    failedOnly: false,
     loading: false,
     error: null,
     overridePrompt: null,
@@ -352,6 +365,11 @@ export function mountQualityView(container: HTMLElement): () => void {
     if (kind) {
       if (state.selectedKinds.has(kind)) state.selectedKinds.delete(kind);
       else state.selectedKinds.add(kind);
+      render(container, state);
+      return;
+    }
+    if (target.closest("[data-q-failed-only]")) {
+      state.failedOnly = !state.failedOnly;
       render(container, state);
       return;
     }
