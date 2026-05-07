@@ -39,6 +39,7 @@ import {
 } from "./handlers/adopted-versions";
 import { handleBootstrap } from "./handlers/bootstrap";
 import { handleBible } from "./handlers/bible";
+import { handleBibleMetaPut } from "./handlers/bible-meta";
 import { handleVolumePlot, handleVolumePlotPut } from "./handlers/volume-plot";
 import { handleVolumesList } from "./handlers/volumes";
 import {
@@ -84,9 +85,15 @@ export type ScopedRouterDefaults = {
   allowCrossScopeRead?: boolean;
 };
 
+type TrademarkCheckSaveBody = Parameters<typeof handleTrademarkCheckPost>[2];
+
 function send(res: http.ServerResponse, status: number, body: unknown): void {
   res.writeHead(status, { "Content-Type": "application/json" });
   res.end(JSON.stringify(body));
+}
+
+function asBodyRecord(body: unknown): Record<string, unknown> {
+  return body !== null && typeof body === "object" ? (body as Record<string, unknown>) : {};
 }
 
 /** url のクエリ slug/episode が defaults に一致するか */
@@ -106,13 +113,14 @@ function checkLegacyScope(
 }
 
 function checkLegacyBodyScope(
-  body: any,
+  body: unknown,
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
   if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
     return { ok: false, status: 400, error: "操作対象の作品が未選択です。ヘッダーの「scope 切替」から作品+話を選んでください" };
   }
-  if (body?.slug !== defaults.defaultSlug || Number(body?.episode) !== defaults.defaultEpisode) {
+  const obj = asBodyRecord(body);
+  if (obj.slug !== defaults.defaultSlug || Number(obj.episode) !== defaults.defaultEpisode) {
     return { ok: false, status: 403, error: "現在の scope と異なる作品です。ヘッダーの「scope 切替」で対象を変更してください" };
   }
   return { ok: true };
@@ -193,16 +201,17 @@ export async function handleApi(
       return send(res, 200, { slug: liveScope.slug, episode: liveScope.episode });
     }
     if (req.method === "POST") {
-      let body: any;
+      let body: unknown;
       try {
         body = await readJsonBody(req);
       } catch (e) {
         return send(res, 400, { error: String(e) });
       }
       // body.slug/episode が両方 null/undefined なら scope 解除。それ以外は両方必須。
-      const wantClear = body?.slug == null && body?.episode == null;
-      const slug = wantClear ? null : (typeof body?.slug === "string" ? body.slug : null);
-      const episode = wantClear ? null : (typeof body?.episode === "number" ? body.episode : Number(body?.episode));
+      const bodyObj = asBodyRecord(body);
+      const wantClear = bodyObj.slug == null && bodyObj.episode == null;
+      const slug = wantClear ? null : (typeof bodyObj.slug === "string" ? bodyObj.slug : null);
+      const episode = wantClear ? null : (typeof bodyObj.episode === "number" ? bodyObj.episode : Number(bodyObj.episode));
       try {
         const next = await setScope(slug, wantClear ? null : episode);
         return send(res, 200, next);
@@ -224,13 +233,13 @@ export async function handleApi(
   }
   if (p === "/api/ai-edit/commit") {
     if (req.method !== "POST") return send(res, 405, { error: "このメソッドは許可されていません" });
-    let body: any;
+    let body: unknown;
     try {
       body = await readJsonBody(req);
     } catch (e) {
       return send(res, 400, { error: String(e) });
     }
-    return handleAiEditCommit(body, res);
+    return handleAiEditCommit(asBodyRecord(body), res);
   }
   if (p === "/api/ai-edit/discard") {
     if (req.method !== "POST") return send(res, 405, { error: "このメソッドは許可されていません" });
@@ -242,20 +251,22 @@ export async function handleApi(
     if (p === "/api/jobs") {
       if (req.method === "GET") return handleJobsList(req, res, url, defaults);
       if (req.method === "POST") {
-        let body: any;
+        let body: unknown;
         try {
           body = await readJsonBody(req);
         } catch (e) {
           return send(res, 400, { error: String(e) });
         }
-        const isAiEditConsole = body?.layer === "L99" && body?.slug === "_console";
+        const bodyObj = asBodyRecord(body);
+        const requestedJobSlug = typeof bodyObj.slug === "string" ? bodyObj.slug : null;
+        const isAiEditConsole = bodyObj.layer === "L99" && requestedJobSlug === "_console";
         // 一覧モードの L99 AI 編集では実 slug はジョブ一覧の scope hint なので、
         // repo 全体編集の安全性は ai-edit の diff/commit review に委ねて bypass 対象にする。
         const isAiEditWorkInListMode =
-          body?.layer === "L99" &&
-          typeof body?.slug === "string" &&
-          body.slug !== "_console" &&
-          isValidSlug(body.slug) &&
+          bodyObj.layer === "L99" &&
+          requestedJobSlug !== null &&
+          requestedJobSlug !== "_console" &&
+          isValidSlug(requestedJobSlug) &&
           (defaults.defaultSlug === null || defaults.defaultEpisode === null);
         if (
           !isAiEditConsole &&
@@ -265,9 +276,9 @@ export async function handleApi(
           return send(res, 400, { error: "操作対象の作品が未選択です。ヘッダーの「scope 切替」から作品+話を選んでください" });
         }
         const scopedDefaults: ScopedRouterDefaults = isAiEditConsole
-          ? { defaultSlug: "_console", defaultEpisode: 0, allowCrossScopeRead: defaults.allowCrossScopeRead }
+            ? { defaultSlug: "_console", defaultEpisode: 0, allowCrossScopeRead: defaults.allowCrossScopeRead }
           : isAiEditWorkInListMode
-            ? { defaultSlug: body.slug, defaultEpisode: 0, allowCrossScopeRead: defaults.allowCrossScopeRead }
+            ? { defaultSlug: requestedJobSlug!, defaultEpisode: 0, allowCrossScopeRead: defaults.allowCrossScopeRead }
             : {
                 defaultSlug: defaults.defaultSlug!,
                 defaultEpisode: defaults.defaultEpisode!,
@@ -308,7 +319,7 @@ export async function handleApi(
   if (p === "/api/works") {
     if (req.method === "GET") return handleWorksList(res);
     if (req.method === "POST") {
-      let body: any;
+      let body: unknown;
       try {
         body = await readJsonBody(req);
       } catch (e) {
@@ -338,13 +349,28 @@ export async function handleApi(
         return send(res, 400, { error: "書き込みには scope 固定モードが必要です。`npm run console -- --slug <slug> --episode <NN>` で起動してください" });
       }
       if (slug !== defaults.defaultSlug) return send(res, 403, { error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)" });
-      let body: any;
+      let body: unknown;
       try {
         body = await readJsonBody(req);
       } catch (e) {
         return send(res, 400, { error: String(e) });
       }
       return handleWorkKdpMetadataPut(slug, body, res);
+    }
+  }
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/bible\/meta$/);
+    if (m) {
+      if (req.method !== "PUT") return send(res, 405, { error: "このメソッドは許可されていません" });
+      const slug = m[1];
+      if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
+      if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+        return send(res, 400, { error: "書き込みには scope 固定モードが必要です。`npm run console -- --slug <slug> --episode <NN>` で起動してください" });
+      }
+      if (slug !== defaults.defaultSlug) {
+        return send(res, 403, { error: "起動 scope と異なる作品です" });
+      }
+      return handleBibleMetaPut(slug, req, res);
     }
   }
   {
@@ -411,13 +437,13 @@ export async function handleApi(
             error: "起動 scope と異なる作品です (`npm run console -- --slug X` で起動してください)",
           });
         }
-        let body: any;
+        let body: unknown;
         try {
           body = await readJsonBody(req);
         } catch (e) {
           return send(res, 400, { error: String(e) });
         }
-        return handleTrademarkCheckPost(req, res, body, slug, volume);
+        return handleTrademarkCheckPost(req, res, body as TrademarkCheckSaveBody, slug, volume);
       }
       return send(res, 405, { error: "このメソッドは許可されていません" });
     }
@@ -448,7 +474,7 @@ export async function handleApi(
       if (req.method === "POST") {
         const guard = checkScopedWritePath(scoped, defaults);
         if (!guard.ok) return send(res, guard.status, { error: guard.error });
-        let body: any;
+        let body: unknown;
         try {
           body = await readJsonBody(req);
         } catch (e) {
@@ -489,7 +515,7 @@ export async function handleApi(
       if (req.method === "POST") {
         const guard = checkScopedWritePath(scoped, defaults);
         if (!guard.ok) return send(res, guard.status, { error: guard.error });
-        let body: any;
+        let body: unknown;
         try {
           body = await readJsonBody(req);
         } catch (e) {
@@ -504,7 +530,7 @@ export async function handleApi(
       if (req.method === "POST") {
         const guard = checkScopedWritePath(scoped, defaults);
         if (!guard.ok) return send(res, guard.status, { error: guard.error });
-        let body: any;
+        let body: unknown;
         try {
           body = await readJsonBody(req);
         } catch (e) {
@@ -525,7 +551,7 @@ export async function handleApi(
       return handleNameApprovalGet(defaults.defaultSlug!, defaults.defaultEpisode!, res);
     }
     if (req.method === "POST") {
-      let body: any;
+      let body: unknown;
       try {
         body = await readJsonBody(req);
       } catch {
@@ -552,7 +578,7 @@ export async function handleApi(
       return handleRevisionQueueGet(defaults.defaultSlug!, defaults.defaultEpisode!, res);
     }
     if (req.method === "POST") {
-      let body: any;
+      let body: unknown;
       try {
         body = await readJsonBody(req);
       } catch (e) {
@@ -572,7 +598,7 @@ export async function handleApi(
       return handleAdoptedGet(defaults.defaultSlug!, defaults.defaultEpisode!, res);
     }
     if (req.method === "POST") {
-      let body: any;
+      let body: unknown;
       try {
         body = await readJsonBody(req);
       } catch (e) {

@@ -1,6 +1,7 @@
 import {
   ApiError,
   apiGetBible,
+  apiPutBibleMeta,
   apiPostJob,
   openJobStream,
   type BibleAssetView,
@@ -16,9 +17,7 @@ import {
   type JobEvent,
   type LayerId,
 } from "../lib/api";
-
-type AuditEntity = BibleAuditLocation | BibleAuditCharacter | BibleAuditProp;
-type AnyAuditReport = BibleImagesAuditReport | BibleCharactersAuditReport | BiblePropsAuditReport;
+import type { CoreHookV2 } from "../../../schemas-v2";
 import {
   asKeyValueTable,
   asList,
@@ -29,10 +28,11 @@ import {
 import { store } from "../lib/store";
 import { navigateToAiEdit } from "../lib/layer-actions";
 
-type BibleTab = "world" | "characters" | "locations" | "props" | "style" | "costumes" | "relations" | "nav" | "synopsis" | "meta" | "raw";
+type AuditEntity = BibleAuditLocation | BibleAuditCharacter | BibleAuditProp;
+type AnyAuditReport = BibleImagesAuditReport | BibleCharactersAuditReport | BiblePropsAuditReport;
+type BibleTab = "world" | "characters" | "locations" | "props" | "style" | "costumes" | "relations" | "nav" | "synopsis" | "core_hook" | "meta" | "raw";
 type ActionLayer = "L01" | "L01b" | "L01c";
 type DisplayMode = "reader" | "raw";
-type AnyRecord = Record<string, unknown>;
 type AssetKind = "characters" | "locations" | "props";
 
 const BIBLE_TABS: Array<{ id: BibleTab; label: string }> = [
@@ -45,6 +45,7 @@ const BIBLE_TABS: Array<{ id: BibleTab; label: string }> = [
   { id: "relations", label: "関係性" },
   { id: "nav", label: "ナビ仕様" },
   { id: "synopsis", label: "巻シノプシス" },
+  { id: "core_hook", label: "中核ギミック" },
   { id: "meta", label: "メタ・補足" },
   { id: "raw", label: "生 JSON" },
 ];
@@ -143,7 +144,27 @@ const CSS = `
 .bib-img-job__head { display: flex; gap: 6px; align-items: baseline; }
 .bib-img-job__label { font-weight: 600; color: var(--text-primary); }
 .bib-img-job__log { max-height: 100px; overflow: auto; font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: var(--fs-xs, 10px); color: var(--text-tertiary); white-space: pre-wrap; line-height: 1.4; }
+.bib-core-hook__one-liner { font-size: var(--fs-xl); font-weight: 700; line-height: 1.45; }
+.bib-core-hook__notice { padding: var(--space-2); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--surface-sunken); color: var(--text-secondary); }
+.bib-core-hook__notice--danger { border-color: rgba(229, 62, 62, 0.5); color: #ef4f4f; }
+.bib-core-hook__notice--warning { border-color: rgba(236, 201, 75, 0.45); color: #d6b340; }
+.bib-core-hook__type { display: flex; gap: var(--space-2); align-items: baseline; flex-wrap: wrap; }
+.bib-core-hook__type-code { font-weight: 700; font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+.bib-core-hook__refs { margin: 0; padding-left: 1.25rem; }
+.bib-core-hook__form { display: grid; gap: var(--space-3); }
+.bib-core-hook__count { color: var(--text-tertiary); font-size: var(--fs-sm); }
+.bib-core-hook__count.is-over { color: #ef4f4f; font-weight: 600; }
+.bib-core-hook__error { color: #ef4f4f; font-size: var(--fs-sm); }
+.bib-core-hook__radio-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.bib-core-hook__refs-edit { display: grid; gap: var(--space-2); }
+.bib-core-hook__ref-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
 `;
+
+type CoreHookDraft = {
+  one_liner: string;
+  type: CoreHookV2["type"];
+  hit_references: string[];
+};
 
 type ViewState = {
   slug: string;
@@ -178,6 +199,10 @@ type ViewState = {
     bulkProgress?: { total: number; done: number };
   } | null;
   toast: { message: string; kind: "success" | "warning" | "danger" | "info" } | null;
+  coreHookEditMode: boolean;
+  coreHookDraft: CoreHookDraft | null;
+  coreHookSaving: boolean;
+  coreHookSavedAt: string | null;
 };
 
 function ensureStyles(): void {
@@ -788,6 +813,138 @@ function renderSynopsisReader(bible: BibleAssetView): string {
   return `<div class="bib-reader">${renderSynopsisEntry(value)}</div>`;
 }
 
+const CORE_HOOK_TYPE_LABELS: Record<CoreHookV2["type"], string> = {
+  A: "反復蓄積",
+  B: "接続媒介",
+  C: "視点ずらし",
+};
+
+function asCoreHook(value: unknown): CoreHookV2 | null {
+  const obj = asRecord(value);
+  if (
+    typeof obj.one_liner === "string" &&
+    (obj.type === "A" || obj.type === "B" || obj.type === "C") &&
+    Array.isArray(obj.hit_references) &&
+    obj.hit_references.every((item) => typeof item === "string")
+  ) {
+    return {
+      one_liner: obj.one_liner,
+      type: obj.type,
+      hit_references: obj.hit_references,
+    };
+  }
+  return null;
+}
+
+function coreHookFromBible(bible: BibleAssetView): CoreHookV2 | null {
+  return asCoreHook(asRecord(bible.meta).core_hook);
+}
+
+function createCoreHookDraft(coreHook: CoreHookV2 | null): CoreHookDraft {
+  return {
+    one_liner: coreHook?.one_liner ?? "",
+    type: coreHook?.type ?? "A",
+    hit_references: coreHook?.hit_references.length ? coreHook.hit_references.slice(0, 3) : [""],
+  };
+}
+
+function coreHookValidation(draft: CoreHookDraft): { oneLinerRequired: boolean; refsRequired: boolean; valid: boolean } {
+  const oneLinerRequired = draft.one_liner.trim().length === 0;
+  const refsRequired = draft.hit_references.filter((item) => item.trim()).length === 0;
+  return { oneLinerRequired, refsRequired, valid: !oneLinerRequired && !refsRequired };
+}
+
+function renderCoreHookReader(state: ViewState, bible: BibleAssetView): string {
+  if (state.coreHookEditMode) return renderCoreHookEditor(state);
+  const coreHook = coreHookFromBible(bible);
+  const lintCommand = `npx tsx scripts/manga/layers/L01b-bible-lint.ts --slug=${state.slug}`;
+  const savedGuide = state.coreHookSavedAt
+    ? `<div class="nc-card nc-card--sunken bib-section">
+        <h3>保存後の案内</h3>
+        <p>再 lint を実行するには次を実行してください。</p>
+        <pre class="nc-code-block">${escapeHtml(lintCommand)}</pre>
+      </div>`
+    : "";
+  if (!coreHook) {
+    return `<div class="bib-reader">
+      <section class="nc-card bib-section">
+        <h3>中核ギミック</h3>
+        <div class="bib-core-hook__notice bib-core-hook__notice--danger">中核ギミック未設定（lint で fatal になります）</div>
+        <div class="bib-actions">
+          <button type="button" class="nc-button nc-button--primary" data-core-hook-edit="new">新規作成</button>
+        </div>
+      </section>
+      ${savedGuide}
+    </div>`;
+  }
+  const isTooLong = coreHook.one_liner.length > 30;
+  return `<div class="bib-reader">
+    <section class="nc-card bib-section">
+      <h3>中核ギミック</h3>
+      <div class="bib-core-hook__one-liner">${escapeHtml(coreHook.one_liner)}</div>
+      ${isTooLong ? `<div class="bib-core-hook__notice bib-core-hook__notice--warning">one_liner が ${coreHook.one_liner.length}字です。30字以内に圧縮してください。</div>` : ""}
+      <div class="bib-core-hook__type">
+        <span class="bib-core-hook__type-code">${escapeHtml(coreHook.type)}</span>
+        <span>${escapeHtml(CORE_HOOK_TYPE_LABELS[coreHook.type])}</span>
+      </div>
+      <section class="bib-section">
+        <h3>参照ヒット作</h3>
+        <ul class="bib-core-hook__refs">${coreHook.hit_references.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </section>
+      <div class="bib-actions">
+        <button type="button" class="nc-button nc-button--secondary" data-core-hook-edit="edit">編集</button>
+      </div>
+    </section>
+    ${savedGuide}
+  </div>`;
+}
+
+function renderCoreHookEditor(state: ViewState): string {
+  const draft = state.coreHookDraft ?? createCoreHookDraft(null);
+  const validation = coreHookValidation(draft);
+  const overClass = draft.one_liner.length > 30 ? " is-over" : "";
+  const refs = draft.hit_references.slice(0, 3);
+  while (refs.length === 0) refs.push("");
+  const saveDisabled = state.coreHookSaving || !validation.valid ? " disabled" : "";
+  return `<form class="bib-reader bib-core-hook__form" data-core-hook-form>
+    <section class="nc-card bib-section">
+      <h3>中核ギミック編集</h3>
+      <label class="nc-field">
+        <span class="nc-field__label">one_liner</span>
+        <textarea class="nc-field__textarea" name="one_liner" rows="3" data-core-hook-field="one_liner">${escapeHtml(draft.one_liner)}</textarea>
+        <span class="bib-core-hook__count${overClass}" data-core-hook-count>${draft.one_liner.length} / 30字</span>
+        <span class="bib-core-hook__error" data-core-hook-one-liner-error${validation.oneLinerRequired ? "" : " hidden"}>必須</span>
+      </label>
+      <fieldset class="nc-field">
+        <span class="nc-field__label">type</span>
+        <div class="bib-core-hook__radio-row">
+          ${(["A", "B", "C"] as const).map((type) => `<label class="nc-pill nc-pill--check">
+            <input type="radio" name="type" value="${type}" data-core-hook-field="type"${draft.type === type ? " checked" : ""}>
+            ${type}: ${escapeHtml(CORE_HOOK_TYPE_LABELS[type])}
+          </label>`).join("")}
+        </div>
+      </fieldset>
+      <section class="bib-section">
+        <h3>hit_references</h3>
+        <div class="bib-core-hook__refs-edit">
+          ${refs.map((ref, index) => `<div class="bib-core-hook__ref-row">
+            <input class="nc-field__input" value="${escapeHtml(ref)}" data-core-hook-ref-index="${index}" placeholder="既存ヒット作">
+            <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-core-hook-remove-ref="${index}"${refs.length <= 1 ? " disabled" : ""}>削除</button>
+          </div>`).join("")}
+        </div>
+        <span class="bib-core-hook__error" data-core-hook-refs-error${validation.refsRequired ? "" : " hidden"}>1作以上必須</span>
+        <div>
+          <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-core-hook-add-ref${refs.length >= 3 ? " disabled" : ""}>追加</button>
+        </div>
+      </section>
+      <div class="bib-actions">
+        <button type="button" class="nc-button nc-button--ghost" data-core-hook-cancel${state.coreHookSaving ? " disabled" : ""}>キャンセル</button>
+        <button type="submit" class="nc-button nc-button--primary"${saveDisabled}>${state.coreHookSaving ? "保存中" : "保存"}</button>
+      </div>
+    </section>
+  </form>`;
+}
+
 function asKeyValueTableWithLists(obj: Record<string, unknown>): string {
   const entries = Object.entries(obj);
   if (entries.length === 0) return `<div class="nc-empty">項目がありません。</div>`;
@@ -879,6 +1036,10 @@ function renderBibleContent(state: ViewState): string {
   }
   if (state.tab === "synopsis") {
     return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(bible.volume_synopsis)}</pre>` : renderSynopsisReader(bible)}`;
+  }
+  if (state.tab === "core_hook") {
+    const raw = asRecord(bible.meta).core_hook ?? null;
+    return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(raw)}</pre>` : renderCoreHookReader(state, bible)}`;
   }
   if (state.tab === "meta") {
     const raw = {
@@ -1130,6 +1291,10 @@ export function mountBibleView(container: HTMLElement): () => void {
     lightbox: null,
     imageJob: null,
     toast: null,
+    coreHookEditMode: false,
+    coreHookDraft: null,
+    coreHookSaving: false,
+    coreHookSavedAt: null,
   };
   let stream: { close: () => void } | null = null;
   let lightboxKeyListenerAttached = false;
@@ -1220,13 +1385,48 @@ export function mountBibleView(container: HTMLElement): () => void {
     if (tab && BIBLE_TABS.some((item) => item.id === tab)) {
       state.tab = tab;
       state.displayMode = "reader";
+      state.coreHookEditMode = false;
+      state.coreHookDraft = null;
       render(container, state);
       return;
     }
     const mode = target.closest<HTMLButtonElement>("[data-display-mode]")?.dataset.displayMode as DisplayMode | undefined;
     if (mode === "reader" || mode === "raw") {
       state.displayMode = mode;
+      if (mode === "raw") {
+        state.coreHookEditMode = false;
+        state.coreHookDraft = null;
+      }
       render(container, state);
+      return;
+    }
+    const coreHookEdit = target.closest<HTMLButtonElement>("[data-core-hook-edit]")?.dataset.coreHookEdit;
+    if (coreHookEdit) {
+      state.coreHookEditMode = true;
+      state.coreHookDraft = createCoreHookDraft(state.bible ? coreHookFromBible(state.bible) : null);
+      state.coreHookSavedAt = null;
+      render(container, state);
+      return;
+    }
+    if (target.closest("[data-core-hook-cancel]")) {
+      state.coreHookEditMode = false;
+      state.coreHookDraft = null;
+      render(container, state);
+      return;
+    }
+    const addRef = target.closest("[data-core-hook-add-ref]");
+    if (addRef && state.coreHookDraft) {
+      if (state.coreHookDraft.hit_references.length < 3) state.coreHookDraft.hit_references.push("");
+      render(container, state);
+      return;
+    }
+    const removeRefIndex = target.closest<HTMLElement>("[data-core-hook-remove-ref]")?.dataset.coreHookRemoveRef;
+    if (removeRefIndex !== undefined && state.coreHookDraft) {
+      const index = Number(removeRefIndex);
+      if (Number.isInteger(index) && state.coreHookDraft.hit_references.length > 1) {
+        state.coreHookDraft.hit_references.splice(index, 1);
+        render(container, state);
+      }
       return;
     }
     const action = target.closest<HTMLButtonElement>("[data-action]")?.dataset.action as ActionLayer | undefined;
@@ -1286,6 +1486,47 @@ export function mountBibleView(container: HTMLElement): () => void {
       return;
     }
   }, { signal: controller.signal });
+
+  function syncCoreHookDraftFromInput(target: HTMLInputElement | HTMLTextAreaElement): void {
+    if (!state.coreHookDraft) return;
+    const field = target.dataset.coreHookField;
+    if (field === "one_liner") {
+      state.coreHookDraft.one_liner = target.value;
+    } else if (field === "type" && target instanceof HTMLInputElement && target.checked) {
+      if (target.value === "A" || target.value === "B" || target.value === "C") {
+        state.coreHookDraft.type = target.value;
+      }
+    }
+    const refIndex = target.dataset.coreHookRefIndex;
+    if (refIndex !== undefined) {
+      const index = Number(refIndex);
+      if (Number.isInteger(index)) state.coreHookDraft.hit_references[index] = target.value;
+    }
+  }
+
+  // core_hook 編集中はフォーカス維持のため draft だけ更新し、カウンタと保存可否を局所更新する。
+  const onCoreHookInput = (event: Event): void => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLTextAreaElement)) return;
+    if (!target.dataset.coreHookField && target.dataset.coreHookRefIndex === undefined) return;
+    syncCoreHookDraftFromInput(target);
+    const draft = state.coreHookDraft;
+    if (!draft) return;
+    const validation = coreHookValidation(draft);
+    const count = container.querySelector<HTMLElement>("[data-core-hook-count]");
+    if (count) {
+      count.textContent = `${draft.one_liner.length} / 30字`;
+      count.classList.toggle("is-over", draft.one_liner.length > 30);
+    }
+    const save = container.querySelector<HTMLButtonElement>("[data-core-hook-form] button[type='submit']");
+    if (save) save.disabled = state.coreHookSaving || !validation.valid;
+    const oneLinerError = container.querySelector<HTMLElement>("[data-core-hook-one-liner-error]");
+    if (oneLinerError) oneLinerError.hidden = !validation.oneLinerRequired;
+    const refsError = container.querySelector<HTMLElement>("[data-core-hook-refs-error]");
+    if (refsError) refsError.hidden = !validation.refsRequired;
+  };
+  container.addEventListener("input", onCoreHookInput, { signal: controller.signal });
+  container.addEventListener("change", onCoreHookInput, { signal: controller.signal });
 
   /**
    * kind に応じた L02 引数を組み立てる。
@@ -1639,6 +1880,36 @@ export function mountBibleView(container: HTMLElement): () => void {
     event.preventDefault();
     const form = event.target;
     if (!(form instanceof HTMLFormElement)) return;
+    if (form.dataset.coreHookForm !== undefined) {
+      if (!state.coreHookDraft) return;
+      const validation = coreHookValidation(state.coreHookDraft);
+      if (!validation.valid) {
+        render(container, state);
+        return;
+      }
+      const coreHook: CoreHookV2 = {
+        one_liner: state.coreHookDraft.one_liner.trim(),
+        type: state.coreHookDraft.type,
+        hit_references: state.coreHookDraft.hit_references.map((item) => item.trim()).filter(Boolean).slice(0, 3),
+      };
+      state.coreHookSaving = true;
+      render(container, state);
+      void apiPutBibleMeta(state.slug, { core_hook: coreHook })
+        .then((result) => {
+          if (state.bible) state.bible.meta = result.meta;
+          state.coreHookEditMode = false;
+          state.coreHookDraft = null;
+          state.coreHookSaving = false;
+          state.coreHookSavedAt = result.saved_at;
+          setToast(state, container, "中核ギミックを保存しました", "success");
+        })
+        .catch((error) => {
+          state.coreHookSaving = false;
+          render(container, state);
+          window.alert(`保存に失敗: ${errorText(error)}`);
+        });
+      return;
+    }
     const layer = form.dataset.bibForm as ActionLayer | undefined;
     if (!(layer === "L01" || layer === "L01b" || layer === "L01c")) return;
     state.runningLayer = layer;

@@ -11,6 +11,7 @@ import type {
 } from "../../../revision-ui/types";
 import type {
   AuditReport,
+  CoreHookV2,
   EpisodeStoryboardV2,
   PagePlanV2,
 } from "../../../schemas-v2";
@@ -539,6 +540,16 @@ export type BibleAssetView = {
 
 export function apiGetBible(slug: string): Promise<BibleAssetView> {
   return getJson<BibleAssetView>(`/api/works/${encodeURIComponent(slug)}/bible`);
+}
+
+export function apiPutBibleMeta(
+  slug: string,
+  body: { core_hook?: CoreHookV2 | null; meta?: Record<string, unknown> }
+): Promise<{ ok: true; meta: unknown; saved_at: string }> {
+  return putJson<{ ok: true; meta: unknown; saved_at: string }>(
+    `/api/works/${encodeURIComponent(slug)}/bible/meta`,
+    body
+  );
 }
 
 export type VolumePlot = {
