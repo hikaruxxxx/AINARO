@@ -1,6 +1,15 @@
 import { store, type AppState } from "./lib/store";
 import { viewLabel } from "./nav";
 
+const WORK_SCOPE_VIEWS = new Set([
+  "bible",
+  "volume-plot",
+  "kdp-metadata",
+  "trademark-gate",
+  "volumes",
+  "work-overview",
+]);
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -30,18 +39,23 @@ function render(state: AppState): string {
     return `<span class="nc-breadcrumb__crumb nc-breadcrumb__crumb--current">Works</span>`;
   }
   const work = workLabel(state);
-  if (state.currentView === "work-overview") {
+  if (WORK_SCOPE_VIEWS.has(state.currentView)) {
+    const current = state.currentView === "work-overview";
     return `
       <button type="button" class="nc-breadcrumb__crumb" data-crumb="works">Works</button>
       <span class="nc-breadcrumb__sep">/</span>
-      <span class="nc-breadcrumb__crumb nc-breadcrumb__crumb--current" title="${escapeHtml(work.full)}">${escapeHtml(work.display)}</span>
+      ${current
+        ? `<span class="nc-breadcrumb__crumb nc-breadcrumb__crumb--title nc-breadcrumb__crumb--current" title="${escapeHtml(work.full)}">${escapeHtml(work.display)}</span>`
+        : `<button type="button" class="nc-breadcrumb__crumb nc-breadcrumb__crumb--title" data-crumb="work" title="${escapeHtml(work.full)}">${escapeHtml(work.display)}</button>
+           <span class="nc-breadcrumb__sep">/</span>
+           <span class="nc-breadcrumb__crumb nc-breadcrumb__crumb--current">${escapeHtml(viewLabel(state.currentView))}</span>`}
     `;
   }
   const ep = episodeLabel(state.currentEpisode);
   return `
     <button type="button" class="nc-breadcrumb__crumb" data-crumb="works">Works</button>
     <span class="nc-breadcrumb__sep">/</span>
-    <button type="button" class="nc-breadcrumb__crumb" data-crumb="work" title="${escapeHtml(work.full)}">${escapeHtml(work.display)}</button>
+    <button type="button" class="nc-breadcrumb__crumb nc-breadcrumb__crumb--title" data-crumb="work" title="${escapeHtml(work.full)}">${escapeHtml(work.display)}</button>
     <span class="nc-breadcrumb__sep">/</span>
     <button type="button" class="nc-breadcrumb__crumb" data-crumb="episode">${escapeHtml(ep)}</button>
     <span class="nc-breadcrumb__sep">/</span>

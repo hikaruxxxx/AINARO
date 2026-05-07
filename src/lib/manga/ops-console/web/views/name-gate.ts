@@ -32,21 +32,23 @@ const REASONS: Array<{ key: NameRejectReason; label: string }> = [
 ];
 
 const NAME_GATE_CSS = `
-.name-gate-container { display: grid; gap: 14px; }
+.name-gate-container { display: grid; grid-template-rows: auto auto 1fr; gap: 14px; }
 .name-gate-toolbar {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 5;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
+  row-gap: 8px;
   padding: 12px 14px;
   border: 1px solid #dbe1ea;
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface-elevated);
 }
 .name-gate-toolbar h2 { margin: 0; font-size: 18px; letter-spacing: 0; }
-.name-gate-toolbar .info { color: #64748b; font-size: 13px; }
+.name-gate-toolbar .info { min-width: 0; max-inline-size: min(72ch, 100%); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #64748b; font-size: 13px; }
 .name-gate-toolbar .summary { margin-left: auto; color: #334155; font-size: 13px; }
 .ng-kpis { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
 .ng-kpi { display: inline-flex; align-items: center; min-height: 24px; padding: 0 9px; border-radius: 999px; font-size: var(--fs-sm); font-weight: 700; }

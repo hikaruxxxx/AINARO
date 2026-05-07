@@ -26,6 +26,15 @@ import { mountWorkOverviewView } from "./views/work-overview";
 
 type Unmount = () => void;
 
+const WORK_SCOPE_VIEWS = new Set<ViewName>([
+  "bible",
+  "volume-plot",
+  "kdp-metadata",
+  "trademark-gate",
+  "volumes",
+  "work-overview",
+]);
+
 function parseRoute(): { slug: string | null; episode: number | null; view: ViewName } {
   if (window.location.pathname === "/jobs") {
     return { slug: null, episode: null, view: "jobs-hub" };
@@ -38,7 +47,10 @@ function parseRoute(): { slug: string | null; episode: number | null; view: View
   }
   const workMatch = window.location.pathname.match(/^\/works\/([^/]+)\/?$/);
   if (workMatch) {
-    return { slug: decodeURIComponent(workMatch[1]), episode: 0, view: "work-overview" };
+    const slug = decodeURIComponent(workMatch[1]);
+    const hashView = window.location.hash.replace(/^#/, "");
+    const view = isViewName(hashView) && WORK_SCOPE_VIEWS.has(hashView) ? hashView : "work-overview";
+    return { slug, episode: 0, view };
   }
   const m = window.location.pathname.match(/^\/works\/([^/]+)\/episodes\/ep(\d+)\/?$/);
   const hashView = window.location.hash.replace(/^#/, "");
@@ -87,9 +99,11 @@ function syncRoute(slug: string, episode: number, view: ViewName): void {
     history.pushState(null, "", next);
     return;
   }
-  if (view === "work-overview") {
+  if (WORK_SCOPE_VIEWS.has(view)) {
     if (!slug) return;
-    const next = `/works/${encodeURIComponent(slug)}/`;
+    const next = view === "work-overview"
+      ? `/works/${encodeURIComponent(slug)}/`
+      : `/works/${encodeURIComponent(slug)}/#${view}`;
     const current = `${window.location.pathname}${window.location.hash}`;
     if (current === next) return;
     history.pushState(null, "", next);
@@ -213,7 +227,10 @@ async function start(): Promise<void> {
 
   window.addEventListener("hashchange", () => {
     const hashView = window.location.hash.replace(/^#/, "");
-    if (isViewName(hashView)) store.update({ currentView: hashView });
+    if (!isViewName(hashView)) return;
+    const route = parseRoute();
+    if (route.slug && route.episode === 0 && !WORK_SCOPE_VIEWS.has(hashView)) return;
+    store.update({ currentSlug: route.slug ?? store.state.currentSlug, currentEpisode: route.episode ?? store.state.currentEpisode, currentView: hashView });
   });
 }
 
