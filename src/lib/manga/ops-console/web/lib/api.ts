@@ -140,6 +140,57 @@ export function apiGetWorks(): Promise<{ works: WorkInfo[] }> {
   return getJson<{ works: WorkInfo[] }>("/api/works");
 }
 
+// Client mirror of server/lib/dashboard-scanner.ts. The server type remains the SSoT.
+export type NextActionKind =
+  | "job_failed"
+  | "pending_name"
+  | "audit_failed"
+  | "kdp_meta_missing"
+  | "new_work";
+
+export type NextActionItem = {
+  kind: NextActionKind;
+  slug?: string;
+  title?: string;
+  episode?: number;
+  volume?: number;
+  message: string;
+  detail?: string;
+  cta_label: string;
+  cta_view?: "index" | "name-gate" | "revision" | "quality" | "kdp-metadata" | "volumes" | "pipeline";
+  failure_reason?: string;
+};
+
+export type WorkSnapshot = {
+  slug: string;
+  title?: string;
+  phase?: string;
+  audit_failed_total: number;
+  pending_name_total: number;
+  last_job?: { state: "succeeded" | "failed" | "aborted" | "running"; ts: string; layer: string };
+  last_modified_at?: string;
+  state: "stale" | "failed" | "not_started" | "ok";
+  episodes: Array<{
+    episode: number;
+    audit_failed_count: number;
+    audit_status: "ready" | "missing" | "stale";
+    pending_name_count: number;
+    last_audit_at?: string;
+    last_modified_at?: string;
+  }>;
+  volumes: Array<{ volume: number; kdp_package_ready: boolean; kdp_metadata_present: boolean }>;
+};
+
+export type DashboardData = {
+  generated_at: string;
+  works_snapshot: WorkSnapshot[];
+  next_actions: NextActionItem[];
+};
+
+export function apiGetDashboard(limit = 3): Promise<DashboardData> {
+  return getJson<DashboardData>(`/api/dashboard/next-actions?limit=${limit}`);
+}
+
 export function apiGetWorkEpisodes(slug: string): Promise<{ slug: string; episodes: number[] }> {
   return getJson<{ slug: string; episodes: number[] }>(
     `/api/works/${encodeURIComponent(slug)}/episodes`
