@@ -110,6 +110,17 @@ function styleHeader(bible: BibleSnapshotV2): string {
   ].join("\n");
 }
 
+function mangaTechniqueMandatoryBlock(): string {
+  return [
+    "MANGA TECHNIQUE (MANDATORY — do NOT relax):",
+    "- INK LINEWORK: clear pen lines with weight modulation, NOT soft gradients. Outlines must be confident black ink.",
+    "- SCREENTONE: visible dot patterns / hatching for shading. NO smooth tonal gradients.",
+    "- WHITE HIGHLIGHTS: bold abrupt shapes (e.g., \"T highlight\" on hair, hard-edged catch lights), NOT subtle airbrush.",
+    "- CONTRAST: deep blacks for drama, clean whites for emphasis. NO mid-grey wash dominating panels.",
+    "- TONAL HIERARCHY: Different panels MUST have different screentone densities. Use light tones for everyday/dialogue beats, dark tones for emotional/dramatic beats, solid black for shock/despair. The page should NOT look uniformly grey.",
+  ].join("\n");
+}
+
 function negativesBlock(): string {
   return [
     "NEGATIVES (must avoid):",
@@ -323,13 +334,16 @@ function inPanelTextBlock(panel: PanelV2, bible: BibleSnapshotV2): string | null
   if (panel.dialogue.length > 0) {
     lines.push("Speech bubbles (rounded oval bubbles with tail pointing to speaker, Japanese vertical text right-to-left):");
     for (const d of panel.dialogue) {
-      lines.push(`  - ${charName(d.character_id)}: 「${d.text}」`);
+      const shapeTag = d.bubble_shape ? ` [bubble: ${d.bubble_shape}]` : "";
+      const tailTag = d.tail_direction ? ` [tail toward ${d.tail_direction}]` : "";
+      lines.push(`  - ${charName(d.character_id)}: 「${d.text}」${shapeTag}${tailTag}`);
     }
   }
   if (panel.monologue.length > 0) {
     lines.push("Inner monologue (square/angular bubbles WITHOUT tail, or thought-cloud, vertical Japanese text):");
     for (const m of panel.monologue) {
-      lines.push(`  - ${charName(m.character_id)} (thinks): 「${m.text}」`);
+      const shapeTag = m.bubble_shape ? ` [bubble: ${m.bubble_shape}]` : "";
+      lines.push(`  - ${charName(m.character_id)} (thinks): 「${m.text}」${shapeTag}`);
     }
   }
   if (panel.narration.length > 0) {
@@ -345,6 +359,7 @@ function inPanelTextBlock(panel: PanelV2, bible: BibleSnapshotV2): string | null
     }
   }
   lines.push(
+    "Each dialogue / monologue / narration / sfx item is associated with EXACTLY ONE panel (the one listed above). Do NOT duplicate the same bubble or caption across multiple panels — each speech bubble appears ONLY in its assigned panel.",
     "All text MUST be drawn INSIDE the image. Use authentic Japanese manga lettering style. Do NOT translate to English. Do NOT leave blank balloons.",
   );
   return lines.join("\n");
@@ -353,6 +368,7 @@ function inPanelTextBlock(panel: PanelV2, bible: BibleSnapshotV2): string | null
 export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImagePaths: string[] } {
   if (!args.panel) throw new Error("composePanelPrompt requires panel");
   const p = args.panel;
+  const screentoneTag = p.screentone_intensity ? `, screentone=${p.screentone_intensity}` : "";
   const inlineLabels = args.packet.refs
     .map((r, i) => `<ref#${i + 1}> (${r.role}${r.target_entity_id ? ` for ${r.target_entity_id}` : ""}, weight ${r.weight.toFixed(2)})`)
     .join("\n");
@@ -366,7 +382,7 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     "REFERENCE IMAGES (passed via image_inputs in this order):",
     inlineLabels,
     "",
-    `SHOT: ${p.shot_type} / camera=${p.camera}${p.bleed ? " / BLEED edges" : ""}${p.silence ? " / SILENT atmospheric" : ""}, importance=${p.importance}/5`,
+    `SHOT: ${p.shot_type} / camera=${p.camera}${p.bleed ? " / BLEED edges" : ""}${p.silence ? " / SILENT atmospheric" : ""}, importance=${p.importance}/5${screentoneTag}`,
     "",
     "CHARACTERS IN PANEL:",
     characterRefDescription(p, args.bible),
@@ -383,6 +399,7 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     "MUST PRESERVE invariants from continuity refs (face geometry, outfit details, location layout). Match line weight and screentone density of refs.",
     "",
     userInstructionsBlock(args.userInstructions),
+    mangaTechniqueMandatoryBlock(),
     negativesBlock(),
   ];
 
@@ -407,13 +424,14 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
 
   const charName = (id: string) => args.bible!.characters.find((c) => c.id === id)?.name ?? id;
   const panelLines = page.panels.map((p) => {
+    const screentoneTag = p.screentone_intensity ? `, screentone=${p.screentone_intensity}` : "";
     const cs = p.entities.characters.map((c) => {
       const ent = args.bible.characters.find((x) => x.id === c.character_id);
       return `${ent?.name ?? c.character_id} (${c.role}, ${c.on_screen_via}, expr=${c.expression})`;
     }).join("; ");
     const loc = args.bible.locations.find((x) => x.id === p.entities.location_id)?.name ?? p.entities.location_id;
     const lines = [
-      `PANEL #${p.panel_no} (reading order ${p.reading_order}, ${p.shot_type}, ${p.camera}${p.bleed ? ", BLEED" : ""}${p.silence ? ", SILENT" : ""}):`,
+      `PANEL #${p.panel_no} (reading order ${p.reading_order}, ${p.shot_type}, ${p.camera}${p.bleed ? ", BLEED" : ""}${p.silence ? ", SILENT" : ""}${screentoneTag}):`,
       `  Characters: ${cs || "none"}.`,
       `  Location: ${loc}.`,
       `  Action: ${p.action}.`,
@@ -462,6 +480,7 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     "MUST PRESERVE invariants from continuity refs across all panels of this page (same character face/outfit, same location layout).",
     "",
     userInstructionsBlock(args.userInstructions),
+    mangaTechniqueMandatoryBlock(),
     negativesBlock(),
   ];
 
