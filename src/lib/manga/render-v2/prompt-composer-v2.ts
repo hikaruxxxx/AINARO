@@ -293,7 +293,10 @@ function buildLayoutGeometryBlock(
   if (bleedPanels.length > 0) {
     lines.push(`- BLEED panels (${bleedPanels.map(panelLabel).join(", ")}) extend artwork to the page edge with no white margin on the bleed side.`);
   }
-  lines.push("- Maintain consistent gutter (white space) of ~3-5% page width between non-bleed panels.");
+  lines.push("- BLEED panels are exempt from gutter rules ONLY on the bleed sides. Other sides still require 30px gutter.");
+  lines.push("- GUTTER (CRITICAL): Adjacent non-bleed panels MUST be separated by a clean WHITE STRIP of MINIMUM 30 pixels. Panel borders must NOT touch each other.");
+  lines.push("- Vertical gutters (between left/right panels in same row): minimum 30px white space.");
+  lines.push("- Horizontal gutters (between rows): minimum 30-50px white space, slightly wider for major scene transitions.");
 
   return lines.join("\n");
 }

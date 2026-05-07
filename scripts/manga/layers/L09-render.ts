@@ -40,6 +40,7 @@ import { composePagePrompt, composePanelPrompt } from "../../../src/lib/manga/re
 import { composePanelsIntoPage } from "../../../src/lib/manga/render-v2/page-composer";
 import { overlayEffectLinesOntoPage } from "../../../src/lib/manga/render/page-with-effect-lines";
 import { overlayBubblesOntoPage } from "../../../src/lib/manga/render/page-with-bubbles";
+import { overlayPolygonFramesOntoPage } from "../../../src/lib/manga/render/page-with-polygon-frames";
 import type {
   BibleSnapshotV2,
   EpisodeStoryboardV2,
@@ -286,6 +287,14 @@ async function main() {
           .png()
           .toFile(outPath);
         try { await fs.unlink(tmpPath); } catch {}
+        const polygonResult = await overlayPolygonFramesOntoPage({
+          pagePngPath: outPath,
+          outputPath: outPath,
+          pagePlanPage: page,
+          pageWidth: 1748,
+          pageHeight: 2480,
+        });
+        if (polygonResult.framedCount > 0) console.log(`[L09] polygon frames p${page.page_no}: ${polygonResult.framedCount}`);
         const effectResult = await overlayEffectLinesOntoPage({
           pageOutputPath: outPath,
           pagePlanPage: page,
