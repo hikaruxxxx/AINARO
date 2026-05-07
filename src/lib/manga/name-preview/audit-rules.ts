@@ -25,6 +25,8 @@
  * - establishing_late:    establishing shot が page 後半に登場 (普通は page 冒頭)
  * - cliffhanger_role_mismatch: page_role が cliffhanger なのに最終 panel の importance が低い
  * - opening_hook_no_focus: page_role が opening_hook なのに focus が曖昧 (importance ≤ 2)
+ * - same_page_dialogue_duplication: 同一 page 内の異なる panel に同一 dialogue.text が重複
+ * - page_narrative_density: page の text 量 / panel 数が閾値超
  *
  * Phase X WX-4 で追加 (panel スコープ):
  * - narration_dominant:   panel の narration 文字数 > dialogue + monologue 合計 (ナレ過多)
@@ -55,8 +57,20 @@ const DIALOGUE_OVERFLOW_CHARS = 60;
 const PANEL_OVERCROWD = 7;
 const PANEL_UNDERCROWD = 1;
 const SHOT_REPETITION_RUN = 3;
+// page_role 別 shot 連続閾値。action / reveal / cliffhanger は画の変化を厳しめに見る。
+const SHOT_REPETITION_THRESHOLD: Record<string, number> = {
+  dialogue: 4,
+  buildup: 4,
+  domestic: 4,
+  character_intro: 4,
+  action: 2,
+  reveal: 2,
+  cliffhanger: 2,
+  default: SHOT_REPETITION_RUN,
+};
 const SILENT_RUN = 3;
 const BLEED_OVERUSE = 3;
+const PAGE_NARRATIVE_DENSITY_THRESHOLD = 60;
 // Phase X WX-4 で追加
 /** panel の narration 文字数がこの倍率 × (dialogue+monologue 文字数) を超えると warn */
 const NARRATION_DOMINANT_RATIO = 1.0;
@@ -78,6 +92,8 @@ export type AuditRuleKind =
   | "establishing_late"
   | "cliffhanger_role_mismatch"
   | "opening_hook_no_focus"
+  | "same_page_dialogue_duplication"
+  | "page_narrative_density"
   // Phase X WX-4 で追加
   | "narration_dominant"
   | "face_only_emotion_run"
@@ -169,20 +185,22 @@ export function auditPage(input: PageAuditInput): AuditFinding[] {
   }
 
   // shot_repetition
+  const shotRepetitionThreshold =
+    SHOT_REPETITION_THRESHOLD[page.page_role] ?? SHOT_REPETITION_THRESHOLD.default;
   let runStart = 0;
   for (let i = 1; i <= sortedPanels.length; i++) {
     const prev = sortedPanels[i - 1];
     const curr = sortedPanels[i];
     if (curr && curr.shot_type === prev.shot_type) continue;
     const runLen = i - runStart;
-    if (runLen >= SHOT_REPETITION_RUN) {
+    if (runLen >= shotRepetitionThreshold) {
       findings.push({
         page_no: pageNo,
         panel_id: prev.panel_id,
         panel_no: prev.panel_no,
         rule: "shot_repetition",
         severity: "warn",
-        message: `${prev.shot_type} が ${runLen} コマ連続 (panels ${sortedPanels[runStart].panel_no}..${prev.panel_no})`,
+        message: `${prev.shot_type} が ${runLen} コマ連続 (panels ${sortedPanels[runStart].panel_no}..${prev.panel_no}, 閾値 ${shotRepetitionThreshold})`,
       });
     }
     runStart = i;
@@ -273,6 +291,49 @@ export function auditPage(input: PageAuditInput): AuditFinding[] {
       rule: "establishing_late",
       severity: "info",
       message: `establishing が page 後半 (panel ${establishingIdx + 1}/${sortedPanels.length}, 通常は冒頭)`,
+    });
+  }
+
+  // same_page_dialogue_duplication: 同 page 内の異なる panel に同一 dialogue.text が重複
+  const dialogueTextPanels = new Map<string, number[]>();
+  for (const panel of page.panels) {
+    const textsInPanel = new Set<string>();
+    for (const d of panel.dialogue) {
+      const key = d.text.trim();
+      if (!key || textsInPanel.has(key)) continue;
+      textsInPanel.add(key);
+      const panels = dialogueTextPanels.get(key) ?? [];
+      panels.push(panel.panel_no);
+      dialogueTextPanels.set(key, panels);
+    }
+  }
+  for (const [text, panels] of dialogueTextPanels) {
+    if (panels.length >= 2) {
+      findings.push({
+        page_no: pageNo,
+        panel_no: panels[0],
+        rule: "same_page_dialogue_duplication",
+        severity: "warn",
+        message: `同一 page 内で dialogue「${text}」が ${panels.length} 個の panel (panel_no=${panels.join(", ")}) に重複しています。AI 生成時にコマ間で吹き出しが複製される原因になります。`,
+      });
+    }
+  }
+
+  // page_narrative_density: text 量 / panel 数が閾値超
+  let pageNarrativeChars = 0;
+  for (const panel of page.panels) {
+    for (const d of panel.dialogue) pageNarrativeChars += d.text.length;
+    for (const m of panel.monologue) pageNarrativeChars += m.text.length;
+    for (const n of panel.narration) pageNarrativeChars += n.length;
+    // sfx は擬音で短いので含めない
+  }
+  const narrativeDensity = page.panels.length > 0 ? pageNarrativeChars / page.panels.length : 0;
+  if (narrativeDensity > PAGE_NARRATIVE_DENSITY_THRESHOLD) {
+    findings.push({
+      page_no: pageNo,
+      rule: "page_narrative_density",
+      severity: "warn",
+      message: `page narrative density ${narrativeDensity.toFixed(1)} 文字/panel (>${PAGE_NARRATIVE_DENSITY_THRESHOLD}) - text 過密、情報詳細図化の懸念。`,
     });
   }
 
@@ -402,6 +463,8 @@ export function findingsToWarnings(findings: AuditFinding[]): NameWarning[] {
       case "establishing_late":
       case "cliffhanger_role_mismatch":
       case "opening_hook_no_focus":
+      case "same_page_dialogue_duplication":
+      case "page_narrative_density":
       case "dialogue_speaker_absent":
       // Phase X WX-4 で追加されたルールも name_audit.json には残るが
       // manifest.warnings には入れない (v1 互換維持)
