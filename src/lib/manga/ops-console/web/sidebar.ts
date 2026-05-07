@@ -18,27 +18,59 @@ function episodeLabel(n: number): string {
   return `ep${String(n).padStart(2, "0")}`;
 }
 
-function groupedMenuHtml(currentView: ViewName): string {
-  const groups: MenuGroup[] = ["home", "inventory", "judge", "browse", "publish"];
-  return groups
-    .map((group) => {
-      const items = MENU.filter((item) => item.group === group);
-      const homeButton =
-        group === "home"
-          ? `<button type="button" class="sidebar__menu-item${currentView === "index" ? " is-active" : ""}" data-view="index">ホーム</button>`
-          : "";
-      return `
-        <div class="sidebar__group">
-          <h3 class="sidebar__group-title">${escapeHtml(GROUP_LABELS[group])}</h3>
-          ${homeButton}${items
-            .map(
-              (item) =>
-                `<button type="button" class="sidebar__menu-item${item.view === currentView ? " is-active" : ""}" data-view="${item.view}">${escapeHtml(item.label)}</button>`
-            )
-            .join("")}
-        </div>`;
+function sectionTitle(group: MenuGroup, state: AppState): string {
+  if (group === "work") {
+    return `${GROUP_LABELS.work} <span class="sidebar__group-title-context">· ${escapeHtml(state.currentSlug)}</span>`;
+  }
+  if (group === "episode") {
+    const ep = state.currentEpisode ? episodeLabel(state.currentEpisode) : "";
+    const context = [state.currentSlug, ep].filter(Boolean).join(" / ");
+    return `${GROUP_LABELS.episode} <span class="sidebar__group-title-context">· ${escapeHtml(context)}</span>`;
+  }
+  return GROUP_LABELS[group];
+}
+
+function menuButtonHtml(item: { view: ViewName; label: string }, currentView: ViewName): string {
+  return `<button type="button" class="sidebar__menu-item${item.view === currentView ? " is-active" : ""}" data-view="${item.view}">${escapeHtml(item.label)}</button>`;
+}
+
+function groupItems(group: MenuGroup, includeAiEdit = false): Array<{ view: ViewName; label: string; group: MenuGroup }> {
+  return MENU.filter((item) => item.group === group && (includeAiEdit || item.view !== "ai-edit"));
+}
+
+function menuSectionHtml(group: MenuGroup, state: AppState): string {
+  const items = groupItems(group);
+  if (items.length === 0) return "";
+  const body = items
+    .map((item) => {
+      const divider = group === "work" && item.view === "volumes"
+        ? `<div class="sidebar__subdivider" aria-hidden="true"><span>Publish</span></div>`
+        : "";
+      return `${divider}${menuButtonHtml(item, state.currentView)}`;
     })
     .join("");
+  return `
+    <div class="sidebar__group">
+      <h3 class="sidebar__group-title">${sectionTitle(group, state)}</h3>
+      ${body}
+    </div>`;
+}
+
+function groupedMenuHtml(state: AppState): string {
+  const sections = [
+    menuSectionHtml("global", state),
+    state.currentSlug ? menuSectionHtml("work", state) : "",
+    state.currentSlug && state.currentEpisode ? menuSectionHtml("episode", state) : "",
+    state.currentSlug ? menuSectionHtml("utility", state) : "",
+  ];
+  const aiEdit = MENU.find((item) => item.view === "ai-edit");
+  if (aiEdit) {
+    sections.push(`
+      <div class="sidebar__group sidebar__group--tail">
+        ${menuButtonHtml(aiEdit, state.currentView)}
+      </div>`);
+  }
+  return sections.join("");
 }
 
 /**
@@ -50,14 +82,10 @@ function rerender(root: HTMLElement, state: AppState): void {
     root.innerHTML = `
       <div class="nc-scope-panel">
         <p class="nc-scope-note">作品を選択してください。</p>
-        <div class="sidebar__group">
-          <h3 class="sidebar__group-title">全体</h3>
-          <button type="button" class="sidebar__menu-item${state.currentView === "index" ? " is-active" : ""}" data-view="index">作品一覧</button>
-          <button type="button" class="sidebar__menu-item${state.currentView === "jobs-hub" ? " is-active" : ""}" data-view="jobs-hub">全作品ジョブ</button>
-          <button type="button" class="sidebar__menu-item${state.currentView === "quality-hub" ? " is-active" : ""}" data-view="quality-hub">全作品品質</button>
-          <button type="button" class="sidebar__menu-item${state.currentView === "ai-edit" ? " is-active" : ""}" data-view="ai-edit">AI 編集</button>
-        </div>
       </div>
+      <nav class="menu" aria-label="ops views">
+        ${groupedMenuHtml(state)}
+      </nav>
     `;
     root.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {
       button.addEventListener("click", () => {
@@ -94,7 +122,7 @@ function rerender(root: HTMLElement, state: AppState): void {
       <p class="nc-scope-note">scope 切替は閲覧専用 (read)。承認・起動は起動時 default scope に限定。</p>
     </div>
     <nav class="menu" aria-label="ops views">
-      ${groupedMenuHtml(state.currentView)}
+      ${groupedMenuHtml(state)}
     </nav>
   `;
 

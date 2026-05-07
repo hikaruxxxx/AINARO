@@ -363,11 +363,11 @@ function renderModal(state: ViewState): string {
 function renderGlossaryModal(state: ViewState): string {
   if (!state.glossaryOpen) return "";
   const rows = [
-    ["ホーム", "開いた瞬間の「次の一手」と全作品スナップショット。停滞を検知。"],
-    ["棚卸し", "全作品の進捗とジョブ履歴を俯瞰、停滞作品を発見する場所。"],
-    ["判定する", "ネーム a/r/p、修正・採用、品質監査、品質改善のループを回す場所。"],
-    ["中身を見る", "Bible・巻プロット・ネーム原案・作品概要などの閲覧。"],
-    ["公開する", "巻管理 (KDP)・KDPメタ・商標 IP チェック。AI 編集はここから困ったとき逃げ込む口。"],
+    ["GLOBAL", "全作品の一覧、ジョブ履歴、品質状況を俯瞰する場所。"],
+    ["WORK", "作品を選ぶと出る、概要・Bible / 参照素材・巻プロット・公開準備の場所。"],
+    ["EPISODE", "エピソードを選ぶと出る、パイプライン進捗から読者維持改善までの作業場所。"],
+    ["Utility", "個別 layer 起動など、通常フロー外の確認と再実行を扱う場所。"],
+    ["AI 編集", "現時点では単独 view として残し、次 wave で modal 化する予定。"],
   ];
   return `
     <div class="nc-modal is-open" id="idx-glossary-modal" data-action="close-glossary">

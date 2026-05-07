@@ -1,33 +1,33 @@
 import type { ViewName } from "./lib/store";
 
-export type MenuGroup = "home" | "inventory" | "judge" | "browse" | "publish";
+export type MenuGroup = "global" | "work" | "episode" | "utility";
 
 export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = [
-  { view: "jobs-hub", label: "全作品ジョブ", group: "inventory" },
-  { view: "quality-hub", label: "全作品品質", group: "inventory" },
-  { view: "pipeline", label: "パイプライン進捗", group: "judge" },
-  { view: "name-gate", label: "ネーム判定", group: "judge" },
-  { view: "revision", label: "ページ承認", group: "judge" },
-  { view: "revision-effects", label: "修正効果分析", group: "judge" },
-  { view: "quality", label: "品質監査", group: "judge" },
-  { view: "improvements", label: "品質改善 (Hook / Cliff)", group: "judge" },
-  { view: "storyboard", label: "ネーム原案", group: "browse" },
-  { view: "bible", label: "世界観・設定", group: "browse" },
-  { view: "volume-plot", label: "巻プロット", group: "browse" },
-  { view: "work-overview", label: "作品概要", group: "browse" },
-  { view: "layers", label: "個別 layer 起動", group: "browse" },
-  { view: "volumes", label: "巻管理", group: "publish" },
-  { view: "kdp-metadata", label: "KDP メタ情報", group: "publish" },
-  { view: "trademark-gate", label: "商標 / IP チェック", group: "publish" },
-  { view: "ai-edit", label: "AI 編集", group: "publish" },
+  { view: "index", label: "ホーム", group: "global" },
+  { view: "jobs-hub", label: "全作品ジョブ", group: "global" },
+  { view: "quality-hub", label: "全作品品質", group: "global" },
+  { view: "work-overview", label: "作品概要", group: "work" },
+  { view: "bible", label: "Bible / 参照素材", group: "work" },
+  { view: "volume-plot", label: "巻プロット", group: "work" },
+  { view: "volumes", label: "巻管理", group: "work" },
+  { view: "kdp-metadata", label: "KDP メタ情報", group: "work" },
+  { view: "trademark-gate", label: "商標 / IP チェック", group: "work" },
+  { view: "pipeline", label: "パイプライン進捗", group: "episode" },
+  { view: "storyboard", label: "ネーム原案", group: "episode" },
+  { view: "name-gate", label: "ネーム判定", group: "episode" },
+  { view: "revision", label: "ページ承認", group: "episode" },
+  { view: "revision-effects", label: "修正効果分析", group: "episode" },
+  { view: "quality", label: "品質監査", group: "episode" },
+  { view: "improvements", label: "読者維持改善", group: "episode" },
+  { view: "layers", label: "個別 layer 起動", group: "utility" },
+  { view: "ai-edit", label: "AI 編集", group: "utility" },
 ];
 
 export const GROUP_LABELS: Record<MenuGroup, string> = {
-  home: "ホーム",
-  inventory: "棚卸し",
-  judge: "判定する",
-  browse: "中身を見る",
-  publish: "公開する",
+  global: "GLOBAL",
+  work: "WORK",
+  episode: "EPISODE",
+  utility: "Utility",
 };
 
 // work scope のみで動作する view (episode 不要)。`/works/<slug>/` の URL に対応。
