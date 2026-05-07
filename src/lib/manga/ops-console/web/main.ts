@@ -1,6 +1,7 @@
 import { apiGetBootstrap } from "./lib/api";
 import { loadFavorites, loadRecent, pushRecent } from "./lib/persistence";
 import { isViewName, store, type ViewName } from "./lib/store";
+import { WORK_SCOPE_VIEWS } from "./nav";
 import { mountBreadcrumb } from "./breadcrumb";
 import { mountRestartButton } from "./restart-button";
 import { mountScopeSwitcher } from "./scope-switcher";
@@ -16,6 +17,7 @@ import { mountNameGateView } from "./views/name-gate";
 import { mountPipelineView } from "./views/pipeline";
 import { mountQualityView } from "./views/quality";
 import { mountQualityHubView } from "./views/quality-hub";
+import { mountRevisionEffectsView } from "./views/revision-effects";
 import { mountRevisionView } from "./views/revision";
 import { mountImprovementsView } from "./views/improvements";
 import { mountStoryboardView } from "./views/storyboard";
@@ -25,15 +27,6 @@ import { mountVolumesView } from "./views/volumes";
 import { mountWorkOverviewView } from "./views/work-overview";
 
 type Unmount = () => void;
-
-const WORK_SCOPE_VIEWS = new Set<ViewName>([
-  "bible",
-  "volume-plot",
-  "kdp-metadata",
-  "trademark-gate",
-  "volumes",
-  "work-overview",
-]);
 
 function parseRoute(): { slug: string | null; episode: number | null; view: ViewName } {
   if (window.location.pathname === "/jobs") {
@@ -145,6 +138,7 @@ function mountCurrentView(main: HTMLElement): () => void {
     else if (state.currentView === "volumes") unmount = mountVolumesView(main);
     else if (state.currentView === "layers") unmount = mountLayersView(main);
     else if (state.currentView === "revision") unmount = mountRevisionView(main);
+    else if (state.currentView === "revision-effects") unmount = mountRevisionEffectsView(main);
     else unmount = mountNameGateView(main);
   });
 }

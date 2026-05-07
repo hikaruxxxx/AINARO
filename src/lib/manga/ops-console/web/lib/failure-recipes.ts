@@ -55,7 +55,7 @@ export const FAILURE_RECIPES: Record<FailureReason, FailureRecipe> = {
   panel_render_timeout: {
     summary: "パネル描画が時間内に終わらず、レンダー工程が停止しました。",
     ctas: [
-      { kind: "open-view", label: "修正・採用", view: "revision" },
+      { kind: "open-view", label: "ページ承認", view: "revision" },
       { kind: "ai-edit", label: "AI で修正", prompt: "タイムアウトした panel/page をログから特定し、プロンプトや再実行範囲を軽くしてください。" },
       { kind: "rerun", label: "再実行" },
       { kind: "open-log", label: "ログ" },
@@ -64,7 +64,7 @@ export const FAILURE_RECIPES: Record<FailureReason, FailureRecipe> = {
   page_render_timeout: {
     summary: "ページ単位の one-shot 描画が時間切れで停止しています。",
     ctas: [
-      { kind: "open-view", label: "修正・採用", view: "revision" },
+      { kind: "open-view", label: "ページ承認", view: "revision" },
       { kind: "ai-edit", label: "AI で修正", prompt: "page_one_shot timeout のページを確認し、ページ構成またはレンダー指示を分割してください。" },
       { kind: "rerun", label: "再実行" },
       { kind: "open-log", label: "ログ" },

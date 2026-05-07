@@ -1,5 +1,5 @@
 import { isViewName, store, type AppState, type ViewName } from "./lib/store";
-import { GROUP_LABELS, MENU, type MenuGroup } from "./nav";
+import { GROUP_LABELS, MENU, requiresEpisode, type MenuGroup } from "./nav";
 
 function renderOptions(values: Array<{ value: string; label: string }>, selected: string): string {
   return values
@@ -91,7 +91,7 @@ function rerender(root: HTMLElement, state: AppState): void {
           )}
         </select>
       </div>
-      <p class="nc-scope-note">scope 切替は閲覧専用 (read)。修正・採用・起動は起動時 default scope に限定。</p>
+      <p class="nc-scope-note">scope 切替は閲覧専用 (read)。承認・起動は起動時 default scope に限定。</p>
     </div>
     <nav class="menu" aria-label="ops views">
       ${groupedMenuHtml(state.currentView)}
@@ -105,6 +105,16 @@ function rerender(root: HTMLElement, state: AppState): void {
       // 「作品一覧へ戻る」を押したら currentSlug/Episode をクリアして scope 解除。
       if (view === "index") {
         store.update({ currentView: "index", currentSlug: "", currentEpisode: 0 });
+        return;
+      }
+      // work-scope (currentEpisode=0) から episode-scope view へ遷移する場合は episode を補完。
+      // これをしないと loadXxx 系が `if (!episode) return` で空画面になる。
+      if (requiresEpisode(view) && !store.state.currentEpisode) {
+        const work = store.state.works.find((w) => w.slug === store.state.currentSlug);
+        const episode = work?.episodes.includes(store.state.defaultEpisode)
+          ? store.state.defaultEpisode
+          : work?.episodes[0] ?? 1;
+        store.update({ currentView: view, currentEpisode: episode });
         return;
       }
       store.update({ currentView: view });

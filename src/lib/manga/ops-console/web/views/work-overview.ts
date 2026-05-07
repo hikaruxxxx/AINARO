@@ -138,7 +138,7 @@ function render(container: HTMLElement, state: ViewState): void {
               <td>${row.adopted_count}</td>
               <td><div class="wo-actions">
                 <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-episode="${row.episode}" data-view="pipeline">パイプライン</button>
-                <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-episode="${row.episode}" data-view="revision">修正・採用</button>
+                <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-episode="${row.episode}" data-view="revision">ページ承認</button>
                 <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-episode="${row.episode}" data-view="quality">品質監査</button>
               </div></td>
             </tr>`).join("") || '<tr><td colspan="6">episode がありません</td></tr>'}</tbody>

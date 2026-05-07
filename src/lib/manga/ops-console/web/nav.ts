@@ -7,7 +7,8 @@ export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = 
   { view: "quality-hub", label: "全作品品質", group: "inventory" },
   { view: "pipeline", label: "パイプライン進捗", group: "judge" },
   { view: "name-gate", label: "ネーム判定", group: "judge" },
-  { view: "revision", label: "修正・採用", group: "judge" },
+  { view: "revision", label: "ページ承認", group: "judge" },
+  { view: "revision-effects", label: "修正効果分析", group: "judge" },
   { view: "quality", label: "品質監査", group: "judge" },
   { view: "improvements", label: "品質改善 (Hook / Cliff)", group: "judge" },
   { view: "storyboard", label: "ネーム原案", group: "browse" },
@@ -28,6 +29,29 @@ export const GROUP_LABELS: Record<MenuGroup, string> = {
   browse: "中身を見る",
   publish: "公開する",
 };
+
+// work scope のみで動作する view (episode 不要)。`/works/<slug>/` の URL に対応。
+export const WORK_SCOPE_VIEWS = new Set<ViewName>([
+  "bible",
+  "volume-plot",
+  "kdp-metadata",
+  "trademark-gate",
+  "volumes",
+  "work-overview",
+]);
+
+// scope を持たない view (slug/episode 不要)。
+export const NO_SCOPE_VIEWS = new Set<ViewName>([
+  "index",
+  "jobs-hub",
+  "quality-hub",
+  "ai-edit",
+]);
+
+/** episode-scope の view か (それ以外は work-scope または scope なし)。 */
+export function requiresEpisode(view: ViewName): boolean {
+  return !WORK_SCOPE_VIEWS.has(view) && !NO_SCOPE_VIEWS.has(view);
+}
 
 export function viewLabel(view: ViewName): string {
   if (view === "index") return "Works";
