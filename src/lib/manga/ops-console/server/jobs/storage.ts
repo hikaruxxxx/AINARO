@@ -12,6 +12,7 @@ export type StoredJob = {
   startedAt: string;
   finishedAt?: string;
   exitCode?: number;
+  failure_reason?: string;
   events: JobEvent[];
   revision_id?: string;
   panel_ids?: string[];

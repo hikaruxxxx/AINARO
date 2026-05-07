@@ -22,6 +22,7 @@ function summarize(job: JobRecord | StoredJob, eventLimit = 100): unknown {
     startedAt: job.startedAt,
     finishedAt: job.finishedAt,
     exitCode: job.exitCode,
+    failure_reason: job.failure_reason,
     events: job.events.slice(-eventLimit),
   };
 }

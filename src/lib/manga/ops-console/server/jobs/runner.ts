@@ -12,6 +12,7 @@ import {
   RUNNING_JOBS_DIR,
   type RunningJobMeta,
 } from "./running-store";
+import { classifyFailureReason } from "./failure-classifier";
 import { loadRecentJobs, persistJob, type StoredJob } from "./storage";
 import { validateJobRequest, type JobRequest } from "./validate";
 
@@ -33,6 +34,7 @@ export type JobRecord = {
   startedAt: string;
   finishedAt?: string;
   exitCode?: number;
+  failure_reason?: string;
   events: JobEvent[];
   revision_id?: string;
   panel_ids?: string[];
@@ -150,6 +152,7 @@ export class JobRegistry {
       record.finishedAt = new Date().toISOString();
       this.runningByKey.delete(validated.key);
       push("system", `log file open failed: ${String(e)}`);
+      record.failure_reason = classifyFailureReason(record) ?? undefined;
       this.persistFinal(record);
       return record;
     }
@@ -172,6 +175,7 @@ export class JobRegistry {
       record.finishedAt = new Date().toISOString();
       this.runningByKey.delete(validated.key);
       push("system", `spawn failed: ${String(e)}`);
+      record.failure_reason = classifyFailureReason(record) ?? undefined;
       this.persistFinal(record);
       return record;
     }
@@ -281,6 +285,7 @@ export class JobRegistry {
       record.state = abortRequested ? "aborted" : code === 0 ? "succeeded" : "failed";
       this.runningByKey.delete(validated.key);
       push("system", `done: ${record.state}${code === null ? "" : ` exit=${code}`}`);
+      record.failure_reason = classifyFailureReason(record) ?? undefined;
       this.persistFinal(record);
       this.scheduleExpire(record.id);
       void deleteRunning(record.id).catch(() => {});
@@ -366,6 +371,7 @@ export class JobRegistry {
           startedAt: meta.startedAt,
           finishedAt: new Date().toISOString(),
           exitCode: undefined,
+          failure_reason: "aborted",
           events: [],
           revision_id: meta.revision_id,
           panel_ids: meta.panel_ids,
@@ -458,6 +464,7 @@ export class JobRegistry {
         record.state = record.aborted ? "aborted" : "succeeded";
         this.runningByKey.delete(record.key);
         this.pushEvent(record, "system", `re-attached job exited: ${record.state} (exit code unknown)`);
+        record.failure_reason = classifyFailureReason(record) ?? undefined;
         this.persistFinal(record);
         this.scheduleExpire(record.id);
         void deleteRunning(record.id).catch(() => {});
@@ -486,6 +493,7 @@ export class JobRegistry {
       startedAt: record.startedAt,
       finishedAt: record.finishedAt,
       exitCode: record.exitCode,
+      failure_reason: record.failure_reason,
       events: record.events.slice(-MAX_EVENTS),
       revision_id: record.revision_id,
       panel_ids: record.panel_ids,
@@ -505,6 +513,7 @@ export class JobRegistry {
       startedAt: job.startedAt,
       finishedAt: job.finishedAt,
       exitCode: job.exitCode,
+      failure_reason: job.failure_reason,
       events: job.events.slice(-MAX_EVENTS),
       revision_id: job.revision_id,
       panel_ids: job.panel_ids,

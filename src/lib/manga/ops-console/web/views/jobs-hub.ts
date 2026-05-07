@@ -1,4 +1,11 @@
-import { ApiError, apiAbortJob, apiGetJobs, type JobSummary } from "../lib/api";
+import { ApiError, apiAbortJob, apiGetJobs, apiPostJob, type JobSummary } from "../lib/api";
+import {
+  FAILURE_RECIPES,
+  isFailureReason,
+  type FailureCta,
+  type FailureReason,
+} from "../lib/failure-recipes";
+import { store, type ViewName } from "../lib/store";
 import { layerLabel } from "../labels";
 
 const CSS = `
@@ -17,6 +24,9 @@ const CSS = `
 .jobs-table thead th { border-top: 0; color: var(--text-secondary); background: var(--surface-sunken); font-weight: var(--fw-bold); white-space: nowrap; }
 .jobs-log { max-width: 360px; color: var(--text-tertiary); overflow-wrap: anywhere; }
 .jobs-pattern { display: grid; gap: var(--space-1); }
+.jobs-failure-list { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
+.jobs-failure-item { display: grid; gap: var(--space-1); padding: var(--space-2); border-top: 1px solid var(--border-subtle); }
+.jobs-failure-actions { display: flex; gap: var(--space-1); flex-wrap: wrap; }
 .jobs-toast { position: fixed; top: 64px; right: 18px; z-index: 50; }
 `;
 
@@ -26,6 +36,13 @@ type ViewState = {
   error: string | null;
   toast: { message: string; kind: "success" | "warning" | "danger" | "info" } | null;
   tick: number;
+};
+
+type FailureGroup = {
+  key: string;
+  reason: FailureReason;
+  summary: string;
+  jobs: JobSummary[];
 };
 
 function ensureStyles(): void {
@@ -88,6 +105,60 @@ function failurePattern(job: JobSummary): string {
   return (lastLog(job) || "(no stderr)").slice(0, 80);
 }
 
+function failureReason(job: JobSummary): FailureReason | null {
+  return isFailureReason(job.failure_reason) ? job.failure_reason : null;
+}
+
+function fallbackFailureSummary(job: JobSummary): string {
+  return failurePattern(job);
+}
+
+function failureGroupFor(job: JobSummary): { key: string; reason: FailureReason; summary: string } {
+  const reason = failureReason(job);
+  if (reason) return { key: `reason:${reason}`, reason, summary: FAILURE_RECIPES[reason].summary };
+  const summary = fallbackFailureSummary(job);
+  return { key: `fallback:${summary}`, reason: "unknown", summary };
+}
+
+function viewLabel(view: ViewName): string {
+  const labels: Record<ViewName, string> = {
+    index: "ホーム",
+    "ai-edit": "AI 編集",
+    "jobs-hub": "ジョブ",
+    "quality-hub": "全作品品質",
+    pipeline: "パイプライン",
+    "name-gate": "ネーム判定",
+    revision: "修正・採用",
+    quality: "品質監査",
+    storyboard: "ネーム原案",
+    bible: "Bible",
+    "volume-plot": "巻プロット",
+    "kdp-metadata": "KDP メタ",
+    "trademark-gate": "商標 / IP",
+    improvements: "品質改善",
+    "work-overview": "作品概要",
+    volumes: "巻管理",
+    layers: "レイヤー",
+  };
+  return labels[view];
+}
+
+function ctaLabel(cta: FailureCta): string {
+  if (cta.kind === "open-view") return cta.label || viewLabel(cta.view);
+  return cta.label;
+}
+
+function renderFailureCtas(job: JobSummary): string {
+  const reason = failureReason(job) ?? "unknown";
+  const recipe = FAILURE_RECIPES[reason];
+  return `<div class="jobs-failure-actions">
+    ${recipe.ctas.map((cta, index) => {
+      const style = cta.kind === "rerun" ? "nc-button--primary" : cta.kind === "open-log" ? "nc-button--ghost" : "nc-button--secondary";
+      return `<button type="button" class="nc-button ${style} nc-button--sm" data-failure-job="${escapeHtml(job.id)}" data-failure-cta="${index}">${escapeHtml(ctaLabel(cta))}</button>`;
+    }).join("")}
+  </div>`;
+}
+
 function renderRunning(jobs: JobSummary[], now: number): string {
   const running = jobs.filter((job) => job.state === "running");
   return `<section class="jobs-section">
@@ -133,23 +204,33 @@ function renderHistory(jobs: JobSummary[], now: number): string {
 }
 
 function renderFailures(jobs: JobSummary[]): string {
-  const groups = new Map<string, JobSummary[]>();
+  const groups = new Map<string, FailureGroup>();
   for (const job of jobs.filter((item) => item.state === "failed")) {
-    const key = failurePattern(job);
-    const list = groups.get(key) ?? [];
-    list.push(job);
-    groups.set(key, list);
+    const base = failureGroupFor(job);
+    const group = groups.get(base.key) ?? { ...base, jobs: [] };
+    group.jobs.push(job);
+    groups.set(base.key, group);
   }
-  const rows = Array.from(groups.entries())
-    .sort((a, b) => b[1].length - a[1].length)
-    .map(([pattern, list]) => `<tr>
+  const rows = Array.from(groups.values())
+    .sort((a, b) => b.jobs.length - a.jobs.length)
+    .map((group) => {
+      const sorted = group.jobs.slice().sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt));
+      return `<tr>
       <td class="jobs-pattern">
-        <strong>${escapeHtml(pattern)}</strong>
-        <details><summary>job ids</summary><div class="jobs-meta">${escapeHtml(list.map((job) => job.id).join(", "))}</div></details>
+        <strong>[${escapeHtml(group.reason)}] ${escapeHtml(group.summary)}</strong>
+        <details><summary>jobs</summary>
+          <div class="jobs-failure-list">
+            ${sorted.map((job) => `<div class="jobs-failure-item">
+              <div class="jobs-meta">${escapeHtml(job.id)} / ${escapeHtml(scopeLabel(job))} / ${escapeHtml(layerLabel(job.layer).title)} / ${escapeHtml(fmtDate(job.startedAt))}</div>
+              ${renderFailureCtas(job)}
+            </div>`).join("")}
+          </div>
+        </details>
       </td>
-      <td>${list.length}</td>
-      <td>${escapeHtml(fmtDate(list.slice().sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt))[0]?.startedAt))}</td>
-    </tr>`)
+      <td>${group.jobs.length}</td>
+      <td>${escapeHtml(fmtDate(sorted[0]?.startedAt))}</td>
+    </tr>`;
+    })
     .join("");
   return `<section class="jobs-section">
     <h3>失敗パターン (頻度降順)</h3>
@@ -158,6 +239,52 @@ function renderFailures(jobs: JobSummary[]): string {
       <tbody>${rows}</tbody>
     </table></div>` : '<div class="nc-empty">失敗 job はありません。</div>'}
   </section>`;
+}
+
+function openJobView(job: JobSummary, view: ViewName): void {
+  store.update({
+    currentSlug: job.scope.slug,
+    currentEpisode: job.scope.episode ?? store.state.currentEpisode,
+    currentView: view,
+  });
+}
+
+function openAiEdit(job: JobSummary, cta: Extract<FailureCta, { kind: "ai-edit" }>): void {
+  store.update({
+    currentSlug: job.scope.slug,
+    currentEpisode: job.scope.episode ?? store.state.currentEpisode,
+    currentView: "ai-edit",
+    aiEditPreset: {
+      scope: job.scope.slug,
+      target: cta.target ?? "",
+      prompt: `${cta.prompt}\n\njob: ${job.id}\nkey: ${job.key}\nlast log: ${lastLog(job)}`,
+      originLayer: job.layer,
+      originView: "jobs-hub",
+    },
+  });
+}
+
+function openLog(job: JobSummary): void {
+  const lines = (job.events ?? []).slice(-40).map((event) => `[${event.channel}] ${event.line}`);
+  window.alert(lines.join("\n") || "(log はありません)");
+}
+
+async function rerunJob(job: JobSummary): Promise<void> {
+  await apiPostJob({
+    layer: job.layer,
+    slug: job.scope.slug,
+    episode: job.scope.episode,
+    volume: job.scope.volume,
+    args: {},
+  });
+}
+
+function failureCtaFor(job: JobSummary, indexRaw: string | undefined): FailureCta | null {
+  if (indexRaw === undefined) return null;
+  const index = Number(indexRaw);
+  if (!Number.isInteger(index) || index < 0) return null;
+  const reason = failureReason(job) ?? "unknown";
+  return FAILURE_RECIPES[reason].ctas[index] ?? null;
 }
 
 function render(container: HTMLElement, state: ViewState): void {
@@ -224,10 +351,31 @@ export function mountJobsHubView(container: HTMLElement): () => void {
       return;
     }
     const jobId = target.closest<HTMLElement>("[data-abort-job]")?.dataset.abortJob;
-    if (!jobId) return;
-    void apiAbortJob(jobId)
+    if (jobId) {
+      void apiAbortJob(jobId)
       .then(() => refresh(state, container))
       .catch((error) => toast(state, container, `abort に失敗: ${errorText(error)}`, "warning"));
+      return;
+    }
+    const ctaButton = target.closest<HTMLElement>("[data-failure-job][data-failure-cta]");
+    const ctaJobId = ctaButton?.dataset.failureJob;
+    const job = ctaJobId ? state.jobs.find((item) => item.id === ctaJobId) : undefined;
+    const cta = job ? failureCtaFor(job, ctaButton?.dataset.failureCta) : null;
+    if (!job || !cta) return;
+    if (cta.kind === "rerun") {
+      void rerunJob(job)
+        .then(() => {
+          toast(state, container, `再実行を開始: ${job.key}`, "success");
+          return refresh(state, container);
+        })
+        .catch((error) => toast(state, container, `再実行に失敗: ${errorText(error)}`, "warning"));
+    } else if (cta.kind === "open-view") {
+      openJobView(job, cta.view);
+    } else if (cta.kind === "ai-edit") {
+      openAiEdit(job, cta);
+    } else {
+      openLog(job);
+    }
   }, { signal: controller.signal });
 
   return () => {

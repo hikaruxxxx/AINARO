@@ -304,6 +304,7 @@ export type JobSummary = {
   startedAt: string;
   finishedAt?: string;
   exitCode?: number;
+  failure_reason?: string;
   events?: JobEvent[];
 };
 
