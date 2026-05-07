@@ -33,7 +33,41 @@ const CSS = `
 .sb-text { color: var(--text-secondary); font-size: var(--fs-base); line-height: 1.55; }
 .sb-details { display: grid; gap: var(--space-2); }
 .sb-copy { justify-self: start; }
+/* Phase C-1α: page card click → 精読 modal */
+.sb-page { cursor: zoom-in; transition: box-shadow 120ms; }
+.sb-page:hover { box-shadow: 0 0 0 2px rgba(37,99,235,0.35); }
+.sb-modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(15,23,42,0.55); }
+.sb-modal-card { width: min(1200px, 96vw); max-height: 96vh; overflow: auto; padding: 16px 20px; border-radius: 8px; background: var(--surface-elevated, #fff); box-shadow: 0 12px 42px rgba(15,23,42,0.32); display: grid; gap: 12px; direction: ltr; }
+.sb-modal-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.sb-modal-title { margin: 0; font-size: var(--fs-lg, 18px); }
+.sb-modal-meta { color: var(--text-secondary, #64748b); font-size: 12px; flex: 1 1 auto; }
+.sb-modal-close { background: var(--surface-elevated, #fff); border: 1px solid var(--border-subtle, #d1d5db); color: var(--text-primary, #111827); padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+.sb-modal-nav { display: flex; gap: 6px; }
+.sb-modal-nav button { background: var(--surface-elevated, #fff); border: 1px solid var(--border-subtle, #d1d5db); padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+.sb-modal-nav button:disabled { opacity: 0.5; cursor: not-allowed; }
+.sb-panel-grid {
+  display: grid;
+  gap: var(--space-2, 10px);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.sb-panel-card { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--border-subtle, #d1d5db); border-radius: 6px; background: var(--surface-sunken, #f8fafc); }
+.sb-panel-card h4 { margin: 0; font-size: var(--fs-md, 14px); }
+.sb-panel-card .sb-meta { font-size: 11px; }
+.sb-panel-card .sb-line { font-size: 13px; line-height: 1.5; color: var(--text-primary, #111827); padding: 2px 0; }
+.sb-panel-card .sb-line--dialogue { color: #1e40af; }
+.sb-panel-card .sb-line--monologue { color: #6d28d9; }
+.sb-panel-card .sb-line--narration { color: #475569; }
+.sb-panel-card .sb-line--sfx { color: #b45309; font-weight: 700; }
+.sb-panel-card .sb-line--action { color: #047857; font-style: italic; }
+.sb-modal-hint { color: var(--text-tertiary, #6b7280); font-size: 11px; }
 `;
+
+/** Phase C-1α: 各 page を modal で精読する。Tab/Shift+Tab で page 移動、Esc で閉じる。 */
+type PageDetailModal = {
+  /** どの tab から開いた modal か (storyboard | page-plan)。表示内容を切替える。 */
+  source: "storyboard" | "page-plan";
+  pageNo: number;
+};
 
 type ViewState = {
   slug: string;
@@ -43,6 +77,7 @@ type ViewState = {
   loading: boolean;
   error: string | null;
   copied: string | null;
+  pageModal: PageDetailModal | null;
 };
 
 function ensureStyles(): void {
@@ -79,8 +114,12 @@ function renderStoryboard(manifest: Manifest): string {
   if (pages.length === 0) return `<div class="nc-empty">ネーム原案のページが空です。</div>`;
   return `<div class="sb-list">${pages.map((page: any) => {
     const panels = Array.isArray(page.panels) ? page.panels : [];
+    const pageNo = Number(page.page_no);
+    const clickAttrs = Number.isFinite(pageNo)
+      ? ` data-sb-page-modal="storyboard" data-sb-page-no="${pageNo}"`
+      : "";
     return `
-      <section class="nc-card sb-page">
+      <section class="nc-card sb-page"${clickAttrs}>
         <div class="sb-page__head">
           <h3 class="sb-page__title">ページ ${escapeHtml(String(page.page_no ?? "-"))}</h3>
           ${page.role ? `<span class="nc-badge nc-badge--neutral">${escapeHtml(String(page.role))}</span>` : ""}
@@ -106,13 +145,75 @@ function renderStoryboard(manifest: Manifest): string {
   }).join("")}</div>`;
 }
 
+/** modal hero: 1 page を panel ごとに大きく展開、dialogue / monologue / narration / sfx / action を分類表示 */
+function renderPageDetailModal(state: ViewState): string {
+  const ctx = state.pageModal;
+  const manifest = state.manifest;
+  if (!ctx || !manifest) return "";
+  const pages = ctx.source === "storyboard" ? (manifest.storyboard?.pages ?? []) : (manifest.page_plan?.pages ?? []);
+  const page = (pages as any[]).find((p: any) => Number(p.page_no) === ctx.pageNo);
+  if (!page) return "";
+  const allPageNos = (pages as any[]).map((p: any) => Number(p.page_no)).filter((n) => Number.isFinite(n));
+  const idx = allPageNos.indexOf(ctx.pageNo);
+  const total = allPageNos.length;
+  const role = page.role ?? page.page_role ?? "";
+  const renderStrategy = page.render_strategy ?? "";
+  const panels = Array.isArray(page.panels) ? page.panels : [];
+
+  const panelHtml = panels.map((panel: any) => {
+    const arr = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
+    const dialogue = arr(panel.dialogue).map((d: any) => typeof d === "string" ? d : `${d?.character_id ?? ""}: ${d?.text ?? ""}`).filter(Boolean);
+    const monologue = arr(panel.monologue).map((m: any) => typeof m === "string" ? m : `${m?.character_id ?? ""}: ${m?.text ?? ""}`).filter(Boolean);
+    const narration = arr(panel.narration).map((n: any) => typeof n === "string" ? n : (n?.text ?? "")).filter(Boolean);
+    const sfx = arr(panel.sfx).map((s: any) => typeof s === "string" ? s : (s?.text ?? "")).filter(Boolean);
+    const action = typeof panel.action === "string" ? panel.action : "";
+    const keyVisual = typeof panel.key_visual === "string" ? panel.key_visual : "";
+    const lines: string[] = [];
+    if (action) lines.push(`<div class="sb-line sb-line--action">演出: ${escapeHtml(action)}</div>`);
+    if (keyVisual) lines.push(`<div class="sb-line sb-line--action">key visual: ${escapeHtml(keyVisual)}</div>`);
+    for (const t of dialogue) lines.push(`<div class="sb-line sb-line--dialogue">「${escapeHtml(t)}」</div>`);
+    for (const t of monologue) lines.push(`<div class="sb-line sb-line--monologue">(M) ${escapeHtml(t)}</div>`);
+    for (const t of narration) lines.push(`<div class="sb-line sb-line--narration">(N) ${escapeHtml(t)}</div>`);
+    if (sfx.length > 0) lines.push(`<div class="sb-line sb-line--sfx">SFX: ${escapeHtml(sfx.join(" / "))}</div>`);
+    if (panel.silence) lines.push(`<div class="sb-line">(silence)</div>`);
+    if (lines.length === 0) lines.push(`<div class="sb-line sb-meta">(テキストなし)</div>`);
+    return `
+      <article class="sb-panel-card">
+        <h4>${escapeHtml(String(panel.panel_id ?? "-"))}</h4>
+        <div class="sb-meta">順序=${escapeHtml(String(panel.reading_order ?? "-"))} / ショット=${escapeHtml(String(panel.shot_type ?? "-"))}${panel.importance ? ` / 重要度=${escapeHtml(String(panel.importance))}` : ""}</div>
+        ${lines.join("")}
+      </article>`;
+  }).join("");
+
+  return `
+    <div class="sb-modal" data-sb-modal-overlay>
+      <div class="sb-modal-card" role="dialog" aria-modal="true" aria-labelledby="sb-modal-title">
+        <div class="sb-modal-head">
+          <h3 class="sb-modal-title" id="sb-modal-title">P.${escapeHtml(String(page.page_no))} ${role ? `<span class="nc-badge nc-badge--neutral">[${escapeHtml(String(role))}]</span>` : ""}${renderStrategy ? `<span class="nc-badge nc-badge--info">${escapeHtml(String(renderStrategy))}</span>` : ""}</h3>
+          <span class="sb-modal-meta">${idx + 1} / ${total} · ${ctx.source === "storyboard" ? "ネーム原案" : "ページ配置"} · panel ${panels.length} 件</span>
+          <div class="sb-modal-nav">
+            <button type="button" data-sb-modal-prev${idx <= 0 ? " disabled" : ""}>← 前</button>
+            <button type="button" data-sb-modal-next${idx < 0 || idx >= total - 1 ? " disabled" : ""}>次 →</button>
+          </div>
+          <button type="button" class="sb-modal-close" data-sb-modal-close>閉じる</button>
+        </div>
+        <div class="sb-panel-grid">${panelHtml || `<div class="nc-empty">panel データが空です</div>`}</div>
+        <div class="sb-modal-hint">Tab で次の page · Shift+Tab で前の page · Esc で閉じる</div>
+      </div>
+    </div>`;
+}
+
 function renderPagePlan(manifest: Manifest): string {
   const pages = manifest.page_plan?.pages ?? [];
   if (pages.length === 0) return `<div class="nc-empty">ページ配置データが空です。</div>`;
   return `<div class="sb-list">${pages.map((page: any) => {
     const panels = Array.isArray(page.panels) ? page.panels : [];
+    const pageNo = Number(page.page_no);
+    const clickAttrs = Number.isFinite(pageNo)
+      ? ` data-sb-page-modal="page-plan" data-sb-page-no="${pageNo}"`
+      : "";
     return `
-      <section class="nc-card sb-page">
+      <section class="nc-card sb-page"${clickAttrs}>
         <div class="sb-page__head">
           <h3 class="sb-page__title">ページ ${escapeHtml(String(page.page_no ?? "-"))}</h3>
           ${page.render_strategy ? `<span class="nc-badge nc-badge--info">${escapeHtml(String(page.render_strategy))}</span>` : ""}
@@ -183,7 +284,8 @@ function render(container: HTMLElement, state: ViewState): void {
       </div>
       ${renderTabs(state.tab)}
       <div class="sb-content">${renderContent(state)}</div>
-    </div>`;
+    </div>
+    ${renderPageDetailModal(state)}`;
 }
 
 async function refresh(state: ViewState, container: HTMLElement): Promise<void> {
@@ -212,13 +314,61 @@ export function mountStoryboardView(container: HTMLElement): () => void {
     loading: false,
     error: null,
     copied: null,
+    pageModal: null,
   };
 
   void refresh(state, container);
 
+  function navigatePageModal(dir: 1 | -1): void {
+    const ctx = state.pageModal;
+    const manifest = state.manifest;
+    if (!ctx || !manifest) return;
+    const pages = ctx.source === "storyboard" ? (manifest.storyboard?.pages ?? []) : (manifest.page_plan?.pages ?? []);
+    const allPageNos = (pages as any[]).map((p: any) => Number(p.page_no)).filter((n) => Number.isFinite(n));
+    if (allPageNos.length <= 1) return;
+    const idx = allPageNos.indexOf(ctx.pageNo);
+    if (idx < 0) return;
+    const nextIdx = Math.max(0, Math.min(allPageNos.length - 1, idx + dir));
+    if (nextIdx === idx) return;
+    state.pageModal = { source: ctx.source, pageNo: allPageNos[nextIdx] };
+    render(container, state);
+  }
+
   container.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
+
+    // Phase C-1α: page card click → 精読 modal
+    if (target.closest("[data-sb-modal-close]")) {
+      state.pageModal = null;
+      render(container, state);
+      return;
+    }
+    if (target.closest("[data-sb-modal-prev]")) {
+      navigatePageModal(-1);
+      return;
+    }
+    if (target.closest("[data-sb-modal-next]")) {
+      navigatePageModal(1);
+      return;
+    }
+    const overlay = target.closest<HTMLElement>("[data-sb-modal-overlay]");
+    if (overlay && target === overlay) {
+      state.pageModal = null;
+      render(container, state);
+      return;
+    }
+    const pageCard = target.closest<HTMLElement>("[data-sb-page-modal]");
+    if (pageCard) {
+      const source = pageCard.dataset.sbPageModal as "storyboard" | "page-plan" | undefined;
+      const pageNo = Number(pageCard.dataset.sbPageNo);
+      if ((source === "storyboard" || source === "page-plan") && Number.isFinite(pageNo)) {
+        state.pageModal = { source, pageNo };
+        render(container, state);
+        return;
+      }
+    }
+
     const tab = target.closest<HTMLButtonElement>("[data-sb-tab]")?.dataset.sbTab as StoryboardTab | undefined;
     if (tab && TABS.some((item) => item.id === tab)) {
       state.tab = tab;
@@ -245,6 +395,31 @@ export function mountStoryboardView(container: HTMLElement): () => void {
   }, { signal: controller.signal });
 
   window.addEventListener("keydown", (event) => {
+    // modal が開いている時は Tab / Esc を捕捉して page navigate
+    if (state.pageModal) {
+      if (event.key === "Escape") {
+        state.pageModal = null;
+        render(container, state);
+        event.preventDefault();
+        return;
+      }
+      if (event.key === "Tab") {
+        navigatePageModal(event.shiftKey ? -1 : 1);
+        event.preventDefault();
+        return;
+      }
+      if (event.key === "ArrowLeft") {
+        navigatePageModal(-1);
+        event.preventDefault();
+        return;
+      }
+      if (event.key === "ArrowRight") {
+        navigatePageModal(1);
+        event.preventDefault();
+        return;
+      }
+      return;
+    }
     const found = TABS.find((tab) => tab.key === event.key);
     if (!found) return;
     state.tab = found.id;
