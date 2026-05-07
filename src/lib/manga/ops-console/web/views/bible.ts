@@ -1,9 +1,13 @@
 import {
   ApiError,
   apiGetBible,
+  apiGetBibleAdoptedVariants,
+  apiPostBibleAdoptedVariant,
   apiPutBibleMeta,
   apiPostJob,
   openJobStream,
+  type BibleAdoptedAssetKind,
+  type BibleAdoptedVariants,
   type BibleAssetView,
   type BibleAuditCharacter,
   type BibleAuditLocation,
@@ -134,12 +138,43 @@ const CSS = `
 .bib-no-audit { color: var(--text-tertiary); font-size: var(--fs-sm); padding: 4px 6px; }
 .bib-lightbox__audit { display: grid; gap: 6px; max-height: 220px; overflow: auto; padding: var(--space-2); margin-top: var(--space-1); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--surface-sunken); font-size: var(--fs-sm); }
 .bib-lightbox__bottom { display: grid; gap: var(--space-1); }
-.bib-img-actions { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: 4px; }
+.bib-img-actions { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: 4px; align-items: center; }
+.bib-img-actions--adopt { gap: var(--space-2); }
 .bib-img-actions__btn { padding: 4px 10px; font-size: var(--fs-sm); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--surface-elevated); color: var(--text-primary); cursor: pointer; }
 .bib-img-actions__btn:hover { background: var(--surface-hover, color-mix(in srgb, var(--surface-elevated) 80%, white 5%)); }
 .bib-img-actions__btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .bib-img-actions__btn--primary { background: var(--color-primary, #4c8bff); color: white; border-color: var(--color-primary, #4c8bff); }
 .bib-img-actions__btn--primary:hover { filter: brightness(1.08); }
+.bib-img-actions__btn--adopted { background: #16a34a; color: #fff; border-color: #16a34a; cursor: default; }
+.bib-img-actions__btn--adopted:disabled { opacity: 1; }
+.bib-adopt-note { color: var(--text-secondary); font-size: var(--fs-xs, 11px); padding: 2px 6px; background: color-mix(in srgb, #16a34a 15%, transparent); border-radius: var(--radius-sm); }
+.bib-adopt-other { color: var(--text-tertiary); font-size: var(--fs-xs, 11px); }
+.bib-card { position: relative; }
+.bib-card--adopted { box-shadow: 0 0 0 2px rgba(22,163,74,0.45); }
+.bib-card__adopted {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #16a34a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  z-index: 1;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+.bib-thumb-adopted {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  font-size: 14px;
+  color: #facc15;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+  pointer-events: none;
+}
+.bib-lightbox__thumb { position: relative; }
+.bib-lightbox__thumb.is-adopted { border: 2px solid #16a34a; padding: 1px; }
 .bib-img-job { display: grid; gap: 4px; padding: var(--space-2); border-left: 3px solid var(--color-primary, #4c8bff); background: color-mix(in srgb, var(--surface-elevated) 90%, transparent); font-size: var(--fs-xs, 11px); }
 .bib-img-job__head { display: flex; gap: 6px; align-items: baseline; }
 .bib-img-job__label { font-weight: 600; color: var(--text-primary); }
@@ -169,6 +204,8 @@ type CoreHookDraft = {
 type ViewState = {
   slug: string;
   bible: BibleAssetView | null;
+  /** Phase A: 採用 variant 記録 (character / location / prop ごとに 1 chosen) */
+  adoptedVariants: BibleAdoptedVariants | null;
   tab: BibleTab;
   displayMode: DisplayMode;
   loading: boolean;
@@ -438,15 +475,15 @@ function renderIssueRow(issue: { category: string; anchor_id?: string; descripti
 function renderVariantAuditDetail(variant: BibleAuditVariant): string {
   const issues = variant.issues.length > 0
     ? variant.issues.map((i) => renderIssueRow(i, variant.severity)).join("")
-    : `<div class="bib-no-audit">issue なし</div>`;
+    : `<div class="bib-no-audit">問題なし</div>`;
   return `<div class="bib-issues">
     <div class="bib-issues__variant-head">
       ${renderSeverityBadge(variant.severity)}
       <span class="bib-issues__variant-name">${escapeHtml(variant.variant)}</span>
     </div>
     ${issues}
-    ${variant.suggested_fix ? `<div class="bib-fix"><strong>fix:</strong> ${escapeHtml(variant.suggested_fix)}</div>` : ""}
-    ${variant.strengths ? `<div class="bib-strengths"><strong>good:</strong> ${escapeHtml(variant.strengths)}</div>` : ""}
+    ${variant.suggested_fix ? `<div class="bib-fix"><strong>修正案:</strong> ${escapeHtml(variant.suggested_fix)}</div>` : ""}
+    ${variant.strengths ? `<div class="bib-strengths"><strong>良い点:</strong> ${escapeHtml(variant.strengths)}</div>` : ""}
   </div>`;
 }
 
@@ -512,12 +549,46 @@ function renderImageActions(kind: AssetKind, entityId: string, variant: string, 
   return `<div class="bib-img-actions">
     <button type="button" class="bib-img-actions__btn bib-img-actions__btn--primary"
       data-bib-img-action="regen" data-bib-kind="${escapeHtml(kind)}" data-bib-entity="${escapeHtml(entityId)}" data-bib-variant="${escapeHtml(variant)}"${dis}>
-      この variant を再生成
+      このバリエーションを再生成
     </button>
     <button type="button" class="bib-img-actions__btn"
       data-bib-img-action="audit" data-bib-kind="${escapeHtml(kind)}" data-bib-entity="${escapeHtml(entityId)}"${dis}>
       この${escapeHtml(label)}を再監査
     </button>
+  </div>`;
+}
+
+/** Phase A: lightbox bottom に採用 / 採用中バッジを表示する row */
+function renderAdoptionRow(
+  state: ViewState,
+  kind: AssetKind,
+  entityId: string,
+  file: string
+): string {
+  if (!file) return "";
+  const isAdopted = isAdoptedVariantFile(state.adoptedVariants, kind, entityId, file);
+  const choice = adoptedChoiceFor(state.adoptedVariants, kind, entityId);
+  const variantStem = file.replace(/\.[^.]+$/, "");
+  const disabled = state.imageJob !== null || isAdopted;
+  const dis = disabled ? " disabled" : "";
+  const note = isAdopted && choice?.note
+    ? `<span class="bib-adopt-note">採用メモ: ${escapeHtml(choice.note)}</span>`
+    : "";
+  const otherAdopted = !isAdopted && choice
+    ? `<span class="bib-adopt-other">現在採用中: ${escapeHtml(choice.chosen_variant)}</span>`
+    : "";
+  return `<div class="bib-img-actions bib-img-actions--adopt">
+    <button type="button"
+      class="bib-img-actions__btn ${isAdopted ? "bib-img-actions__btn--adopted" : "bib-img-actions__btn--primary"}"
+      data-bib-img-action="adopt"
+      data-bib-kind="${escapeHtml(kind)}"
+      data-bib-entity="${escapeHtml(entityId)}"
+      data-bib-variant="${escapeHtml(variantStem)}"
+      data-bib-file="${escapeHtml(file)}"${dis}>
+      ${isAdopted ? "★ 採用中" : "このバリエーションを採用"}
+    </button>
+    ${otherAdopted}
+    ${note}
   </div>`;
 }
 
@@ -541,6 +612,36 @@ function refUrl(slug: string, kind: AssetKind, id: string, file: string): string
   return `/works/${encodeURIComponent(slug)}/bible/refs/${kind}/${encodeURIComponent(id)}/${encodeURIComponent(file)}`;
 }
 
+/** Phase A: workdir 起点の relpath (server の isSafeBibleRefPath が許す形式) */
+function bibleRefRelpath(kind: AssetKind, id: string, file: string): string {
+  return `bible/refs/${kind}/${id}/${file}`;
+}
+
+/** characters / locations / props は AssetKind と BibleAdoptedAssetKind が一致するので safe-cast */
+function toAdoptedKind(kind: AssetKind): BibleAdoptedAssetKind {
+  return kind;
+}
+
+function adoptedChoiceFor(
+  adopted: BibleAdoptedVariants | null,
+  kind: AssetKind,
+  id: string
+): BibleAdoptedVariants["characters"][string] | undefined {
+  if (!adopted) return undefined;
+  const k = toAdoptedKind(kind);
+  return adopted[k]?.[id];
+}
+
+function isAdoptedVariantFile(
+  adopted: BibleAdoptedVariants | null,
+  kind: AssetKind,
+  id: string,
+  file: string
+): boolean {
+  const choice = adoptedChoiceFor(adopted, kind, id);
+  return !!choice && choice.image_relpath === bibleRefRelpath(kind, id, file);
+}
+
 function renderAssetCards(
   slug: string,
   kind: AssetKind,
@@ -548,7 +649,8 @@ function renderAssetCards(
   refs: BibleCharacterRef[],
   audit?: AnyAuditReport | null,
   jobRunning?: boolean,
-  jobLog?: ViewState["imageJob"] | null
+  jobLog?: ViewState["imageJob"] | null,
+  adoptedVariants?: BibleAdoptedVariants | null
 ): string {
   if (items.length === 0) return `<div class="nc-empty">No ${kind}</div>`;
   const byId = refMap(refs);
@@ -564,9 +666,13 @@ function renderAssetCards(
     const summary = summaryOf(item);
     const highlights = pickSpecHighlights(item, kind);
     const auditCard = renderEntityCardAudit(getEntityAudit(audit, kind, id));
+    const choice = adoptedChoiceFor(adoptedVariants ?? null, kind, id);
+    const adoptedBadge = choice
+      ? `<span class="bib-card__adopted" title="採用中: ${escapeHtml(choice.chosen_variant)}">★ ${escapeHtml(choice.chosen_variant)}</span>`
+      : "";
     return `
-      <article class="nc-card nc-card--default bib-card">
-        ${thumb ? `<div class="bib-thumb-wrap" ${lbAttrs}><img class="bib-thumb" src="${escapeHtml(thumb)}" alt="${escapeHtml(name)}" loading="lazy"></div>` : ""}
+      <article class="nc-card nc-card--default bib-card${choice ? " bib-card--adopted" : ""}">
+        ${thumb ? `<div class="bib-thumb-wrap" ${lbAttrs}><img class="bib-thumb" src="${escapeHtml(thumb)}" alt="${escapeHtml(name)}" loading="lazy">${adoptedBadge}</div>` : ""}
         <h3>${escapeHtml(name)}</h3>
         <div class="bib-meta">${escapeHtml(id)}</div>
         ${auditCard}
@@ -1011,9 +1117,9 @@ function renderBibleContent(state: ViewState): string {
   if (state.error && !bible) return `<div class="view-placeholder"><h2>Bible</h2><p>${escapeHtml(state.error)}</p></div>`;
   if (!bible) return `<div class="nc-empty">Bible snapshot は未作成です。「Bible 全体構築」から生成してください。</div>`;
   const jobRunning = state.imageJob !== null;
-  if (state.tab === "characters") return renderAssetCards(state.slug, "characters", bible.characters, bible.refs.characters, bible.image_audit_characters, jobRunning, state.imageJob);
-  if (state.tab === "locations") return renderAssetCards(state.slug, "locations", bible.locations, bible.refs.locations, bible.image_audit, jobRunning, state.imageJob);
-  if (state.tab === "props") return renderAssetCards(state.slug, "props", bible.props, bible.refs.props, bible.image_audit_props, jobRunning, state.imageJob);
+  if (state.tab === "characters") return renderAssetCards(state.slug, "characters", bible.characters, bible.refs.characters, bible.image_audit_characters, jobRunning, state.imageJob, state.adoptedVariants);
+  if (state.tab === "locations") return renderAssetCards(state.slug, "locations", bible.locations, bible.refs.locations, bible.image_audit, jobRunning, state.imageJob, state.adoptedVariants);
+  if (state.tab === "props") return renderAssetCards(state.slug, "props", bible.props, bible.refs.props, bible.image_audit_props, jobRunning, state.imageJob, state.adoptedVariants);
   if (state.tab === "world") {
     return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(bible.world)}</pre>` : renderWorldReader(bible.world)}`;
   }
@@ -1147,6 +1253,24 @@ function navigateLightbox(state: ViewState, direction: -1 | 1): void {
   lightbox.index = (lightbox.index + direction + lightbox.files.length) % lightbox.files.length;
 }
 
+/** Tab / Shift+Tab で同一 kind 内の隣の entity (キャラ / ロケーション / 小道具) に切替。
+ *  modal は閉じず、新 entity の variant 1 枚目から表示する。 */
+function navigateLightboxEntity(state: ViewState, direction: -1 | 1): void {
+  const lightbox = state.lightbox;
+  const bible = state.bible;
+  if (!lightbox || !bible) return;
+  const items = itemsForKind(bible, lightbox.kind);
+  if (items.length <= 1) return;
+  const currentIdx = items.findIndex((item) => idOf(item) === lightbox.id);
+  if (currentIdx < 0) return;
+  const nextIdx = (currentIdx + direction + items.length) % items.length;
+  const nextItem = items[nextIdx];
+  const nextId = idOf(nextItem);
+  if (nextId === lightbox.id) return;
+  // openLightbox が state.lightbox を完全置換し、index=0 にリセット
+  openLightbox(state, lightbox.kind, nextId, 0);
+}
+
 function renderLightbox(state: ViewState): string {
   const lightbox = state.lightbox;
   if (!lightbox) return "";
@@ -1170,15 +1294,16 @@ function renderLightbox(state: ViewState): string {
     if (variant) {
       auditParts.push(renderVariantAuditDetail(variant));
     } else if (audit) {
-      auditParts.push(`<div class="bib-no-audit">この variant は監査未収録です</div>`);
+      auditParts.push(`<div class="bib-no-audit">このバリエーションは監査未収録です</div>`);
     } else {
       auditParts.push(`<div class="bib-no-audit">画像監査未実施 (タブ上部の「監査実行」または CLI で L02b を起動)</div>`);
     }
     if (entity?.cross_variant_notes) {
-      auditParts.push(`<div class="bib-cross-notes"><strong>cross-variant:</strong> ${escapeHtml(entity.cross_variant_notes)}</div>`);
+      auditParts.push(`<div class="bib-cross-notes"><strong>クロスバリエーション:</strong> ${escapeHtml(entity.cross_variant_notes)}</div>`);
     }
     const auditHtml = `<div class="bib-lightbox__audit">${auditParts.join("")}</div>`;
-    const actionsHtml = `${renderImageJobStatus(state, lightbox.kind, lightbox.id, variantStem)}${renderImageActions(lightbox.kind, lightbox.id, variantStem, jobRunning)}`;
+    const adoptHtml = renderAdoptionRow(state, lightbox.kind, lightbox.id, file);
+    const actionsHtml = `${renderImageJobStatus(state, lightbox.kind, lightbox.id, variantStem)}${adoptHtml}${renderImageActions(lightbox.kind, lightbox.id, variantStem, jobRunning)}`;
     return { auditBlock: auditHtml, actionsBlock: actionsHtml };
   })();
   return `
@@ -1202,8 +1327,13 @@ function renderLightbox(state: ViewState): string {
         ${actionsBlock ? `<div class="bib-lightbox__bottom">${actionsBlock}</div>` : ""}
         ${multi ? `<div class="bib-lightbox__thumbs">${lightbox.files.map((thumbFile, thumbIndex) => {
           const thumb = refUrl(state.slug, lightbox.kind, lightbox.id, thumbFile);
-          return `<button type="button" class="bib-lightbox__thumb${thumbIndex === index ? " is-active" : ""}" data-bib-lightbox-index="${thumbIndex}" aria-label="${escapeHtml(thumbFile)}">
+          const adopted = isAdoptedVariantFile(state.adoptedVariants, lightbox.kind, lightbox.id, thumbFile);
+          const cls = ["bib-lightbox__thumb"];
+          if (thumbIndex === index) cls.push("is-active");
+          if (adopted) cls.push("is-adopted");
+          return `<button type="button" class="${cls.join(" ")}" data-bib-lightbox-index="${thumbIndex}" aria-label="${escapeHtml(thumbFile)}${adopted ? " (採用中)" : ""}">
             <img src="${escapeHtml(thumb)}" alt="${escapeHtml(thumbFile)}">
+            ${adopted ? `<span class="bib-thumb-adopted">★</span>` : ""}
           </button>`;
         }).join("")}</div>` : ""}
       </div>
@@ -1236,9 +1366,15 @@ async function refresh(state: ViewState, container: HTMLElement): Promise<void> 
   state.error = null;
   render(container, state);
   try {
-    state.bible = await apiGetBible(state.slug);
+    const [bible, adoptedVariants] = await Promise.all([
+      apiGetBible(state.slug),
+      apiGetBibleAdoptedVariants(state.slug).catch(() => null),
+    ]);
+    state.bible = bible;
+    state.adoptedVariants = adoptedVariants;
   } catch (error) {
     state.bible = null;
+    state.adoptedVariants = null;
     state.error = errorText(error);
   }
   state.loading = false;
@@ -1281,6 +1417,7 @@ export function mountBibleView(container: HTMLElement): () => void {
   const state: ViewState = {
     slug: app.currentSlug || app.defaultSlug,
     bible: null,
+    adoptedVariants: null,
     tab: "world",
     displayMode: "reader",
     loading: false,
@@ -1315,6 +1452,13 @@ export function mountBibleView(container: HTMLElement): () => void {
     if (event.key === "ArrowRight") {
       event.preventDefault();
       navigateLightbox(state, 1);
+      render(container, state);
+      return;
+    }
+    // Tab / Shift+Tab で同一 kind 内の前後 entity (キャラ / ロケーション / 小道具) に切替。
+    if (event.key === "Tab") {
+      event.preventDefault();
+      navigateLightboxEntity(state, event.shiftKey ? -1 : 1);
       render(container, state);
     }
   }
@@ -1463,7 +1607,7 @@ export function mountBibleView(container: HTMLElement): () => void {
       const mode = bulkBtn.dataset.bibBulkRegen;
       const severities: BibleAuditSeverity[] = mode === "critical_major" ? ["critical", "major"] : ["critical"];
       const confirmed = window.confirm(
-        `${kindLabel(headerKind)}タブの ${severities.join("/")} variant を一括再生成します。\nL02 を entity ごとに順次起動 → 全完了後に L02_audit を 1 回実行。\n途中経過はタブ上部に表示されます。続行しますか?`
+        `${kindLabel(headerKind)}タブの ${severities.join("/")} 判定のバリエーションを一括再生成します。\nL02 を対象ごとに順次起動 → 全完了後に L02_audit を 1 回実行。\n途中経過はタブ上部に表示されます。続行しますか?`
       );
       if (!confirmed) return;
       startBulkRegen({ entityKind: headerKind, severities });
@@ -1482,10 +1626,47 @@ export function mountBibleView(container: HTMLElement): () => void {
         startRegenJob({ entityKind, entityId, variant });
       } else if (action === "audit") {
         startAuditJob({ entityKind, targets: [entityId], entityId });
+      } else if (action === "adopt") {
+        const file = imgActionBtn.dataset.bibFile ?? "";
+        if (!variant || !file) return;
+        void adoptVariant({ entityKind, entityId, variant, file });
       }
       return;
     }
   }, { signal: controller.signal });
+
+  async function adoptVariant(args: {
+    entityKind: AssetKind;
+    entityId: string;
+    variant: string;
+    file: string;
+  }): Promise<void> {
+    try {
+      const result = await apiPostBibleAdoptedVariant(state.slug, {
+        asset_kind: toAdoptedKind(args.entityKind),
+        asset_id: args.entityId,
+        chosen_variant: args.variant,
+        image_relpath: bibleRefRelpath(args.entityKind, args.entityId, args.file),
+      });
+      // state を local 更新 (refresh 不要にしてレスポンス感を良くする)
+      const adopted = state.adoptedVariants ?? {
+        schema_version: 1 as const,
+        slug: state.slug,
+        updated_at: new Date().toISOString(),
+        characters: {},
+        locations: {},
+        props: {},
+      };
+      const k = result.asset_kind;
+      adopted[k] = { ...adopted[k], [result.asset_id]: result.choice };
+      adopted.updated_at = new Date().toISOString();
+      state.adoptedVariants = adopted;
+      render(container, state);
+      setToast(state, container, `${args.variant} を採用しました`, "success");
+    } catch (error) {
+      setToast(state, container, `採用失敗: ${errorText(error)}`, "danger");
+    }
+  }
 
   function syncCoreHookDraftFromInput(target: HTMLInputElement | HTMLTextAreaElement): void {
     if (!state.coreHookDraft) return;
@@ -1687,7 +1868,7 @@ export function mountBibleView(container: HTMLElement): () => void {
       entityId: queue[0].entityId,
       variant: "",
       log: [
-        `bulk_regen 開始: ${opts.severities.join("+")} の ${totalImages} variant / ${queue.length} entity を順次再生成`,
+        `一括再生成 開始: ${opts.severities.join("+")} 判定の ${totalImages} バリエーション / ${queue.length} 件を順次再生成`,
       ],
       bulkProgress: { total: queue.length, done: 0 },
     };
@@ -1706,7 +1887,7 @@ export function mountBibleView(container: HTMLElement): () => void {
       const { entityId, variants } = queue[i];
       job.entityId = entityId;
       job.bulkProgress = { total: queue.length, done: i };
-      job.log.push(`[${i + 1}/${queue.length}] L02 開始: ${entityId} variants=${variants.join(",")}`);
+      job.log.push(`[${i + 1}/${queue.length}] L02 開始: ${entityId} バリエーション=${variants.join(",")}`);
       render(container, state);
       try {
         await runOneL02(entityKind, entityId, variants, job);

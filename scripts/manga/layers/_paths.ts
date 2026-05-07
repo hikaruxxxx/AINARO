@@ -24,6 +24,11 @@ export function bibleDir(slug: string): string {
   return path.join(workDir(slug), "bible");
 }
 
+/** Phase A: bible variant 採用記録 (character / location / prop ごとに 1 chosen variant) */
+export function bibleAdoptedVariantsPath(slug: string): string {
+  return path.join(workDir(slug), "bible", "adopted_variants.json");
+}
+
 export function bibleSnapshotPath(slug: string): string {
   return path.join(bibleDir(slug), "snapshot.json");
 }

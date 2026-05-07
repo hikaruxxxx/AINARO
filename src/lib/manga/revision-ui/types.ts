@@ -142,6 +142,58 @@ export type EngagementAudit = {
   per_page_scores: EngagementAuditPageScore[];
 };
 
+/**
+ * Phase A: bible variant 採用記録。
+ *
+ * character / location / prop は L02 で複数 variant が並列生成されるため、
+ * 「どの variant を render layer の ref として使うか」を 1 file に集約する。
+ *
+ * - key (asset_id) ごとに 1 chosen のみ
+ * - 既存の bible image 評価 (BibleAuditVariant の severity) とは独立して、人間判断を記録
+ * - L07 refs-resolver は将来的にこの file を参照して variant 選択を優先する余地あり (Phase A では UI のみ)
+ */
+export type BibleAdoptedVariantChoice = {
+  /** 拡張子なしの variant 名 (例: "face_v2") */
+  chosen_variant: string;
+  /** workdir 起点の相対パス (例: "bible/refs/characters/char_xxx_v1/face_v2.png") */
+  image_relpath: string;
+  /** ISO 8601 */
+  chosen_at: string;
+  /** 任意の人間メモ */
+  note?: string;
+};
+
+export type BibleAdoptedAssetKind = "characters" | "locations" | "props";
+
+export type BibleAdoptedVariants = {
+  schema_version: 1;
+  slug: string;
+  updated_at: string;
+  /** key = character_id */
+  characters: Record<string, BibleAdoptedVariantChoice>;
+  /** key = location_id */
+  locations: Record<string, BibleAdoptedVariantChoice>;
+  /** key = prop_id */
+  props: Record<string, BibleAdoptedVariantChoice>;
+};
+
+export function emptyBibleAdoptedVariants(slug: string): BibleAdoptedVariants {
+  return {
+    schema_version: 1,
+    slug,
+    updated_at: new Date().toISOString(),
+    characters: {},
+    locations: {},
+    props: {},
+  };
+}
+
+export const BIBLE_ADOPTED_KINDS: ReadonlyArray<BibleAdoptedAssetKind> = ["characters", "locations", "props"];
+
+export function isBibleAdoptedKind(value: unknown): value is BibleAdoptedAssetKind {
+  return typeof value === "string" && (BIBLE_ADOPTED_KINDS as readonly string[]).includes(value);
+}
+
 export const REVISION_TAGS: ReadonlyArray<RevisionTag> = [
   "face",
   "composition",

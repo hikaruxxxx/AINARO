@@ -5,6 +5,9 @@ import type {
 } from "../../../name-preview/types";
 import type {
   AdoptedVersions,
+  BibleAdoptedAssetKind,
+  BibleAdoptedVariantChoice,
+  BibleAdoptedVariants,
   EngagementAudit,
   RenderManifestEntry,
   RevisionEntry,
@@ -54,6 +57,9 @@ export type NameApproval = SourceNameApproval;
 export type {
   AdoptedPanelChoice,
   AdoptedVersions,
+  BibleAdoptedAssetKind,
+  BibleAdoptedVariantChoice,
+  BibleAdoptedVariants,
   EngagementAudit,
   EngagementAuditPageScore,
   RenderManifestEntry,
@@ -596,6 +602,34 @@ export type BibleAssetView = {
 
 export function apiGetBible(slug: string): Promise<BibleAssetView> {
   return getJson<BibleAssetView>(`/api/works/${encodeURIComponent(slug)}/bible`);
+}
+
+export function apiGetBibleAdoptedVariants(slug: string): Promise<BibleAdoptedVariants> {
+  return getJson<BibleAdoptedVariants>(
+    `/api/works/${encodeURIComponent(slug)}/bible/adopted-variants`
+  );
+}
+
+export function apiPostBibleAdoptedVariant(
+  slug: string,
+  body: {
+    asset_kind: BibleAdoptedAssetKind;
+    asset_id: string;
+    chosen_variant: string;
+    image_relpath: string;
+    note?: string;
+  }
+): Promise<{
+  ok: true;
+  slug: string;
+  asset_kind: BibleAdoptedAssetKind;
+  asset_id: string;
+  choice: BibleAdoptedVariantChoice;
+}> {
+  return postJson(
+    `/api/works/${encodeURIComponent(slug)}/bible/adopted-variants`,
+    body
+  );
 }
 
 export function apiPutBibleMeta(

@@ -41,6 +41,10 @@ import {
 import { handleBootstrap } from "./handlers/bootstrap";
 import { handleBible } from "./handlers/bible";
 import { handleBibleMetaPut } from "./handlers/bible-meta";
+import {
+  handleBibleAdoptedVariantsGet,
+  handleBibleAdoptedVariantsPost,
+} from "./handlers/bible-adopted-variants";
 import { handleVolumePlot, handleVolumePlotPut } from "./handlers/volume-plot";
 import { handleVolumesList } from "./handlers/volumes";
 import {
@@ -386,6 +390,32 @@ export async function handleApi(
       const slug = m[1];
       if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
       return handleBible(slug, res);
+    }
+  }
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/bible\/adopted-variants$/);
+    if (m) {
+      const slug = m[1];
+      if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
+      if (req.method === "GET") {
+        return handleBibleAdoptedVariantsGet(slug, res);
+      }
+      if (req.method === "POST") {
+        if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+          return send(res, 400, { error: "書き込みには scope 固定モードが必要です。`npm run console -- --slug <slug> --episode <NN>` で起動してください" });
+        }
+        if (slug !== defaults.defaultSlug) {
+          return send(res, 403, { error: "起動 scope と異なる作品です" });
+        }
+        let body: unknown;
+        try {
+          body = await readJsonBody(req);
+        } catch (e) {
+          return send(res, 400, { error: String(e) });
+        }
+        return handleBibleAdoptedVariantsPost(slug, body, res);
+      }
+      return send(res, 405, { error: "このメソッドは許可されていません" });
     }
   }
   {

@@ -17,8 +17,6 @@ import {
 } from "../../../revision-ui/types";
 import type { PagePlanPage, PanelV2 } from "../../../schemas-v2";
 
-type Mode = "grid" | "compare" | "effects";
-type UiLayer = "renders";
 type Filters = {
   failed: boolean;
   revised: boolean;
@@ -67,23 +65,22 @@ type AdoptModalContext = {
   current_note: string;
 };
 
+type VersionsModalContext = {
+  panel_id: string;
+  page_no: number;
+  current_image_path: string;
+  current_for_version: string;
+  /** modal 内 hero に表示中の version。
+   *  versions 配列の idx で保持する (同 version 文字列・同 image_path が複数並ぶケース対応)。 */
+  viewingIdx?: number;
+};
+
 type ViewState = {
   manifest: Manifest | null;
-  mode: Mode;
-  layer: UiLayer;
   filters: Filters;
   modal: ModalContext | null;
   adoptModal: AdoptModalContext | null;
-};
-
-type EffectsStats = {
-  totalQueued: number;
-  resolved: number;
-  adoptedNonV1: number;
-  resolutionRate: number;
-  adoptionRate: number;
-  byTag: Map<RevisionTag, { queued: number; resolved: number; adopted: number }>;
-  panelStats: Array<{ panel_id: string; instructionCount: number; adoptedVersion: string | null; rounds: number }>;
+  versionsModal: VersionsModalContext | null;
 };
 
 const RV_CSS = `
@@ -121,6 +118,17 @@ const RV_CSS = `
   cursor: pointer;
 }
 .rv-button.is-active, .rv-pill.is-active { background: #2563eb; border-color: #2563eb; color: #fff; }
+.rv-button:disabled {
+  background: var(--surface-sunken, #f3f4f6);
+  border-color: var(--border-default, #d1d5db);
+  color: var(--text-tertiary, #9ca3af);
+  cursor: not-allowed;
+}
+.rv-button-attention {
+  background: var(--color-primary, #2563eb);
+  border-color: var(--color-primary, #2563eb);
+  color: var(--color-primary-fg, #fff);
+}
 .rv-button--sm { min-height: 24px; padding: 0 6px; font-size: 11px; margin-left: 8px; font-weight: 500; }
 .rv-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: #64748b; font-size: 12px; }
 .rv-filter-check {
@@ -139,8 +147,20 @@ const RV_CSS = `
 }
 .rv-filter-check:has(input:checked) { background: #2563eb; border-color: #2563eb; color: #fff; }
 .rv-main { min-height: 240px; }
-.rv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px; }
-.rv-page-card { background: var(--surface-elevated); border: 2px solid var(--border-subtle); border-radius: 8px; padding: 10px; }
+.rv-grid {
+  display: grid;
+  /* 見開き表示: 2 列固定。row-gap で見開きペアの間を空け、column-gap=0 で本のノドを密着させる。
+     direction: rtl で奇数 page (P.1, P.3, ...) を右、偶数 page (P.2, P.4, ...) を左に配置。 */
+  grid-template-columns: 1fr 1fr;
+  column-gap: 0;
+  row-gap: 24px;
+  direction: rtl;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.rv-page-card { background: var(--surface-elevated); border: 2px solid var(--border-subtle); border-radius: 8px; padding: 10px; direction: ltr; }
+/* 見開きペアの本ノド側 (内側) は border を細く、外側を強調しない（ペア感の表現） */
+.rv-page-card--shot { padding: 6px; border-radius: 4px; }
 .rv-page-card h3 { margin: 0 0 8px; font-size: 14px; display: flex; gap: 8px; align-items: center; }
 .rv-page-role { color: #6b7280; font-weight: 400; font-size: 12px; }
 .rv-audit-fail { color: #dc2626; font-size: 11px; font-weight: 700; margin-left: auto; }
@@ -171,30 +191,15 @@ const RV_CSS = `
 .rv-rev-badge { right: 4px; bottom: 4px; min-width: 18px; padding: 1px 7px; border-radius: 10px; background: rgba(245,158,11,0.95); text-align: center; }
 .rv-miss { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 11px; pointer-events: none; }
 .rv-empty { padding: 40px; text-align: center; color: #6b7280; font-size: 14px; }
-.rv-compare-list { display: flex; flex-direction: column; gap: 14px; }
-.rv-compare-row { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
-.rv-compare-row h3 { margin: 0 0 8px; font-size: 13px; }
-.rv-versions { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-.rv-ver-card { border: 2px solid #e5e7eb; border-radius: 6px; padding: 6px; background: #fafafa; }
-.rv-ver-card.rv-adopted { border-color: #16a34a; background: #f0fdf4; }
-.rv-ver-card img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; border: 1px solid #d1d5db; }
-.rv-ver-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px; color: #6b7280; font-size: 11px; }
-.rv-ver-meta button { background: #2563eb; color: #fff; border: 0; border-radius: 3px; padding: 2px 8px; font-size: 10px; cursor: pointer; }
-.rv-ver-card.rv-adopted .rv-ver-meta button { background: #16a34a; }
-.rv-ver-note { margin-top: 4px; padding: 4px 6px; background: #f0fdf4; border: 1px solid #16a34a; border-radius: 3px; color: #166534; font-size: 11px; line-height: 1.4; }
-.rv-hard { padding: var(--space-3, 12px); border: 1px solid var(--color-warning, #f59e0b); border-radius: var(--radius-md, 6px); background: var(--color-warning-bg, #fef3c7); margin-bottom: var(--space-3, 12px); }
-.rv-hard h3 { margin: 0 0 8px; font-size: 14px; }
-.rv-hard ul { margin: 0; padding-left: 18px; color: #334155; font-size: 12px; line-height: 1.6; }
-.rv-effects { display: grid; gap: 14px; }
-.rv-effects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-.rv-effects-card { border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; padding: 12px; }
-.rv-effects-card span { display: block; color: #64748b; font-size: 12px; font-weight: 700; }
-.rv-effects-card strong { display: block; margin-top: 4px; color: #111827; font-size: 26px; line-height: 1; }
-.rv-effects-section { border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; padding: 12px; }
-.rv-effects-section h3 { margin: 0 0 10px; font-size: 14px; }
-.rv-effects-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.rv-effects-table th, .rv-effects-table td { border-top: 1px solid #e5e7eb; padding: 7px 8px; text-align: left; }
-.rv-effects-table th { color: #64748b; font-weight: 700; background: #f8fafc; }
+.rv-progress { display: grid; grid-template-columns: minmax(180px, 1fr) auto; align-items: center; gap: 10px; width: 100%; }
+.rv-progress-bar { display: flex; min-width: 0; height: 12px; overflow: hidden; border: 1px solid var(--border-default, #d1d5db); border-radius: 999px; background: var(--surface-sunken, #f3f4f6); }
+.rv-progress-seg { flex: 1 1 0; min-width: 8px; border: 0; border-right: 1px solid rgba(255,255,255,0.55); padding: 0; }
+.rv-progress-seg:last-child { border-right: 0; }
+.rv-progress-seg--ng { background: #dc2626; }
+.rv-progress-seg--pending { background: #f59e0b; }
+.rv-progress-seg--ok { background: #16a34a; }
+.rv-progress-seg--idle { background: var(--surface-sunken, #e5e7eb); }
+.rv-progress-summary { white-space: nowrap; color: var(--text-secondary, #64748b); font-size: 12px; font-weight: 700; }
 .rv-help { color: #64748b; font-size: 12px; line-height: 1.6; }
 .rv-help code { background: #eef2f6; padding: 1px 5px; border-radius: 3px; font-family: ui-monospace, monospace; }
 .rv-modal {
@@ -216,6 +221,7 @@ const RV_CSS = `
 .rv-tags { display: flex; flex-wrap: wrap; gap: 6px 10px; margin-bottom: 10px; font-size: 12px; }
 .rv-tags label { display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 3px 8px; border: 1px solid #d1d5db; border-radius: 4px; }
 .rv-modal-body textarea { width: 100%; min-height: 80px; padding: 8px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; font-family: inherit; resize: vertical; }
+.rv-modal-hint { color: var(--text-secondary, #6b7280); font-size: 12px; margin: 8px 0 0; }
 .rv-adopt-note-label { display: grid; gap: 4px; margin-bottom: 10px; }
 .rv-adopt-note-label span { color: var(--text-secondary); font-size: 12px; font-weight: 700; }
 .rv-adopt-note-label textarea { width: 100%; min-height: 60px; padding: 8px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; font-family: inherit; resize: vertical; }
@@ -227,17 +233,23 @@ const RV_CSS = `
 .rv-toast-ok { background: #16a34a; }
 .rv-toast-warn { background: #f59e0b; }
 .rv-toast-error { background: #dc2626; }
-/* --- page_one_shot: page-level view + overlay --- */
-.rv-page-card--shot { padding: 8px; }
+/* --- page_one_shot: page 全体を 1 つの click target にする (overlay 廃止) --- */
 .rv-page-card--shot h3 { margin: 0 0 6px; padding: 0 4px; }
 .rv-page-shot {
   position: relative;
   width: 100%;
-  background: #f1f5f9;
+  height: auto;
+  /* aspect-ratio は inline style で page_plan canvas (1748/2480 等) を指定 */
+  background: #fff;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   overflow: hidden;
+  padding: 0;
 }
+.rv-page-shot:focus { outline: 3px solid rgba(37,99,235,0.35); border-color: #2563eb; }
+.rv-page-shot.rv-failed { border-color: #dc2626; box-shadow: 0 0 0 2px rgba(220,38,38,0.22); }
+.rv-page-shot.rv-has-revision { border-color: #f59e0b; }
+.rv-page-shot.rv-adopted-v2plus { border-color: #16a34a; }
 .rv-page-shot-img {
   position: absolute;
   inset: 0;
@@ -246,69 +258,6 @@ const RV_CSS = `
   object-fit: contain;
   display: block;
   background: #fff;
-}
-.rv-overlay-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.rv-overlay-rect {
-  position: absolute;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  pointer-events: auto;
-  /* halo: 白縁背面 + 黒線前面 (写実画像に埋もれない 2 段重ね) */
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.85), inset 0 0 0 1px rgba(17,24,39,0.65);
-  border-radius: 1px;
-  transition: box-shadow 120ms ease-out, background 120ms ease-out;
-  overflow: visible;
-}
-.rv-overlay-rect:hover,
-.rv-overlay-rect:focus {
-  outline: none;
-  background: rgba(37,99,235,0.10);
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.95), inset 0 0 0 2px rgba(37,99,235,0.85);
-}
-.rv-overlay-rect.rv-failed {
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.85), inset 0 0 0 2px rgba(220,38,38,0.85);
-}
-.rv-overlay-rect.rv-failed:hover {
-  background: rgba(220,38,38,0.12);
-}
-.rv-overlay-rect.rv-has-revision {
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.85), inset 0 0 0 2px rgba(245,158,11,0.85);
-}
-.rv-overlay-rect.rv-adopted-v2plus {
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.85), inset 0 0 0 2px rgba(22,163,74,0.85);
-}
-.rv-overlay-label {
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  background: rgba(31,41,55,0.86);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  pointer-events: none;
-}
-.rv-overlay-rect .rv-rev-badge {
-  position: absolute;
-  right: 4px;
-  bottom: 4px;
-  min-width: 18px;
-  padding: 1px 7px;
-  border-radius: 10px;
-  background: rgba(245,158,11,0.95);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  text-align: center;
-  pointer-events: none;
 }
 .rv-page-version-badge {
   position: absolute;
@@ -348,6 +297,105 @@ const RV_CSS = `
   font-weight: 700;
   margin-left: 4px;
 }
+/* page 詳細 modal (拡大 hero + version サムネ列) */
+.rv-versions-card { width: min(1400px, 96vw); max-height: 96vh; overflow: auto; }
+.rv-versions-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+/* 汎用 .rv-modal-body img の max-height: 50vh を上書きするため selector を強める */
+.rv-modal-body .rv-versions-hero-img,
+.rv-versions-hero-img {
+  display: block;
+  max-width: 100%;
+  max-height: 86vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  margin-bottom: 0;
+}
+.rv-versions-hero-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: #374151;
+  font-size: 12px;
+}
+.rv-versions-hero-version {
+  font-size: 16px;
+  font-weight: 700;
+  background: rgba(37,99,235,0.92);
+  color: #fff;
+  padding: 3px 12px;
+  border-radius: 12px;
+}
+.rv-versions-hero-adopt {
+  margin-left: 8px;
+}
+.rv-version-origin { color: #6b7280; font-size: 11px; }
+.rv-version-adopted-badge {
+  background: #16a34a;
+  color: #fff;
+  border-radius: 8px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.rv-version-note {
+  align-self: stretch;
+  padding: 6px 10px;
+  background: #f0fdf4;
+  border: 1px solid #16a34a;
+  border-radius: 4px;
+  color: #166534;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.rv-versions-thumbs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px;
+  margin-bottom: 8px;
+  scrollbar-width: thin;
+}
+.rv-versions-thumb {
+  flex-shrink: 0;
+  width: 96px;
+  border: 2px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 4px;
+  background: #fafafa;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.rv-versions-thumb img {
+  width: 100%;
+  aspect-ratio: 1748/2480;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  display: block;
+}
+.rv-versions-thumb span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #374151;
+  text-align: center;
+}
+.rv-versions-thumb.rv-viewing { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.22); }
+.rv-versions-thumb.rv-adopted { background: #f0fdf4; border-color: #16a34a; }
+.rv-versions-thumb.rv-adopted span { color: #166534; }
 `;
 
 const TAG_LABELS: Record<RevisionTag, string> = {
@@ -381,10 +429,6 @@ function epLabel(episode: number): string {
   return `ep${String(episode).padStart(2, "0")}`;
 }
 
-function manifestLayer(_layer: UiLayer): "render" {
-  return "render";
-}
-
 function parseVersion(version: string): number {
   const m = version.match(/^v(\d+)$/);
   return m ? Number(m[1]) : 0;
@@ -402,10 +446,9 @@ function assetUrl(path: string): string {
   return `/${path}`;
 }
 
-function defaultImagePath(layer: UiLayer, episode: number, pageNo: number): string {
+function defaultImagePath(episode: number, pageNo: number): string {
   const ep = epLabel(episode);
   const page = String(pageNo).padStart(2, "0");
-  void layer;
   return `episodes/${ep}/renders/p${page}.png`;
 }
 
@@ -438,27 +481,23 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
         <h2>Revision</h2>
         <span class="rv-info">${escapeHtml(slug)} / ${epLabel(episode)}</span>
         <span class="rv-summary">
-          queue <strong id="rv-cnt-queue">0</strong> / adopted <strong id="rv-cnt-adopted">0</strong> / failed <strong id="rv-cnt-failed">0</strong>
+          修正待ち <strong id="rv-cnt-queue">0</strong> / 採用済 <strong id="rv-cnt-adopted">0</strong> / 監査NG <strong id="rv-cnt-failed">0</strong>
           <span class="rv-resolved-badge" id="rv-badge-resolved"></span>
         </span>
         <div class="rv-controls">
-          <button type="button" class="rv-button" data-rv-mode="grid">Grid</button>
-          <button type="button" class="rv-button" data-rv-mode="compare">Compare</button>
-          <button type="button" class="rv-button" data-rv-mode="effects">Effects</button>
-          <button type="button" class="rv-button" data-rv-layer="renders">Renders</button>
-          <span style="width: 1px; height: 20px; background: var(--border-default); margin: 0 4px;"></span>
-          <button type="button" class="rv-button" data-rv-rerun="L09" title="L09 Render を再実行">L09 再実行</button>
-          <button type="button" class="rv-button" data-rv-rerun="L12" title="L12 Repair で revision_queue を適用">L12 適用</button>
-          <button type="button" class="rv-button" data-rv-ai-edit="L09" title="L09 を AI 編集 view へ">L09 AI</button>
+          <button type="button" class="rv-button" data-rv-rerun="L09" title="L09 Render を再実行 (全 page を Renderer に流し直す)">全頁再生成</button>
+          <button type="button" class="rv-button" id="rv-btn-l12-apply" data-rv-rerun="L12" title="L12 Repair で revision_queue を適用" disabled>修正を反映</button>
+          <button type="button" class="rv-button" data-rv-ai-edit="L09" title="L09 (Render) を AI 編集 view へ">AI 編集</button>
         </div>
+        <div class="rv-progress" id="rv-progress"></div>
       </div>
       <div class="rv-filters">
-        <label class="rv-filter-check"><input type="checkbox" data-rv-filter="failed"> failed only</label>
-        <label class="rv-filter-check"><input type="checkbox" data-rv-filter="revised"> revised only</label>
-        <label class="rv-filter-check"><input type="checkbox" data-rv-filter="notAdopted"> hide adopted</label>
+        <label class="rv-filter-check"><input type="checkbox" data-rv-filter="failed"> 監査NGのみ</label>
+        <label class="rv-filter-check"><input type="checkbox" data-rv-filter="revised"> 修正済のみ</label>
+        <label class="rv-filter-check"><input type="checkbox" data-rv-filter="notAdopted"> 採用済を隠す</label>
         <span id="rv-filter-summary"></span>
       </div>
-      <div class="rv-help"><code>1</code> renders <code>g</code> grid <code>c</code> compare <code>3</code> effects <code>j/k</code> panel 移動 <code>esc</code> close</div>
+      <div class="rv-help"><code>j/k</code> panel 移動 <code>Tab</code> page 移動 <code>esc</code> close</div>
       <div class="rv-main" id="rv-main"><div class="rv-empty">読み込み中...</div></div>
       <div class="rv-modal" id="rv-modal" role="dialog" aria-modal="true" aria-labelledby="rv-modal-title">
         <div class="rv-modal-card">
@@ -469,9 +508,24 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
             <div class="rv-tags">${tags}</div>
             <textarea id="rv-modal-instruction" maxlength="1000" placeholder="自由記述 (1000 字以内)"></textarea>
             <div class="rv-message" id="rv-modal-message"></div>
+            <p class="rv-modal-hint">送信しただけでは画像は変わりません。送信後ヘッダの『修正を反映』で再生成されます。</p>
             <div class="rv-modal-actions">
               <button type="button" class="rv-secondary" id="rv-modal-cancel">キャンセル</button>
               <button type="button" class="rv-primary" id="rv-modal-submit">指示を送信</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="rv-modal" id="rv-versions-modal" role="dialog" aria-modal="true" aria-labelledby="rv-versions-title">
+        <div class="rv-modal-card rv-versions-card">
+          <div class="rv-modal-body">
+            <h3 id="rv-versions-title">page 詳細</h3>
+            <div class="rv-modal-meta" id="rv-versions-meta"></div>
+            <div class="rv-versions-hero" id="rv-versions-hero"></div>
+            <div class="rv-versions-thumbs" id="rv-versions-thumbs"></div>
+            <div class="rv-modal-actions">
+              <button type="button" class="rv-secondary" id="rv-versions-instruct">この page に修正指示を入れる</button>
+              <button type="button" class="rv-secondary" id="rv-versions-close">閉じる</button>
             </div>
           </div>
         </div>
@@ -589,11 +643,10 @@ function buildPanelTooltip(panel: PanelView): string {
   return lines.join("\n");
 }
 
-function versionMap(manifest: Manifest, layer: UiLayer): Map<string, VersionView[]> {
+function versionMap(manifest: Manifest): Map<string, VersionView[]> {
   const result = new Map<string, VersionView[]>();
-  const targetLayer = manifestLayer(layer);
   for (const entry of manifest.render_manifest ?? []) {
-    if (entry.layer !== targetLayer) continue;
+    if (entry.layer !== "render") continue;
     const versions = result.get(entry.panel_id) ?? [];
     versions.push({
       version: entry.version,
@@ -638,67 +691,6 @@ function lastUnresolvedByPanel(manifest: Manifest): Map<string, RevisionEntry> {
 
 function adoptedPanels(manifest: Manifest): AdoptedVersions["panels"] {
   return manifest.adopted?.panels ?? {};
-}
-
-function formatPct(value: number): string {
-  return `${Math.round(value * 100)}%`;
-}
-
-function instructionCountByPanel(manifest: Manifest): Map<string, number> {
-  const result = new Map<string, number>();
-  for (const entry of manifest.revision_queue ?? []) {
-    result.set(entry.panel_id, (result.get(entry.panel_id) ?? 0) + 1);
-  }
-  return result;
-}
-
-function computeEffects(manifest: Manifest): EffectsStats {
-  const queue = manifest.revision_queue ?? [];
-  const adopted = adoptedPanels(manifest);
-  const totalQueued = queue.length;
-  const resolved = queue.filter((entry) => Boolean(entry.resolved_version)).length;
-  const adoptedNonV1 = Object.values(adopted).filter((choice) => choice?.chosen && choice.chosen !== "v1").length;
-  const byTag = new Map<RevisionTag, { queued: number; resolved: number; adopted: number }>();
-  for (const tag of REVISION_TAGS) byTag.set(tag, { queued: 0, resolved: 0, adopted: 0 });
-
-  const panelStats = new Map<string, { panel_id: string; instructionCount: number; adoptedVersion: string | null; rounds: number }>();
-  for (const entry of queue) {
-    const tags = (entry.checked_tags ?? []).filter(isRevisionTag);
-    const resolvedVersion = entry.resolved_version ?? null;
-    for (const tag of tags) {
-      const row = byTag.get(tag);
-      if (!row) continue;
-      row.queued++;
-      if (resolvedVersion) row.resolved++;
-      if (resolvedVersion && adopted[entry.panel_id]?.chosen === resolvedVersion) row.adopted++;
-    }
-
-    const stat = panelStats.get(entry.panel_id) ?? {
-      panel_id: entry.panel_id,
-      instructionCount: 0,
-      adoptedVersion: adopted[entry.panel_id]?.chosen ?? null,
-      rounds: 0,
-    };
-    stat.instructionCount++;
-    stat.adoptedVersion = adopted[entry.panel_id]?.chosen ?? stat.adoptedVersion;
-    stat.rounds = Math.max(
-      stat.rounds,
-      parseVersion(stat.adoptedVersion ?? ""),
-      parseVersion(entry.resolved_version ?? ""),
-      parseVersion(entry.for_version ?? "")
-    );
-    panelStats.set(entry.panel_id, stat);
-  }
-
-  return {
-    totalQueued,
-    resolved,
-    adoptedNonV1,
-    resolutionRate: totalQueued > 0 ? resolved / totalQueued : 0,
-    adoptionRate: resolved > 0 ? adoptedNonV1 / resolved : 0,
-    byTag,
-    panelStats: Array.from(panelStats.values()).sort((a, b) => b.instructionCount - a.instructionCount),
-  };
 }
 
 function matchingVersions(versions: Map<string, VersionView[]>, panel: PanelView): VersionView[] {
@@ -752,17 +744,18 @@ function renderSummary(root: HTMLElement, state: ViewState): void {
   setText(root, "#rv-cnt-queue", unresolved + (resolved > 0 ? ` (${resolved} 消化済)` : ""));
   setText(root, "#rv-cnt-adopted", String(adopted));
   setText(root, "#rv-cnt-failed", String(failed));
+  const l12ApplyButton = root.querySelector<HTMLButtonElement>("#rv-btn-l12-apply");
+  if (l12ApplyButton) {
+    l12ApplyButton.disabled = unresolved === 0;
+    l12ApplyButton.classList.toggle("rv-button-attention", unresolved > 0);
+    l12ApplyButton.textContent = unresolved > 0 ? `修正を反映 (${unresolved})` : "修正を反映";
+  }
   const badge = root.querySelector<HTMLElement>("#rv-badge-resolved");
   if (badge) {
     badge.textContent = resolved > 0 ? `+${resolved} 消化` : "";
     badge.classList.toggle("is-visible", resolved > 0);
   }
-  root.querySelectorAll<HTMLElement>("[data-rv-mode]").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.rvMode === state.mode);
-  });
-  root.querySelectorAll<HTMLElement>("[data-rv-layer]").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.rvLayer === state.layer);
-  });
+  renderProgress(root, manifest);
   root.querySelectorAll<HTMLInputElement>("[data-rv-filter]").forEach((input) => {
     if (input.dataset.rvFilter === "failed") input.checked = state.filters.failed;
     else if (input.dataset.rvFilter === "revised") input.checked = state.filters.revised;
@@ -770,27 +763,51 @@ function renderSummary(root: HTMLElement, state: ViewState): void {
   });
 }
 
-function renderHardPanels(manifest: Manifest): string {
-  const queued = instructionCountByPanel(manifest);
-  const adopted = adoptedPanels(manifest);
+type PageProgressStatus = "ng" | "pending" | "ok" | "idle";
+
+function renderProgress(root: HTMLElement, manifest: Manifest): void {
+  const progress = root.querySelector<HTMLElement>("#rv-progress");
+  if (!progress) return;
+  const lookup = panelLookup(manifest);
   const failed = failedPanelSet(manifest);
-  const hard = Array.from(queued.entries())
-    .filter(([id, count]) => count >= 3 || failed.has(id) || !adopted[id])
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-  if (hard.length === 0) return "";
-  return `<section class="rv-hard">
-    <h3>注意が必要な panel (上位 ${hard.length})</h3>
-    <ul>${hard.map(([id, count]) => {
-      const choice = adopted[id];
-      const status = [
-        `指示 ${count} 回`,
-        failed.has(id) ? "audit failed" : "",
-        choice ? `採用済 (${choice.chosen})` : "未採用",
-      ].filter(Boolean).join(" / ");
-      return `<li><strong>${escapeHtml(id)}</strong> ${escapeHtml(status)}</li>`;
-    }).join("")}</ul>
-  </section>`;
+  const unresolved = unresolvedCountByPanel(manifest);
+  const adopted = adoptedPanels(manifest);
+  const pages = manifest.page_plan.pages.slice().sort((a, b) => a.page_no - b.page_no);
+  const counts: Record<PageProgressStatus, number> = { ng: 0, pending: 0, ok: 0, idle: 0 };
+
+  const segments = pages.map((page) => {
+    const panels = lookup.get(page.page_no) ?? [];
+    const panelIds = new Set<string>();
+    for (const panel of panels) {
+      panelIds.add(panel.queueKey);
+      panelIds.add(panel.rawPanelId);
+    }
+    let status: PageProgressStatus = "idle";
+    let chosen = "";
+    if (Array.from(panelIds).some((id) => failed.has(id))) {
+      status = "ng";
+    } else if (Array.from(panelIds).some((id) => (unresolved.get(id) ?? 0) > 0)) {
+      status = "pending";
+    } else {
+      for (const id of panelIds) {
+        const choice = adopted[id];
+        if (choice?.chosen && choice.chosen !== "v1") {
+          status = "ok";
+          chosen = choice.chosen;
+          break;
+        }
+      }
+    }
+    counts[status]++;
+    const label =
+      status === "ng" ? "監査NG" : status === "pending" ? "修正待ち" : status === "ok" ? `採用済 (${chosen})` : "未着手";
+    return `<span class="rv-progress-seg rv-progress-seg--${status}" title="${escapeHtml(`P.${page.page_no} ${label}`)}" aria-label="${escapeHtml(`P.${page.page_no} ${label}`)}"></span>`;
+  }).join("");
+
+  progress.innerHTML = `
+    <div class="rv-progress-bar" role="img" aria-label="${escapeHtml(`${pages.length} ページの承認進捗`)}">${segments}</div>
+    <div class="rv-progress-summary">${pages.length} ページ中 ${counts.ok} 採用済 / ${counts.pending} 修正待ち / ${counts.ng} 監査NG</div>
+  `;
 }
 
 function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: number): void {
@@ -799,7 +816,7 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
   if (!manifest || !main) return;
 
   const lookup = panelLookup(manifest);
-  const versions = versionMap(manifest, state.layer);
+  const versions = versionMap(manifest);
   const failed = failedPanelSet(manifest);
   const revised = revisedPanelSet(manifest);
   const unresolved = unresolvedCountByPanel(manifest);
@@ -816,9 +833,80 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
     const panels = lookup.get(page.page_no) ?? [];
     const pageFailedCount = panels.filter((panel) => failed.has(panel.queueKey)).length;
     const isPageShot = page.render_strategy === "page_one_shot";
+
+    if (isPageShot) {
+      // 1 page = 1 click target。panel rect overlay は廃止 (1P 単位生成のため不要)。
+      // queueKey は全 panel 共通で `page_${page.page_no}`、状態は page 単位に集約。
+      const repr = panels[0];
+      if (!repr) continue;
+      total++;
+      if (!passesFilter(state.filters, repr, failed, revised, adopted)) continue;
+      shown++;
+      const allVersions = matchingVersions(versions, repr);
+      const latest = allVersions[allVersions.length - 1];
+      const adoptedChoice = matchingAdopted(adopted, repr);
+      const showVersion = adoptedChoice?.chosen ?? latest?.version ?? "v1";
+      const imagePath =
+        adoptedChoice?.image_path ?? latest?.image_path ?? defaultImagePath(episode, page.page_no);
+      const revisionCount = unresolvedCount(unresolved, repr);
+      const lastEntry = lastInstruction(lastEntries, repr);
+      const stateTooltip = lastEntry
+        ? `\n指示 ${revisionCount} 件 / 最新: ${lastEntry.instruction.slice(0, 80)}`
+        : pageFailedCount > 0
+          ? `\n監査失敗 panel: ${pageFailedCount} 件`
+          : "";
+      const tooltip = `page ${page.page_no} (${showVersion}) — クリックで過去版表示${stateTooltip}`;
+
+      const classes = ["rv-panel", "rv-page-shot"];
+      if (failed.has(repr.queueKey) || pageFailedCount > 0) classes.push("rv-failed");
+      if (hasRevision(revised, repr)) classes.push("rv-has-revision");
+      if (showVersion !== "v1") classes.push("rv-adopted-v2plus");
+
+      const score = engagement.get(page.page_no);
+      const headerBadges: string[] = [];
+      if (score) {
+        const riskClass =
+          score.drop_off_risk >= 70
+            ? "rv-page-risk-critical"
+            : score.drop_off_risk >= 50
+              ? "rv-page-risk-warn"
+              : "rv-page-risk-ok";
+        headerBadges.push(
+          `<span class="rv-page-risk ${riskClass}" title="${escapeHtml(score.comment ?? "")}">risk ${score.drop_off_risk}</span>`
+        );
+        if (score.boring_flagged) {
+          headerBadges.push(
+            `<span class="rv-page-boring" title="${escapeHtml(score.boring_reason ?? "boring flagged")}">⚠ boring</span>`
+          );
+        }
+      }
+      if (pageFailedCount > 0) {
+        headerBadges.push(`<span class="rv-audit-fail">audit failed: ${pageFailedCount}</span>`);
+      }
+
+      const aspect = `${canvas.w}/${canvas.h}`;
+      pageHtml.push(`
+        <section class="rv-page-card rv-page-card--shot">
+          <h3>P.${page.page_no} <span class="rv-page-role">[${escapeHtml(String(page.page_role))}]</span>${headerBadges.join("")}</h3>
+          <button type="button" class="${classes.join(" ")}"
+            data-panel-id="${escapeHtml(repr.queueKey)}"
+            data-page-no="${page.page_no}"
+            data-image-path="${escapeHtml(imagePath)}"
+            data-for-version="${escapeHtml(showVersion)}"
+            title="${escapeHtml(tooltip)}"
+            aria-label="${escapeHtml(`page ${page.page_no} の修正・採用`)}"
+            style="aspect-ratio:${aspect};">
+            <img class="rv-page-shot-img" src="${escapeHtml(assetUrl(imagePath))}" loading="lazy" alt="${escapeHtml(`page_${page.page_no} ${showVersion}`)}">
+            <span class="rv-page-version-badge">${escapeHtml(showVersion)}</span>
+            ${revisionCount > 0 ? `<span class="rv-rev-badge">${revisionCount}</span>` : ""}
+          </button>
+        </section>
+      `);
+      continue;
+    }
+
+    // panel_composite: 既存 panel grid
     const panelHtml: string[] = [];
-    let pageImagePath: string | null = null;
-    let pageShowVersion: string = "v1";
     for (const panel of panels) {
       total++;
       if (!passesFilter(state.filters, panel, failed, revised, adopted)) continue;
@@ -828,67 +916,33 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
       const adoptedChoice = matchingAdopted(adopted, panel);
       const showVersion = adoptedChoice?.chosen ?? latest?.version ?? "v1";
       const imagePath =
-        adoptedChoice?.image_path ?? latest?.image_path ?? defaultImagePath(state.layer, episode, panel.pageNo);
+        adoptedChoice?.image_path ?? latest?.image_path ?? defaultImagePath(episode, panel.pageNo);
       const revisionCount = unresolvedCount(unresolved, panel);
       const lastEntry = lastInstruction(lastEntries, panel);
-      const baseTooltip = isPageShot
-        ? buildPanelTooltip(panel)
-        : `#${panel.readingOrder} ${panel.shotType ?? ""}`.trim();
-      const stateTooltip = lastEntry
-        ? `\n指示 ${revisionCount} 件 / 最新: ${lastEntry.instruction.slice(0, 80)}`
+      const tooltip = lastEntry
+        ? `指示 ${revisionCount} 件 / 最新: ${lastEntry.instruction.slice(0, 80)}`
         : failed.has(panel.queueKey)
-          ? "\n監査失敗 panel"
+          ? "監査失敗 panel"
           : "";
-      const tooltip = `${baseTooltip}${stateTooltip}`;
       const classes = ["rv-panel"];
-      if (isPageShot) classes.push("rv-overlay-rect");
       if (failed.has(panel.queueKey)) classes.push("rv-failed");
       if (hasRevision(revised, panel)) classes.push("rv-has-revision");
       if (showVersion !== "v1") classes.push("rv-adopted-v2plus");
       const panelNoAttr = panel.panelNo !== undefined ? ` data-panel-no="${panel.panelNo}"` : "";
-
-      if (isPageShot) {
-        // page_one_shot: overlay button (画像なし、% 配置)
-        pageImagePath = imagePath;
-        pageShowVersion = showVersion;
-        const rect = panel.rect;
-        if (!rect) continue;
-        const leftPct = (rect.x / canvas.w) * 100;
-        const topPct = (rect.y / canvas.h) * 100;
-        const widthPct = (rect.w / canvas.w) * 100;
-        const heightPct = (rect.h / canvas.h) * 100;
-        const styleAttr = `left:${leftPct.toFixed(3)}%;top:${topPct.toFixed(3)}%;width:${widthPct.toFixed(3)}%;height:${heightPct.toFixed(3)}%;`;
-        panelHtml.push(`
-          <button type="button" class="${classes.join(" ")}"
-            data-panel-id="${escapeHtml(panel.queueKey)}"
-            data-page-no="${panel.pageNo}"
-            ${panelNoAttr}
-            data-image-path="${escapeHtml(imagePath)}"
-            data-for-version="${escapeHtml(showVersion)}"
-            style="${styleAttr}"
-            title="${escapeHtml(tooltip)}"
-            aria-label="${escapeHtml(`page ${panel.pageNo} panel ${panel.readingOrder}`)}">
-            <span class="rv-overlay-label">#${panel.readingOrder}</span>
-            ${revisionCount > 0 ? `<span class="rv-rev-badge">${revisionCount}</span>` : ""}
-          </button>
-        `);
-      } else {
-        // panel_composite: 既存 panel grid
-        panelHtml.push(`
-          <button type="button" class="${classes.join(" ")}"
-            data-panel-id="${escapeHtml(panel.queueKey)}"
-            data-page-no="${panel.pageNo}"
-            ${panelNoAttr}
-            data-image-path="${escapeHtml(imagePath)}"
-            data-for-version="${escapeHtml(showVersion)}"
-            title="${escapeHtml(tooltip)}">
-            <span class="rv-label">#${panel.readingOrder} ${escapeHtml(panel.shotType ?? "")}</span>
-            <span class="rv-version">${escapeHtml(showVersion)}</span>
-            ${revisionCount > 0 ? `<span class="rv-rev-badge">${revisionCount}</span>` : ""}
-            <img src="${escapeHtml(assetUrl(imagePath))}" loading="lazy" alt="${escapeHtml(panel.queueKey)}">
-          </button>
-        `);
-      }
+      panelHtml.push(`
+        <button type="button" class="${classes.join(" ")}"
+          data-panel-id="${escapeHtml(panel.queueKey)}"
+          data-page-no="${panel.pageNo}"
+          ${panelNoAttr}
+          data-image-path="${escapeHtml(imagePath)}"
+          data-for-version="${escapeHtml(showVersion)}"
+          title="${escapeHtml(tooltip)}">
+          <span class="rv-label">#${panel.readingOrder} ${escapeHtml(panel.shotType ?? "")}</span>
+          <span class="rv-version">${escapeHtml(showVersion)}</span>
+          ${revisionCount > 0 ? `<span class="rv-rev-badge">${revisionCount}</span>` : ""}
+          <img src="${escapeHtml(assetUrl(imagePath))}" loading="lazy" alt="${escapeHtml(panel.queueKey)}">
+        </button>
+      `);
     }
     if (panelHtml.length === 0) continue;
 
@@ -914,126 +968,22 @@ function renderGrid(root: HTMLElement, state: ViewState, slug: string, episode: 
       headerBadges.push(`<span class="rv-audit-fail">audit failed: ${pageFailedCount}</span>`);
     }
 
-    let body: string;
-    if (isPageShot && pageImagePath) {
-      const aspect = `${canvas.w}/${canvas.h}`;
-      body = `<div class="rv-page-shot" style="aspect-ratio:${aspect};">
-        <img class="rv-page-shot-img" src="${escapeHtml(assetUrl(pageImagePath))}" loading="lazy" alt="${escapeHtml(`page_${page.page_no} ${pageShowVersion}`)}">
-        <div class="rv-overlay-layer">${panelHtml.join("")}</div>
-        <span class="rv-page-version-badge">${escapeHtml(pageShowVersion)}</span>
-      </div>`;
-    } else {
-      body = `<div class="rv-panel-grid">${panelHtml.join("")}</div>`;
-    }
-
     pageHtml.push(`
-      <section class="rv-page-card${isPageShot ? " rv-page-card--shot" : ""}">
+      <section class="rv-page-card">
         <h3>P.${page.page_no} <span class="rv-page-role">[${escapeHtml(String(page.page_role))}]</span>${headerBadges.join("")}</h3>
-        ${body}
+        <div class="rv-panel-grid">${panelHtml.join("")}</div>
       </section>
     `);
   }
 
-  main.innerHTML = `${renderHardPanels(manifest)}<div class="rv-grid">${pageHtml.join("") || '<div class="rv-empty">該当パネルなし</div>'}</div>`;
+  main.innerHTML = `<div class="rv-grid">${pageHtml.join("") || '<div class="rv-empty">該当パネルなし</div>'}</div>`;
   setText(root, "#rv-filter-summary", `${shown} / ${total} panels`);
   void slug;
 }
 
-function renderEffects(root: HTMLElement, state: ViewState): void {
-  const manifest = state.manifest;
-  const main = root.querySelector<HTMLElement>("#rv-main");
-  if (!manifest || !main) return;
-  const stats = computeEffects(manifest);
-  const unresolved = stats.totalQueued - stats.resolved;
-  const tagRows = REVISION_TAGS.map((tag) => {
-    const row = stats.byTag.get(tag) ?? { queued: 0, resolved: 0, adopted: 0 };
-    const conv = row.resolved > 0 ? row.adopted / row.resolved : 0;
-    return `<tr>
-      <td>${escapeHtml(TAG_LABELS[tag])}</td>
-      <td>${row.queued}</td>
-      <td>${row.resolved}</td>
-      <td>${row.adopted}</td>
-      <td>${formatPct(conv)}</td>
-    </tr>`;
-  }).join("");
-  const hardRows = stats.panelStats
-    .filter((panel) => panel.instructionCount >= 3)
-    .map((panel) => `<tr>
-      <td>${escapeHtml(panel.panel_id)}</td>
-      <td>${panel.instructionCount}</td>
-      <td>${escapeHtml(panel.adoptedVersion ?? "-")}</td>
-      <td>${panel.rounds || "-"}</td>
-    </tr>`)
-    .join("");
-
-  main.innerHTML = `
-    <div class="rv-effects">
-      <div class="rv-effects-grid">
-        <section class="rv-effects-card"><span>総指示数</span><strong>${stats.totalQueued}</strong></section>
-        <section class="rv-effects-card"><span>解消率</span><strong>${formatPct(stats.resolutionRate)}</strong></section>
-        <section class="rv-effects-card"><span>採用率</span><strong>${formatPct(stats.adoptionRate)}</strong></section>
-        <section class="rv-effects-card"><span>未解消</span><strong>${unresolved}</strong></section>
-      </div>
-      <section class="rv-effects-section">
-        <h3>タグ別の効果</h3>
-        <table class="rv-effects-table">
-          <thead><tr><th>tag</th><th>queued</th><th>resolved</th><th>adopted</th><th>conv%</th></tr></thead>
-          <tbody>${tagRows}</tbody>
-        </table>
-      </section>
-      <section class="rv-effects-section">
-        <h3>困難 panel ランキング</h3>
-        ${hardRows ? `<table class="rv-effects-table">
-          <thead><tr><th>panel_id</th><th>指示回数</th><th>採用 v?</th><th>rounds</th></tr></thead>
-          <tbody>${hardRows}</tbody>
-        </table>` : '<div class="rv-empty">指示回数 3 回以上の panel はありません。</div>'}
-      </section>
-    </div>`;
-  setText(root, "#rv-filter-summary", "effects");
-}
-
-function renderCompare(root: HTMLElement, state: ViewState): void {
-  const manifest = state.manifest;
-  const main = root.querySelector<HTMLElement>("#rv-main");
-  if (!manifest || !main) return;
-
-  const versions = versionMap(manifest, state.layer);
-  const adopted = adoptedPanels(manifest);
-  const rows: string[] = [];
-  const queueKeys = Array.from(panelLookup(manifest).values())
-    .flat()
-    .map((panel) => panel.queueKey);
-  for (const panelId of Array.from(new Set(queueKeys))) {
-    const panelVersions = versions.get(panelId) ?? [];
-    if (panelVersions.length < 2) continue;
-    const cards = panelVersions
-      .map((version) => {
-        const isAdopted = adopted[panelId]?.chosen === version.version;
-        return `
-          <div class="rv-ver-card${isAdopted ? " rv-adopted" : ""}">
-            <img src="${escapeHtml(assetUrl(version.image_path))}" loading="lazy" alt="${escapeHtml(panelId)} ${escapeHtml(version.version)}">
-            <div class="rv-ver-meta">
-              <span>${escapeHtml(version.version)} (${escapeHtml(version.origin ?? "initial")})</span>
-              <button type="button" data-rv-adopt-panel="${escapeHtml(panelId)}" data-rv-adopt-version="${escapeHtml(version.version)}" data-rv-adopt-path="${escapeHtml(version.image_path)}">${isAdopted ? "採用中" : "採用"}</button>
-            </div>
-            ${isAdopted && adopted[panelId]?.note ? `<div class="rv-ver-note">メモ: ${escapeHtml(adopted[panelId]!.note!)}</div>` : ""}
-          </div>
-        `;
-      })
-      .join("");
-    rows.push(`<section class="rv-compare-row"><h3>${escapeHtml(panelId)}</h3><div class="rv-versions">${cards}</div></section>`);
-  }
-  main.innerHTML = rows.length
-    ? `<div class="rv-compare-list">${rows.join("")}</div>`
-    : '<div class="rv-empty">複数 version のあるパネルはまだありません。</div>';
-  setText(root, "#rv-filter-summary", `${rows.length} compare rows`);
-}
-
 function refresh(root: HTMLElement, state: ViewState, slug: string, episode: number): void {
   renderSummary(root, state);
-  if (state.mode === "effects") renderEffects(root, state);
-  else if (state.mode === "compare") renderCompare(root, state);
-  else renderGrid(root, state, slug, episode);
+  renderGrid(root, state, slug, episode);
 }
 
 function selectedTags(root: HTMLElement): RevisionTag[] {
@@ -1064,6 +1014,184 @@ function openRevisionModal(root: HTMLElement, state: ViewState, context: ModalCo
 function closeRevisionModal(root: HTMLElement, state: ViewState): void {
   state.modal = null;
   root.querySelector<HTMLElement>("#rv-modal")?.classList.remove("is-open");
+}
+
+function renderVersionsList(root: HTMLElement, state: ViewState, ctx: VersionsModalContext): void {
+  const manifest = state.manifest;
+  if (!manifest) return;
+  const versions = versionMap(manifest).get(ctx.panel_id) ?? [];
+  const adopted = adoptedPanels(manifest);
+  const adoptedChoice = adopted[ctx.panel_id];
+  const hero = root.querySelector<HTMLElement>("#rv-versions-hero");
+  const thumbs = root.querySelector<HTMLElement>("#rv-versions-thumbs");
+  if (!hero || !thumbs) return;
+
+  if (versions.length === 0) {
+    // render 履歴ゼロでも現在表示中の画像 (defaultImagePath) を hero に出す
+    hero.innerHTML = `
+      <img class="rv-versions-hero-img" src="${escapeHtml(assetUrl(ctx.current_image_path))}" alt="${escapeHtml(`page ${ctx.page_no}`)}">
+      <div class="rv-versions-hero-meta">
+        <span class="rv-versions-hero-version">${escapeHtml(ctx.current_for_version)}</span>
+        <span class="rv-version-origin">render 履歴未登録</span>
+      </div>
+    `;
+    thumbs.innerHTML = "";
+    return;
+  }
+
+  // viewing idx 決定: 明示指定 → adopted の最後の出現 → latest (末尾)
+  let viewingIdx = typeof ctx.viewingIdx === "number" ? ctx.viewingIdx : -1;
+  if (viewingIdx < 0 || viewingIdx >= versions.length) {
+    if (adoptedChoice?.chosen) {
+      // adopted version 文字列に一致する最後の entry (同 version 重複時、最新を選ぶ)
+      for (let i = versions.length - 1; i >= 0; i--) {
+        if (versions[i].version === adoptedChoice.chosen) {
+          viewingIdx = i;
+          break;
+        }
+      }
+    }
+    if (viewingIdx < 0) viewingIdx = versions.length - 1;
+  }
+  const viewing = versions[viewingIdx];
+  const viewingIsAdopted = adoptedChoice?.chosen === viewing?.version;
+  const adoptLabel = viewingIsAdopted ? "採用中" : "この版を採用";
+  const tsLong = viewing?.ts
+    ? new Date(viewing.ts).toLocaleString("ja-JP", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })
+    : "";
+  const noteHtml = viewingIsAdopted && adoptedChoice?.note
+    ? `<div class="rv-version-note">${escapeHtml(adoptedChoice.note)}</div>`
+    : "";
+
+  hero.innerHTML = `
+    <img class="rv-versions-hero-img" src="${escapeHtml(assetUrl(viewing?.image_path ?? ""))}" alt="${escapeHtml(`page ${ctx.page_no} ${viewing?.version ?? ""}`)}">
+    <div class="rv-versions-hero-meta">
+      <span class="rv-versions-hero-version">${escapeHtml(viewing?.version ?? "")}</span>
+      <span class="rv-version-origin">${escapeHtml(viewing?.origin ?? "initial")}</span>
+      ${tsLong ? `<span class="rv-version-origin">${escapeHtml(tsLong)}</span>` : ""}
+      ${viewingIsAdopted ? `<span class="rv-version-adopted-badge">採用中</span>` : ""}
+      <button type="button" class="rv-primary rv-versions-hero-adopt"
+        data-rv-adopt-page="${escapeHtml(ctx.panel_id)}"
+        data-rv-adopt-version="${escapeHtml(viewing?.version ?? "")}"
+        data-rv-adopt-path="${escapeHtml(viewing?.image_path ?? "")}">${escapeHtml(adoptLabel)}</button>
+    </div>
+    ${noteHtml}
+  `;
+
+  if (versions.length <= 1) {
+    // 単一 version はサムネ列を出さない (冗長)
+    thumbs.innerHTML = "";
+  } else {
+    thumbs.innerHTML = versions.map((v, i) => {
+      const isAdopted = adoptedChoice?.chosen === v.version;
+      const isViewing = i === viewingIdx;
+      const cls = ["rv-versions-thumb"];
+      if (isAdopted) cls.push("rv-adopted");
+      if (isViewing) cls.push("rv-viewing");
+      return `
+        <button type="button" class="${cls.join(" ")}"
+          data-rv-thumb
+          data-rv-idx="${i}"
+          title="${escapeHtml(`${v.version} (${v.origin ?? "initial"})`)}">
+          <img src="${escapeHtml(assetUrl(v.image_path))}" loading="lazy" alt="${escapeHtml(v.version)}">
+          <span>${escapeHtml(v.version)}${isAdopted ? " ★" : ""}</span>
+        </button>
+      `;
+    }).join("");
+  }
+}
+
+function openVersionsModal(root: HTMLElement, state: ViewState, context: VersionsModalContext): void {
+  state.versionsModal = context;
+  const manifest = state.manifest;
+  const adopted = manifest ? adoptedPanels(manifest) : {};
+  const adoptedChoice = adopted[context.panel_id];
+  const versionsCount = manifest ? (versionMap(manifest).get(context.panel_id) ?? []).length : 0;
+  const navHint = (versionsCount > 1 ? " · ←/→ で版切替" : "") + " · Tab で前後 page";
+  setText(
+    root,
+    "#rv-versions-meta",
+    `page ${context.page_no} / ${versionsCount} 版${adoptedChoice ? ` / 採用中: ${adoptedChoice.chosen}` : ""}${navHint}`
+  );
+  renderVersionsList(root, state, context);
+  root.querySelector<HTMLElement>("#rv-versions-modal")?.classList.add("is-open");
+}
+
+function setViewingByIdx(root: HTMLElement, state: ViewState, idx: number): void {
+  if (!state.versionsModal) return;
+  state.versionsModal.viewingIdx = idx;
+  renderVersionsList(root, state, state.versionsModal);
+}
+
+/** versions modal を開いたまま、隣の page に対象を切り替える (Tab / Shift+Tab)。
+ *  modal は閉じない。viewingIdx は新 page の adopted/latest にリセット。 */
+function navigateVersionsModalPage(
+  root: HTMLElement,
+  state: ViewState,
+  dir: 1 | -1,
+  episode: number
+): void {
+  const ctx = state.versionsModal;
+  if (!ctx || !state.manifest) return;
+  const pages = state.manifest.page_plan.pages.slice().sort((a, b) => a.page_no - b.page_no);
+  if (pages.length <= 1) return;
+  const currentIdx = pages.findIndex((p) => p.page_no === ctx.page_no);
+  if (currentIdx < 0) return;
+  // wrap (端で循環): 22 page なら最後の Tab で page 1 に戻る
+  const nextIdx = (currentIdx + dir + pages.length) % pages.length;
+  const nextPage = pages[nextIdx];
+  if (nextPage.page_no === ctx.page_no) return;
+
+  const lookup = panelLookup(state.manifest);
+  const versions = versionMap(state.manifest);
+  const adopted = adoptedPanels(state.manifest);
+  const panels = lookup.get(nextPage.page_no) ?? [];
+  const repr = panels[0];
+  if (!repr) return;
+  const allVersions = versions.get(repr.queueKey) ?? [];
+  const latest = allVersions[allVersions.length - 1];
+  const adoptedChoice = adopted[repr.queueKey];
+  const showVersion = adoptedChoice?.chosen ?? latest?.version ?? "v1";
+  const imagePath =
+    adoptedChoice?.image_path ?? latest?.image_path ?? defaultImagePath(episode, nextPage.page_no);
+
+  openVersionsModal(root, state, {
+    panel_id: repr.queueKey,
+    page_no: nextPage.page_no,
+    current_image_path: imagePath,
+    current_for_version: showVersion,
+  });
+}
+
+/** versions modal で前/次 version に移動 (矢印キー)。idx で行き来する。 */
+function navigateVersion(root: HTMLElement, state: ViewState, dir: 1 | -1): void {
+  const ctx = state.versionsModal;
+  if (!ctx || !state.manifest) return;
+  const versions = versionMap(state.manifest).get(ctx.panel_id) ?? [];
+  if (versions.length <= 1) return;
+  const adoptedChoice = adoptedPanels(state.manifest)[ctx.panel_id];
+
+  let idx = typeof ctx.viewingIdx === "number" ? ctx.viewingIdx : -1;
+  if (idx < 0 || idx >= versions.length) {
+    if (adoptedChoice?.chosen) {
+      for (let i = versions.length - 1; i >= 0; i--) {
+        if (versions[i].version === adoptedChoice.chosen) {
+          idx = i;
+          break;
+        }
+      }
+    }
+    if (idx < 0) idx = versions.length - 1;
+  }
+
+  const nextIdx = Math.max(0, Math.min(versions.length - 1, idx + dir));
+  if (nextIdx === idx) return;
+  setViewingByIdx(root, state, nextIdx);
+}
+
+function closeVersionsModal(root: HTMLElement, state: ViewState): void {
+  state.versionsModal = null;
+  root.querySelector<HTMLElement>("#rv-versions-modal")?.classList.remove("is-open");
 }
 
 function openAdoptModal(root: HTMLElement, state: ViewState, context: AdoptModalContext): void {
@@ -1126,6 +1254,30 @@ function bindStaticListeners(
     focusIndex = (idx + list.length) % list.length;
     list[focusIndex]?.focus();
   };
+  const focusPage = (dir: 1 | -1): void => {
+    const list = panels();
+    if (list.length <= 1) return;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.classList.contains("rv-panel")) {
+      const idx = list.indexOf(active);
+      if (idx >= 0) focusIndex = idx;
+    }
+    const currentPage = Number(list[focusIndex]?.dataset.pageNo ?? NaN);
+    if (!Number.isFinite(currentPage)) return;
+    // DOM 順で page_no を重複排除した一覧を作る (見開き grid でも DOM 順は P.1, P.2, ... と昇順)
+    const pageNos: number[] = [];
+    for (const panel of list) {
+      const p = Number(panel.dataset.pageNo ?? NaN);
+      if (Number.isFinite(p) && pageNos[pageNos.length - 1] !== p) pageNos.push(p);
+    }
+    if (pageNos.length <= 1) return;
+    const currentPageIdx = pageNos.indexOf(currentPage);
+    if (currentPageIdx < 0) return;
+    const targetPage = pageNos[(currentPageIdx + dir + pageNos.length) % pageNos.length];
+    // 該当ページの先頭 panel に focus (両方向対称)
+    const targetIndex = list.findIndex((panel) => Number(panel.dataset.pageNo ?? NaN) === targetPage);
+    if (targetIndex >= 0) focusPanel(targetIndex);
+  };
   const focusedPanel = (): HTMLElement | undefined => {
     const active = document.activeElement;
     if (active instanceof HTMLElement && active.classList.contains("rv-panel")) {
@@ -1136,32 +1288,6 @@ function bindStaticListeners(
     return panels()[focusIndex];
   };
 
-  root.querySelectorAll<HTMLButtonElement>("[data-rv-mode]").forEach((button) => {
-    button.addEventListener(
-      "click",
-      () => {
-        const mode = button.dataset.rvMode;
-        if (mode === "grid" || mode === "compare" || mode === "effects") {
-          state.mode = mode;
-          refresh(root, state, slug, episode);
-        }
-      },
-      { signal }
-    );
-  });
-  root.querySelectorAll<HTMLButtonElement>("[data-rv-layer]").forEach((button) => {
-    button.addEventListener(
-      "click",
-      () => {
-        const layer = button.dataset.rvLayer;
-        if (layer === "renders") {
-          state.layer = "renders";
-          refresh(root, state, slug, episode);
-        }
-      },
-      { signal }
-    );
-  });
   root.querySelectorAll<HTMLButtonElement>("[data-rv-rerun]").forEach((button) => {
     button.addEventListener(
       "click",
@@ -1215,6 +1341,31 @@ function bindStaticListeners(
         }
         return;
       }
+      if (state.versionsModal) {
+        if (event.key === "Escape") {
+          closeVersionsModal(root, state);
+          event.preventDefault();
+          return;
+        }
+        // 矢印キー / h・l (vim 風) で version サムネを行き来する
+        if (event.key === "ArrowRight" || event.key === "l" || event.key === "L") {
+          navigateVersion(root, state, 1);
+          event.preventDefault();
+          return;
+        }
+        if (event.key === "ArrowLeft" || event.key === "h" || event.key === "H") {
+          navigateVersion(root, state, -1);
+          event.preventDefault();
+          return;
+        }
+        // Tab / Shift+Tab で modal を閉じずに前後 page に対象を切替
+        if (event.key === "Tab") {
+          navigateVersionsModalPage(root, state, event.shiftKey ? -1 : 1, episode);
+          event.preventDefault();
+          return;
+        }
+        return;
+      }
       const target = event.target;
       if (target instanceof HTMLElement) {
         const tag = target.tagName;
@@ -1222,27 +1373,14 @@ function bindStaticListeners(
           if (event.key !== "Escape") return;
         }
       }
-      if (event.key === "1") {
-        state.layer = "renders";
-        refresh(root, state, slug, episode);
-        event.preventDefault();
-      } else if (event.key === "g" || event.key === "G") {
-        state.mode = "grid";
-        refresh(root, state, slug, episode);
-        event.preventDefault();
-      } else if (event.key === "c" || event.key === "C") {
-        state.mode = "compare";
-        refresh(root, state, slug, episode);
-        event.preventDefault();
-      } else if (event.key === "3") {
-        state.mode = "effects";
-        refresh(root, state, slug, episode);
-        event.preventDefault();
-      } else if (event.key === "j" || event.key === "ArrowDown") {
+      if (event.key === "j" || event.key === "ArrowDown") {
         focusPanel(focusIndex + 1);
         event.preventDefault();
       } else if (event.key === "k" || event.key === "ArrowUp") {
         focusPanel(focusIndex - 1);
+        event.preventDefault();
+      } else if (event.key === "Tab") {
+        focusPage(event.shiftKey ? -1 : 1);
         event.preventDefault();
       } else if (event.key === "Enter") {
         const panel = focusedPanel();
@@ -1250,18 +1388,15 @@ function bindStaticListeners(
         event.preventDefault();
       } else if (event.key === " ") {
         const panel = focusedPanel();
-        if (panel) {
-          state.mode = "compare";
-          refresh(root, state, slug, episode);
-          toast(root, `${panel.dataset.panelId ?? "panel"} の採用候補を Compare で確認してください`, "ok");
-        }
+        if (panel) panel.click();
         event.preventDefault();
       } else if (event.key === "?") {
-        toast(root, "j/k 移動 / Enter 修正指示 / Space Compare / 1 renders / g grid / c compare / 3 effects / esc close", "ok");
+        toast(root, "j/k 移動 / Tab page 移動 / Enter 修正指示 / esc close", "ok");
         event.preventDefault();
       } else if (event.key === "Escape") {
         closeRevisionModal(root, state);
         closeAdoptModal(root, state);
+        closeVersionsModal(root, state);
         event.preventDefault();
       }
     },
@@ -1291,6 +1426,33 @@ function bindStaticListeners(
     },
     { signal }
   );
+  root.querySelector<HTMLButtonElement>("#rv-versions-close")?.addEventListener(
+    "click",
+    () => closeVersionsModal(root, state),
+    { signal }
+  );
+  root.querySelector<HTMLElement>("#rv-versions-modal")?.addEventListener(
+    "click",
+    (event) => {
+      if (event.target === event.currentTarget) closeVersionsModal(root, state);
+    },
+    { signal }
+  );
+  root.querySelector<HTMLButtonElement>("#rv-versions-instruct")?.addEventListener(
+    "click",
+    () => {
+      const ctx = state.versionsModal;
+      if (!ctx) return;
+      closeVersionsModal(root, state);
+      openRevisionModal(root, state, {
+        panel_id: ctx.panel_id,
+        page_no: ctx.page_no,
+        image_path: ctx.current_image_path,
+        for_version: ctx.current_for_version,
+      });
+    },
+    { signal }
+  );
   root.querySelector<HTMLButtonElement>("#rv-modal-submit")?.addEventListener(
     "click",
     () => {
@@ -1313,7 +1475,9 @@ function bindStaticListeners(
           closeRevisionModal(root, state);
           toast(
             root,
-            result.duplicate_warning ? `⚠ ${result.duplicate_warning}` : "修正指示を queue に追加しました",
+            result.duplicate_warning
+              ? `⚠ ${result.duplicate_warning}`
+              : "修正指示を追加しました。右上『修正を反映』を押すと画像が再生成されます",
             result.duplicate_warning ? "warn" : "ok"
           );
           await reloadManifest(state, slug, episode);
@@ -1357,6 +1521,44 @@ function bindStaticListeners(
     (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
+      // versions modal のサムネ click → hero 画像を切替 (拡大表示する版を変える)
+      const thumbBtn = target.closest<HTMLButtonElement>("[data-rv-thumb]");
+      if (thumbBtn) {
+        const idxAttr = thumbBtn.dataset.rvIdx;
+        const idx = idxAttr !== undefined ? Number(idxAttr) : NaN;
+        if (Number.isFinite(idx)) setViewingByIdx(root, state, idx);
+        return;
+      }
+      // versions modal の「この版を採用」 / Compare の「採用」ボタン -> openAdoptModal
+      const adoptBtn = target.closest<HTMLButtonElement>("[data-rv-adopt-page], [data-rv-adopt-panel]");
+      if (adoptBtn) {
+        const panelId = adoptBtn.dataset.rvAdoptPage ?? adoptBtn.dataset.rvAdoptPanel ?? "";
+        const chosenVersion = adoptBtn.dataset.rvAdoptVersion ?? "";
+        const imagePath = adoptBtn.dataset.rvAdoptPath ?? "";
+        const currentNote = state.manifest ? adoptedPanels(state.manifest)[panelId]?.note ?? "" : "";
+        const adoptedChoice = state.manifest ? adoptedPanels(state.manifest)[panelId] : undefined;
+        if (adoptedChoice?.chosen === chosenVersion) return; // 既に採用中なら無視
+        if (state.versionsModal) closeVersionsModal(root, state);
+        openAdoptModal(root, state, {
+          panel_id: panelId,
+          chosen_version: chosenVersion,
+          image_path: imagePath,
+          current_note: currentNote,
+        });
+        return;
+      }
+      // page card (page_one_shot) → version chooser modal を優先で開く
+      const pageShot = target.closest<HTMLElement>(".rv-page-shot");
+      if (pageShot) {
+        openVersionsModal(root, state, {
+          panel_id: pageShot.dataset.panelId ?? "",
+          page_no: Number(pageShot.dataset.pageNo),
+          current_image_path: pageShot.dataset.imagePath ?? "",
+          current_for_version: pageShot.dataset.forVersion ?? "v1",
+        });
+        return;
+      }
+      // panel_composite (panel grid) の従来動線: panel button → 修正指示 modal
       const panel = target.closest<HTMLElement>(".rv-panel");
       if (panel) {
         openRevisionModal(root, state, {
@@ -1368,18 +1570,6 @@ function bindStaticListeners(
         });
         return;
       }
-      const button = target.closest<HTMLButtonElement>("[data-rv-adopt-panel]");
-      if (!button) return;
-      const panelId = button.dataset.rvAdoptPanel ?? "";
-      const chosenVersion = button.dataset.rvAdoptVersion ?? "";
-      const imagePath = button.dataset.rvAdoptPath ?? "";
-      const currentNote = state.manifest ? adoptedPanels(state.manifest)[panelId]?.note ?? "" : "";
-      openAdoptModal(root, state, {
-        panel_id: panelId,
-        chosen_version: chosenVersion,
-        image_path: imagePath,
-        current_note: currentNote,
-      });
     },
     { signal }
   );
@@ -1399,11 +1589,10 @@ async function loadRevision(
 
   const state: ViewState = {
     manifest: null,
-    mode: "grid",
-    layer: "renders",
     filters: { failed: false, revised: false, notAdopted: false },
     modal: null,
     adoptModal: null,
+    versionsModal: null,
   };
   bindStaticListeners(root, state, slug, episode, signal, chains);
   try {
