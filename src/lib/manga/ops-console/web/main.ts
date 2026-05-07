@@ -19,7 +19,6 @@ import { mountQualityHubView } from "./views/quality-hub";
 import { mountRevisionEffectsView } from "./views/revision-effects";
 import { mountRevisionView } from "./views/revision";
 import { mountImprovementsView } from "./views/improvements";
-import { mountStoryboardView } from "./views/storyboard";
 import { mountTrademarkGateView } from "./views/trademark-gate";
 import { mountVolumePlotView } from "./views/volume-plot";
 import { mountVolumesView } from "./views/volumes";
@@ -46,7 +45,11 @@ function parseRoute(): { slug: string | null; episode: number | null; view: View
     return { slug, episode: 0, view };
   }
   const m = window.location.pathname.match(/^\/works\/([^/]+)\/episodes\/ep(\d+)\/?$/);
-  const hashView = window.location.hash.replace(/^#/, "");
+  let hashView = window.location.hash.replace(/^#/, "");
+  if (hashView === "storyboard") {
+    hashView = "name-gate";
+    history.replaceState(null, "", `${window.location.pathname}#name-gate`);
+  }
   // / (or 不明 path) の場合は scope なし → index view を初期表示。
   if (!m) {
     return { slug: null, episode: null, view: "index" };
@@ -120,7 +123,6 @@ function mountCurrentView(main: HTMLElement): () => void {
     else if (state.currentView === "quality-hub") unmount = mountQualityHubView(main);
     else if (state.currentView === "work-overview") unmount = mountWorkOverviewView(main);
     else if (state.currentView === "pipeline") unmount = mountPipelineView(main);
-    else if (state.currentView === "storyboard") unmount = mountStoryboardView(main);
     else if (state.currentView === "quality") unmount = mountQualityView(main);
     else if (state.currentView === "bible") unmount = mountBibleView(main);
     else if (state.currentView === "volume-plot") unmount = mountVolumePlotView(main);
@@ -213,6 +215,11 @@ async function start(): Promise<void> {
 
   window.addEventListener("hashchange", () => {
     const hashView = window.location.hash.replace(/^#/, "");
+    if (hashView === "storyboard") {
+      const route = parseRoute();
+      store.update({ currentSlug: route.slug ?? store.state.currentSlug, currentEpisode: route.episode ?? store.state.currentEpisode, currentView: route.view });
+      return;
+    }
     if (!isViewName(hashView)) return;
     const route = parseRoute();
     if (route.slug && route.episode === 0 && !WORK_SCOPE_VIEWS.has(hashView)) return;

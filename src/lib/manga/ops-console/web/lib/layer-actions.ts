@@ -1,6 +1,6 @@
 /**
  * 各 view の toolbar から共通利用される layer アクション (再実行 / AI で修正) ヘルパ。
- * pipeline view 以外の bible / volume-plot / kdp-metadata / quality / revision / storyboard / name-gate
+ * pipeline view 以外の bible / volume-plot / kdp-metadata / quality / revision / name-gate
  * すべての toolbar で同じ 2 ボタンを露出するために抽出。
  */
 import { apiPostJob, openJobStream, type JobStartRequest, type LayerId } from "./api";
@@ -10,7 +10,7 @@ import { openLaunchModal, type LaunchArgSpec } from "./launch-modal";
 import { openAiEditModal } from "../components/ai-edit-modal";
 
 /** Console から spawn 可能な layer。 server LAYER_REGISTRY と同期させる。 */
-const RUNNABLE = new Set<string>(["L01", "L01b", "L01c", "L02", "L02b", "L04_1", "L04_9", "L09", "L11", "L12", "L13"]);
+const RUNNABLE = new Set<string>(["L01", "L01b", "L01c", "L02", "L02b", "L04", "L04_1", "L04_9", "L08.5", "L09", "L11", "L12", "L13"]);
 
 export function isRunnableLayer(value: string | null | undefined): value is LayerId {
   return typeof value === "string" && RUNNABLE.has(value);
@@ -47,6 +47,7 @@ export function startRequest(
     const vol = Number(extras?.volume ?? 1);
     return { ...req, volume: Number.isFinite(vol) && vol > 0 ? vol : 1 };
   }
+  if (layer === "L04") return { ...req, episode, args: { "--from-scene-graph": "" } };
   return { ...req, episode };
 }
 
@@ -139,7 +140,7 @@ export async function spawnLayerWithModal(opts: {
 
 /**
  * 各 view の toolbar に挿し込む 2 ボタン HTML を返す。
- * 多 layer view (storyboard / revision 等) のために array 入力。
+ * 多 layer view (name-gate / revision 等) のために array 入力。
  */
 export function renderLayerActionButtons(
   layers: Array<{ id: LayerKey | string; label?: string }>,

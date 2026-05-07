@@ -423,7 +423,7 @@ function deriveNextStep(data: ImprovementsResponse): {
       primary: { label: "パイプライン進捗 view へ", action: "nav-pipeline" },
       secondary: [
         { label: "L11 audit を手動再実行", nav: "layers" },
-        { label: "ネーム原案 (storyboard) を確認", nav: "storyboard" },
+        { label: "ネームを確認", nav: "name-gate" },
       ],
     };
   }
@@ -920,7 +920,7 @@ export function mountImprovementsView(container: HTMLElement): () => void {
         const view = btn.dataset.view;
         if (view) {
           // store の ViewName 型に合致するもののみ受理。安全側で許容リスト方式。
-          const allowed = ["pipeline", "layers", "improvements", "storyboard", "quality"];
+          const allowed = ["pipeline", "layers", "improvements", "name-gate", "quality"];
           if (allowed.includes(view)) {
             store.update({ currentView: view as Parameters<typeof store.update>[0]["currentView"] });
           }

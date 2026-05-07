@@ -5,9 +5,11 @@ export type LayerId =
   | "L02"
   | "L02_audit"
   | "L02b"
+  | "L04"
   | "L04_1"
   | "L04_9"
   | "L05_5"
+  | "L08.5"
   | "L09"
   | "L11"
   | "L12"
@@ -103,6 +105,16 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
     ],
     timeoutMs: 10 * 60 * 1000,
   },
+  L04: {
+    script: "scripts/manga/layers/L04-storyboard.ts",
+    scope: "episode",
+    allowedFlags: [
+      { name: "--from-scene-graph", pattern: /^$/ },
+      { name: "--dry-run", pattern: /^$/ },
+      { name: "--enrich", pattern: /^$/ },
+    ],
+    timeoutMs: 30 * 60 * 1000,
+  },
   L04_1: {
     script: "scripts/manga/layers/L04-1-opening-hook.ts",
     scope: "episode",
@@ -127,6 +139,12 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
     scope: "episode",
     allowedFlags: [],
     timeoutMs: 20 * 60 * 1000,
+  },
+  "L08.5": {
+    script: "scripts/manga/layers/L08-5-name-preview.ts",
+    scope: "episode",
+    allowedFlags: [],
+    timeoutMs: 10 * 60 * 1000,
   },
   L09: {
     script: "scripts/manga/layers/L09-render.ts",
