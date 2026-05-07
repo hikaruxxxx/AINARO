@@ -23,30 +23,36 @@ export type LayerKey =
   | "L12"
   | "L13";
 
-export const LAYER_LABELS: Record<LayerKey, { title: string; subtitle: string }> = {
-  L01: { title: "世界観・キャラ設定 (Bible)", subtitle: "L01" },
-  L01b: { title: "Bible 監査 (Lint)", subtitle: "L01b Bible Lint" },
-  L01c: { title: "Bible 深掘り (Deepen)", subtitle: "L01c Bible Deepen" },
-  L02: { title: "参考画像 (初回バッチ・キャラ/背景)", subtitle: "L02 Bible Images" },
-  L02b: { title: "巻あらすじ・章構成 (Volume Plot)", subtitle: "L02b" },
-  L03: { title: "シーン分割 (Shotlist)", subtitle: "L03" },
-  L04: { title: "ネーム（構成データ）", subtitle: "L04 Storyboard" },
-  L04_1: { title: "オープニングフック改善", subtitle: "L04.1 Opening Hook" },
-  L04_9: { title: "クリフハンガー改善", subtitle: "L04.9 Cliffhanger" },
-  L05: { title: "ページ配置 (Page Plan)", subtitle: "L05" },
-  L06: { title: "整合性チェック (Continuity)", subtitle: "L06" },
-  L07: { title: "参照画像の自動選択 (Refs)", subtitle: "L07" },
-  L08: { title: "参考画像 (話別・不足分の追加生成)", subtitle: "L08 Incremental Refs" },
-  "L08.5": { title: "ネーム可視化 + ルール監査", subtitle: "L08.5 Name Preview + Audit" },
-  "L08.7": { title: "ネーム判定 (人間 a/r)", subtitle: "L08.7 Name Approval" },
-  L09: { title: "本番画像生成 (Render)", subtitle: "L09" },
-  L11: { title: "品質監査 (Audit)", subtitle: "L11" },
-  L12: { title: "修正再生成 (Repair)", subtitle: "L12" },
-  L13: { title: "KDP 入稿パッケージ", subtitle: "L13 KDP" },
+export type LayerInfo = { title: string; subtitle: string; hint?: string };
+
+export const LAYER_LABELS: Record<LayerKey, LayerInfo> = {
+  L01: { title: "世界観・キャラ設定 (Bible)", subtitle: "L01", hint: "世界観・キャラ・設定の Bible スナップショットを構築" },
+  L01b: { title: "Bible 監査 (Lint)", subtitle: "L01b Bible Lint", hint: "Bible Lint。命名・整合・必須欄の機械チェック" },
+  L01c: { title: "Bible 深掘り (Deepen)", subtitle: "L01c Bible Deepen", hint: "Bible Deepen。Bible に深さを足す再生成" },
+  L02: { title: "参考画像 (初回バッチ・キャラ/背景)", subtitle: "L02 Bible Images", hint: "Bible refs (キャラ画像・場所画像など参照素材) を生成" },
+  L02b: { title: "巻あらすじ・章構成 (Volume Plot)", subtitle: "L02b", hint: "巻あらすじ・章構成・登場キャラの巻プロットを生成" },
+  L03: { title: "シーン分割 (Shotlist)", subtitle: "L03", hint: "エピソードのシーン・テンポ・shotlist を計画" },
+  L04: { title: "ネーム（構成データ）", subtitle: "L04 Storyboard", hint: "scene_graph + bible から storyboard (panel 単位ネーム) を構築" },
+  L04_1: { title: "オープニングフック改善", subtitle: "L04.1 Opening Hook", hint: "Opening Hook (冒頭の引き) を補強" },
+  L04_9: { title: "クリフハンガー改善", subtitle: "L04.9 Cliffhanger", hint: "Cliffhanger (末尾の引き) を補強" },
+  L05: { title: "ページ配置 (Page Plan)", subtitle: "L05", hint: "Page Director: 紙面 layout (rect / importance) を割り当て" },
+  L06: { title: "整合性チェック (Continuity)", subtitle: "L06", hint: "Continuity Resolve: 連続性グループを panel に注入" },
+  L07: { title: "参照画像の自動選択 (Refs)", subtitle: "L07", hint: "Refs Resolution: 各 panel に必要な参照画像を解決" },
+  L08: { title: "参考画像 (話別・不足分の追加生成)", subtitle: "L08 Incremental Refs", hint: "不足 refs を作品単位で追加生成" },
+  "L08.5": { title: "ネーム可視化 + ルール監査", subtitle: "L08.5 Name Preview + Audit", hint: "Name Preview: SVG ネームと audit を生成" },
+  "L08.7": { title: "ネーム判定 (人間 a/r)", subtitle: "L08.7 Name Approval", hint: "Name Approval: SVG ネームを a/r/p で人間判定" },
+  L09: { title: "本番画像生成 (Render)", subtitle: "L09", hint: "Render: page_one_shot で page 画像を生成" },
+  L11: { title: "品質監査 (Audit)", subtitle: "L11", hint: "Audit: 顔一貫性・吹き出し重なり等の品質監査" },
+  L12: { title: "修正再生成 (Repair)", subtitle: "L12", hint: "Repair: 失敗 panel を再実行する修復 layer" },
+  L13: { title: "KDP 入稿パッケージ", subtitle: "L13 KDP", hint: "KDP Package: 巻全体を入稿用 PDF にパッケージ" },
 };
 
-export function layerLabel(id: string): { title: string; subtitle: string } {
+export function layerLabel(id: string): LayerInfo {
   return LAYER_LABELS[id as LayerKey] ?? { title: id, subtitle: "" };
+}
+
+export function layerHint(id: string): string {
+  return layerLabel(id).hint ?? `${layerLabel(id).title}: 生成物と進捗を確認する layer`;
 }
 
 /**

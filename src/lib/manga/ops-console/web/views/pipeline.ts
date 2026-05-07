@@ -8,7 +8,7 @@ import {
   type PipelineStatusLayer,
 } from "../lib/api";
 import { isViewName, store } from "../lib/store";
-import { layerLabel, resolveAiEditHint } from "../labels";
+import { layerHint, layerLabel, resolveAiEditHint } from "../labels";
 import { isRunnableLayer, navigateToAiEdit, spawnLayerWithModal } from "../lib/layer-actions";
 
 type HintMap = Map<string, string>;
@@ -139,19 +139,20 @@ function renderLayer(layer: PipelineStatusLayer, state: ViewState): string {
   const runnable = isRunnableLayer(layer.next_layer_id ?? null) ? layer.next_layer_id : "";
   const ts = formatTs(layer.last_modified);
   const label = layerLabel(layer.id);
+  const title = layerHint(layer.id);
   const aiHint = resolveAiEditHint(layer.id, { slug: state.slug, episode: state.episode });
   const rerunLabel = layer.status === "ready" ? "再実行" : "生成";
   const rerunBtn = runnable
-    ? `<button type="button" class="nc-button nc-button--primary nc-button--sm" data-rerun-layer="${escapeHtml(runnable)}" data-current-status="${escapeHtml(layer.status)}" ${running ? "disabled" : ""}>${running ? "起動中" : rerunLabel}</button>`
+    ? `<button type="button" class="nc-button nc-button--primary nc-button--sm" data-rerun-layer="${escapeHtml(runnable)}" data-current-status="${escapeHtml(layer.status)}" title="${escapeHtml(title)}" ${running ? "disabled" : ""}>${running ? "起動中" : rerunLabel}</button>`
     : `<button type="button" class="nc-button nc-button--sm" data-locked="cli" disabled title="${escapeHtml(`${layer.id} は CLI から起動してください (例: npx tsx scripts/manga/layers/${layer.id}-...ts --slug ${state.slug} --episode ${state.episode})`)}">CLI のみ</button>`;
   const openBtn = nextView
-    ? `<button type="button" class="nc-button nc-button--secondary nc-button--sm" data-next-view="${escapeHtml(nextView)}">開く</button>`
+    ? `<button type="button" class="nc-button nc-button--secondary nc-button--sm" data-next-view="${escapeHtml(nextView)}" title="${escapeHtml(title)}">開く</button>`
     : "";
   const aiBtn = aiHint
     ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ai-edit-layer="${escapeHtml(layer.id)}" title="AI 編集 view へ遷移し、${escapeHtml(layer.id)} の context を prefill します">AI で修正</button>`
     : "";
   return `
-    <li class="pipe-step${current}">
+    <li class="pipe-step${current}" title="${escapeHtml(title)}">
       <div class="pipe-step__head">
         <div class="pipe-step__id-block">
           <span class="pipe-step__id">${escapeHtml(label.subtitle)}</span>

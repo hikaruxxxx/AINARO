@@ -45,6 +45,10 @@ const CSS = `
 .idx-modal-head { display:flex; align-items:center; gap:var(--space-2); }
 .idx-modal-title { margin:0; font-size:var(--fs-xl); }
 .idx-actions { display:flex; justify-content:flex-end; gap:var(--space-2); }
+.idx-help-btn { min-width:32px; min-height:32px; padding:0; border-radius:999px; }
+.idx-glossary dl { display:grid; gap:10px; margin:0; }
+.idx-glossary dt { font-weight:700; color:var(--text-primary); }
+.idx-glossary dd { margin:2px 0 0; color:var(--text-secondary); line-height:1.6; }
 .idx-next-actions { display:grid; gap:var(--space-2); }
 .idx-next-list { display:grid; gap:10px; }
 .idx-next-card { display:grid; grid-template-columns:auto minmax(0, 1fr) auto; gap:12px; align-items:center; padding:14px; border:1px solid var(--border-subtle); background:var(--surface-elevated); border-radius:8px; }
@@ -76,6 +80,7 @@ const CSS = `
 
 type ViewState = {
   modalOpen: boolean;
+  glossaryOpen: boolean;
   creating: boolean;
   dashboard: DashboardData | null;
   dashboardLoading: boolean;
@@ -350,6 +355,30 @@ function renderModal(state: ViewState): string {
     </div>`;
 }
 
+function renderGlossaryModal(state: ViewState): string {
+  if (!state.glossaryOpen) return "";
+  const rows = [
+    ["ホーム", "開いた瞬間の「次の一手」と全作品スナップショット。停滞を検知。"],
+    ["棚卸し", "全作品の進捗とジョブ履歴を俯瞰、停滞作品を発見する場所。"],
+    ["判定する", "ネーム a/r/p、修正・採用、品質監査、品質改善のループを回す場所。"],
+    ["中身を見る", "Bible・巻プロット・ネーム原案・作品概要などの閲覧。"],
+    ["公開する", "巻管理 (KDP)・KDPメタ・商標 IP チェック。AI 編集はここから困ったとき逃げ込む口。"],
+  ];
+  return `
+    <div class="nc-modal is-open" id="idx-glossary-modal" data-action="close-glossary">
+      <div class="nc-modal__card nc-modal__card--md idx-modal-body idx-glossary" role="dialog" aria-modal="true" aria-labelledby="idx-glossary-title">
+        <div class="idx-modal-head">
+          <h3 class="idx-modal-title" id="idx-glossary-title">用語ヒント</h3>
+          <span class="idx-spacer"></span>
+          <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-action="close-glossary">閉じる</button>
+        </div>
+        <dl>
+          ${rows.map(([term, detail]) => `<div><dt>${escapeHtml(term)}</dt><dd>${escapeHtml(detail)}</dd></div>`).join("")}
+        </dl>
+      </div>
+    </div>`;
+}
+
 function render(container: HTMLElement, works: WorkInfo[], state: ViewState): void {
   const favorites = store.state.favorites
     .map((entry) => renderScopeCard(entry.slug, entry.episode, entry.label || workTitle(entry.slug)))
@@ -361,6 +390,7 @@ function render(container: HTMLElement, works: WorkInfo[], state: ViewState): vo
   const head = `
     <div class="idx-head">
       <h2>ホーム</h2>
+      <button type="button" class="nc-button nc-button--ghost idx-help-btn" data-action="show-glossary" title="用語ヒント">？</button>
       <span class="idx-spacer"></span>
       <button type="button" class="nc-button nc-button--ghost" data-action="reload-dashboard">更新</button>
       <button type="button" class="nc-button nc-button--primary" data-action="new-work">+ 新規作品</button>
@@ -374,6 +404,7 @@ function render(container: HTMLElement, works: WorkInfo[], state: ViewState): vo
         <div class="idx-empty">data/manga/works/ 配下に作品がありません。</div>
       </div>
       ${renderModal(state)}
+      ${renderGlossaryModal(state)}
       ${state.toast ? `<div class="nc-toast nc-toast--${state.toast.kind}">${escapeHtml(state.toast.message)}</div>` : ""}
     `;
     return;
@@ -396,6 +427,7 @@ function render(container: HTMLElement, works: WorkInfo[], state: ViewState): vo
       </section>
     </div>
     ${renderModal(state)}
+    ${renderGlossaryModal(state)}
     ${state.toast ? `<div class="nc-toast nc-toast--${state.toast.kind}">${escapeHtml(state.toast.message)}</div>` : ""}
   `;
 }
@@ -413,7 +445,7 @@ function setToast(state: ViewState, container: HTMLElement, message: string, kin
 export function mountIndexView(container: HTMLElement): () => void {
   ensureStyles();
   const controller = new AbortController();
-  const state: ViewState = { modalOpen: false, creating: false, dashboard: null, dashboardLoading: false, toast: null };
+  const state: ViewState = { modalOpen: false, glossaryOpen: false, creating: false, dashboard: null, dashboardLoading: false, toast: null };
 
   const renderFromState = () => render(container, store.state.works, state);
   const loadDashboard = () => {
@@ -443,6 +475,18 @@ export function mountIndexView(container: HTMLElement): () => void {
       const action = target.closest<HTMLButtonElement>("[data-action]")?.dataset.action;
       if (action === "new-work") {
         state.modalOpen = true;
+        renderFromState();
+        return;
+      }
+      if (action === "show-glossary") {
+        state.glossaryOpen = true;
+        renderFromState();
+        return;
+      }
+      if (action === "close-glossary") {
+        const card = target.closest(".nc-modal__card");
+        if (card && !target.closest<HTMLButtonElement>("[data-action='close-glossary']")) return;
+        state.glossaryOpen = false;
         renderFromState();
         return;
       }
