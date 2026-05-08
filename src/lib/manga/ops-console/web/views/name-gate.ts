@@ -1,5 +1,6 @@
 import {
   ApiError,
+  apiGetManifest,
   apiGetNameApproval,
   apiGetNameManifest,
   apiPostNameApproval,
@@ -15,6 +16,13 @@ import type {
   NameRejectReason,
   NameWarning,
 } from "../../../name-preview/types";
+import type { PagePlanPage } from "../../../schemas-v2";
+
+type NamePage = NameManifest["pages"][number];
+
+type PageUnit =
+  | { kind: "single"; page: NamePage }
+  | { kind: "spread"; left: NamePage; right: NamePage };
 
 type DecisionDraft = {
   status: NamePageStatus;
@@ -57,8 +65,16 @@ const NAME_GATE_CSS = `
 .ng-kpi--approved { background: #d1fae5; color: #065f46; }
 .ng-kpi--rejected { background: #fee2e2; color: #991b1b; }
 .name-gate-toolbar strong { font-weight: 700; }
-.name-gate-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px; }
+.name-gate-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 0;
+  row-gap: 16px;
+  direction: rtl;
+  max-width: 1400px;
+}
 .name-gate-container .page-card {
+  direction: ltr;
   background: #fff;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -66,6 +82,17 @@ const NAME_GATE_CSS = `
   outline: none;
   transition: border-color .12s, box-shadow .12s;
 }
+.name-gate-container .page-card.is-spread {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  direction: rtl;
+  column-gap: 0;
+  row-gap: 10px;
+}
+.name-gate-container .page-card.is-spread .page-card-inner { direction: ltr; padding: 0 8px; }
+.name-gate-container .page-card.is-spread .spread-decision { grid-column: 1 / -1; direction: ltr; padding: 8px 8px 0; border-top: 1px solid #e5e7eb; }
+.name-gate-container .page-card.is-spread .spread-note { color: #64748b; font-size: 12px; }
 .name-gate-container .page-card:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.18); }
 .name-gate-container .page-card.ng-page--focused { outline: 2px solid var(--color-primary); outline-offset: 3px; }
 .name-gate-container .page-card.approved { border-color: #16a34a; }
@@ -190,28 +217,104 @@ function warningHtml(warnings: NameWarning[], findings: NameAuditFindingLite[]):
     .join("");
 }
 
-function renderPageCards(manifest: NameManifest, episode: number): string {
-  return manifest.pages
-    .map((page) => {
-      const reasons = REASONS.map(
-        (reason) =>
-          `<label><input type="checkbox" data-reason="${reason.key}"> ${escapeHtml(reason.label)}</label>`
-      ).join("");
-      return `<article class="page-card" data-page-no="${page.page_no}" tabindex="0" id="page-${page.page_no}">
+function shouldStartSpread(
+  page: NamePage,
+  nextPage: NamePage | undefined,
+  planPages: Map<number, PagePlanPage>
+): boolean {
+  if (!nextPage) return false;
+  const planPage = planPages.get(page.page_no);
+  if (planPage?.is_spread === true) return true;
+  // Heuristic spread detection is intentionally disabled for Phase A to keep
+  // existing episodes without is_spread page-plan flags as single-page units.
+  return false;
+}
+
+function groupPagesIntoUnits(pages: NamePage[], planPages: Map<number, PagePlanPage>): PageUnit[] {
+  const units: PageUnit[] = [];
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
+    const nextPage = pages[i + 1];
+    if (shouldStartSpread(page, nextPage, planPages)) {
+      units.push({ kind: "spread", left: page, right: nextPage });
+      i++;
+      continue;
+    }
+    units.push({ kind: "single", page });
+  }
+  return units;
+}
+
+function pageUnitPageNos(unit: PageUnit): number[] {
+  return unit.kind === "spread" ? [unit.left.page_no, unit.right.page_no] : [unit.page.page_no];
+}
+
+function unitRepresentativePageNo(unit: PageUnit): number {
+  return pageUnitPageNos(unit)[0] ?? 1;
+}
+
+function renderReasonInputs(): string {
+  return REASONS.map(
+    (reason) =>
+      `<label><input type="checkbox" data-reason="${reason.key}"> ${escapeHtml(reason.label)}</label>`
+  ).join("");
+}
+
+function renderPageInner(page: NamePage, episode: number): string {
+  return `<div class="page-card-inner">
   <header>
     <span class="page-no">P.${page.page_no}</span>
     <span class="page-role">[${escapeHtml(page.page_role)}]</span>
     <span class="panel-count">${page.panel_count}コマ</span>
-    <span class="status status-pending" data-page-status="${page.page_no}">pending</span>
   </header>
   <div class="svg-wrap"><img src="${escapeHtml(legacySvgPath(episode, page.svg_filename))}" alt="page ${page.page_no} preview"></div>
   <div class="warnings">${warningHtml(page.warnings ?? [], page.audit_findings ?? [])}</div>
-  <div class="reasons" data-page-reasons="${page.page_no}">${reasons}</div>
-  <textarea class="note" placeholder="(任意) note" data-page-note="${page.page_no}"></textarea>
+</div>`;
+}
+
+function renderDecisionControls(pageNo: number, spread: boolean): string {
+  const spreadNote = spread ? `<div class="spread-note">見開き判定: 理由・note・a/r/p は両ページに同時適用</div>` : "";
+  return `${spreadNote}
+  <div class="reasons" data-page-reasons="${pageNo}">${renderReasonInputs()}</div>
+  <textarea class="note" placeholder="(任意) note" data-page-note="${pageNo}"></textarea>
   <div class="page-actions">
-    <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-status="approved" data-page="${page.page_no}">承認</button>
-    <button type="button" class="nc-button nc-button--danger nc-button--sm" data-ng-status="rejected" data-page="${page.page_no}">却下</button>
-    <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-status="pending" data-page="${page.page_no}">未判定</button>
+    <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-status="approved" data-page="${pageNo}">承認</button>
+    <button type="button" class="nc-button nc-button--danger nc-button--sm" data-ng-status="rejected" data-page="${pageNo}">却下</button>
+    <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-status="pending" data-page="${pageNo}">未判定</button>
+  </div>`;
+}
+
+function renderPageCards(units: PageUnit[], episode: number): string {
+  return units
+    .map((unit) => {
+      const pageNos = pageUnitPageNos(unit);
+      const representativePageNo = unitRepresentativePageNo(unit);
+      const unitPages = pageNos.join(" ");
+      const status = `<span class="status status-pending" data-unit-status="${pageNos.join(",")}">pending</span>`;
+      if (unit.kind === "single") {
+        return `<article class="page-card" data-page-no="${representativePageNo}" data-unit-pages="${unitPages}" tabindex="0" id="page-${representativePageNo}">
+  <header>
+    <span class="page-no">P.${unit.page.page_no}</span>
+    <span class="page-role">[${escapeHtml(unit.page.page_role)}]</span>
+    <span class="panel-count">${unit.page.panel_count}コマ</span>
+    ${status}
+  </header>
+  <div class="svg-wrap"><img src="${escapeHtml(legacySvgPath(episode, unit.page.svg_filename))}" alt="page ${unit.page.page_no} preview"></div>
+  <div class="warnings">${warningHtml(unit.page.warnings ?? [], unit.page.audit_findings ?? [])}</div>
+  ${renderDecisionControls(representativePageNo, false)}
+</article>`;
+      }
+      return `<article class="page-card is-spread" data-page-no="${representativePageNo}" data-unit-pages="${unitPages}" tabindex="0" id="page-${representativePageNo}">
+  ${renderPageInner(unit.left, episode)}
+  ${renderPageInner(unit.right, episode)}
+  <div class="spread-decision">
+    <header>
+      <span class="page-no">P.${unit.left.page_no}+P.${unit.right.page_no}</span>
+      <span class="page-role">[spread]</span>
+      <span class="panel-count">${unit.left.panel_count + unit.right.panel_count}コマ</span>
+      ${status}
+    </header>
+    ${renderDecisionControls(representativePageNo, true)}
   </div>
 </article>`;
     })
@@ -225,6 +328,7 @@ function emptyDecision(): DecisionDraft {
 function renderShell(
   container: HTMLElement,
   manifest: NameManifest,
+  units: PageUnit[],
   slug: string,
   episode: number
 ): void {
@@ -254,7 +358,7 @@ function renderShell(
       </div>
       <section class="ng-section" aria-labelledby="ng-approval-title">
         <h3 class="ng-section-title" id="ng-approval-title">判定</h3>
-      <div class="name-gate-grid" id="ng-grid">${renderPageCards(manifest, episode)}</div>
+      <div class="name-gate-grid" id="ng-grid">${renderPageCards(units, episode)}</div>
       </section>
       <div id="ng-overlay-root"></div>
     </div>
@@ -280,14 +384,45 @@ function refreshSummary(container: HTMLElement, decisions: Map<number, DecisionD
   setCounter(container, "#ng-cnt-pending", pending);
 }
 
-function refreshCard(container: HTMLElement, pageNo: number, decision: DecisionDraft): void {
-  const card = container.querySelector<HTMLElement>(`[data-page-no="${pageNo}"]`);
-  const status = container.querySelector<HTMLElement>(`[data-page-status="${pageNo}"]`);
+function unitPageNosFromCard(card: HTMLElement): number[] {
+  return (card.dataset.unitPages ?? card.dataset.pageNo ?? "")
+    .split(/\s+/)
+    .map((value) => Number(value))
+    .filter((value) => Number.isInteger(value));
+}
+
+function statusLabel(status: NamePageStatus): string {
+  return status === "approved" ? "ok" : status === "rejected" ? "reject" : "pending";
+}
+
+function refreshCard(
+  container: HTMLElement,
+  pageNo: number,
+  decision: DecisionDraft,
+  decisions?: Map<number, DecisionDraft>
+): void {
+  const card =
+    container.querySelector<HTMLElement>(`[data-unit-pages~="${pageNo}"]`) ??
+    container.querySelector<HTMLElement>(`[data-page-no="${pageNo}"]`);
+  const status = card?.querySelector<HTMLElement>("[data-unit-status]");
   if (!card || !status) return;
-  status.className = `status status-${decision.status}`;
-  status.innerHTML = `${decision.status}${decision.persistFailed ? '<span class="persist-error">(persist failed)</span>' : ""}`;
-  card.classList.toggle("approved", decision.status === "approved");
-  card.classList.toggle("rejected", decision.status === "rejected");
+  const pageNos = unitPageNosFromCard(card);
+  const unitDecisions = decisions
+    ? pageNos.map((unitPageNo) => decisions.get(unitPageNo)).filter((d): d is DecisionDraft => Boolean(d))
+    : [decision];
+  const statuses = new Set(unitDecisions.map((d) => d.status));
+  const persistFailed = unitDecisions.some((d) => d.persistFailed);
+  const displayStatus = statuses.size === 1 ? unitDecisions[0]?.status ?? decision.status : "pending";
+  status.className = `status status-${displayStatus}`;
+  if (statuses.size > 1 && decisions) {
+    status.innerHTML = `split (${pageNos
+      .map((unitPageNo) => `P${unitPageNo} ${statusLabel(decisions.get(unitPageNo)?.status ?? "pending")}`)
+      .join(" / ")})${persistFailed ? '<span class="persist-error">(persist failed)</span>' : ""}`;
+  } else {
+    status.innerHTML = `${displayStatus}${persistFailed ? '<span class="persist-error">(persist failed)</span>' : ""}`;
+  }
+  card.classList.toggle("approved", statuses.size === 1 && displayStatus === "approved");
+  card.classList.toggle("rejected", statuses.size === 1 && displayStatus === "rejected");
 }
 
 function applyDecisionToInputs(
@@ -397,10 +532,17 @@ function setFocus(cards: HTMLElement[], pageNo: number): number {
   return pageNo;
 }
 
-function firstPendingOrFirst(manifest: NameManifest, decisions: Map<number, DecisionDraft>): number {
-  return manifest.pages.find((page) => decisions.get(page.page_no)?.status === "pending")?.page_no
-    ?? manifest.pages[0]?.page_no
-    ?? 1;
+function unitHasPending(unit: PageUnit, decisions: Map<number, DecisionDraft>): boolean {
+  return pageUnitPageNos(unit).some((pageNo) => decisions.get(pageNo)?.status === "pending");
+}
+
+function firstPendingOrFirst(units: PageUnit[], decisions: Map<number, DecisionDraft>): number {
+  const pending = units.find((unit) => unitHasPending(unit, decisions));
+  return pending
+    ? unitRepresentativePageNo(pending)
+    : units[0]
+      ? unitRepresentativePageNo(units[0])
+      : 1;
 }
 
 function nextPendingPage(cards: HTMLElement[], currentPageNo: number, decisions: Map<number, DecisionDraft>): number {
@@ -409,12 +551,14 @@ function nextPendingPage(cards: HTMLElement[], currentPageNo: number, decisions:
   if (currentIndex < 0) return currentPageNo;
   for (let offset = 1; offset < pageNos.length; offset++) {
     const pageNo = pageNos[(currentIndex + offset) % pageNos.length];
-    if (decisions.get(pageNo)?.status === "pending") return pageNo;
+    const card = cards.find((candidate) => Number(candidate.dataset.pageNo) === pageNo);
+    const unitPageNos = card ? unitPageNosFromCard(card) : [pageNo];
+    if (unitPageNos.some((unitPageNo) => decisions.get(unitPageNo)?.status === "pending")) return pageNo;
   }
   return currentPageNo;
 }
 
-function adjacentPage(cards: HTMLElement[], currentPageNo: number, delta: number): number {
+function adjacentUnit(cards: HTMLElement[], currentPageNo: number, delta: number): number {
   const index = cards.findIndex((card) => Number(card.dataset.pageNo) === currentPageNo);
   if (index < 0) return currentPageNo;
   const next = cards[index + delta];
@@ -435,7 +579,7 @@ function applyApproval(
     decision.note = value.note ?? "";
     decision.persistFailed = false;
     applyDecisionToInputs(container, pageNo, decision);
-    refreshCard(container, pageNo, decision);
+    refreshCard(container, pageNo, decision, decisions);
   }
   refreshSummary(container, decisions);
 }
@@ -468,10 +612,12 @@ async function doPersist(
 ): Promise<void> {
   const decision = decisions.get(pageNo);
   if (!decision) return;
-  decision.reasons = readReasons(container, pageNo);
-  decision.note = readNote(container, pageNo);
+  if (container.querySelector(`[data-page-reasons="${pageNo}"]`)) {
+    decision.reasons = readReasons(container, pageNo);
+    decision.note = readNote(container, pageNo);
+  }
   decision.persistFailed = false;
-  refreshCard(container, pageNo, decision);
+  refreshCard(container, pageNo, decision, decisions);
 
   try {
     await apiPostNameApproval(slug, episode, {
@@ -482,7 +628,7 @@ async function doPersist(
     });
   } catch (e) {
     decision.persistFailed = true;
-    refreshCard(container, pageNo, decision);
+    refreshCard(container, pageNo, decision, decisions);
     if (e instanceof ApiError) console.warn("name-gate persist failed", e.status, e.body);
     else console.warn("name-gate persist failed", e);
   }
@@ -520,13 +666,18 @@ async function loadNameGate(
   container.innerHTML = `<div class="view-placeholder"><h2>ネーム</h2><p>loading...</p></div>`;
 
   try {
-    const [manifest, approval] = await Promise.all([
+    const [manifest, approval, consoleManifest] = await Promise.all([
       apiGetNameManifest(slug, episode),
       apiGetNameApproval(slug, episode),
+      apiGetManifest(slug, episode),
     ]);
     if (signal.aborted) return;
 
-    renderShell(container, manifest, slug, episode);
+    const planPages = new Map<number, PagePlanPage>(
+      consoleManifest.page_plan.pages.map((page) => [page.page_no, page])
+    );
+    const units = groupPagesIntoUnits(manifest.pages, planPages);
+    renderShell(container, manifest, units, slug, episode);
     const decisions = new Map<number, DecisionDraft>();
     for (const page of manifest.pages) decisions.set(page.page_no, emptyDecision());
     const cards = Array.from(container.querySelectorAll<HTMLElement>("article.page-card"));
@@ -546,23 +697,50 @@ async function loadNameGate(
       if (next !== focusedPageNo) focusPage(next);
     };
 
-    const persistAndAdvance = (pageNo: number): void => {
-      const decision = decisions.get(pageNo);
-      if (!decision) return;
-      refreshCard(container, pageNo, decision);
+    const pageNosForUnit = (pageNo: number): number[] => {
+      const card =
+        container.querySelector<HTMLElement>(`[data-unit-pages~="${pageNo}"]`) ??
+        container.querySelector<HTMLElement>(`[data-page-no="${pageNo}"]`);
+      const pageNos = card ? unitPageNosFromCard(card) : [pageNo];
+      return pageNos.length > 0 ? pageNos : [pageNo];
+    };
+
+    const syncUnitDraft = (
+      pageNo: number,
+      status: NamePageStatus,
+      reasons: NameRejectReason[],
+      note: string
+    ): number[] => {
+      const pageNos = pageNosForUnit(pageNo);
+      for (const unitPageNo of pageNos) {
+        const decision = decisions.get(unitPageNo);
+        if (!decision) continue;
+        decision.status = status;
+        decision.reasons = [...reasons];
+        decision.note = note;
+        decision.persistFailed = false;
+      }
+      for (const unitPageNo of pageNos) {
+        const decision = decisions.get(unitPageNo);
+        if (decision) refreshCard(container, unitPageNo, decision, decisions);
+      }
       refreshSummary(container, decisions);
-      void persistDecision(container, slug, episode, pageNo, decisions);
+      return pageNos;
+    };
+
+    const persistUnitAndAdvance = (pageNos: number[]): void => {
+      void Promise.all(pageNos.map((unitPageNo) => persistDecision(container, slug, episode, unitPageNo, decisions)));
       advanceToNextPending();
     };
 
     const setStatus = (pageNo: number, status: NamePageStatus): void => {
-      const decision = decisions.get(pageNo);
-      if (!decision) return;
-      decision.status = status;
-      if (status !== "rejected") decision.reasons = [];
-      decision.persistFailed = false;
-      applyDecisionToInputs(container, pageNo, decision);
-      persistAndAdvance(pageNo);
+      const current = decisions.get(pageNo);
+      if (!current) return;
+      const reasons = status === "rejected" ? current.reasons : [];
+      const note = current.note;
+      const pageNos = syncUnitDraft(pageNo, status, reasons, note);
+      applyDecisionToInputs(container, pageNo, current);
+      persistUnitAndAdvance(pageNos);
     };
 
     const openRejectModal = (pageNo: number): void => {
@@ -576,16 +754,12 @@ async function loadNameGate(
     const confirmRejectModal = (): void => {
       if (rejectPageNo === null) return;
       const pageNo = rejectPageNo;
+      const pageNos = syncUnitDraft(pageNo, "rejected", modalReasons(container), modalNote(container));
       const decision = decisions.get(pageNo);
-      if (!decision) return;
-      decision.status = "rejected";
-      decision.reasons = modalReasons(container);
-      decision.note = modalNote(container);
-      decision.persistFailed = false;
-      applyDecisionToInputs(container, pageNo, decision);
+      if (decision) applyDecisionToInputs(container, pageNo, decision);
       closeRejectModal(container);
       rejectPageNo = null;
-      persistAndAdvance(pageNo);
+      persistUnitAndAdvance(pageNos);
     };
 
     const cancelRejectModal = (): void => {
@@ -624,10 +798,9 @@ async function loadNameGate(
             () => {
               const decision = decisions.get(pageNo);
               if (!decision) return;
-              if (decision.status === "pending") decision.status = "rejected";
-              void persistDecision(container, slug, episode, pageNo, decisions);
-              refreshCard(container, pageNo, decision);
-              refreshSummary(container, decisions);
+              const status = decision.status === "pending" ? "rejected" : decision.status;
+              const pageNos = syncUnitDraft(pageNo, status, readReasons(container, pageNo), readNote(container, pageNo));
+              void Promise.all(pageNos.map((unitPageNo) => persistDecision(container, slug, episode, unitPageNo, decisions)));
             },
             { signal }
           );
@@ -636,7 +809,12 @@ async function loadNameGate(
         .querySelector<HTMLTextAreaElement>(`[data-page-note="${pageNo}"]`)
         ?.addEventListener(
           "change",
-          () => void persistDecision(container, slug, episode, pageNo, decisions),
+          () => {
+            const decision = decisions.get(pageNo);
+            if (!decision) return;
+            const pageNos = syncUnitDraft(pageNo, decision.status, readReasons(container, pageNo), readNote(container, pageNo));
+            void Promise.all(pageNos.map((unitPageNo) => persistDecision(container, slug, episode, unitPageNo, decisions)));
+          },
           { signal }
         );
     });
@@ -744,11 +922,11 @@ async function loadNameGate(
           setStatus(focusedPageNo, "pending");
           event.preventDefault();
         } else if (event.key === "ArrowDown" || event.key === "j") {
-          focusPage(adjacentPage(cards, focusedPageNo, 1));
+          focusPage(adjacentUnit(cards, focusedPageNo, 1));
           event.preventDefault();
           return;
         } else if (event.key === "ArrowUp" || event.key === "k") {
-          focusPage(adjacentPage(cards, focusedPageNo, -1));
+          focusPage(adjacentUnit(cards, focusedPageNo, -1));
           event.preventDefault();
           return;
         } else if (event.key === "Enter") {
@@ -762,7 +940,7 @@ async function loadNameGate(
       { signal }
     );
 
-    focusedPageNo = firstPendingOrFirst(manifest, decisions);
+    focusedPageNo = firstPendingOrFirst(units, decisions);
     if (cards[0]) {
       requestAnimationFrame(() => {
         if (!signal.aborted) focusPage(focusedPageNo);

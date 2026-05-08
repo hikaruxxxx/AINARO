@@ -573,6 +573,8 @@ export type PagePlanPage = {
   page_role: PageRoleV2;
   render_strategy: RenderStrategy;
   panels: PagePlanPanel[];
+  /** Phase 2A: name-gate UI で次ページと見開き 1 unit として扱う */
+  is_spread?: boolean;
   /** F-2 page_one_shot 用 */
   page_continuity_group_ids?: string[];
 };
