@@ -21,7 +21,7 @@ import {
   type JobEvent,
   type LayerId,
 } from "../lib/api";
-import type { CoreHookV2 } from "../../../schemas-v2";
+import type { CoreHookV2, RewardMode } from "../../../schemas-v2";
 import {
   asKeyValueTable,
   asList,
@@ -200,6 +200,10 @@ type CoreHookDraft = {
   one_liner: string;
   type: CoreHookV2["type"];
   hit_references: string[];
+  mechanic: string;
+  reader_question: string;
+  reward_mode: RewardMode | "";
+  custom_reward_mode: string;
 };
 
 type ViewState = {
@@ -926,6 +930,22 @@ const CORE_HOOK_TYPE_LABELS: Record<CoreHookV2["type"], string> = {
   C: "視点ずらし",
 };
 
+const CORE_HOOK_REWARD_MODE_LABELS: Array<{ value: RewardMode | ""; label: string }> = [
+  { value: "", label: "未設定" },
+  { value: "reveal", label: "reveal / 秘密開示" },
+  { value: "intimacy", label: "intimacy / 関係進展" },
+  { value: "power_growth", label: "power_growth / 能力成長" },
+  { value: "justice", label: "justice / ざまぁ・正義" },
+  { value: "spectacle", label: "spectacle / 見世物性" },
+  { value: "comfort", label: "comfort / 安心・生活感" },
+  { value: "mystery_progress", label: "mystery_progress / 謎の進展" },
+  { value: "custom", label: "custom / カスタム" },
+];
+
+function isRewardMode(value: unknown): value is RewardMode {
+  return CORE_HOOK_REWARD_MODE_LABELS.some((item) => item.value === value && item.value !== "");
+}
+
 function asCoreHook(value: unknown): CoreHookV2 | null {
   const obj = asRecord(value);
   if (
@@ -938,6 +958,10 @@ function asCoreHook(value: unknown): CoreHookV2 | null {
       one_liner: obj.one_liner,
       type: obj.type,
       hit_references: obj.hit_references,
+      mechanic: typeof obj.mechanic === "string" ? obj.mechanic : undefined,
+      reader_question: typeof obj.reader_question === "string" ? obj.reader_question : undefined,
+      reward_mode: isRewardMode(obj.reward_mode) ? obj.reward_mode : undefined,
+      custom_reward_mode: typeof obj.custom_reward_mode === "string" ? obj.custom_reward_mode : undefined,
     };
   }
   return null;
@@ -952,6 +976,10 @@ function createCoreHookDraft(coreHook: CoreHookV2 | null): CoreHookDraft {
     one_liner: coreHook?.one_liner ?? "",
     type: coreHook?.type ?? "A",
     hit_references: coreHook?.hit_references.length ? coreHook.hit_references.slice(0, 3) : [""],
+    mechanic: coreHook?.mechanic ?? "",
+    reader_question: coreHook?.reader_question ?? "",
+    reward_mode: coreHook?.reward_mode ?? "",
+    custom_reward_mode: coreHook?.custom_reward_mode ?? "",
   };
 }
 
@@ -995,6 +1023,15 @@ function renderCoreHookReader(state: ViewState, bible: BibleAssetView): string {
         <span>${escapeHtml(CORE_HOOK_TYPE_LABELS[coreHook.type])}</span>
       </div>
       <section class="bib-section">
+        <h3>下流活性化タグ</h3>
+        ${asKeyValueTable({
+          mechanic: coreHook.mechanic ?? "(未設定)",
+          reader_question: coreHook.reader_question ?? "(未設定)",
+          reward_mode: coreHook.reward_mode ?? "(未設定)",
+          custom_reward_mode: coreHook.custom_reward_mode ?? "(未設定)",
+        })}
+      </section>
+      <section class="bib-section">
         <h3>参照ヒット作</h3>
         <ul class="bib-core-hook__refs">${coreHook.hit_references.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
       </section>
@@ -1031,6 +1068,24 @@ function renderCoreHookEditor(state: ViewState): string {
           </label>`).join("")}
         </div>
       </fieldset>
+      <label class="nc-field">
+        <span class="nc-field__label">mechanic</span>
+        <input class="nc-field__input" name="mechanic" value="${escapeHtml(draft.mechanic)}" data-core-hook-field="mechanic" placeholder="例: exp_multiplier_route">
+      </label>
+      <label class="nc-field">
+        <span class="nc-field__label">reader_question</span>
+        <textarea class="nc-field__textarea" name="reader_question" rows="2" data-core-hook-field="reader_question" placeholder="読者が追い続ける問いを1文で">${escapeHtml(draft.reader_question)}</textarea>
+      </label>
+      <label class="nc-field">
+        <span class="nc-field__label">reward_mode</span>
+        <select class="nc-field__input" name="reward_mode" data-core-hook-field="reward_mode">
+          ${CORE_HOOK_REWARD_MODE_LABELS.map((item) => `<option value="${escapeHtml(item.value)}"${draft.reward_mode === item.value ? " selected" : ""}>${escapeHtml(item.label)}</option>`).join("")}
+        </select>
+      </label>
+      <label class="nc-field" data-core-hook-custom-reward-wrap${draft.reward_mode === "custom" ? "" : " hidden"}>
+        <span class="nc-field__label">custom_reward_mode</span>
+        <input class="nc-field__input" name="custom_reward_mode" value="${escapeHtml(draft.custom_reward_mode)}" data-core-hook-field="custom_reward_mode" placeholder="独自報酬モード">
+      </label>
       <section class="bib-section">
         <h3>hit_references</h3>
         <div class="bib-core-hook__refs-edit">
@@ -1674,7 +1729,7 @@ export function mountBibleView(container: HTMLElement): () => void {
     }
   }
 
-  function syncCoreHookDraftFromInput(target: HTMLInputElement | HTMLTextAreaElement): void {
+  function syncCoreHookDraftFromInput(target: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement): void {
     if (!state.coreHookDraft) return;
     const field = target.dataset.coreHookField;
     if (field === "one_liner") {
@@ -1683,6 +1738,14 @@ export function mountBibleView(container: HTMLElement): () => void {
       if (target.value === "A" || target.value === "B" || target.value === "C") {
         state.coreHookDraft.type = target.value;
       }
+    } else if (field === "mechanic") {
+      state.coreHookDraft.mechanic = target.value;
+    } else if (field === "reader_question") {
+      state.coreHookDraft.reader_question = target.value;
+    } else if (field === "reward_mode") {
+      state.coreHookDraft.reward_mode = isRewardMode(target.value) ? target.value : "";
+    } else if (field === "custom_reward_mode") {
+      state.coreHookDraft.custom_reward_mode = target.value;
     }
     const refIndex = target.dataset.coreHookRefIndex;
     if (refIndex !== undefined) {
@@ -1694,7 +1757,7 @@ export function mountBibleView(container: HTMLElement): () => void {
   // core_hook 編集中はフォーカス維持のため draft だけ更新し、カウンタと保存可否を局所更新する。
   const onCoreHookInput = (event: Event): void => {
     const target = event.target;
-    if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLTextAreaElement)) return;
+    if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLTextAreaElement) && !(target instanceof HTMLSelectElement)) return;
     if (!target.dataset.coreHookField && target.dataset.coreHookRefIndex === undefined) return;
     syncCoreHookDraftFromInput(target);
     const draft = state.coreHookDraft;
@@ -1711,6 +1774,8 @@ export function mountBibleView(container: HTMLElement): () => void {
     if (oneLinerError) oneLinerError.hidden = !validation.oneLinerRequired;
     const refsError = container.querySelector<HTMLElement>("[data-core-hook-refs-error]");
     if (refsError) refsError.hidden = !validation.refsRequired;
+    const customReward = container.querySelector<HTMLElement>("[data-core-hook-custom-reward-wrap]");
+    if (customReward) customReward.hidden = draft.reward_mode !== "custom";
   };
   container.addEventListener("input", onCoreHookInput, { signal: controller.signal });
   container.addEventListener("change", onCoreHookInput, { signal: controller.signal });
@@ -2079,6 +2144,15 @@ export function mountBibleView(container: HTMLElement): () => void {
         type: state.coreHookDraft.type,
         hit_references: state.coreHookDraft.hit_references.map((item) => item.trim()).filter(Boolean).slice(0, 3),
       };
+      const mechanic = state.coreHookDraft.mechanic.trim();
+      const readerQuestion = state.coreHookDraft.reader_question.trim();
+      const customRewardMode = state.coreHookDraft.custom_reward_mode.trim();
+      if (mechanic) coreHook.mechanic = mechanic;
+      if (readerQuestion) coreHook.reader_question = readerQuestion;
+      if (state.coreHookDraft.reward_mode) coreHook.reward_mode = state.coreHookDraft.reward_mode;
+      if (state.coreHookDraft.reward_mode === "custom" && customRewardMode) {
+        coreHook.custom_reward_mode = customRewardMode;
+      }
       state.coreHookSaving = true;
       render(container, state);
       void apiPutBibleMeta(state.slug, { core_hook: coreHook })

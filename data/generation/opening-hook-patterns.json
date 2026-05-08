@@ -62,7 +62,11 @@
         "best": "「Fランクの俺にだけ聞こえる」 ep01 page 1-3 (夜勤コンビニ→朝6時の声)",
         "worst": "page 1 がナレ過多で establishing なし、page 2 まで主人公が登場しない"
       },
-      "expected_effect": "reader_friction -0.3 / hook_strength +0.4 / familiar_entry_point +0.5"
+      "expected_effect": "reader_friction -0.3 / hook_strength +0.4 / familiar_entry_point +0.5",
+      "valid_core_hook_types": ["A", "B"],
+      "valid_mechanics": [],
+      "reward_modes": ["mystery_progress", "power_growth", "comfort"],
+      "produces_reader_question": true
     },
 
     {
@@ -114,7 +118,11 @@
         "best": "「ヘルモード」「シャングリラ」の冒頭 (世界観紹介→主人公)",
         "worst": "page 1 が世界観だけで主人公が page 3 まで顔出ししない"
       },
-      "expected_effect": "world_immersion +0.5 / hook_strength +0.2 / reader_friction +0.1 (世界観難解化リスク)"
+      "expected_effect": "world_immersion +0.5 / hook_strength +0.2 / reader_friction +0.1 (世界観難解化リスク)",
+      "valid_core_hook_types": ["B", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["reveal", "mystery_progress", "spectacle"],
+      "produces_reader_question": true
     },
 
     {
@@ -166,7 +174,11 @@
         "best": "「ヘルモード」(山田健一の前世独白)",
         "worst": "独白が3行以上連続で読みにくい / 主人公の苦さが過剰でlikability低下"
       },
-      "expected_effect": "character_depth +0.5 / hook_strength +0.3 / likability +0.1 (overdone なら -0.2)"
+      "expected_effect": "character_depth +0.5 / hook_strength +0.3 / likability +0.1 (overdone なら -0.2)",
+      "valid_core_hook_types": ["A", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["justice", "power_growth", "reveal"],
+      "produces_reader_question": true
     },
 
     {
@@ -216,7 +228,11 @@
         "best": "「Solo Leveling」「断罪のクリスタ」など派手系コミカライズの冒頭",
         "worst": "page 1 が派手だが page 2 への落差が極端で読者が混乱"
       },
-      "expected_effect": "hook_strength +0.6 / commercial_pull +0.4 / character_depth +0.1"
+      "expected_effect": "hook_strength +0.6 / commercial_pull +0.4 / character_depth +0.1",
+      "valid_core_hook_types": ["A"],
+      "valid_mechanics": [],
+      "reward_modes": ["spectacle", "power_growth"],
+      "produces_reader_question": true
     },
 
     {
@@ -268,7 +284,11 @@
         "best": "「薬屋のひとりごと」「本好きの下剋上」の冒頭",
         "worst": "ヒロインが顔出しだけで個性が出ない"
       },
-      "expected_effect": "character_warmth +0.5 / sidekick_presence +0.6 / hook_strength +0.3"
+      "expected_effect": "character_warmth +0.5 / sidekick_presence +0.6 / hook_strength +0.3",
+      "valid_core_hook_types": ["B", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["intimacy", "comfort", "reveal"],
+      "produces_reader_question": true
     },
 
     {
@@ -320,7 +340,11 @@
         "best": "「Fランクの俺にだけ聞こえる」 (ステータス画面 + ナビ音声)、「Solo Leveling」",
         "worst": "ステータス画面ばかりで主人公の感情が出ない"
       },
-      "expected_effect": "hook_strength +0.4 / world_immersion +0.4 / commercial_pull +0.4"
+      "expected_effect": "hook_strength +0.4 / world_immersion +0.4 / commercial_pull +0.4",
+      "valid_core_hook_types": ["A"],
+      "valid_mechanics": ["status_window", "gacha", "exp_multiplier", "skill_reveal"],
+      "reward_modes": ["power_growth", "reveal", "mystery_progress"],
+      "produces_reader_question": true
     },
 
     {
@@ -371,7 +395,11 @@
         "best": "「呪術廻戦」冒頭、緊迫アクション系コミカライズ",
         "worst": "回想が長すぎて現在に戻らない / 主人公の動機がわからない"
       },
-      "expected_effect": "tension +0.6 / hook_strength +0.5 / character_depth -0.1 (説明不足リスク)"
+      "expected_effect": "tension +0.6 / hook_strength +0.5 / character_depth -0.1 (説明不足リスク)",
+      "valid_core_hook_types": ["A", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["spectacle", "justice", "power_growth"],
+      "produces_reader_question": true
     }
   ],
 

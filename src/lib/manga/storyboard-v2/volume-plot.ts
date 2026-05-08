@@ -29,6 +29,8 @@ export type VolumeEpisodePlan = {
   title_working: string;
   theme: string;
   protagonist_arc: { start: string; turn: string; end: string };
+  /** Phase 11-1: その話で core_hook の何を拡大するか。後方互換 optional */
+  core_hook_usage?: string;
   beats: EpisodeBeat[];
   must_include_events: string[];
   cliffhanger_hook: string;
@@ -68,6 +70,7 @@ type VolumePlotOutput = {
     title_working: string;
     theme: string;                         // 50字
     protagonist_arc: { start: string; turn: string; end: string };  // 各 50字
+    core_hook_usage: string;                // 40-120字。この話で core_hook の何を拡大するか
     beats: Array<{
       beat_idx: number;                    // 1-7
       label: "hook" | "buildup" | "turn" | "climax" | "resolution" | "cliffhanger";
@@ -82,6 +85,27 @@ type VolumePlotOutput = {
   }>;
 };
 `;
+
+function buildCoreHookContract(bible: BibleSnapshotV2): string {
+  const coreHook = bible.meta.core_hook;
+  if (!coreHook) {
+    return [
+      "## Core Hook Contract (必須参照)",
+      "- 未設定。既存 bible との後方互換のため生成は継続するが、各話は meta.genre / volume_synopsis から一文ギミックを補って設計すること。",
+    ].join("\n");
+  }
+  return [
+    "## Core Hook Contract (必須参照)",
+    `- 一文: ${coreHook.one_liner}`,
+    `- 類型: ${coreHook.type} / メカニクス: ${coreHook.mechanic ?? "(未設定)"}`,
+    `- 読者の問い: ${coreHook.reader_question ?? "(未設定)"}`,
+    `- 報酬モード: ${coreHook.reward_mode ?? "(未設定)"}`,
+    coreHook.reward_mode === "custom"
+      ? `- カスタム報酬: ${coreHook.custom_reward_mode ?? "(未設定)"}`
+      : "",
+    `- 参考作: ${coreHook.hit_references.join(", ")}`,
+  ].filter(Boolean).join("\n");
+}
 
 export async function generateVolumePlot(args: {
   bible: BibleSnapshotV2;
@@ -127,7 +151,10 @@ export async function generateVolumePlot(args: {
       "- 各話の cliffhanger が次話を読みたくなる強さ (turn_strength 4+)",
       `- 1巻必須シーン (このジャンルの定石): ${genreThreeElements}`,
       recoveryRequired,
+      "- 各 episode に core_hook_usage を必ず入れ、その話で Core Hook Contract の一文/メカニクス/読者の問い/報酬モードの何を拡大するかを短く明示する",
       "- 各話の brief_for_L3 は L3 Shotlist にそのまま流せる本文を 1000-2000字で書く (各シーンの場所/登場人物/出来事/モノローグ核ライン)",
+      "",
+      buildCoreHookContract(args.bible),
       "",
       "## bible (登場人物 / 世界観 / 視覚モチーフ)",
       "```json",

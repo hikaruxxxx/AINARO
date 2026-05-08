@@ -26,8 +26,10 @@ import { extractStructuredJson } from "../llm/codex-text";
 import { validatePanelText } from "../render-v2/prompt-composer-v2";
 import type {
   BibleSnapshotV2,
+  CoreHookV2,
   EpisodeStoryboardV2,
   PanelV2,
+  RewardMode,
   StoryboardPageV2,
   ToneProfile,
 } from "../schemas-v2";
@@ -55,6 +57,11 @@ export type OpeningHookPattern = {
   first_speech_panel: number;
   examples: { best: string; worst: string };
   expected_effect: string;
+  /** Phase 11-1: core_hook 互換タグ。未設定なら unknown_compatibility として減点しない */
+  valid_core_hook_types?: CoreHookV2["type"][];
+  valid_mechanics?: string[];
+  reward_modes?: RewardMode[];
+  produces_reader_question?: boolean;
 };
 
 export type OpeningHookPatternBank = {
@@ -85,6 +92,7 @@ export function selectCandidatePatterns(
   bank: OpeningHookPatternBank,
   toneProfile: ToneProfile | undefined,
   genre: string | undefined,
+  coreHook?: CoreHookV2,
 ): OpeningHookPattern[] {
   const darkness = toneProfile?.darkness ?? 0.5;
   let toneKey: string;
@@ -96,12 +104,46 @@ export function selectCandidatePatterns(
   const toneIds = new Set(bank.selection_guide.by_tone_profile[toneKey] ?? []);
   const genreIds = new Set(genre ? (bank.selection_guide.by_genre[genre] ?? []) : []);
 
-  // intersection 優先、空なら union
-  const intersection = bank.patterns.filter(
-    (p) => toneIds.has(p.id) && genreIds.has(p.id),
-  );
-  if (intersection.length > 0) return intersection;
-  return bank.patterns.filter((p) => toneIds.has(p.id) || genreIds.has(p.id));
+  return scoreOpeningHookPatterns(bank, toneIds, genreIds, coreHook)
+    .sort((a, b) => b.score - a.score)
+    .map((item) => item.pattern);
+}
+
+function coreHookTagScore(pattern: OpeningHookPattern, coreHook: CoreHookV2 | undefined): number {
+  if (!coreHook) return 0;
+  let score = 0;
+
+  // optional タグが不在なら unknown_compatibility として除外・減点しない。
+  if (pattern.valid_core_hook_types && pattern.valid_core_hook_types.length > 0) {
+    score += pattern.valid_core_hook_types.includes(coreHook.type) ? 3 : -3;
+  }
+  if (pattern.valid_mechanics && pattern.valid_mechanics.length > 0 && coreHook.mechanic) {
+    score += pattern.valid_mechanics.includes(coreHook.mechanic) ? 2 : -2;
+  }
+  if (pattern.reward_modes && pattern.reward_modes.length > 0 && coreHook.reward_mode) {
+    score += pattern.reward_modes.includes(coreHook.reward_mode) ? 3 : -2;
+  }
+  if (pattern.produces_reader_question === true && coreHook.reader_question) score += 1;
+
+  return score;
+}
+
+function scoreOpeningHookPatterns(
+  bank: OpeningHookPatternBank,
+  toneIds: Set<string>,
+  genreIds: Set<string>,
+  coreHook?: CoreHookV2,
+): Array<{ pattern: OpeningHookPattern; score: number }> {
+  return bank.patterns.map((pattern, index) => {
+    let score = 0;
+    if (toneIds.has(pattern.id)) score += 4;
+    if (genreIds.has(pattern.id)) score += 5;
+    if (toneIds.has(pattern.id) && genreIds.has(pattern.id)) score += 3;
+    score += coreHookTagScore(pattern, coreHook);
+    // 同点時は pattern bank の順序を維持する。
+    score -= index / 1000;
+    return { pattern, score };
+  });
 }
 
 // ===== Hook 編集パス本体 =====
@@ -128,10 +170,20 @@ export type HookProposalPage = {
 export type HookProposal = {
   pattern_id: string;
   pattern_name: string;
+  deterministic_score?: number;
   pages: HookProposalPage[];
   rationale: string;
   expected_effect: string;
+  advisory_scores?: CoreHookAdvisoryScores;
   warnings?: string[];
+};
+
+export type CoreHookAdvisoryScores = {
+  reader_question_clarity: number;
+  hook_specificity: number;
+  reward_expectation: number;
+  staleness_risk: number;
+  core_hook_reflection_evidence: number;
 };
 
 export type OpeningHookOutput = {
@@ -168,6 +220,7 @@ export async function generateOpeningHookProposals(args: {
     patternsBank,
     bible.meta.tone_profile,
     bible.meta.genre,
+    bible.meta.core_hook,
   );
   const selected = candidates.slice(0, maxProposals);
   if (selected.length === 0) {
@@ -185,6 +238,7 @@ export async function generateOpeningHookProposals(args: {
       storyboard,
       cliffhangerHook: args.cliffhangerHook,
       pattern,
+      deterministicScore: scorePatternForOpeningRecommendation(patternsBank, pattern, bible),
       sourcePages,
       cwd: args.cwd,
       timeoutMs: args.timeoutMs,
@@ -192,10 +246,10 @@ export async function generateOpeningHookProposals(args: {
     proposals.push(proposal);
   }
 
-  // recommendation: 候補1番目 (selection_guide で優先度が高い) を推奨
+  // recommendation: deterministic score の最上位を推奨。LLM advisory は kill 条件に使わない。
   const recommendation = {
     pattern_id: selected[0].id,
-    rationale: `tone_profile.darkness=${bible.meta.tone_profile?.darkness ?? "unset"} / genre=${bible.meta.genre ?? "unset"} の組み合わせで selection_guide が最初に推奨するパターン`,
+    rationale: `deterministic score + LLM advisory 方式。tone_profile.darkness=${bible.meta.tone_profile?.darkness ?? "unset"} / genre=${bible.meta.genre ?? "unset"} / core_hook.type=${bible.meta.core_hook?.type ?? "unset"} で最上位`,
   };
 
   return {
@@ -216,6 +270,13 @@ type HookProposalOutput = {
   pattern_name: string;
   rationale: string;            // この提案を採用すべき理由 100字
   expected_effect: string;       // 期待効果 (hook_strength +0.X / character_depth +0.X 等)
+  advisory_scores?: {
+    reader_question_clarity: number;        // 1-5
+    hook_specificity: number;               // 1-5
+    reward_expectation: number;             // 1-5
+    staleness_risk: number;                 // 1-5 高いほど既視感リスクが高い
+    core_hook_reflection_evidence: number;  // 1-5
+  };
   pages: Array<{
     page_no: number;             // 1, 2, 3
     page_role: "opening_hook" | "buildup";
@@ -235,6 +296,21 @@ type HookProposalOutput = {
   warnings?: string[];           // 採用時のリスクメモ
 };
 `;
+
+function scorePatternForOpeningRecommendation(
+  bank: OpeningHookPatternBank,
+  pattern: OpeningHookPattern,
+  bible: BibleSnapshotV2,
+): number {
+  const ranked = selectCandidatePatterns(
+    bank,
+    bible.meta.tone_profile,
+    bible.meta.genre,
+    bible.meta.core_hook,
+  );
+  const index = ranked.findIndex((item) => item.id === pattern.id);
+  return index < 0 ? 0 : ranked.length - index;
+}
 
 export function buildOpeningHookTextQualityDirectives(bible: BibleSnapshotV2): string {
   const materials = buildTextQualityMaterials(bible);
@@ -333,6 +409,7 @@ async function generateSingleHookProposal(args: {
   storyboard: EpisodeStoryboardV2;
   cliffhangerHook?: string;
   pattern: OpeningHookPattern;
+  deterministicScore?: number;
   sourcePages: StoryboardPageV2[];
   cwd?: string;
   timeoutMs?: number;
@@ -399,6 +476,7 @@ async function generateSingleHookProposal(args: {
       }>;
     }>;
     warnings?: string[];
+    advisory_scores?: CoreHookAdvisoryScores;
   }>({
     systemContext: [
       "あなたは商業漫画 (なろう系コミカライズ、KDP+KU 1巻10万円目標) の編集者として、",
@@ -416,6 +494,8 @@ async function generateSingleHookProposal(args: {
       "- ナレーション禁則: 各 page の narration 数は speech_distribution の上限を超えない",
       "- 主人公の独白(雲型)は monologue として明示、地のナレと混ぜない",
       "- パターンの structure に書かれた shot_type / importance / purpose を尊重",
+      "- core_hook は補助情報として必ず参照し、冒頭3ページで読者の問い・報酬期待・既視感回避を強める",
+      "- LLM judge は advisory_scores の5指標のみを返す。単独で候補を不採用にしてはならない",
       "",
       textQualityDirectives,
     ].join("\n"),
@@ -428,10 +508,12 @@ async function generateSingleHookProposal(args: {
           art_style: bible.meta.art_style,
           tone_profile: bible.meta.tone_profile,
           profile_id: bible.meta.profile_id,
+          core_hook: bible.meta.core_hook,
         },
         null,
         2,
       ),
+      core_hook: JSON.stringify(bible.meta.core_hook ?? null, null, 2),
       characters: charsBlock,
       visual_motifs: JSON.stringify(bible.visual_motifs ?? [], null, 2),
       world_lexicon: JSON.stringify(textQualityMaterials.world_lexicon, null, 2),
@@ -458,6 +540,8 @@ async function generateSingleHookProposal(args: {
       `- 既存の物語流れを参考にしつつ、より KU 読者を引き込む構成に最適化`,
       `- speech_distribution / narration_quota / first_speech_panel を厳守`,
       `- materials の world_lexicon / narration_style_guide / nav_full_spec / character_speech_styles と systemContext の Text Quality Directives を strict に適用`,
+      `- core_hook が存在する場合、one_liner / type / mechanic / reader_question / reward_mode を冒頭の状況・台詞・引きで反射させる`,
+      `- advisory_scores は reader_question_clarity / hook_specificity / reward_expectation / staleness_risk / core_hook_reflection_evidence の5指標だけを 1-5 で返す`,
       `- forbidden_terms_global を proposal の dialogue / monologue / narration に含めない。p1_opening_directive_specific と anti_pattern_dialogue に反する文は出力しない`,
       `- ナビ発話は canonical_disclosure_lines_vol_1 を anchor 例として、敬体・事務的な開示プロトコルに寄せる`,
       `- 1パターン分の提案 (HookProposalOutput 1件) を返却`,
@@ -471,8 +555,10 @@ async function generateSingleHookProposal(args: {
   const proposal: HookProposal = {
     pattern_id: pattern.id,
     pattern_name: pattern.name,
+    deterministic_score: args.deterministicScore,
     rationale: result.rationale,
     expected_effect: result.expected_effect,
+    advisory_scores: result.advisory_scores,
     pages: result.pages.map((page) => ({
       page_no: page.page_no,
       page_role: page.page_role as "opening_hook" | "buildup",

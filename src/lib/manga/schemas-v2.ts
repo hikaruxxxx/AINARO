@@ -202,7 +202,25 @@ export type CoreHookV2 = {
   type: "A" | "B" | "C";
   /** 既存ヒット作との差分確認用。bible-lint で1-3作を検証する */
   hit_references: string[];
+  /** 下流パイプラインで参照する中核メカニクス slug。free-form なので lint では縛らない */
+  mechanic?: string;
+  /** 読者が追い続ける1文の問い。opening/cliffhanger の反射面として使う */
+  reader_question?: string;
+  /** 読者に約束する主報酬。custom の場合は custom_reward_mode を併用する */
+  reward_mode?: RewardMode;
+  /** reward_mode === "custom" のときの自由記述 */
+  custom_reward_mode?: string;
 };
+
+export type RewardMode =
+  | "reveal"
+  | "intimacy"
+  | "power_growth"
+  | "justice"
+  | "spectacle"
+  | "comfort"
+  | "mystery_progress"
+  | "custom";
 
 export type BibleSnapshotV2 = {
   schema_version: 2;
@@ -651,11 +669,38 @@ export type AuditCheckResult = {
     | "regulation_violation"
     /** 2026-05-06 追加。pattern dictionary 由来 background_treatment と
      *  実 ref/render の整合性検査 (RULE 11 が遵守されているか) */
-    | "bg_treatment_compliance";
+    | "bg_treatment_compliance"
+    /** 2026-05-08 追加。vision audit で拾う軽量な構図違和感 flag */
+    | "composition_flag";
   passed: boolean;
   score?: number;
   threshold?: number;
   detail?: string;
+};
+
+export type BgTreatmentComplianceCheck = {
+  panel_id: string;
+  specified: BackgroundTreatment;
+  observed: BackgroundTreatment;
+  compliance: "match" | "minor_drift" | "major_violation";
+  /** LLM vision 判定の根拠。人間レビュー時に読むため自然文を保持する */
+  evidence: string;
+};
+
+export type CompositionFlags = {
+  panel_id: string;
+  character_placement_feels_impossible?: boolean;
+  speech_bubble_overlaps_face_or_action?: boolean;
+  tail_points_to_wrong_speaker?: boolean;
+  perspective_or_location_continuity_broken?: boolean;
+  over_detailed_background_contradicts_expected_treatment?: boolean;
+  /** flag だけでは判断しづらい場合の補足。正常なら省略可 */
+  notes?: string;
+};
+
+export type VisionAuditResult = {
+  bg_treatment_compliance: BgTreatmentComplianceCheck[];
+  composition_flags: CompositionFlags[];
 };
 
 export type AuditReport = {
@@ -666,6 +711,8 @@ export type AuditReport = {
   panels_passed: number;
   panels_failed: number;
   checks: AuditCheckResult[];
+  /** 任意の重い vision audit 結果。CLI opt-in 時のみ付与する */
+  vision?: VisionAuditResult;
   failed_panel_ids: string[];
 };
 

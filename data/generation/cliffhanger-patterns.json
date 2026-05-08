@@ -36,7 +36,11 @@
         "best": "Solo Leveling 各話末の影系敵登場、a07 ep10 末の海外ランカー登場",
         "worst": "シルエットだけで次話に何の手掛かりもない (謎の引き伸ばしと取られる)"
       },
-      "expected_effect": "next_episode_pull +0.5 / mystery +0.4 / character_depth +0.0"
+      "expected_effect": "next_episode_pull +0.5 / mystery +0.4 / character_depth +0.0",
+      "valid_core_hook_types": ["A", "B"],
+      "valid_mechanics": [],
+      "reward_modes": ["mystery_progress", "spectacle", "reveal"],
+      "produces_reader_question": true
     },
 
     {
@@ -64,7 +68,11 @@
         "best": "「Fランクの俺にだけ聞こえる」 ep01 末の「まだ、行ける」型 (Phase X 適用済)",
         "worst": "決意モノローグが3行以上連続でくどい / 受動的すぎて能動性が見えない"
       },
-      "expected_effect": "next_episode_pull +0.4 / character_agency +0.5 / likability +0.2"
+      "expected_effect": "next_episode_pull +0.4 / character_agency +0.5 / likability +0.2",
+      "valid_core_hook_types": ["A", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["power_growth", "justice", "comfort"],
+      "produces_reader_question": true
     },
 
     {
@@ -92,7 +100,11 @@
         "best": "薬屋のひとりごと型の各話末 (穏やかな会話 → 異変通知)",
         "worst": "異物が予測可能で驚きがない"
       },
-      "expected_effect": "next_episode_pull +0.4 / world_immersion +0.3 / tension +0.3"
+      "expected_effect": "next_episode_pull +0.4 / world_immersion +0.3 / tension +0.3",
+      "valid_core_hook_types": ["B"],
+      "valid_mechanics": [],
+      "reward_modes": ["mystery_progress", "comfort", "reveal"],
+      "produces_reader_question": true
     },
 
     {
@@ -119,7 +131,11 @@
         "best": "Solo Leveling 各巻末の予告コマ (新階層/新影/新敵)",
         "worst": "予告コマだけで次巻まで主人公が進展しない"
       },
-      "expected_effect": "next_volume_buy +0.6 / commercial_pull +0.5"
+      "expected_effect": "next_volume_buy +0.6 / commercial_pull +0.5",
+      "valid_core_hook_types": ["A", "B", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["spectacle", "mystery_progress", "reveal"],
+      "produces_reader_question": true
     },
 
     {
@@ -147,7 +163,11 @@
         "best": "本好きの下剋上型の各巻末 (家族・仲間との温度上昇)",
         "worst": "関係性の進展が急すぎて違和感"
       },
-      "expected_effect": "next_episode_pull +0.3 / sidekick_warmth +0.5 / character_depth +0.3"
+      "expected_effect": "next_episode_pull +0.3 / sidekick_warmth +0.5 / character_depth +0.3",
+      "valid_core_hook_types": ["B", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["intimacy", "comfort", "reveal"],
+      "produces_reader_question": true
     },
 
     {
@@ -175,7 +195,11 @@
         "best": "「世界最速のレベルアップ」「Solo Leveling」各話末の新スキル開示",
         "worst": "能力開示だけで主人公の感情が動かない"
       },
-      "expected_effect": "next_episode_pull +0.5 / world_immersion +0.4 / commercial_pull +0.3"
+      "expected_effect": "next_episode_pull +0.5 / world_immersion +0.4 / commercial_pull +0.3",
+      "valid_core_hook_types": ["A"],
+      "valid_mechanics": ["status_window", "gacha", "exp_multiplier", "skill_reveal"],
+      "reward_modes": ["power_growth", "reveal", "mystery_progress"],
+      "produces_reader_question": true
     },
 
     {
@@ -203,7 +227,11 @@
         "best": "a07-modern-dungeon Vol.1 末: 「ナビの声が途切れる。契約者上限に接近。私の優先順位が下がります」",
         "worst": "ヒロインの危機が頻発しすぎて読者が慣れる (狼少年化)"
       },
-      "expected_effect": "next_volume_buy +0.7 / sidekick_warmth +0.6 / emotional_pull +0.6"
+      "expected_effect": "next_volume_buy +0.7 / sidekick_warmth +0.6 / emotional_pull +0.6",
+      "valid_core_hook_types": ["B", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["intimacy", "reveal", "mystery_progress"],
+      "produces_reader_question": true
     }
   ],
 

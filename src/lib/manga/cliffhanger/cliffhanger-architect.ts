@@ -27,9 +27,11 @@ import { extractStructuredJson } from "../llm/codex-text";
 import type {
   BibleSnapshotV2,
   CliffhangerPatternId,
+  CoreHookV2,
   EpisodeStoryboardV2,
   PanelV2,
   PullLink,
+  RewardMode,
   StoryboardPageV2,
   ToneProfile,
 } from "../schemas-v2";
@@ -56,6 +58,11 @@ export type CliffhangerPattern = {
   next_opening_hook_examples: string[];
   examples: { best: string; worst: string };
   expected_effect: string;
+  /** Phase 11-1: core_hook 互換タグ。未設定なら unknown_compatibility として減点しない */
+  valid_core_hook_types?: CoreHookV2["type"][];
+  valid_mechanics?: string[];
+  reward_modes?: RewardMode[];
+  produces_reader_question?: boolean;
 };
 
 export type CliffhangerPatternBank = {
@@ -88,6 +95,7 @@ export function selectCliffhangerCandidates(
   toneProfile: ToneProfile | undefined,
   genre: string | undefined,
   volumePosition: "early" | "mid" | "late" | "volume_end",
+  coreHook?: CoreHookV2,
 ): CliffhangerPattern[] {
   const darkness = toneProfile?.darkness ?? 0.5;
   let toneKey: string;
@@ -102,25 +110,49 @@ export function selectCliffhangerCandidates(
     bank.selection_guide.by_volume_position[volumePosition] ?? [],
   );
 
-  // 3軸 intersection
-  const triple = bank.patterns.filter(
-    (p) => toneIds.has(p.id) && genreIds.has(p.id) && positionIds.has(p.id),
-  );
-  if (triple.length > 0) return triple;
+  return scoreCliffhangerPatterns(bank, toneIds, genreIds, positionIds, coreHook)
+    .sort((a, b) => b.score - a.score)
+    .map((item) => item.pattern);
+}
 
-  // 2軸 intersection (genre + position 優先、tone は弱め)
-  const genrePosition = bank.patterns.filter(
-    (p) => genreIds.has(p.id) && positionIds.has(p.id),
-  );
-  if (genrePosition.length > 0) return genrePosition;
+function coreHookTagScore(pattern: CliffhangerPattern, coreHook: CoreHookV2 | undefined): number {
+  if (!coreHook) return 0;
+  let score = 0;
 
-  const tonePosition = bank.patterns.filter(
-    (p) => toneIds.has(p.id) && positionIds.has(p.id),
-  );
-  if (tonePosition.length > 0) return tonePosition;
+  // optional タグ不在は unknown_compatibility。候補から除外しない。
+  if (pattern.valid_core_hook_types && pattern.valid_core_hook_types.length > 0) {
+    score += pattern.valid_core_hook_types.includes(coreHook.type) ? 3 : -3;
+  }
+  if (pattern.valid_mechanics && pattern.valid_mechanics.length > 0 && coreHook.mechanic) {
+    score += pattern.valid_mechanics.includes(coreHook.mechanic) ? 2 : -2;
+  }
+  if (pattern.reward_modes && pattern.reward_modes.length > 0 && coreHook.reward_mode) {
+    score += pattern.reward_modes.includes(coreHook.reward_mode) ? 3 : -2;
+  }
+  if (pattern.produces_reader_question === true && coreHook.reader_question) score += 1;
 
-  // 1軸 (volume_position 優先)
-  return bank.patterns.filter((p) => positionIds.has(p.id));
+  return score;
+}
+
+function scoreCliffhangerPatterns(
+  bank: CliffhangerPatternBank,
+  toneIds: Set<string>,
+  genreIds: Set<string>,
+  positionIds: Set<string>,
+  coreHook?: CoreHookV2,
+): Array<{ pattern: CliffhangerPattern; score: number }> {
+  return bank.patterns.map((pattern, index) => {
+    let score = 0;
+    if (positionIds.has(pattern.id)) score += 6;
+    if (genreIds.has(pattern.id)) score += 5;
+    if (toneIds.has(pattern.id)) score += 3;
+    if (positionIds.has(pattern.id) && genreIds.has(pattern.id)) score += 3;
+    if (positionIds.has(pattern.id) && genreIds.has(pattern.id) && toneIds.has(pattern.id)) score += 2;
+    score += coreHookTagScore(pattern, coreHook);
+    // 同点時は pattern bank の順序を維持する。
+    score -= index / 1000;
+    return { pattern, score };
+  });
 }
 
 // ===== Cliffhanger 編集パス本体 =====
@@ -141,8 +173,11 @@ export type CliffhangerProposalPanel = {
 export type CliffhangerProposal = {
   pattern_id: CliffhangerPatternId;
   pattern_name: string;
+  deterministic_score?: number;
   rationale: string;
   expected_effect: string;
+  advisory_scores?: CoreHookAdvisoryScores;
+  reader_question_update?: string;
   /** 再設計された last_page (last_page_no と panels) */
   last_page: {
     page_no: number;
@@ -152,6 +187,14 @@ export type CliffhangerProposal = {
   /** 次話/次巻への接続情報 */
   pull_link: PullLink;
   warnings?: string[];
+};
+
+export type CoreHookAdvisoryScores = {
+  reader_question_clarity: number;
+  hook_specificity: number;
+  reward_expectation: number;
+  staleness_risk: number;
+  core_hook_reflection_evidence: number;
 };
 
 export type CliffhangerOutput = {
@@ -190,6 +233,7 @@ export async function generateCliffhangerProposals(args: {
     bible.meta.tone_profile,
     bible.meta.genre,
     volumePosition,
+    bible.meta.core_hook,
   );
   const selected = candidates.slice(0, maxProposals);
   if (selected.length === 0) {
@@ -209,6 +253,12 @@ export async function generateCliffhangerProposals(args: {
       storyboard,
       lastPage,
       pattern,
+      deterministicScore: scorePatternForCliffhangerRecommendation(
+        patternsBank,
+        pattern,
+        bible,
+        volumePosition,
+      ),
       volumePosition,
       cwd: args.cwd,
       timeoutMs: args.timeoutMs,
@@ -218,7 +268,7 @@ export async function generateCliffhangerProposals(args: {
 
   const recommendation = {
     pattern_id: selected[0].id,
-    rationale: `tone=${bible.meta.tone_profile?.darkness ?? "unset"} / genre=${bible.meta.genre ?? "unset"} / volume_position=${volumePosition} の組み合わせで selection_guide が最初に推奨するパターン`,
+    rationale: `deterministic score + LLM advisory 方式。tone=${bible.meta.tone_profile?.darkness ?? "unset"} / genre=${bible.meta.genre ?? "unset"} / volume_position=${volumePosition} / core_hook.type=${bible.meta.core_hook?.type ?? "unset"} で最上位`,
   };
 
   return {
@@ -242,6 +292,14 @@ type CliffhangerProposalOutput = {
   pattern_name: string;
   rationale: string;             // 採用理由 100字以内
   expected_effect: string;        // 期待効果
+  advisory_scores?: {
+    reader_question_clarity: number;        // 1-5
+    hook_specificity: number;               // 1-5
+    reward_expectation: number;             // 1-5
+    staleness_risk: number;                 // 1-5 高いほど既視感リスクが高い
+    core_hook_reflection_evidence: number;  // 1-5
+  };
+  reader_question_update?: string;          // core_hook.reader_question を次話へどう更新/深化するか
   last_page: {
     page_no: number;
     page_role: "cliffhanger";
@@ -268,11 +326,29 @@ type CliffhangerProposalOutput = {
 };
 `;
 
+function scorePatternForCliffhangerRecommendation(
+  bank: CliffhangerPatternBank,
+  pattern: CliffhangerPattern,
+  bible: BibleSnapshotV2,
+  volumePosition: "early" | "mid" | "late" | "volume_end",
+): number {
+  const ranked = selectCliffhangerCandidates(
+    bank,
+    bible.meta.tone_profile,
+    bible.meta.genre,
+    volumePosition,
+    bible.meta.core_hook,
+  );
+  const index = ranked.findIndex((item) => item.id === pattern.id);
+  return index < 0 ? 0 : ranked.length - index;
+}
+
 async function generateSingleCliffhangerProposal(args: {
   bible: BibleSnapshotV2;
   storyboard: EpisodeStoryboardV2;
   lastPage: StoryboardPageV2;
   pattern: CliffhangerPattern;
+  deterministicScore?: number;
   volumePosition: "early" | "mid" | "late" | "volume_end";
   cwd?: string;
   timeoutMs?: number;
@@ -327,6 +403,8 @@ async function generateSingleCliffhangerProposal(args: {
       next_volume_teaser?: string;
     };
     warnings?: string[];
+    advisory_scores?: CoreHookAdvisoryScores;
+    reader_question_update?: string;
   }>({
     systemContext: [
       "あなたは商業漫画 (なろう系コミカライズ、KDP+KU 1巻10万円目標) の編集者として、",
@@ -345,6 +423,8 @@ async function generateSingleCliffhangerProposal(args: {
       "- next_opening_hook_hint は最低30字 (次話 opening の設計に使うので具体的に)",
       "- 巻末でない場合 (volume_position !== volume_end) は next_volume_teaser を返さない",
       "- メタ台詞 (「次巻で」「To be continued」など作中キャラが言わない言葉) は避ける",
+      "- core_hook は補助情報として必ず参照し、引きで読者の問いを更新・深化させる",
+      "- LLM judge は advisory_scores の5指標と reader_question_update だけ。単独で候補を不採用にしてはならない",
     ].join("\n"),
     materials: {
       bible_meta: JSON.stringify(
@@ -354,10 +434,12 @@ async function generateSingleCliffhangerProposal(args: {
           genre: bible.meta.genre,
           tone_profile: bible.meta.tone_profile,
           profile_id: bible.meta.profile_id,
+          core_hook: bible.meta.core_hook,
         },
         null,
         2,
       ),
+      core_hook: JSON.stringify(bible.meta.core_hook ?? null, null, 2),
       characters: charsBlock,
       visual_motifs: JSON.stringify(bible.visual_motifs ?? [], null, 2),
       pattern_id: pattern.id,
@@ -379,6 +461,8 @@ async function generateSingleCliffhangerProposal(args: {
       `- last_page_importance_pattern: ${importancePatternStr} を尊重 (5 panel 想定)`,
       `- 最終 panel に視線の山 (importance=5) を作る`,
       `- pull_link.next_opening_hook_hint は次話 opening_hook の設計者が読んでも分かる具体的な予告 (30字以上)`,
+      `- core_hook が存在する場合、reader_question を次話/次巻へどう更新するか reader_question_update に明記する`,
+      `- advisory_scores は reader_question_clarity / hook_specificity / reward_expectation / staleness_risk / core_hook_reflection_evidence の5指標だけを 1-5 で返す`,
       `- volume_position=${volumePosition}: ${volumePosition === "volume_end" ? "巻末。next_volume_teaser も生成し、is_volume_end=true" : "話末 (巻内連続)。is_volume_end=false、next_volume_teaser 不要"}`,
       `- メタ台詞禁則を厳守`,
     ].join("\n"),
@@ -391,8 +475,11 @@ async function generateSingleCliffhangerProposal(args: {
   return {
     pattern_id: pattern.id,
     pattern_name: pattern.name,
+    deterministic_score: args.deterministicScore,
     rationale: result.rationale,
     expected_effect: result.expected_effect,
+    advisory_scores: result.advisory_scores,
+    reader_question_update: result.reader_question_update,
     last_page: {
       page_no: result.last_page.page_no,
       page_role: "cliffhanger",

@@ -26,13 +26,34 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+function isRewardMode(value: unknown): boolean {
+  return (
+    value === "reveal" ||
+    value === "intimacy" ||
+    value === "power_growth" ||
+    value === "justice" ||
+    value === "spectacle" ||
+    value === "comfort" ||
+    value === "mystery_progress" ||
+    value === "custom"
+  );
+}
+
 function isCoreHook(value: unknown): value is CoreHookV2 {
   if (!isRecord(value)) return false;
-  return (
+  const requiredOk =
     typeof value.one_liner === "string" &&
     (value.type === "A" || value.type === "B" || value.type === "C") &&
     Array.isArray(value.hit_references) &&
-    value.hit_references.every((item) => typeof item === "string")
+    value.hit_references.every((item) => typeof item === "string");
+  if (!requiredOk) return false;
+
+  // Phase 11-1 追加項目は optional。存在する場合だけ型を確認する。
+  return (
+    (value.mechanic === undefined || typeof value.mechanic === "string") &&
+    (value.reader_question === undefined || typeof value.reader_question === "string") &&
+    (value.reward_mode === undefined || isRewardMode(value.reward_mode)) &&
+    (value.custom_reward_mode === undefined || typeof value.custom_reward_mode === "string")
   );
 }
 
