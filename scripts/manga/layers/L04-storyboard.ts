@@ -26,6 +26,7 @@ import {
   extractStoryboardFromShotlist,
   validateStoryboardEntityBinding,
 } from "../../../src/lib/manga/storyboard-v2/storyboard-extractor";
+import { validateStoryboardPanelCounts } from "../../../src/lib/manga/page-director-v2/panel-count-validator";
 import { buildStoryboardFromSceneGraph, enrichStoryboardWithLLM } from "../../../src/lib/manga/scene-graph/storyboard-from-scenes";
 import {
   repoRelativePath,
@@ -160,7 +161,9 @@ async function buildStoryboard(args: Args, bible: BibleSnapshotV2, directive?: s
       throw new Error("scene_graph.json is not a valid SceneGraphV1");
     }
     const sceneGraph = sgRaw as SceneGraphV1;
-    let storyboard = buildStoryboardFromSceneGraph(sceneGraph, bible);
+    let storyboard = buildStoryboardFromSceneGraph(sceneGraph, bible, {
+      panelRangeProfile: { byBeatType: true },
+    });
 
     // panel-scene 継承検査 (B5-1) を兼ねる
     const inheritance = validatePanelSceneInheritance(
@@ -190,6 +193,7 @@ async function buildStoryboard(args: Args, bible: BibleSnapshotV2, directive?: s
     shotlist,
     panelsPerPageRange: { min: 4, max: 7 },
     avgPanelsPerPage: 5,
+    generationProfile: args.profile,
     generationProfileDirective: directive,
   });
 }
@@ -201,10 +205,17 @@ function validateOrThrow(storyboard: EpisodeStoryboardV2, bible: BibleSnapshotV2
   }
 }
 
+function emitPanelCountWarnings(storyboard: EpisodeStoryboardV2, args: Args): void {
+  const { warnings } = validateStoryboardPanelCounts(storyboard, args.profile);
+  for (const warning of warnings) {
+    console.warn(`[L04] WARNING: ${warning}`);
+  }
+}
+
 async function main() {
   const args = parseArgs();
   if (args.variants === 1) {
-    console.log(`[L04] slug=${args.slug} ep=${args.episode} mode=${args.fromSceneGraph ? "scene-graph" : "shotlist"} dry-run=${args.dryRun}`);
+    console.log(`[L04] slug=${args.slug} ep=${args.episode} mode=${args.fromSceneGraph ? "scene-graph" : "shotlist"} dry-run=${args.dryRun} profile=${args.profile}`);
   } else {
     console.log(`[L04] slug=${args.slug} ep=${args.episode} mode=${args.fromSceneGraph ? "scene-graph" : "shotlist"} dry-run=${args.dryRun} variants=${args.variants} profile=${args.profile} concurrency=${args.concurrency}`);
   }
@@ -227,6 +238,7 @@ async function main() {
       console.log(`[L04] generating proposal ${proposalId} (${index + 1}/${proposalIds.length}) profile=${args.profile}`);
       const storyboard = await buildStoryboard(args, bible, directive);
       validateOrThrow(storyboard, bible);
+      emitPanelCountWarnings(storyboard, args);
       const targetPath = storyboardAltProposalPath(args.slug, args.episode, proposalId);
       await fs.mkdir(episodeDir(args.slug, args.episode), { recursive: true });
       await fs.mkdir(path.dirname(targetPath), { recursive: true });
@@ -260,8 +272,10 @@ async function main() {
     return;
   }
 
-  const storyboard = await buildStoryboard(args, bible);
+  const directive = profileDirective(args.profile);
+  const storyboard = await buildStoryboard(args, bible, directive);
   validateOrThrow(storyboard, bible);
+  emitPanelCountWarnings(storyboard, args);
 
   const totalPanels = storyboard.pages.reduce((n, p) => n + p.panels.length, 0);
   if (args.dryRun) {

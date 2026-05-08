@@ -40,6 +40,8 @@ import { runCodexText } from "../llm/codex-text";
 export type BuildStoryboardOptions = {
   /** B5-5a 段階では panel.action と key_visual に scene 由来の placeholder を入れる */
   placeholderActions?: boolean;
+  /** Phase 2 opt-in: beat_type に応じて scene.panel_range の page 配分を調整する */
+  panelRangeProfile?: { byBeatType?: boolean };
 };
 
 export function buildStoryboardFromSceneGraph(
@@ -56,7 +58,7 @@ export function buildStoryboardFromSceneGraph(
   for (const scene of sceneGraph.scenes) {
     const panels = buildPanelsForScene(scene, bible, placeholderActions);
     for (const panel of panels) {
-      const pageNo = pickPageForPanel(panel, scene);
+      const pageNo = pickPageForPanel(panel, scene, options.panelRangeProfile);
       const list = pageToPanels.get(pageNo) ?? [];
       list.push(panel);
       pageToPanels.set(pageNo, list);
@@ -225,7 +227,11 @@ function buildPanelsForScene(
  * scene の panel_range と page_range は呼び出し元が整合するように与える前提。
  * 同 scene 内の panel を page_range に均等割り。
  */
-function pickPageForPanel(panel: PanelV2, scene: Scene): number {
+function pickPageForPanel(
+  panel: PanelV2,
+  scene: Scene,
+  panelRangeProfile?: BuildStoryboardOptions["panelRangeProfile"]
+): number {
   const pageStart = scene.page_range.start;
   const pageEnd = scene.page_range.end;
   const pageCount = pageEnd - pageStart + 1;
@@ -234,6 +240,10 @@ function pickPageForPanel(panel: PanelV2, scene: Scene): number {
   const panelEnd = scene.panel_range.end_panel_no;
   const panelTotal = panelEnd - panelStart + 1;
   const panelOffset = panel.panel_no - panelStart;
+  if (panelRangeProfile?.byBeatType && isSparseBeatType(scene.beat_type)) {
+    const pageIdx = Math.min(pageCount - 1, Math.floor(panelOffset / 3));
+    return pageStart + pageIdx;
+  }
   const pageIdx = Math.min(
     pageCount - 1,
     Math.floor((panelOffset / Math.max(1, panelTotal)) * pageCount)
@@ -383,6 +393,10 @@ function mapBeatTypeToPageRole(beat: Scene["beat_type"]): PageRoleV2 {
     default:
       return "buildup";
   }
+}
+
+function isSparseBeatType(beat: Scene["beat_type"]): boolean {
+  return beat === "cliff" || (beat as string) === "hook";
 }
 
 function buildPlaceholderAction(scene: Scene, idx: number, total: number): string {

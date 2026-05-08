@@ -5,6 +5,7 @@
  * entity_id binding は L3 で確定済み、ここでは意味的な ネーム を補強する。
  */
 import { extractStructuredJson } from "../llm/codex-text";
+import { buildPanelCountHintTable, type GenerationProfile } from "../page-director-v2/panel-count-hint";
 import { buildCraftGuideDirectives } from "./craft-guide-directives";
 import { loadDensityProfile } from "./density-profile-loader";
 import type {
@@ -108,13 +109,13 @@ export async function extractStoryboardFromShotlist(args: {
   shotlist: ShotlistV2;
   panelsPerPageRange?: { min: number; max: number };
   avgPanelsPerPage?: number;
+  generationProfile?: GenerationProfile;
   generationProfileDirective?: string;
   cwd?: string;
   timeoutMs?: number;
 }): Promise<EpisodeStoryboardV2> {
   const { bible, shotlist } = args;
-  const range = args.panelsPerPageRange ?? { min: 4, max: 7 };
-  const avg = args.avgPanelsPerPage ?? 5;
+  const profile = args.generationProfile ?? "balanced";
   const densityProfile = loadDensityProfile(bible.meta.genre) ?? undefined;
 
   const charsBlock = bible.characters
@@ -149,8 +150,8 @@ export async function extractStoryboardFromShotlist(args: {
       "- セリフは『ナレーション/モノローグ/対話/SFX』のいずれかに分類。混ぜない。",
       "- 1コマあたり吹き出し合計 0-2 個、合計文字数 80字以内。",
       "- silence=true の panel は dialogue/monologue/narration/sfx すべて空配列。",
-      `- 各ページの panel_count は ${range.min}〜${range.max} の範囲で variation を付ける。固定 N の monotonous な配分は商業漫画的に NG。`,
-      `- 配分目安: cliffhanger / 強い見せ場 = ${range.min}〜${avg - 1} (大ゴマ多用), 対話・説明・密度ページ = ${avg + 1}〜${range.max} (情報密度高め), 標準 = ${avg} 中心。`,
+      "- 各ページの panel_count は page_role 別 hint を主指針にし、固定 N の monotonous な配分は商業漫画的に NG。",
+      buildPanelCountHintTable(profile),
       "- 22ページ目標で全 page の panel_count が同じ値に偏ることは禁止。最低 3 種類の panel_count を使う。",
       "- ページ末 (cliffhanger / page_end_hook) は重要 panel を最後に置く。",
       args.generationProfileDirective ? `\n## Generation Profile Directive\n${args.generationProfileDirective}` : "",

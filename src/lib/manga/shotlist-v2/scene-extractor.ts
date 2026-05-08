@@ -6,6 +6,7 @@
  */
 import type { BibleSnapshotV2 } from "../schemas-v2";
 import { extractStructuredJson } from "../llm/codex-text";
+import { buildPanelCountHintTable } from "../page-director-v2/panel-count-hint";
 
 export type ShotlistScene = {
   scene_id: string;
@@ -91,7 +92,6 @@ export async function extractShotlistFromBible(args: {
 }): Promise<ShotlistV2> {
   const { bible, episodeNo, episodeBrief, targetPages } = args;
   const avgPanelsPerPage = args.targetPanelsPerPage ?? 5;
-  const range = args.panelsPerPageRange ?? { min: 4, max: 7 };
   const targetPanels = Math.round(targetPages * avgPanelsPerPage);
 
   const charsBlock = bible.characters
@@ -137,8 +137,8 @@ export async function extractShotlistFromBible(args: {
     instruction: [
       `第${episodeNo}話の shotlist を構築してください。`,
       `総ページ数 ${targetPages}、総コマ数 ${targetPanels} 前後。`,
-      `各ページの panel_count は ${range.min}〜${range.max} の範囲で variation を付けること。固定 ${avgPanelsPerPage} の monotonous な配分は商業漫画的に NG。`,
-      `配分目安: cliffhanger / 強い見せ場 = ${range.min}〜${avgPanelsPerPage-1} (大ゴマ多用), 対話・説明・密度ページ = ${avgPanelsPerPage+1}〜${range.max} (情報密度高め), 標準ページ = ${avgPanelsPerPage} 中心。`,
+      "各ページの panel_count は page_role 別 hint を主指針にし、固定 N の monotonous な配分は商業漫画的に NG。",
+      buildPanelCountHintTable("balanced"),
       "scenes は 4-7 個、各 scene の panel_idx_range が連続していて重複なく全 panel を覆うこと。",
       "panels は 1-indexed の panel_no で連続採番。最終 panel が cliffhanger に対応する。",
     ].join("\n"),
