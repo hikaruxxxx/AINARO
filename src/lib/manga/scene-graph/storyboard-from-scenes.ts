@@ -417,7 +417,7 @@ export type EnrichedPanelDetail = {
 export async function enrichStoryboardWithLLM(
   storyboard: EpisodeStoryboardV2,
   sceneGraph: SceneGraphV1,
-  options?: { timeoutMsPerScene?: number; cwd?: string }
+  options?: { timeoutMsPerScene?: number; cwd?: string; generationProfileDirective?: string }
 ): Promise<EpisodeStoryboardV2> {
   const cwd = options?.cwd ?? process.env.AINARO_REPO_ROOT ?? process.cwd();
   const timeoutMs = options?.timeoutMsPerScene ?? 5 * 60 * 1000;
@@ -444,7 +444,7 @@ export async function enrichStoryboardWithLLM(
     const count = end - start + 1;
     if (count <= 0) continue;
 
-    const task = buildPanelDetailPrompt(scene, count);
+    const task = buildPanelDetailPrompt(scene, count, options?.generationProfileDirective);
     const result = await runCodexText<{ panels: EnrichedPanelDetail[] }>({
       task,
       format: "json",
@@ -497,7 +497,7 @@ export async function enrichStoryboardWithLLM(
  * scene の文脈 (key_visual_intent / beat / mode / dialogue_plan / protagonist_arc_state) を渡し、
  * 各 panel の action / key_visual / shot_type / camera / dialogue / monologue を返してもらう。
  */
-export function buildPanelDetailPrompt(scene: Scene, panelCount: number): string {
+export function buildPanelDetailPrompt(scene: Scene, panelCount: number, generationProfileDirective?: string): string {
   const startNo = scene.panel_range.start_panel_no;
   const lines: string[] = [];
   lines.push(`あなたは AINARO 漫画 v2 の panel 詳細化エージェントです。`);
@@ -535,6 +535,9 @@ export function buildPanelDetailPrompt(scene: Scene, panelCount: number): string
   lines.push(`5. camera は eye_level / low_angle / high_angle / over_shoulder / birds_eye から選択。`);
   lines.push(`6. dialogue / monologue の character_id は cast 内のもの限定。key_lines を panel に分配し、新規台詞を増やさない。`);
   lines.push(`7. scene_exclusive uniqueness の text は他 scene で使われていないため、この scene 内 panel でのみ書ける。`);
+  if (generationProfileDirective) {
+    lines.push(`8. generation profile: ${generationProfileDirective}`);
+  }
   lines.push("");
   lines.push(`## 出力形式`);
   lines.push("```json");

@@ -38,7 +38,12 @@ import type {
   PagePlanV2,
 } from "../../../src/lib/manga/schemas-v2";
 
-type Args = { slug: string; episode: number };
+type Args = {
+  slug: string;
+  episode: number;
+  storyboardPath?: string;
+  outDir?: string;
+};
 
 function parseArgs(): Args {
   const a: Partial<Args> = {};
@@ -53,6 +58,8 @@ function parseArgs(): Args {
     if (!key || val === null) continue;
     if (key === "slug") a.slug = val;
     else if (key === "episode") a.episode = Number(val);
+    else if (key === "storyboard-path") a.storyboardPath = val;
+    else if (key === "out-dir") a.outDir = val;
   }
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
   return a as Args;
@@ -92,16 +99,19 @@ async function buildRefsExistsPredicate(slug: string): Promise<(rel: string) => 
 
 async function main() {
   const args = parseArgs();
-  console.log(`[L08.5] slug=${args.slug} ep=${args.episode}`);
+  const isVariantPreview = Boolean(args.storyboardPath || args.outDir);
+  console.log(`[L08.5] slug=${args.slug} ep=${args.episode}${isVariantPreview ? " variant-preview=true" : ""}`);
 
   const bible = JSON.parse(await fs.readFile(bibleSnapshotPath(args.slug), "utf-8")) as BibleSnapshotV2;
-  const storyboard = JSON.parse(await fs.readFile(storyboardPath(args.slug, args.episode), "utf-8")) as EpisodeStoryboardV2;
+  const storyboardSourcePath = args.storyboardPath ?? storyboardPath(args.slug, args.episode);
+  const storyboard = JSON.parse(await fs.readFile(storyboardSourcePath, "utf-8")) as EpisodeStoryboardV2;
   const pagePlan = JSON.parse(await fs.readFile(pagePlanPath(args.slug, args.episode), "utf-8")) as PagePlanV2;
 
   const refsExists = await buildRefsExistsPredicate(args.slug);
 
-  const outDir = nameDir(args.slug, args.episode);
+  const outDir = args.outDir ?? nameDir(args.slug, args.episode);
   await fs.mkdir(outDir, { recursive: true });
+  const proposalId = isVariantPreview ? path.basename(outDir) : undefined;
 
   const sbPagesByNo = new Map(storyboard.pages.map((p) => [p.page_no, p]));
   const manifestPages: NameManifestPage[] = [];
@@ -179,7 +189,10 @@ async function main() {
     counts_by_rule: countByRule(allFindings),
     counts_by_severity: countBySeverity(allFindings),
   };
-  await fs.writeFile(nameAuditPath(args.slug, args.episode), JSON.stringify(auditReport, null, 2), "utf-8");
+  const auditPath = isVariantPreview
+    ? path.join(outDir, "audit.json")
+    : nameAuditPath(args.slug, args.episode);
+  await fs.writeFile(auditPath, JSON.stringify(auditReport, null, 2), "utf-8");
 
   const manifest: NameManifest = {
     schema_version: 1,
@@ -189,34 +202,44 @@ async function main() {
     generated_at: new Date().toISOString(),
     pages: manifestPages,
   };
-  await fs.writeFile(nameManifestPath(args.slug, args.episode), JSON.stringify(manifest, null, 2), "utf-8");
+  const manifestPath = isVariantPreview
+    ? path.join(path.dirname(outDir), `name_manifest.${proposalId ?? "variant"}.json`)
+    : nameManifestPath(args.slug, args.episode);
+  await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), "utf-8");
 
-  // Phase 2C: 操作 UI は Novelis Console (SPA) に統合済み。旧 index.html は redirect stub のみ残す。
-  await fs.writeFile(
-    nameIndexHtmlPath(args.slug, args.episode),
-    renderSpaRedirectStub(args.slug, args.episode),
-    "utf-8"
-  );
-
-  // name_approval.json が無ければ全ページ pending で初期化
-  const approvalP = nameApprovalPath(args.slug, args.episode);
-  if (!(await fileExists(approvalP))) {
-    const approval = pendingApproval(
-      storyboard.episode_id,
-      pagePlan.pages.map((p) => p.page_no)
+  if (!isVariantPreview) {
+    // Phase 2C: 操作 UI は Novelis Console (SPA) に統合済み。旧 index.html は redirect stub のみ残す。
+    await fs.writeFile(
+      nameIndexHtmlPath(args.slug, args.episode),
+      renderSpaRedirectStub(args.slug, args.episode),
+      "utf-8"
     );
-    await fs.writeFile(approvalP, JSON.stringify(approval, null, 2), "utf-8");
-    console.log(`[L08.5] name_approval.json initialized (all pending)`);
-  } else {
-    console.log(`[L08.5] name_approval.json already exists, kept`);
+  }
+
+  if (!isVariantPreview) {
+    // name_approval.json が無ければ全ページ pending で初期化
+    const approvalP = nameApprovalPath(args.slug, args.episode);
+    if (!(await fileExists(approvalP))) {
+      const approval = pendingApproval(
+        storyboard.episode_id,
+        pagePlan.pages.map((p) => p.page_no)
+      );
+      await fs.writeFile(approvalP, JSON.stringify(approval, null, 2), "utf-8");
+      console.log(`[L08.5] name_approval.json initialized (all pending)`);
+    } else {
+      console.log(`[L08.5] name_approval.json already exists, kept`);
+    }
   }
 
   const totalWarnings = manifestPages.reduce((s, p) => s + p.warnings.length, 0);
   const sev = auditReport.counts_by_severity;
   console.log(`[L08.5] DONE: pages=${manifestPages.length} manifest_warnings=${totalWarnings} audit=info:${sev.info ?? 0}/warn:${sev.warn ?? 0}/error:${sev.error ?? 0}`);
   console.log(`[L08.5] outputs: ${outDir}`);
-  console.log(`[L08.5] audit:   ${nameAuditPath(args.slug, args.episode)}`);
-  console.log(`[L08.5] UI:      /works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/#name-gate`);
+  console.log(`[L08.5] manifest: ${manifestPath}`);
+  console.log(`[L08.5] audit:    ${auditPath}`);
+  if (!isVariantPreview) {
+    console.log(`[L08.5] UI:       /works/${args.slug}/episodes/ep${String(args.episode).padStart(2, "0")}/#name-gate`);
+  }
 }
 
 function renderSpaRedirectStub(slug: string, episode: number): string {

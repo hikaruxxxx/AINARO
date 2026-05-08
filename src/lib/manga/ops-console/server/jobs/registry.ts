@@ -112,6 +112,9 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
       { name: "--from-scene-graph", pattern: /^$/ },
       { name: "--dry-run", pattern: /^$/ },
       { name: "--enrich", pattern: /^$/ },
+      { name: "--variants", pattern: /^[1-9]\d?$/ },
+      { name: "--profile", pattern: /^(balanced|cinematic|clarity-first)$/ },
+      { name: "--concurrency", pattern: /^[1-9]$/ },
     ],
     timeoutMs: 30 * 60 * 1000,
   },
@@ -143,7 +146,10 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
   "L08.5": {
     script: "scripts/manga/layers/L08-5-name-preview.ts",
     scope: "episode",
-    allowedFlags: [],
+    allowedFlags: [
+      { name: "--storyboard-path", pattern: /^[A-Za-z0-9_\-./]{1,500}$/ },
+      { name: "--out-dir", pattern: /^[A-Za-z0-9_\-./]{1,500}$/ },
+    ],
     timeoutMs: 10 * 60 * 1000,
   },
   L09: {

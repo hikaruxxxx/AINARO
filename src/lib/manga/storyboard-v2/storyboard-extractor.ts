@@ -107,6 +107,7 @@ export async function extractStoryboardFromShotlist(args: {
   shotlist: ShotlistV2;
   panelsPerPageRange?: { min: number; max: number };
   avgPanelsPerPage?: number;
+  generationProfileDirective?: string;
   cwd?: string;
   timeoutMs?: number;
 }): Promise<EpisodeStoryboardV2> {
@@ -150,6 +151,7 @@ export async function extractStoryboardFromShotlist(args: {
       `- 配分目安: cliffhanger / 強い見せ場 = ${range.min}〜${avg - 1} (大ゴマ多用), 対話・説明・密度ページ = ${avg + 1}〜${range.max} (情報密度高め), 標準 = ${avg} 中心。`,
       "- 22ページ目標で全 page の panel_count が同じ値に偏ることは禁止。最低 3 種類の panel_count を使う。",
       "- ページ末 (cliffhanger / page_end_hook) は重要 panel を最後に置く。",
+      args.generationProfileDirective ? `\n## Generation Profile Directive\n${args.generationProfileDirective}` : "",
       "",
       // Phase X WX-3 で追加: craft 知見を tone_profile / genre に応じて注入
       buildCraftGuideDirectives(
@@ -189,6 +191,7 @@ export async function extractStoryboardFromShotlist(args: {
       "panels_extra[] には全 panel_id について 1 entry。",
       "panel text 生成では systemContext と materials の Text Quality Directives を strict に適用してください。",
       "dialogue / monologue / narration / sfx は分類を混ぜず、禁止語・opening_hook・ナビ発話・speech_style の全ガードを通過する文だけを出力してください。",
+      args.generationProfileDirective ? `generation profile: ${args.generationProfileDirective}` : "",
     ].join("\n"),
     outputSchema: STORYBOARD_SCHEMA,
     cwd: args.cwd,
