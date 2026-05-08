@@ -154,6 +154,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
       { name: "--version", pattern: /^v[0-9]+$/ },
       { name: "--revision-id", pattern: /^[0-9a-f-]{36}$/i },
       { name: "--skip-name-gate", pattern: /^$/ },
+      { name: "--auto-version", pattern: /^$/ },
     ],
     timeoutMs: 30 * 60 * 1000,
   },

@@ -87,9 +87,15 @@ export async function spawnLayerWithModal(opts: {
   slug: string;
   episode: number;
   extraArgs?: Record<string, string>;
+  modalOverrides?: {
+    title?: string;
+    warning?: string;
+    description?: string;
+    confirmLabel?: string;
+  };
   callbacks?: SpawnCallbacks;
 }): Promise<void> {
-  const { layer, status = "missing", slug, episode, extraArgs, callbacks } = opts;
+  const { layer, status = "missing", slug, episode, extraArgs, modalOverrides, callbacks } = opts;
 
   // L01 / L02b は引数 (concept path / volume) が必要なので、再実行 UI は該当 view に委譲。
   if (layer === "L01") {
@@ -105,17 +111,19 @@ export async function spawnLayerWithModal(opts: {
 
   const label = layerLabel(layer);
   const result = await openLaunchModal({
-    title: `${layer} ${label.title} を ${status === "ready" ? "再実行" : "生成"}`,
-    warning:
+    title: modalOverrides?.title ?? `${layer} ${label.title} を ${status === "ready" ? "再実行" : "生成"}`,
+    warning: modalOverrides?.warning ?? (
       status === "ready"
         ? "既に生成済みです。再実行すると現状の成果物が上書きされる可能性があります。"
-        : undefined,
-    description:
+        : undefined
+    ),
+    description: modalOverrides?.description ?? (
       status === "ready"
         ? "成果物のバックアップは取得しません (Phase 8C で対応予定)。続行する場合は git で diff を確認してください。"
-        : undefined,
+        : undefined
+    ),
     args: launchArgsFor(layer),
-    confirmLabel: status === "ready" ? "再実行する" : "生成する",
+    confirmLabel: modalOverrides?.confirmLabel ?? (status === "ready" ? "再実行する" : "生成する"),
   });
   if (!result) return;
 

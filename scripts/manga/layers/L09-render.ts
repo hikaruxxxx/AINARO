@@ -68,6 +68,7 @@ type Args = {
   pages?: number[];
   concurrency: number;
   skipNameGate: boolean;
+  autoVersion: boolean;
   /** Phase C: 出力 version。"v1" は既存命名 (p{NN}.png)、v2+ は p{NN}_vN.png */
   version: string;
   /**
@@ -80,9 +81,9 @@ type Args = {
 };
 
 function parseArgs(): Args {
-  const a: Partial<Args> = { concurrency: 2, skipNameGate: false, version: "v1" };
+  const a: Partial<Args> = { concurrency: 2, skipNameGate: false, autoVersion: false, version: "v1" };
   const argv = process.argv.slice(2);
-  const BOOLEAN_FLAGS = new Set(["skip-name-gate"]);
+  const BOOLEAN_FLAGS = new Set(["skip-name-gate", "auto-version"]);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     const eq = arg.match(/^--([^=]+)=(.*)$/);
@@ -96,6 +97,7 @@ function parseArgs(): Args {
       key = flag[1];
       if (BOOLEAN_FLAGS.has(key)) {
         if (key === "skip-name-gate") a.skipNameGate = true;
+        else if (key === "auto-version") a.autoVersion = true;
         continue;
       }
       const nextToken = argv[i + 1];
@@ -115,6 +117,25 @@ function parseArgs(): Args {
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
   if (a.version && !/^v\d+$/.test(a.version)) throw new Error(`--version must be vN (got ${a.version})`);
   return a as Args;
+}
+
+async function computeNextVersion(slug: string, episode: number): Promise<string> {
+  const dir = rendersDir(slug, episode);
+  let max = 0;
+  try {
+    const files = await fs.readdir(dir);
+    for (const f of files) {
+      const m = f.match(/^p\d+_v(\d+)\.png$/);
+      if (m) {
+        max = Math.max(max, Number(m[1]));
+        continue;
+      }
+      if (/^p\d+\.png$/.test(f)) max = Math.max(max, 1);
+    }
+  } catch {
+    // renders dir が空/未作成でも v2 から始める。
+  }
+  return `v${Math.max(max, 1) + 1}`;
 }
 
 /** v1 → p{NN}.png、v2+ → p{NN}_vN.png */
@@ -199,6 +220,10 @@ async function main() {
   const resolved = JSON.parse(await fs.readFile(resolvedRefsPath(args.slug, args.episode), "utf-8")) as ResolvedRefs;
 
   await fs.mkdir(rendersDir(args.slug, args.episode), { recursive: true });
+  if (args.autoVersion) {
+    args.version = await computeNextVersion(args.slug, args.episode);
+    console.log(`[L09] auto-version: using ${args.version}`);
+  }
 
   // Phase C: revision-id 指定時は queue から userInstructions を取得して single-panel 経路へ
   let revisionEntry: RevisionEntry | null = null;
