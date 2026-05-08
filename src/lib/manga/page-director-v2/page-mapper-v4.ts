@@ -1,9 +1,27 @@
 import type { CapabilityProfile } from "../capability/capability";
-import type { EpisodeStoryboardV2, PagePlanV2 } from "../schemas-v2";
+import type { EpisodeStoryboardV2, PagePlanPage, PagePlanV2 } from "../schemas-v2";
 import { buildPagePlanFromStoryboardV3 } from "./page-mapper-v3";
 import { applyPattern } from "./pattern-applier";
 import type { PatternDict } from "./pattern-loader";
-import { matchPattern } from "./pattern-matcher";
+import { isNonRect, matchPattern } from "./pattern-matcher";
+
+export type LayoutMatchMeta = {
+  pattern_id: string;
+  phase: 1 | 2 | 3;
+  actualApplied: boolean;
+  score: number;
+  penalty: number;
+  nonRect: boolean;
+  fallbackReason?: string;
+};
+
+type PagePlanPageWithLayoutMatchMeta = PagePlanPage & {
+  _layout_match_meta?: LayoutMatchMeta;
+};
+
+type PagePlanV2WithLayoutMatchMeta = Omit<PagePlanV2, "pages"> & {
+  pages: PagePlanPageWithLayoutMatchMeta[];
+};
 
 function polygonWithinPage(args: {
   polygon: [number, number][];
@@ -18,7 +36,7 @@ export function buildPagePlanFromStoryboardV4(args: {
   capability: CapabilityProfile;
   dict: PatternDict;
   storyboardSubtype?: string;
-}): PagePlanV2 {
+}): PagePlanV2WithLayoutMatchMeta {
   const basePlan = buildPagePlanFromStoryboardV3({
     storyboard: args.storyboard,
     capability: args.capability,
@@ -50,7 +68,14 @@ export function buildPagePlanFromStoryboardV4(args: {
     for (const warning of match.warnings) {
       console.warn(`[page-mapper-v4] page ${basePage.page_no}: ${warning}; pattern=${match.pattern.id}`);
     }
-    history.push(match.pattern.id);
+
+    const matchMetaBase = {
+      pattern_id: match.pattern.id,
+      phase: match.phase,
+      score: match.score,
+      penalty: match.penalty,
+      nonRect: isNonRect(match.pattern),
+    };
 
     const applied = applyPattern({
       panels: basePage.panels,
@@ -66,16 +91,30 @@ export function buildPagePlanFromStoryboardV4(args: {
       })
     );
     if (invalidPanel) {
+      const fallbackReason = `polygon out of page bounds on panel=${invalidPanel.panel_id}`;
       console.warn(
-        `[page-mapper-v4] page ${basePage.page_no}: pattern=${match.pattern.id} polygon out of page bounds on panel=${invalidPanel.panel_id}; keeping v3 rect layout`
+        `[L05] page ${basePage.page_no}: v4 polygon validation failed, falling back to v3 (reason: pattern=${match.pattern.id} ${fallbackReason})`
       );
-      return basePage;
+      return {
+        ...basePage,
+        _layout_match_meta: {
+          ...matchMetaBase,
+          actualApplied: false,
+          fallbackReason,
+        },
+      };
     }
+
+    history.push(match.pattern.id);
 
     return {
       ...basePage,
       layout_template_id: `v4_${match.pattern.id}`,
       panels: applied.planPanels,
+      _layout_match_meta: {
+        ...matchMetaBase,
+        actualApplied: true,
+      },
     };
   });
 

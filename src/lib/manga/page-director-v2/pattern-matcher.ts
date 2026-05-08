@@ -37,6 +37,25 @@ const SIZE_RANK: Record<PatternSizeClass, number> = {
   xx_large: 5,
 };
 
+/**
+ * polygon が axis-aligned rect か判定。
+ * 4頂点で xs と ys がそれぞれ 2 種類の値しか持たない場合のみ true。
+ * 4頂点斜め台形 / 5+頂点 polygon は false。
+ */
+export function isAxisAlignedRect(polygon: Array<[number, number]>): boolean {
+  if (polygon.length !== 4) return false;
+  const xs = new Set(polygon.map(([x]) => x));
+  const ys = new Set(polygon.map(([, y]) => y));
+  return xs.size === 2 && ys.size === 2;
+}
+
+/**
+ * pattern の slot に non-rect (axis-aligned rect でない polygon) が 1 個でもあれば true。
+ */
+export function isNonRect(pattern: Pattern): boolean {
+  return pattern.slots.some((slot) => !isAxisAlignedRect(slot.polygon));
+}
+
 function roleMatches(pageRole: string, pattern: Pattern): boolean {
   if (pattern.page_role_hints.includes(pageRole)) return true;
   if (pageRole === "action") {

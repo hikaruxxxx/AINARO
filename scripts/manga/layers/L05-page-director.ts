@@ -23,6 +23,16 @@ import type { EpisodeStoryboardV2 } from "../../../src/lib/manga/schemas-v2";
 
 type MapperVersion = "v2" | "v3" | "v4";
 type Args = { slug: string; episode: number; capabilityModel: string; mapperVersion?: MapperVersion };
+type LayoutMatchSummaryPage = {
+  page_no: number;
+  _layout_match_meta?: {
+    pattern_id: string;
+    phase: 1 | 2 | 3;
+    actualApplied: boolean;
+    score: number;
+    nonRect: boolean;
+  };
+};
 
 function parseMapperVersion(value: string, label: string): MapperVersion {
   if (value !== "v2" && value !== "v3" && value !== "v4") {
@@ -58,6 +68,7 @@ async function main() {
   // a08+ で問題が出たら `--mapper v3` または `MANGA_MAPPER=v3` で従前挙動に戻せる。
   const mapperVersion = parseMapperVersion(process.env.MANGA_MAPPER ?? args.mapperVersion ?? "v4", "MANGA_MAPPER");
   console.log(`[L05] slug=${args.slug} ep=${args.episode} mapper=${mapperVersion}`);
+  console.log("[L05] default mapper: v4 (env MANGA_MAPPER=v3 で旧挙動へ切替可)");
 
   const storyboard = JSON.parse(await fs.readFile(storyboardPath(args.slug, args.episode), "utf-8")) as EpisodeStoryboardV2;
   const capability = await loadCapabilityProfile(capabilityProfilePath(args.capabilityModel));
@@ -71,6 +82,16 @@ async function main() {
     : mapperVersion === "v3"
       ? buildPagePlanFromStoryboardV3({ storyboard, capability })
       : buildPagePlanFromStoryboard({ storyboard, capability });
+
+  const pagesWithMatchMeta = plan.pages as LayoutMatchSummaryPage[];
+  process.stderr.write("[L05] match summary:\n");
+  for (const page of pagesWithMatchMeta) {
+    const meta = page._layout_match_meta;
+    if (!meta) continue;
+    process.stderr.write(
+      `  P.${page.page_no}: pattern=${meta.pattern_id} score=${meta.score.toFixed(2)} phase=${meta.phase} ${meta.nonRect ? "nonRect" : "rect"}${meta.actualApplied ? "" : " [v3-fallback]"}\n`
+    );
+  }
 
   await fs.mkdir(episodeDir(args.slug, args.episode), { recursive: true });
   await fs.writeFile(pagePlanPath(args.slug, args.episode), JSON.stringify(plan, null, 2));
