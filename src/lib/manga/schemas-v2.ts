@@ -139,7 +139,41 @@ export type CharacterRelationV2 = {
   to_character_id: string;
   relation_type: string;
   description: string;
+  /** 推し導線の魅力軸（relation_type と独立。enum 外も string で許容するため未知文字列は warn） */
+  appeal_axis?: AppealAxis | string;
+  /** 作者主観の推し度 0-5 */
+  appeal_score_manual?: 0 | 1 | 2 | 3 | 4 | 5;
+  /** 自動推定の推し度 0-5（heuristic） */
+  appeal_score_auto?: number;
+  /** 推し導線として推奨するか */
+  is_recommended_pairing?: boolean;
+  /** 推し評価の根拠（手動 or 自動の証拠スニペット） */
+  appeal_evidence?: string[];
 };
+
+/** 推し導線の魅力軸（14種、relation_type と独立） */
+export type AppealAxis =
+  | "mentor_disciple"
+  | "rivalry"
+  | "loyalty"
+  | "protector_protected"
+  | "forbidden_bond"
+  | "co_conspirator"
+  | "unrequited_love"
+  | "mutual_rescue"
+  | "banter_tension"
+  | "status_gap"
+  | "found_family"
+  | "sibling_like"
+  | "betrayal_repair"
+  | "admiration_envy";
+
+/** primary_appeal_mode: 作品全体の主訴求モード */
+export type PrimaryAppealMode =
+  | "solo_growth"
+  | "ensemble_relation"
+  | "romance"
+  | "mystery";
 
 export type StyleDirectivesV2 = {
   /** 全話通底の画風 1-2文 */
@@ -294,6 +328,8 @@ export type BibleSnapshotV2 = {
     subtype?: DungeonModernSubtype;
     /** 中核ギミック1点突破。後方互換のため optional、必須化は bible-lint で担保する */
     core_hook?: CoreHookV2;
+    /** 作品全体の主訴求モード。後方互換 optional */
+    primary_appeal_mode?: PrimaryAppealMode;
   };
   world: WorldSpec;
   characters: CharacterEntryV2[];

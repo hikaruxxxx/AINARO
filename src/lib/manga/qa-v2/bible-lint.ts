@@ -39,6 +39,23 @@ export type BibleLintReport = {
 const TEMPLATE_TEXTS = ["TODO_post_bible_review", "TODO", "TBD", "未定", "後で書く"];
 const DUNGEON_MODERN_SUBTYPES = new Set(["external_social", "gacha_ui", "hybrid"]);
 const CORE_HOOK_TYPES = new Set(["A", "B", "C"]);
+const APPEAL_AXES = new Set([
+  "mentor_disciple",
+  "rivalry",
+  "loyalty",
+  "protector_protected",
+  "forbidden_bond",
+  "co_conspirator",
+  "unrequited_love",
+  "mutual_rescue",
+  "banter_tension",
+  "status_gap",
+  "found_family",
+  "sibling_like",
+  "betrayal_repair",
+  "admiration_envy",
+]);
+const CRITICAL_APPEAL_MODES = new Set(["romance", "ensemble_relation"]);
 
 function isModernDungeonGenre(genre: string | undefined): boolean {
   return genre === "modern_dungeon" || genre === "modern-dungeon" || genre === "dungeon-modern";
@@ -128,6 +145,26 @@ function staticLint(bible: BibleSnapshotV2): LintFinding[] {
     }
   }
 
+  const recommendedPairingCount = bible.relations.filter((r) => r.is_recommended_pairing === true).length;
+  const primaryAppealMode = bible.meta.primary_appeal_mode;
+  if (recommendedPairingCount < 2) {
+    if (primaryAppealMode && CRITICAL_APPEAL_MODES.has(primaryAppealMode)) {
+      f.push({
+        severity: "fatal",
+        scope: "global",
+        rule: "recommended_pairing_count_low_critical",
+        message: `meta.primary_appeal_mode=${primaryAppealMode} ですが、is_recommended_pairing=true の関係が ${recommendedPairingCount} 個です (最低 2 個必須)`,
+      });
+    } else {
+      f.push({
+        severity: "warn",
+        scope: "global",
+        rule: "recommended_pairing_count_low",
+        message: `is_recommended_pairing=true の関係が ${recommendedPairingCount} 個です (推し導線として最低 2 個推奨)`,
+      });
+    }
+  }
+
   // world
   if (bible.world.premise.length < 100) {
     f.push({ severity: "warn", scope: "world", rule: "premise_too_short", message: `premise が ${bible.world.premise.length}字 (最低 100字推奨)` });
@@ -198,6 +235,71 @@ function staticLint(bible: BibleSnapshotV2): LintFinding[] {
   }
   if (bible.volume_synopsis.summary.length < 200) {
     f.push({ severity: "warn", scope: "volume_synopsis", rule: "synopsis_short", message: `volume_synopsis.summary が ${bible.volume_synopsis.summary.length}字 (最低 200字)` });
+  }
+
+  for (const rel of bible.relations) {
+    const runtimeRel = rel as {
+      from_character_id?: unknown;
+      to_character_id?: unknown;
+      appeal_axis?: unknown;
+      appeal_score_manual?: unknown;
+      appeal_score_auto?: unknown;
+      is_recommended_pairing?: unknown;
+    };
+    const targetId = `${String(runtimeRel.from_character_id ?? "?")}->${String(runtimeRel.to_character_id ?? "?")}`;
+    if (
+      runtimeRel.appeal_score_manual !== undefined &&
+      (!Number.isInteger(runtimeRel.appeal_score_manual) ||
+        (runtimeRel.appeal_score_manual as number) < 0 ||
+        (runtimeRel.appeal_score_manual as number) > 5)
+    ) {
+      f.push({
+        severity: "fatal",
+        scope: "relation",
+        target_id: targetId,
+        rule: "appeal_score_manual_invalid_range",
+        message: `appeal_score_manual=${String(runtimeRel.appeal_score_manual)} は範囲外です (0-5 の整数のみ)`,
+      });
+    }
+    if (
+      typeof runtimeRel.appeal_axis === "string" &&
+      runtimeRel.appeal_axis.length > 0 &&
+      !APPEAL_AXES.has(runtimeRel.appeal_axis)
+    ) {
+      f.push({
+        severity: "warn",
+        scope: "relation",
+        target_id: targetId,
+        rule: "appeal_axis_unknown",
+        message: `appeal_axis="${runtimeRel.appeal_axis}" は定義済み14種の enum 外です。free-form として許容しますが運用語彙の追加候補です。`,
+      });
+    }
+    if (
+      runtimeRel.is_recommended_pairing === true &&
+      typeof runtimeRel.appeal_score_manual !== "number" &&
+      typeof runtimeRel.appeal_score_auto !== "number"
+    ) {
+      f.push({
+        severity: "warn",
+        scope: "relation",
+        target_id: targetId,
+        rule: "appeal_score_missing_on_recommended",
+        message: "推奨ペアですが appeal_score_manual / appeal_score_auto がどちらも未設定です。",
+      });
+    }
+    if (
+      typeof runtimeRel.appeal_score_manual === "number" &&
+      typeof runtimeRel.appeal_score_auto === "number" &&
+      Math.abs(runtimeRel.appeal_score_manual - runtimeRel.appeal_score_auto) >= 2
+    ) {
+      f.push({
+        severity: "warn",
+        scope: "relation",
+        target_id: targetId,
+        rule: "appeal_score_divergence",
+        message: `appeal_score_manual=${runtimeRel.appeal_score_manual} と appeal_score_auto=${runtimeRel.appeal_score_auto} の差が 2 以上です。`,
+      });
+    }
   }
 
   // テンプレ反復チェック (同じ outfit_default を2人以上のキャラが持つ等)

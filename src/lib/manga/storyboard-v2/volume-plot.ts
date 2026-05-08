@@ -31,6 +31,8 @@ export type VolumeEpisodePlan = {
   protagonist_arc: { start: string; turn: string; end: string };
   /** Phase 11-1: その話で core_hook の何を拡大するか。後方互換 optional */
   core_hook_usage?: string;
+  /** Phase 11-2: その話で推し関係性をどう進展させるか。後方互換 optional */
+  pairing_progression?: string;
   beats: EpisodeBeat[];
   must_include_events: string[];
   cliffhanger_hook: string;
@@ -71,6 +73,7 @@ type VolumePlotOutput = {
     theme: string;                         // 50字
     protagonist_arc: { start: string; turn: string; end: string };  // 各 50字
     core_hook_usage: string;                // 40-120字。この話で core_hook の何を拡大するか
+    pairing_progression?: string;           // 40-120字。この話で推し関係性をどう進展させるか
     beats: Array<{
       beat_idx: number;                    // 1-7
       label: "hook" | "buildup" | "turn" | "climax" | "resolution" | "cliffhanger";
@@ -105,6 +108,21 @@ function buildCoreHookContract(bible: BibleSnapshotV2): string {
       : "",
     `- 参考作: ${coreHook.hit_references.join(", ")}`,
   ].filter(Boolean).join("\n");
+}
+
+function buildRecommendedPairings(bible: BibleSnapshotV2): string {
+  const recommendedPairings = bible.relations.filter((r) => r.is_recommended_pairing === true);
+  if (recommendedPairings.length === 0) return "";
+  return [
+    "## Recommended Pairings (推し導線、必須参照)",
+    ...recommendedPairings.map((rel) => {
+      const score = rel.appeal_score_manual ?? rel.appeal_score_auto;
+      const scoreText = typeof score === "number" ? ` / score=${score}` : "";
+      return `- ${rel.from_character_id} ⇔ ${rel.to_character_id}: ${rel.appeal_axis ?? "(axis 未指定)"}${scoreText} — ${rel.description}`;
+    }),
+    "- 各 episode に「どの推し関係性をどれだけ進展させるか」を outline 内で具体化する",
+    "- 推し関係性が主要訴求の場合は pairing_progression に関係性の進展を 40-120字で明示する",
+  ].join("\n");
 }
 
 export async function generateVolumePlot(args: {
@@ -155,6 +173,7 @@ export async function generateVolumePlot(args: {
       "- 各話の brief_for_L3 は L3 Shotlist にそのまま流せる本文を 1000-2000字で書く (各シーンの場所/登場人物/出来事/モノローグ核ライン)",
       "",
       buildCoreHookContract(args.bible),
+      buildRecommendedPairings(args.bible),
       "",
       "## bible (登場人物 / 世界観 / 視覚モチーフ)",
       "```json",
@@ -162,6 +181,16 @@ export async function generateVolumePlot(args: {
         meta: args.bible.meta,
         world: args.bible.world,
         characters: args.bible.characters.map((c) => ({ id: c.id, name: c.name, role: c.role })),
+        relations: args.bible.relations.map((r) => ({
+          from_character_id: r.from_character_id,
+          to_character_id: r.to_character_id,
+          relation_type: r.relation_type,
+          description: r.description,
+          appeal_axis: r.appeal_axis,
+          appeal_score_manual: r.appeal_score_manual,
+          appeal_score_auto: r.appeal_score_auto,
+          is_recommended_pairing: r.is_recommended_pairing,
+        })),
         locations: args.bible.locations.map((l) => ({ id: l.id, name: l.name })),
         visual_motifs: args.bible.visual_motifs,
         volume_synopsis: args.bible.volume_synopsis,
