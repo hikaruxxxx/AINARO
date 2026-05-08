@@ -195,6 +195,32 @@ export function isBibleAdoptedKind(value: unknown): value is BibleAdoptedAssetKi
 }
 
 /**
+ * Phase 2B: storyboard 採用記録 (materialize 方式)。
+ *
+ * chosen_proposal_id="current" は現存 episodes/epNN/storyboard.json を指す
+ * predefined 値。proposal を採用すると _storyboard_alts/{proposal_id}/storyboard.json
+ * が episodes/epNN/storyboard.json にコピーされる (materialize)。
+ */
+export type AdoptedStoryboard = {
+  schema_version: 1;
+  slug: string;
+  episode: number;
+  chosen_proposal_id: string;
+  chosen_at: string;
+  note?: string;
+};
+
+export function emptyAdoptedStoryboard(slug: string, episode: number): AdoptedStoryboard {
+  return {
+    schema_version: 1,
+    slug,
+    episode,
+    chosen_proposal_id: "current",
+    chosen_at: new Date(0).toISOString(),
+  };
+}
+
+/**
  * Phase C-3: volume plot 採用記録 (1 巻 = 1 chosen)。
  * 現状 plot.json は単一案 (proposal_id="current") として扱う。
  * 将来 _plot_alts/ に複数案が並んだら chosen_proposal_id で切替。

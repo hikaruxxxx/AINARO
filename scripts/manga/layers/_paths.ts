@@ -62,6 +62,26 @@ export function storyboardPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "storyboard.json");
 }
 
+/** Phase 2B: storyboard.json (現存単一案 or materialize 後) を「採用」記録する file */
+export function adoptedStoryboardPath(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "adopted_storyboard.json");
+}
+
+/** Phase 2B/Phase C: storyboard 複数案保存ディレクトリ (proposal_id ごとに subdir) */
+export function storyboardAltsDir(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "_storyboard_alts");
+}
+
+/** Phase 2B: 特定 proposal の storyboard.json への path */
+export function storyboardAltProposalPath(slug: string, ep: number, proposalId: string): string {
+  return path.join(storyboardAltsDir(slug, ep), proposalId, "storyboard.json");
+}
+
+/** Phase 2B: 採用前バックアップ (1 度のみ作成、巻き戻し用) */
+export function storyboardPreAdoptBackupPath(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "storyboard.json.pre-adopt.backup");
+}
+
 /** L3.5 出力 (Phase β B2 で追加): scene-graph 中間表現 */
 export function sceneGraphPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "scene_graph.json");

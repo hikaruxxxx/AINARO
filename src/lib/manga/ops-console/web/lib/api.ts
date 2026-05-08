@@ -4,6 +4,7 @@ import type {
   NameManifest as SourceNameManifest,
 } from "../../../name-preview/types";
 import type {
+  AdoptedStoryboard,
   AdoptedVersions,
   AdoptedVolumePlot,
   BibleAdoptedAssetKind,
@@ -57,6 +58,7 @@ export type NameManifest = SourceNameManifest;
 export type NameApproval = SourceNameApproval;
 export type {
   AdoptedPanelChoice,
+  AdoptedStoryboard,
   AdoptedVersions,
   AdoptedVolumePlot,
   BibleAdoptedAssetKind,
@@ -227,6 +229,23 @@ export function apiPostAdoptedVolumePlot(
 ): Promise<{ ok: true; slug: string; volume: number; adopted: AdoptedVolumePlot }> {
   return postJson(
     `/api/works/${encodeURIComponent(slug)}/volumes/v${String(volume).padStart(2, "0")}/adopted-plot`,
+    body
+  );
+}
+
+export function apiGetAdoptedStoryboard(slug: string, episode: number): Promise<AdoptedStoryboard> {
+  return getJson<AdoptedStoryboard>(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/adopted-storyboard`
+  );
+}
+
+export function apiPostAdoptedStoryboard(
+  slug: string,
+  episode: number,
+  body: { chosen_proposal_id: string; note?: string }
+): Promise<{ ok: true; slug: string; episode: number; adopted: AdoptedStoryboard }> {
+  return postJson(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/adopted-storyboard`,
     body
   );
 }
