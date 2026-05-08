@@ -149,19 +149,6 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function jsonHtml(value: unknown): string {
-  return escapeHtml(JSON.stringify(value, null, 2));
-}
-
-function errorText(error: unknown): string {
-  if (error instanceof ApiError) return `API ${error.status}: ${error.body}`;
-  return error instanceof Error ? error.message : String(error);
-}
-
-function renderOriginalTabs(active: StoryboardTab): string {
-  return `<div class="ng-tabs">${STORYBOARD_TABS.map((tab) => `<button type="button" class="nc-pill${tab.id === active ? " nc-pill--active" : ""}" data-ng-sb-tab="${tab.id}">${escapeHtml(tab.label)}</button>`).join("")}</div>`;
-}
-
 function epLabel(episode: number): string {
   return `ep${String(episode).padStart(2, "0")}`;
 }
@@ -181,203 +168,6 @@ function isEditableTarget(target: EventTarget | null): boolean {
 
 function isRejectReason(value: string | undefined): value is NameRejectReason {
   return REASONS.some((r) => r.key === value);
-}
-
-function renderStoryboard(manifest: Manifest): string {
-  const pages = manifest.storyboard?.pages ?? [];
-  if (pages.length === 0) return `<div class="nc-empty">ネーム原案のページが空です。</div>`;
-  return `<div class="sb-list">${pages.map((page: any) => {
-    const panels = Array.isArray(page.panels) ? page.panels : [];
-    const pageNo = Number(page.page_no);
-    const clickAttrs = Number.isFinite(pageNo)
-      ? ` data-ng-sb-page-modal="storyboard" data-ng-sb-page-no="${pageNo}"`
-      : "";
-    return `
-      <section class="nc-card sb-page"${clickAttrs}>
-        <div class="sb-page__head">
-          <h3 class="sb-page__title">ページ ${escapeHtml(String(page.page_no ?? "-"))}</h3>
-          ${page.role ? `<span class="nc-badge nc-badge--neutral">${escapeHtml(String(page.role))}</span>` : ""}
-        </div>
-        <div class="sb-panels">
-          ${panels.map((panel: any) => `
-            <article class="nc-card nc-card--sunken sb-panel">
-              <h4>${escapeHtml(String(panel.panel_id ?? "-"))}</h4>
-              <div class="sb-meta">順序=${escapeHtml(String(panel.reading_order ?? "-"))} / ショット=${escapeHtml(String(panel.shot_type ?? "-"))}</div>
-              <div class="sb-text">${escapeHtml((() => {
-                const extract = (item: any): string => typeof item === "string" ? item : (item?.text ?? "");
-                const arr = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
-                return [...arr(panel.dialogue), ...arr(panel.monologue), ...arr(panel.narration)]
-                  .map(extract).filter(Boolean).join(" / ") || "(テキストなし)";
-              })())}</div>
-            </article>`).join("")}
-        </div>
-        <details class="sb-details">
-          <summary>ページの生 JSON</summary>
-          <pre class="nc-code-block">${jsonHtml(page)}</pre>
-        </details>
-      </section>`;
-  }).join("")}</div>`;
-}
-
-function renderPagePlan(manifest: Manifest): string {
-  const pages = manifest.page_plan?.pages ?? [];
-  if (pages.length === 0) return `<div class="nc-empty">ページ配置データが空です。</div>`;
-  return `<div class="sb-list">${pages.map((page: any) => {
-    const panels = Array.isArray(page.panels) ? page.panels : [];
-    const pageNo = Number(page.page_no);
-    const clickAttrs = Number.isFinite(pageNo)
-      ? ` data-ng-sb-page-modal="page-plan" data-ng-sb-page-no="${pageNo}"`
-      : "";
-    return `
-      <section class="nc-card sb-page"${clickAttrs}>
-        <div class="sb-page__head">
-          <h3 class="sb-page__title">ページ ${escapeHtml(String(page.page_no ?? "-"))}</h3>
-          ${page.render_strategy ? `<span class="nc-badge nc-badge--info">${escapeHtml(String(page.render_strategy))}</span>` : ""}
-        </div>
-        <div class="sb-panels">
-          ${panels.map((panel: any) => `
-            <article class="nc-card nc-card--sunken sb-panel">
-              <h4>${escapeHtml(String(panel.panel_id ?? "-"))}</h4>
-              <div class="sb-meta">順序=${escapeHtml(String(panel.reading_order ?? "-"))} / 重要度=${escapeHtml(String(panel.importance ?? "-"))} / rect=${escapeHtml(JSON.stringify(panel.rect ?? null))}</div>
-              <div class="sb-meta">borderless=${escapeHtml(String(panel.is_borderless ?? false))} / bleed=${escapeHtml(String(panel.bleed_polygon ?? false))} / bg=${escapeHtml(String(panel.background_treatment ?? "-"))}</div>
-            </article>`).join("")}
-        </div>
-        <details class="sb-details">
-          <summary>ページ配置の生 JSON</summary>
-          <pre class="nc-code-block">${jsonHtml(page)}</pre>
-        </details>
-      </section>`;
-  }).join("")}</div>`;
-}
-
-function rawSection(id: string, label: string, value: unknown, copied: string | null): string {
-  return `
-    <details class="nc-card sb-details" open>
-      <summary>${escapeHtml(label)}</summary>
-      <button type="button" class="nc-button nc-button--sm sb-copy" data-ng-copy-raw="${escapeHtml(id)}">${copied === id ? "コピー済み" : "コピー"}</button>
-      <pre class="nc-code-block" data-ng-raw="${escapeHtml(id)}">${jsonHtml(value)}</pre>
-    </details>`;
-}
-
-function renderRaw(manifest: Manifest, copied: string | null): string {
-  return `<div class="sb-list">
-    ${rawSection("storyboard", "storyboard.json", manifest.storyboard, copied)}
-    ${rawSection("page_plan", "page_plan.json", manifest.page_plan, copied)}
-    ${rawSection("render_manifest", "render manifest", manifest.render_manifest, copied)}
-  </div>`;
-}
-
-function renderResolvedRefs(): string {
-  return `<div class="nc-empty">resolved_refs.json を直接見るには Pipeline view から L07 結果を確認してください。</div>`;
-}
-
-function renderOriginalContent(state: OriginalDraftState): string {
-  if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
-  if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>原案</h2><p>${escapeHtml(state.error)}</p></div>`;
-  const manifest = state.manifest;
-  if (!manifest) return `<div class="nc-empty">manifest が読み込まれていません。</div>`;
-  if (state.tab === "storyboard") return renderStoryboard(manifest);
-  if (state.tab === "page-plan") return renderPagePlan(manifest);
-  if (state.tab === "resolved-refs") return renderResolvedRefs();
-  return renderRaw(manifest, state.copied);
-}
-
-function renderPageDetailModal(state: OriginalDraftState): string {
-  const ctx = state.pageModal;
-  const manifest = state.manifest;
-  if (!ctx || !manifest) return "";
-  const pages = ctx.source === "storyboard" ? (manifest.storyboard?.pages ?? []) : (manifest.page_plan?.pages ?? []);
-  const page = (pages as any[]).find((p: any) => Number(p.page_no) === ctx.pageNo);
-  if (!page) return "";
-  const allPageNos = (pages as any[]).map((p: any) => Number(p.page_no)).filter((n) => Number.isFinite(n));
-  const idx = allPageNos.indexOf(ctx.pageNo);
-  const total = allPageNos.length;
-  const role = page.role ?? page.page_role ?? "";
-  const renderStrategy = page.render_strategy ?? "";
-  const panels = Array.isArray(page.panels) ? page.panels : [];
-
-  const panelHtml = panels.map((panel: any) => {
-    const arr = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
-    const dialogue = arr(panel.dialogue).map((d: any) => typeof d === "string" ? d : `${d?.character_id ?? ""}: ${d?.text ?? ""}`).filter(Boolean);
-    const monologue = arr(panel.monologue).map((m: any) => typeof m === "string" ? m : `${m?.character_id ?? ""}: ${m?.text ?? ""}`).filter(Boolean);
-    const narration = arr(panel.narration).map((n: any) => typeof n === "string" ? n : (n?.text ?? "")).filter(Boolean);
-    const sfx = arr(panel.sfx).map((s: any) => typeof s === "string" ? s : (s?.text ?? "")).filter(Boolean);
-    const action = typeof panel.action === "string" ? panel.action : "";
-    const keyVisual = typeof panel.key_visual === "string" ? panel.key_visual : "";
-    const lines: string[] = [];
-    if (action) lines.push(`<div class="sb-line sb-line--action">演出: ${escapeHtml(action)}</div>`);
-    if (keyVisual) lines.push(`<div class="sb-line sb-line--action">key visual: ${escapeHtml(keyVisual)}</div>`);
-    for (const t of dialogue) lines.push(`<div class="sb-line sb-line--dialogue">「${escapeHtml(t)}」</div>`);
-    for (const t of monologue) lines.push(`<div class="sb-line sb-line--monologue">(M) ${escapeHtml(t)}</div>`);
-    for (const t of narration) lines.push(`<div class="sb-line sb-line--narration">(N) ${escapeHtml(t)}</div>`);
-    if (sfx.length > 0) lines.push(`<div class="sb-line sb-line--sfx">SFX: ${escapeHtml(sfx.join(" / "))}</div>`);
-    if (panel.silence) lines.push(`<div class="sb-line">(silence)</div>`);
-    if (lines.length === 0) lines.push(`<div class="sb-line sb-meta">(テキストなし)</div>`);
-    return `
-      <article class="sb-panel-card">
-        <h4>${escapeHtml(String(panel.panel_id ?? "-"))}</h4>
-        <div class="sb-meta">順序=${escapeHtml(String(panel.reading_order ?? "-"))} / ショット=${escapeHtml(String(panel.shot_type ?? "-"))}${panel.importance ? ` / 重要度=${escapeHtml(String(panel.importance))}` : ""}</div>
-        ${lines.join("")}
-      </article>`;
-  }).join("");
-
-  // Phase C-1β: 採用 button / 採用中 badge (storyboard tab のみ表示。page-plan は L05 系で別扱い)
-  const adopted = state.adoptedStoryboard;
-  const isAdopted = ctx.source === "storyboard" && adopted?.chosen_proposal_id === "current";
-  const adoptionBlock = ctx.source !== "storyboard"
-    ? ""
-    : isAdopted
-      ? `<span class="sb-adopt-badge" title="${escapeHtml(`採用日時: ${adopted?.chosen_at ?? ""}`)}">★ 採用中</span>`
-      : `<button type="button" class="sb-adopt-btn"
-          data-ng-sb-adopt
-          data-ng-sb-proposal-id="current"
-          ${state.adoptingStoryboard ? " disabled" : ""}>${state.adoptingStoryboard ? "採用中…" : "この案を採用"}</button>`;
-
-  return `
-    <div class="sb-modal" data-ng-sb-modal-overlay>
-      <div class="sb-modal-card" role="dialog" aria-modal="true" aria-labelledby="sb-modal-title">
-        <div class="sb-modal-head">
-          <h3 class="sb-modal-title" id="sb-modal-title">P.${escapeHtml(String(page.page_no))} ${role ? `<span class="nc-badge nc-badge--neutral">[${escapeHtml(String(role))}]</span>` : ""}${renderStrategy ? `<span class="nc-badge nc-badge--info">${escapeHtml(String(renderStrategy))}</span>` : ""}</h3>
-          <span class="sb-modal-meta">${idx + 1} / ${total} · ${ctx.source === "storyboard" ? "原案" : "ページ配置"} · panel ${panels.length} 件</span>
-          ${adoptionBlock}
-          <div class="sb-modal-nav">
-            <button type="button" data-ng-sb-modal-prev${idx <= 0 ? " disabled" : ""}>← 前</button>
-            <button type="button" data-ng-sb-modal-next${idx < 0 || idx >= total - 1 ? " disabled" : ""}>次 →</button>
-          </div>
-          <button type="button" class="sb-modal-close" data-ng-sb-modal-close>閉じる</button>
-        </div>
-        <div class="sb-panel-grid">${panelHtml || `<div class="nc-empty">panel データが空です</div>`}</div>
-        <div class="sb-modal-hint">Tab で次の page · Shift+Tab で前の page · Esc で閉じる${ctx.source === "storyboard" ? "  ·  この案を採用するとエピソード全体の原案として記録されます" : ""}</div>
-      </div>
-    </div>`;
-}
-
-function renderOriginalSection(state: OriginalDraftState): string {
-  const scope = `${state.slug} / ${epLabel(state.episode)}`;
-  return `
-    <section class="nc-card ng-original" id="original">
-      <div class="ng-original__head">
-        <h3>原案</h3>
-        <span class="sb-info">${escapeHtml(scope)}</span>
-        <span class="ng-original__spacer"></span>
-        <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L04" ${state.runningLayer === "L04" ? "disabled" : ""}>L04 原案を生成</button>
-        <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L08.5" ${state.runningLayer === "L08.5" ? "disabled" : ""}>ネーム preview を生成</button>
-        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_1" ${state.runningLayer === "L04_1" ? "disabled" : ""}>Hook 提案を生成</button>
-        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_9" ${state.runningLayer === "L04_9" ? "disabled" : ""}>Cliff 提案を生成</button>
-        <select class="nc-field__select" data-ng-original-ai-layer aria-label="原案 AI 編集対象 layer">
-          <option value="L03">L03 Shotlist</option>
-          <option value="L04" selected>L04 Storyboard</option>
-          <option value="L05">L05 Page Plan</option>
-          <option value="L06">L06 Continuity</option>
-          <option value="L07">L07 Refs Resolution</option>
-          <option value="L08">L08 Incremental Refs</option>
-        </select>
-        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-original-ai-edit title="選択した layer を AI 編集 view へ">AI で修正</button>
-      </div>
-      ${renderOriginalTabs(state.tab)}
-      <div class="ng-original-content">${renderOriginalContent(state)}</div>
-    </section>
-    ${renderPageDetailModal(state)}`;
 }
 
 function warningHtml(warnings: NameWarning[], findings: NameAuditFindingLite[]): string {
@@ -434,7 +224,6 @@ function emptyDecision(): DecisionDraft {
 
 function renderShell(
   container: HTMLElement,
-  originalState: OriginalDraftState,
   manifest: NameManifest,
   slug: string,
   episode: number
@@ -449,14 +238,16 @@ function renderShell(
           <span class="ng-kpi ng-kpi--approved">承認 <strong id="ng-cnt-approved">0</strong></span>
           <span class="ng-kpi ng-kpi--rejected">却下 <strong id="ng-cnt-rejected">0</strong></span>
         </span>
-        <select class="nc-field__select" data-ng-ai-layer aria-label="AI 編集対象 layer" style="margin-left: 12px;">
-          <option value="L08.5" selected>L08.5 Name Preview</option>
-          <option value="L08.6">L08.6 Name Audit</option>
-          <option value="L08.7">L08.7 Name Approval</option>
-        </select>
-        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-ai-edit title="選択した layer を AI 編集 view へ">AI で修正</button>
+        <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L04">L04 Storyboard 生成</button>
+        <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L08.5">L08.5 Name Preview 生成</button>
+        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_1">L04.1 Hook 提案</button>
+        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_9">L04.9 Cliff 提案</button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI 編集</button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L04">L04 を AI で修正</button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L08.5">L08.5 を AI で修正</button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L08.6">L08.6 を AI で修正</button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L08.7">L08.7 を AI で修正</button>
       </div>
-      <div id="ng-original-root">${renderOriginalSection(originalState)}</div>
       <div class="name-gate-help">
         <code>a</code> approve <code>r</code> reject <code>p</code> pending
         <code>↑/k</code> 前ページ <code>↓/j</code> 次ページ <code>1..6</code> reject 理由
@@ -487,7 +278,6 @@ function refreshSummary(container: HTMLElement, decisions: Map<number, DecisionD
   setCounter(container, "#ng-cnt-approved", approved);
   setCounter(container, "#ng-cnt-rejected", rejected);
   setCounter(container, "#ng-cnt-pending", pending);
-  setCounter(container, "#ng-cnt-total", decisions.size);
 }
 
 function refreshCard(container: HTMLElement, pageNo: number, decision: DecisionDraft): void {
@@ -661,30 +451,6 @@ function renderError(container: HTMLElement, title: string, error: unknown): voi
   `;
 }
 
-function originalRoot(container: HTMLElement): HTMLElement | null {
-  return container.querySelector<HTMLElement>("#ng-original-root");
-}
-
-function renderOriginalRoot(container: HTMLElement, state: OriginalDraftState): void {
-  const root = originalRoot(container);
-  if (root) root.innerHTML = renderOriginalSection(state);
-}
-
-function navigateOriginalPageModal(state: OriginalDraftState, container: HTMLElement, dir: 1 | -1): void {
-  const ctx = state.pageModal;
-  const manifest = state.manifest;
-  if (!ctx || !manifest) return;
-  const pages = ctx.source === "storyboard" ? (manifest.storyboard?.pages ?? []) : (manifest.page_plan?.pages ?? []);
-  const allPageNos = (pages as any[]).map((p: any) => Number(p.page_no)).filter((n) => Number.isFinite(n));
-  if (allPageNos.length <= 1) return;
-  const idx = allPageNos.indexOf(ctx.pageNo);
-  if (idx < 0) return;
-  const nextIdx = Math.max(0, Math.min(allPageNos.length - 1, idx + dir));
-  if (nextIdx === idx) return;
-  state.pageModal = { source: ctx.source, pageNo: allPageNos[nextIdx] };
-  renderOriginalRoot(container, state);
-}
-
 /**
  * page 単位で persist を直列化する queue。
  * checkbox を高速 toggle すると並列 POST が走り、サーバ側の「last arrival wins」で
@@ -754,38 +520,13 @@ async function loadNameGate(
   container.innerHTML = `<div class="view-placeholder"><h2>ネーム</h2><p>loading...</p></div>`;
 
   try {
-    const originalState: OriginalDraftState = {
-      slug,
-      episode,
-      tab: "storyboard",
-      manifest: null,
-      loading: true,
-      error: null,
-      copied: null,
-      pageModal: null,
-      runningLayer: null,
-      adoptedStoryboard: null,
-      adoptingStoryboard: false,
-    };
-    const [manifest, approval, originalManifestResult, adoptedStoryboardResult] = await Promise.all([
+    const [manifest, approval] = await Promise.all([
       apiGetNameManifest(slug, episode),
       apiGetNameApproval(slug, episode),
-      apiGetManifest(slug, episode).then(
-        (value) => ({ ok: true as const, value }),
-        (error) => ({ ok: false as const, error })
-      ),
-      apiGetAdoptedStoryboard(slug, episode).then(
-        (value) => ({ ok: true as const, value }),
-        () => ({ ok: false as const })
-      ),
     ]);
     if (signal.aborted) return;
-    originalState.loading = false;
-    if (originalManifestResult.ok) originalState.manifest = originalManifestResult.value;
-    else originalState.error = errorText(originalManifestResult.error);
-    if (adoptedStoryboardResult.ok) originalState.adoptedStoryboard = adoptedStoryboardResult.value;
 
-    renderShell(container, originalState, manifest, slug, episode);
+    renderShell(container, manifest, slug, episode);
     const decisions = new Map<number, DecisionDraft>();
     for (const page of manifest.pages) decisions.set(page.page_no, emptyDecision());
     const cards = Array.from(container.querySelectorAll<HTMLElement>("article.page-card"));
@@ -900,91 +641,21 @@ async function loadNameGate(
         );
     });
 
-    // toolbar の「AI で修正」ボタン: 選択中の L08.5/L08.6/L08.7 を ai-edit へ。
+    const setRunningLayer = (runningLayer: string | null): void => {
+      container.querySelectorAll<HTMLButtonElement>("[data-ng-run-layer]").forEach((button) => {
+        button.disabled = Boolean(runningLayer) && button.dataset.ngRunLayer === runningLayer;
+      });
+    };
+
     container.addEventListener(
       "click",
       (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
-        if (target.closest("[data-ng-sb-modal-close]")) {
-          originalState.pageModal = null;
-          renderOriginalRoot(container, originalState);
-          return;
-        }
-        // Phase C-1β: 「この案を採用」 button
-        const adoptBtn = target.closest<HTMLButtonElement>("[data-ng-sb-adopt]");
-        if (adoptBtn) {
-          const proposalId = adoptBtn.dataset.ngSbProposalId ?? "current";
-          if (originalState.adoptingStoryboard) return;
-          originalState.adoptingStoryboard = true;
-          renderOriginalRoot(container, originalState);
-          void apiPostAdoptedStoryboard(slug, episode, { chosen_proposal_id: proposalId })
-            .then((result) => {
-              originalState.adoptedStoryboard = result.adopted;
-              originalState.adoptingStoryboard = false;
-              renderOriginalRoot(container, originalState);
-            })
-            .catch((err) => {
-              originalState.adoptingStoryboard = false;
-              renderOriginalRoot(container, originalState);
-              window.alert(`採用に失敗しました: ${errorText(err)}`);
-            });
-          return;
-        }
-        if (target.closest("[data-ng-sb-modal-prev]")) {
-          navigateOriginalPageModal(originalState, container, -1);
-          return;
-        }
-        if (target.closest("[data-ng-sb-modal-next]")) {
-          navigateOriginalPageModal(originalState, container, 1);
-          return;
-        }
-        const originalOverlay = target.closest<HTMLElement>("[data-ng-sb-modal-overlay]");
-        if (originalOverlay && target === originalOverlay) {
-          originalState.pageModal = null;
-          renderOriginalRoot(container, originalState);
-          return;
-        }
-        const originalPageCard = target.closest<HTMLElement>("[data-ng-sb-page-modal]");
-        if (originalPageCard) {
-          const source = originalPageCard.dataset.ngSbPageModal as "storyboard" | "page-plan" | undefined;
-          const pageNo = Number(originalPageCard.dataset.ngSbPageNo);
-          if ((source === "storyboard" || source === "page-plan") && Number.isFinite(pageNo)) {
-            originalState.pageModal = { source, pageNo };
-            renderOriginalRoot(container, originalState);
-            return;
-          }
-        }
-        const originalTab = target.closest<HTMLButtonElement>("[data-ng-sb-tab]")?.dataset.ngSbTab as StoryboardTab | undefined;
-        if (originalTab && STORYBOARD_TABS.some((item) => item.id === originalTab)) {
-          originalState.tab = originalTab;
-          originalState.copied = null;
-          renderOriginalRoot(container, originalState);
-          return;
-        }
-        const copyId = target.closest<HTMLButtonElement>("[data-ng-copy-raw]")?.dataset.ngCopyRaw;
-        if (copyId) {
-          const raw = Array.from(container.querySelectorAll<HTMLElement>("[data-ng-raw]")).find(
-            (node) => node.dataset.ngRaw === copyId
-          );
-          const text = raw?.textContent ?? "";
-          void navigator.clipboard?.writeText(text);
-          originalState.copied = copyId;
-          renderOriginalRoot(container, originalState);
-          return;
-        }
-        const originalAiButton = target.closest<HTMLButtonElement>("[data-ng-original-ai-edit]");
-        if (originalAiButton) {
-          const select = container.querySelector<HTMLSelectElement>("[data-ng-original-ai-layer]");
-          const layer = select?.value || "L04";
-          navigateToAiEdit(layer, { slug, episode });
-          return;
-        }
         const runLayer = target.closest<HTMLButtonElement>("[data-ng-run-layer]")?.dataset.ngRunLayer;
         if (runLayer) {
           if (!isRunnableLayer(runLayer)) return;
-          originalState.runningLayer = runLayer;
-          renderOriginalRoot(container, originalState);
+          setRunningLayer(runLayer);
           void spawnLayerWithModal({
             layer: runLayer,
             status: "missing",
@@ -992,28 +663,14 @@ async function loadNameGate(
             episode,
             callbacks: {
               onProgress: (running) => {
-                originalState.runningLayer = running ? runLayer : null;
-                renderOriginalRoot(container, originalState);
+                setRunningLayer(running ? runLayer : null);
               },
-              onSuccess: async () => {
-                if (runLayer === "L08.5") {
-                  window.location.reload();
-                  return;
-                }
-                try {
-                  originalState.manifest = await apiGetManifest(slug, episode);
-                  originalState.error = null;
-                } catch (error) {
-                  originalState.error = errorText(error);
-                }
-                renderOriginalRoot(container, originalState);
+              onSuccess: () => {
+                if (runLayer === "L08.5") window.location.reload();
               },
-              onError: (message) => {
-                originalState.error = message;
-                renderOriginalRoot(container, originalState);
-              },
+              onError: () => setRunningLayer(null),
             },
-          });
+          }).finally(() => setRunningLayer(null));
           return;
         }
         const modalReason = target.closest<HTMLInputElement>("[data-ng-modal-reason]");
@@ -1035,10 +692,13 @@ async function loadNameGate(
           else setStatus(pageNo, status);
           return;
         }
-        if (target.closest("[data-ng-ai-edit]")) {
-          const select = container.querySelector<HTMLSelectElement>("[data-ng-ai-layer]");
-          const layer = select?.value || "L08.5";
-          navigateToAiEdit(layer, { slug, episode });
+        if (target.closest<HTMLButtonElement>("[data-open-ai-edit]")) {
+          void openAiEditModal({ scope: slug || "_console", originView: "name-gate" });
+          return;
+        }
+        const layerAiEdit = target.closest<HTMLButtonElement>("[data-ng-layer-ai-edit]")?.dataset.ngLayerAiEdit;
+        if (layerAiEdit) {
+          navigateToAiEdit(layerAiEdit, { slug, episode });
         }
       },
       { signal }
@@ -1047,30 +707,6 @@ async function loadNameGate(
     document.addEventListener(
       "keydown",
       (event) => {
-        if (originalState.pageModal) {
-          if (event.key === "Escape") {
-            originalState.pageModal = null;
-            renderOriginalRoot(container, originalState);
-            event.preventDefault();
-            return;
-          }
-          if (event.key === "Tab") {
-            navigateOriginalPageModal(originalState, container, event.shiftKey ? -1 : 1);
-            event.preventDefault();
-            return;
-          }
-          if (event.key === "ArrowLeft") {
-            navigateOriginalPageModal(originalState, container, -1);
-            event.preventDefault();
-            return;
-          }
-          if (event.key === "ArrowRight") {
-            navigateOriginalPageModal(originalState, container, 1);
-            event.preventDefault();
-            return;
-          }
-          return;
-        }
         if (rejectPageNo !== null) {
           if (/^[1-6]$/.test(event.key)) {
             const input = container.querySelectorAll<HTMLInputElement>("[data-ng-modal-reason]")[Number(event.key) - 1];
