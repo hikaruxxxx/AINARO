@@ -125,7 +125,7 @@ function scorePattern(args: {
   const subtypeBonus = subtypeMatches(args.pattern, args.storyboardSubtype) ? 0.5 : 0;
   const importance = importanceMax(args.page);
   const importanceBonus = importance >= 4 ? 0.3 : 0;
-  const nonRectBonus = importance >= 4 && isNonRect(args.pattern) ? 1.2 : 0;
+  const nonRectBonus = importance >= 4 && isNonRect(args.pattern) ? 1.1 : 0;
   const roleSoftBonus = roleMatches(args.page.page_role, args.pattern)
     ? 0.5
     : roleSemanticFamilyMatches(args.page.page_role, args.pattern)
