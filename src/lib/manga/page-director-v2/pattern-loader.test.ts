@@ -49,17 +49,17 @@ describe("getDefaultDictVersion", () => {
     expect(getDefaultDictVersion()).toBe("v1");
   });
 
-  it("MANGA_LAYOUT_DICT 未設定で v2 を返す", () => {
+  it("MANGA_LAYOUT_DICT 未設定で v1 を返す (2026-05-09 default 逆転)", () => {
     delete process.env.MANGA_LAYOUT_DICT;
 
-    expect(getDefaultDictVersion()).toBe("v2");
+    expect(getDefaultDictVersion()).toBe("v1");
   });
 
-  it("MANGA_LAYOUT_DICT=invalid で v2 を返し console.warn を呼ぶ", () => {
+  it("MANGA_LAYOUT_DICT=invalid で v1 を返し console.warn を呼ぶ", () => {
     process.env.MANGA_LAYOUT_DICT = "invalid";
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
-    expect(getDefaultDictVersion()).toBe("v2");
+    expect(getDefaultDictVersion()).toBe("v1");
     expect(warn).toHaveBeenCalledTimes(1);
   });
 });

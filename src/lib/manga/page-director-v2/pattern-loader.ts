@@ -95,9 +95,12 @@ export function getDefaultDictVersion(): DictVersion {
   const env = process.env.MANGA_LAYOUT_DICT;
   if (env === "v1" || env === "v2") return env;
   if (env !== undefined && env !== "") {
-    console.warn(`[pattern-loader] invalid MANGA_LAYOUT_DICT=${env}; defaulting to v2`);
+    console.warn(`[pattern-loader] invalid MANGA_LAYOUT_DICT=${env}; defaulting to v1`);
   }
-  return "v2";
+  // 2026-05-09: default を v2 → v1 に戻す。dict v2 の追加 archetype (pat_053-070) は
+  // 商業漫画の典型構図を参照せず想像で polygon を起こしたため、コマ割りが奇抜で違和感あり。
+  // 実物 (kindle-test-1) ベースの v1 に戻す。env MANGA_LAYOUT_DICT=v2 で明示時のみ v2 を使う。
+  return "v1";
 }
 
 export function resolveDictPath(args: { repoRoot: string; version?: DictVersion }): {
