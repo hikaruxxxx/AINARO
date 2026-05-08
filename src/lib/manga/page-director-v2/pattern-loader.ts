@@ -3,7 +3,7 @@ import path from "node:path";
 import { z } from "zod";
 import type { BackgroundTreatment } from "../schemas-v2";
 
-export type DictVersion = "v1" | "v2";
+export type DictVersion = "v1" | "v2" | "v3";
 export type PatternFrequency = "high" | "medium-high" | "medium" | "rare-medium" | "low" | "rare";
 export type PatternSizeClass = "small" | "medium" | "large" | "extra_large" | "xx_large";
 
@@ -93,7 +93,7 @@ const PatternDictSchema = z.object({
 
 export function getDefaultDictVersion(): DictVersion {
   const env = process.env.MANGA_LAYOUT_DICT;
-  if (env === "v1" || env === "v2") return env;
+  if (env === "v1" || env === "v2" || env === "v3") return env;
   if (env !== undefined && env !== "") {
     console.warn(`[pattern-loader] invalid MANGA_LAYOUT_DICT=${env}; defaulting to v1`);
   }
