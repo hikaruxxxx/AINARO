@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-06T07:19:10.378Z",
+  "generated_at": "2026-05-06T09:51:32.755Z",
   "slug": "a07-modern-dungeon",
   "episode": 1,
   "source_last_page": {
@@ -180,7 +180,7 @@
     {
       "pattern_id": "ability_or_identity_glimpse",
       "pattern_name": "能力/正体の片鱗",
-      "rationale": "監査ログからレン本人の新表示へ焦点を移し、制度異常と能力覚醒を同時に引く。",
+      "rationale": "監査側の異常検知から、レン本人の新ステータス開示へ視線を収束させるため。",
       "expected_effect": "next_episode_pull +0.5 / world_immersion +0.4 / commercial_pull +0.3",
       "last_page": {
         "page_no": 22,
@@ -188,34 +188,35 @@
         "panels": [
           {
             "panel_no": 106,
-            "shot_type": "close_up",
+            "shot_type": "establishing",
             "importance": 3,
             "silence": false,
-            "action": "無人のDPC内部監査室。監査モニターにFランク一階限定入域者の戦闘ログが自動展開される。",
-            "key_visual": "朱色の警告枠が走る監査UI。ログ欄は空枠中心で、異常値だけが白く点滅する。",
+            "action": "無人のDPC新宿支部・内部監査室。暗い室内で、壁一面のモニターだけが冷たく点灯している。",
+            "key_visual": "朱色の公的光を帯びた監査モニター群。中央にだけ薄い青の異常枠が浮き始める。",
+            "dialogue": [],
+            "monologue": [],
+            "narration": [
+              "同時刻。DPC新宿支部、内部監査室。"
+            ],
+            "sfx": [
+              "ピッ"
+            ]
+          },
+          {
+            "panel_no": 107,
+            "shot_type": "close_up",
+            "importance": 4,
+            "silence": false,
+            "action": "監査モニターに、Fランク一階限定入域者の戦闘ログが高速で巻き戻される。レンの黒フード姿だけが何度も停止表示される。",
+            "key_visual": "ひび割れた画面越しの世界を思わせるノイズ入りログ画面。空の数値オーバーレイ枠が急速に増殖する。",
             "dialogue": [],
             "monologue": [],
             "narration": [
               "制度は、異常値を見逃さない。"
             ],
             "sfx": [
+              "カチッ",
               "カチッ"
-            ]
-          },
-          {
-            "panel_no": 107,
-            "shot_type": "insert",
-            "importance": 4,
-            "silence": false,
-            "action": "監査ログの一行が拡大され、レンの討伐タイムだけが記録不能の表示に切り替わる。",
-            "key_visual": "『Fランク』『一階限定』の空欄UIと、数値オーバーレイの空枠がぶつかる画面。",
-            "dialogue": [],
-            "monologue": [],
-            "narration": [
-              "測定値は、規格の外へ跳ねた。"
-            ],
-            "sfx": [
-              "ピロン"
             ]
           },
           {
@@ -223,8 +224,8 @@
             "shot_type": "medium",
             "importance": 3,
             "silence": true,
-            "action": "ダンジョンの下降階段前。黒のフードジャケット姿のレンが、ヒビ入りスマホを見下ろしたまま足を止める。",
-            "key_visual": "沈黙の白コマ。スマホの青光だけがレンの目元と階段の端を薄く照らす。",
+            "action": "監査室の全モニターが一瞬だけ白飛びし、異常ログの枠も警告文も消える。室内に人影はない。",
+            "key_visual": "沈黙の白コマ。中央モニターに薄い青光だけが残り、情報の欠落を大きな余白で見せる。",
             "dialogue": [],
             "monologue": [],
             "narration": [],
@@ -232,21 +233,21 @@
           },
           {
             "panel_no": 109,
-            "shot_type": "over_shoulder",
+            "shot_type": "close_up",
             "importance": 4,
             "silence": false,
-            "action": "レンのスマホ画面に、公社アプリではない薄青いステータス枠が上書き表示される。",
-            "key_visual": "ひび割れた画面越しの世界。上向きの空HUDに未知のスキル欄が生成される瞬間。",
+            "action": "ダンジョン内。レンのヒビ入りスマートフォンが震え、通常の公社アプリとは違う青いステータス枠が画面の奥からせり上がる。",
+            "key_visual": " cracked smartphone screen越しに、未入力のステータス画面とスキル欄が重なる。レンの瞳にナビ青光。",
             "dialogue": [
               {
                 "character_id": "char_獅童_響_v1",
-                "text": "条件達成。未登録スキルを解放します。"
+                "text": "隠し条件、達成。"
               }
             ],
             "monologue": [
               {
                 "character_id": "char_桐生_レン_v1",
-                "text": "未登録……？"
+                "text": "今の通知……公社アプリじゃない？"
               }
             ],
             "narration": [],
@@ -259,18 +260,18 @@
             "shot_type": "close_up",
             "importance": 5,
             "silence": false,
-            "action": "レンの瞳とスマホ画面を極端な近景で重ねる。青いHUDに新スキル名の一部だけが浮かび、背後の下降階段が暗く伸びる。",
-            "key_visual": "ステータス画面パネル。『隠し階層ナビゲート』の先頭だけ読める空枠、レンの瞳にナビ青光。",
+            "action": "レンの目元とスマホ画面を極端な寄りで重ねる。画面のスキル欄に、通常ランク表記を押しのけて未知の能力名が浮かび上がる。",
+            "key_visual": "ステータス画面 panel。青白いHUDに『固有スキル：階層ナビゲート』の空枠演出、背後に暗く伸びる下降階段。",
             "dialogue": [
               {
                 "character_id": "char_獅童_響_v1",
-                "text": "あなたは、二階への最短経路を取得しました。"
+                "text": "固有スキルを開示します。"
               }
             ],
             "monologue": [
               {
                 "character_id": "char_桐生_レン_v1",
-                "text": "これは……道が見える。"
+                "text": "これは……俺だけの？"
               }
             ],
             "narration": [],
@@ -282,13 +283,13 @@
       },
       "pull_link": {
         "current_episode_cliff": "ability_or_identity_glimpse",
-        "next_opening_hook_hint": "次話冒頭は、レンが表示された最短経路を疑いながら一階の壁際へ進み、通常マップに存在しない二階直通ルートを検証する場面から始める。",
+        "next_opening_hook_hint": "次話冒頭は、レンが『階層ナビゲート』の表示を確認し、隠し通路や敵配置が見えるのかを一階層で検証する。同時にDPC監査ログ側でも彼の異常値が追跡対象へ切り替わる。",
         "is_volume_end": false
       }
     }
   ],
   "recommendation": {
     "pattern_id": "ability_or_identity_glimpse",
-    "rationale": "tone=unset / genre=主人公最強無双 / volume_position=early の組み合わせで selection_guide が最初に推奨するパターン"
+    "rationale": "tone=unset / genre=modern_dungeon / volume_position=early の組み合わせで selection_guide が最初に推奨するパターン"
   }
 }
