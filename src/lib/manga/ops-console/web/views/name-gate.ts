@@ -3,12 +3,15 @@ import {
   apiGetManifest,
   apiGetNameApproval,
   apiGetNameManifest,
+  apiGetStoryboardProposals,
   apiPostNameApproval,
   type NameManifest,
+  type StoryboardProposalsResponse,
 } from "../lib/api";
 import { store } from "../lib/store";
 import { isRunnableLayer, navigateToAiEdit, spawnLayerWithModal } from "../lib/layer-actions";
 import { openAiEditModal } from "../components/ai-edit-modal";
+import { openStoryboardVariantLightbox } from "../components/storyboard-variant-lightbox";
 import type {
   NameAuditFindingLite,
   NamePageDecision,
@@ -29,6 +32,10 @@ type DecisionDraft = {
   reasons: NameRejectReason[];
   note: string;
   persistFailed: boolean;
+};
+
+type ViewState = {
+  storyboardProposals: StoryboardProposalsResponse | null;
 };
 
 const REASONS: Array<{ key: NameRejectReason; label: string }> = [
@@ -330,8 +337,10 @@ function renderShell(
   manifest: NameManifest,
   units: PageUnit[],
   slug: string,
-  episode: number
+  episode: number,
+  state: ViewState
 ): void {
+  const proposalCount = state.storyboardProposals?.proposals.length ?? 0;
   container.innerHTML = `
     <div class="name-gate-container">
       <div class="name-gate-toolbar">
@@ -343,6 +352,11 @@ function renderShell(
           <span class="ng-kpi ng-kpi--rejected">却下 <strong id="ng-cnt-rejected">0</strong></span>
         </span>
         <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L04">L04 Storyboard 生成</button>
+        <button type="button" class="nc-button nc-button--secondary nc-button--sm"
+                data-ng-action="open-variant-lightbox"
+                ${proposalCount > 0 ? "" : "disabled"}>
+          StoryBoard variants を比較 (${proposalCount})
+        </button>
         <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L08.5">L08.5 Name Preview 生成</button>
         <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_1">L04.1 Hook 提案</button>
         <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_9">L04.9 Cliff 提案</button>
@@ -382,6 +396,14 @@ function refreshSummary(container: HTMLElement, decisions: Map<number, DecisionD
   setCounter(container, "#ng-cnt-approved", approved);
   setCounter(container, "#ng-cnt-rejected", rejected);
   setCounter(container, "#ng-cnt-pending", pending);
+}
+
+function refreshStoryboardProposalButton(container: HTMLElement, state: ViewState): void {
+  const button = container.querySelector<HTMLButtonElement>('[data-ng-action="open-variant-lightbox"]');
+  if (!button) return;
+  const count = state.storyboardProposals?.proposals.length ?? 0;
+  button.disabled = count === 0;
+  button.textContent = `StoryBoard variants を比較 (${count})`;
 }
 
 function unitPageNosFromCard(card: HTMLElement): number[] {
@@ -677,7 +699,17 @@ async function loadNameGate(
       consoleManifest.page_plan.pages.map((page) => [page.page_no, page])
     );
     const units = groupPagesIntoUnits(manifest.pages, planPages);
-    renderShell(container, manifest, units, slug, episode);
+    const state: ViewState = { storyboardProposals: null };
+    renderShell(container, manifest, units, slug, episode, state);
+    apiGetStoryboardProposals(slug, episode)
+      .then((response) => {
+        if (signal.aborted) return;
+        state.storyboardProposals = response;
+        refreshStoryboardProposalButton(container, state);
+      })
+      .catch(() => {
+        // proposals 不在時は無視 (button disabled になる)
+      });
     const decisions = new Map<number, DecisionDraft>();
     for (const page of manifest.pages) decisions.set(page.page_no, emptyDecision());
     const cards = Array.from(container.querySelectorAll<HTMLElement>("article.page-card"));
@@ -830,6 +862,23 @@ async function loadNameGate(
       (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
+        if (target.matches('[data-ng-action="open-variant-lightbox"]')) {
+          if (!state.storyboardProposals?.proposals.length) return;
+          void openStoryboardVariantLightbox({
+            slug,
+            episode,
+            proposals: state.storyboardProposals.proposals,
+            audit: state.storyboardProposals.audit,
+            adopted: state.storyboardProposals.adopted,
+            variantSvgs: state.storyboardProposals.variant_svgs,
+          }).then((result) => {
+            if (result.status === "adopted") {
+              // storyboard.json が materialize されたので reload で反映
+              window.location.reload();
+            }
+          });
+          return;
+        }
         const runLayer = target.closest<HTMLButtonElement>("[data-ng-run-layer]")?.dataset.ngRunLayer;
         if (runLayer) {
           if (!isRunnableLayer(runLayer)) return;

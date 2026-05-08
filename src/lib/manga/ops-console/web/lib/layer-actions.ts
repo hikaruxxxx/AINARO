@@ -10,7 +10,7 @@ import { openLaunchModal, type LaunchArgSpec } from "./launch-modal";
 import { openAiEditModal } from "../components/ai-edit-modal";
 
 /** Console から spawn 可能な layer。 server LAYER_REGISTRY と同期させる。 */
-const RUNNABLE = new Set<string>(["L01", "L01b", "L01c", "L02", "L02b", "L04", "L04_1", "L04_9", "L08.5", "L09", "L11", "L12", "L13"]);
+const RUNNABLE = new Set<string>(["L01", "L01b", "L01c", "L02", "L02b", "L04", "L04_audit", "L04_1", "L04_9", "L08.5", "L09", "L11", "L12", "L13"]);
 
 export function isRunnableLayer(value: string | null | undefined): value is LayerId {
   return typeof value === "string" && RUNNABLE.has(value);

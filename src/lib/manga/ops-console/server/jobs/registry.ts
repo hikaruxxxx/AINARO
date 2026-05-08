@@ -6,6 +6,7 @@ export type LayerId =
   | "L02_audit"
   | "L02b"
   | "L04"
+  | "L04_audit"
   | "L04_1"
   | "L04_9"
   | "L05_5"
@@ -117,6 +118,14 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
       { name: "--concurrency", pattern: /^[1-9]$/ },
     ],
     timeoutMs: 30 * 60 * 1000,
+  },
+  L04_audit: {
+    script: "scripts/manga/layers/L04-audit.ts",
+    scope: "episode",
+    allowedFlags: [
+      { name: "--proposals", pattern: /^[A-Za-z0-9_\-./]{1,500}$/ },
+    ],
+    timeoutMs: 10 * 60 * 1000,
   },
   L04_1: {
     script: "scripts/manga/layers/L04-1-opening-hook.ts",

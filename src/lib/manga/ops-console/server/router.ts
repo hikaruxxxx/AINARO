@@ -42,6 +42,7 @@ import {
   handleAdoptedStoryboardGet,
   handleAdoptedStoryboardPost,
 } from "./handlers/adopted-storyboard";
+import { handleStoryboardProposalsGet } from "./handlers/storyboard-proposals";
 import { handleBootstrap } from "./handlers/bootstrap";
 import { handleBible } from "./handlers/bible";
 import { handleBibleMetaPut } from "./handlers/bible-meta";
@@ -625,6 +626,10 @@ export async function handleApi(
         return handleAdoptedStoryboardPost(scoped.slug, scoped.episode, body, res);
       }
       return send(res, 405, { error: "このメソッドは許可されていません" });
+    }
+    if (tail === "/storyboard-proposals") {
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
+      return handleStoryboardProposalsGet(scoped.slug, scoped.episode, res);
     }
     return send(res, 404, { error: "not found" });
   }

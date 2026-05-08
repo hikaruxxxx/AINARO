@@ -10,6 +10,7 @@ export type LayerKey =
   | "L02b"
   | "L03"
   | "L04"
+  | "L04_audit"
   | "L04_1"
   | "L04_9"
   | "L05"
@@ -33,6 +34,7 @@ export const LAYER_LABELS: Record<LayerKey, LayerInfo> = {
   L02b: { title: "巻あらすじ・章構成 (Volume Plot)", subtitle: "L02b", hint: "巻あらすじ・章構成・登場キャラの巻プロットを生成" },
   L03: { title: "シーン分割 (Shotlist)", subtitle: "L03", hint: "エピソードのシーン・テンポ・shotlist を計画" },
   L04: { title: "ネーム（構成データ）", subtitle: "L04 Storyboard", hint: "scene_graph + bible から storyboard (panel 単位ネーム) を構築" },
+  L04_audit: { title: "Storyboard variants 監査", subtitle: "L04_audit", hint: "複数 storyboard 案を 8 軸で比較監査" },
   L04_1: { title: "オープニングフック改善", subtitle: "L04.1 Opening Hook", hint: "Opening Hook (冒頭の引き) を補強" },
   L04_9: { title: "クリフハンガー改善", subtitle: "L04.9 Cliffhanger", hint: "Cliffhanger (末尾の引き) を補強" },
   L05: { title: "ページ配置 (Page Plan)", subtitle: "L05", hint: "Page Director: 紙面 layout (rect / importance) を割り当て" },

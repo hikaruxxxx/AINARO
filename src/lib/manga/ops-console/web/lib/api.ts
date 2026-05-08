@@ -21,6 +21,8 @@ import type {
   EpisodeStoryboardV2,
   PagePlanV2,
 } from "../../../schemas-v2";
+import type { StoryboardAuditReport } from "../../../qa-v2/storyboard-audit";
+import type { StoryboardProposal } from "../../../storyboard-v2/storyboard-alts";
 
 export class ApiError extends Error {
   constructor(
@@ -250,6 +252,22 @@ export function apiPostAdoptedStoryboard(
   );
 }
 
+export type StoryboardProposalsResponse = {
+  proposals: StoryboardProposal[];
+  audit: StoryboardAuditReport | null;
+  adopted: AdoptedStoryboard;
+  variant_svgs: Record<string, string[]>;
+};
+
+export function apiGetStoryboardProposals(
+  slug: string,
+  episode: number
+): Promise<StoryboardProposalsResponse> {
+  return getJson<StoryboardProposalsResponse>(
+    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/storyboard-proposals`
+  );
+}
+
 export type PipelineStatusLayer = {
   id: string;
   label: string;
@@ -377,6 +395,7 @@ export type LayerId =
   | "L02"
   | "L02b"
   | "L04"
+  | "L04_audit"
   | "L04_1"
   | "L04_9"
   | "L08.5"
