@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import type { CapabilityProfile } from "../capability/capability";
 import type { StoryboardPageV2 } from "../schemas-v2";
+import { buildPagePlanFromStoryboardV4 } from "./page-mapper-v4";
 import type { Pattern, PatternDict, PatternFrequency, PatternSizeClass } from "./pattern-loader";
 import { loadPatternDict } from "./pattern-loader";
-import { matchPattern } from "./pattern-matcher";
+import { isAxisAlignedRect, isNonRect, matchPattern } from "./pattern-matcher";
 
 function page(args: {
   role: StoryboardPageV2["page_role"];
@@ -27,6 +29,7 @@ function pattern(args: {
   frequency?: PatternFrequency;
   subtypeHints?: string[];
   sizeClass?: PatternSizeClass;
+  polygon?: [number, number][];
 }): Pattern {
   return {
     id: args.id,
@@ -44,7 +47,7 @@ function pattern(args: {
       reading_order: index + 1,
       role_hint: "body",
       size_class: args.sizeClass ?? "medium",
-      polygon: [[0, 0], [10, 0], [10, 10], [0, 10]],
+      polygon: args.polygon ?? [[0, 0], [10, 0], [10, 10], [0, 10]],
     })),
   };
 }
@@ -81,7 +84,7 @@ describe("matchPattern", () => {
 
     expect(result?.phase).toBe(1);
     expect(result?.pattern.id).toBe("pat_026_explosive_top_calm_bottom_5");
-    expect(result?.alternatives).toContainEqual({ id: "pat_010_diag_speedline_combat_3", score: 2, phase: 1 });
+    expect(result?.alternatives).toContainEqual({ id: "pat_010_diag_speedline_combat_3", score: 2.5, phase: 1 });
     expect(result?.warnings).toEqual([]);
   });
 
@@ -201,6 +204,85 @@ describe("matchPattern", () => {
 
     expect(result?.phase).toBe(1);
     expect(result?.pattern.id).toBe("p_exact");
-    expect(result?.alternatives).toContainEqual({ id: "p_n4", score: 2, phase: 1 });
+    expect(result?.alternatives).toContainEqual({ id: "p_n4", score: 2.5, phase: 1 });
+  });
+
+  it("P.1 importance=4, role=opening_hook → non-rect (pat_017/pat_018) が選ばれる", async () => {
+    const actualDict = await loadPatternDict("data/manga/layout_patterns/v1.json");
+    const result = matchPattern({
+      page: page({ role: "opening_hook", panelCount: 2, importance: 4 }),
+      dict: {
+        ...actualDict,
+        patterns: actualDict.patterns.filter((p) =>
+          ["pat_013_two_shot_iconic_2", "pat_017_bubble_panel_power_2", "pat_018_diagonal_skewed_panel_2"].includes(p.id)
+        ),
+      },
+    });
+
+    expect(result?.pattern.id).toMatch(/^pat_01[78]_/);
+    expect(result?.pattern).toSatisfy((p: Pattern) => isNonRect(p));
+  });
+
+  it("rect 3 連続後に rect-only + non-rect が同 score 帯なら non-rect が勝つ (variety_window)", () => {
+    const result = matchPattern({
+      page: page({ role: "dialogue", panelCount: 2 }),
+      dict: dict([
+        pattern({ id: "p_rect", panelCount: 2, roles: ["dialogue"], frequency: "medium" }),
+        pattern({
+          id: "p_non_rect",
+          panelCount: 2,
+          roles: ["dialogue"],
+          frequency: "medium",
+          polygon: [[0, 0], [10, 0], [8, 10], [0, 10]],
+        }),
+      ]),
+      recentNonRectHistory: [false, false, false],
+    });
+
+    expect(result?.pattern.id).toBe("p_non_rect");
+  });
+
+  it("history push は applied 後 (polygon validation 失敗時 history 不変)", () => {
+    const capability = {
+      profile_id: "test",
+      recommended_strategy: "page_one_shot",
+    } as CapabilityProfile;
+    const result = buildPagePlanFromStoryboardV4({
+      capability,
+      storyboard: {
+        schema_version: 2,
+        episode_id: "ep-test",
+        total_pages: 2,
+        pages: [
+          page({ role: "dialogue", panelCount: 1 }),
+          { ...page({ role: "dialogue", panelCount: 1 }), page_no: 2 },
+        ],
+      },
+      dict: dict([
+        pattern({
+          id: "p_a_bad",
+          panelCount: 1,
+          roles: ["dialogue"],
+          frequency: "medium",
+          polygon: [[0, 0], [2000, 0], [2000, 20], [0, 20]],
+        }),
+        pattern({ id: "p_b_good", panelCount: 1, roles: ["dialogue"], frequency: "medium" }),
+      ]),
+    });
+
+    expect(result.pages[0]._layout_match_meta).toMatchObject({
+      pattern_id: "p_a_bad",
+      actualApplied: false,
+    });
+    expect(result.pages[1]._layout_match_meta).toMatchObject({
+      pattern_id: "p_a_bad",
+      actualApplied: false,
+    });
+  });
+
+  it("isAxisAlignedRect: 4 頂点軸並行 rect は true, 4 頂点斜め台形は false, 5 頂点 polygon は false", () => {
+    expect(isAxisAlignedRect([[0, 0], [10, 0], [10, 10], [0, 10]])).toBe(true);
+    expect(isAxisAlignedRect([[0, 0], [10, 2], [8, 10], [0, 10]])).toBe(false);
+    expect(isAxisAlignedRect([[0, 0], [10, 0], [10, 5], [5, 10], [0, 10]])).toBe(false);
   });
 });

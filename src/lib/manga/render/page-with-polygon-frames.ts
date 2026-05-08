@@ -6,7 +6,7 @@
  *   gpt-image-2 は LAYOUT GEOMETRY 指示でも polygon (5+ vertex) コマ枠を
  *   再現できず rect で描いてしまう。これを強制的に上書きする。
  *
- * 適用対象: pagePlanPage.panels の中で polygon.length > 4 の panel のみ。
+ * 適用対象: pagePlanPage.panels の中で axis-aligned rect ではない panel。
  *           rect 4 vertex polygon は AI 描画で十分なので skip。
  *
  * SVG halo 必須 (memory: feedback_manga_overlay_halo_required):
@@ -16,6 +16,7 @@
 import { promises as fs } from "node:fs";
 import sharp from "sharp";
 import type { PagePlanPage } from "../schemas-v2";
+import { isAxisAlignedRect } from "../page-director-v2/pattern-matcher";
 import { polygonSvgFrame } from "./polygon-utils";
 
 export async function overlayPolygonFramesOntoPage(args: {
@@ -27,9 +28,9 @@ export async function overlayPolygonFramesOntoPage(args: {
 }): Promise<{ framedCount: number }> {
   const { pagePngPath, outputPath, pagePlanPage, pageWidth, pageHeight } = args;
 
-  // polygon.length > 4 の panel のみ抽出 (rect は AI 任せでよい)
+  // axis-aligned rect ではない panel のみ抽出 (rect は AI 任せでよい)
   const polygonPanels = pagePlanPage.panels.filter(
-    (p) => !!p.polygon && p.polygon.length > 4
+    (p) => !!p.polygon && !isAxisAlignedRect(p.polygon)
   );
 
   if (polygonPanels.length === 0) {

@@ -43,6 +43,7 @@ export function buildPagePlanFromStoryboardV4(args: {
   });
 
   const history: string[] = [];
+  const recentNonRectHistory: boolean[] = [];
   const pages = basePlan.pages.map((basePage) => {
     const storyboardPage = args.storyboard.pages.find((page) => page.page_no === basePage.page_no);
     if (!storyboardPage) {
@@ -56,7 +57,8 @@ export function buildPagePlanFromStoryboardV4(args: {
       storyboardSubtype: args.storyboardSubtype,
       history,
       historyPenaltyDepth: 5,
-      historyPenaltyIntensity: 1.5,
+      historyPenaltyIntensity: 1.0,
+      recentNonRectHistory,
     });
     if (!match) {
       console.warn(
@@ -106,6 +108,8 @@ export function buildPagePlanFromStoryboardV4(args: {
     }
 
     history.push(match.pattern.id);
+    recentNonRectHistory.push(isNonRect(match.pattern));
+    if (recentNonRectHistory.length > 3) recentNonRectHistory.shift();
 
     return {
       ...basePage,
