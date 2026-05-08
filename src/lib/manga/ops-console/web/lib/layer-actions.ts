@@ -86,9 +86,10 @@ export async function spawnLayerWithModal(opts: {
   status?: "ready" | "missing" | "stale";
   slug: string;
   episode: number;
+  extraArgs?: Record<string, string>;
   callbacks?: SpawnCallbacks;
 }): Promise<void> {
-  const { layer, status = "missing", slug, episode, callbacks } = opts;
+  const { layer, status = "missing", slug, episode, extraArgs, callbacks } = opts;
 
   // L01 / L02b は引数 (concept path / volume) が必要なので、再実行 UI は該当 view に委譲。
   if (layer === "L01") {
@@ -120,7 +121,9 @@ export async function spawnLayerWithModal(opts: {
 
   callbacks?.onProgress?.(true);
   try {
-    const job = await apiPostJob(startRequest(layer, slug, episode, result));
+    const req = startRequest(layer, slug, episode, result);
+    if (extraArgs) req.args = { ...req.args, ...extraArgs };
+    const job = await apiPostJob(req);
     openJobStream(job.job_id, {
       onEvent: () => undefined,
       onDone: () => {

@@ -521,7 +521,7 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
           <span class="rv-resolved-badge" id="rv-badge-resolved"></span>
         </span>
         <div class="rv-controls">
-          <button type="button" class="rv-button" data-rv-rerun="L09" title="L09 Render を再実行 (全 page を Renderer に流し直す)">全頁再生成</button>
+          <button type="button" class="rv-button" data-rv-rerun="L09" title="L09 Render を name gate を skip して全 page を再 render する">全頁再生成</button>
           <button type="button" class="rv-button" id="rv-btn-l12-apply" data-rv-rerun="L12" title="L12 Repair で revision_queue を適用" disabled>修正を反映</button>
           <button type="button" class="rv-button" data-rv-ai-edit="L09" title="L09 (Render) を AI 編集 view へ">AI 編集</button>
         </div>
@@ -1465,6 +1465,7 @@ function bindStaticListeners(
           status: "ready",
           slug,
           episode,
+          extraArgs: layer === "L09" ? { "--skip-name-gate": "" } : undefined,
           callbacks: {
             onSuccess: () => refresh(root, state, slug, episode),
             onError: (msg) => alert(msg),
