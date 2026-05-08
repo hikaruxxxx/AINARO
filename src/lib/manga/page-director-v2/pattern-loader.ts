@@ -1,7 +1,9 @@
-import { promises as fs } from "node:fs";
+import { existsSync, promises as fs } from "node:fs";
+import path from "node:path";
 import { z } from "zod";
 import type { BackgroundTreatment } from "../schemas-v2";
 
+export type DictVersion = "v1" | "v2";
 export type PatternFrequency = "high" | "medium-high" | "medium" | "rare-medium" | "low" | "rare";
 export type PatternSizeClass = "small" | "medium" | "large" | "extra_large" | "xx_large";
 
@@ -88,6 +90,44 @@ const PatternDictSchema = z.object({
   page_gutter: z.number().nonnegative(),
   patterns: z.array(PatternSchema).min(1),
 }).passthrough();
+
+export function getDefaultDictVersion(): DictVersion {
+  const env = process.env.MANGA_LAYOUT_DICT;
+  if (env === "v1" || env === "v2") return env;
+  if (env !== undefined && env !== "") {
+    console.warn(`[pattern-loader] invalid MANGA_LAYOUT_DICT=${env}; defaulting to v2`);
+  }
+  return "v2";
+}
+
+export function resolveDictPath(args: { repoRoot: string; version?: DictVersion }): {
+  path: string;
+  version: DictVersion;
+  fallback: boolean;
+} {
+  const requestedVersion = args.version ?? getDefaultDictVersion();
+  const requestedPath = path.join(args.repoRoot, "data/manga/layout_patterns", `${requestedVersion}.json`);
+  if (existsSync(requestedPath)) {
+    return { path: requestedPath, version: requestedVersion, fallback: false };
+  }
+
+  const v1Path = path.join(args.repoRoot, "data/manga/layout_patterns/v1.json");
+  if (requestedVersion !== "v1" && existsSync(v1Path)) {
+    console.warn(`[pattern-loader] layout dict ${requestedVersion} not found at ${requestedPath}; fallback to v1`);
+    return { path: v1Path, version: "v1", fallback: true };
+  }
+
+  throw new Error(`[pattern-loader] layout dict not found: ${requestedPath}`);
+}
+
+export async function loadDefaultPatternDict(args: {
+  repoRoot: string;
+  version?: DictVersion;
+}): Promise<{ dict: PatternDict; version: DictVersion; fallback: boolean }> {
+  const resolved = resolveDictPath(args);
+  const dict = await loadPatternDict(resolved.path);
+  return { dict, version: resolved.version, fallback: resolved.fallback };
+}
 
 export async function loadPatternDict(path: string): Promise<PatternDict> {
   let raw: string;

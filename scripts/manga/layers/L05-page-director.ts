@@ -5,7 +5,6 @@
  */
 import "../_env";
 import { promises as fs } from "node:fs";
-import path from "node:path";
 import {
   storyboardPath,
   pagePlanPath,
@@ -17,7 +16,7 @@ import {
 import { buildPagePlanFromStoryboard } from "../../../src/lib/manga/page-director-v2/page-mapper-v2";
 import { buildPagePlanFromStoryboardV3 } from "../../../src/lib/manga/page-director-v2/page-mapper-v3";
 import { buildPagePlanFromStoryboardV4 } from "../../../src/lib/manga/page-director-v2/page-mapper-v4";
-import { loadPatternDict } from "../../../src/lib/manga/page-director-v2/pattern-loader";
+import { loadDefaultPatternDict } from "../../../src/lib/manga/page-director-v2/pattern-loader";
 import { loadCapabilityProfile } from "../../../src/lib/manga/capability/capability";
 import type { EpisodeStoryboardV2 } from "../../../src/lib/manga/schemas-v2";
 
@@ -69,6 +68,8 @@ async function main() {
   const mapperVersion = parseMapperVersion(process.env.MANGA_MAPPER ?? args.mapperVersion ?? "v4", "MANGA_MAPPER");
   console.log(`[L05] slug=${args.slug} ep=${args.episode} mapper=${mapperVersion}`);
   console.log("[L05] default mapper: v4 (env MANGA_MAPPER=v3 で旧挙動へ切替可)");
+  const layoutDict = await loadDefaultPatternDict({ repoRoot: REPO_ROOT });
+  console.log(`[L05] layout dict: ${layoutDict.version}${layoutDict.fallback ? " (fallback to v1)" : ""}`);
 
   const storyboard = JSON.parse(await fs.readFile(storyboardPath(args.slug, args.episode), "utf-8")) as EpisodeStoryboardV2;
   const capability = await loadCapabilityProfile(capabilityProfilePath(args.capabilityModel));
@@ -77,7 +78,7 @@ async function main() {
     ? buildPagePlanFromStoryboardV4({
         storyboard,
         capability,
-        dict: await loadPatternDict(path.join(REPO_ROOT, "data/manga/layout_patterns/v1.json")),
+        dict: layoutDict.dict,
       })
     : mapperVersion === "v3"
       ? buildPagePlanFromStoryboardV3({ storyboard, capability })
