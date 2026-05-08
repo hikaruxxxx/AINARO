@@ -156,7 +156,8 @@ export const LAYER_REGISTRY: Record<LayerId, LayerRegistryEntry> = {
       { name: "--skip-name-gate", pattern: /^$/ },
       { name: "--auto-version", pattern: /^$/ },
     ],
-    timeoutMs: 30 * 60 * 1000,
+    // 22 ページ × ~3.3 min/page (concurrency=2) で wall 70+ 分かかるため 90 min 確保
+    timeoutMs: 90 * 60 * 1000,
   },
   L11: {
     script: "scripts/manga/layers/L11-audit.ts",
