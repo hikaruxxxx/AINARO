@@ -19,7 +19,7 @@ import type {
   NameRejectReason,
   NameWarning,
 } from "../../../name-preview/types";
-import type { PagePlanPage } from "../../../schemas-v2";
+import type { PagePlanPage, PanelV2, StoryboardPageV2 } from "../../../schemas-v2";
 
 type NamePage = NameManifest["pages"][number];
 
@@ -74,29 +74,44 @@ const NAME_GATE_CSS = `
 .name-gate-toolbar strong { font-weight: 700; }
 .name-gate-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 0;
+  grid-template-columns: 1fr;
   row-gap: 16px;
-  direction: rtl;
   max-width: 1400px;
 }
 .name-gate-container .page-card {
-  direction: ltr;
   background: #fff;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   padding: 12px;
   outline: none;
   transition: border-color .12s, box-shadow .12s;
-}
-.name-gate-container .page-card.is-spread {
-  grid-column: 1 / -1;
   display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "header header"
+    "name storyboard"
+    "warnings warnings"
+    "reasons reasons"
+    "note note"
+    "actions actions";
+  column-gap: 14px;
+  row-gap: 8px;
+}
+.name-gate-container .page-card > header { grid-area: header; }
+.name-gate-container .page-card > .svg-wrap { grid-area: name; align-self: start; }
+.name-gate-container .page-card > .page-storyboard { grid-area: storyboard; align-self: start; margin: 0; }
+.name-gate-container .page-card > .warnings { grid-area: warnings; }
+.name-gate-container .page-card > .reasons { grid-area: reasons; }
+.name-gate-container .page-card > textarea.note { grid-area: note; }
+.name-gate-container .page-card > .page-actions { grid-area: actions; }
+.name-gate-container .page-card.is-spread {
   grid-template-columns: 1fr 1fr;
+  grid-template-areas: none;
   direction: rtl;
   column-gap: 0;
   row-gap: 10px;
 }
+.name-gate-container .page-card.is-spread > * { grid-area: auto; }
 .name-gate-container .page-card.is-spread .page-card-inner { direction: ltr; padding: 0 8px; }
 .name-gate-container .page-card.is-spread .spread-decision { grid-column: 1 / -1; direction: ltr; padding: 8px 8px 0; border-top: 1px solid #e5e7eb; }
 .name-gate-container .page-card.is-spread .spread-note { color: #64748b; font-size: 12px; }
@@ -150,6 +165,67 @@ const NAME_GATE_CSS = `
 }
 .name-gate-help { color: #64748b; font-size: 12px; line-height: 1.6; }
 .name-gate-help code { background: #eef2f6; padding: 1px 5px; border-radius: 3px; font-family: ui-monospace, monospace; }
+.name-gate-container .page-storyboard {
+  margin: 6px 0 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+.name-gate-container .page-storyboard > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.name-gate-container .page-storyboard > summary::-webkit-details-marker { display: none; }
+.name-gate-container .page-storyboard > summary::before {
+  content: "▶";
+  font-size: 10px;
+  color: #64748b;
+  transition: transform .12s;
+}
+.name-gate-container .page-storyboard[open] > summary::before { transform: rotate(90deg); }
+.name-gate-container .page-storyboard .sb-summary-count { color: #94a3b8; font-weight: 400; }
+.name-gate-container .page-storyboard .sb-panels {
+  display: grid;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+.name-gate-container .page-storyboard .sb-panel {
+  border-left: 2px solid #cbd5e1;
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.name-gate-container .sb-panel-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: #475569;
+}
+.name-gate-container .sb-no { font-weight: 700; color: #0f172a; }
+.name-gate-container .sb-shot { color: #4f46e5; font-family: ui-monospace, monospace; }
+.name-gate-container .sb-tag { padding: 0 4px; border-radius: 3px; font-size: 10px; }
+.name-gate-container .sb-tag-silence { background: #fef3c7; color: #92400e; }
+.name-gate-container .sb-tag-bleed { background: #e0f2fe; color: #075985; }
+.name-gate-container .sb-importance { color: #f59e0b; margin-left: auto; }
+.name-gate-container .sb-action { color: #0f172a; padding: 2px 0; }
+.name-gate-container .sb-keyvis { color: #64748b; font-size: 11px; font-style: italic; }
+.name-gate-container .sb-lines { margin: 4px 0 0; padding-left: 14px; list-style: disc; }
+.name-gate-container .sb-lines .line-dialogue { color: #0f172a; }
+.name-gate-container .sb-lines .line-dialogue .who,
+.name-gate-container .sb-lines .line-monologue .who { color: #4f46e5; font-weight: 600; margin-right: 4px; }
+.name-gate-container .sb-lines .line-monologue { color: #475569; }
+.name-gate-container .sb-lines .line-narration { color: #6b7280; font-style: italic; }
+.name-gate-container .sb-lines .line-sfx { color: #b45309; font-family: ui-monospace, monospace; }
+.name-gate-container .sb-empty { padding: 6px 10px; color: #94a3b8; font-size: 12px; }
 .ng-section { display: grid; gap: 12px; }
 .ng-section-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; font-size: 16px; }
 .ng-modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 18px; background: rgba(15, 23, 42, .38); }
@@ -202,6 +278,69 @@ function isEditableTarget(target: EventTarget | null): boolean {
 
 function isRejectReason(value: string | undefined): value is NameRejectReason {
   return REASONS.some((r) => r.key === value);
+}
+
+// char_桐生_レン_v1 → 桐生_レン (prefix の "char_" と suffix の "_v\d+" を削る)
+function shortCharacterId(characterId: string): string {
+  return characterId.replace(/^char_/, "").replace(/_v\d+$/, "");
+}
+
+function renderPanelLines(panel: PanelV2): string {
+  const dialogue = panel.dialogue
+    .map(
+      (d) =>
+        `<li class="line line-dialogue"><span class="who">${escapeHtml(shortCharacterId(d.character_id))}</span>「${escapeHtml(d.text)}」</li>`
+    )
+    .join("");
+  const monologue = panel.monologue
+    .map(
+      (m) =>
+        `<li class="line line-monologue"><span class="who">${escapeHtml(shortCharacterId(m.character_id))}</span>(${escapeHtml(m.text)})</li>`
+    )
+    .join("");
+  const narration = panel.narration
+    .map((n) => `<li class="line line-narration">[ナレ] ${escapeHtml(n)}</li>`)
+    .join("");
+  const sfx =
+    panel.sfx.length > 0
+      ? `<li class="line line-sfx">[SFX] ${escapeHtml(panel.sfx.join(" / "))}</li>`
+      : "";
+  const inner = `${dialogue}${monologue}${narration}${sfx}`;
+  return inner ? `<ul class="sb-lines">${inner}</ul>` : "";
+}
+
+function renderStoryboardSection(storyboardPage: StoryboardPageV2 | undefined): string {
+  if (!storyboardPage || storyboardPage.panels.length === 0) {
+    return `<details class="page-storyboard" open><summary>ストーリーボード <span class="sb-summary-count">[未生成]</span></summary><div class="sb-empty">storyboard.json にこのページの定義がありません</div></details>`;
+  }
+  const panelsHtml = storyboardPage.panels
+    .map((panel) => {
+      const tags = [
+        panel.silence ? `<span class="sb-tag sb-tag-silence">silence</span>` : "",
+        panel.bleed ? `<span class="sb-tag sb-tag-bleed">bleed</span>` : "",
+      ]
+        .filter(Boolean)
+        .join("");
+      const keyvis = panel.key_visual
+        ? `<div class="sb-keyvis">${escapeHtml(panel.key_visual)}</div>`
+        : "";
+      return `<div class="sb-panel">
+        <div class="sb-panel-head">
+          <span class="sb-no">#${panel.panel_no}</span>
+          <span class="sb-shot">${escapeHtml(panel.shot_type)}/${escapeHtml(panel.camera)}</span>
+          ${tags}
+          <span class="sb-importance">★${panel.importance}</span>
+        </div>
+        <div class="sb-action">${escapeHtml(panel.action)}</div>
+        ${keyvis}
+        ${renderPanelLines(panel)}
+      </div>`;
+    })
+    .join("");
+  return `<details class="page-storyboard" open>
+    <summary>ストーリーボード <span class="sb-summary-count">[${storyboardPage.panels.length} panels]</span></summary>
+    <div class="sb-panels">${panelsHtml}</div>
+  </details>`;
 }
 
 function warningHtml(warnings: NameWarning[], findings: NameAuditFindingLite[]): string {
@@ -267,13 +406,18 @@ function renderReasonInputs(): string {
   ).join("");
 }
 
-function renderPageInner(page: NamePage, episode: number): string {
+function renderPageInner(
+  page: NamePage,
+  episode: number,
+  storyboardPage: StoryboardPageV2 | undefined
+): string {
   return `<div class="page-card-inner">
   <header>
     <span class="page-no">P.${page.page_no}</span>
     <span class="page-role">[${escapeHtml(page.page_role)}]</span>
     <span class="panel-count">${page.panel_count}コマ</span>
   </header>
+  ${renderStoryboardSection(storyboardPage)}
   <div class="svg-wrap"><img src="${escapeHtml(legacySvgPath(episode, page.svg_filename))}" alt="page ${page.page_no} preview"></div>
   <div class="warnings">${warningHtml(page.warnings ?? [], page.audit_findings ?? [])}</div>
 </div>`;
@@ -291,7 +435,11 @@ function renderDecisionControls(pageNo: number, spread: boolean): string {
   </div>`;
 }
 
-function renderPageCards(units: PageUnit[], episode: number): string {
+function renderPageCards(
+  units: PageUnit[],
+  episode: number,
+  storyboardByPage: Map<number, StoryboardPageV2>
+): string {
   return units
     .map((unit) => {
       const pageNos = pageUnitPageNos(unit);
@@ -306,14 +454,15 @@ function renderPageCards(units: PageUnit[], episode: number): string {
     <span class="panel-count">${unit.page.panel_count}コマ</span>
     ${status}
   </header>
+  ${renderStoryboardSection(storyboardByPage.get(unit.page.page_no))}
   <div class="svg-wrap"><img src="${escapeHtml(legacySvgPath(episode, unit.page.svg_filename))}" alt="page ${unit.page.page_no} preview"></div>
   <div class="warnings">${warningHtml(unit.page.warnings ?? [], unit.page.audit_findings ?? [])}</div>
   ${renderDecisionControls(representativePageNo, false)}
 </article>`;
       }
       return `<article class="page-card is-spread" data-page-no="${representativePageNo}" data-unit-pages="${unitPages}" tabindex="0" id="page-${representativePageNo}">
-  ${renderPageInner(unit.left, episode)}
-  ${renderPageInner(unit.right, episode)}
+  ${renderPageInner(unit.left, episode, storyboardByPage.get(unit.left.page_no))}
+  ${renderPageInner(unit.right, episode, storyboardByPage.get(unit.right.page_no))}
   <div class="spread-decision">
     <header>
       <span class="page-no">P.${unit.left.page_no}+P.${unit.right.page_no}</span>
@@ -338,7 +487,8 @@ function renderShell(
   units: PageUnit[],
   slug: string,
   episode: number,
-  state: ViewState
+  state: ViewState,
+  storyboardByPage: Map<number, StoryboardPageV2>
 ): void {
   const proposalCount = state.storyboardProposals?.proposals.length ?? 0;
   container.innerHTML = `
@@ -372,7 +522,7 @@ function renderShell(
       </div>
       <section class="ng-section" aria-labelledby="ng-approval-title">
         <h3 class="ng-section-title" id="ng-approval-title">判定</h3>
-      <div class="name-gate-grid" id="ng-grid">${renderPageCards(units, episode)}</div>
+      <div class="name-gate-grid" id="ng-grid">${renderPageCards(units, episode, storyboardByPage)}</div>
       </section>
       <div id="ng-overlay-root"></div>
     </div>
@@ -698,9 +848,12 @@ async function loadNameGate(
     const planPages = new Map<number, PagePlanPage>(
       consoleManifest.page_plan.pages.map((page) => [page.page_no, page])
     );
+    const storyboardByPage = new Map<number, StoryboardPageV2>(
+      (consoleManifest.storyboard?.pages ?? []).map((page) => [page.page_no, page])
+    );
     const units = groupPagesIntoUnits(manifest.pages, planPages);
     const state: ViewState = { storyboardProposals: null };
-    renderShell(container, manifest, units, slug, episode, state);
+    renderShell(container, manifest, units, slug, episode, state, storyboardByPage);
     apiGetStoryboardProposals(slug, episode)
       .then((response) => {
         if (signal.aborted) return;
