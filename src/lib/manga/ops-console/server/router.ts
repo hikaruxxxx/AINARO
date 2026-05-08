@@ -38,10 +38,6 @@ import {
   handleAdoptedGet,
   handleAdoptedPost,
 } from "./handlers/adopted-versions";
-import {
-  handleAdoptedStoryboardGet,
-  handleAdoptedStoryboardPost,
-} from "./handlers/adopted-storyboard";
 import { handleBootstrap } from "./handlers/bootstrap";
 import { handleBible } from "./handlers/bible";
 import { handleBibleMetaPut } from "./handlers/bible-meta";
@@ -50,6 +46,10 @@ import {
   handleBibleAdoptedVariantsPost,
 } from "./handlers/bible-adopted-variants";
 import { handleVolumePlot, handleVolumePlotPut } from "./handlers/volume-plot";
+import {
+  handleAdoptedVolumePlotGet,
+  handleAdoptedVolumePlotPost,
+} from "./handlers/adopted-volume-plot";
 import { handleVolumesList } from "./handlers/volumes";
 import {
   handleWorkCreate,
@@ -453,6 +453,33 @@ export async function handleApi(
       return send(res, 405, { error: "このメソッドは許可されていません" });
     }
   }
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/volumes\/v(\d+)\/adopted-plot$/);
+    if (m) {
+      const slug = m[1];
+      const volume = Number(m[2]);
+      if (!isValidSlug(slug) || !Number.isInteger(volume) || volume <= 0) {
+        return send(res, 400, { error: "作品 ID または巻番号が不正です" });
+      }
+      if (req.method === "GET") return handleAdoptedVolumePlotGet(slug, volume, res);
+      if (req.method === "POST") {
+        if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
+          return send(res, 400, { error: "書き込みには scope 固定モードが必要です" });
+        }
+        if (slug !== defaults.defaultSlug) {
+          return send(res, 403, { error: "起動 scope と異なる作品です" });
+        }
+        let body: unknown;
+        try {
+          body = await readJsonBody(req);
+        } catch (e) {
+          return send(res, 400, { error: String(e) });
+        }
+        return handleAdoptedVolumePlotPost(slug, volume, body, res);
+      }
+      return send(res, 405, { error: "このメソッドは許可されていません" });
+    }
+  }
   // Phase X WX-5: trademark / IP 類似チェックの人間判定
   {
     const m = p.match(/^\/api\/works\/([^/]+)\/volumes\/v(\d+)\/trademark-check$/);
@@ -577,21 +604,6 @@ export async function handleApi(
           return send(res, 400, { error: String(e) });
         }
         return handleAdoptedPost(scoped.slug, scoped.episode, body, res);
-      }
-      return send(res, 405, { error: "このメソッドは許可されていません" });
-    }
-    if (tail === "/adopted-storyboard") {
-      if (req.method === "GET") return handleAdoptedStoryboardGet(scoped.slug, scoped.episode, res);
-      if (req.method === "POST") {
-        const guard = checkScopedWritePath(scoped, defaults);
-        if (!guard.ok) return send(res, guard.status, { error: guard.error });
-        let body: unknown;
-        try {
-          body = await readJsonBody(req);
-        } catch (e) {
-          return send(res, 400, { error: String(e) });
-        }
-        return handleAdoptedStoryboardPost(scoped.slug, scoped.episode, body, res);
       }
       return send(res, 405, { error: "このメソッドは許可されていません" });
     }

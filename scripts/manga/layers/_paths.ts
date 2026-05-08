@@ -139,16 +139,6 @@ export function engagementAuditPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "engagement_audit.json");
 }
 
-/** Phase C-1β: storyboard.json (現存単一案) を「採用」記録する file */
-export function adoptedStoryboardPath(slug: string, ep: number): string {
-  return path.join(episodeDir(slug, ep), "adopted_storyboard.json");
-}
-
-/** Phase C-1β/γ: storyboard 複数案保存ディレクトリ (proposals-YYYY-MM-DD.json) */
-export function storyboardAltsDir(slug: string, ep: number): string {
-  return path.join(episodeDir(slug, ep), "_storyboard_alts");
-}
-
 export function repairLogPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "repair_log.json");
 }
@@ -164,6 +154,16 @@ export function volumeDir(slug: string, vol: number): string {
 
 export function volumePlotPath(slug: string, vol: number): string {
   return path.join(volumeDir(slug, vol), "plot.json");
+}
+
+/** Phase C-3: volume plot 採用記録 (1 巻 = 1 chosen) */
+export function adoptedVolumePlotPath(slug: string, vol: number): string {
+  return path.join(volumeDir(slug, vol), "adopted_plot.json");
+}
+
+/** Phase C-3/γ: volume plot 複数案保存ディレクトリ (proposals-YYYY-MM-DD.json) */
+export function volumePlotAltsDir(slug: string, vol: number): string {
+  return path.join(volumeDir(slug, vol), "_plot_alts");
 }
 
 export function kdpDir(slug: string, vol: number): string {

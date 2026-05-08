@@ -4,8 +4,8 @@ import type {
   NameManifest as SourceNameManifest,
 } from "../../../name-preview/types";
 import type {
-  AdoptedStoryboard,
   AdoptedVersions,
+  AdoptedVolumePlot,
   BibleAdoptedAssetKind,
   BibleAdoptedVariantChoice,
   BibleAdoptedVariants,
@@ -57,8 +57,8 @@ export type NameManifest = SourceNameManifest;
 export type NameApproval = SourceNameApproval;
 export type {
   AdoptedPanelChoice,
-  AdoptedStoryboard,
   AdoptedVersions,
+  AdoptedVolumePlot,
   BibleAdoptedAssetKind,
   BibleAdoptedVariantChoice,
   BibleAdoptedVariants,
@@ -211,22 +211,22 @@ export function apiGetManifest(slug: string, episode: number): Promise<Manifest>
   );
 }
 
-export function apiGetAdoptedStoryboard(
+export function apiGetAdoptedVolumePlot(
   slug: string,
-  episode: number
-): Promise<AdoptedStoryboard> {
-  return getJson<AdoptedStoryboard>(
-    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/adopted-storyboard`
+  volume: number
+): Promise<AdoptedVolumePlot> {
+  return getJson<AdoptedVolumePlot>(
+    `/api/works/${encodeURIComponent(slug)}/volumes/v${String(volume).padStart(2, "0")}/adopted-plot`
   );
 }
 
-export function apiPostAdoptedStoryboard(
+export function apiPostAdoptedVolumePlot(
   slug: string,
-  episode: number,
+  volume: number,
   body: { chosen_proposal_id: string; note?: string }
-): Promise<{ ok: true; slug: string; episode: number; adopted: AdoptedStoryboard }> {
+): Promise<{ ok: true; slug: string; volume: number; adopted: AdoptedVolumePlot }> {
   return postJson(
-    `/api/works/${encodeURIComponent(slug)}/episodes/ep${String(episode).padStart(2, "0")}/adopted-storyboard`,
+    `/api/works/${encodeURIComponent(slug)}/volumes/v${String(volume).padStart(2, "0")}/adopted-plot`,
     body
   );
 }
