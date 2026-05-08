@@ -24,8 +24,10 @@ import path from "node:path";
 import { extractStructuredJson } from "../llm/codex-text";
 import type {
   BibleSnapshotV2,
+  EpisodeRewardDensity,
   EpisodeStoryboardV2,
   PagePlanV2,
+  RewardTagType,
   StoryboardPageV2,
 } from "../schemas-v2";
 
@@ -71,7 +73,7 @@ export type RewardInterval = {
 };
 
 export type EngagementAuditResult = {
-  schema_version: 1;
+  schema_version: 1 | 2;
   generated_at: string;
   slug: string;
   episode_id: string;
@@ -85,13 +87,296 @@ export type EngagementAuditResult = {
   // 副指標
   per_page_scores: PageEngagementScore[];
   character_arcs: CharacterArcCheck[];
+  /** @deprecated Phase 11-3 以降は reward_density を優先。後方互換のため維持 */
   reward_interval: RewardInterval;
+  reward_density?: EpisodeRewardDensity;
 
   // メタ
   human_review_required: boolean;
   llm_model: string;
   rationale_summary: string;
 };
+
+type RewardSource = "explicit" | "deterministic" | "llm";
+
+const REWARD_TAG_TYPES: RewardTagType[] = [
+  "achievement",
+  "secret_revealed",
+  "relationship_advance",
+  "power_growth",
+  "justice_payoff",
+  "spectacle",
+  "comic_relief",
+  "comfort_recovery",
+  "status_gain",
+  "mystery_progress",
+];
+
+const REWARD_TAG_TYPE_SET = new Set<string>(REWARD_TAG_TYPES);
+
+function isRewardTagType(v: unknown): v is RewardTagType {
+  return typeof v === "string" && REWARD_TAG_TYPE_SET.has(v);
+}
+
+function uniqueRewardTagTypes(types: RewardTagType[]): RewardTagType[] {
+  return REWARD_TAG_TYPES.filter((type) => types.includes(type));
+}
+
+function uniqueRewardSources(sources: RewardSource[]): RewardSource[] {
+  return ["explicit", "deterministic", "llm"].filter((source): source is RewardSource =>
+    sources.includes(source as RewardSource),
+  );
+}
+
+function getPageRewardState(page: StoryboardPageV2): {
+  rewardTypes: RewardTagType[];
+  sources: RewardSource[];
+  hasExplicit: boolean;
+} {
+  const rewardTypes: RewardTagType[] = [];
+  const sources: RewardSource[] = [];
+  let hasExplicit = false;
+
+  for (const panel of page.panels) {
+    for (const tag of panel.reward_tags ?? []) {
+      if (!isRewardTagType(tag.type)) {
+        console.warn(
+          `[engagement-audit] unknown explicit reward tag dropped: page=${page.page_no} panel=${panel.panel_id} type=${String(tag.type)}`,
+        );
+        continue;
+      }
+      rewardTypes.push(tag.type);
+      sources.push("explicit");
+      hasExplicit = true;
+    }
+  }
+
+  return {
+    rewardTypes: uniqueRewardTagTypes(rewardTypes),
+    sources: uniqueRewardSources(sources),
+    hasExplicit,
+  };
+}
+
+function panelRewardText(panel: StoryboardPageV2["panels"][number]): string {
+  return [
+    panel.action,
+    panel.key_visual,
+    ...panel.dialogue.map((d) => d.text),
+    ...panel.monologue.map((m) => m.text),
+    ...panel.narration,
+    ...panel.sfx,
+  ].join("\n");
+}
+
+function deterministicRewardForPanel(
+  page: StoryboardPageV2,
+  panel: StoryboardPageV2["panels"][number],
+): RewardTagType | null {
+  const text = panelRewardText(panel);
+
+  if (/達成|成功|勝った|勝利|やった|やった！/.test(text)) return "achievement";
+  if (/見つけた|気づいた|わかった|判明|正体/.test(text)) return "secret_revealed";
+  if (/ありがとう|大好き|信じて|守る|二人で/.test(text)) return "relationship_advance";
+  if (/成長|レベルアップ|覚醒|進化|新スキル/.test(text)) return "power_growth";
+  if (/ざまあ|当然の報い|因果応報|罰/.test(text)) return "justice_payoff";
+
+  if (page.page_role === "reveal") return "mystery_progress";
+  if (page.page_role === "cliffhanger") {
+    return panel.importance >= 4 ? "spectacle" : "mystery_progress";
+  }
+  if (page.page_role === "aftermath") return "comfort_recovery";
+  if (panel.importance >= 4) {
+    return page.page_role === "action" ? "achievement" : "spectacle";
+  }
+
+  return null;
+}
+
+function summarizePagesForRewardJudge(pages: StoryboardPageV2[]): string {
+  return pages
+    .map((page) => {
+      const panels = page.panels
+        .map((panel) => {
+          const speech = [
+            ...panel.dialogue.map((d) => `${d.character_id}: 「${d.text}」`),
+            ...panel.monologue.map((m) => `${m.character_id} (心): 「${m.text}」`),
+            ...panel.narration.map((n) => `[ナレ] ${n}`),
+            ...panel.sfx.map((s) => `[SFX] ${s}`),
+          ].join(" / ");
+          return `  panel#${panel.panel_no} imp=${panel.importance}: ${panel.action.slice(0, 100)}${speech ? " | " + speech : ""}`;
+        })
+        .join("\n");
+      return `## page ${page.page_no} (page_role=${page.page_role})\n${panels}`;
+    })
+    .join("\n\n");
+}
+
+const REWARD_DENSITY_LLM_SCHEMA = `
+type RewardDensityJudgeOutput = {
+  page_rewards: Array<{
+    page_no: number;
+    reward_detected: boolean;
+    type?: "achievement" | "secret_revealed" | "relationship_advance" | "power_growth" | "justice_payoff" | "spectacle" | "comic_relief" | "comfort_recovery" | "status_gain" | "mystery_progress";
+    note?: string;
+  }>;
+};
+`;
+
+async function judgeMissingRewardPagesWithLLM(args: {
+  pages: StoryboardPageV2[];
+  cwd?: string;
+  timeoutMs?: number;
+}): Promise<Map<number, RewardTagType>> {
+  if (args.pages.length === 0) return new Map();
+
+  const result = await extractStructuredJson<{
+    page_rewards?: Array<{
+      page_no?: number;
+      reward_detected?: boolean;
+      type?: string;
+      note?: string;
+    }>;
+  }>({
+    systemContext: [
+      "あなたは商業漫画の engagement audit 補助エージェントです。",
+      "明示タグと機械ヒューリスティックで報酬が検出されなかった page だけを読み、",
+      "読者が小さな満足・進展・息抜きを感じる page かを補助判定します。",
+      "過検出を避け、弱い雰囲気だけなら reward_detected=false にしてください。",
+    ].join("\n"),
+    materials: {
+      unresolved_pages: summarizePagesForRewardJudge(args.pages),
+    },
+    instruction: [
+      "各 page について reward_detected を判定してください。",
+      "reward_detected=true の場合、type は必ず指定の10種 enum から1つだけ選んでください。",
+      "enum 外の type は無効になります。",
+    ].join("\n"),
+    outputSchema: REWARD_DENSITY_LLM_SCHEMA,
+    cwd: args.cwd,
+    timeoutMs: args.timeoutMs ?? 8 * 60 * 1000,
+    maxRetries: 2,
+  });
+
+  const byPage = new Map<number, RewardTagType>();
+  for (const item of result.page_rewards ?? []) {
+    if (!item.reward_detected || item.page_no === undefined) continue;
+    if (!isRewardTagType(item.type)) {
+      console.warn(
+        `[engagement-audit] unknown llm reward tag dropped: page=${item.page_no} type=${String(item.type)}`,
+      );
+      continue;
+    }
+    byPage.set(item.page_no, item.type);
+  }
+  return byPage;
+}
+
+function buildEpisodeRewardDensity(args: {
+  storyboard: EpisodeStoryboardV2;
+  pageRewards: Array<{
+    page_no: number;
+    reward_types: RewardTagType[];
+    sources: RewardSource[];
+  }>;
+}): EpisodeRewardDensity {
+  const totalPages = args.storyboard.total_pages || args.storyboard.pages.length;
+  const rewardPages = args.pageRewards.filter((p) => p.reward_types.length > 0);
+  const rewardTypes = uniqueRewardTagTypes(rewardPages.flatMap((p) => p.reward_types));
+
+  let maxGapPages = 0;
+  let currentGap = 0;
+  for (const page of args.pageRewards) {
+    if (page.reward_types.length > 0) {
+      maxGapPages = Math.max(maxGapPages, currentGap);
+      currentGap = 0;
+    } else {
+      currentGap++;
+    }
+  }
+  maxGapPages = Math.max(maxGapPages, currentGap);
+
+  const density: EpisodeRewardDensity = {
+    episode_no: parseEpisodeNo(args.storyboard.episode_id),
+    total_pages: totalPages,
+    reward_count: rewardPages.length,
+    reward_density: totalPages > 0 ? rewardPages.length / totalPages : 0,
+    max_gap_pages: maxGapPages,
+    variety_score: rewardTypes.length,
+    reward_types: rewardTypes,
+    per_page_rewards: args.pageRewards.map((p) => ({
+      page_no: p.page_no,
+      reward_types: uniqueRewardTagTypes(p.reward_types),
+      sources: uniqueRewardSources(p.sources),
+    })),
+    warnings: [],
+  };
+  density.warnings = deriveRewardDensityWarnings(density);
+  return density;
+}
+
+function parseEpisodeNo(episodeId: string): number {
+  const match = episodeId.match(/(\d+)$/);
+  return match ? Number(match[1]) : 0;
+}
+
+export function deriveRewardDensityWarnings(d: EpisodeRewardDensity): string[] {
+  const w: string[] = [];
+  if (d.reward_density < 0.05) w.push("density_critical");
+  else if (d.reward_density < 0.08) w.push("density_warn");
+  if (d.max_gap_pages > 12) w.push("gap_critical");
+  else if (d.max_gap_pages > 8) w.push("gap_warn");
+  if (d.variety_score < 2) w.push("variety_warn");
+  return w;
+}
+
+export async function auditEpisodeRewardDensity(
+  storyboard: EpisodeStoryboardV2,
+  args: { cwd?: string; timeoutMs?: number } = {},
+): Promise<EpisodeRewardDensity> {
+  const pageRewards = storyboard.pages.map((page) => {
+    const explicit = getPageRewardState(page);
+    if (explicit.hasExplicit) {
+      return {
+        page_no: page.page_no,
+        reward_types: explicit.rewardTypes,
+        sources: explicit.sources,
+      };
+    }
+
+    const deterministicTypes: RewardTagType[] = [];
+    for (const panel of page.panels) {
+      const type = deterministicRewardForPanel(page, panel);
+      if (type) deterministicTypes.push(type);
+    }
+    return {
+      page_no: page.page_no,
+      reward_types: uniqueRewardTagTypes(deterministicTypes),
+      sources: deterministicTypes.length > 0 ? (["deterministic"] as RewardSource[]) : [],
+    };
+  });
+
+  const unresolvedPages = storyboard.pages.filter((page) => {
+    const current = pageRewards.find((p) => p.page_no === page.page_no);
+    return !current || current.reward_types.length === 0;
+  });
+
+  const llmRewards = await judgeMissingRewardPagesWithLLM({
+    pages: unresolvedPages,
+    cwd: args.cwd,
+    timeoutMs: args.timeoutMs,
+  });
+
+  for (const pageReward of pageRewards) {
+    if (pageReward.reward_types.length > 0) continue;
+    const type = llmRewards.get(pageReward.page_no);
+    if (!type) continue;
+    pageReward.reward_types = [type];
+    pageReward.sources = ["llm"];
+  }
+
+  return buildEpisodeRewardDensity({ storyboard, pageRewards });
+}
 
 // ===== 編集判断カード few-shot 注入 =====
 
@@ -203,6 +488,10 @@ export async function generateEngagementAudit(args: {
   const { bible, storyboard } = args;
 
   const editorialCardsBlock = await loadEditorialCardSummaries();
+  const rewardDensity = await auditEpisodeRewardDensity(storyboard, {
+    cwd: args.cwd,
+    timeoutMs: args.timeoutMs,
+  });
 
   const result = await extractStructuredJson<{
     per_page_scores: Array<{
@@ -280,10 +569,14 @@ export async function generateEngagementAudit(args: {
 
   // human_review_required: drop_off_risk >= 50 の page が 3つ以上、または overall >= 50
   const highRiskPages = result.per_page_scores.filter((p) => p.drop_off_risk >= 50).length;
-  const humanReviewRequired = highRiskPages >= 3 || result.overall_drop_off_risk >= 50;
+  const hasRewardDensityCritical = rewardDensity.warnings.some(
+    (w) => w === "density_critical" || w === "gap_critical",
+  );
+  const humanReviewRequired =
+    highRiskPages >= 3 || result.overall_drop_off_risk >= 50 || hasRewardDensityCritical;
 
   return {
-    schema_version: 1,
+    schema_version: 2,
     generated_at: new Date().toISOString(),
     slug: bible.meta.slug,
     episode_id: storyboard.episode_id,
@@ -294,10 +587,28 @@ export async function generateEngagementAudit(args: {
     per_page_scores: result.per_page_scores,
     character_arcs: result.character_arcs,
     reward_interval: result.reward_interval,
+    reward_density: rewardDensity,
     human_review_required: humanReviewRequired,
     llm_model: "claude-opus (Codex CLI 経由)",
     rationale_summary: result.rationale_summary,
   };
+}
+
+export function normalizeEngagementAuditResult(v: unknown): EngagementAuditResult {
+  if (typeof v !== "object" || v === null) {
+    throw new Error("engagement audit must be an object");
+  }
+  const result = v as EngagementAuditResult;
+  if (result.schema_version !== 1 && result.schema_version !== 2) {
+    throw new Error(`unsupported engagement audit schema_version: ${String(result.schema_version)}`);
+  }
+  return result;
+}
+
+export async function loadEngagementAudit(filePath: string): Promise<EngagementAuditResult> {
+  return normalizeEngagementAuditResult(
+    JSON.parse(await fs.readFile(filePath, "utf-8")) as unknown,
+  );
 }
 
 /**

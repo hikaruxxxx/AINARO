@@ -222,6 +222,50 @@ export type RewardMode =
   | "mystery_progress"
   | "custom";
 
+/** Reward tag enum（panel 単位の報酬種別、10種） */
+export type RewardTagType =
+  | "achievement"
+  | "secret_revealed"
+  | "relationship_advance"
+  | "power_growth"
+  | "justice_payoff"
+  | "spectacle"
+  | "comic_relief"
+  | "comfort_recovery"
+  | "status_gain"
+  | "mystery_progress";
+
+export type RewardTag = {
+  type: RewardTagType;
+  /** 補足（任意） */
+  note?: string;
+  /** 検出層: explicit=作者明示, deterministic=ヒューリスティック, llm=LLM補助 */
+  source?: "explicit" | "deterministic" | "llm";
+};
+
+/** Episode 単位の報酬密度集計 */
+export type EpisodeRewardDensity = {
+  episode_no: number;
+  total_pages: number;
+  reward_count: number;
+  /** reward_count / total_pages (0-1+) */
+  reward_density: number;
+  /** 連続無報酬ページの最大値 */
+  max_gap_pages: number;
+  /** distinct reward type 数 */
+  variety_score: number;
+  /** episode 内に出現した distinct reward types */
+  reward_types: RewardTagType[];
+  /** ページ単位の reward 検出結果 */
+  per_page_rewards: Array<{
+    page_no: number;
+    reward_types: RewardTagType[];
+    sources: Array<"explicit" | "deterministic" | "llm">;
+  }>;
+  /** 警告メッセージ */
+  warnings: string[];
+};
+
 export type BibleSnapshotV2 = {
   schema_version: 2;
   generated_at: string;
@@ -469,6 +513,8 @@ export type PanelV2 = {
   continuity_group_ids?: string[];
   /** 2026-05-07 追加: panel-level screentone 濃度。L9 prompt が反映 */
   screentone_intensity?: "light" | "medium" | "dark";
+  /** 報酬タグ（panel 単位、optional） */
+  reward_tags?: RewardTag[];
 };
 
 export type StoryboardPageV2 = {
@@ -555,6 +601,37 @@ export type BackgroundTreatment =
   | "solid_black"
   | "floating_ui"
   | "unspecified";
+
+/** density profile distribution (BackgroundTreatment 各値の比率) */
+export type DensityDistribution = Record<BackgroundTreatment, number>;
+
+/** density profile (ジャンル別 bg_treatment 分布統計) */
+export type DensityProfile = {
+  schema_version: 1;
+  genre: string;
+  sources: string[];
+  panel_count: number;
+  page_count: number;
+  generated_at: string;
+  method: "llm-vision-v1-aggregate";
+  overall: DensityDistribution;
+  by_spread: {
+    single_page: DensityDistribution;
+    spread: DensityDistribution;
+  };
+  by_panel_position: {
+    top: DensityDistribution;
+    middle: DensityDistribution;
+    bottom: DensityDistribution;
+  };
+  policy: {
+    max_detailed_bg_per_page: number;
+    require_atmospheric_or_tone_each_page: boolean;
+    detailed_bg_target_ratio: number;
+    atmospheric_fade_target_ratio: number;
+    solid_color_target_ratio: number;
+  };
+};
 
 /**
  * background_treatment が L02 の「背景描き込み reference」として使えるか?

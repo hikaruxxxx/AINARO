@@ -90,6 +90,15 @@ async function main() {
   console.log(`[L5.5] audit complete:`);
   console.log(`  overall_drop_off_risk: ${result.overall_drop_off_risk.toFixed(1)}`);
   console.log(`  boring_pages: [${result.boring_pages.join(", ")}]`);
+  if (result.reward_density) {
+    console.log(
+      `  reward_density: ${result.reward_density.reward_density.toFixed(3)} (${result.reward_density.reward_count}/${result.reward_density.total_pages} pages)`,
+    );
+    console.log(`  reward_max_gap_pages: ${result.reward_density.max_gap_pages}`);
+    if (result.reward_density.warnings.length > 0) {
+      console.warn(`  reward_density_warnings: [${result.reward_density.warnings.join(", ")}]`);
+    }
+  }
   if (result.worst_page) {
     console.log(
       `  worst_page: page ${result.worst_page.page_no} (risk ${result.worst_page.drop_off_risk}) — ${result.worst_page.reason}`,

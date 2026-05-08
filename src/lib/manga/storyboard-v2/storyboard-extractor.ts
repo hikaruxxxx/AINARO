@@ -6,6 +6,7 @@
  */
 import { extractStructuredJson } from "../llm/codex-text";
 import { buildCraftGuideDirectives } from "./craft-guide-directives";
+import { loadDensityProfile } from "./density-profile-loader";
 import type {
   BibleSnapshotV2,
   EpisodeStoryboardV2,
@@ -114,6 +115,7 @@ export async function extractStoryboardFromShotlist(args: {
   const { bible, shotlist } = args;
   const range = args.panelsPerPageRange ?? { min: 4, max: 7 };
   const avg = args.avgPanelsPerPage ?? 5;
+  const densityProfile = loadDensityProfile(bible.meta.genre) ?? undefined;
 
   const charsBlock = bible.characters
     .map((c) => `- ${c.id} :: ${c.name} (${c.role})`)
@@ -164,6 +166,7 @@ export async function extractStoryboardFromShotlist(args: {
           navFullSpec: bible.nav_full_spec,
           characters: bible.characters,
         },
+        densityProfile,
       ),
       buildTextQualityPromptDirectives(bible),
     ].join("\n"),

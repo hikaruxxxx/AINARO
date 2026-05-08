@@ -17,6 +17,7 @@
 
 import type {
   CharacterEntryV2,
+  DensityProfile,
   DungeonModernSubtype,
   NarrationStyleGuideV2,
   NavFullSpecV2,
@@ -212,6 +213,7 @@ export function buildCraftGuideDirectives(
   genre?: string,
   subtype?: string,
   textQuality?: TextQualityDirectiveInputs,
+  densityProfile?: DensityProfile,
 ): string {
   const lines: string[] = [];
 
@@ -321,6 +323,20 @@ export function buildCraftGuideDirectives(
         `  speech_style 対象: ${speechStyleCharacters.map((c) => `${c.id} (${c.name})`).join(" / ")}`,
       );
     }
+    lines.push("");
+  }
+
+  if (densityProfile) {
+    const percent = (value: number) => `${(value * 100).toFixed(1)}%`;
+    lines.push(`## DENSITY POLICY (from ${densityProfile.genre}.json)`);
+    lines.push(`- detailed_bg target: ${percent(densityProfile.policy.detailed_bg_target_ratio)} per panel`);
+    lines.push(`- atmospheric_fade target: ${percent(densityProfile.policy.atmospheric_fade_target_ratio)}`);
+    lines.push(`- solid color target: ${percent(densityProfile.policy.solid_color_target_ratio)}`);
+    lines.push(`- max detailed_bg per page: ${densityProfile.policy.max_detailed_bg_per_page}`);
+    lines.push(
+      `- require atmospheric or tone each page: ${densityProfile.policy.require_atmospheric_or_tone_each_page}`,
+    );
+    lines.push("- Apply this as a statistical target, not as reference-image copying.");
     lines.push("");
   }
 
