@@ -194,6 +194,32 @@ export function isBibleAdoptedKind(value: unknown): value is BibleAdoptedAssetKi
   return typeof value === "string" && (BIBLE_ADOPTED_KINDS as readonly string[]).includes(value);
 }
 
+/**
+ * Phase C-1β: storyboard 採用記録。
+ *
+ * 現状 storyboard.json は単一案 (proposal_id="current") として扱う。
+ * 将来 _storyboard_alts/ に複数案が並んだら chosen_proposal_id で切替。
+ */
+export type AdoptedStoryboard = {
+  schema_version: 1;
+  slug: string;
+  episode: number;
+  /** 採用された proposal の識別子。"current" は現存 storyboard.json を指す predefined 値 */
+  chosen_proposal_id: string;
+  chosen_at: string;
+  note?: string;
+};
+
+export function emptyAdoptedStoryboard(slug: string, episode: number): AdoptedStoryboard {
+  return {
+    schema_version: 1,
+    slug,
+    episode,
+    chosen_proposal_id: "current",
+    chosen_at: new Date(0).toISOString(),
+  };
+}
+
 export const REVISION_TAGS: ReadonlyArray<RevisionTag> = [
   "face",
   "composition",

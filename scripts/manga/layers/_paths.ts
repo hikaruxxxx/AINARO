@@ -139,6 +139,16 @@ export function engagementAuditPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "engagement_audit.json");
 }
 
+/** Phase C-1β: storyboard.json (現存単一案) を「採用」記録する file */
+export function adoptedStoryboardPath(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "adopted_storyboard.json");
+}
+
+/** Phase C-1β/γ: storyboard 複数案保存ディレクトリ (proposals-YYYY-MM-DD.json) */
+export function storyboardAltsDir(slug: string, ep: number): string {
+  return path.join(episodeDir(slug, ep), "_storyboard_alts");
+}
+
 export function repairLogPath(slug: string, ep: number): string {
   return path.join(episodeDir(slug, ep), "repair_log.json");
 }

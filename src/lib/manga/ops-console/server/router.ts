@@ -38,6 +38,10 @@ import {
   handleAdoptedGet,
   handleAdoptedPost,
 } from "./handlers/adopted-versions";
+import {
+  handleAdoptedStoryboardGet,
+  handleAdoptedStoryboardPost,
+} from "./handlers/adopted-storyboard";
 import { handleBootstrap } from "./handlers/bootstrap";
 import { handleBible } from "./handlers/bible";
 import { handleBibleMetaPut } from "./handlers/bible-meta";
@@ -573,6 +577,21 @@ export async function handleApi(
           return send(res, 400, { error: String(e) });
         }
         return handleAdoptedPost(scoped.slug, scoped.episode, body, res);
+      }
+      return send(res, 405, { error: "このメソッドは許可されていません" });
+    }
+    if (tail === "/adopted-storyboard") {
+      if (req.method === "GET") return handleAdoptedStoryboardGet(scoped.slug, scoped.episode, res);
+      if (req.method === "POST") {
+        const guard = checkScopedWritePath(scoped, defaults);
+        if (!guard.ok) return send(res, guard.status, { error: guard.error });
+        let body: unknown;
+        try {
+          body = await readJsonBody(req);
+        } catch (e) {
+          return send(res, 400, { error: String(e) });
+        }
+        return handleAdoptedStoryboardPost(scoped.slug, scoped.episode, body, res);
       }
       return send(res, 405, { error: "このメソッドは許可されていません" });
     }

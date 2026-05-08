@@ -1,14 +1,13 @@
 import {
   ApiError,
-  apiGetManifest,
   apiGetNameApproval,
   apiGetNameManifest,
   apiPostNameApproval,
-  type Manifest,
   type NameManifest,
 } from "../lib/api";
 import { store } from "../lib/store";
 import { isRunnableLayer, navigateToAiEdit, spawnLayerWithModal } from "../lib/layer-actions";
+import { openAiEditModal } from "../components/ai-edit-modal";
 import type {
   NameAuditFindingLite,
   NamePageDecision,
@@ -16,25 +15,6 @@ import type {
   NameRejectReason,
   NameWarning,
 } from "../../../name-preview/types";
-
-type StoryboardTab = "storyboard" | "page-plan" | "resolved-refs" | "raw";
-
-type PageDetailModal = {
-  source: "storyboard" | "page-plan";
-  pageNo: number;
-};
-
-type OriginalDraftState = {
-  slug: string;
-  episode: number;
-  tab: StoryboardTab;
-  manifest: Manifest | null;
-  loading: boolean;
-  error: string | null;
-  copied: string | null;
-  pageModal: PageDetailModal | null;
-  runningLayer: string | null;
-};
 
 type DecisionDraft = {
   status: NamePageStatus;
@@ -52,15 +32,8 @@ const REASONS: Array<{ key: NameRejectReason; label: string }> = [
   { key: "render_risk", label: "[6] render risk" },
 ];
 
-const STORYBOARD_TABS: Array<{ id: StoryboardTab; label: string; key: string }> = [
-  { id: "storyboard", label: "原案", key: "1" },
-  { id: "page-plan", label: "ページ配置", key: "2" },
-  { id: "resolved-refs", label: "参照画像", key: "3" },
-  { id: "raw", label: "生 JSON", key: "4" },
-];
-
 const NAME_GATE_CSS = `
-.name-gate-container { display: grid; grid-template-rows: auto auto auto 1fr; gap: 14px; }
+.name-gate-container { display: grid; grid-template-rows: auto auto 1fr; gap: 14px; }
 .name-gate-toolbar {
   position: sticky;
   top: 0;
@@ -145,45 +118,6 @@ const NAME_GATE_CSS = `
 .name-gate-help code { background: #eef2f6; padding: 1px 5px; border-radius: 3px; font-family: ui-monospace, monospace; }
 .ng-section { display: grid; gap: 12px; }
 .ng-section-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; font-size: 16px; }
-.ng-original { display: grid; gap: var(--space-3); scroll-margin-top: 84px; }
-.ng-original__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
-.ng-original__head h3 { margin: 0; font-size: 16px; }
-.ng-original__spacer { flex: 1 1 auto; }
-.ng-tabs { display: flex; gap: var(--space-1); flex-wrap: wrap; }
-.ng-original-content { display: grid; gap: var(--space-3); }
-.sb-info { color: var(--text-secondary); font-size: var(--fs-sm); }
-.sb-list { display: grid; gap: var(--space-2); }
-.sb-page { display: grid; gap: var(--space-2); cursor: zoom-in; transition: box-shadow 120ms; }
-.sb-page:hover { box-shadow: 0 0 0 2px rgba(37,99,235,0.35); }
-.sb-page__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
-.sb-page__title { margin: 0; font-size: var(--fs-lg); }
-.sb-panels { display: grid; gap: var(--space-2); grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-.sb-panel { display: grid; gap: var(--space-2); }
-.sb-panel h4 { margin: 0; font-size: var(--fs-md); }
-.sb-meta { color: var(--text-tertiary); font-size: var(--fs-sm); overflow-wrap: anywhere; }
-.sb-text { color: var(--text-secondary); font-size: var(--fs-base); line-height: 1.55; }
-.sb-details { display: grid; gap: var(--space-2); }
-.sb-copy { justify-self: start; }
-.sb-modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(15,23,42,0.55); }
-.sb-modal-card { width: min(1200px, 96vw); max-height: 96vh; overflow: auto; padding: 16px 20px; border-radius: 8px; background: var(--surface-elevated, #fff); box-shadow: 0 12px 42px rgba(15,23,42,0.32); display: grid; gap: 12px; direction: ltr; }
-.sb-modal-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.sb-modal-title { margin: 0; font-size: var(--fs-lg, 18px); }
-.sb-modal-meta { color: var(--text-secondary, #64748b); font-size: 12px; flex: 1 1 auto; }
-.sb-modal-close { background: var(--surface-elevated, #fff); border: 1px solid var(--border-subtle, #d1d5db); color: var(--text-primary, #111827); padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
-.sb-modal-nav { display: flex; gap: 6px; }
-.sb-modal-nav button { background: var(--surface-elevated, #fff); border: 1px solid var(--border-subtle, #d1d5db); padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
-.sb-modal-nav button:disabled { opacity: 0.5; cursor: not-allowed; }
-.sb-panel-grid { display: grid; gap: var(--space-2, 10px); grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-.sb-panel-card { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--border-subtle, #d1d5db); border-radius: 6px; background: var(--surface-sunken, #f8fafc); }
-.sb-panel-card h4 { margin: 0; font-size: var(--fs-md, 14px); }
-.sb-panel-card .sb-meta { font-size: 11px; }
-.sb-panel-card .sb-line { font-size: 13px; line-height: 1.5; color: var(--text-primary, #111827); padding: 2px 0; }
-.sb-panel-card .sb-line--dialogue { color: #1e40af; }
-.sb-panel-card .sb-line--monologue { color: #6d28d9; }
-.sb-panel-card .sb-line--narration { color: #475569; }
-.sb-panel-card .sb-line--sfx { color: #b45309; font-weight: 700; }
-.sb-panel-card .sb-line--action { color: #047857; font-style: italic; }
-.sb-modal-hint { color: var(--text-tertiary, #6b7280); font-size: 11px; }
 .ng-modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 18px; background: rgba(15, 23, 42, .38); }
 .ng-modal { width: min(520px, 100%); display: grid; gap: 12px; padding: 16px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-elevated); box-shadow: var(--shadow-3); }
 .ng-modal h3 { margin: 0; font-size: 18px; }
@@ -387,12 +321,25 @@ function renderPageDetailModal(state: OriginalDraftState): string {
       </article>`;
   }).join("");
 
+  // Phase C-1β: 採用 button / 採用中 badge (storyboard tab のみ表示。page-plan は L05 系で別扱い)
+  const adopted = state.adoptedStoryboard;
+  const isAdopted = ctx.source === "storyboard" && adopted?.chosen_proposal_id === "current";
+  const adoptionBlock = ctx.source !== "storyboard"
+    ? ""
+    : isAdopted
+      ? `<span class="sb-adopt-badge" title="${escapeHtml(`採用日時: ${adopted?.chosen_at ?? ""}`)}">★ 採用中</span>`
+      : `<button type="button" class="sb-adopt-btn"
+          data-ng-sb-adopt
+          data-ng-sb-proposal-id="current"
+          ${state.adoptingStoryboard ? " disabled" : ""}>${state.adoptingStoryboard ? "採用中…" : "この案を採用"}</button>`;
+
   return `
     <div class="sb-modal" data-ng-sb-modal-overlay>
       <div class="sb-modal-card" role="dialog" aria-modal="true" aria-labelledby="sb-modal-title">
         <div class="sb-modal-head">
           <h3 class="sb-modal-title" id="sb-modal-title">P.${escapeHtml(String(page.page_no))} ${role ? `<span class="nc-badge nc-badge--neutral">[${escapeHtml(String(role))}]</span>` : ""}${renderStrategy ? `<span class="nc-badge nc-badge--info">${escapeHtml(String(renderStrategy))}</span>` : ""}</h3>
           <span class="sb-modal-meta">${idx + 1} / ${total} · ${ctx.source === "storyboard" ? "原案" : "ページ配置"} · panel ${panels.length} 件</span>
+          ${adoptionBlock}
           <div class="sb-modal-nav">
             <button type="button" data-ng-sb-modal-prev${idx <= 0 ? " disabled" : ""}>← 前</button>
             <button type="button" data-ng-sb-modal-next${idx < 0 || idx >= total - 1 ? " disabled" : ""}>次 →</button>
@@ -400,7 +347,7 @@ function renderPageDetailModal(state: OriginalDraftState): string {
           <button type="button" class="sb-modal-close" data-ng-sb-modal-close>閉じる</button>
         </div>
         <div class="sb-panel-grid">${panelHtml || `<div class="nc-empty">panel データが空です</div>`}</div>
-        <div class="sb-modal-hint">Tab で次の page · Shift+Tab で前の page · Esc で閉じる</div>
+        <div class="sb-modal-hint">Tab で次の page · Shift+Tab で前の page · Esc で閉じる${ctx.source === "storyboard" ? "  ·  この案を採用するとエピソード全体の原案として記録されます" : ""}</div>
       </div>
     </div>`;
 }
@@ -817,19 +764,26 @@ async function loadNameGate(
       copied: null,
       pageModal: null,
       runningLayer: null,
+      adoptedStoryboard: null,
+      adoptingStoryboard: false,
     };
-    const [manifest, approval, originalManifestResult] = await Promise.all([
+    const [manifest, approval, originalManifestResult, adoptedStoryboardResult] = await Promise.all([
       apiGetNameManifest(slug, episode),
       apiGetNameApproval(slug, episode),
       apiGetManifest(slug, episode).then(
         (value) => ({ ok: true as const, value }),
         (error) => ({ ok: false as const, error })
       ),
+      apiGetAdoptedStoryboard(slug, episode).then(
+        (value) => ({ ok: true as const, value }),
+        () => ({ ok: false as const })
+      ),
     ]);
     if (signal.aborted) return;
     originalState.loading = false;
     if (originalManifestResult.ok) originalState.manifest = originalManifestResult.value;
     else originalState.error = errorText(originalManifestResult.error);
+    if (adoptedStoryboardResult.ok) originalState.adoptedStoryboard = adoptedStoryboardResult.value;
 
     renderShell(container, originalState, manifest, slug, episode);
     const decisions = new Map<number, DecisionDraft>();
@@ -955,6 +909,26 @@ async function loadNameGate(
         if (target.closest("[data-ng-sb-modal-close]")) {
           originalState.pageModal = null;
           renderOriginalRoot(container, originalState);
+          return;
+        }
+        // Phase C-1β: 「この案を採用」 button
+        const adoptBtn = target.closest<HTMLButtonElement>("[data-ng-sb-adopt]");
+        if (adoptBtn) {
+          const proposalId = adoptBtn.dataset.ngSbProposalId ?? "current";
+          if (originalState.adoptingStoryboard) return;
+          originalState.adoptingStoryboard = true;
+          renderOriginalRoot(container, originalState);
+          void apiPostAdoptedStoryboard(slug, episode, { chosen_proposal_id: proposalId })
+            .then((result) => {
+              originalState.adoptedStoryboard = result.adopted;
+              originalState.adoptingStoryboard = false;
+              renderOriginalRoot(container, originalState);
+            })
+            .catch((err) => {
+              originalState.adoptingStoryboard = false;
+              renderOriginalRoot(container, originalState);
+              window.alert(`採用に失敗しました: ${errorText(err)}`);
+            });
           return;
         }
         if (target.closest("[data-ng-sb-modal-prev]")) {
