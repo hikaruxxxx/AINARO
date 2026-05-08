@@ -1,9 +1,12 @@
 import {
   ApiError,
+  apiGetAdoptedVolumePlot,
   apiGetVolumePlot,
+  apiPostAdoptedVolumePlot,
   apiPostJob,
   apiPutVolumePlot,
   openJobStream,
+  type AdoptedVolumePlot,
   type JobEvent,
   type VolumePlot,
 } from "../lib/api";
@@ -34,6 +37,9 @@ type ViewState = {
   /** edit モードで draft を保持。dirty 判定に使う。 */
   editDraft: unknown | null;
   saving: boolean;
+  /** Phase C-3: volume plot 採用記録 (chosen_proposal_id="current" は plot.json を指す) */
+  adoptedPlot: AdoptedVolumePlot | null;
+  adoptingPlot: boolean;
 };
 
 const CSS = `
@@ -80,6 +86,29 @@ const CSS = `
 .vp-edit-save-bar { position: sticky; top: 0; z-index: 5; padding: var(--space-2); background: var(--surface-elevated); border-bottom: 1px solid var(--border-default); display: flex; gap: var(--space-2); align-items: center; }
 .vp-edit-save-bar__hint { color: var(--text-tertiary); font-size: var(--fs-xs); margin-left: auto; }
 .vp-edit-dirty { color: var(--color-warning); font-weight: var(--fw-medium); }
+/* Phase C-3: 採用ボタン / 採用中バッジ */
+.vp-adopt-btn {
+  background: #2563eb;
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.vp-adopt-btn:hover { filter: brightness(1.06); }
+.vp-adopt-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.vp-adopt-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: #16a34a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
 `;
 
 function ensureStyles(): void {
@@ -339,6 +368,18 @@ function render(container: HTMLElement, state: ViewState): void {
         <h2 class="nc-toolbar__title">巻あらすじ・章構成 (Volume Plot)</h2>
         <span class="vplot-info">${escapeHtml(scope)}</span>
         <span class="vplot-spacer"></span>
+        ${(() => {
+          const adopted = state.adoptedPlot;
+          const isAdopted = adopted?.chosen_proposal_id === "current";
+          if (!state.plot) return "";
+          if (isAdopted) {
+            return `<span class="vp-adopt-badge" title="${escapeHtml(`採用日時: ${adopted?.chosen_at ?? ""}`)}">★ 採用中</span>`;
+          }
+          return `<button type="button" class="vp-adopt-btn"
+            data-vp-adopt
+            data-vp-proposal-id="current"
+            ${state.adoptingPlot ? " disabled" : ""}>${state.adoptingPlot ? "採用中…" : "この案を採用"}</button>`;
+        })()}
         ${renderDisplayMode(state.displayMode)}
         <button type="button" class="nc-button nc-button--primary" data-open-modal>Volume Plot を構築 (再生成)</button>
         <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI 編集</button>
@@ -356,9 +397,18 @@ async function refresh(state: ViewState, container: HTMLElement): Promise<void> 
   state.error = null;
   render(container, state);
   try {
-    state.plot = await apiGetVolumePlot(state.slug, state.volume);
+    const [plot, adoptedResult] = await Promise.all([
+      apiGetVolumePlot(state.slug, state.volume),
+      apiGetAdoptedVolumePlot(state.slug, state.volume).then(
+        (value) => ({ ok: true as const, value }),
+        () => ({ ok: false as const })
+      ),
+    ]);
+    state.plot = plot;
+    state.adoptedPlot = adoptedResult.ok ? adoptedResult.value : null;
   } catch (error) {
     state.plot = null;
+    state.adoptedPlot = null;
     state.error = errorText(error);
   }
   state.loading = false;
@@ -392,6 +442,8 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
     toast: null,
     editDraft: null,
     saving: false,
+    adoptedPlot: null,
+    adoptingPlot: false,
   };
 
   /**
@@ -430,6 +482,27 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
     if (!(target instanceof HTMLElement)) return;
     if (target.closest<HTMLButtonElement>("[data-open-ai-edit]")) {
       void openAiEditModal({ scope: state.slug ?? "_console" });
+      return;
+    }
+    // Phase C-3: 「この案を採用」 button
+    const adoptBtn = target.closest<HTMLButtonElement>("[data-vp-adopt]");
+    if (adoptBtn) {
+      const proposalId = adoptBtn.dataset.vpProposalId ?? "current";
+      if (state.adoptingPlot) return;
+      state.adoptingPlot = true;
+      render(container, state);
+      void apiPostAdoptedVolumePlot(state.slug, state.volume, { chosen_proposal_id: proposalId })
+        .then((result) => {
+          state.adoptedPlot = result.adopted;
+          state.adoptingPlot = false;
+          render(container, state);
+          setToast(state, container, "Volume Plot を採用しました", "success");
+        })
+        .catch((err) => {
+          state.adoptingPlot = false;
+          render(container, state);
+          setToast(state, container, `採用に失敗: ${errorText(err)}`, "danger");
+        });
       return;
     }
     const mode = target.closest<HTMLButtonElement>("[data-display-mode]")?.dataset.displayMode as DisplayMode | undefined;
