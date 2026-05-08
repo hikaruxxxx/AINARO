@@ -2369,3 +2369,27 @@ pat_052_explanation_pointer_presentation_5
 - **omake_4koma は本編 archetype dictionary とは別レイヤーで管理**: chapter_end_signal で別 picker を呼ぶのが妥当。本編 archetype の選択 logic に混ぜない
 - **n=3 archetype が増えたことで mapper-v4 の panel_count 分布調整が必要**: test-1 偏重で n=5 が多かったが、vol-2 を含めた104 page では n=3 がトップ。作品種別によって panel_count 分布を調整すべき
 
+---
+
+## v3 dict 採用 archetype (2026-05-09)
+
+dict v2 (想像ベースで失敗) を撤回し、kindle-test-1 から実物視認で 5 archetype を抽出。Phase 1 で 60 page 視認・Phase 2 で polygon 採寸完了。詳細 plan: `docs/plans/manga/layout-patterns-dictionary-v3.md`、draft: `data/manga/layout_patterns/_drafts/v3-additions.json`、生成 dict: `data/manga/layout_patterns/v3.json` (57 patterns, validator pass)。
+
+| pat_id | example_page | name | panel_count | polygon 種別 |
+|--------|--------------|------|-------------|--------------|
+| pat_071_ellipse_power_activation | 40 | 楕円バブル発動 | 2 | 8頂点 octagon (楕円近似) |
+| pat_072_trapezoid_supernatural_reveal | 41 | 斜め台形パース_異変出現 | 2 | 4頂点 trapezoid (パース台形) |
+| pat_073_diagonal_split_face_establishing | 48 | 斜め分断_顔と establishing | 2 | 4頂点 trapezoid × 2 (page を斜め 2 分割) |
+| pat_075_slash_polygon_combat | 137 | 斜め切り欠き_slash combat | 4 | 4頂点 trapezoid × 2 (上段) + rect × 2 (中下段) |
+| pat_076_l_shape_repeat_item_explanation | 145 | L字反復_item_explanation | 6 | 6頂点 L 字 cutout × 2 (中下段) + rect × 2 (上段) + inset rect × 2 |
+
+### Phase 1/2 で却下した page (採用基準満たさず)
+
+- **page_0054** (pat_074 候補): Phase 1 で「silhouette polygon」と判定したが、Phase 2 採寸時に右半分は **borderless atmospheric な背景描画** で polygon 境界線なしと判明。「panel 境界とオブジェクト描画を混同しない」原則で却下
+- **page_0086** (vertical split): rect 2 個で表現可能、Claude 判定で却下 (catalog 既述「斜め分断」は誇張)
+- **page_0050/0053/0093/0120/0122/0135/0142** 等: 5 並列 Agent で「採用候補」と報告されたが Claude 再視認で却下 (rect + atmospheric / 図版 inset を polygon と誤認)
+
+### 既存 v1 archetype との関係
+
+- **pat_011_l_shape_inset_5** (panel_count=6, example_pages=[127, 145]): pat_076 と部分重複の例。pat_011 は **中段のみ** L字 inset、pat_076 は **中段+下段の両方** に L字 反復。例 page で 145 を pat_011 にも残しているが、新規生成時は trigger_conditions で別経路に分岐 (`repeated_demonstration_beat>=2` の有無)
+
