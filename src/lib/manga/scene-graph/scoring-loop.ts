@@ -19,12 +19,19 @@
  * 仕様: docs/plans/manga/scene-graph-l3-5.md "2. scene-graph (L3.5) — 3 系統ナレッジの交差ハブ" / "C 系: 選別ループ"
  */
 
+import { promises as fs } from "node:fs";
 import type {
   SceneGraphV1,
   Scene,
   SceneSelection,
   PayoffEpisodeHint,
 } from "./schema";
+import type { BibleSnapshotV2 } from "../schemas-v2";
+import {
+  relevantMotifs,
+  relevantWorldRules,
+  relevantProps,
+} from "../bible/broker";
 import { runCodexText } from "../llm/codex-text";
 
 // ============================================================================
@@ -106,7 +113,43 @@ export async function generateSceneCandidates(
       stubCandidate(slot, i)
     );
   }
-  const task = buildSceneCandidatePrompt(slot, context, config.candidatesPerScene);
+
+  const bibleRaw = await fs.readFile(context.bibleSnapshotPath, "utf-8");
+  const bible = JSON.parse(bibleRaw) as BibleSnapshotV2;
+  const placeholderScene = {
+    beat_type: "transition" as const,
+    mode: "transition_montage" as const,
+    cast: [] as Scene["cast"],
+    location_id: slot.location_id,
+    key_visual_intent: "",
+  };
+  const motifCandidates = relevantMotifs(bible, placeholderScene);
+  const worldRuleCandidates = relevantWorldRules(bible, placeholderScene);
+  const propCandidates = relevantProps(bible, placeholderScene);
+  const bibleContext = {
+    characters: bible.characters.map((character) => ({
+      id: character.id,
+      name: character.name,
+      role: character.role,
+    })),
+    costumes: bible.costumes.map((costume) => ({
+      id: costume.id,
+      character_id: costume.character_id,
+      name: "name" in costume && typeof costume.name === "string" ? costume.name : undefined,
+    })),
+    motifCandidates: motifCandidates.map((motif) => ({
+      id: "id" in motif && typeof motif.id === "string" ? motif.id : undefined,
+      name: motif.name,
+      description: motif.meaning || motif.draw_directive,
+    })),
+    worldRuleCandidates,
+    propCandidates: propCandidates.map((prop) => ({
+      id: prop.id,
+      name: prop.name,
+    })),
+  };
+
+  const task = buildSceneCandidatePrompt(slot, context, config.candidatesPerScene, bibleContext);
   const result = await runCodexText<{ candidates: Partial<Scene>[] }>({
     task,
     format: "json",
@@ -149,7 +192,14 @@ export async function generateSceneCandidates(
 export function buildSceneCandidatePrompt(
   slot: SceneSlot,
   context: GenerationContext,
-  candidates: number
+  candidates: number,
+  bibleContext: {
+    characters: Array<{ id: string; name: string; role: string }>;
+    costumes: Array<{ id: string; character_id: string; name?: string }>;
+    motifCandidates: Array<{ id?: string; name: string; description?: string }>;
+    worldRuleCandidates: string[];
+    propCandidates: Array<{ id: string; name: string }>;
+  }
 ): string {
   const finalized = context.finalizedScenes
     .map(
@@ -177,18 +227,59 @@ export function buildSceneCandidatePrompt(
     `## 周辺シーン (採用済み、prev → ...)`,
     finalized || "  (no prev scenes yet)",
     "",
+    `## bible 抜粋 (D 系参照用)`,
+    "",
+    `### 登場可能キャラクター (bible.characters)`,
+    bibleContext.characters.map((c) => `- ${c.id} (${c.name}, ${c.role})`).join("\n"),
+    "",
+    `### 衣装 ID (bible.costumes)`,
+    bibleContext.costumes
+      .map((c) => `- ${c.id} (character=${c.character_id}${c.name ? `, name=${c.name}` : ""})`)
+      .join("\n"),
+    "",
+    `### この場所で使用候補の visual motif (broker.relevantMotifs)`,
+    bibleContext.motifCandidates
+      .map((m) => `- name=${m.name}${m.id ? ` (id=${m.id})` : ""}${m.description ? `: ${m.description.slice(0, 80)}` : ""}`)
+      .join("\n"),
+    "",
+    `### この場所で active な world.rules (broker.relevantWorldRules)`,
+    bibleContext.worldRuleCandidates.map((r) => `- ${r.slice(0, 120)}`).join("\n"),
+    "",
+    `### この場所で取り回しうる props (broker.relevantProps)`,
+    bibleContext.propCandidates.map((p) => `- ${p.id} (${p.name})`).join("\n"),
+    "",
     `## 指示`,
     `1. 上記 slot に対して ${candidates} 個の scene 候補を生成してください。`,
     `2. 各候補は scene-graph schema の A 系 (beat_type / cast / dialogue_plan / foreshadow / protagonist_arc_state / relationship_state_delta / time_axis) と B 系 (mode / turn_anchor / layout_pattern_id / subtype_directive / render_strategy / key_visual_intent) を埋めてください。`,
-    `3. cast は brief.cast の subset とし、bible.characters に存在する character_id のみを使用してください。`,
-    `4. dialogue_plan.key_lines の uniqueness は cliffhanger 等の決め台詞のみ "scene_exclusive" とし、それ以外は "may_repeat" としてください。`,
-    `5. foreshadow_setup の payoff_episode_hint は "this_episode" / "next_episode" / "later_in_volume" / "cross_volume" から選んでください。`,
-    `6. 候補間で beat 解釈・演出 mode・key_visual_intent を変えて多様性を確保してください。`,
-    `7. 仕様詳細: docs/plans/manga/scene-graph-l3-5.md`,
+    `3. (D 系) 各候補は以下の D 系軸も埋めてください。値は上記「bible 抜粋」内の候補から選んでください。bible に存在しない id を返してはいけません:`,
+    `   - wardrobe_state: cast の各キャラについて、どの costume_id を着ているか (cast に含まれるキャラのみ)`,
+    `   - visual_motif_anchors: この scene で前景化する visual motif を 1-3 個。motif_id は bible 抜粋の motif name または id を使用、intensity は "subtle" / "clear" / "dominant" のいずれか`,
+    `   - world_rules_active: この scene で読者に意識させる world rule の本文を最大 4 件 (bible 抜粋から選択、原文ママで複写)`,
+    `   - props_in_play: この scene で実際に登場する prop。prop_id と held_by (cast 内のキャラ id) を指定`,
+    `   - theme_subtext: この scene が情緒的に投影する 1 行の theme (15-40 字程度)`,
+    `4. (多様性確保) 候補間で D 系の選択 (motif / props / wardrobe) を変えて視覚的バラつきを作ること。同じ motif/prop ばかり繰り返さない。`,
+    `5. cast は brief.cast の subset とし、bible.characters に存在する character_id のみを使用してください。`,
+    `6. dialogue_plan.key_lines の uniqueness は cliffhanger 等の決め台詞のみ "scene_exclusive" とし、それ以外は "may_repeat" としてください。`,
+    `7. foreshadow_setup の payoff_episode_hint は "this_episode" / "next_episode" / "later_in_volume" / "cross_volume" から選んでください。`,
+    `8. 候補間で beat 解釈・演出 mode・key_visual_intent を変えて多様性を確保してください。`,
+    `9. 仕様詳細: docs/plans/manga/scene-graph-l3-5.md`,
     "",
     `## 出力形式`,
     `\`\`\`json`,
-    `{ "candidates": [ /* ${candidates} 個 */ ] }`,
+    `{`,
+    `  "candidates": [`,
+    `    {`,
+    `      "beat_type": "...",`,
+    `      "cast": [...],`,
+    `      "...A系/B系...": "...",`,
+    `      "wardrobe_state": [{ "character_id": "char_xxx_v1", "costume_id": "cos_xxx" }],`,
+    `      "visual_motif_anchors": [{ "motif_id": "...", "intensity": "clear" }],`,
+    `      "world_rules_active": ["..."],`,
+    `      "props_in_play": [{ "prop_id": "...", "held_by": "char_xxx_v1" }],`,
+    `      "theme_subtext": "..."`,
+    `    }`,
+    `  ]`,
+    `}`,
     `\`\`\``,
   ].join("\n");
 }
