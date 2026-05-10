@@ -153,7 +153,7 @@ export function apiPostRestart(): Promise<{ ok: true; restarting: true; eta_seco
 export function runNameLintFix(
   slug: string,
   episode: number,
-  panelNos: number[],
+  target: { panelNos?: number[]; sceneIds?: string[] },
   findingRules: string[] | undefined,
   onProgress: (message: string) => void,
   onDone: () => void,
@@ -168,7 +168,8 @@ export function runNameLintFix(
         body: JSON.stringify({
           slug,
           episode,
-          panel_nos: panelNos,
+          panel_nos: target.panelNos ?? [],
+          scene_ids: target.sceneIds ?? [],
           finding_rules: findingRules,
         }),
         signal: controller.signal,

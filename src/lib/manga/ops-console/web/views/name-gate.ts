@@ -274,7 +274,8 @@ const NAME_GATE_CSS = `
 .name-gate-container .lint-hint { color: #64748b; font-size: 11px; }
 .name-gate-container .lint-fix-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .name-gate-container .lint-fix-progress { min-width: 0; color: #64748b; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.name-gate-container [data-name-lint-fix-panel][disabled] { opacity: .55; cursor: wait; }
+.name-gate-container [data-name-lint-fix-panel][disabled],
+.name-gate-container [data-name-lint-fix-scene][disabled] { opacity: .55; cursor: wait; }
 .name-gate-container .lint-empty { padding: 6px 10px; color: #94a3b8; font-size: 12px; }
 .name-lint-episode {
   display: grid;
@@ -292,7 +293,7 @@ const NAME_GATE_CSS = `
 .name-lint-episode__pill--warn { background: #fef3c7; color: #92400e; }
 .name-lint-episode__pill--info { background: #dbeafe; color: #1d4ed8; }
 .name-lint-episode__assessments { display: flex; gap: 6px; flex-wrap: wrap; color: #475569; }
-.name-lint-episode__assessment { padding: 2px 6px; border-radius: 4px; background: #fff; border: 1px solid #e5e7eb; }
+.name-lint-episode__assessment { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 2px 6px; border-radius: 4px; background: #fff; border: 1px solid #e5e7eb; }
 .name-lint-episode__global-findings { display: grid; gap: 6px; }
 .name-lint-episode__global-title { color: #475569; font-weight: 700; }
 .name-lint-episode__missing { color: #64748b; }
@@ -498,11 +499,20 @@ function renderNameLintEpisodeSummary(report: NameLintReport | null | undefined)
     .filter((finding) => finding.rule === "overall_assessment")
     .map((finding) => {
       const scene = finding.scene_id ? `${finding.scene_id}: ` : "";
-      return `${scene}${finding.message.replace(/^LLM scene assessment: /, "")}`;
+      const text = `${scene}${finding.message.replace(/^LLM scene assessment: /, "")}`;
+      const fixButton = finding.scene_id
+        ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm"
+            data-name-lint-fix-scene="${escapeHtml(finding.scene_id)}">この scene を AI で書き直す</button>
+          <span class="lint-fix-progress"></span>`
+        : "";
+      return `<span class="name-lint-episode__assessment">
+        <span>${escapeHtml(text)}</span>
+        ${fixButton}
+      </span>`;
     });
   const assessmentHtml =
     assessments.length > 0
-      ? assessments.map((text) => `<span class="name-lint-episode__assessment">${escapeHtml(text)}</span>`).join("")
+      ? assessments.join("")
       : `<span class="name-lint-episode__missing">overall_assessment なし</span>`;
   const globalFindings = sortLintFindings(
     report.findings.filter((finding) => finding.page_no === undefined && finding.rule !== "overall_assessment")
@@ -1244,12 +1254,14 @@ async function loadNameGate(
           }).finally(() => setRunningLayer(null));
           return;
         }
-        const lintFixButton = target.closest<HTMLButtonElement>("[data-name-lint-fix-panel]");
+        const lintFixButton = target.closest<HTMLButtonElement>("[data-name-lint-fix-panel], [data-name-lint-fix-scene]");
         if (lintFixButton) {
           if (activeNameLintFix) return;
-          const panelNo = Number(lintFixButton.dataset.nameLintFixPanel);
+          const panelRaw = lintFixButton.dataset.nameLintFixPanel;
+          const panelNo = panelRaw ? Number(panelRaw) : null;
+          const sceneId = lintFixButton.dataset.nameLintFixScene;
           const rule = lintFixButton.dataset.nameLintFixRule;
-          if (!Number.isInteger(panelNo) || panelNo <= 0) return;
+          if (!sceneId && (!Number.isInteger(panelNo) || !panelNo || panelNo <= 0)) return;
           const progress = lintFixButton.parentElement?.querySelector<HTMLElement>(".lint-fix-progress");
           lintFixButton.disabled = true;
           lintFixButton.textContent = "修正中...";
@@ -1257,7 +1269,10 @@ async function loadNameGate(
           activeNameLintFix = runNameLintFix(
             slug,
             episode,
-            [panelNo],
+            {
+              panelNos: panelNo ? [panelNo] : [],
+              sceneIds: sceneId ? [sceneId] : [],
+            },
             rule ? [rule] : undefined,
             (message) => {
               console.log(message);
@@ -1271,7 +1286,7 @@ async function loadNameGate(
             (error) => {
               activeNameLintFix = null;
               lintFixButton.disabled = false;
-              lintFixButton.textContent = "AI 修正";
+              lintFixButton.textContent = sceneId ? "この scene を AI で書き直す" : "AI 修正";
               if (progress) progress.textContent = error.message;
               alert(`AI 修正に失敗しました: ${error.message}`);
             }
