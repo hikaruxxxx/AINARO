@@ -18,13 +18,21 @@
 import { runCodexText } from "../llm/codex-text";
 import type {
   BibleSnapshotV2,
+  CharacterEntryV2,
+  CharacterRelationV2,
+  CostumeEntryV2,
   CoreHookV2,
+  LocationEntryV2,
   NavFullSpecV2,
   NarrationStyleGuideV2,
+  PropEntryV2,
   TextQualityLexiconV2,
+  VisualMotifV2,
 } from "../schemas-v2";
 import type { V2Concept } from "./v2-adapter";
 import type { BibleLintReport } from "../qa-v2/bible-lint";
+import { loadBlocklist, loadFalsePositives, scanBible } from "../compliance/scanner";
+import { BIBLE_DEPTH_SPEC, measureChars, type DepthRule } from "./depth-spec";
 
 const ENHANCEMENT_SCHEMA = `
 type DeepExtractorOutput = {
@@ -126,6 +134,582 @@ export type DeepExtractionPatch = {
   nav_full_spec_patch?: NavFullSpecV2 | null;
 };
 
+export type CharacterDeepPatch = {
+  character_id: string;
+  patch: Partial<CharacterEntryV2>;
+};
+
+export type LocationDeepPatch = {
+  location_id: string;
+  patch: Partial<LocationEntryV2>;
+};
+
+export type WorldAspect =
+  | "history"
+  | "power_system"
+  | "cosmology"
+  | "economy"
+  | "social"
+  | "daily_life"
+  | "language"
+  | "forbidden_lore";
+
+export type WorldDeepPatch = {
+  aspect: WorldAspect;
+  patch: Partial<BibleSnapshotV2["world"]>;
+};
+
+export type MotifDeepPatch = {
+  motif_id: string;
+  patch: Partial<VisualMotifV2>;
+};
+
+export type PropDeepPatch = {
+  prop_id: string;
+  patch: Partial<PropEntryV2>;
+};
+
+export type CostumeDeepPatch = {
+  costume_id: string;
+  patch: Partial<CostumeEntryV2>;
+};
+
+export type RelationDeepPatch = {
+  relation: { a_id: string; b_id: string };
+  patch: Partial<CharacterRelationV2>;
+};
+
+export type VolumeDeepPatch = {
+  volume_no: number;
+  patch: Partial<BibleSnapshotV2["volume_synopsis"]>;
+};
+
+export type CrossRefPatch = {
+  character_patches?: CharacterDeepPatch[];
+  location_patches?: LocationDeepPatch[];
+  world_patch?: Partial<BibleSnapshotV2["world"]>;
+  motif_patches?: MotifDeepPatch[];
+  prop_patches?: PropDeepPatch[];
+  costume_patches?: CostumeDeepPatch[];
+  relation_patches?: RelationDeepPatch[];
+  volume_patch?: Partial<BibleSnapshotV2["volume_synopsis"]>;
+  compliance_replacements?: Array<{ field_path: string; from: string; to: string; reason?: string }>;
+  notes?: string[];
+};
+
+type DryRunResult = { dryRunPrompt: string };
+type StageCommonArgs = {
+  bible: BibleSnapshotV2;
+  styleReferenceNote: string;
+  cwd?: string;
+  timeoutMs?: number;
+  dryRun?: boolean;
+};
+
+type JsonRecord = Record<string, unknown>;
+
+const DEFAULT_CODEX_TIMEOUT_MS = 12 * 60 * 1000;
+
+const COMPLIANCE_DIRECTIVE = [
+  "## コンプライアンス (絶対遵守)",
+  "- 実在企業・実在商標・実在人物名・実在著作物名は **一切使用禁止**",
+  "  - NG 例: ローソン / セブンイレブン / マクドナルド / iPhone / Galaxy / LINE / Twitter / Instagram / YouTube / TikTok / Tesla / トヨタ / Apple / Google / Amazon / ポケモン / ガンダム / 鬼滅の刃 / ワンピース / 大谷翔平 / ハリーポッター 等",
+  "  - 完全な NG リスト: data/manga/compliance/blocklist.json (scanner.ts で自動検査、違反は lint fatal でブロック)",
+  "- 代替表現の指針:",
+  "  - コンビニ → 架空チェーン名 + 視覚的特徴 (青と白の看板、24h営業、おでん什器、入口チャイム2音 等)",
+  "  - 自動車メーカー → 架空ブランド名 + 「日本の自動車メーカー」等の記述",
+  "  - スマートフォン → 架空メーカー名 + 「黒い縦長端末、上端カメラ切り欠き、抽象シンボルロゴ」等",
+  "  - SNS / メッセージアプリ → 架空アプリ名 + 「緑のメッセージアプリ」「短文 SNS、鳥は使わない抽象シンボル」等",
+  "  - ファストフード / カフェチェーン → 架空名 + ロゴ色とメニュー特徴で identity",
+  "  - 大学・私学・特定施設 → 架空名 + 一般描写 (赤門/校章等の固有アイコンは避ける)",
+  "  - 実在人物名 (政治家・芸能人・スポーツ選手・CEO 等) → 役割描写で代替",
+  "- 不安なら『○○系の』『○○風の』+ 説明的記述で代替し、固有名は出さない",
+  "- **重要**: 既存 bible に NG 語が含まれていたら、必ず patch で safe な架空名に置換すること",
+  "- 代替名の発想: data/manga/compliance/blocklist.json の safe_substitutes セクションに各カテゴリの fictional_name_hint と description を用意してあるので、参考にしてよい",
+].join("\n");
+
+const WORLD_ASPECT_TO_PATH: Record<WorldAspect, string[]> = {
+  history: ["world.history.timeline"],
+  power_system: ["world.power_system_logic"],
+  cosmology: ["world.cosmology"],
+  economy: ["world.economic_system"],
+  social: ["world.social_strata", "world.factions[*].summary"],
+  daily_life: ["world.daily_life_textures"],
+  language: ["world.language_and_naming"],
+  forbidden_lore: ["world.forbidden_lore"],
+};
+
+export async function runStage1Character(args: StageCommonArgs & {
+  v2Concept: V2Concept;
+  characterId: string;
+}): Promise<CharacterDeepPatch | DryRunResult> {
+  const character = requireEntity(args.bible.characters.find((item) => item.id === args.characterId), "character", args.characterId);
+  const relatedRelations = args.bible.relations.filter(
+    (relation) => relation.from_character_id === args.characterId || relation.to_character_id === args.characterId,
+  );
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 1 Character Deepen",
+    bible: args.bible,
+    v2Concept: args.v2Concept,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `character_id=${args.characterId}`,
+    rules: rulesForCharacter(character.role),
+    context: {
+      target_character: character,
+      related_relations: relatedRelations,
+      related_characters_minimal: minimalCharacters(args.bible, relatedRelations, args.characterId),
+    },
+    instruction: "1コール = 1 character に集中し、このキャラだけを商業漫画 bible 水準まで深く書く。既存の口調・役割を尊重し、backstory / psychology_deep / voice_samples / growth_per_volume などを stage patch として返す。",
+    outputSchema: "type CharacterDeepPatch = { character_id: string; patch: Partial<CharacterEntryV2> }",
+  });
+  return runStageJson<CharacterDeepPatch>(prompt, args, "stage1 character JSON 抽出失敗");
+}
+
+export async function runStage2Location(args: StageCommonArgs & {
+  locationId: string;
+}): Promise<LocationDeepPatch | DryRunResult> {
+  const location = requireEntity(args.bible.locations.find((item) => item.id === args.locationId), "location", args.locationId);
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 2 Location Deepen",
+    bible: args.bible,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `location_id=${args.locationId}`,
+    rules: rulesByScope("location"),
+    context: {
+      target_location: location,
+      characters_minimal: args.bible.characters.map(minimalCharacter),
+      related_props: args.bible.props.filter((prop) => location.continuity_anchors.some((anchor) => JSON.stringify(prop).includes(anchor))).slice(0, 5),
+    },
+    instruction: "1コール = 1 location に集中し、場所の視覚・歴史・社会的文脈・五感・住人・象徴物を深く書く。新規 location ではなく既存 location の patch だけを返す。",
+    outputSchema: "type LocationDeepPatch = { location_id: string; patch: Partial<LocationEntryV2> }",
+  });
+  return runStageJson<LocationDeepPatch>(prompt, args, "stage2 location JSON 抽出失敗");
+}
+
+export async function runStage3World(args: StageCommonArgs & {
+  v2Concept: V2Concept;
+  aspect: WorldAspect;
+}): Promise<WorldDeepPatch | DryRunResult> {
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 3 World Deepen",
+    bible: args.bible,
+    v2Concept: args.v2Concept,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `world_aspect=${args.aspect}`,
+    rules: rulesByPaths(WORLD_ASPECT_TO_PATH[args.aspect]),
+    context: {
+      current_world: args.bible.world,
+      core_hook: args.bible.meta.core_hook,
+      characters_minimal: args.bible.characters.map(minimalCharacter),
+    },
+    instruction: "1コール = 1 world aspect に集中し、他 aspect を薄く広げず指定 aspect だけを深掘りする。作中ルールと読者報酬が矛盾しない patch を返す。",
+    outputSchema: "type WorldDeepPatch = { aspect: WorldAspect; patch: Partial<BibleSnapshotV2['world']> }",
+  });
+  return runStageJson<WorldDeepPatch>(prompt, args, "stage3 world JSON 抽出失敗");
+}
+
+export async function runStage4Motif(args: StageCommonArgs & {
+  motifId: string;
+}): Promise<MotifDeepPatch | DryRunResult> {
+  const motif = requireEntity(findMotif(args.bible, args.motifId), "motif", args.motifId);
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 4 Motif Deepen",
+    bible: args.bible,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `motif_id=${args.motifId}`,
+    rules: rulesByScope("motif"),
+    context: { target_motif: motif, volume_synopsis: args.bible.volume_synopsis },
+    instruction: "1コール = 1 motif に集中し、意味・描画指示・象徴の系譜・参照場面・NG例を深く書く。既存 motif の patch だけを返す。",
+    outputSchema: "type MotifDeepPatch = { motif_id: string; patch: Partial<VisualMotifV2> }",
+  });
+  return runStageJson<MotifDeepPatch>(prompt, args, "stage4 motif JSON 抽出失敗");
+}
+
+export async function runStage5Prop(args: StageCommonArgs & {
+  propId: string;
+}): Promise<PropDeepPatch | DryRunResult> {
+  const prop = requireEntity(args.bible.props.find((item) => item.id === args.propId), "prop", args.propId);
+  const owner = args.bible.characters.find((character) => character.id === prop.owner_character_id);
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 5 Prop Deepen",
+    bible: args.bible,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `prop_id=${args.propId}`,
+    rules: rulesByScope("prop"),
+    context: { target_prop: prop, owner_character: owner ? minimalCharacter(owner) : null },
+    instruction: "1コール = 1 prop に集中し、識別特徴・由来・機能とロア・誰に見えるか・作画連続性を深く書く。既存 prop の patch だけを返す。",
+    outputSchema: "type PropDeepPatch = { prop_id: string; patch: Partial<PropEntryV2> }",
+  });
+  return runStageJson<PropDeepPatch>(prompt, args, "stage5 prop JSON 抽出失敗");
+}
+
+export async function runStage6Costume(args: StageCommonArgs & {
+  costumeId: string;
+}): Promise<CostumeDeepPatch | DryRunResult> {
+  const costume = requireEntity(args.bible.costumes.find((item) => item.id === args.costumeId), "costume", args.costumeId);
+  const wearer = args.bible.characters.find((character) => character.id === costume.character_id);
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 6 Costume Deepen",
+    bible: args.bible,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `costume_id=${args.costumeId}`,
+    rules: rulesByScope("costume"),
+    context: { target_costume: costume, wearer_character: wearer ? minimalCharacter(wearer) : null },
+    instruction: "1コール = 1 costume に集中し、視覚説明・変更理由・巻またぎの状態差分・作画禁則を深く書く。既存 costume の patch だけを返す。",
+    outputSchema: "type CostumeDeepPatch = { costume_id: string; patch: Partial<CostumeEntryV2> }",
+  });
+  return runStageJson<CostumeDeepPatch>(prompt, args, "stage6 costume JSON 抽出失敗");
+}
+
+export async function runStage7Relation(args: StageCommonArgs & {
+  relation: { a_id: string; b_id: string };
+}): Promise<RelationDeepPatch | DryRunResult> {
+  const relation = requireEntity(findRelation(args.bible, args.relation.a_id, args.relation.b_id), "relation", `${args.relation.a_id}->${args.relation.b_id}`);
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 7 Relation Deepen",
+    bible: args.bible,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `relation=${args.relation.a_id}->${args.relation.b_id}`,
+    rules: rulesByScope("relation"),
+    context: {
+      target_relation: relation,
+      character_a: args.bible.characters.find((character) => character.id === args.relation.a_id),
+      character_b: args.bible.characters.find((character) => character.id === args.relation.b_id),
+    },
+    instruction: "1コール = 1 relation pair に集中し、双方向感情・葛藤・事件・巻ごとの変化を深く書く。既存 relation の patch だけを返す。",
+    outputSchema: "type RelationDeepPatch = { relation: { a_id: string; b_id: string }; patch: Partial<CharacterRelationV2> }",
+  });
+  return runStageJson<RelationDeepPatch>(prompt, args, "stage7 relation JSON 抽出失敗");
+}
+
+export async function runStage8Volume(args: StageCommonArgs & {
+  v2Concept: V2Concept;
+  volumeNo: number;
+}): Promise<VolumeDeepPatch | DryRunResult> {
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 8 Volume Deepen",
+    bible: args.bible,
+    v2Concept: args.v2Concept,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `volume_no=${args.volumeNo}`,
+    rules: [],
+    context: {
+      target_volume_no: args.volumeNo,
+      current_volume_synopsis: args.bible.volume_synopsis,
+      core_hook: args.bible.meta.core_hook,
+      character_growth: args.bible.characters.map((character) => ({
+        id: character.id,
+        name: character.name,
+        growth_per_volume: character.growth_per_volume,
+      })),
+    },
+    instruction: "1コール = 1 volume に集中し、theme / summary / cliffhanger を商業単行本の設計密度まで深く書く。下流 schema にある volume_synopsis patch だけを返す。",
+    outputSchema: "type VolumeDeepPatch = { volume_no: number; patch: Partial<BibleSnapshotV2['volume_synopsis']> }",
+  });
+  return runStageJson<VolumeDeepPatch>(prompt, args, "stage8 volume JSON 抽出失敗");
+}
+
+export async function runStage9CrossReference(args: StageCommonArgs): Promise<CrossRefPatch | DryRunResult> {
+  const [blocklist, fp] = await Promise.all([loadBlocklist(), loadFalsePositives()]);
+  const complianceFindings = scanBible(args.bible, blocklist, fp);
+  const shallowDepthRules = BIBLE_DEPTH_SPEC.rules.filter((rule) => {
+    const label = rule.label;
+    return label.length > 0;
+  });
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 9 Cross Reference Polish",
+    bible: args.bible,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: "cross_reference=whole_bible",
+    rules: shallowDepthRules,
+    context: {
+      full_bible_after_stage_1_to_8: args.bible,
+      compliance_findings: complianceFindings,
+    },
+    instruction: "1コール = bible 全体の矛盾解消と最終 polish に集中する。protagonist.backstory と antagonist.dark_mirror_to_protagonist などの不整合、compliance 検出語の置換、depth-spec の per_match 未達項目への追記 patch を返す。",
+    outputSchema: "type CrossRefPatch = { character_patches?: CharacterDeepPatch[]; location_patches?: LocationDeepPatch[]; world_patch?: Partial<WorldSpec>; motif_patches?: MotifDeepPatch[]; prop_patches?: PropDeepPatch[]; costume_patches?: CostumeDeepPatch[]; relation_patches?: RelationDeepPatch[]; volume_patch?: Partial<VolumeSynopsis>; compliance_replacements?: Array<{ field_path: string; from: string; to: string; reason?: string }>; notes?: string[] }",
+  });
+  return runStageJson<CrossRefPatch>(prompt, args, "stage9 cross-reference JSON 抽出失敗");
+}
+
+export function applyCharacterPatch(bible: BibleSnapshotV2, patch: CharacterDeepPatch): BibleSnapshotV2 {
+  return replaceById(bible, "characters", patch.character_id, patch.patch);
+}
+
+export function applyLocationPatch(bible: BibleSnapshotV2, patch: LocationDeepPatch): BibleSnapshotV2 {
+  return replaceById(bible, "locations", patch.location_id, patch.patch);
+}
+
+export function applyWorldPatch(bible: BibleSnapshotV2, patch: WorldDeepPatch): BibleSnapshotV2 {
+  const out = cloneBible(bible);
+  out.world = mergePreservingDeep(out.world, patch.patch, "world") as BibleSnapshotV2["world"];
+  return out;
+}
+
+export function applyMotifPatch(bible: BibleSnapshotV2, patch: MotifDeepPatch): BibleSnapshotV2 {
+  const out = cloneBible(bible);
+  out.visual_motifs = out.visual_motifs.map((motif) =>
+    motifId(motif) === patch.motif_id ? mergePreservingDeep(motif, patch.patch, "visual_motifs") as VisualMotifV2 : motif,
+  );
+  return out;
+}
+
+export function applyPropPatch(bible: BibleSnapshotV2, patch: PropDeepPatch): BibleSnapshotV2 {
+  return replaceById(bible, "props", patch.prop_id, patch.patch);
+}
+
+export function applyCostumePatch(bible: BibleSnapshotV2, patch: CostumeDeepPatch): BibleSnapshotV2 {
+  return replaceById(bible, "costumes", patch.costume_id, patch.patch);
+}
+
+export function applyRelationPatch(bible: BibleSnapshotV2, patch: RelationDeepPatch): BibleSnapshotV2 {
+  const out = cloneBible(bible);
+  out.relations = out.relations.map((relation) =>
+    relation.from_character_id === patch.relation.a_id && relation.to_character_id === patch.relation.b_id
+      ? mergePreservingDeep(relation, patch.patch, "relations") as CharacterRelationV2
+      : relation,
+  );
+  return out;
+}
+
+export function applyVolumePatch(bible: BibleSnapshotV2, patch: VolumeDeepPatch): BibleSnapshotV2 {
+  const out = cloneBible(bible);
+  out.volume_synopsis = mergePreservingDeep(out.volume_synopsis, patch.patch, "volume_synopsis") as BibleSnapshotV2["volume_synopsis"];
+  return out;
+}
+
+export function applyCrossRefPatch(bible: BibleSnapshotV2, patch: CrossRefPatch): BibleSnapshotV2 {
+  let out = cloneBible(bible);
+  for (const item of patch.character_patches ?? []) out = applyCharacterPatch(out, item);
+  for (const item of patch.location_patches ?? []) out = applyLocationPatch(out, item);
+  if (patch.world_patch) out = applyWorldPatch(out, { aspect: "history", patch: patch.world_patch });
+  for (const item of patch.motif_patches ?? []) out = applyMotifPatch(out, item);
+  for (const item of patch.prop_patches ?? []) out = applyPropPatch(out, item);
+  for (const item of patch.costume_patches ?? []) out = applyCostumePatch(out, item);
+  for (const item of patch.relation_patches ?? []) out = applyRelationPatch(out, item);
+  if (patch.volume_patch) out = applyVolumePatch(out, { volume_no: 1, patch: patch.volume_patch });
+  return out;
+}
+
+async function runStageJson<T>(prompt: string, args: { dryRun?: boolean; cwd?: string; timeoutMs?: number }, errorMessage: string): Promise<T | DryRunResult> {
+  if (args.dryRun) return { dryRunPrompt: prompt };
+  const result = await runCodexText<T>({
+    task: prompt,
+    format: "json",
+    cwd: args.cwd,
+    timeoutMs: args.timeoutMs ?? DEFAULT_CODEX_TIMEOUT_MS,
+    maxRetries: 1,
+  });
+  if (!result.parsed) throw new Error(errorMessage);
+  return result.parsed;
+}
+
+function buildStagePrompt(args: {
+  stageTitle: string;
+  bible: BibleSnapshotV2;
+  v2Concept?: V2Concept;
+  styleReferenceNote: string;
+  targetLabel: string;
+  rules: DepthRule[];
+  context: unknown;
+  instruction: string;
+  outputSchema: string;
+}): string {
+  const depthTargets = renderDepthTargets(args.rules);
+  const totalMin = args.rules.reduce((sum, rule) => sum + ruleMinChars(rule), 0);
+  const totalIdeal = args.rules.reduce((sum, rule) => sum + ruleIdealChars(rule), 0);
+  const minText = totalMin > 0 ? `${totalMin.toLocaleString("ja-JP")} 字` : "該当 stage の schema 最大限";
+  const idealText = totalIdeal > 0 ? `${totalIdeal.toLocaleString("ja-JP")} 字` : "出力 token 上限まで";
+  return [
+    COMPLIANCE_DIRECTIVE,
+    "",
+    `# ${args.stageTitle}`,
+    "",
+    "あなたは商業漫画 bible の深掘り専門編集者です。",
+    `対象: ${args.targetLabel}`,
+    "",
+    "## 量の原則",
+    `- 1コール = 1対象に集中し、最低 ${minText}、ideal ${idealText} を目指す`,
+    "- 出力 token を最大限活用し、薄い全体網羅ではなく対象 1 つを深く書く",
+    "- 既存 bible と矛盾する場合は、patch 側で矛盾解消案を含める",
+    "",
+    "## depth-spec 由来の文字数・件数目安",
+    depthTargets,
+    "",
+    "## stage 指示",
+    args.instruction,
+    "",
+    "## 画風参考",
+    args.styleReferenceNote,
+    "",
+    "## 対象 context (関連分のみ)",
+    "```json",
+    JSON.stringify(args.context, null, 2).slice(0, 50000),
+    "```",
+    ...(args.v2Concept ? [
+      "",
+      "## 元の V2 企画書 (対象の補助素材)",
+      "```json",
+      JSON.stringify(args.v2Concept, null, 2).slice(0, 30000),
+      "```",
+    ] : []),
+    "",
+    "## 出力 schema",
+    "```typescript",
+    args.outputSchema,
+    "```",
+    "",
+    "## 出力形式",
+    "schema に従う JSON のみ。説明文・前置き・後書きは禁止。",
+    "出力は ```json ... ``` のコードブロックで囲む。",
+  ].join("\n");
+}
+
+function renderDepthTargets(rules: DepthRule[]): string {
+  if (rules.length === 0) return "- この stage 専用の明示 rule はないため、対象 patch の各 string を 1,000 字以上、主要 summary を 3,000 字以上で設計する。";
+  return rules.map((rule) => `- ${rule.path}: ${metricText(rule)}`).join("\n");
+}
+
+function metricText(rule: DepthRule): string {
+  if (rule.metric.kind === "min_chars") return `最低 ${rule.metric.min.toLocaleString("ja-JP")} 字、ideal ${rule.metric.ideal.toLocaleString("ja-JP")} 字`;
+  if (rule.metric.kind === "min_count") {
+    const each = rule.metric.min_chars_each ? `、各 ${rule.metric.min_chars_each.toLocaleString("ja-JP")} 字以上` : "";
+    const ideal = rule.metric.ideal ? `、ideal ${rule.metric.ideal.toLocaleString("ja-JP")} 件` : "";
+    return `最低 ${rule.metric.min.toLocaleString("ja-JP")} 件${each}${ideal}`;
+  }
+  return `最低 ${rule.metric.min.toLocaleString("ja-JP")} 件`;
+}
+
+function ruleMinChars(rule: DepthRule): number {
+  if (rule.metric.kind === "min_chars") return rule.metric.min;
+  if (rule.metric.kind === "min_count") return rule.metric.min * (rule.metric.min_chars_each ?? 120);
+  return rule.metric.min * 80;
+}
+
+function ruleIdealChars(rule: DepthRule): number {
+  if (rule.metric.kind === "min_chars") return rule.metric.ideal;
+  if (rule.metric.kind === "min_count") return (rule.metric.ideal ?? rule.metric.min) * (rule.metric.min_chars_each ?? 120);
+  return rule.metric.min * 120;
+}
+
+function rulesByScope(scope: DepthRule["scope"]): DepthRule[] {
+  return BIBLE_DEPTH_SPEC.rules.filter((rule) => rule.scope === scope);
+}
+
+function rulesForCharacter(role: CharacterEntryV2["role"]): DepthRule[] {
+  return BIBLE_DEPTH_SPEC.rules.filter((rule) => rule.scope === "character" && (!rule.applies_to_role || rule.applies_to_role === role));
+}
+
+function rulesByPaths(paths: string[]): DepthRule[] {
+  return BIBLE_DEPTH_SPEC.rules.filter((rule) => paths.includes(rule.path));
+}
+
+function minimalCharacter(character: CharacterEntryV2): JsonRecord {
+  return {
+    id: character.id,
+    name: character.name,
+    role: character.role,
+    appearance_notes: character.appearance_notes,
+    continuity_anchors: character.continuity_anchors,
+  };
+}
+
+function minimalCharacters(bible: BibleSnapshotV2, relations: CharacterRelationV2[], excludedId: string): JsonRecord[] {
+  const ids = new Set<string>();
+  for (const relation of relations) {
+    ids.add(relation.from_character_id);
+    ids.add(relation.to_character_id);
+  }
+  ids.delete(excludedId);
+  return bible.characters.filter((character) => ids.has(character.id)).map(minimalCharacter);
+}
+
+function findMotif(bible: BibleSnapshotV2, motifIdValue: string): VisualMotifV2 | undefined {
+  return bible.visual_motifs.find((motif) => motifId(motif) === motifIdValue);
+}
+
+function motifId(motif: VisualMotifV2): string {
+  return slugForId(motif.name);
+}
+
+function slugForId(value: string): string {
+  return value.trim().toLowerCase().replace(/[^a-z0-9ぁ-んァ-ヶ一-龠]+/gu, "_");
+}
+
+function findRelation(bible: BibleSnapshotV2, aId: string, bId: string): CharacterRelationV2 | undefined {
+  return bible.relations.find((relation) => relation.from_character_id === aId && relation.to_character_id === bId);
+}
+
+function requireEntity<T>(value: T | undefined, kind: string, id: string): T {
+  if (value === undefined) throw new Error(`${kind} not found: ${id}`);
+  return value;
+}
+
+function cloneBible(bible: BibleSnapshotV2): BibleSnapshotV2 {
+  return JSON.parse(JSON.stringify(bible)) as BibleSnapshotV2;
+}
+
+function replaceById<K extends "characters" | "locations" | "props" | "costumes">(
+  bible: BibleSnapshotV2,
+  key: K,
+  id: string,
+  patch: Partial<BibleSnapshotV2[K][number]>,
+): BibleSnapshotV2 {
+  const out = cloneBible(bible);
+  out[key] = out[key].map((entry) => {
+    const entryRecord = entry as JsonRecord;
+    return entryRecord.id === id
+      ? mergePreservingDeep(entry, patch, key) as BibleSnapshotV2[K][number]
+      : entry;
+  }) as BibleSnapshotV2[K];
+  return out;
+}
+
+function mergePreservingDeep<T>(existing: T, patch: Partial<T>, pathPrefix: string): T {
+  if (!isRecord(existing) || !isRecord(patch)) return shouldKeepExistingValue(existing, patch, pathPrefix) ? existing : patch as T;
+  const out: JsonRecord = { ...existing };
+  for (const [key, patchValue] of Object.entries(patch)) {
+    if (patchValue === undefined) continue;
+    const currentPath = `${pathPrefix}.${key}`;
+    const existingValue = out[key];
+    if (shouldKeepExistingValue(existingValue, patchValue, currentPath)) continue;
+    if (isRecord(existingValue) && isRecord(patchValue) && !Array.isArray(existingValue) && !Array.isArray(patchValue)) {
+      out[key] = mergePreservingDeep(existingValue, patchValue, currentPath);
+    } else {
+      out[key] = patchValue;
+    }
+  }
+  return out as T;
+}
+
+function shouldKeepExistingValue(existing: unknown, patch: unknown, pathValue: string): boolean {
+  if (patch === undefined || patch === null) return true;
+  if (existing === undefined || existing === null) return false;
+  const existingChars = measureChars(existing);
+  if (existingChars === 0) return false;
+  const threshold = depthThresholdForPath(pathValue) ?? 5000;
+  return existingChars >= threshold;
+}
+
+function depthThresholdForPath(pathValue: string): number | undefined {
+  const normalized = pathValue
+    .replace(/^characters\./u, "characters[*].")
+    .replace(/^locations\./u, "locations[*].")
+    .replace(/^props\./u, "props[*].")
+    .replace(/^costumes\./u, "costumes[*].")
+    .replace(/^relations\./u, "relations[*].")
+    .replace(/^visual_motifs\./u, "visual_motifs[*].");
+  const rule = BIBLE_DEPTH_SPEC.rules.find((item) => item.path.endsWith(normalized.split(".").slice(1).join(".")) || item.path === normalized);
+  return rule?.metric.kind === "min_chars" ? rule.metric.min : undefined;
+}
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * @deprecated Phase 1-2b 以降は runStage1Character〜runStage9CrossReference を使用してください。
+ */
 export async function runDeepExtractor(args: {
   v2Concept: V2Concept;
   currentBible: BibleSnapshotV2;
@@ -237,10 +821,9 @@ export async function runDeepExtractor(args: {
   return result.parsed as never;
 }
 
-// ============================================================
-// patch 適用 (snapshot v2 → v2.1)
-// ============================================================
-
+/**
+ * @deprecated Phase 1-2b 以降は stage 別 apply 関数を使用してください。
+ */
 export function applyDeepEnhancements(args: {
   bible: BibleSnapshotV2;
   patch: DeepExtractionPatch;
