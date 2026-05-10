@@ -71,6 +71,8 @@ const CSS = `
 .bib-card h3 { margin: 0; font-size: var(--fs-md); line-height: 1.3; overflow-wrap: anywhere; }
 .bib-meta { color: var(--text-tertiary); font-size: var(--fs-sm); overflow-wrap: anywhere; font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
 .bib-summary { color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.bib-card--relation .bib-summary { display: block; -webkit-line-clamp: unset; -webkit-box-orient: unset; overflow: visible; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bib-grid--relations { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
 .bib-thumb-wrap { position: relative; width: 100%; height: 160px; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--surface-sunken); }
 .bib-thumb { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .bib-thumb-wrap[data-bib-lightbox] { cursor: zoom-in; }
@@ -844,12 +846,12 @@ function renderRelationsReader(bible: BibleAssetView): string {
   const relations = Array.isArray(bible.relations) ? bible.relations : [];
   if (relations.length === 0) return `<div class="nc-empty">登録された関係性はありません</div>`;
   const names = characterNameMap(bible);
-  return `<div class="bib-reader"><div class="bib-grid">${relations.map((relation) => {
+  return `<div class="bib-reader"><div class="bib-grid bib-grid--relations">${relations.map((relation) => {
     const obj = asRecord(relation);
     const from = typeof obj.from_character_id === "string" ? obj.from_character_id : "";
     const to = typeof obj.to_character_id === "string" ? obj.to_character_id : "";
     const title = `${characterLabel(from || "(from 未設定)", names)} → ${characterLabel(to || "(to 未設定)", names)}`;
-    return `<article class="nc-card nc-card--default bib-card">
+    return `<article class="nc-card nc-card--default bib-card bib-card--relation">
       <h3>${escapeHtml(title)}</h3>
       <div class="bib-meta">${escapeHtml(asText(obj.relation_type))}</div>
       <div class="bib-summary">${escapeHtml(asText(obj.description))}</div>
