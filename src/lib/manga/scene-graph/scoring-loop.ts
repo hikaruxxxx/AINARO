@@ -32,6 +32,7 @@ import {
   relevantWorldRules,
   relevantProps,
 } from "../bible/broker";
+import { contextForSceneV2 } from "../bible/broker-v3";
 import { runCodexText } from "../llm/codex-text";
 
 // ============================================================================
@@ -103,6 +104,81 @@ export type GenerationContext = {
   finalizedScenes: Scene[];
 };
 
+export type BibleContextForSlot = {
+  characters: Array<{ id: string; name: string; role: string }>;
+  costumes: Array<{ id: string; character_id: string; name?: string }>;
+  motifCandidates: Array<{ id?: string; name: string; description?: string }>;
+  worldRuleCandidates: string[];
+  propCandidates: Array<{ id: string; name: string }>;
+};
+
+export function buildBibleContextForSlot(
+  bible: BibleSnapshotV2,
+  slot: SceneSlot,
+  useBibleV3: boolean
+): BibleContextForSlot {
+  const placeholderScene = {
+    beat_type: "transition" as const,
+    mode: "transition_montage" as const,
+    cast: [] as Scene["cast"],
+    location_id: slot.location_id,
+    key_visual_intent: "",
+  };
+  const brokerContext = useBibleV3
+    ? (() => {
+        const v3ctx = contextForSceneV2(
+          bible,
+          placeholderScene,
+          "in_world_plus_revealed_up_to_vol",
+        );
+        return {
+          motifCandidates: v3ctx.motifs.map((fact) => ({
+            id: undefined,
+            name: motifNameForFact(bible, fact.evidence.json_pointer) ?? fact.body.slice(0, 40),
+            description: fact.body,
+          })),
+          worldRuleCandidates: v3ctx.world_rules.map((fact) => fact.body),
+          propCandidates: v3ctx.props.map((fact) => ({
+            id: fact.entity_id ?? "",
+            name: fact.body.slice(0, 40),
+          })),
+        };
+      })()
+    : {
+        motifCandidates: relevantMotifs(bible, placeholderScene).map((motif) => ({
+          id: "id" in motif && typeof motif.id === "string" ? motif.id : undefined,
+          name: motif.name,
+          description: motif.meaning || motif.draw_directive,
+        })),
+        worldRuleCandidates: relevantWorldRules(bible, placeholderScene),
+        propCandidates: relevantProps(bible, placeholderScene).map((prop) => ({
+          id: prop.id,
+          name: prop.name,
+        })),
+      };
+
+  return {
+    characters: bible.characters.map((character) => ({
+      id: character.id,
+      name: character.name,
+      role: character.role,
+    })),
+    costumes: bible.costumes.map((costume) => ({
+      id: costume.id,
+      character_id: costume.character_id,
+      name: "name" in costume && typeof costume.name === "string" ? costume.name : undefined,
+    })),
+    ...brokerContext,
+  };
+}
+
+function motifNameForFact(bible: BibleSnapshotV2, jsonPointer: string | undefined): string | undefined {
+  const match = jsonPointer?.match(/^\/visual_motifs\/(\d+)$/);
+  if (!match) return undefined;
+  const motif = bible.visual_motifs[Number(match[1])];
+  return motif?.name;
+}
+
 export async function generateSceneCandidates(
   slot: SceneSlot,
   context: GenerationContext,
@@ -114,41 +190,9 @@ export async function generateSceneCandidates(
     );
   }
 
-  const placeholderScene = {
-    beat_type: "transition" as const,
-    mode: "transition_montage" as const,
-    cast: [] as Scene["cast"],
-    location_id: slot.location_id,
-    key_visual_intent: "",
-  };
   const useBibleV3 = process.env.USE_BIBLE_V3 === "true";
-  const { bible, motifCandidates, worldRuleCandidates, propCandidates } = await loadBibleViaBroker(
-    context.bibleSnapshotPath,
-    useBibleV3,
-    placeholderScene
-  );
-  const bibleContext = {
-    characters: bible.characters.map((character) => ({
-      id: character.id,
-      name: character.name,
-      role: character.role,
-    })),
-    costumes: bible.costumes.map((costume) => ({
-      id: costume.id,
-      character_id: costume.character_id,
-      name: "name" in costume && typeof costume.name === "string" ? costume.name : undefined,
-    })),
-    motifCandidates: motifCandidates.map((motif) => ({
-      id: "id" in motif && typeof motif.id === "string" ? motif.id : undefined,
-      name: motif.name,
-      description: motif.meaning || motif.draw_directive,
-    })),
-    worldRuleCandidates,
-    propCandidates: propCandidates.map((prop) => ({
-      id: prop.id,
-      name: prop.name,
-    })),
-  };
+  const bible = await loadBibleSnapshot(context.bibleSnapshotPath);
+  const bibleContext = buildBibleContextForSlot(bible, slot, useBibleV3);
 
   const task = buildSceneCandidatePrompt(slot, context, config.candidatesPerScene, bibleContext);
   const result = await runCodexText<{ candidates: Partial<Scene>[] }>({
@@ -180,47 +224,9 @@ export async function generateSceneCandidates(
   }));
 }
 
-async function loadBibleViaBroker(
-  bibleSnapshotPath: string,
-  useBibleV3: boolean,
-  placeholderScene: Pick<Scene, "beat_type" | "mode" | "cast" | "location_id" | "key_visual_intent">
-): Promise<{
-  bible: BibleSnapshotV2;
-  motifCandidates: Array<{ id?: string; name: string; meaning?: string; draw_directive?: string; description?: string }>;
-  worldRuleCandidates: string[];
-  propCandidates: Array<{ id: string; name: string }>;
-}> {
+async function loadBibleSnapshot(bibleSnapshotPath: string): Promise<BibleSnapshotV2> {
   const bibleRaw = await fs.readFile(bibleSnapshotPath, "utf-8");
-  const bible = JSON.parse(bibleRaw) as BibleSnapshotV2;
-  if (useBibleV3) {
-    const { contextForSceneV2 } = await import("../bible/broker-v3");
-    const v3ctx = contextForSceneV2(
-      bible,
-      placeholderScene,
-      "in_world_plus_revealed_up_to_vol",
-      { char: { min: 200, max: 1500 } }
-    );
-    return {
-      bible,
-      motifCandidates: v3ctx.motifs.map((fact) => ({
-        id: undefined,
-        name: fact.body.slice(0, 40),
-        description: fact.body,
-      })),
-      worldRuleCandidates: v3ctx.world_rules.map((fact) => fact.body),
-      propCandidates: v3ctx.props.map((fact) => ({
-        id: fact.entity_id ?? "",
-        name: fact.body.slice(0, 40),
-      })),
-    };
-  }
-
-  return {
-    bible,
-    motifCandidates: relevantMotifs(bible, placeholderScene),
-    worldRuleCandidates: relevantWorldRules(bible, placeholderScene),
-    propCandidates: relevantProps(bible, placeholderScene),
-  };
+  return JSON.parse(bibleRaw) as BibleSnapshotV2;
 }
 
 /**
@@ -237,13 +243,7 @@ export function buildSceneCandidatePrompt(
   slot: SceneSlot,
   context: GenerationContext,
   candidates: number,
-  bibleContext: {
-    characters: Array<{ id: string; name: string; role: string }>;
-    costumes: Array<{ id: string; character_id: string; name?: string }>;
-    motifCandidates: Array<{ id?: string; name: string; description?: string }>;
-    worldRuleCandidates: string[];
-    propCandidates: Array<{ id: string; name: string }>;
-  }
+  bibleContext: BibleContextForSlot
 ): string {
   const finalized = context.finalizedScenes
     .map(
