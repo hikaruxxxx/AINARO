@@ -1,6 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BibleSnapshotV2 } from "../schemas-v2";
-import { complianceLint, lintBible } from "./bible-lint";
+import { runCodexText } from "../llm/codex-text";
+import { complianceLint, lintBible, llmLintBibleChunked } from "./bible-lint";
+import { detectUndefinedReferences } from "./undefined-reference-detector";
+
+vi.mock("../llm/codex-text", () => ({
+  runCodexText: vi.fn(),
+}));
+
+const runCodexTextMock = vi.mocked(runCodexText);
 
 function baseBible(patch: Partial<BibleSnapshotV2> = {}): BibleSnapshotV2 {
   const bible = {
@@ -115,6 +123,10 @@ function bibleWithLocationName(name: string): BibleSnapshotV2 {
 }
 
 describe("complianceLint", () => {
+  beforeEach(() => {
+    runCodexTextMock.mockReset();
+  });
+
   it("ローソンが含まれる bible で fatal finding を返す", async () => {
     const findings = await complianceLint({ bible: bibleWithLocationName("ローソン灯町店") });
 
@@ -197,5 +209,144 @@ describe("lintBible depth integration", () => {
 
     expect(report.findings.some((finding) => finding.rule === "depth:characters[role=protagonist].backstory")).toBe(true);
     expect(report.summary).toMatch(/fatal=\d+ warn=\d+ info=\d+/u);
+  });
+});
+
+describe("llmLintBibleChunked", () => {
+  beforeEach(() => {
+    runCodexTextMock.mockReset();
+  });
+
+  it("1 chunk が失敗しても他 chunk の findings を集約する", async () => {
+    runCodexTextMock.mockImplementation(async (options) => {
+      if (options.task.includes("characters[char_aoi]")) {
+        throw new Error("simulated chunk failure");
+      }
+      return {
+        stdout: "ok",
+        parsed: {
+          overall_assessment: "passable",
+          rationale: "chunk は最低限成立している。",
+          shallowness_findings: [],
+        },
+        attempts: 1,
+        totalDurationMs: 1,
+      };
+    });
+
+    const result = await llmLintBibleChunked({
+      bible: baseBible(),
+      chunkTimeoutMs: 60,
+      maxParallel: 2,
+    });
+
+    expect(result.chunkResults.some((chunk) => chunk.chunkId === "characters[char_aoi]" && chunk.status === "failed")).toBe(true);
+    expect(result.chunkResults.some((chunk) => chunk.status === "ok")).toBe(true);
+    expect(result.findings.some((finding) => finding.rule === "llm_judge_failed")).toBe(true);
+    expect(result.findings.some((finding) => finding.rule === "llm_chunk_assessment")).toBe(true);
+  });
+
+  it("timeout chunk は info finding にして処理を続行する", async () => {
+    runCodexTextMock.mockImplementation(async (options) => {
+      if (options.task.includes("world.premise")) {
+        throw new Error("Codex CLI タイムアウト (60ms)");
+      }
+      return {
+        stdout: "ok",
+        parsed: {
+          overall_assessment: "professional",
+          rationale: "chunk は十分具体的。",
+          shallowness_findings: [],
+        },
+        attempts: 1,
+        totalDurationMs: 1,
+      };
+    });
+
+    const result = await llmLintBibleChunked({
+      bible: baseBible(),
+      chunkTimeoutMs: 60,
+      maxParallel: 3,
+    });
+
+    expect(result.chunkResults.some((chunk) => chunk.chunkId === "world.premise" && chunk.status === "timeout")).toBe(true);
+    expect(result.findings.some((finding) => finding.rule === "llm_judge_timeout")).toBe(true);
+    expect(result.chunkResults.some((chunk) => chunk.status === "ok")).toBe(true);
+  });
+});
+
+describe("undefined-reference-detector", () => {
+  it("未定義の固有名詞候補を検出する", () => {
+    const bible = baseBible({
+      characters: [
+        {
+          ...baseBible().characters[0],
+          backstory: "青井レンは玄蔵の暗号を追う途中、ナビ第二段階という未登録の現象に遭遇する。",
+        },
+      ],
+    });
+
+    const refs = detectUndefinedReferences(bible);
+
+    expect(refs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ matched_text: "玄蔵の暗号", source_path: "characters[0].backstory" }),
+        expect.objectContaining({ matched_text: "ナビ第二段階", source_path: "characters[0].backstory" }),
+      ]),
+    );
+  });
+});
+
+describe("lintBible provenance", () => {
+  beforeEach(() => {
+    runCodexTextMock.mockReset();
+  });
+
+  it("lint_report に provenance を必ず入れる", async () => {
+    const report = await lintBible({
+      bible: baseBible(),
+      skipLlm: true,
+      skipCompliance: true,
+      skipDepth: true,
+      executor: "standalone",
+      snapshotHash: "abc123def456",
+    });
+
+    expect(report.schema_version).toBe(2);
+    expect(report.provenance).toEqual({
+      skipLlm: true,
+      executor: "standalone",
+      snapshotHash: "abc123def456",
+      judgeModel: "skipped",
+      stagePosition: "standalone",
+    });
+  });
+
+  it("skipLlm: false では chunked judge の provenance を残す", async () => {
+    runCodexTextMock.mockResolvedValue({
+      stdout: "ok",
+      parsed: {
+        overall_assessment: "passable",
+        rationale: "chunk review done",
+        shallowness_findings: [],
+      },
+      attempts: 1,
+      totalDurationMs: 1,
+    });
+
+    const report = await lintBible({
+      bible: baseBible(),
+      skipLlm: false,
+      skipCompliance: true,
+      skipDepth: true,
+      executor: "L01c-bible-deepen",
+      stagePosition: "post",
+    });
+
+    expect(report.provenance.skipLlm).toBe(false);
+    expect(report.provenance.executor).toBe("L01c-bible-deepen");
+    expect(report.provenance.stagePosition).toBe("post");
+    expect(report.provenance.judgeModel).toBe("codex");
+    expect(report.findings.some((finding) => finding.rule === "llm_chunk_assessment")).toBe(true);
   });
 });

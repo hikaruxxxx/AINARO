@@ -70,6 +70,7 @@ type Args = {
   all: boolean;
   dryRun: boolean;
   reLint: boolean;
+  llmLint?: boolean;
 };
 
 const WORLD_ASPECTS: WorldAspect[] = ["history", "power_system", "cosmology", "economy", "social", "daily_life", "language", "forbidden_lore"];
@@ -89,6 +90,10 @@ function parseArgs(): Args {
     }
     if (arg === "--no-relint") {
       a.reLint = false;
+      continue;
+    }
+    if (arg === "--llm-lint") {
+      a.llmLint = true;
       continue;
     }
     const eq = arg.match(/^--([^=]+)=(.*)$/u);
@@ -150,7 +155,12 @@ async function main() {
     : args.styleRefNote ?? DEFAULT_STYLE_REF_NOTE;
 
   console.log(`[L01c] slug=${args.slug} mode=${args.all ? "all" : args.stage} dry-run=${args.dryRun}`);
-  const preLint = await lintBible({ bible, skipLlm: true });
+  const preLint = await lintBible({
+    bible,
+    skipLlm: !args.llmLint,
+    executor: "L01c-bible-deepen",
+    stagePosition: "pre",
+  });
   console.log(`[L01c] pre-lint: fatal=${preLint.fatal_count} warn=${preLint.warn_count}`);
 
   if (args.all) {
@@ -165,7 +175,12 @@ async function main() {
   }
 
   if (args.reLint && !args.dryRun) {
-    const postLint = await lintBible({ bible, skipLlm: true });
+    const postLint = await lintBible({
+      bible,
+      skipLlm: !args.llmLint,
+      executor: "L01c-bible-deepen",
+      stagePosition: "post",
+    });
     console.log(`[L01c] post-lint: fatal=${postLint.fatal_count} warn=${postLint.warn_count} (improved fatal -${preLint.fatal_count - postLint.fatal_count} / warn -${preLint.warn_count - postLint.warn_count})`);
     await fs.writeFile(path.join(bibleDir(args.slug), "lint_report.json"), JSON.stringify(postLint, null, 2));
   }

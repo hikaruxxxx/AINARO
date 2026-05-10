@@ -14,6 +14,8 @@ import { loadBlocklist, loadFalsePositives, scanBible } from "../compliance/scan
 import type { ComplianceFinding } from "../compliance/types";
 import type { BibleSnapshotV2 } from "../schemas-v2";
 import { depthLint } from "../bible/depth-lint";
+import { createHash } from "node:crypto";
+import { detectUndefinedReferences } from "./undefined-reference-detector";
 
 export type LintSeverity = "fatal" | "warn" | "info";
 export type LintScope =
@@ -27,6 +29,8 @@ export type LintScope =
   | "continuity_seed"
   | "volume_synopsis"
   | "depth"
+  | "cli_runtime"
+  | "atomic_write"
   | "global"
   | "compliance";
 
@@ -39,8 +43,19 @@ export type LintFinding = {
   hint?: string;
 };
 
+export type LintExecutor = "L01c-bible-deepen" | "run-world-aspect" | "run-deepen-all" | "standalone";
+export type LintStagePosition = "pre" | "post" | "standalone";
+
+export type LintProvenance = {
+  skipLlm: boolean;
+  executor: LintExecutor;
+  snapshotHash: string;
+  judgeModel: string;
+  stagePosition: LintStagePosition;
+};
+
 export type BibleLintReport = {
-  schema_version: 1;
+  schema_version: 2;
   audited_at: string;
   bible_slug: string;
   fatal_count: number;
@@ -48,6 +63,7 @@ export type BibleLintReport = {
   info_count: number;
   findings: LintFinding[];
   summary: string;
+  provenance: LintProvenance;
 };
 
 // ============================================================
@@ -364,83 +380,264 @@ type LlmJudgeOutput = {
 };
 `;
 
+type LlmJudgeParsed = {
+  overall_assessment: string;
+  rationale: string;
+  shallowness_findings: Array<{
+    severity: LintSeverity;
+    scope: LintFinding["scope"];
+    target_id?: string;
+    rule: string;
+    message: string;
+    hint?: string;
+  }>;
+};
+
+type LlmJudgeChunk = {
+  chunkId: string;
+  scope: LintScope;
+  targetId?: string;
+  focus: string;
+  payload: unknown;
+};
+
+export type ChunkResult = {
+  chunkId: string;
+  status: "ok" | "failed" | "timeout";
+  findings: LintFinding[];
+  durationMs: number;
+};
+
 export async function llmLintBible(args: {
   bible: BibleSnapshotV2;
   cwd?: string;
   timeoutMs?: number;
 }): Promise<LintFinding[]> {
-  const result = await runCodexText<{
-    overall_assessment: string;
-    rationale: string;
-    shallowness_findings: Array<{
-      severity: LintSeverity;
-      scope: LintFinding["scope"];
-      target_id?: string;
-      rule: string;
-      message: string;
-      hint?: string;
-    }>;
-  }>({
-    task: [
-      "あなたは商業漫画の編集者として、bible (作品設計書 JSON) の作り込みの深さをレビューします。",
-      "ヒット作 (200万部級) と並ぶレベルかどうかを判断してください。お世辞は不要、率直な指摘を。",
-      "",
-      "## レビュー観点 (浅い/怠惰のサイン)",
-      "1. キャラ personality_visual がジャンルの常套句のみ (例: '感情を表に出さない', '無感動')",
-      "2. キャラ continuity_anchors が外見要素のみで、心理的記号 (例: 「人と話すとき必ず半歩後ろに下がる」) が無い",
-      "3. キャラ間の差別化が弱い (主人公以外がテンプレ)",
-      "4. world.rules がジャンル定型のみ (例: 'スキルはダンジョン内でのみ成長') で、edge case がない",
-      "5. visual_motifs が衣装/小道具の単純列挙、意味付け (なぜ繰り返すか) が浅い",
-      "6. locations が章舞台のみ、ジャンル象徴ロケ (例: ダンジョン内部マップ) が無い",
-      "7. volume_synopsis が出来事の列挙のみ、テーマの一貫した感情ライン設計が無い",
-      "8. プレースホルダ (TODO, 後で書く) が放置",
-      "9. 同じ役割のキャラが似た spec で書かれている",
-      "10. 主人公の信念・トラウマ・矛盾が言語化されていない",
-      "",
-      "## core_hook gateway",
-      "bible.meta.core_hook が存在する場合は、次の4観点も必ず評価し、問題があれば shallowness_findings に該当 rule を追加してください。",
-      "- core_hook_one_liner_blurry (warn): one_liner が凡庸/ぼやけ。具体的な異常性が見えない",
-      "- core_hook_type_misclassified (warn): type タグ (A:反復蓄積 / B:接続媒介 / C:視点ずらし) と one_liner の中身が整合しない",
-      "- core_hook_differentiation_unclear (fatal): hit_references との差分が one_liner から伝わらない",
-      "- core_hook_long_term_viability (warn): 15巻続けられる構造がなく、短命ギミックに見える",
-      "",
-      "## 入力 (bible 全文)",
-      "```json",
-      JSON.stringify(args.bible, null, 2).slice(0, 100000),
-      "```",
-      "",
-      "## 出力スキーマ",
-      "```typescript",
-      LLM_JUDGE_SCHEMA,
-      "```",
-      "",
-      "## 出力形式",
-      "上記スキーマに従う JSON のみを返してください。説明文・前置き・後書きは不要。",
-      "出力は ```json ... ``` のコードブロックで囲んでください。",
-    ].join("\n"),
-    format: "json",
+  const result = await llmLintBibleChunked({
+    bible: args.bible,
     cwd: args.cwd,
-    timeoutMs: args.timeoutMs ?? 6 * 60 * 1000,
-    maxRetries: 1,
+    chunkTimeoutMs: args.timeoutMs,
+  });
+  return result.findings;
+}
+
+export async function llmLintBibleChunked(args: {
+  bible: BibleSnapshotV2;
+  cwd?: string;
+  chunkTimeoutMs?: number;
+  maxParallel?: number;
+}): Promise<{
+  findings: LintFinding[];
+  chunkResults: ChunkResult[];
+  judgeModel: string;
+}> {
+  const chunks = buildLlmJudgeChunks(args.bible);
+  const chunkTimeoutMs = args.chunkTimeoutMs ?? 60 * 1000;
+  const maxParallel = Math.max(1, args.maxParallel ?? 3);
+  const chunkResults = await runWithConcurrency(chunks, maxParallel, (chunk) =>
+    lintJudgeChunk({
+      bible: args.bible,
+      chunk,
+      cwd: args.cwd,
+      timeoutMs: chunkTimeoutMs,
+    }),
+  );
+  const findings = chunkResults.flatMap((result) => result.findings);
+  const failedCount = chunkResults.filter((result) => result.status !== "ok").length;
+
+  if (chunkResults.length > 0 && failedCount === chunkResults.length) {
+    findings.push({
+      severity: "warn",
+      scope: "global",
+      rule: "lint_judge_unavailable",
+      message: `LLM judge の全 chunk が失敗しました (${failedCount}/${chunkResults.length})。static/depth/compliance lint のみ採用します。`,
+    });
+  }
+
+  return {
+    findings,
+    chunkResults,
+    judgeModel: "codex",
+  };
+}
+
+function buildLlmJudgeChunks(bible: BibleSnapshotV2): LlmJudgeChunk[] {
+  const chunks: LlmJudgeChunk[] = [];
+  const add = (chunk: LlmJudgeChunk): void => {
+    if (JSON.stringify(chunk.payload).length > 2) chunks.push(chunk);
+  };
+
+  bible.characters.forEach((character) => {
+    add({
+      chunkId: `characters[${character.id}]`,
+      scope: "character",
+      targetId: character.id,
+      focus: "このキャラが商業漫画の主要人物として浅くないか。心理、外見記号、生い立ち、関係、成長導線を重点確認。",
+      payload: { character },
+    });
   });
 
-  if (!result.parsed) return [];
-  const parsed = result.parsed as {
-    overall_assessment: string;
-    rationale: string;
-    shallowness_findings: Array<LintFinding>;
-  };
-  // 先頭に overall_assessment を info で挿入
-  const out: LintFinding[] = [
-    {
-      severity: "info",
-      scope: "global",
-      rule: "llm_overall_assessment",
-      message: `LLM 総評: ${parsed.overall_assessment} — ${parsed.rationale}`,
-    },
-    ...parsed.shallowness_findings,
-  ];
-  return out;
+  const world = bible.world as Record<string, unknown>;
+  for (const key of ["premise", "rules", "system", "timeline", "history", "power_system_logic", "cosmology", "economic_system", "social_strata", "daily_life_textures", "language_and_naming", "forbidden_lore", "factions"]) {
+    if (world[key] === undefined) continue;
+    add({
+      chunkId: `world.${key}`,
+      scope: "world",
+      focus: `world.${key} が作品固有のフック、edge case、長期連載の伸びしろを持つか。`,
+      payload: { [key]: world[key] },
+    });
+  }
+
+  bible.locations.forEach((location) => {
+    add({
+      chunkId: `locations[${location.id}]`,
+      scope: "location",
+      targetId: location.id,
+      focus: "この場所が章舞台以上の固有性、画面記号、物語機能を持つか。",
+      payload: { location },
+    });
+  });
+  bible.props.forEach((prop) => {
+    add({
+      chunkId: `props[${prop.id}]`,
+      scope: "prop",
+      targetId: prop.id,
+      focus: "この小道具が単なる所持品でなく、関係・伏線・画面記号として機能するか。",
+      payload: { prop },
+    });
+  });
+  bible.costumes.forEach((costume) => {
+    add({
+      chunkId: `costumes[${costume.id}]`,
+      scope: "costume",
+      targetId: costume.id,
+      focus: "この衣装がキャラ性、時系列、視認性を支える設計になっているか。",
+      payload: { costume },
+    });
+  });
+  bible.visual_motifs.forEach((motif, index) => {
+    add({
+      chunkId: `visual_motifs[${motif.name || index}]`,
+      scope: "motif",
+      targetId: motif.name,
+      focus: "この視覚モチーフが意味付けと反復設計を持ち、列挙で終わっていないか。",
+      payload: { motif },
+    });
+  });
+  add({
+    chunkId: "volume_synopsis",
+    scope: "volume_synopsis",
+    focus: "巻全体のテーマ、感情ライン、cliffhanger が出来事の列挙で終わっていないか。",
+    payload: { volume_synopsis: bible.volume_synopsis },
+  });
+
+  return chunks;
+}
+
+async function lintJudgeChunk(args: {
+  bible: BibleSnapshotV2;
+  chunk: LlmJudgeChunk;
+  cwd?: string;
+  timeoutMs: number;
+}): Promise<ChunkResult> {
+  const startedAt = Date.now();
+  try {
+    const result = await runCodexText<LlmJudgeParsed>({
+      task: [
+        "あなたは商業漫画の編集者として、bible (作品設計書 JSON) の一部だけをレビューします。",
+        "入力 chunk に限定して、浅い/怠惰/矛盾して見える箇所を具体的に指摘してください。お世辞は不要です。",
+        `対象 chunk: ${args.chunk.chunkId}`,
+        `観点: ${args.chunk.focus}`,
+        "",
+        "## 作品全体の最小文脈",
+        "```json",
+        JSON.stringify({
+          title: args.bible.meta.title,
+          genre: args.bible.meta.genre,
+          core_hook: args.bible.meta.core_hook,
+          primary_appeal_mode: args.bible.meta.primary_appeal_mode,
+        }, null, 2),
+        "```",
+        "",
+        "## 入力 chunk",
+        "```json",
+        JSON.stringify(args.chunk.payload, null, 2),
+        "```",
+        "",
+        "## 出力スキーマ",
+        "```typescript",
+        LLM_JUDGE_SCHEMA,
+        "```",
+        "",
+        "## 出力形式",
+        "上記スキーマに従う JSON のみを返してください。説明文・前置き・後書きは不要。",
+        "出力は ```json ... ``` のコードブロックで囲んでください。",
+      ].join("\n"),
+      format: "json",
+      cwd: args.cwd,
+      timeoutMs: args.timeoutMs,
+      maxRetries: 0,
+    });
+
+    const parsed = result.parsed;
+    const findings: LintFinding[] = parsed
+      ? [
+          {
+            severity: "info",
+            scope: args.chunk.scope,
+            ...(args.chunk.targetId ? { target_id: args.chunk.targetId } : {}),
+            rule: "llm_chunk_assessment",
+            message: `LLM chunk ${args.chunk.chunkId}: ${parsed.overall_assessment} — ${parsed.rationale}`,
+          },
+          ...parsed.shallowness_findings.map((finding) => ({
+            ...finding,
+            target_id: finding.target_id ?? args.chunk.targetId,
+          })),
+        ]
+      : [];
+
+    return {
+      chunkId: args.chunk.chunkId,
+      status: "ok",
+      findings,
+      durationMs: Date.now() - startedAt,
+    };
+  } catch (error) {
+    const message = errorMessage(error);
+    const status: ChunkResult["status"] = /timeout|タイムアウト/i.test(message) ? "timeout" : "failed";
+    return {
+      chunkId: args.chunk.chunkId,
+      status,
+      findings: [
+        {
+          severity: "info",
+          scope: args.chunk.scope,
+          ...(args.chunk.targetId ? { target_id: args.chunk.targetId } : {}),
+          rule: status === "timeout" ? "llm_judge_timeout" : "llm_judge_failed",
+          message: `LLM judge chunk ${args.chunk.chunkId} をスキップしました: ${message}`,
+        },
+      ],
+      durationMs: Date.now() - startedAt,
+    };
+  }
+}
+
+async function runWithConcurrency<T, R>(
+  items: T[],
+  maxParallel: number,
+  worker: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = [];
+  let nextIndex = 0;
+  const runners = Array.from({ length: Math.min(maxParallel, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await worker(items[index]);
+    }
+  });
+  await Promise.allSettled(runners);
+  return results.filter((result): result is R => result !== undefined);
 }
 
 // ============================================================
@@ -538,22 +735,27 @@ export async function lintBible(args: {
   blocklistPath?: string;
   falsePositivesPath?: string;
   cwd?: string;
+  executor?: LintExecutor;
+  stagePosition?: LintStagePosition;
+  snapshotHash?: string;
 }): Promise<BibleLintReport> {
   const findings: LintFinding[] = [];
+  let judgeModel = "skipped";
   findings.push(...staticLint(args.bible));
   if (!args.skipLlm) {
-    try {
-      const llm = await llmLintBible({ bible: args.bible, cwd: args.cwd });
-      findings.push(...llm);
-    } catch (e) {
-      findings.push({
-        severity: "info",
-        scope: "global",
-        rule: "llm_judge_failed",
-        message: `LLM judge 失敗 (static lint のみ採用): ${(e as Error).message}`,
-      });
-    }
+    const llm = await llmLintBibleChunked({ bible: args.bible, cwd: args.cwd });
+    judgeModel = llm.judgeModel;
+    findings.push(...llm.findings);
   }
+  findings.push(
+    ...detectUndefinedReferences(args.bible).map((reference): LintFinding => ({
+      severity: "warn",
+      scope: "global",
+      rule: "undefined_reference",
+      message: `${reference.source_path}: 未定義の固有名詞候補 "${reference.matched_text}"`,
+      hint: reference.context_excerpt,
+    })),
+  );
   if (!args.skipCompliance) {
     try {
       const compliance = await complianceLint({
@@ -589,7 +791,7 @@ export async function lintBible(args: {
   const info = findings.filter((x) => x.severity === "info").length;
 
   return {
-    schema_version: 1,
+    schema_version: 2,
     audited_at: new Date().toISOString(),
     bible_slug: args.bible.meta.slug,
     fatal_count: fatal,
@@ -597,5 +799,16 @@ export async function lintBible(args: {
     info_count: info,
     findings,
     summary: `fatal=${fatal} warn=${warn} info=${info}`,
+    provenance: {
+      skipLlm: args.skipLlm === true,
+      executor: args.executor ?? "standalone",
+      snapshotHash: args.snapshotHash ?? hashBibleSnapshot(args.bible),
+      judgeModel,
+      stagePosition: args.stagePosition ?? "standalone",
+    },
   };
+}
+
+function hashBibleSnapshot(bible: BibleSnapshotV2): string {
+  return createHash("sha1").update(JSON.stringify(bible)).digest("hex").slice(0, 12);
 }

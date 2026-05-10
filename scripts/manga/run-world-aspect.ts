@@ -74,7 +74,12 @@ async function main(): Promise<void> {
   await fs.writeFile(snapshotPath, JSON.stringify(bible, null, 2));
   await backup(args.slug, bible, `post-world-aspect-${args.aspect}`);
 
-  const postLint = await lintBible({ bible, skipLlm: true });
+  const postLint = await lintBible({
+    bible,
+    skipLlm: true,
+    executor: "run-world-aspect",
+    stagePosition: "post",
+  });
   await fs.writeFile(path.join(bibleDir(args.slug), "lint_report.json"), JSON.stringify(postLint, null, 2));
 
   console.log(`[world-aspect] summary aspect=${args.aspect} output_chars=${outputChars} fatal=${postLint.fatal_count} warn=${postLint.warn_count}`);

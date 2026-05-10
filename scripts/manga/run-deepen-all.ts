@@ -163,7 +163,12 @@ async function main(): Promise<void> {
   await finishStage(args.slug, bible, "9-cross-reference");
 
   await fs.writeFile(bibleSnapshotPath(args.slug), JSON.stringify(bible, null, 2));
-  const postLint = await lintBible({ bible, skipLlm: true });
+  const postLint = await lintBible({
+    bible,
+    skipLlm: true,
+    executor: "run-deepen-all",
+    stagePosition: "post",
+  });
   await fs.writeFile(path.join(bibleDir(args.slug), "lint_report.json"), JSON.stringify(postLint, null, 2));
 
   console.log("[deepen-all] summary");
