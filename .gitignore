@@ -35,7 +35,12 @@ yarn-error.log*
 .env*
 
 # crawled data
-/data/
+/data/*
+
+# 例外: 運用辞書 (コンプラ・商標) は git 管理
+!/data/manga/
+/data/manga/*
+!/data/manga/compliance/
 
 # vercel
 .vercel

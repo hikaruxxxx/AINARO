@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "_meta": {
+    "purpose": "blocklist.json の語のうち、文脈的に一般語化が進んでいて誤検出になりやすい語を除外する辞書。scanner はこのファイルの語に該当する match を suppression する (warn にも上げない)。",
+    "policy": "誤検出フィードバックは運用しながら追加。除外する語は『商標としての保護対象だが、文中の使われ方が普通名詞として確立している』ものに限る。判断に迷ったら除外しない (false negative より false positive の方が安全)。",
+    "first_seeded_at": "2026-05-10",
+    "review_cadence": "月次の update-blocklist.ts 実行時に併せてレビュー"
+  },
+  "exact_term_excludes": [],
+  "context_excludes": [
+    {
+      "term": "新幹線",
+      "reason": "高速鉄道一般を指す普通名詞として定着。具体的な車両名 (のぞみ/はやぶさ等) は引き続き warn",
+      "added_at": "2026-05-10"
+    },
+    {
+      "term": "JR",
+      "reason": "通称として一般化。ただし 'JR東日本' 'JR西日本' 等の特定法人名は引き続き warn",
+      "added_at": "2026-05-10"
+    },
+    {
+      "term": "Apple",
+      "reason": "果物のリンゴを指す英単語としての使用は OK。Apple 社 / Apple 製品の文脈では NG",
+      "context_check_required": true,
+      "added_at": "2026-05-10"
+    },
+    {
+      "term": "ワンピース",
+      "reason": "衣服のワンピースを指す普通名詞としての使用は OK。作品名や配信/商品等の商業文脈では NG",
+      "context_check_required": true,
+      "added_at": "2026-05-10"
+    },
+    {
+      "term": "Switch",
+      "reason": "ネットワーク機器/切替えスイッチ等の一般語としての使用は OK。Nintendo Switch の文脈では NG",
+      "context_check_required": true,
+      "added_at": "2026-05-10"
+    },
+    {
+      "term": "Galaxy",
+      "reason": "天文学の銀河を指す英単語としての使用は OK。Samsung Galaxy の文脈では NG",
+      "context_check_required": true,
+      "added_at": "2026-05-10"
+    },
+    {
+      "term": "Pixel",
+      "reason": "画素を指す技術用語としての使用は OK。Google Pixel の文脈では NG",
+      "context_check_required": true,
+      "added_at": "2026-05-10"
+    },
+    {
+      "term": "アマゾン",
+      "reason": "アマゾン川/アマゾン熱帯雨林等の地理的呼称としての使用は OK。Amazon 社の文脈では NG",
+      "context_check_required": true,
+      "added_at": "2026-05-10"
+    }
+  ]
+}
