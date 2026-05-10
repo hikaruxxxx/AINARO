@@ -468,7 +468,7 @@ function renderLintFindingsSection(findings: NameLintFinding[]): string {
   const findingsHtml = sortLintFindings(findings).map(renderLintFinding).join("");
   const openAttr = findings.some((finding) => finding.severity !== "info") ? " open" : "";
   return `<details class="page-lint"${openAttr}>
-    <summary>ネーム監査 <span class="lint-summary-count">[fatal ${fatal} / warn ${warn} / info ${info}]</span></summary>
+    <summary>ネームレビュー <span class="lint-summary-count">[fatal ${fatal} / warn ${warn} / info ${info}]</span></summary>
     <div class="lint-findings">${findingsHtml}</div>
   </details>`;
 }
@@ -476,7 +476,7 @@ function renderLintFindingsSection(findings: NameLintFinding[]): string {
 function renderNameLintEpisodeSummary(report: NameLintReport | null | undefined): string {
   if (!report) {
     return `<div class="name-lint-episode">
-      <div class="name-lint-episode__missing">ネーム監査: lint_report.json はまだ生成されていません</div>
+      <div class="name-lint-episode__missing">ネームレビュー: lint_report.json はまだ生成されていません</div>
     </div>`;
   }
   const assessments = report.findings
@@ -501,7 +501,7 @@ function renderNameLintEpisodeSummary(report: NameLintReport | null | undefined)
       : "";
   return `<div class="name-lint-episode">
     <div class="name-lint-episode__summary">
-      <span class="name-lint-episode__title">ネーム監査</span>
+      <span class="name-lint-episode__title">ネームレビュー</span>
       <span class="name-lint-episode__pill name-lint-episode__pill--fatal">fatal ${report.fatal_count}</span>
       <span class="name-lint-episode__pill name-lint-episode__pill--warn">warn ${report.warn_count}</span>
       <span class="name-lint-episode__pill name-lint-episode__pill--info">info ${report.info_count}</span>
