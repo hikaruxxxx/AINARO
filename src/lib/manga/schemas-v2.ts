@@ -1120,3 +1120,143 @@ export type KdpSeries = {
   isbn_by_volume?: Record<number, string>;
   publication_schedule: { volume_no: number; planned_date: string }[];
 };
+
+// ============================================================
+// L1 出力: BibleSnapshotV3 (fact-based layered schema)
+// ============================================================
+
+export type Layer =
+  | "in_world_belief"
+  | "revealed_at_volume"
+  | "meta_truth"
+  | "system_specification"
+  | "character_arc_state";
+
+export type Aspect =
+  | "identity"
+  | "appearance"
+  | "psychology"
+  | "backstory"
+  | "speech"
+  | "relationship"
+  | "location_layout"
+  | "location_history"
+  | "prop_function"
+  | "prop_provenance"
+  | "world_rule"
+  | "system_param"
+  | "history_event"
+  | "faction_dynamics"
+  | "motif_meaning"
+  | "motif_directive";
+
+export type FactPov =
+  | "author_omniscient"
+  | "protagonist"
+  | "specific_character"
+  | "in_world_public"
+  | "in_world_secret";
+
+export type FactNode = {
+  fact_id: string;
+  entity_id: string | null;
+  aspect: Aspect;
+  layer: Layer;
+  revealed_at_volume?: number | null;
+  arc_at_volume?: number;
+  episode_range?: { from: number; to: number | null };
+  pov?: FactPov;
+  pov_character_id?: string | null;
+  confidence?: number;
+  body: string;
+  references?: string[];
+  invalidates?: string[];
+  supersedes?: string[];
+  priority?: number;
+  evidence: {
+    source_path?: string;
+    json_pointer?: string;
+    source_span?: [number, number];
+    generated_by?: { stage: string; model: string; ts: string };
+    confidence: number;
+  };
+};
+
+export type EntityKind =
+  | "character"
+  | "location"
+  | "faction"
+  | "prop"
+  | "costume"
+  | "motif"
+  | "event"
+  | "rule"
+  | "system_param";
+
+export type EntityNode = {
+  id: string;
+  kind: EntityKind;
+  name: string;
+  spec?: unknown;
+  fact_ids: string[];
+  appears_in_volumes: number[];
+  appears_in_episodes?: number[];
+};
+
+export type EntityRelation = {
+  rel_id: string;
+  from_id: string;
+  to_id: string;
+  rel_type:
+    | "interpersonal"
+    | "owns"
+    | "lives_in"
+    | "member_of"
+    | "knows_about"
+    | "child_of"
+    | "rivals_with";
+  fact_ids: string[];
+  /** V2 round-trip preservation during adapter dual-read period. */
+  spec?: unknown;
+};
+
+export type VolumeSpec = {
+  volume_no: number;
+  theme: string;
+  summary: string;
+  cliffhanger: string;
+  reveals_fact_ids: string[];
+  invalidates_fact_ids: string[];
+};
+
+export type VolumeMap = Record<number, VolumeSpec>;
+
+export type BibleSnapshotV3 = {
+  schema_version: 3;
+  meta: BibleSnapshotV2["meta"];
+  generated_from?: BibleSnapshotV2["generated_from"];
+  narration_style_guide?: NarrationStyleGuideV2;
+  nav_full_spec?: NavFullSpecV2;
+  style_directives: StyleDirectivesV2;
+  world_lexicon?: TextQualityLexiconV2;
+  entities: EntityNode[];
+  relations: EntityRelation[];
+  facts: FactNode[];
+  volumes: VolumeMap;
+  continuity_seeds: ContinuitySeedV2[];
+  generated_at: string;
+};
+
+export function isBibleSnapshotV3(v: unknown): v is BibleSnapshotV3 {
+  if (typeof v !== "object" || v === null) return false;
+  const x = v as Partial<BibleSnapshotV3>;
+  return (
+    x.schema_version === 3 &&
+    typeof x.meta === "object" &&
+    x.meta !== null &&
+    Array.isArray(x.entities) &&
+    Array.isArray(x.facts) &&
+    typeof x.volumes === "object" &&
+    x.volumes !== null
+  );
+}
