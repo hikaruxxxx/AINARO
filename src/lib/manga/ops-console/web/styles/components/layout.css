@@ -9,6 +9,12 @@
   border-right: 1px solid var(--border-default);
   background: var(--surface-sunken);
   padding: var(--space-3) var(--space-2);
+  /* スクロールしても scope (work/episode) 選択が常に見えるよう sticky 化 */
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100vh;
+  overflow-y: auto;
 }
 
 .nc-main {
