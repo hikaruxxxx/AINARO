@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BibleSnapshotV2 } from "../schemas-v2";
+import type { Scene } from "../scene-graph/schema";
 import {
   activeCostumeFor,
   continuityAnchorTextFor,
@@ -8,6 +9,8 @@ import {
   sceneOverrideTextFor,
   summarizeCharacterForEpisode,
   summarizeLocationForScene,
+  summarizeMotifForPanel,
+  summarizeWorldRulesForScene,
 } from "./broker";
 
 describe("bible broker resolvers", () => {
@@ -70,11 +73,21 @@ describe("bible broker summarizers", () => {
     expect(deep.length).toBeLessThanOrEqual(1500);
     expect(medium.length).toBeGreaterThanOrEqual(400);
     expect(medium.length).toBeLessThanOrEqual(800);
-    expect(minimal.length).toBeGreaterThanOrEqual(200);
-    expect(minimal.length).toBeLessThanOrEqual(400);
+    expect(minimal.length).toBeGreaterThanOrEqual(150);
+    expect(minimal.length).toBeLessThanOrEqual(250);
     expect(deep).toContain("vol.2");
     expect(medium).toContain("レン");
     expect(minimal).toContain("レン");
+  });
+
+  it("summarizeCharacterForEpisode: tier 未指定時は minimal で 150-250 字に収める", () => {
+    const result = summarizeCharacterForEpisode(bible(), 15, "char_ren");
+
+    expect(result).toContain("レン");
+    expect(result).toContain("外見:");
+    expect(result).toContain("心理:");
+    expect(result.length).toBeGreaterThanOrEqual(150);
+    expect(result.length).toBeLessThanOrEqual(250);
   });
 
   it("summarizeCharacterForEpisode: psychology_deep 未着手でも personality_visual から fallback", () => {
@@ -118,14 +131,43 @@ describe("bible broker summarizers", () => {
 
     const result = summarizeLocationForScene(source, {
       location_id: "loc_rooftop",
-      mode: "silence",
-      beat_type: "aftermath",
-    });
+      mode: "silence" as Scene["mode"],
+      beat_type: "aftermath" as Scene["beat_type"],
+    }, { tier: "medium" });
 
     expect(result).toContain("風が強く");
     expect(result).toContain("夜明け前");
     expect(result.length).toBeGreaterThanOrEqual(300);
     expect(result.length).toBeLessThanOrEqual(600);
+  });
+
+  it("minimal tier summaries keep location, world rules, and motif compact", () => {
+    const source = bible();
+    const scene: Pick<Scene, "location_id" | "mode" | "beat_type" | "time_axis"> & {
+      visual_motif_anchors: Array<{ motif_name: string; intensity: number }>;
+    } = {
+      location_id: "loc_rooftop",
+      mode: "silence",
+      beat_type: "aftermath",
+      time_axis: {
+        label: "present",
+        order: 1,
+        is_flashback: false,
+        is_flashforward: false,
+        duration_hint: "minutes",
+      },
+      visual_motif_anchors: [{ motif_name: "sleep_strategy", intensity: 1 }],
+    };
+
+    const location = summarizeLocationForScene(source, scene);
+    const rules = summarizeWorldRulesForScene(source, scene);
+    const motif = summarizeMotifForPanel(source, { panel_no: 1 }, scene);
+
+    expect(location).toContain("組合屋上");
+    expect(location.length).toBeLessThanOrEqual(220);
+    expect(rules.length).toBeLessThanOrEqual(240);
+    expect(motif).toContain("sleep_strategy");
+    expect(motif.length).toBeLessThanOrEqual(220);
   });
 });
 

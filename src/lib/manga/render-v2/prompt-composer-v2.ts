@@ -81,8 +81,14 @@ type ComposeArgs = {
   episodeNo?: number;
   /** scene graph 由来の文脈。panel スコープでは undefined OK */
   scene?: PromptScene;
-  /** bible broker summary tier。未指定時は medium */
+  /** bible broker summary tier。未指定時は minimal */
   bibleTier?: BibleTier;
+};
+
+type ComposeResult = {
+  prompt: string;
+  refImagePaths: string[];
+  tierUsed?: BibleTier;
 };
 
 /**
@@ -141,6 +147,26 @@ function backgroundDirective(t: BackgroundTreatment | undefined): string | null 
   }
 }
 
+function compactBackgroundDirective(t: BackgroundTreatment | undefined): string | null {
+  switch (t) {
+    case "detailed_bg":
+      return "BACKGROUND: draw clear location detail; match ref screentone density if provided.";
+    case "atmospheric_fade":
+      return "BACKGROUND: atmospheric fade / 抜きコマ. Keep >=90% blank white or sparse tone; no walls, furniture, architecture, crowds, or scenery.";
+    case "tone_back":
+      return "BACKGROUND: solid screentone only; no drawn environment.";
+    case "solid_white":
+      return "BACKGROUND: pure white paper; subject only.";
+    case "solid_black":
+      return "BACKGROUND: pure black void; minimal subject silhouette/text only.";
+    case "floating_ui":
+      return "BACKGROUND: panel is the UI/HUD/SNS/news artifact itself; no surrounding character/location.";
+    case "unspecified":
+    case undefined:
+      return null;
+  }
+}
+
 function userInstructionsBlock(s: string | undefined): string | null {
   if (!s || !s.trim()) return null;
   return [
@@ -160,7 +186,7 @@ function characterRefDescription(
       bible,
       args.episodeNo,
       ch.character_id,
-      { tier: args.tier ?? "medium" },
+      { tier: args.tier ?? "minimal" },
     );
     blocks.push(`- ${summary} (role=${ch.role}, on_screen_via=${ch.on_screen_via}, expression=${ch.expression})`);
   }
@@ -175,8 +201,8 @@ function locationSceneForPanel(panel: PanelV2, scene?: PromptScene): Pick<Scene,
   };
 }
 
-function locationDescription(panel: PanelV2, bible: BibleSnapshotV2, scene?: PromptScene): string {
-  return summarizeLocationForScene(bible, locationSceneForPanel(panel, scene));
+function locationDescription(panel: PanelV2, bible: BibleSnapshotV2, scene?: PromptScene, tier: BibleTier = "minimal"): string {
+  return summarizeLocationForScene(bible, locationSceneForPanel(panel, scene), { tier });
 }
 
 function styleOverrideBlock(scene: Pick<Scene, "mode" | "beat_type"> | undefined, bible: BibleSnapshotV2): string {
@@ -193,10 +219,11 @@ function motifBlock(
     visual_motif_anchors?: PromptScene["visual_motif_anchors"];
   } | undefined,
   bible: BibleSnapshotV2,
+  tier: BibleTier = "minimal",
   panel: { panel_no: number },
 ): string | null {
   if (!scene) return null;
-  const summary = summarizeMotifForPanel(bible, panel, scene);
+  const summary = summarizeMotifForPanel(bible, panel, scene, { tier });
   if (!summary) return null;
   return [
     "RECURRING VISUAL MOTIFS (must include):",
@@ -208,13 +235,17 @@ function costumeBlock(
   panel: PanelV2,
   episodeNo: number,
   bible: BibleSnapshotV2,
+  tier: BibleTier = "minimal",
 ): string | null {
   const lines: string[] = [];
   for (const ch of panel.entities.characters) {
     const active = activeCostumeFor(bible, episodeNo, ch.character_id);
     if (active.source === "costume" && active.spec) {
       const outfit = [active.spec.outerwear, active.spec.top].filter(Boolean).join(" ");
-      lines.push(`- ${ch.character_id} wears ${outfit} (state: ${active.spec.state_description ?? ""})`);
+      const state = tier === "minimal"
+        ? firstChars(active.spec.state_description ?? "", 70)
+        : active.spec.state_description ?? "";
+      lines.push(`- ${ch.character_id} wears ${outfit} (state: ${state})`);
     }
   }
   if (lines.length === 0) return null;
@@ -227,14 +258,51 @@ function costumeBlock(
 function worldRuleBlock(
   scene: Pick<Scene, "location_id" | "beat_type" | "mode" | "time_axis"> | undefined,
   bible: BibleSnapshotV2,
+  tier: BibleTier = "minimal",
 ): string | null {
   if (!scene) return null;
-  const summary = summarizeWorldRulesForScene(bible, scene);
+  const summary = summarizeWorldRulesForScene(bible, scene, { tier });
   if (!summary) return null;
   return [
     "WORLD CONSTRAINTS:",
     summary,
   ].join("\n");
+}
+
+function compactPageBibleContext(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+  args: { episodeNo: number; scene?: PromptScene; tier: BibleTier; maxChars: number },
+): string {
+  const characters = firstChars(
+    characterRefDescription(panel, bible, { episodeNo: args.episodeNo, tier: args.tier }).replace(/\n/gu, " / "),
+    Math.max(70, Math.floor(args.maxChars * 0.35)),
+  );
+  const location = firstChars(
+    locationDescription(panel, bible, args.scene, args.tier),
+    Math.max(45, Math.floor(args.maxChars * 0.18)),
+  );
+  const costume = firstChars(
+    (costumeBlock(panel, args.episodeNo, bible, args.tier) ?? "").replace(/\n/gu, " / "),
+    Math.max(0, Math.floor(args.maxChars * 0.12)),
+  );
+  const motif = firstChars(
+    (motifBlock(args.scene, bible, args.tier, { panel_no: panel.panel_no }) ?? "")
+      .replace("RECURRING VISUAL MOTIFS (must include):", "")
+      .replace(/\n/gu, " / "),
+    Math.max(90, Math.floor(args.maxChars * 0.25)),
+  );
+
+  return firstChars(
+    [
+      `PANEL #${panel.panel_no} BIBLE:`,
+      `Characters: ${characters}`,
+      `Location: ${location}`,
+      motif ? `Motif: ${motif}` : null,
+      costume ? `Costume: ${costume}` : null,
+    ].filter((line): line is string => line !== null).join("\n"),
+    args.maxChars,
+  );
 }
 
 function warnIfPromptTooLarge(prompt: string): void {
@@ -245,25 +313,52 @@ function warnIfPromptTooLarge(prompt: string): void {
   }
 }
 
+function warnTierDowngrade(tier: BibleTier, promptLength: number): void {
+  console.warn(
+    `[prompt-composer-v2] tier=${tier} size=${promptLength} > ${MAX_PROMPT_CHARS}, downgrading`,
+  );
+}
+
+function composeWithSizeFallback(
+  args: ComposeArgs,
+  composeCore: (args: ComposeArgs) => ComposeResult,
+): ComposeResult {
+  const tiers: BibleTier[] = args.bibleTier ? [args.bibleTier, "minimal"] : ["minimal"];
+  const seen = new Set<BibleTier>();
+  let last: ComposeResult | null = null;
+
+  for (const tier of tiers) {
+    if (seen.has(tier)) continue;
+    seen.add(tier);
+    const result = composeCore({ ...args, bibleTier: tier });
+    last = { ...result, tierUsed: tier };
+    if (result.prompt.length <= MAX_PROMPT_CHARS) return last;
+    if (tier !== "minimal") warnTierDowngrade(tier, result.prompt.length);
+  }
+
+  return last ?? { ...composeCore({ ...args, bibleTier: "minimal" }), tierUsed: "minimal" };
+}
+
+function firstChars(text: string, max: number): string {
+  const normalized = text.replace(/\s+/gu, " ").trim();
+  if (normalized.length <= max) return normalized;
+  return `${normalized.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
+}
+
 function mangaTechniqueMandatoryBlock(): string {
   return [
     "MANGA TECHNIQUE (MANDATORY — do NOT relax):",
-    "- INK LINEWORK: clear pen lines with weight modulation, NOT soft gradients. Outlines must be confident black ink.",
-    "- SCREENTONE: visible dot patterns / hatching for shading. NO smooth tonal gradients.",
-    "- WHITE HIGHLIGHTS: bold abrupt shapes (e.g., \"T highlight\" on hair, hard-edged catch lights), NOT subtle airbrush.",
-    "- CONTRAST: deep blacks for drama, clean whites for emphasis. NO mid-grey wash dominating panels.",
-    "- TONAL HIERARCHY: Different panels MUST have different screentone densities. Use light tones for everyday/dialogue beats, dark tones for emotional/dramatic beats, solid black for shock/despair. The page should NOT look uniformly grey.",
+    "- Black ink linework with weight modulation; visible screentone/hatching; no soft or smooth tonal gradients.",
+    "- Hard white highlights and strong black/white contrast. Vary screentone density by panel emotion; avoid uniform grey pages.",
   ].join("\n");
 }
 
 function negativesBlock(): string {
   return [
     "NEGATIVES (must avoid):",
-    "- NO color, NO 3D-render shading, NO photorealistic shading",
-    "- NO page numbers, NO signatures, NO watermarks, NO studio logos",
-    "- Hands and fingers must look natural; render no more than five fingers per hand",
-    "- Background density should match the scene: establishing/dungeon/world-intro panels can have moderate fantasy/setting iconography (torches, stone walls, magic circles, urban signage); dialogue-only panels stay minimal",
-    "- NO English dialogue. All in-panel text must be Japanese (kanji/kana) using a typical Japanese manga font.",
+    "- No color, 3D shading, photorealism, page numbers, signatures, watermarks, or logos.",
+    "- Natural hands only, max five fingers per hand. No English dialogue; all in-panel text must be Japanese manga lettering.",
+    "- Background density follows scene role: establishing/world panels can be moderate; dialogue-only panels stay minimal.",
   ].join("\n");
 }
 
@@ -601,11 +696,11 @@ function inPanelTextBlock(
   return lines.join("\n");
 }
 
-export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImagePaths: string[] } {
+function composePanelPromptCore(args: ComposeArgs): ComposeResult {
   if (!args.panel) throw new Error("composePanelPrompt requires panel");
   const p = args.panel;
   const episodeNo = args.episodeNo ?? 1;
-  const bibleTier = args.bibleTier ?? "medium";
+  const bibleTier = args.bibleTier ?? "minimal";
   const screentoneTag = p.screentone_intensity ? `, screentone=${p.screentone_intensity}` : "";
   const inlineLabels = args.packet.refs
     .map((r, i) => `<ref#${i + 1}> (${r.role}${r.target_entity_id ? ` for ${r.target_entity_id}` : ""}, weight ${r.weight.toFixed(2)})`)
@@ -625,13 +720,13 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     "CHARACTERS IN PANEL:",
     characterRefDescription(p, args.bible, { episodeNo, tier: bibleTier }),
     "",
-    locationDescription(p, args.bible, args.scene),
+    locationDescription(p, args.bible, args.scene, bibleTier),
     "",
-    costumeBlock(p, episodeNo, args.bible),
+    costumeBlock(p, episodeNo, args.bible, bibleTier),
     "",
-    worldRuleBlock(args.scene, args.bible),
+    worldRuleBlock(args.scene, args.bible, bibleTier),
     "",
-    motifBlock(args.scene, args.bible, { panel_no: p.panel_no }),
+    motifBlock(args.scene, args.bible, bibleTier, { panel_no: p.panel_no }),
     "",
     `Action: ${p.action}`,
     `Visual focus: ${p.key_visual}`,
@@ -655,11 +750,15 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
   };
 }
 
-export function composePagePrompt(args: ComposeArgs): { prompt: string; refImagePaths: string[] } {
+export function composePanelPrompt(args: ComposeArgs): ComposeResult {
+  return composeWithSizeFallback(args, composePanelPromptCore);
+}
+
+function composePagePromptCore(args: ComposeArgs): ComposeResult {
   if (!args.page) throw new Error("composePagePrompt requires page");
   const page = args.page;
   const episodeNo = args.episodeNo ?? 1;
-  const bibleTier = args.bibleTier ?? "medium";
+  const bibleTier = args.bibleTier ?? "minimal";
   const geometryBlock: string | null = args.pagePlanPage
     ? buildLayoutGeometryBlock(
       args.pagePlanPage,
@@ -671,14 +770,25 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     .join("\n");
 
   const charName = (id: string) => args.bible!.characters.find((c) => c.id === id)?.name ?? id;
+  const bibleContextBudgetPerPanel = bibleTier === "minimal"
+    ? Math.max(180, Math.floor(1500 / Math.max(1, page.panels.length)))
+    : Number.POSITIVE_INFINITY;
   const bibleContextBlocks = page.panels.map((p) => {
+    if (bibleTier === "minimal") {
+      return compactPageBibleContext(p, args.bible, {
+        episodeNo,
+        scene: args.scene,
+        tier: bibleTier,
+        maxChars: bibleContextBudgetPerPanel,
+      });
+    }
     const blocks = [
       `PANEL #${p.panel_no} BIBLE CONTEXT:`,
       "Characters:",
       characterRefDescription(p, args.bible, { episodeNo, tier: bibleTier }),
-      locationDescription(p, args.bible, args.scene),
-      costumeBlock(p, episodeNo, args.bible),
-      motifBlock(args.scene, args.bible, { panel_no: p.panel_no }),
+      locationDescription(p, args.bible, args.scene, bibleTier),
+      costumeBlock(p, episodeNo, args.bible, bibleTier),
+      motifBlock(args.scene, args.bible, bibleTier, { panel_no: p.panel_no }),
     ];
     return blocks.filter(Boolean).join("\n");
   }).join("\n\n");
@@ -716,7 +826,7 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     }
     // 2026-05-06 追加: panel ごとの bg_treatment 指示 (page_one_shot 用)
     const bg = args.pageBackgroundTreatments?.get(p.panel_id);
-    const bgLine = backgroundDirective(bg);
+    const bgLine = compactBackgroundDirective(bg);
     if (bgLine) lines.push(`  ${bgLine}`);
     return lines.join("\n");
   }).join("\n\n");
@@ -737,7 +847,7 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     "BIBLE CONTEXT SUMMARIES:",
     bibleContextBlocks,
     "",
-    worldRuleBlock(args.scene, args.bible),
+    worldRuleBlock(args.scene, args.bible, bibleTier),
     "",
     panelLines,
     "",
@@ -754,4 +864,8 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     prompt,
     refImagePaths: args.packet.refs.map((r) => r.path),
   };
+}
+
+export function composePagePrompt(args: ComposeArgs): ComposeResult {
+  return composeWithSizeFallback(args, composePagePromptCore);
 }

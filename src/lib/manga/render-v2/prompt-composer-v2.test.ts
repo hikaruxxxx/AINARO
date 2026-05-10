@@ -3,6 +3,7 @@ import type {
   BibleSnapshotV2,
   PanelV2,
   ResolvedRefPacket,
+  StoryboardPageV2,
 } from "../schemas-v2";
 import type { Scene } from "../scene-graph/schema";
 import type {
@@ -10,6 +11,7 @@ import type {
   FalsePositives,
 } from "../compliance/types";
 import {
+  composePagePrompt,
   composePanelPrompt,
   extractForbiddenKeywords,
   validateAgainstCompliance,
@@ -105,6 +107,21 @@ function panel(text: string): PanelV2 {
     narration: [],
     sfx: [],
   } as unknown as PanelV2;
+}
+
+function page(panelCount = 6): StoryboardPageV2 {
+  return {
+    page_no: 1,
+    page_role: "dialogue",
+    panels: Array.from({ length: panelCount }, (_, index) => ({
+      ...panel(`台詞${index + 1}`),
+      panel_id: `p${index + 1}`,
+      panel_no: index + 1,
+      reading_order: index + 1,
+      action: `レンが出口と案内板を確認する ${index + 1}`,
+      key_visual: `濡れた床の反射とレンの警戒した表情 ${index + 1}`,
+    })),
+  };
 }
 
 const packet: ResolvedRefPacket = {
@@ -212,6 +229,46 @@ function brokerBible(): BibleSnapshotV2 {
       meaning: "salvation that may also be a lure",
       draw_directive: "place a cracked EXIT pictogram reflection near Ren's shoulder",
       symbolic_lineage: "threshold / false safety",
+      reference_scenes: ["dialogue loc_dungeon"],
+    },
+  ] as unknown as BibleSnapshotV2["visual_motifs"];
+  return b;
+}
+
+function deepBrokerBible(): BibleSnapshotV2 {
+  const b = brokerBible();
+  const longText = (seed: string, repeat: number) =>
+    Array.from({ length: repeat }, (_, index) => `${seed}${index + 1}。`).join("");
+  b.world.premise = longText("新宿地下の異常空間は登録制度と駅構造の記憶を混ぜ、通行者の判断を試す", 60);
+  b.world.rules = [
+    longText("loc_dungeonでは壁面案内板が安全経路と危険経路を同じ記号で示す", 20),
+    longText("dialogue時でも床面反射は直前の選択を薄く映し、読者に違和感を残す", 20),
+    longText("setupでは登録証の表示が本人の迷いで欠け、能力表示は断片化する", 20),
+  ];
+  b.world.power_system_logic = longText("能力表示は視認した事実だけを記録し、推測や願望を数値化しない", 45);
+  b.world.social_strata = longText("登録等級は仕事の単価だけでなく避難時の優先順位にも影響する", 45);
+  b.characters = b.characters.map((character) => ({
+    ...character,
+    appearance_notes: longText("左前髪、疲れた目、濡れたフード、片肩の上がり方を必ず維持する", 55),
+    psychology_deep: longText("約束を罠として読む一方で、他人の恐怖を見落とせず実務で助けようとする", 55),
+    backstory: longText("過去の救助失敗が英雄的な言葉への不信と、遅れへの過敏さを残している", 45),
+    defense_mechanisms: longText("追い込まれると冗談で距離を取り、出口と相手の手元を先に確認する", 45),
+    worldview_filter: longText("部屋を危険地図として読み、光源、反射、扉、遮蔽物の順に意味付ける", 45),
+  })) as BibleSnapshotV2["characters"];
+  b.locations = b.locations.map((location) => ({
+    ...location,
+    spec: {
+      ...location.spec,
+      visual_description: longText("地下駅に似た通路、欠けたタイル、濡れた床、古い案内板、蛍光灯の明滅", 45),
+      sensory_textures: longText("水滴音、電気の唸り、冷気、靴音の反響が台詞の間を埋める", 35),
+    },
+  })) as BibleSnapshotV2["locations"];
+  b.visual_motifs = [
+    {
+      name: "motif_exit_sign",
+      meaning: longText("救済に見える出口が誘導でもある", 30),
+      draw_directive: longText("レンの肩近くに割れたEXITピクトの反射を置き、床面で歪ませる", 30),
+      symbolic_lineage: longText("境界、偽の安全、登録制度", 20),
       reference_scenes: ["dialogue loc_dungeon"],
     },
   ] as unknown as BibleSnapshotV2["visual_motifs"];
@@ -452,5 +509,67 @@ describe("prompt-composer-v2 Phase 2-2 bible broker composition", () => {
 
     expect(composed.prompt).toContain("WORLD CONSTRAINTS:");
     expect(composed.prompt).toContain("loc_dungeonでは壁面の古い案内板");
+  });
+
+  it("composePagePrompt defaults to minimal tier and stays within the prompt threshold for deep bible input", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    const composed = composePagePrompt({
+      page: page(),
+      packet,
+      bible: deepBrokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      episodeNo: 5,
+      scene: brokerScene(),
+    });
+
+    expect(composed.tierUsed).toBe("minimal");
+    expect(composed.prompt.length).toBeLessThanOrEqual(8000);
+    expect(composed.prompt).toContain("桐生 レン");
+    expect(composed.prompt).toContain("新宿第三1F");
+    expect(composed.prompt).toContain("motif_exit_sign");
+    expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining("downgrading"));
+    warnSpy.mockRestore();
+  });
+
+  it("composePagePrompt downgrades explicit deep tier to minimal when prompt overflows", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    const composed = composePagePrompt({
+      page: page(),
+      packet,
+      bible: deepBrokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      episodeNo: 5,
+      scene: brokerScene(),
+      bibleTier: "deep",
+    });
+
+    expect(composed.tierUsed).toBe("minimal");
+    expect(composed.prompt.length).toBeLessThanOrEqual(8000);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("tier=deep"));
+    warnSpy.mockRestore();
+  });
+
+  it("minimal character context in composed prompt remains compact", () => {
+    const composed = composePanelPrompt({
+      panel: panel("出口を見る。"),
+      packet,
+      bible: deepBrokerBible(),
+      pageDimensions: { width: 600, height: 400 },
+      episodeNo: 5,
+      scene: brokerScene(),
+      bibleTier: "minimal",
+    });
+
+    const characterBlock = sectionBetween(
+      composed.prompt,
+      "CHARACTERS IN PANEL:",
+      "新宿第三1F",
+    );
+    expect(characterBlock.length).toBeGreaterThanOrEqual(150);
+    expect(characterBlock.length).toBeLessThanOrEqual(330);
+    expect(characterBlock).toContain("外見:");
+    expect(characterBlock).toContain("心理:");
   });
 });

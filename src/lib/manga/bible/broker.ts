@@ -21,7 +21,7 @@ type SceneWithOptionalMotifs = Pick<Scene, "beat_type" | "location_id" | "mode">
 const TIER_LIMITS: Record<SummaryTier, { min: number; max: number }> = {
   deep: { min: 800, max: 1500 },
   medium: { min: 400, max: 800 },
-  minimal: { min: 200, max: 400 },
+  minimal: { min: 150, max: 250 },
 };
 
 /** episode_no で active な costume を解決。なければ outfit_default */
@@ -169,7 +169,7 @@ export function summarizeCharacterForEpisode(
   characterId: string,
   options: { tier?: SummaryTier } = {},
 ): string {
-  const tier = options.tier ?? "medium";
+  const tier = options.tier ?? "minimal";
   const limits = TIER_LIMITS[tier];
   const character = findCharacter(bible, characterId);
   if (!character) {
@@ -202,6 +202,20 @@ export function summarizeCharacterForEpisode(
   );
   const psychologyFallback = psychology || character.spec.personality_visual || character.appearance_notes || specIdentity(character);
 
+  if (tier === "minimal") {
+    return fitSummary(
+      joinNonEmpty(
+        [
+          `${character.name} (${character.id}, ${character.role}) ep.${episodeNo}.`,
+          `外見: ${firstChars(appearance, 78)}`,
+          `心理: ${firstChars(psychologyFallback, 78)}`,
+        ],
+        "\n",
+      ),
+      limits,
+    );
+  }
+
   const blocks = [
     `${character.name} (${character.id}, ${character.role}) ep.${episodeNo} vol.${volume}.`,
     `外見記号: ${appearance}`,
@@ -221,9 +235,22 @@ export function summarizeCharacterForEpisode(
 export function summarizeLocationForScene(
   bible: BibleSnapshotV2,
   scene: Pick<Scene, "location_id" | "mode" | "beat_type">,
+  options: { tier?: SummaryTier } = {},
 ): string {
+  const tier = options.tier ?? "minimal";
   const location = findLocation(bible, scene.location_id);
   if (!location) return `Location ${scene.location_id}: bible entry missing. Mode=${scene.mode}, beat=${scene.beat_type}.`;
+
+  if (tier === "minimal") {
+    const atmosphere = joinNonEmpty(
+      [location.spec.atmosphere, location.spec.lighting_default, location.spec.visual_description],
+      " / ",
+    ) || "場所の雰囲気は既存 spec に従う。";
+    return fitSummary(
+      `${location.name} (${location.id}). 雰囲気: ${firstChars(atmosphere, 150)}`,
+      { min: 120, max: 220 },
+    );
+  }
 
   const iconic = (location.spec.iconic_objects ?? [])
     .slice(0, 4)
@@ -249,9 +276,17 @@ export function summarizeLocationForScene(
 export function summarizeWorldRulesForScene(
   bible: BibleSnapshotV2,
   scene: Pick<Scene, "location_id" | "beat_type" | "mode" | "time_axis">,
+  options: { tier?: SummaryTier } = {},
 ): string {
-  const rules = relevantWorldRules(bible, scene);
+  const tier = options.tier ?? "minimal";
+  const rules = relevantWorldRules(bible, scene).slice(0, tier === "minimal" ? 2 : 4);
   const location = findLocation(bible, scene.location_id);
+  if (tier === "minimal") {
+    return fitSummary(
+      `World rules (${location?.name ?? scene.location_id}): ${rules.join(" / ") || "scene 内の物理・制度ルールを破らない。"}`,
+      { min: 120, max: 240 },
+    );
+  }
   return fitSummary(
     joinNonEmpty(
       [
@@ -273,9 +308,19 @@ export function summarizeMotifForPanel(
   bible: BibleSnapshotV2,
   panel: { panel_no: number },
   scene: SceneWithOptionalMotifs,
+  options: { tier?: SummaryTier } = {},
 ): string {
+  const tier = options.tier ?? "minimal";
   const anchored = motifsFromAnchors(bible, scene.visual_motif_anchors);
   const motifs = anchored.length > 0 ? anchored : relevantMotifs(bible, { ...scene, key_visual_intent: "" });
+  if (tier === "minimal") {
+    const motif = motifs[0];
+    if (!motif) return `Panel ${panel.panel_no} motif: restrained scene symbolism.`;
+    return fitSummary(
+      `Panel ${panel.panel_no} motif: ${motif.name}. draw=${firstChars(motif.draw_directive || motif.meaning, 150)}`,
+      { min: 100, max: 220 },
+    );
+  }
   const text = motifs
     .slice(0, 3)
     .map((motif) => `${motif.name}: ${motif.meaning}. draw=${motif.draw_directive}`)

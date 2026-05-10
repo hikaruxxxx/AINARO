@@ -165,8 +165,9 @@ function computeVoiceReflectionRate(
   // voice_samples は schema 上 Array<{ line: string; ... }> だが、Codex CLI が
   // Array<string> や { line }/{ text }/{ utterance } 等の表記揺れで返すことが
   // あるため defensive に複数フィールドから抽出する。
-  const voiceLines = bible.characters.flatMap((character) =>
-    (character.voice_samples ?? []).map((sample) => {
+  const voiceLines = bible.characters.flatMap((character) => {
+    const samples: unknown[] = character.voice_samples ?? [];
+    return samples.map((sample) => {
       if (typeof sample === "string") return sample.trim();
       const candidate =
         (sample as { line?: string; text?: string; utterance?: string }).line ??
@@ -174,8 +175,8 @@ function computeVoiceReflectionRate(
         (sample as { line?: string; text?: string; utterance?: string }).utterance ??
         "";
       return typeof candidate === "string" ? candidate.trim() : "";
-    }).filter((line) => line.length > 0)
-  );
+    }).filter((line) => line.length > 0);
+  });
   if (voiceLines.length === 0) return 0;
 
   const storyboardDialogue = panels.flatMap((panel) => panel.dialogue.map((line) => line.text));
