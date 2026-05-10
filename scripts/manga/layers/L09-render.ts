@@ -36,7 +36,8 @@ function pickPanelSize(rect: { w: number; h: number }): MangaImageSize {
   if (ratio < 0.77) return MANGA_SIZE_PRESETS.panel_portrait;
   return MANGA_SIZE_PRESETS.panel_square;
 }
-import { composePagePrompt, composePanelPrompt } from "../../../src/lib/manga/render-v2/prompt-composer-v2";
+import { composePagePrompt, composePanelPrompt, validatePromptAgainstCompliance } from "../../../src/lib/manga/render-v2/prompt-composer-v2";
+import { loadBlocklist, loadFalsePositives } from "../../../src/lib/manga/compliance/scanner";
 import { composePanelsIntoPage } from "../../../src/lib/manga/render-v2/page-composer";
 import { overlayEffectLinesOntoPage } from "../../../src/lib/manga/render/page-with-effect-lines";
 import { overlayBubblesOntoPage } from "../../../src/lib/manga/render/page-with-bubbles";
@@ -216,6 +217,10 @@ async function main() {
   const args = parseArgs();
   const bible = JSON.parse(await fs.readFile(bibleSnapshotPath(args.slug), "utf-8")) as BibleSnapshotV2;
   const storyboard = JSON.parse(await fs.readFile(storyboardPath(args.slug, args.episode), "utf-8")) as EpisodeStoryboardV2;
+  // Compliance 辞書を 1 度だけ読み込み (panel/page 単位で使い回す)
+  const complianceBlocklist = await loadBlocklist();
+  const complianceFp = await loadFalsePositives();
+  const compliance = { blocklist: complianceBlocklist, fp: complianceFp };
   const pagePlan = JSON.parse(await fs.readFile(pagePlanPath(args.slug, args.episode), "utf-8")) as PagePlanV2;
   const resolved = JSON.parse(await fs.readFile(resolvedRefsPath(args.slug, args.episode), "utf-8")) as ResolvedRefs;
 
@@ -294,7 +299,20 @@ async function main() {
         userInstructions,
         pageBackgroundTreatments: pageBgMap.size > 0 ? pageBgMap : undefined,
         pagePlanPage: page,
+        compliance,
       });
+      // 最終 prompt に対する compliance gate (実在企業名/商標が prompt に残っていたら fatal stop)
+      const promptCompliance = validatePromptAgainstCompliance(prompt, complianceBlocklist, complianceFp, { treatAsFatal: true });
+      if (!promptCompliance.ok && promptCompliance.severity === "fatal") {
+        console.error(`[L09] COMPLIANCE FATAL on p${page.page_no}: ${promptCompliance.reason}`);
+        if (promptCompliance.findings) {
+          for (const f of promptCompliance.findings.slice(0, 5)) {
+            console.error(`  - [${f.category}] '${f.matched_term}' @ ${f.field_path}: ${f.text_excerpt.slice(0, 80)}`);
+          }
+        }
+        failed++;
+        return;
+      }
       try {
         console.log(`[L09] gen p${page.page_no} (page_one_shot, refs=${refImagePaths.length})`);
         // gpt-image-2 は 1748x2480 を受け付けず fall back するため、
@@ -373,7 +391,15 @@ async function main() {
           panel: sbPanel, packet, bible, pageDimensions: { width: pp.rect.w, height: pp.rect.h },
           userInstructions,
           backgroundTreatment: pp.background_treatment,
+          compliance,
         });
+        // 最終 prompt の compliance gate
+        const panelPromptCompliance = validatePromptAgainstCompliance(prompt, complianceBlocklist, complianceFp, { treatAsFatal: true });
+        if (!panelPromptCompliance.ok && panelPromptCompliance.severity === "fatal") {
+          console.error(`[L09] COMPLIANCE FATAL on p${page.page_no}/panel#${pp.reading_order}: ${panelPromptCompliance.reason}`);
+          failed++;
+          continue;
+        }
         try {
           console.log(`[L09] gen p${page.page_no}/panel#${pp.reading_order} (${args.version})`);
           await generateMangaImage({

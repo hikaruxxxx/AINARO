@@ -71,6 +71,12 @@
       "reason": "「ファンタジー」「ファンタジック」等の一般語の一部。飲料 Fanta の文脈 (オレンジ/グレープ/瓶/缶/炭酸 等) のみ NG",
       "context_check_required": true,
       "added_at": "2026-05-10"
+    },
+    {
+      "term": "GU",
+      "reason": "「GUTTER」「GUARD」「GUIDE」等の英単語の prefix にマッチする 2 文字英字。ファッション店ジーユー の文脈のみ NG (服/店舗/ブランド)",
+      "context_check_required": true,
+      "added_at": "2026-05-10"
     }
   ]
 }
