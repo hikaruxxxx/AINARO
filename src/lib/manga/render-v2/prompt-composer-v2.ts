@@ -28,6 +28,14 @@ import {
   summarizeWorldRulesForScene,
 } from "../bible/broker";
 import {
+  activeCostumeForV3,
+  sceneOverrideTextForV3,
+  summarizeCharacterForEpisodeV3,
+  summarizeLocationForSceneV3,
+  summarizeMotifForPanelV3,
+  summarizeWorldRulesForSceneV3,
+} from "../bible/broker-v3";
+import {
   scanPrompt,
   scanText,
 } from "../compliance/scanner";
@@ -99,6 +107,10 @@ type ComposeResult = {
   refImagePaths: string[];
   tierUsed?: BibleTier;
 };
+
+function useBibleV3(): boolean {
+  return process.env.USE_BIBLE_V3 === "true";
+}
 
 /**
  * background_treatment 別のプロンプト直接指示。pattern dictionary 由来の slot
@@ -191,12 +203,19 @@ function characterRefDescription(
 ): string {
   const blocks: string[] = [];
   for (const ch of panel.entities.characters) {
-    const summary = summarizeCharacterForEpisode(
-      bible,
-      args.episodeNo,
-      ch.character_id,
-      { tier: args.tier ?? "minimal" },
-    );
+    const summary = useBibleV3()
+      ? summarizeCharacterForEpisodeV3(
+          bible,
+          args.episodeNo,
+          ch.character_id,
+          { tier: args.tier ?? "minimal" },
+        )
+      : summarizeCharacterForEpisode(
+          bible,
+          args.episodeNo,
+          ch.character_id,
+          { tier: args.tier ?? "minimal" },
+        );
     blocks.push(`- ${summary} (role=${ch.role}, on_screen_via=${ch.on_screen_via}, expression=${ch.expression})`);
   }
   return blocks.join("\n");
@@ -211,13 +230,17 @@ function locationSceneForPanel(panel: PanelV2, scene?: PromptScene): Pick<Scene,
 }
 
 function locationDescription(panel: PanelV2, bible: BibleSnapshotV2, scene?: PromptScene, tier: BibleTier = "minimal"): string {
-  return summarizeLocationForScene(bible, locationSceneForPanel(panel, scene), { tier });
+  return useBibleV3()
+    ? summarizeLocationForSceneV3(bible, locationSceneForPanel(panel, scene), { tier })
+    : summarizeLocationForScene(bible, locationSceneForPanel(panel, scene), { tier });
 }
 
 function styleOverrideBlock(scene: Pick<Scene, "mode" | "beat_type"> | undefined, bible: BibleSnapshotV2): string {
   const blocks = [bible.style_directives.global];
   if (scene) {
-    const override = sceneOverrideTextFor(bible, scene);
+    const override = useBibleV3()
+      ? sceneOverrideTextForV3(bible, scene)
+      : sceneOverrideTextFor(bible, scene);
     if (override) blocks.push(override);
   }
   return blocks.filter((block) => block.trim().length > 0).join("\n");
@@ -232,7 +255,9 @@ function motifBlock(
   panel: { panel_no: number },
 ): string | null {
   if (!scene) return null;
-  const summary = summarizeMotifForPanel(bible, panel, scene, { tier });
+  const summary = useBibleV3()
+    ? summarizeMotifForPanelV3(bible, panel, scene, { tier })
+    : summarizeMotifForPanel(bible, panel, scene, { tier });
   if (!summary) return null;
   return [
     "RECURRING VISUAL MOTIFS (must include):",
@@ -248,7 +273,9 @@ function costumeBlock(
 ): string | null {
   const lines: string[] = [];
   for (const ch of panel.entities.characters) {
-    const active = activeCostumeFor(bible, episodeNo, ch.character_id);
+    const active = useBibleV3()
+      ? activeCostumeForV3(bible, episodeNo, ch.character_id)
+      : activeCostumeFor(bible, episodeNo, ch.character_id);
     if (active.source === "costume" && active.spec) {
       const outfit = [active.spec.outerwear, active.spec.top].filter(Boolean).join(" ");
       const state = tier === "minimal"
@@ -270,7 +297,9 @@ function worldRuleBlock(
   tier: BibleTier = "minimal",
 ): string | null {
   if (!scene) return null;
-  const summary = summarizeWorldRulesForScene(bible, scene, { tier });
+  const summary = useBibleV3()
+    ? summarizeWorldRulesForSceneV3(bible, scene, { tier })
+    : summarizeWorldRulesForScene(bible, scene, { tier });
   if (!summary) return null;
   return [
     "WORLD CONSTRAINTS:",

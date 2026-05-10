@@ -325,6 +325,20 @@ function sectionBetween(text: string, start: string, end: string): string {
   return text.slice(contentStart, endIndex);
 }
 
+function withUseBibleV3<T>(value: "true" | "false", fn: () => T): T {
+  const original = process.env.USE_BIBLE_V3;
+  process.env.USE_BIBLE_V3 = value;
+  try {
+    return fn();
+  } finally {
+    if (original === undefined) {
+      delete process.env.USE_BIBLE_V3;
+    } else {
+      process.env.USE_BIBLE_V3 = original;
+    }
+  }
+}
+
 describe("prompt-composer-v2 text validation", () => {
   it("extracts keywords from bible forbidden term entries", () => {
     expect(extractForbiddenKeywords("世界記録 (単独使用)")).toEqual(["世界記録"]);
@@ -631,5 +645,45 @@ describe("prompt-composer-v2 Phase 2-2 bible broker composition", () => {
     expect(characterBlock.length).toBeLessThanOrEqual(330);
     expect(characterBlock).toContain("外見:");
     expect(characterBlock).toContain("心理:");
+  });
+});
+
+describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
+  it("composePanelPrompt returns identical output for legacy and V3 broker paths", () => {
+    const args = {
+      panel: panel("出口が見える。"),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 600, height: 400 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "medium" as const,
+    };
+
+    const legacy = withUseBibleV3("false", () => composePanelPrompt(args));
+    const v3 = withUseBibleV3("true", () => composePanelPrompt(args));
+
+    expect(v3.prompt).toBe(legacy.prompt);
+    expect(v3.refImagePaths).toEqual(legacy.refImagePaths);
+    expect(v3.tierUsed).toBe(legacy.tierUsed);
+  });
+
+  it("composePagePrompt returns identical output for legacy and V3 broker paths", () => {
+    const args = {
+      page: page(2),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+
+    const legacy = withUseBibleV3("false", () => composePagePrompt(args));
+    const v3 = withUseBibleV3("true", () => composePagePrompt(args));
+
+    expect(v3.prompt).toBe(legacy.prompt);
+    expect(v3.refImagePaths).toEqual(legacy.refImagePaths);
+    expect(v3.tierUsed).toBe(legacy.tierUsed);
   });
 });

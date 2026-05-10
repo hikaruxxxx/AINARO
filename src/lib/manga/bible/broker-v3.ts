@@ -10,10 +10,15 @@ import type {
 import type { Scene } from "../scene-graph/schema";
 import {
   activeCostumeFor,
+  attributeTagsFor,
+  continuityAnchorTextFor,
   relationshipStateAt,
   relevantMotifs,
   relevantWorldRules,
+  sceneOverrideTextFor,
   summarizeCharacterForEpisode,
+  summarizeLocationForScene,
+  summarizeMotifForPanel,
   summarizeWorldRulesForScene,
 } from "./broker";
 import { v2ToV3 } from "./v3-adapter";
@@ -208,6 +213,45 @@ export function summarizeWorldRulesForSceneV3(
 ): string {
   v2ToV3(v2);
   return summarizeWorldRulesForScene(v2, scene, options);
+}
+
+export function summarizeLocationForSceneV3(
+  v2: BibleSnapshotV2,
+  scene: Pick<Scene, "location_id" | "mode" | "beat_type">,
+  options?: { tier?: "deep" | "medium" | "minimal" },
+): string {
+  v2ToV3(v2);
+  return summarizeLocationForScene(v2, scene, options);
+}
+
+export function summarizeMotifForPanelV3(
+  v2: BibleSnapshotV2,
+  panel: { panel_no: number },
+  scene: Pick<Scene, "beat_type" | "location_id" | "mode" | "key_visual_intent"> & {
+    visual_motif_anchors?: Array<{ motif_id?: string; motif_name?: string; intensity?: number }>;
+  },
+  options?: { tier?: "deep" | "medium" | "minimal" },
+): string {
+  v2ToV3(v2);
+  return summarizeMotifForPanel(v2, panel, scene, options);
+}
+
+export function attributeTagsForV3(v2: BibleSnapshotV2, characterId: string): string[] {
+  v2ToV3(v2);
+  return attributeTagsFor(v2, characterId);
+}
+
+export function continuityAnchorTextForV3(v2: BibleSnapshotV2, characterId: string): string {
+  v2ToV3(v2);
+  return continuityAnchorTextFor(v2, characterId);
+}
+
+export function sceneOverrideTextForV3(
+  v2: BibleSnapshotV2,
+  scene: Pick<Scene, "mode" | "beat_type">,
+): string | null {
+  v2ToV3(v2);
+  return sceneOverrideTextFor(v2, scene);
 }
 
 function visibleAt(fact: FactNode, q: BibleQuery): boolean {

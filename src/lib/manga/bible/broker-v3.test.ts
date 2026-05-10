@@ -3,20 +3,30 @@ import type { BibleSnapshotV2, BibleSnapshotV3, FactNode, Layer } from "../schem
 import type { Scene } from "../scene-graph/schema";
 import {
   activeCostumeFor,
+  attributeTagsFor,
+  continuityAnchorTextFor,
   relationshipStateAt,
   relevantMotifs,
   relevantWorldRules,
+  sceneOverrideTextFor,
   summarizeCharacterForEpisode,
+  summarizeLocationForScene,
+  summarizeMotifForPanel,
   summarizeWorldRulesForScene,
 } from "./broker";
 import {
   activeCostumeForV3,
+  attributeTagsForV3,
+  continuityAnchorTextForV3,
   contextForScene,
   queryBible,
   relationshipStateAtV3,
   relevantMotifsV3,
   relevantWorldRulesV3,
+  sceneOverrideTextForV3,
   summarizeCharacterForEpisodeV3,
+  summarizeLocationForSceneV3,
+  summarizeMotifForPanelV3,
   summarizeWorldRulesForSceneV3,
 } from "./broker-v3";
 import { v2ToV3 } from "./v3-adapter";
@@ -59,6 +69,22 @@ describe("broker-v3 read-only mirror parity with legacy broker", () => {
     expect(relationshipStateAtV3(v2, 1, ["char_a", "char_b"])).toEqual(
       relationshipStateAt(v2, 1, ["char_a", "char_b"]),
     );
+  });
+
+  it("追加 V3 wrapper の出力が legacy broker と一致する", () => {
+    const v2 = createMinimalV2();
+    const scene = sceneStub();
+    const panel = { panel_no: 1 };
+
+    expect(summarizeLocationForSceneV3(v2, scene, { tier: "minimal" })).toBe(
+      summarizeLocationForScene(v2, scene, { tier: "minimal" }),
+    );
+    expect(summarizeMotifForPanelV3(v2, panel, scene, { tier: "minimal" })).toBe(
+      summarizeMotifForPanel(v2, panel, scene, { tier: "minimal" }),
+    );
+    expect(attributeTagsForV3(v2, "char_a")).toEqual(attributeTagsFor(v2, "char_a"));
+    expect(continuityAnchorTextForV3(v2, "char_a")).toBe(continuityAnchorTextFor(v2, "char_a"));
+    expect(sceneOverrideTextForV3(v2, scene)).toBe(sceneOverrideTextFor(v2, scene));
   });
 });
 
