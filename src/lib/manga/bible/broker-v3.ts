@@ -155,6 +155,16 @@ export function contextForScene(
   };
 }
 
+export function contextForSceneV2(
+  v2: BibleSnapshotV2,
+  scene: Parameters<typeof contextForScene>[1],
+  visibility: Visibility,
+  budget?: Parameters<typeof contextForScene>[3],
+): ReturnType<typeof contextForScene> {
+  const v3 = v2ToV3(v2);
+  return contextForScene(v3, scene, visibility, budget);
+}
+
 export function summarizeCharacterForEpisodeV3(
   v2: BibleSnapshotV2,
   episodeNo: number,

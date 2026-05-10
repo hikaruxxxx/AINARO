@@ -30,6 +30,8 @@ import {
   type StoryboardAuditSeverity,
   type StoryboardAuditVariant,
 } from "../../../src/lib/manga/qa-v2/storyboard-audit";
+import { checkMonologueLayerLeak } from "../../../src/lib/manga/qa-v2/monologue-layer-check";
+import type { BibleSnapshotV2, EpisodeStoryboardV2 } from "../../../src/lib/manga/schemas-v2";
 
 type Args = {
   slug: string;
@@ -215,6 +217,7 @@ async function buildPrompt(args: {
 - shot_type_variation: wide/close_up/medium 等の単調さ
 - focus_entity_coherence: focus_entity_id が page 単位で logical
 - opening_hook_priority: page 1-3 で importance 高 panel 十分
+monologue_layer_check は deterministic audit で後段追加するため、LLM 評価では使わないでください。
 
 各 proposal について severity, issues, strengths, suggested_fix を返し、全体比較として cross_variant_notes と recommended_proposal_id を返してください。
 JSON schema に厳密準拠し、JSON 以外の文章は出力しないでください。
@@ -325,6 +328,61 @@ function normalizeReport(args: {
   };
 }
 
+function appendMonologueLayerAudit(
+  report: StoryboardAuditReport,
+  proposalStoryboards: Array<{ proposal: StoryboardProposal; storyboard: EpisodeStoryboardV2 }>,
+  bible: BibleSnapshotV2
+): StoryboardAuditReport {
+  let totalFatal = 0;
+  let totalWarn = 0;
+  const proposals = report.proposals.map((proposal) => {
+    const storyboard = proposalStoryboards.find((item) => item.proposal.proposal_id === proposal.proposal_id)?.storyboard;
+    if (!storyboard) return proposal;
+    const leaks = checkMonologueLayerLeak(storyboard, bible);
+    for (const leak of leaks) {
+      if (leak.severity === "fatal") totalFatal++;
+      else totalWarn++;
+      console.warn(
+        `[L04-audit] monologue layer leak: p${leak.page_no} ${leak.panel_id}: "${leak.matched_meta_phrase}" from ${leak.source_character_id ?? "unknown"}`
+      );
+    }
+    if (leaks.length === 0) return proposal;
+    const nextSeverity = upgradeSeverity(
+      proposal.severity,
+      leaks.some((leak) => leak.severity === "fatal") ? "critical" : "major"
+    );
+    return {
+      ...proposal,
+      severity: nextSeverity,
+      issues: [
+        ...proposal.issues,
+        ...leaks.map((leak) => ({
+          category: "monologue_layer_check" as const,
+          description: `${leak.page_no}/${leak.panel_id}: meta_truth "${leak.matched_meta_phrase}" leaked into ${leak.speaker_id ?? "narration"}`,
+          page_no: leak.page_no,
+          panel_id: leak.panel_id,
+        })),
+      ],
+    };
+  });
+  const counts = emptyStoryboardAuditSeverityCounts();
+  for (const proposal of proposals) counts[proposal.severity]++;
+  console.log(`[L04-audit] monologue_layer_check fatal=${totalFatal} warn=${totalWarn}`);
+  return {
+    ...report,
+    proposals,
+    summary: {
+      ...report.summary,
+      by_severity: counts,
+    },
+  };
+}
+
+function upgradeSeverity(a: StoryboardAuditSeverity, b: StoryboardAuditSeverity): StoryboardAuditSeverity {
+  const rank: Record<StoryboardAuditSeverity, number> = { ok: 0, minor: 1, major: 2, critical: 3 };
+  return rank[b] > rank[a] ? b : a;
+}
+
 async function main(): Promise<void> {
   const args = parseArgs();
   const altsDir = storyboardAltsDir(args.slug, args.episode);
@@ -344,10 +402,10 @@ async function main(): Promise<void> {
   const proposalStoryboards = await Promise.all(
     index.proposals.map(async (proposal) => ({
       proposal,
-      storyboard: await loadJson(resolveMaybeRepoPath(proposal.storyboard_path)),
+      storyboard: await loadJson<EpisodeStoryboardV2>(resolveMaybeRepoPath(proposal.storyboard_path)),
     }))
   );
-  const bible = await loadJson(bibleSnapshotPath(args.slug));
+  const bible = await loadJson<BibleSnapshotV2>(bibleSnapshotPath(args.slug));
   const prompt = await buildPrompt({
     slug: args.slug,
     episode: args.episode,
@@ -372,13 +430,13 @@ async function main(): Promise<void> {
     throw new Error(`claude exit ${response.exitCode}: ${response.stderr.slice(0, 1000)}`);
   }
 
-  const report = normalizeReport({
+  const report = appendMonologueLayerAudit(normalizeReport({
     slug: args.slug,
     episode: args.episode,
     model: args.model,
     parsed: extractInnerJson(response.raw),
     index,
-  });
+  }), proposalStoryboards, bible);
   const date = new Date().toISOString().slice(0, 10);
   await fs.mkdir(altsDir, { recursive: true });
   const outPath = path.join(altsDir, `audit-${date}.json`);

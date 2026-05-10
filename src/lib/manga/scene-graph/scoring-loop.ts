@@ -114,8 +114,6 @@ export async function generateSceneCandidates(
     );
   }
 
-  const bibleRaw = await fs.readFile(context.bibleSnapshotPath, "utf-8");
-  const bible = JSON.parse(bibleRaw) as BibleSnapshotV2;
   const placeholderScene = {
     beat_type: "transition" as const,
     mode: "transition_montage" as const,
@@ -123,9 +121,12 @@ export async function generateSceneCandidates(
     location_id: slot.location_id,
     key_visual_intent: "",
   };
-  const motifCandidates = relevantMotifs(bible, placeholderScene);
-  const worldRuleCandidates = relevantWorldRules(bible, placeholderScene);
-  const propCandidates = relevantProps(bible, placeholderScene);
+  const useBibleV3 = process.env.USE_BIBLE_V3 === "true";
+  const { bible, motifCandidates, worldRuleCandidates, propCandidates } = await loadBibleViaBroker(
+    context.bibleSnapshotPath,
+    useBibleV3,
+    placeholderScene
+  );
   const bibleContext = {
     characters: bible.characters.map((character) => ({
       id: character.id,
@@ -177,6 +178,49 @@ export async function generateSceneCandidates(
     location_id: slot.location_id,
     sub_locations: slot.sub_locations,
   }));
+}
+
+async function loadBibleViaBroker(
+  bibleSnapshotPath: string,
+  useBibleV3: boolean,
+  placeholderScene: Pick<Scene, "beat_type" | "mode" | "cast" | "location_id" | "key_visual_intent">
+): Promise<{
+  bible: BibleSnapshotV2;
+  motifCandidates: Array<{ id?: string; name: string; meaning?: string; draw_directive?: string; description?: string }>;
+  worldRuleCandidates: string[];
+  propCandidates: Array<{ id: string; name: string }>;
+}> {
+  const bibleRaw = await fs.readFile(bibleSnapshotPath, "utf-8");
+  const bible = JSON.parse(bibleRaw) as BibleSnapshotV2;
+  if (useBibleV3) {
+    const { contextForSceneV2 } = await import("../bible/broker-v3");
+    const v3ctx = contextForSceneV2(
+      bible,
+      placeholderScene,
+      "in_world_plus_revealed_up_to_vol",
+      { char: { min: 200, max: 1500 } }
+    );
+    return {
+      bible,
+      motifCandidates: v3ctx.motifs.map((fact) => ({
+        id: undefined,
+        name: fact.body.slice(0, 40),
+        description: fact.body,
+      })),
+      worldRuleCandidates: v3ctx.world_rules.map((fact) => fact.body),
+      propCandidates: v3ctx.props.map((fact) => ({
+        id: fact.entity_id ?? "",
+        name: fact.body.slice(0, 40),
+      })),
+    };
+  }
+
+  return {
+    bible,
+    motifCandidates: relevantMotifs(bible, placeholderScene),
+    worldRuleCandidates: relevantWorldRules(bible, placeholderScene),
+    propCandidates: relevantProps(bible, placeholderScene),
+  };
 }
 
 /**

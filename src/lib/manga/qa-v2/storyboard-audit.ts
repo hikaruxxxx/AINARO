@@ -6,7 +6,8 @@ export type StoryboardAuditCategory =
   | "entity_binding"
   | "shot_type_variation"
   | "focus_entity_coherence"
-  | "opening_hook_priority";
+  | "opening_hook_priority"
+  | "monologue_layer_check";
 
 export type StoryboardAuditSeverity = "ok" | "minor" | "major" | "critical";
 
@@ -49,6 +50,7 @@ export const STORYBOARD_AUDIT_CATEGORIES: readonly StoryboardAuditCategory[] = [
   "shot_type_variation",
   "focus_entity_coherence",
   "opening_hook_priority",
+  "monologue_layer_check",
 ];
 
 export const STORYBOARD_AUDIT_SEVERITIES: readonly StoryboardAuditSeverity[] = [
