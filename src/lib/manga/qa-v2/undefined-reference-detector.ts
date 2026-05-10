@@ -9,8 +9,12 @@ export type UndefinedReference = {
 const COMMON_TERMS = new Set([
   "アカウント",
   "アクション",
+  "アクセス",
+  "アスファルト",
   "アプリ",
   "アーカイブ",
+  "暗号",
+  "インフラ",
   "イベント",
   "インターフェース",
   "エネルギー",
@@ -21,15 +25,20 @@ const COMMON_TERMS = new Set([
   "ガチャ",
   "カテゴリー",
   "カメラ",
+  "カウンター",
   "キャラクター",
   "キャンセル",
+  "ケーブル",
   "ギルド",
   "クエスト",
   "クラス",
   "グループ",
+  "グレーチング",
   "ゲーム",
   "ゲート",
   "コミュニケーション",
+  "コンビニ",
+  "コンクリート",
   "コントロール",
   "コード",
   "サーバー",
@@ -39,19 +48,26 @@ const COMMON_TERMS = new Set([
   "ステータス",
   "ストーリー",
   "スキル",
+  "シルエット",
   "スコア",
   "スタイル",
   "ステージ",
   "スペック",
+  "スタッフ",
+  "スニーカー",
   "スマートフォン",
   "セキュリティ",
   "センサー",
+  "スキル",
+  "ステータス",
   "ターゲット",
   "タイプ",
   "タイミング",
   "ダメージ",
   "ダンジョン",
   "チーム",
+  "チェーン",
+  "チャイム",
   "テキスト",
   "テンション",
   "テンプレート",
@@ -59,30 +75,39 @@ const COMMON_TERMS = new Set([
   "トラブル",
   "トリガー",
   "ナレーション",
+  "ナレーション",
   "ネットワーク",
   "バランス",
   "バリア",
+  "ハイライト",
   "パターン",
   "パラメータ",
   "パーティ",
   "ヒロイン",
   "フィールド",
+  "フィルタ",
   "フェーズ",
   "フォーム",
   "フロア",
   "フロー",
+  "フォルダ",
   "プロセス",
   "プロフィール",
   "プログラム",
+  "プロトコル",
   "ページ",
   "ポイント",
+  "ポケット",
+  "ホルダー",
   "マップ",
+  "マーカー",
   "ミッション",
   "メッセージ",
   "メニュー",
   "モデル",
   "モチーフ",
   "モード",
+  "モニター",
   "ユーザー",
   "ライセンス",
   "ライン",
@@ -90,21 +115,199 @@ const COMMON_TERMS = new Set([
   "リアクション",
   "リスト",
   "リズム",
+  "レシート",
   "ルール",
   "レベル",
   "ログ",
   "ワールド",
+  "一時",
+  "一人",
+  "一同",
+  "一瞬",
+  "一瞬間",
+  "一部",
+  "上記",
+  "下記",
+  "不明",
+  "両方",
+  "両者",
+  "主人公",
+  "互い",
+  "人物",
+  "人間",
+  "仕草",
+  "以上",
+  "以前",
+  "以降",
+  "以下",
+  "作品",
+  "作中",
   "主人公",
   "作中",
   "作者",
+  "個人",
   "候補",
+  "全体",
+  "全員",
+  "全域",
+  "全範囲",
+  "内容",
+  "内側",
+  "内部",
+  "処理",
+  "判定",
+  "判断",
+  "別人",
+  "原因",
+  "双方",
+  "同一",
+  "同上",
+  "同時",
+  "同期",
+  "同様",
+  "同種",
+  "同類",
+  "周囲",
+  "周辺",
+  "周辺部",
+  "回数",
+  "場所",
+  "場面",
+  "外側",
+  "外部",
+  "姿勢",
+  "巻",
+  "度数",
+  "当人",
+  "当地",
+  "当所",
+  "当時",
+  "形状",
+  "彼女",
+  "彼等",
+  "彼ら",
+  "彼氏",
+  "彼達",
+  "彼女達",
+  "彼女ら",
+  "後半",
+  "心理",
+  "心情",
+  "思考",
+  "性格",
+  "性質",
+  "性能",
+  "感動",
+  "感情",
+  "感想",
+  "感覚",
+  "情報",
+  "状態",
+  "状勢",
+  "状況",
+  "理由",
+  "現在",
+  "現地",
+  "現時点",
+  "理由",
+  "現象",
+  "画面",
+  "発言",
+  "発話",
+  "相手",
+  "直前",
+  "直後",
+  "瞬時",
+  "瞬間",
+  "知識",
+  "社会",
+  "私達",
+  "第一",
+  "第三",
+  "第二",
+  "節",
+  "章",
+  "端末",
+  "結果",
+  "経過",
+  "編集者",
+  "編",
+  "者達",
+  "自己",
+  "自身",
+  "自分",
+  "著者",
+  "表情",
+  "表現",
+  "表面",
+  "裏面",
+  "要件",
+  "要因",
+  "要素",
+  "要素群",
+  "視点",
+  "視線",
+  "解決",
+  "解釈",
+  "記録",
+  "該当者",
+  "話",
+  "詳細",
+  "説明",
+  "読者",
+  "証拠",
+  "評価",
+  "言動",
+  "設定",
+  "制度",
+  "条件",
+  "根拠",
+  "行動",
+  "行為",
+  "表現",
+  "描写",
+  "挙動",
+  "振舞",
+  "探索",
+  "探索者",
+  "携帯",
+  "通知",
+  "数値",
+  "単位",
+  "個数",
+  "件数",
+  "段階",
+  "階段",
+  "段",
+  "階",
+  "項",
+  "部",
+  "物語",
+  "印影",
+  "印象",
+  "印象論",
+  "雰囲気",
+  "特性",
+  "特徴",
+  "未来",
+  "将来",
+  "過去",
+  "期間",
+  "時刻",
+  "時点",
+  "時期",
+  "時代",
+  "一部",
   "関係",
+  "関係者",
+  "集団",
   "世界",
   "都市",
   "能力",
 ]);
 
 const PARTICLE_SUFFIX = /[のはをがにへでと、。！？\s]/u;
+const KANJI_CHAR = /[\p{Script=Han}]/u;
 
 export function detectUndefinedReferences(bible: BibleSnapshotV2): UndefinedReference[] {
   const known = buildKnownEntityNames(bible);
@@ -115,6 +318,7 @@ export function detectUndefinedReferences(bible: BibleSnapshotV2): UndefinedRefe
     for (const match of extractCandidateMatches(field.text)) {
       const normalized = normalizeName(match.text);
       if (!normalized || known.has(normalized) || COMMON_TERMS.has(normalized)) continue;
+      if (isFalsePositiveCandidate(normalized)) continue;
       if (isLikelyCommonTerm(normalized)) continue;
 
       const key = `${field.path}:${normalized}`;
@@ -140,7 +344,7 @@ function buildKnownEntityNames(bible: BibleSnapshotV2): Set<string> {
   };
 
   for (const character of bible.characters) {
-    add(character.name);
+    for (const name of expandCharacterNames(character.name)) add(name);
     add(character.id);
   }
   for (const location of bible.locations) {
@@ -162,6 +366,15 @@ function buildKnownEntityNames(bible: BibleSnapshotV2): Set<string> {
   }
 
   return known;
+}
+
+function expandCharacterNames(name: string): string[] {
+  const out = new Set<string>([name]);
+  const compact = name.replace(/\s+/gu, "");
+  if (compact !== name) out.add(compact);
+  const parts = name.split(/[\s　]+/u).filter((part) => Array.from(part).length >= 2);
+  for (const part of parts) out.add(part);
+  return Array.from(out);
 }
 
 function collectTextFields(bible: BibleSnapshotV2): Array<{ path: string; text: string }> {
@@ -221,10 +434,9 @@ function collectTextFields(bible: BibleSnapshotV2): Array<{ path: string; text: 
 function extractCandidateMatches(text: string): Array<{ text: string; index: number }> {
   const matches: Array<{ text: string; index: number }> = [];
   const patterns = [
-    /[\p{Script=Han}]{2,4}の[\p{Script=Han}\p{Script=Katakana}ー]{2,12}/gu,
-    /[\p{Script=Katakana}ー]{2,8}(?:の)?[\p{Script=Han}0-9一二三四五六七八九十]{2,12}/gu,
+    /(?:[\p{Script=Han}]{2,}[\p{Script=Katakana}ー]+|[\p{Script=Katakana}ー]+[\p{Script=Han}]{2,})[\p{Script=Han}\p{Script=Katakana}ー0-9一二三四五六七八九十]*/gu,
     /[\p{Script=Katakana}ー]{4,18}/gu,
-    /[\p{Script=Han}]{2,3}(?=[のはをがにへでと、。！？\s])/gu,
+    /[\p{Script=Han}]{3,12}/gu,
   ];
 
   for (const pattern of patterns) {
@@ -248,6 +460,12 @@ function normalizeName(value: string): string {
   return trimCandidate(value).replace(/\s+/gu, "").replace(/・/gu, "");
 }
 
+function isFalsePositiveCandidate(value: string): boolean {
+  const chars = Array.from(value);
+  if (chars.length <= 4 && chars.every((char) => KANJI_CHAR.test(char))) return true;
+  return false;
+}
+
 function isLikelyCommonTerm(value: string): boolean {
   if (/^[\p{Script=Katakana}ー]+$/u.test(value) && value.length < 4) return true;
   if (/^[\p{Script=Han}]{2,3}$/u.test(value) && COMMON_TERMS.has(value)) return true;
@@ -260,7 +478,7 @@ function excerptAround(text: string, index: number, length: number): string {
   const chars = Array.from(text);
   const before = Array.from(text.slice(0, index)).length;
   const matchLength = Array.from(text.slice(index, index + length)).length;
-  const start = Math.max(0, before - 30);
-  const end = Math.min(chars.length, before + matchLength + 30);
+  const start = Math.max(0, before - 50);
+  const end = Math.min(chars.length, before + matchLength + 50);
   return chars.slice(start, end).join("");
 }

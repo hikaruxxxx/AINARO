@@ -290,10 +290,43 @@ describe("undefined-reference-detector", () => {
 
     expect(refs).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ matched_text: "玄蔵の暗号", source_path: "characters[0].backstory" }),
         expect.objectContaining({ matched_text: "ナビ第二段階", source_path: "characters[0].backstory" }),
       ]),
     );
+    expect(refs.find((ref) => ref.matched_text === "玄蔵")).toBeUndefined();
+    expect(refs.find((ref) => ref.matched_text === "暗号")).toBeUndefined();
+    expect(refs.find((ref) => ref.matched_text === "玄蔵の暗号")).toBeUndefined();
+  });
+
+  it("漢字 2 字の一般語は検出しない", () => {
+    const bible = baseBible({
+      world: {
+        ...baseBible().world,
+        premise: "世界には制度がある。場所は東京。人間は皆考える。",
+      },
+    });
+
+    const refs = detectUndefinedReferences(bible);
+
+    expect(refs.find((ref) => ref.matched_text === "制度")).toBeUndefined();
+    expect(refs.find((ref) => ref.matched_text === "場所")).toBeUndefined();
+    expect(refs.find((ref) => ref.matched_text === "人間")).toBeUndefined();
+  });
+
+  it("character の名のみは entity name 展開で除外される", () => {
+    const bible = baseBible({
+      characters: [
+        {
+          ...baseBible().characters[0],
+          name: "白瀬 灯里",
+          backstory: "灯里は東京で生まれた。",
+        },
+      ],
+    });
+
+    const refs = detectUndefinedReferences(bible);
+
+    expect(refs.find((ref) => ref.matched_text === "灯里")).toBeUndefined();
   });
 });
 
