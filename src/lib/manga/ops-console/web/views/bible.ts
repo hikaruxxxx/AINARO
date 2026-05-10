@@ -40,23 +40,36 @@ type ActionLayer = "L01" | "L01b" | "L01c";
 type DisplayMode = "reader" | "raw";
 type AssetKind = "characters" | "locations" | "props";
 
-const BIBLE_TABS: Array<{ id: BibleTab; label: string }> = [
-  { id: "world", label: "世界観" },
-  { id: "characters", label: "キャラクター" },
-  { id: "locations", label: "場所" },
-  { id: "props", label: "小道具" },
-  { id: "style", label: "画風指示" },
-  { id: "costumes", label: "衣装" },
-  { id: "relations", label: "関係性" },
-  { id: "nav", label: "ナビ仕様" },
-  { id: "synopsis", label: "巻シノプシス" },
-  { id: "core_hook", label: "中核ギミック" },
-  { id: "meta", label: "メタ・補足" },
-  { id: "raw", label: "生 JSON" },
+const BIBLE_TAB_GROUPS: Array<{ groupLabel: string; tabs: Array<{ id: BibleTab; label: string }> }> = [
+  {
+    groupLabel: "コンテンツ",
+    tabs: [
+      { id: "world", label: "世界観" },
+      { id: "characters", label: "キャラクター" },
+      { id: "locations", label: "場所" },
+      { id: "props", label: "小道具" },
+      { id: "costumes", label: "衣装" },
+      { id: "relations", label: "関係性" },
+    ],
+  },
+  {
+    groupLabel: "構造・補足",
+    tabs: [
+      { id: "style", label: "画風指示" },
+      { id: "nav", label: "ナビ仕様" },
+      { id: "synopsis", label: "巻シノプシス" },
+      { id: "core_hook", label: "中核ギミック" },
+      { id: "meta", label: "メタ・補足" },
+      { id: "raw", label: "生 JSON" },
+    ],
+  },
 ];
 
 const CSS = `
 .bib-view { display: grid; gap: var(--space-3); }
+.bib-tab-groups { display: grid; gap: var(--space-2); }
+.bib-tab-group { display: grid; grid-template-columns: minmax(80px, auto) 1fr; gap: var(--space-2); align-items: center; }
+.bib-tab-group__label { color: var(--text-tertiary); font-size: var(--fs-xs, 11px); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
 .bib-tabs { display: flex; gap: var(--space-1); flex-wrap: wrap; }
 .bib-content { display: grid; gap: var(--space-3); }
 .bib-reader { display: grid; gap: var(--space-3); max-width: 980px; }
@@ -775,7 +788,11 @@ function renderAssetCards(
 }
 
 function renderTabs(active: BibleTab): string {
-  return `<div class="bib-tabs">${BIBLE_TABS.map((tab) => `<button type="button" class="nc-pill${tab.id === active ? " nc-pill--active" : ""}" data-bible-tab="${tab.id}">${escapeHtml(tab.label)}</button>`).join("")}</div>`;
+  return `<div class="bib-tab-groups">${BIBLE_TAB_GROUPS.map((group) => `
+    <div class="bib-tab-group">
+      <span class="bib-tab-group__label">${escapeHtml(group.groupLabel)}</span>
+      <div class="bib-tabs">${group.tabs.map((tab) => `<button type="button" class="nc-pill${tab.id === active ? " nc-pill--active" : ""}" data-bible-tab="${tab.id}">${escapeHtml(tab.label)}</button>`).join("")}</div>
+    </div>`).join("")}</div>`;
 }
 
 function renderDisplayMode(active: DisplayMode): string {
@@ -1805,7 +1822,7 @@ export function mountBibleView(container: HTMLElement): () => void {
       return;
     }
     const tab = target.closest<HTMLButtonElement>("[data-bible-tab]")?.dataset.bibleTab as BibleTab | undefined;
-    if (tab && BIBLE_TABS.some((item) => item.id === tab)) {
+    if (tab && BIBLE_TAB_GROUPS.flatMap((group) => group.tabs).some((item) => item.id === tab)) {
       state.tab = tab;
       state.displayMode = "reader";
       state.coreHookEditMode = false;
