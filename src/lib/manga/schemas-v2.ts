@@ -35,6 +35,39 @@ export type WorldSpec = {
   system: string;
   timeline: string;
   factions: WorldFaction[];
+  /** bible 深掘り: 作中史の時系列と伏線管理 */
+  history?: {
+    timeline?: Array<{
+      year_or_era: string;
+      event: string;
+      impact?: string;
+    }>;
+    pre_canon_events?: Array<{
+      event: string;
+      significance: string;
+      revealed_in_volume?: number;
+    }>;
+    /** volume_number -> "YYYY-MM-DD" */
+    canonical_dates?: Record<string, string>;
+  };
+  /** bible 深掘り: 能力体系の論理 */
+  power_system_logic?: string;
+  /** bible 深掘り: 宇宙観・神話体系 */
+  cosmology?: string;
+  /** bible 深掘り: 経済構造 */
+  economic_system?: string;
+  /** bible 深掘り: 階層・身分・社会圧 */
+  social_strata?: string;
+  /** bible 深掘り: 日常生活の質感 */
+  daily_life_textures?: string;
+  /** bible 深掘り: 言語・命名規則 */
+  language_and_naming?: string;
+  /** bible 深掘り: 禁忌知識と開示計画 */
+  forbidden_lore?: Array<{
+    secret: string;
+    revealed_in_volume?: number;
+    setup_episodes?: number[];
+  }>;
   lexicon?: TextQualityLexiconV2;
 };
 
@@ -101,6 +134,43 @@ export type CharacterEntryV2 = {
   appears_in_volumes: number[];
   /** 任意の脚本ノート (storyboard-builder への自由ヒント) */
   appearance_notes?: string;
+  /** bible 深掘り: 生い立ち */
+  backstory?: string;
+  /** bible 深掘り: 幼少期の具体エピソード */
+  childhood_episodes?: string[];
+  /** bible 深掘り: 心理構造 */
+  psychology_deep?: string;
+  /** bible 深掘り: 防衛機制 */
+  defense_mechanisms?: string;
+  /** bible 深掘り: 世界の見え方フィルタ */
+  worldview_filter?: string;
+  /** bible 深掘り: 場面別の声・台詞サンプル */
+  voice_samples?: Array<{
+    /** どの場面のセリフか */
+    episode_or_scene_hint?: string;
+    line: string;
+    /** "establish" / "reveal" / "cliff" 等 */
+    intent?: string;
+  }>;
+  /** bible 深掘り: 典型的な一日 */
+  typical_day_in_life?: string;
+  /** bible 深掘り: 相手別の関係描写 */
+  relationship_per_partner?: Array<{
+    /** 他 character.id 参照 */
+    partner_id: string;
+    description: string;
+  }>;
+  /** bible 深掘り: 巻ごとの成長変化 */
+  growth_per_volume?: Array<{
+    volume: number;
+    description: string;
+  }>;
+  /** antagonist 深掘り: 原初の傷 */
+  origin_wound_deep?: string;
+  /** antagonist 深掘り: 思想の論証 */
+  ideology_argument?: string;
+  /** antagonist 深掘り: 主人公との暗い鏡像性 */
+  dark_mirror_to_protagonist?: string;
   /** 任意の dialogue / monologue 文体ガード */
   speech_style?: CharacterSpeechStyleV2;
 };
@@ -139,6 +209,18 @@ export type CharacterRelationV2 = {
   to_character_id: string;
   relation_type: string;
   description: string;
+  /** bible 深掘り: from -> to 方向の感情・関係描写 */
+  bidirectional_a_to_b?: string;
+  /** bible 深掘り: to -> from 方向の感情・関係描写 */
+  bidirectional_b_to_a?: string;
+  /** bible 深掘り: 関係を変化させた事件 */
+  catalyst_events?: Array<{
+    description: string;
+    volume?: number;
+    episode?: number;
+  }>;
+  /** bible 深掘り: 巻ごとの関係変化 */
+  per_volume_delta?: string;
   /** 推し導線の魅力軸（relation_type と独立。enum 外も string で許容するため未知文字列は warn） */
   appeal_axis?: AppealAxis | string;
   /** 作者主観の推し度 0-5 */
@@ -188,6 +270,12 @@ export type VisualMotifV2 = {
   name: string;
   meaning: string;
   draw_directive: string;
+  /** bible 深掘り: 象徴の由来・系譜 */
+  symbolic_lineage?: string;
+  /** bible 深掘り: 参照すべき場面 */
+  reference_scenes?: string[];
+  /** bible 深掘り: 避けるべき描写例 */
+  negative_examples?: string[];
 };
 
 export type ContinuitySeedKind =

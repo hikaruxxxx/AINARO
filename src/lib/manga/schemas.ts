@@ -58,6 +58,10 @@ export type CharacterSpec = {
 
 export type CostumeSpec = OutfitSpec & {
   notes?: string;
+  /** bible 深掘り: 衣装の視覚説明 */
+  visual_description?: string;
+  /** bible 深掘り: 衣装変更の理由 */
+  change_reason?: string;
   /** どの状態か: '怪我中' '変身後' 等の自由記述 */
   state_description?: string;
 };
@@ -81,6 +85,18 @@ export type LocationSpec = {
   lighting_default?: string;
   /** カラーパレット */
   color_palette?: string[];
+  /** bible 深掘り: 場所の視覚説明 */
+  visual_description?: string;
+  /** bible 深掘り: 場所の来歴 */
+  history?: string;
+  /** bible 深掘り: 社会経済的な文脈 */
+  socioeconomic_context?: string;
+  /** bible 深掘り: 匂い・音・手触りなどの感覚質感 */
+  sensory_textures?: string;
+  /** bible 深掘り: 普段そこにいる人々 */
+  who_typically_inhabits?: string;
+  /** bible 深掘り: 場所を象徴する物 */
+  iconic_objects?: Array<{ name: string; description: string }>;
 };
 
 // ============================================================
@@ -92,6 +108,14 @@ export type PropSpec = {
   color?: string;
   material?: string;
   distinguishing_features?: string[];
+  /** bible 深掘り: 小物の視覚説明 */
+  visual_description?: string;
+  /** bible 深掘り: 小物の来歴 */
+  provenance?: string;
+  /** bible 深掘り: 機能と設定上の意味 */
+  function_and_lore?: string;
+  /** bible 深掘り: 認識できる人物・条件 */
+  who_can_see_it?: string;
 };
 
 export type PropOwnershipEntry = {
