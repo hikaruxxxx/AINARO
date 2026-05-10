@@ -22,6 +22,7 @@ import {
   handleNameApprovalPost,
 } from "./handlers/name-approval";
 import { handleNameManifest } from "./handlers/name-manifest";
+import { handleNameLintFixPost } from "./handlers/name-lint-fix";
 import { handleManifest } from "./handlers/manifest";
 import { handlePipelineStatus } from "./handlers/pipeline-status";
 import { handleDashboardNextActions } from "./handlers/dashboard";
@@ -660,6 +661,19 @@ export async function handleApi(
     const g = checkLegacyScope(url, defaults);
     if (!g.ok) return send(res, g.status, { error: g.error });
     return handleManifest(defaults.defaultSlug!, defaults.defaultEpisode!, res);
+  }
+
+  if (p === "/api/name-lint-fix") {
+    if (req.method !== "POST") return send(res, 405, { error: "このメソッドは許可されていません" });
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch (e) {
+      return send(res, 400, { error: String(e) });
+    }
+    const g = checkLegacyBodyScope(body, defaults);
+    if (!g.ok) return send(res, g.status, { error: g.error });
+    return handleNameLintFixPost(body, res);
   }
 
   if (p === "/api/revision-queue") {

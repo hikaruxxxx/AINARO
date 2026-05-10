@@ -150,6 +150,66 @@ export function apiPostRestart(): Promise<{ ok: true; restarting: true; eta_seco
   return postJson("/api/restart", {});
 }
 
+export function runNameLintFix(
+  slug: string,
+  episode: number,
+  panelNos: number[],
+  findingRules: string[] | undefined,
+  onProgress: (message: string) => void,
+  onDone: () => void,
+  onError: (error: Error) => void
+): AbortController {
+  const controller = new AbortController();
+  void (async () => {
+    try {
+      const res = await fetch("/api/name-lint-fix", {
+        method: "POST",
+        headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          episode,
+          panel_nos: panelNos,
+          finding_rules: findingRules,
+        }),
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(await res.text());
+      if (!res.body) throw new Error("response body is empty");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split("\n\n");
+        buffer = events.pop() ?? "";
+        for (const rawEvent of events) {
+          const lines = rawEvent.split(/\r?\n/);
+          const eventName = lines.find((line) => line.startsWith("event:"))?.slice("event:".length).trim() ?? "data";
+          const dataRaw = lines
+            .filter((line) => line.startsWith("data:"))
+            .map((line) => line.slice("data:".length).trim())
+            .join("\n");
+          const data = dataRaw ? JSON.parse(dataRaw) as { message?: string } : {};
+          if (eventName === "done") {
+            onDone();
+            return;
+          }
+          if (eventName === "error") {
+            throw new Error(data.message ?? "name-lint fix failed");
+          }
+          if (data.message) onProgress(data.message);
+        }
+      }
+    } catch (e) {
+      if (!controller.signal.aborted) onError(e instanceof Error ? e : new Error(String(e)));
+    }
+  })();
+  return controller;
+}
+
 export function apiGetWorks(): Promise<{ works: WorkInfo[] }> {
   return getJson<{ works: WorkInfo[] }>("/api/works");
 }

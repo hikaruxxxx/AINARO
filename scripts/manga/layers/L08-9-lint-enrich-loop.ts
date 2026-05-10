@@ -19,7 +19,12 @@ import { enrichStoryboardWithLLM, type PanelLintFeedback } from "../../../src/li
 import { isSceneGraphV1, type SceneGraphV1 } from "../../../src/lib/manga/scene-graph/schema";
 import type { BibleSnapshotV2, EpisodeStoryboardV2, PagePlanV2 } from "../../../src/lib/manga/schemas-v2";
 import { lintName, type NameLintReport } from "../../../src/lib/manga/qa-v2/name-lint";
-import { aggregateLintFeedbackByScene, compareReports, selectScenesForReEnrich } from "../../../src/lib/manga/qa-v2/lint-loop";
+import {
+  aggregateLintFeedbackByScene,
+  compareReports,
+  filterFeedbackByPanelNos,
+  selectScenesForReEnrich,
+} from "../../../src/lib/manga/qa-v2/lint-loop";
 
 type Args = {
   slug: string;
@@ -27,6 +32,7 @@ type Args = {
   maxIterations: number;
   targetFindings: number;
   improvementThreshold: number;
+  targetPanels: number[];
 };
 
 type LoopStepSummary = {
@@ -43,6 +49,7 @@ function parseArgs(): Args {
     maxIterations: 3,
     targetFindings: 50,
     improvementThreshold: 0.05,
+    targetPanels: [],
   };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
@@ -68,6 +75,12 @@ function parseArgs(): Args {
     else if (key === "max-iterations") a.maxIterations = Number(val);
     else if (key === "target-findings") a.targetFindings = Number(val);
     else if (key === "improvement-threshold") a.improvementThreshold = Number(val);
+    else if (key === "target-panels") {
+      a.targetPanels = val
+        .split(",")
+        .map((x) => Number(x.trim()))
+        .filter((x) => Number.isInteger(x) && x > 0);
+    }
   }
   if (!a.slug) throw new Error("--slug required");
   if (!Number.isInteger(a.episode) || Number(a.episode) <= 0) throw new Error("--episode required");
@@ -161,18 +174,30 @@ async function main() {
   }
 
   const summaries: LoopStepSummary[] = [];
-  console.log(`[L08.9] start: findings=${report.findings.length} target=${args.targetFindings} max_iterations=${args.maxIterations}`);
+  console.log(
+    `[L08.9] start: findings=${report.findings.length} target=${args.targetFindings} max_iterations=${args.maxIterations}` +
+      (args.targetPanels.length > 0 ? ` target_panels=${args.targetPanels.join(",")}` : "")
+  );
 
   for (let iteration = 1; iteration <= args.maxIterations; iteration++) {
-    if (report.findings.length <= args.targetFindings) {
+    if (args.targetPanels.length === 0 && report.findings.length <= args.targetFindings) {
       console.log(`[L08.9] stop: target reached (${report.findings.length} <= ${args.targetFindings})`);
       break;
     }
 
-    const feedbackByScene = aggregateLintFeedbackByScene(report.findings, sceneGraph);
-    const sceneIds = selectScenesForReEnrich(feedbackByScene);
+    const allFeedbackByScene = aggregateLintFeedbackByScene(report.findings, sceneGraph);
+    const feedbackByScene = args.targetPanels.length > 0
+      ? filterFeedbackByPanelNos(allFeedbackByScene, args.targetPanels)
+      : allFeedbackByScene;
+    const sceneIds = selectScenesForReEnrich(feedbackByScene, {
+      targetPanelNos: args.targetPanels.length > 0 ? args.targetPanels : undefined,
+    });
     if (sceneIds.length === 0) {
-      console.log("[L08.9] stop: no actionable fatal/warn panel/page findings");
+      console.log(
+        args.targetPanels.length > 0
+          ? `[L08.9] stop: no actionable findings for target panels ${args.targetPanels.join(",")}`
+          : "[L08.9] stop: no actionable fatal/warn panel/page findings"
+      );
       break;
     }
 
@@ -215,7 +240,7 @@ async function main() {
       break;
     }
 
-    if (report.findings.length <= args.targetFindings) {
+    if (args.targetPanels.length === 0 && report.findings.length <= args.targetFindings) {
       console.log(`[L08.9] stop: target reached (${report.findings.length} <= ${args.targetFindings})`);
       break;
     }

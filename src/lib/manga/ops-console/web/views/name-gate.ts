@@ -5,6 +5,7 @@ import {
   apiGetNameManifest,
   apiGetStoryboardProposals,
   apiPostNameApproval,
+  runNameLintFix,
   type NameManifest,
   type StoryboardProposalsResponse,
 } from "../lib/api";
@@ -38,6 +39,8 @@ type DecisionDraft = {
 type ViewState = {
   storyboardProposals: StoryboardProposalsResponse | null;
 };
+
+let activeNameLintFix: AbortController | null = null;
 
 const REASONS: Array<{ key: NameRejectReason; label: string }> = [
   { key: "story_problem", label: "[1] story" },
@@ -269,6 +272,9 @@ const NAME_GATE_CSS = `
 .name-gate-container .lint-target { color: #64748b; margin-left: auto; font-size: 11px; }
 .name-gate-container .lint-message { color: #0f172a; }
 .name-gate-container .lint-hint { color: #64748b; font-size: 11px; }
+.name-gate-container .lint-fix-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.name-gate-container .lint-fix-progress { min-width: 0; color: #64748b; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.name-gate-container [data-name-lint-fix-panel][disabled] { opacity: .55; cursor: wait; }
 .name-gate-container .lint-empty { padding: 6px 10px; color: #94a3b8; font-size: 12px; }
 .name-lint-episode {
   display: grid;
@@ -449,6 +455,14 @@ function lintFindingsByPage(report: NameLintReport | null | undefined): Map<numb
 function renderLintFinding(finding: NameLintFinding): string {
   const target = lintTarget(finding);
   const hint = finding.hint ? `<div class="lint-hint">hint: ${escapeHtml(finding.hint)}</div>` : "";
+  const fixButton = finding.panel_no !== undefined
+    ? `<div class="lint-fix-row">
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm"
+          data-name-lint-fix-panel="${finding.panel_no}"
+          data-name-lint-fix-rule="${escapeHtml(finding.rule)}">AI 修正</button>
+        <span class="lint-fix-progress" data-name-lint-fix-progress="${finding.panel_no}:${escapeHtml(finding.rule)}"></span>
+      </div>`
+    : "";
   return `<div class="lint-finding lint-finding--${escapeHtml(finding.severity)}">
     <div class="lint-head">
       <span class="lint-icon lint-icon--${escapeHtml(finding.severity)}">${lintSeverityIcon(finding.severity)}</span>
@@ -457,6 +471,7 @@ function renderLintFinding(finding: NameLintFinding): string {
     </div>
     <div class="lint-message">${escapeHtml(finding.message)}</div>
     ${hint}
+    ${fixButton}
   </div>`;
 }
 
@@ -1227,6 +1242,40 @@ async function loadNameGate(
               onError: () => setRunningLayer(null),
             },
           }).finally(() => setRunningLayer(null));
+          return;
+        }
+        const lintFixButton = target.closest<HTMLButtonElement>("[data-name-lint-fix-panel]");
+        if (lintFixButton) {
+          if (activeNameLintFix) return;
+          const panelNo = Number(lintFixButton.dataset.nameLintFixPanel);
+          const rule = lintFixButton.dataset.nameLintFixRule;
+          if (!Number.isInteger(panelNo) || panelNo <= 0) return;
+          const progress = lintFixButton.parentElement?.querySelector<HTMLElement>(".lint-fix-progress");
+          lintFixButton.disabled = true;
+          lintFixButton.textContent = "修正中...";
+          if (progress) progress.textContent = "starting...";
+          activeNameLintFix = runNameLintFix(
+            slug,
+            episode,
+            [panelNo],
+            rule ? [rule] : undefined,
+            (message) => {
+              console.log(message);
+              if (progress) progress.textContent = message;
+            },
+            () => {
+              activeNameLintFix = null;
+              if (progress) progress.textContent = "done. reloading...";
+              window.location.reload();
+            },
+            (error) => {
+              activeNameLintFix = null;
+              lintFixButton.disabled = false;
+              lintFixButton.textContent = "AI 修正";
+              if (progress) progress.textContent = error.message;
+              alert(`AI 修正に失敗しました: ${error.message}`);
+            }
+          );
           return;
         }
         const modalReason = target.closest<HTMLInputElement>("[data-ng-modal-reason]");

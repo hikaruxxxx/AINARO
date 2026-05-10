@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { SceneGraphV1 } from "../scene-graph/schema";
 import type { NameLintFinding, NameLintReport } from "./name-lint";
-import { aggregateLintFeedbackByScene, compareReports, selectScenesForReEnrich } from "./lint-loop";
+import { aggregateLintFeedbackByScene, compareReports, filterFeedbackByPanelNos, selectScenesForReEnrich } from "./lint-loop";
 
 function sceneGraph(): SceneGraphV1 {
   const sceneBase = {
@@ -139,5 +139,40 @@ describe("selectScenesForReEnrich", () => {
     ]);
 
     expect(selectScenesForReEnrich(feedback)).toEqual(["S01"]);
+  });
+
+  it("filters scene ids by targetPanelNos", () => {
+    const feedback = new Map([
+      ["S01", [{ panel_no: 1, findings: [{ rule: "r", severity: "warn" as const, message: "m" }] }]],
+      ["S02", [{ panel_no: 12, findings: [{ rule: "r", severity: "warn" as const, message: "m" }] }]],
+    ]);
+
+    expect(selectScenesForReEnrich(feedback, { targetPanelNos: [12] })).toEqual(["S02"]);
+  });
+});
+
+describe("filterFeedbackByPanelNos", () => {
+  it("keeps only matching panels", () => {
+    const feedback = new Map([
+      [
+        "S01",
+        [
+          { panel_no: 1, findings: [{ rule: "r1", severity: "warn" as const, message: "m" }] },
+          { panel_no: 2, findings: [{ rule: "r2", severity: "fatal" as const, message: "m" }] },
+        ],
+      ],
+    ]);
+
+    expect(filterFeedbackByPanelNos(feedback, [2]).get("S01")).toEqual([
+      { panel_no: 2, findings: [{ rule: "r2", severity: "fatal", message: "m" }] },
+    ]);
+  });
+
+  it("drops scenes with no matching panels", () => {
+    const feedback = new Map([
+      ["S01", [{ panel_no: 1, findings: [{ rule: "r", severity: "warn" as const, message: "m" }] }]],
+    ]);
+
+    expect(filterFeedbackByPanelNos(feedback, [99]).size).toBe(0);
   });
 });

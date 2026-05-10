@@ -3422,7 +3422,7 @@
           "panel_id": "p92",
           "panel_no": 92,
           "reading_order": 1,
-          "shot_type": "wide",
+          "shot_type": "medium",
           "camera": "over_shoulder",
           "bleed": true,
           "silence": false,
@@ -3446,8 +3446,8 @@
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "レンは黒フードの肩越しに下降階段を見下ろし、割れたスマホへ視線を落とす。",
-          "key_visual": "ヒビ入りスマホの公社アプリに「明日 05:40 第三1F北東階段／DPC監査回避」と予定が勝手に刻まれていく。",
+          "action": "レンは北東廊下の非常灯下で止まり、下降階段を見下ろす背に響の声を受ける。",
+          "key_visual": "ヒビ入りスマホの公社アプリFランク表示を握った黒フードの背中が、地下へ落ちる階段口を塞ぐ。",
           "dialogue": [
             {
               "character_id": "char_獅童_響_v1",
@@ -3486,8 +3486,8 @@
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "レンが短く答えた瞬間、無人のDPC監査室で監査ログだけが一斉に跳ね上がる。",
-          "key_visual": "椅子のないDPC監査室のモニター壁に「KIRYU REN CONSENT／ROUTE LOCK／AUDIT HOLD」が赤く連鎖点滅する。",
+          "action": "レンが震えを止めて手すりを握り返すと、無人のDPC監査室で警告灯だけが一斉に跳ねる。",
+          "key_visual": "汗で曇った手すりにレンの指跡が残り、空席だらけのDPC監査室では倒れた監査官用マグの横で異常ログ壁が赤く脈打つ。",
           "dialogue": [
             {
               "character_id": "char_桐生_レン_v1",

@@ -74,6 +74,19 @@ export function aggregateLintFeedbackByScene(
   return out;
 }
 
+export function filterFeedbackByPanelNos(
+  feedback: Map<string, PanelLintFeedback[]>,
+  panelNos: number[]
+): Map<string, PanelLintFeedback[]> {
+  const targets = new Set(panelNos);
+  const out = new Map<string, PanelLintFeedback[]>();
+  for (const [sceneId, panels] of feedback.entries()) {
+    const filtered = panels.filter((panel) => targets.has(panel.panel_no));
+    if (filtered.length > 0) out.set(sceneId, filtered);
+  }
+  return out;
+}
+
 export function compareReports(
   prev: NameLintReport,
   next: NameLintReport
@@ -86,8 +99,12 @@ export function compareReports(
   };
 }
 
-export function selectScenesForReEnrich(feedback: Map<string, PanelLintFeedback[]>): string[] {
-  return Array.from(feedback.entries())
+export function selectScenesForReEnrich(
+  feedback: Map<string, PanelLintFeedback[]>,
+  options: { targetPanelNos?: number[] } = {}
+): string[] {
+  const filtered = options.targetPanelNos ? filterFeedbackByPanelNos(feedback, options.targetPanelNos) : feedback;
+  return Array.from(filtered.entries())
     .filter(([, panels]) => panels.length > 0)
     .map(([sceneId]) => sceneId);
 }
