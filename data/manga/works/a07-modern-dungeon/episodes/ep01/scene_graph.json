@@ -92,7 +92,44 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続"
+      "key_visual_intent": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_白瀬_灯里_v1",
+          "costume_id": "costume_akari_akane_public_broadcast_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "黒のフードジャケット",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "subtle"
+        }
+      ],
+      "world_rules_active": [
+        "適性ランクは法律上、生涯固定として扱われ、鑑定石による再判定は禁止されている。しかし実体は、鑑定石プロトコルが初回接触時に割り振る初期アクセス権であり、大ナビ側の実仕様では書き換え可能である。この差は序盤では矛盾に見せ、中盤で再鑑定例外の不自然さを置き、終盤で『固定だったのは制度運用だけ』と回収する。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_akari_rank_s_choker_v1",
+          "held_by": "char_白瀬_灯里_v1"
+        }
+      ],
+      "theme_subtext": {
+        "theme_id": "ad_hoc_S01",
+        "how_it_surfaces": "青い看板の下、底辺の夜が白く冷える"
+      }
     },
     {
       "scene_id": "S02",
@@ -191,7 +228,44 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "テレビ枠越しの白い灯里と朱の部隊章、手前に小さなレンの黒い背中という光と影の対比"
+      "key_visual_intent": "テレビ枠越しの白い灯里と朱の部隊章、手前に小さなレンの黒い背中という光と影の対比",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_白瀬_灯里_v1",
+          "costume_id": "costume_akari_akane_public_broadcast_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "黒のフードジャケット",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "clear"
+        }
+      ],
+      "world_rules_active": [
+        "適性ランクは法律上、生涯固定として扱われ、鑑定石による再判定は禁止されている。しかし実体は、鑑定石プロトコルが初回接触時に割り振る初期アクセス権であり、大ナビ側の実仕様では書き換え可能である。この差は序盤では矛盾に見せ、中盤で再鑑定例外の不自然さを置き、終盤で『固定だったのは制度運用だけ』と回収する。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_akari_rank_s_choker_v1",
+          "held_by": "char_白瀬_灯里_v1"
+        }
+      ],
+      "theme_subtext": {
+        "theme_id": "ad_hoc_S02",
+        "how_it_surfaces": "白い栄光が黒い背中を遠ざける"
+      }
     },
     {
       "scene_id": "S03",
@@ -286,7 +360,40 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)"
+      "key_visual_intent": "深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "黒のフードジャケット",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "subtle"
+        }
+      ],
+      "world_rules_active": [
+        "適性ランクは法律上、生涯固定として扱われ、鑑定石による再判定は禁止されている。しかし実体は、鑑定石プロトコルが初回接触時に割り振る初期アクセス権であり、大ナビ側の実仕様では書き換え可能である。この差は序盤では矛盾に見せ、中盤で再鑑定例外の不自然さを置き、終盤で『固定だったのは制度運用だけ』と回収する。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_makishima_red_reanalysis_folder_v1",
+          "held_by": "char_槇島_主任_v1"
+        }
+      ],
+      "theme_subtext": {
+        "theme_id": "ad_hoc_S03",
+        "how_it_surfaces": "白い窓口の記憶が夜道の背を押し潰す"
+      }
     },
     {
       "scene_id": "S04",
@@ -367,7 +474,45 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "薄暗い1Kの床に転がる中古バッグと錆びた鉄パイプ、壁の経験値ログ印刷物、公社アプリのFランク表示の冷たい青"
+      "key_visual_intent": "薄暗い1Kの床に転がる中古バッグと錆びた鉄パイプ、壁の経験値ログ印刷物、公社アプリのFランク表示の冷たい青",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "黒のフードジャケット",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "clear"
+        }
+      ],
+      "world_rules_active": [
+        "レベル・スキル・ステータス上昇は、ダンジョン内の加算域で観測された行為にのみ発生する。地上で筋力訓練、学習、模擬戦、投薬、装備試験を行っても、公社アプリの数値は一切伸びない。地上の努力は無意味ではなく、入域後に失敗しにくい身体と判断を作る準備である。読者には、レンが地上で整えた準備を加算域で正しい秒数に乗せた時だけ数値が動く、と見せる。",
+        "適性ランクは法律上、生涯固定として扱われ、鑑定石による再判定は禁止されている。しかし実体は、鑑定石プロトコルが初回接触時に割り振る初期アクセス権であり、大ナビ側の実仕様では書き換え可能である。この差は序盤では矛盾に見せ、中盤で再鑑定例外の不自然さを置き、終盤で『固定だったのは制度運用だけ』と回収する。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_iron_pipe_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": {
+        "theme_id": "ad_hoc_S04",
+        "how_it_surfaces": "青いF表示が貧しさと諦めを冷やす"
+      }
     },
     {
       "scene_id": "S05",
@@ -474,7 +619,36 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "耳元とスマホ縁に走る薄青のナビ光、時計と地図アプリを同時に見るレンの瞳に初めて宿る検証の意志"
+      "key_visual_intent": "耳元とスマホ縁に走る薄青のナビ光、時計と地図アプリを同時に見るレンの瞳に初めて宿る検証の意志",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "黒のフードジャケット",
+          "intensity": "subtle"
+        }
+      ],
+      "world_rules_active": [
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レンが隠す理由を読者が納得できる圧力として描く。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": {
+        "theme_id": "ad_hoc_S05",
+        "how_it_surfaces": "割れた画面の光が諦観に検証の余白を開く"
+      }
     },
     {
       "scene_id": "S06",
@@ -548,7 +722,44 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "薄明の新宿の路地を斜めに駆け抜けるレンの背中と、スマホの時計の残り秒数の合成"
+      "key_visual_intent": "薄明の新宿の路地を斜めに駆け抜けるレンの背中と、スマホの時計の残り秒数の合成",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "黒のフードジャケット",
+          "intensity": "clear"
+        }
+      ],
+      "world_rules_active": [
+        "レベル・スキル・ステータス上昇は、ダンジョン内の加算域で観測された行為にのみ発生する。地上で筋力訓練、学習、模擬戦、投薬、装備試験を行っても、公社アプリの数値は一切伸びない。地上の努力は無意味ではなく、入域後に失敗しにくい身体と判断を作る準備である。読者には、レンが地上で整えた準備を加算域で正しい秒数に乗せた時だけ数値が動く、と見せる。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_dpc_rank_id_f_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": {
+        "theme_id": "ad_hoc_S06",
+        "how_it_surfaces": "割れた秒数が、信じる足を急がせる"
+      }
     },
     {
       "scene_id": "S07",
@@ -642,7 +853,50 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "Fランク列の最後尾と古い認証端末から、湿った地下通路の天井亀裂から差す朝6時14分の光、鉄パイプを構えるレンの半歩へ"
+      "key_visual_intent": "Fランク列の最後尾と古い認証端末から、湿った地下通路の天井亀裂から差す朝6時14分の光、鉄パイプを構えるレンの半歩へ",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "黒のフードジャケット",
+          "intensity": "clear"
+        },
+        {
+          "motif_id": "下降階段とランク階段",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "subtle"
+        }
+      ],
+      "world_rules_active": [
+        "レベル・スキル・ステータス上昇は、ダンジョン内の加算域で観測された行為にのみ発生する。地上で筋力訓練、学習、模擬戦、投薬、装備試験を行っても、公社アプリの数値は一切伸びない。地上の努力は無意味ではなく、入域後に失敗しにくい身体と判断を作る準備である。読者には、レンが地上で整えた準備を加算域で正しい秒数に乗せた時だけ数値が動く、と見せる。",
+        "適性ランクは法律上、生涯固定として扱われ、鑑定石による再判定は禁止されている。しかし実体は、鑑定石プロトコルが初回接触時に割り振る初期アクセス権であり、大ナビ側の実仕様では書き換え可能である。この差は序盤では矛盾に見せ、中盤で再鑑定例外の不自然さを置き、終盤で『固定だったのは制度運用だけ』と回収する。",
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レンが隠す理由を読者が納得できる圧力として描く。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_iron_pipe_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_dpc_rank_id_f_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": {
+        "theme_id": "ad_hoc_S07",
+        "how_it_surfaces": "Fの薄札を握り、朝の裂光へ半歩立つ"
+      }
     },
     {
       "scene_id": "S08",
@@ -747,7 +1001,41 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "通路奥の影が三つに割れる湧きの瞬間、壁反射と水跳ねを使う鉄パイプの三連撃と、頭部撃破の鋭い線"
+      "key_visual_intent": "通路奥の影が三つに割れる湧きの瞬間、壁反射と水跳ねを使う鉄パイプの三連撃と、頭部撃破の鋭い線",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "黒のフードジャケット",
+          "intensity": "clear"
+        },
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "subtle"
+        }
+      ],
+      "world_rules_active": [
+        "レベル・スキル・ステータス上昇は、ダンジョン内の加算域で観測された行為にのみ発生する。地上で筋力訓練、学習、模擬戦、投薬、装備試験を行っても、公社アプリの数値は一切伸びない。地上の努力は無意味ではなく、入域後に失敗しにくい身体と判断を作る準備である。読者には、レンが地上で整えた準備を加算域で正しい秒数に乗せた時だけ数値が動く、と見せる。",
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レンが隠す理由を読者が納得できる圧力として描く。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_iron_pipe_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": {
+        "theme_id": "ad_hoc_S08",
+        "how_it_surfaces": "信じた座標へ踏み込み、凡手が結果を刻む"
+      }
     },
     {
       "scene_id": "S09",
@@ -841,7 +1129,41 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "倒れた三体のシルエットを背景に、公社アプリの加算ログ大ゴマと、画面の青光に染まるレンの震える手の二段構え"
+      "key_visual_intent": "倒れた三体のシルエットを背景に、公社アプリの加算ログ大ゴマと、画面の青光に染まるレンの震える手の二段構え",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "黒のフードジャケット",
+          "intensity": "clear"
+        }
+      ],
+      "world_rules_active": [
+        "レベル・スキル・ステータス上昇は、ダンジョン内の加算域で観測された行為にのみ発生する。地上で筋力訓練、学習、模擬戦、投薬、装備試験を行っても、公社アプリの数値は一切伸びない。地上の努力は無意味ではなく、入域後に失敗しにくい身体と判断を作る準備である。読者には、レンが地上で整えた準備を加算域で正しい秒数に乗せた時だけ数値が動く、と見せる。",
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レンが隠す理由を読者が納得できる圧力として描く。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": {
+        "theme_id": "ad_hoc_S09",
+        "how_it_surfaces": "割れた画面の数字が震える歓喜を縛る"
+      }
     },
     {
       "scene_id": "S10",
@@ -945,7 +1267,45 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "下降階段を見下ろす黒フードのレンの背中と、無人のDPC監査室で異常ログだけが点滅するモニター壁の対比 (ep02 冒頭への接続)"
+      "key_visual_intent": "下降階段を見下ろす黒フードのレンの背中と、無人のDPC監査室で異常ログだけが点滅するモニター壁の対比 (ep02 冒頭への接続)",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "黒のフードジャケット",
+          "intensity": "clear"
+        },
+        {
+          "motif_id": "下降階段とランク階段",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "subtle"
+        }
+      ],
+      "world_rules_active": [
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レンが隠す理由を読者が納得できる圧力として描く。",
+        "適性ランクは法律上、生涯固定として扱われ、鑑定石による再判定は禁止されている。しかし実体は、鑑定石プロトコルが初回接触時に割り振る初期アクセス権であり、大ナビ側の実仕様では書き換え可能である。この差は序盤では矛盾に見せ、中盤で再鑑定例外の不自然さを置き、終盤で『固定だったのは制度運用だけ』と回収する。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": {
+        "theme_id": "ad_hoc_S10",
+        "how_it_surfaces": "底辺の背中が次の階段を選ぶ"
+      }
     }
   ],
   "pull_link": {

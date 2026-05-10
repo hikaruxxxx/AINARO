@@ -45,13 +45,22 @@ const MAX_PROMPT_CHARS = 8000;
 type BibleTier = "deep" | "medium" | "minimal";
 type PromptScene = Pick<
   Scene,
-  "beat_type" | "location_id" | "mode" | "key_visual_intent" | "time_axis" | "cast"
+  | "beat_type"
+  | "location_id"
+  | "mode"
+  | "key_visual_intent"
+  | "time_axis"
+  | "cast"
+  | "wardrobe_state"
+  | "world_rules_active"
+  | "props_in_play"
 > & {
   visual_motif_anchors?: Array<{
     motif_id?: string;
     motif_name?: string;
     intensity?: number;
   }>;
+  theme_subtext?: Scene["theme_subtext"] | string;
 };
 
 type ComposeArgs = {
@@ -266,6 +275,76 @@ function worldRuleBlock(
   return [
     "WORLD CONSTRAINTS:",
     summary,
+  ].join("\n");
+}
+
+function wardrobeStateBlock(
+  scene: PromptScene | undefined,
+  bible: BibleSnapshotV2,
+  panel: PanelV2,
+  tier: BibleTier = "minimal",
+): string | null {
+  if (!scene?.wardrobe_state || scene.wardrobe_state.length === 0) return null;
+  const panelCharIds = new Set(panel.entities.characters.map((c) => c.character_id));
+  const maxEntries = tier === "minimal" ? 3 : tier === "medium" ? 5 : scene.wardrobe_state.length;
+  const entries = scene.wardrobe_state
+    .filter((ws) => panelCharIds.has(ws.character_id))
+    .slice(0, maxEntries)
+    .map((ws) => {
+      const costume = bible.costumes.find((c) => c.id === ws.costume_id);
+      const charName = bible.characters.find((c) => c.id === ws.character_id)?.name ?? ws.character_id;
+      const outfit = costume?.spec
+        ? [costume.spec.outerwear, costume.spec.top].filter(Boolean).join(" ")
+        : ws.costume_id;
+      return `- ${charName} (${ws.character_id}): ${firstChars(outfit || ws.costume_id, 90)}`;
+    });
+  if (entries.length === 0) return null;
+  return ["SCENE WARDROBE STATE (must match):", ...entries].join("\n");
+}
+
+function activeWorldRulesBlock(
+  scene: PromptScene | undefined,
+  tier: BibleTier = "minimal",
+): string | null {
+  if (!scene?.world_rules_active || scene.world_rules_active.length === 0) return null;
+  const limit = tier === "minimal" ? 2 : tier === "medium" ? 3 : 4;
+  const rules = scene.world_rules_active.slice(0, limit).map((rule) => firstChars(rule, 140));
+  return [
+    "ACTIVE WORLD RULES IN THIS SCENE (must respect; do not contradict):",
+    ...rules.map((r) => `- ${r}`),
+  ].join("\n");
+}
+
+function propsInPlayBlock(
+  scene: PromptScene | undefined,
+  bible: BibleSnapshotV2,
+  panel: PanelV2,
+): string | null {
+  if (!scene?.props_in_play || scene.props_in_play.length === 0) return null;
+  const panelCharIds = new Set(panel.entities.characters.map((c) => c.character_id));
+  const entries = scene.props_in_play.slice(0, 4).map((p) => {
+    const prop = bible.props.find((bp) => bp.id === p.prop_id);
+    const propName = prop?.name ?? p.prop_id;
+    const propDesc = prop?.spec.visual_description
+      ? firstChars(prop.spec.visual_description, 80)
+      : "";
+    const heldByName = p.held_by && panelCharIds.has(p.held_by)
+      ? bible.characters.find((c) => c.id === p.held_by)?.name ?? p.held_by
+      : null;
+    const holderText = heldByName ? ` (held by ${heldByName})` : "";
+    return `- ${propName}${holderText}${propDesc ? `: ${propDesc}` : ""}`;
+  });
+  return ["PROPS IN PLAY (include if visually relevant):", ...entries].join("\n");
+}
+
+function themeSubtextBlock(scene: PromptScene | undefined): string | null {
+  if (!scene?.theme_subtext) return null;
+  const ts = scene.theme_subtext;
+  const text = typeof ts === "string" ? ts : ts.how_it_surfaces;
+  if (!text || !text.trim()) return null;
+  return [
+    "SCENE EMOTIONAL THEME (subtext, render to convey this mood):",
+    `- ${firstChars(text, 160)}`,
   ].join("\n");
 }
 
@@ -728,6 +807,14 @@ function composePanelPromptCore(args: ComposeArgs): ComposeResult {
     "",
     motifBlock(args.scene, args.bible, bibleTier, { panel_no: p.panel_no }),
     "",
+    wardrobeStateBlock(args.scene, args.bible, p, bibleTier),
+    "",
+    activeWorldRulesBlock(args.scene, bibleTier),
+    "",
+    propsInPlayBlock(args.scene, args.bible, p),
+    "",
+    themeSubtextBlock(args.scene),
+    "",
     `Action: ${p.action}`,
     `Visual focus: ${p.key_visual}`,
     "",
@@ -830,6 +917,7 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     if (bgLine) lines.push(`  ${bgLine}`);
     return lines.join("\n");
   }).join("\n\n");
+  const representativePanel = page.panels[0];
 
   const sections = [
     `B6 portrait Japanese light novel comicalization PAGE (${args.pageDimensions.width}x${args.pageDimensions.height} px), single page in BLACK AND WHITE only with screentone and hatching. Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (expressive character-driven art, large emotive eyes, light novel cover lineage), NOT seinen-realism.`,
@@ -848,6 +936,14 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     bibleContextBlocks,
     "",
     worldRuleBlock(args.scene, args.bible, bibleTier),
+    "",
+    representativePanel ? wardrobeStateBlock(args.scene, args.bible, representativePanel, bibleTier) : null,
+    "",
+    activeWorldRulesBlock(args.scene, bibleTier),
+    "",
+    representativePanel ? propsInPlayBlock(args.scene, args.bible, representativePanel) : null,
+    "",
+    themeSubtextBlock(args.scene),
     "",
     panelLines,
     "",

@@ -132,9 +132,18 @@ const packet: ResolvedRefPacket = {
 
 type PromptSceneForTest = Pick<
   Scene,
-  "beat_type" | "location_id" | "mode" | "key_visual_intent" | "time_axis" | "cast"
+  | "beat_type"
+  | "location_id"
+  | "mode"
+  | "key_visual_intent"
+  | "time_axis"
+  | "cast"
+  | "wardrobe_state"
+  | "world_rules_active"
+  | "props_in_play"
 > & {
   visual_motif_anchors?: Array<{ motif_name?: string; intensity?: number }>;
+  theme_subtext?: Scene["theme_subtext"] | string;
 };
 
 function brokerBible(): BibleSnapshotV2 {
@@ -223,6 +232,16 @@ function brokerBible(): BibleSnapshotV2 {
       },
     },
   ] as unknown as BibleSnapshotV2["costumes"];
+  b.props = [
+    {
+      id: "prop_cracked_phone",
+      name: "cracked phone",
+      spec: {
+        visual_description: "A smartphone with a spiderweb crack over the front camera and a dead notification icon.",
+      },
+      continuity_anchors: ["spiderweb crack", "dead notification icon"],
+    },
+  ] as unknown as BibleSnapshotV2["props"];
   b.visual_motifs = [
     {
       name: "motif_exit_sign",
@@ -290,6 +309,10 @@ function brokerScene(): PromptSceneForTest {
     },
     cast: [{ character_id: "char_ren", presence: "in_person" }],
     visual_motif_anchors: [{ motif_name: "motif_exit_sign", intensity: 1 }],
+    wardrobe_state: [{ character_id: "char_ren", costume_id: "costume_ren_ep5" }],
+    world_rules_active: ["Only information visible in the panel can become a valid ability display."],
+    props_in_play: [{ prop_id: "prop_cracked_phone", held_by: "char_ren" }],
+    theme_subtext: { theme_id: "theme_false_safety", how_it_surfaces: "The exit feels like rescue and bait at the same time." },
   };
 }
 
@@ -509,6 +532,43 @@ describe("prompt-composer-v2 Phase 2-2 bible broker composition", () => {
 
     expect(composed.prompt).toContain("WORLD CONSTRAINTS:");
     expect(composed.prompt).toContain("loc_dungeonでは壁面の古い案内板");
+  });
+
+  it("adds D-axis scene context blocks to panel prompts", () => {
+    const composed = composePanelPrompt({
+      panel: panel("画面を見ろ。"),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 600, height: 400 },
+      scene: brokerScene(),
+      episodeNo: 5,
+    });
+
+    expect(composed.prompt).toContain("SCENE WARDROBE STATE (must match):");
+    expect(composed.prompt).toContain("桐生 レン (char_ren): torn black rain jacket gray thermal shirt");
+    expect(composed.prompt).toContain("ACTIVE WORLD RULES IN THIS SCENE");
+    expect(composed.prompt).toContain("Only information visible in the panel");
+    expect(composed.prompt).toContain("PROPS IN PLAY (include if visually relevant):");
+    expect(composed.prompt).toContain("cracked phone (held by 桐生 レン)");
+    expect(composed.prompt).toContain("SCENE EMOTIONAL THEME");
+    expect(composed.prompt).toContain("rescue and bait");
+  });
+
+  it("adds D-axis scene context blocks to page prompts", () => {
+    const composed = composePagePrompt({
+      page: page(2),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+    });
+
+    expect(composed.prompt).toContain("SCENE WARDROBE STATE (must match):");
+    expect(composed.prompt).toContain("ACTIVE WORLD RULES IN THIS SCENE");
+    expect(composed.prompt).toContain("PROPS IN PLAY (include if visually relevant):");
+    expect(composed.prompt).toContain("SCENE EMOTIONAL THEME");
+    expect(composed.prompt.length).toBeLessThanOrEqual(8000);
   });
 
   it("composePagePrompt defaults to minimal tier and stays within the prompt threshold for deep bible input", () => {

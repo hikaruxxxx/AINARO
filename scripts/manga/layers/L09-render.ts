@@ -17,6 +17,7 @@ import {
   bibleSnapshotPath,
   storyboardPath,
   pagePlanPath,
+  sceneGraphPath,
   resolvedRefsPath,
   rendersDir,
   nameApprovalPath,
@@ -48,6 +49,8 @@ import type {
   PagePlanV2,
   ResolvedRefs,
 } from "../../../src/lib/manga/schemas-v2";
+import type { SceneGraphV1, Scene } from "../../../src/lib/manga/scene-graph/schema";
+import { isSceneGraphV1 } from "../../../src/lib/manga/scene-graph/schema";
 import type { NameApproval } from "../../../src/lib/manga/name-preview/types";
 import { appendRenderManifest, readJsonl } from "../../../src/lib/manga/revision-ui/manifest";
 import type { RevisionEntry } from "../../../src/lib/manga/revision-ui/types";
@@ -223,6 +226,21 @@ async function main() {
   const compliance = { blocklist: complianceBlocklist, fp: complianceFp };
   const pagePlan = JSON.parse(await fs.readFile(pagePlanPath(args.slug, args.episode), "utf-8")) as PagePlanV2;
   const resolved = JSON.parse(await fs.readFile(resolvedRefsPath(args.slug, args.episode), "utf-8")) as ResolvedRefs;
+  let sceneByPage = new Map<number, Scene>();
+  try {
+    const sgRaw = JSON.parse(await fs.readFile(sceneGraphPath(args.slug, args.episode), "utf-8")) as unknown;
+    if (isSceneGraphV1(sgRaw)) {
+      const sceneGraph: SceneGraphV1 = sgRaw;
+      for (const scene of sceneGraph.scenes) {
+        for (let p = scene.page_range.start; p <= scene.page_range.end; p++) {
+          if (!sceneByPage.has(p)) sceneByPage.set(p, scene);
+        }
+      }
+      console.log(`[L09] scene_graph loaded: ${sceneGraph.scenes.length} scenes`);
+    }
+  } catch {
+    console.warn(`[L09] scene_graph not found, prompts will lack D-axis context`);
+  }
 
   await fs.mkdir(rendersDir(args.slug, args.episode), { recursive: true });
   if (args.autoVersion) {
@@ -300,6 +318,7 @@ async function main() {
         pageBackgroundTreatments: pageBgMap.size > 0 ? pageBgMap : undefined,
         pagePlanPage: page,
         compliance,
+        scene: sceneByPage.get(page.page_no),
       });
       // 最終 prompt に対する compliance gate (実在企業名/商標が prompt に残っていたら fatal stop)
       const promptCompliance = validatePromptAgainstCompliance(prompt, complianceBlocklist, complianceFp, { treatAsFatal: true });
@@ -392,6 +411,7 @@ async function main() {
           userInstructions,
           backgroundTreatment: pp.background_treatment,
           compliance,
+          scene: sceneByPage.get(page.page_no),
         });
         // 最終 prompt の compliance gate
         const panelPromptCompliance = validatePromptAgainstCompliance(prompt, complianceBlocklist, complianceFp, { treatAsFatal: true });
