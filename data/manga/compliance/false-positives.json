@@ -53,6 +53,24 @@
       "reason": "アマゾン川/アマゾン熱帯雨林等の地理的呼称としての使用は OK。Amazon 社の文脈では NG",
       "context_check_required": true,
       "added_at": "2026-05-10"
+    },
+    {
+      "term": "ライン",
+      "reason": "「線」「直線」「白いライン」等の一般語としての使用は OK。LINE 社/LINE アプリの文脈では NG",
+      "context_check_required": true,
+      "added_at": "2026-05-10"
+    },
+    {
+      "term": "LINE",
+      "reason": "「ライン」表記の英字版。SNS アプリ LINE の文脈以外 (ファッションのライン、戦線、台詞 line 等) は OK",
+      "context_check_required": true,
+      "added_at": "2026-05-10"
+    },
+    {
+      "term": "ファンタ",
+      "reason": "「ファンタジー」「ファンタジック」等の一般語の一部。飲料 Fanta の文脈 (オレンジ/グレープ/瓶/缶/炭酸 等) のみ NG",
+      "context_check_required": true,
+      "added_at": "2026-05-10"
     }
   ]
 }

@@ -562,6 +562,10 @@ export function applyCostumePatch(bible: BibleSnapshotV2, patch: CostumeDeepPatc
 }
 
 export function applyRelationPatch(bible: BibleSnapshotV2, patch: RelationDeepPatch): BibleSnapshotV2 {
+  if (!patch.relation || !patch.relation.a_id || !patch.relation.b_id) {
+    console.warn(`[applyRelationPatch] skip: patch.relation invalid (${JSON.stringify(patch.relation)})`);
+    return bible;
+  }
   const out = cloneBible(bible);
   out.relations = out.relations.map((relation) =>
     relation.from_character_id === patch.relation.a_id && relation.to_character_id === patch.relation.b_id

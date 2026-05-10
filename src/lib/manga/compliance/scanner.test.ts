@@ -104,16 +104,23 @@ describe("manga compliance scanner", () => {
     expect(findings.some((finding) => finding.matched_term === "Apple")).toBe(true);
   });
 
-  it("detects LINE directly", async () => {
+  it("detects LINE in commercial app context", async () => {
+    // Phase 1-2 後、bible 本文中の「白いライン」「直線ライン」等の一般語を skip するため
+    // false-positives.json で context_check_required=true にした。
+    // 商業文脈語 (アプリ/会社/サービス等) があるときだけ fatal として検出する。
     const { blocklist, fp } = await dictionaries();
-    const findings = scanText("LINE で連絡が来た", blocklist, fp);
+    const findings = scanText("LINE アプリで連絡が来た", blocklist, fp);
 
-    expect(findings).toHaveLength(1);
-    expect(findings[0]).toMatchObject({
-      severity: "fatal",
-      category: "trademarks.tech_services",
-      matched_term: "LINE",
-    });
+    expect(findings.some((f) => f.matched_term === "LINE")).toBe(true);
+  });
+
+  it("skips ライン as general term (no commercial context)", async () => {
+    // 「白いラインが引かれ」のような一般語としての「ライン」は LINE アプリではない
+    const { blocklist, fp } = await dictionaries();
+    const findings = scanText("白いラインが床に引かれていた", blocklist, fp);
+
+    // ライン / LINE 系の一致が含まれていないこと
+    expect(findings.some((f) => f.matched_term === "LINE" || f.matched_term === "ライン")).toBe(false);
   });
 
   it("skips 新幹線 from false-positive context excludes", async () => {
