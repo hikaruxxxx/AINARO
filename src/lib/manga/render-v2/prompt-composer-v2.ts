@@ -20,6 +20,14 @@ import type {
   BibleSnapshotV2,
 } from "../schemas-v2";
 import {
+  activeCostumeFor,
+  sceneOverrideTextFor,
+  summarizeCharacterForEpisode,
+  summarizeLocationForScene,
+  summarizeMotifForPanel,
+  summarizeWorldRulesForScene,
+} from "../bible/broker";
+import {
   scanPrompt,
   scanText,
 } from "../compliance/scanner";
@@ -28,9 +36,23 @@ import type {
   ComplianceFinding,
   FalsePositives,
 } from "../compliance/types";
+import type { Scene } from "../scene-graph/schema";
 
 const PAGE_W = 1748;
 const PAGE_H = 2480;
+const MAX_PROMPT_CHARS = 8000;
+
+type BibleTier = "deep" | "medium" | "minimal";
+type PromptScene = Pick<
+  Scene,
+  "beat_type" | "location_id" | "mode" | "key_visual_intent" | "time_axis" | "cast"
+> & {
+  visual_motif_anchors?: Array<{
+    motif_id?: string;
+    motif_name?: string;
+    intensity?: number;
+  }>;
+};
 
 type ComposeArgs = {
   panel?: PanelV2;            // panel スコープ
@@ -55,6 +77,12 @@ type ComposeArgs = {
   pagePlanPage?: PagePlanPage;
   /** Phase 0-5: panel text compliance hard fail を有効にする場合のみ渡す */
   compliance?: { blocklist: Blocklist; fp: FalsePositives };
+  /** bible broker 用。未指定時は episode 1 として圧縮要約を作る */
+  episodeNo?: number;
+  /** scene graph 由来の文脈。panel スコープでは undefined OK */
+  scene?: PromptScene;
+  /** bible broker summary tier。未指定時は medium */
+  bibleTier?: BibleTier;
 };
 
 /**
@@ -121,30 +149,100 @@ function userInstructionsBlock(s: string | undefined): string | null {
   ].join("\n");
 }
 
-function characterRefDescription(panel: PanelV2, bible: BibleSnapshotV2): string {
+function characterRefDescription(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+  args: { episodeNo: number; tier?: BibleTier },
+): string {
+  const blocks: string[] = [];
+  for (const ch of panel.entities.characters) {
+    const summary = summarizeCharacterForEpisode(
+      bible,
+      args.episodeNo,
+      ch.character_id,
+      { tier: args.tier ?? "medium" },
+    );
+    blocks.push(`- ${summary} (role=${ch.role}, on_screen_via=${ch.on_screen_via}, expression=${ch.expression})`);
+  }
+  return blocks.join("\n");
+}
+
+function locationSceneForPanel(panel: PanelV2, scene?: PromptScene): Pick<Scene, "location_id" | "mode" | "beat_type"> {
+  return {
+    location_id: scene?.location_id ?? panel.entities.location_id,
+    mode: scene?.mode ?? "dialogue",
+    beat_type: scene?.beat_type ?? "setup",
+  };
+}
+
+function locationDescription(panel: PanelV2, bible: BibleSnapshotV2, scene?: PromptScene): string {
+  return summarizeLocationForScene(bible, locationSceneForPanel(panel, scene));
+}
+
+function styleOverrideBlock(scene: Pick<Scene, "mode" | "beat_type"> | undefined, bible: BibleSnapshotV2): string {
+  const blocks = [bible.style_directives.global];
+  if (scene) {
+    const override = sceneOverrideTextFor(bible, scene);
+    if (override) blocks.push(override);
+  }
+  return blocks.filter((block) => block.trim().length > 0).join("\n");
+}
+
+function motifBlock(
+  scene: Pick<Scene, "beat_type" | "location_id" | "mode" | "key_visual_intent"> & {
+    visual_motif_anchors?: PromptScene["visual_motif_anchors"];
+  } | undefined,
+  bible: BibleSnapshotV2,
+  panel: { panel_no: number },
+): string | null {
+  if (!scene) return null;
+  const summary = summarizeMotifForPanel(bible, panel, scene);
+  if (!summary) return null;
+  return [
+    "RECURRING VISUAL MOTIFS (must include):",
+    summary,
+  ].join("\n");
+}
+
+function costumeBlock(
+  panel: PanelV2,
+  episodeNo: number,
+  bible: BibleSnapshotV2,
+): string | null {
   const lines: string[] = [];
   for (const ch of panel.entities.characters) {
-    const c = bible.characters.find((x) => x.id === ch.character_id);
-    if (!c) continue;
-    const spec = c.spec ?? {};
-    lines.push(
-      `- ${c.name} (${ch.role}, ${ch.on_screen_via}): expression=${ch.expression}, ${spec.hair?.color ?? ""} ${spec.hair?.style ?? ""} hair, ${spec.eyes?.color ?? ""} ${spec.eyes?.shape ?? ""} eyes, wearing ${spec.outfit_default?.outerwear ?? "default outfit"}`
+    const active = activeCostumeFor(bible, episodeNo, ch.character_id);
+    if (active.source === "costume" && active.spec) {
+      const outfit = [active.spec.outerwear, active.spec.top].filter(Boolean).join(" ");
+      lines.push(`- ${ch.character_id} wears ${outfit} (state: ${active.spec.state_description ?? ""})`);
+    }
+  }
+  if (lines.length === 0) return null;
+  return [
+    "ACTIVE COSTUMES (override outfit_default):",
+    ...lines,
+  ].join("\n");
+}
+
+function worldRuleBlock(
+  scene: Pick<Scene, "location_id" | "beat_type" | "mode" | "time_axis"> | undefined,
+  bible: BibleSnapshotV2,
+): string | null {
+  if (!scene) return null;
+  const summary = summarizeWorldRulesForScene(bible, scene);
+  if (!summary) return null;
+  return [
+    "WORLD CONSTRAINTS:",
+    summary,
+  ].join("\n");
+}
+
+function warnIfPromptTooLarge(prompt: string): void {
+  if (prompt.length > MAX_PROMPT_CHARS) {
+    console.warn(
+      `[prompt-composer-v2] prompt size ${prompt.length} exceeds threshold ${MAX_PROMPT_CHARS}. Consider tier="minimal".`,
     );
   }
-  return lines.join("\n");
-}
-
-function locationDescription(panel: PanelV2, bible: BibleSnapshotV2): string {
-  const l = bible.locations.find((x) => x.id === panel.entities.location_id);
-  if (!l) return "";
-  return `Location: ${l.name}. ${l.spec.atmosphere ?? ""} Lighting: ${l.spec.lighting_default ?? ""}`;
-}
-
-function styleHeader(bible: BibleSnapshotV2): string {
-  return [
-    bible.style_directives.global,
-    `Scene tone overrides available: ${Object.keys(bible.style_directives.scene_overrides).join(", ")}.`,
-  ].join("\n");
 }
 
 function mangaTechniqueMandatoryBlock(): string {
@@ -506,6 +604,8 @@ function inPanelTextBlock(
 export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImagePaths: string[] } {
   if (!args.panel) throw new Error("composePanelPrompt requires panel");
   const p = args.panel;
+  const episodeNo = args.episodeNo ?? 1;
+  const bibleTier = args.bibleTier ?? "medium";
   const screentoneTag = p.screentone_intensity ? `, screentone=${p.screentone_intensity}` : "";
   const inlineLabels = args.packet.refs
     .map((r, i) => `<ref#${i + 1}> (${r.role}${r.target_entity_id ? ` for ${r.target_entity_id}` : ""}, weight ${r.weight.toFixed(2)})`)
@@ -515,7 +615,7 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     `B6 portrait Japanese light novel comicalization PANEL (${args.pageDimensions.width}x${args.pageDimensions.height} px), single panel in BLACK AND WHITE only with screentone and hatching. Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (expressive character-driven art, large emotive eyes, light novel cover lineage), NOT seinen-realism.`,
     "",
     "ART STYLE:",
-    styleHeader(args.bible),
+    styleOverrideBlock(args.scene, args.bible),
     "",
     "REFERENCE IMAGES (passed via image_inputs in this order):",
     inlineLabels,
@@ -523,9 +623,15 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     `SHOT: ${p.shot_type} / camera=${p.camera}${p.bleed ? " / BLEED edges" : ""}${p.silence ? " / SILENT atmospheric" : ""}, importance=${p.importance}/5${screentoneTag}`,
     "",
     "CHARACTERS IN PANEL:",
-    characterRefDescription(p, args.bible),
+    characterRefDescription(p, args.bible, { episodeNo, tier: bibleTier }),
     "",
-    locationDescription(p, args.bible),
+    locationDescription(p, args.bible, args.scene),
+    "",
+    costumeBlock(p, episodeNo, args.bible),
+    "",
+    worldRuleBlock(args.scene, args.bible),
+    "",
+    motifBlock(args.scene, args.bible, { panel_no: p.panel_no }),
     "",
     `Action: ${p.action}`,
     `Visual focus: ${p.key_visual}`,
@@ -540,9 +646,11 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     mangaTechniqueMandatoryBlock(),
     negativesBlock(),
   ];
+  const prompt = sections.filter(Boolean).join("\n");
+  warnIfPromptTooLarge(prompt);
 
   return {
-    prompt: sections.filter(Boolean).join("\n"),
+    prompt,
     refImagePaths: args.packet.refs.map((r) => r.path),
   };
 }
@@ -550,6 +658,8 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
 export function composePagePrompt(args: ComposeArgs): { prompt: string; refImagePaths: string[] } {
   if (!args.page) throw new Error("composePagePrompt requires page");
   const page = args.page;
+  const episodeNo = args.episodeNo ?? 1;
+  const bibleTier = args.bibleTier ?? "medium";
   const geometryBlock: string | null = args.pagePlanPage
     ? buildLayoutGeometryBlock(
       args.pagePlanPage,
@@ -561,6 +671,17 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     .join("\n");
 
   const charName = (id: string) => args.bible!.characters.find((c) => c.id === id)?.name ?? id;
+  const bibleContextBlocks = page.panels.map((p) => {
+    const blocks = [
+      `PANEL #${p.panel_no} BIBLE CONTEXT:`,
+      "Characters:",
+      characterRefDescription(p, args.bible, { episodeNo, tier: bibleTier }),
+      locationDescription(p, args.bible, args.scene),
+      costumeBlock(p, episodeNo, args.bible),
+      motifBlock(args.scene, args.bible, { panel_no: p.panel_no }),
+    ];
+    return blocks.filter(Boolean).join("\n");
+  }).join("\n\n");
   const panelLines = page.panels.map((p) => {
     const screentoneTag = p.screentone_intensity ? `, screentone=${p.screentone_intensity}` : "";
     const cs = p.entities.characters.map((c) => {
@@ -604,7 +725,7 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     `B6 portrait Japanese light novel comicalization PAGE (${args.pageDimensions.width}x${args.pageDimensions.height} px), single page in BLACK AND WHITE only with screentone and hatching. Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (expressive character-driven art, large emotive eyes, light novel cover lineage), NOT seinen-realism.`,
     "",
     "ART STYLE:",
-    styleHeader(args.bible),
+    styleOverrideBlock(args.scene, args.bible),
     "",
     "REFERENCE IMAGES (passed via image_inputs in this order):",
     inlineLabels,
@@ -612,6 +733,11 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     `PAGE LAYOUT: ${page.panels.length} panels, RTL reading order, page_role=${page.page_role}.`,
     "",
     geometryBlock,
+    "",
+    "BIBLE CONTEXT SUMMARIES:",
+    bibleContextBlocks,
+    "",
+    worldRuleBlock(args.scene, args.bible),
     "",
     panelLines,
     "",
@@ -621,9 +747,11 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
     mangaTechniqueMandatoryBlock(),
     negativesBlock(),
   ];
+  const prompt = sections.filter(Boolean).join("\n");
+  warnIfPromptTooLarge(prompt);
 
   return {
-    prompt: sections.filter(Boolean).join("\n"),
+    prompt,
     refImagePaths: args.packet.refs.map((r) => r.path),
   };
 }
