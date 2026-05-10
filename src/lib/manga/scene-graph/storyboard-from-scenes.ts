@@ -415,9 +415,41 @@ export type EnrichedPanelDetail = {
   key_visual?: string;
   shot_type?: ShotType;
   camera?: CameraType;
-  dialogue?: Array<{ character_id: string; text: string }>;
-  monologue?: Array<{ character_id: string; text: string }>;
+  dialogue?: unknown;
+  monologue?: unknown;
 };
+
+type DialogueLikeLine = { character_id: string; text: string };
+
+function normalizeDialogueLike(items: unknown): DialogueLikeLine[] {
+  if (!Array.isArray(items)) return [];
+  const out: DialogueLikeLine[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    const characterId = typeof o.character_id === "string" ? o.character_id : null;
+    if (!characterId) continue;
+
+    if (typeof o.text === "string") {
+      out.push({ character_id: characterId, text: o.text });
+      continue;
+    }
+
+    for (const key of ["key_lines", "lines", "dialogue", "monologue"]) {
+      const values = o[key];
+      if (!Array.isArray(values)) continue;
+      for (const value of values) {
+        if (typeof value === "string") {
+          out.push({ character_id: characterId, text: value });
+        } else if (value && typeof value === "object") {
+          const nested = value as Record<string, unknown>;
+          if (typeof nested.text === "string") out.push({ character_id: characterId, text: nested.text });
+        }
+      }
+    }
+  }
+  return out;
+}
 
 /**
  * B5-5a で生成された storyboard の placeholder panel を Codex CLI 経由で本番文に書き換える。
@@ -498,8 +530,8 @@ export async function enrichStoryboardWithLLM(
           key_visual: e.key_visual ?? panel.key_visual,
           shot_type: e.shot_type ?? panel.shot_type,
           camera: e.camera ?? panel.camera,
-          dialogue: e.dialogue ?? panel.dialogue,
-          monologue: e.monologue ?? panel.monologue,
+          dialogue: e.dialogue !== undefined ? normalizeDialogueLike(e.dialogue) : panel.dialogue,
+          monologue: e.monologue !== undefined ? normalizeDialogueLike(e.monologue) : panel.monologue,
         };
       }),
     })),
@@ -513,6 +545,8 @@ export async function enrichStoryboardWithLLM(
  */
 export function buildPanelDetailPrompt(scene: Scene, panelCount: number, generationProfileDirective?: string): string {
   const startNo = scene.panel_range.start_panel_no;
+  const pageCount = Math.max(1, scene.page_range.end - scene.page_range.start + 1);
+  const panelsPerPageHint = Math.max(1, Math.ceil(panelCount / pageCount));
   const lines: string[] = [];
   lines.push(`あなたは AINARO 漫画 v2 の panel 詳細化エージェントです。`);
   lines.push(
@@ -528,6 +562,11 @@ export function buildPanelDetailPrompt(scene: Scene, panelCount: number, generat
     `- protagonist: belief="${scene.protagonist_arc_state.belief}" / goal="${scene.protagonist_arc_state.goal}" / emotion=${scene.protagonist_arc_state.emotion}`
   );
   lines.push(`- panel_range: panel#${startNo}-${scene.panel_range.end_panel_no} (${panelCount} panels)`);
+  lines.push(`- page_range: p${scene.page_range.start}-p${scene.page_range.end} (${pageCount} pages, 約 ${panelsPerPageHint} panels/page)`);
+  lines.push(`- protagonist_delta_from_prev: ${scene.protagonist_arc_state.delta_from_prev}`);
+  if (scene.turn_anchor.at_panel_no !== null) {
+    lines.push(`- turn_anchor: panel#${scene.turn_anchor.at_panel_no} (${scene.turn_anchor.type})`);
+  }
   lines.push("");
   lines.push(`## cast (panel.entities.characters と一致)`);
   for (const c of scene.cast) {
@@ -548,9 +587,31 @@ export function buildPanelDetailPrompt(scene: Scene, panelCount: number, generat
   lines.push(`4. shot_type は close_up / medium / wide / establishing から選択。`);
   lines.push(`5. camera は eye_level / low_angle / high_angle / over_shoulder / birds_eye から選択。`);
   lines.push(`6. dialogue / monologue の character_id は cast 内のもの限定。key_lines を panel に分配し、新規台詞を増やさない。`);
+  lines.push(`   dialogue / monologue の出力形式は必ず { "character_id": "...", "text": "..." }。text は単一 string、配列ではない。key_lines 配列を直接埋めるのは禁止。`);
+  lines.push(`   複数台詞があれば配列の別要素に分ける: [{ "character_id": "X", "text": "..." }, { "character_id": "X", "text": "..." }]`);
+  lines.push(`   NG: { "character_id": "X", "key_lines": ["..."] }`);
+  lines.push(`   OK: { "character_id": "X", "text": "..." }`);
   lines.push(`7. scene_exclusive uniqueness の text は他 scene で使われていないため、この scene 内 panel でのみ書ける。`);
+  lines.push(`8. importance / hero panel: 内部設計として panel ごとに importance 1-5 を割り振る。各 page 推定範囲ごとに最低 1 panel は importance >= 4 相当の hero panel にし、action/key_visual の密度と見せ場で明確に表現する。全部 3 のようなフラット配置は禁止。`);
+  lines.push(`9. shot_type 多様性: 同 page 内で 2 種類以上の shot_type を使う。close_up / medium / wide / establishing を scene の意図に合わせて混ぜる。close_up 連続 3 panel 以上は禁止。`);
+  lines.push(`10. key_visual の具体性: 「青白い光」「灰色の壁」「白いシーツ」のような定型的・抽象的な描写は禁止。この作品固有の小道具・状況・身分差・UI・傷や汚れを絡める。`);
+  lines.push(`    NG: 「青白い看板光」「白いビニール袋」「夜のガラス」「灰色の背中」`);
+  lines.push(`    OK: 「コンビニ廃棄弁当の半額シール」「ヒビ入りスマホの公社アプリ Fランク表示」「中古鉄パイプの錆」のように bible / brief / scene 由来の固有物を入れる。`);
+  lines.push(`11. dialogue の自然さ: dialogue はキャラの実際の語彙で書く。比喩は本人が使う言葉として違和感ない範囲に留め、教科書的・作家的台詞を避ける。`);
+  lines.push(`    NG: 「同じ教室にいたはずなのに、俺だけ改札の向こうに置いていかれた」`);
+  lines.push(`    OK: 「俺もあの教室にいたんだけどな」または台詞にせず表情・手元・沈黙で出す。`);
+  lines.push(`12. panel 間の論理連結: 各 panel は前 panel の何に反応し、何を受けて次へ進むかが分かるように書く。並列の情景羅列は禁止。`);
+  lines.push(`    例: TV を見る → TV の光が顔に当たる → 目を閉じて情報を遮断する、のように因果でつなぐ。`);
+  lines.push(`13. emotion arc: scene 内で主人公の emotion を最低 2 段変化させる。出発点は scene.protagonist_arc_state.emotion とし、終端では別の感情または感情の強度変化へ移行させる。`);
+  lines.push(`14. cliffhanger / opening_hook: beat=cliff は最終 panel に次ページをめくらせる異変・通知・声・視線のシフトを必ず置く。beat=introduce/opening は最初 1-2 panel に読者を世界へ引き込む異質な絵・不穏な音・逆転の視点を置く。`);
+  lines.push(`15. scene pacing: 重要 beat (turn / payoff / cliff) は最低 2 panel 使って情報過密を避ける。説明 panel 連続 3 個超は禁止。mode=action は page あたり 4-5 panel、mode=silence/dialogue は 3-4 panel を目安にリズムを作る。`);
+  lines.push("");
+  lines.push(`## beat_type 別の重点`);
+  lines.push(beatSpecificPromptDirective(scene));
   if (generationProfileDirective) {
-    lines.push(`8. generation profile: ${generationProfileDirective}`);
+    lines.push("");
+    lines.push(`## generation profile`);
+    lines.push(generationProfileDirective);
   }
   lines.push("");
   lines.push(`## 出力形式`);
@@ -561,4 +622,21 @@ export function buildPanelDetailPrompt(scene: Scene, panelCount: number, generat
   lines.push(`]}`);
   lines.push("```");
   return lines.join("\n");
+}
+
+function beatSpecificPromptDirective(scene: Scene): string {
+  switch (scene.beat_type) {
+    case "cliff":
+      return `- beat=cliff: 最終 panel の引きが弱いと scene 全体が崩壊します。単に立ち止まる・去るだけでなく、異変/通知/声/視線のズレなど次ページの疑問を作ってください。`;
+    case "introduce":
+      return `- beat=introduce: 最初 1-2 panel で opening_hook を作り、${scene.protagonist_arc_state.emotion} から始まる emotion arc の出発点を絵で見せてください。`;
+    case "turn":
+      return `- beat=turn: emotion 変化と因果連結が最優先です。直前 panel の情報を受けて、主人公の判断や視線が変わる瞬間を分解してください。`;
+    case "payoff":
+      return `- beat=payoff: hero panel が必須です。回収される情報と感情爆発を 1 panel に集約し、その前後に受け/余韻を置いてください。`;
+    case "transition":
+      return `- beat=transition: 前 scene と次 scene の連結を明確にし、pacing は短く保ってください。説明だけで 3 panel 以上続けないでください。`;
+    default:
+      return `- beat=${scene.beat_type}: scene の beat と mode に合わせ、key_visual の固有性、panel 間の因果、emotion arc、pacing を必ず両立してください。`;
+  }
 }
