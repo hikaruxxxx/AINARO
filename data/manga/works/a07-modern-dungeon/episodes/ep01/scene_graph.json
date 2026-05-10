@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "episode_id": "a07-modern-dungeon-ep01",
-  "generated_at": "2026-05-07T00:00:00+09:00",
+  "generated_at": "2026-05-09T12:00:00+09:00",
   "source": {
     "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep01/_brief.v2.md",
     "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep01/shotlist.json",
     "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
   },
-  "_note": "Phase β B1 で a07-ep01 を実測切り出し。schema 妥当性検証用の手動切り出しサンプル。本番生成は L3.5 エージェント (B2 で実装) が行う。",
+  "_note": "Phase β B2 — a07-ep01 scene_graph 本番版。shotlist の 6 scene を 10 scene に細分化し、5 must_include_events を全配置 (E1 灯里S級ニュース=S02 / E2 ナビ経験値倍化条件初開示=S05 / E3 1F北東通路 6:14 ゴブリン湧き的中=S07末-S08頭 / E4 頭部撃破 2.4 倍確認=S09 / E5 「明日の予定、頼む」=S10)。bible 正規 location_id を採用 (shotlist の loc_shinjuku_third_1f_ne_corridor_v1 / loc_dpc_internal_audit_room_v1 / loc_dpc_shinjuku_window_v1 はそれぞれ loc_shinjuku_third_1f_northeast_corridor_v1 / loc_dpc_monitor_room_v1 / loc_dpc_public_counter_v1 に正規化)。前版 (2026-05-07 B1 手動切り出し) を上書き。",
   "scenes": [
     {
       "scene_id": "S01",
@@ -16,98 +16,17 @@
       "next_scene_id": "S02",
       "page_range": {
         "start": 1,
-        "end": 1
+        "end": 3
       },
       "panel_range": {
         "start_panel_no": 1,
-        "end_panel_no": 2
+        "end_panel_no": 12
       },
       "arc_position": {
         "volume": 1,
         "episode_in_volume": 1,
         "arc_phase": "introduce",
-        "arc_position_normalized": 0.0
-      },
-      "beat_type": "introduce",
-      "cast": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "presence": "in_person"
-        }
-      ],
-      "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "ナビ、こいつの正解を出せ。",
-            "uniqueness": "scene_exclusive",
-            "intent": "hook"
-          }
-        ]
-      },
-      "foreshadow_setup": [
-        {
-          "token": "F_navi_voice_existence",
-          "payoff_episode_hint": "this_episode"
-        },
-        {
-          "token": "F_boss_battle_5f",
-          "payoff_episode_hint": "later_in_volume"
-        }
-      ],
-      "foreshadow_payoff": [],
-      "protagonist_arc_state": {
-        "belief": "ナビが正解を出せると信じる (覚醒後の状態)",
-        "goal": "階層主の核を撃つ",
-        "emotion": "determination",
-        "delta_from_prev": "(初出 scene、過去 scene なし)"
-      },
-      "relationship_state_delta": [],
-      "time_axis": {
-        "label": "ボス戦の30秒前 (時系列上は ep01 末尾より後)",
-        "order": 999,
-        "is_flashback": false,
-        "is_flashforward": true,
-        "duration_hint": "moments"
-      },
-      "location_id": "loc_shinjuku_third_5f_boss_room_v1",
-      "page_budget": {
-        "min": 1,
-        "max": 1,
-        "preferred": 1
-      },
-      "mode": "action",
-      "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
-      },
-      "layout_pattern_id": "P4_splash_pullback",
-      "subtype_directive": {
-        "external_social": false,
-        "gacha_ui": false,
-        "hybrid": false
-      },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "巨大ボスの影に対し、黒フードのレンが青い導線上にいるフラッシュフォワード"
-    },
-    {
-      "scene_id": "S02",
-      "scene_no": 2,
-      "prev_scene_id": "S01",
-      "next_scene_id": "S03",
-      "page_range": {
-        "start": 2,
-        "end": 4
-      },
-      "panel_range": {
-        "start_panel_no": 3,
-        "end_panel_no": 20
-      },
-      "arc_position": {
-        "volume": 1,
-        "episode_in_volume": 1,
-        "arc_phase": "introduce",
-        "arc_position_normalized": 0.05
+        "arc_position_normalized": 0.005
       },
       "beat_type": "introduce",
       "cast": [
@@ -123,26 +42,8 @@
       "dialogue_plan": {
         "key_lines": [
           {
-            "speaker": "char_白瀬_灯里_v1",
-            "text": "守れる人を、増やしたいんです。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
             "speaker": "char_桐生_レン_v1",
-            "text": "Sランクの記録なんて、俺には一生関係ない。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "比べるだけ、無駄だ。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "俺の側に、声なんてない。",
+            "text": "夜勤明けの空は、いつも俺だけ青くない。",
             "uniqueness": "scene_exclusive",
             "intent": "establish"
           }
@@ -150,46 +51,36 @@
       },
       "foreshadow_setup": [
         {
-          "token": "F_akari_concern_protect_others",
-          "payoff_episode_hint": "cross_volume"
-        },
-        {
-          "token": "F_ren_voiceless",
+          "token": "F_ren_f_rank_id_card",
           "payoff_episode_hint": "later_in_volume"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "Sランクは関係ない、俺は底辺のFランクだ",
-        "goal": "夜勤を消化して家賃を払う",
+        "belief": "自分は夜勤と最低ランクの底辺で、世界に名を残す側ではない",
+        "goal": "夜勤を終わらせる、波風なくシフトを閉める",
         "emotion": "resignation",
-        "delta_from_prev": "ボス戦の覚醒状態から、底辺の日常へ完全に戻る (時系列上は ep01 序盤の出発点)"
+        "delta_from_prev": "ep01 開始点。底辺の日常を諦観で受け入れた状態"
       },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_白瀬_灯里_v1",
-            "char_桐生_レン_v1"
-          ],
-          "direction": "tense",
-          "intensity": -1,
-          "trigger": "Sランクとして TV に映る灯里と、Fランクで夜勤するレンの対比"
-        }
-      ],
+      "relationship_state_delta": [],
       "time_axis": {
-        "label": "深夜0時すぎ、コンビニ夜勤前半",
+        "label": "ep01 一日目 深夜2時、ローソン新宿西",
         "order": 1,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
       "location_id": "loc_lawson_interior_v1",
+      "sub_locations": [
+        "loc_shinjuku_night_skyline_v1",
+        "loc_shinjuku_third_5f_boss_room_v1"
+      ],
       "page_budget": {
-        "min": 2,
-        "max": 4,
+        "min": 3,
+        "max": 3,
         "preferred": 3
       },
-      "mode": "introspection",
+      "mode": "establishing",
       "turn_anchor": {
         "at_panel_no": null,
         "type": "none"
@@ -201,7 +92,106 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "明るすぎる蛍光灯の下、Sランク灯里の朱色とFランクレンの黒フードの色対比"
+      "key_visual_intent": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続"
+    },
+    {
+      "scene_id": "S02",
+      "scene_no": 2,
+      "prev_scene_id": "S01",
+      "next_scene_id": "S03",
+      "page_range": {
+        "start": 4,
+        "end": 5
+      },
+      "panel_range": {
+        "start_panel_no": 13,
+        "end_panel_no": 22
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.012
+      },
+      "beat_type": "setup",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_白瀬_灯里_v1",
+          "presence": "tv"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_白瀬_灯里_v1",
+            "text": "国家直轄『朱』、最年少Sランク認定。歴代最速です。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "同じ教室にいたはずなのに、俺だけ改札の向こうに置いていかれた。",
+            "uniqueness": "scene_exclusive",
+            "intent": "hook"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_akari_s_rank_kanchigai_friend",
+          "payoff_episode_hint": "cross_volume"
+        }
+      ],
+      "foreshadow_payoff": [
+        "F_ren_f_rank_id_card"
+      ],
+      "protagonist_arc_state": {
+        "belief": "幼馴染の灯里は世界の表側、自分は裏側のFランクで隔てられている",
+        "goal": "テレビを見ないようにスマホを裏返す、感情を表に出さない",
+        "emotion": "resignation",
+        "delta_from_prev": "夜勤の倦怠から、灯里S級ニュースに刺された息苦しさへ深化"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_白瀬_灯里_v1"
+          ],
+          "direction": "farther",
+          "intensity": -1,
+          "trigger": "TV 越しに灯里がSランク認定される姿を見て、レンが距離を再確認"
+        }
+      ],
+      "time_axis": {
+        "label": "一日目 深夜2-3時、店内テレビニュース時間",
+        "order": 2,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_lawson_interior_v1",
+      "page_budget": {
+        "min": 2,
+        "max": 2,
+        "preferred": 2
+      },
+      "mode": "introspection",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": true,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "テレビ枠越しの白い灯里と朱の部隊章、手前に小さなレンの黒い背中という光と影の対比"
     },
     {
       "scene_id": "S03",
@@ -209,37 +199,130 @@
       "prev_scene_id": "S02",
       "next_scene_id": "S04",
       "page_range": {
-        "start": 5,
-        "end": 5
+        "start": 6,
+        "end": 7
       },
       "panel_range": {
-        "start_panel_no": 21,
-        "end_panel_no": 23
+        "start_panel_no": 23,
+        "end_panel_no": 28
       },
       "arc_position": {
         "volume": 1,
         "episode_in_volume": 1,
         "arc_phase": "introduce",
-        "arc_position_normalized": 0.18
+        "arc_position_normalized": 0.018
       },
       "beat_type": "transition",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
           "presence": "in_person"
+        },
+        {
+          "character_id": "char_槇島_主任_v1",
+          "presence": "memory"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_槇島_主任_v1",
+            "text": "再鑑定は……制度上、できません。",
+            "uniqueness": "scene_exclusive",
+            "intent": "callback"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_makishima_blocked_recertification",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "公社の窓口で何度殴られても、Fランクは塗り替えられない",
+        "goal": "夜の路地を歩いて自室へ戻る、過去の屈辱を呑み込む",
+        "emotion": "resignation",
+        "delta_from_prev": "灯里ニュースの息苦しさに、15歳のFランク確定の記憶が重なり諦観が固まる"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_槇島_主任_v1"
+          ],
+          "direction": "tense",
+          "intensity": -1,
+          "trigger": "槇島主任が制度を盾に再鑑定を拒んだ過去がレンの中で再生"
+        }
+      ],
+      "time_axis": {
+        "label": "一日目 早朝、コンビニ→帰路 (回想は3年前 公社窓口)",
+        "order": 3,
+        "is_flashback": true,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_lawson_exterior_night_v1",
+      "sub_locations": [
+        "loc_dpc_public_counter_v1",
+        "loc_ren_apartment_v1"
+      ],
+      "page_budget": {
+        "min": 2,
+        "max": 2,
+        "preferred": 2
+      },
+      "mode": "transition_montage",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)"
+    },
+    {
+      "scene_id": "S04",
+      "scene_no": 4,
+      "prev_scene_id": "S03",
+      "next_scene_id": "S05",
+      "page_range": {
+        "start": 8,
+        "end": 10
+      },
+      "panel_range": {
+        "start_panel_no": 29,
+        "end_panel_no": 43
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.025
+      },
+      "beat_type": "setup",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
         "key_lines": [
           {
             "speaker": "char_桐生_レン_v1",
-            "text": "探索だけじゃ、家賃にもならない。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "探索者になれば、少しは変わると思ってた。",
+            "text": "今日も、何も起こらないまま朝が来る。",
             "uniqueness": "scene_exclusive",
             "intent": "establish"
           }
@@ -247,26 +330,207 @@
       },
       "foreshadow_setup": [
         {
-          "token": "F_explorer_low_reward",
-          "payoff_episode_hint": "this_episode"
+          "token": "F_iron_pipe_weapon_origin",
+          "payoff_episode_hint": "later_in_volume"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "探索者でも家賃にすらならない、選択肢はない",
-        "goal": "帰宅して仮眠",
+        "belief": "1Kと中古鉄パイプが俺の世界の全部で、ここから動く理由はない",
+        "goal": "黒パーカーのまま布団へ倒れる、眠気を諦めて朝を待つ",
         "emotion": "resignation",
-        "delta_from_prev": "夜勤明けの疲労、低額振込通知で諦観が深まる"
+        "delta_from_prev": "回想の屈辱を抱えたまま、現実の自室の貧しさで諦観をさらに固定"
       },
       "relationship_state_delta": [],
       "time_axis": {
-        "label": "午前5時すぎ、夜勤明け",
-        "order": 2,
+        "label": "一日目 早朝5時台、桐生レン自室",
+        "order": 4,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "introspection",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": true,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "薄暗い1Kの床に転がる中古バッグと錆びた鉄パイプ、壁の経験値ログ印刷物、公社アプリのFランク表示の冷たい青"
+    },
+    {
+      "scene_id": "S05",
+      "scene_no": 5,
+      "prev_scene_id": "S04",
+      "next_scene_id": "S06",
+      "page_range": {
+        "start": 11,
+        "end": 13
+      },
+      "panel_range": {
+        "start_panel_no": 44,
+        "end_panel_no": 55
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "rising",
+        "arc_position_normalized": 0.032
+      },
+      "beat_type": "reveal",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "経験値倍化条件、開示します。新宿第三ダンジョン1F北東通路、午前6時14分、ゴブリン一群、頭部撃破で2.4倍。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "幻聴か、それとも──",
+            "uniqueness": "scene_exclusive",
+            "intent": "hook"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "従っていただければ、生存率が上がります。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_navi_xp_multiplier_condition",
+          "payoff_episode_hint": "this_episode"
+        },
+        {
+          "token": "F_navi_voice_identity",
+          "payoff_episode_hint": "cross_volume"
+        }
+      ],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "幻聴かもしれないが、座標と時刻が具体的すぎる。検証する余地はある",
+        "goal": "6:14 までに 1F北東通路へ間に合うルートを逆算し、出る支度をする",
+        "emotion": "curiosity",
+        "delta_from_prev": "諦観で固まった意識に規格外の情報が割り込み、初めて動く選択肢が浮上"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "closer",
+          "intensity": 1,
+          "trigger": "ナビが秒単位の具体情報を開示し、レンが半信半疑ながら従う側へ動き出す"
+        }
+      ],
+      "time_axis": {
+        "label": "一日目 朝6時07分、自室",
+        "order": 5,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_ren_apartment_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "dialogue",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "reveal_turn"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": true,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "耳元とスマホ縁に走る薄青のナビ光、時計と地図アプリを同時に見るレンの瞳に初めて宿る検証の意志"
+    },
+    {
+      "scene_id": "S06",
+      "scene_no": 6,
+      "prev_scene_id": "S05",
+      "next_scene_id": "S07",
+      "page_range": {
+        "start": 14,
+        "end": 14
+      },
+      "panel_range": {
+        "start_panel_no": 56,
+        "end_panel_no": 58
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "rising",
+        "arc_position_normalized": 0.038
+      },
+      "beat_type": "transition",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "間に合えば、情報が本物かどうかが分かる",
+        "goal": "薄明の路地を斜めに抜けて入域ゲートまで走る",
+        "emotion": "tension",
+        "delta_from_prev": "自室での検証意志が、身体を路地へ走らせる行動へ転換"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "一日目 朝6時08-12分、新宿西路地→ダンジョン入域ゲート前",
+        "order": 6,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
       "location_id": "loc_lawson_exterior_night_v1",
+      "sub_locations": [
+        "loc_shinjuku_night_skyline_v1",
+        "loc_shinjuku_third_dungeon_gate_v1",
+        "loc_shinjuku_third_1f_northeast_corridor_v1"
+      ],
       "page_budget": {
         "min": 1,
         "max": 1,
@@ -284,319 +548,7 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "チカチカする看板と自販機の白光、ヒビ入りスマホの少額振込通知"
-    },
-    {
-      "scene_id": "S04",
-      "scene_no": 4,
-      "prev_scene_id": "S03",
-      "next_scene_id": "S05",
-      "page_range": {
-        "start": 5,
-        "end": 6
-      },
-      "panel_range": {
-        "start_panel_no": 24,
-        "end_panel_no": 26
-      },
-      "arc_position": {
-        "volume": 1,
-        "episode_in_volume": 1,
-        "arc_phase": "introduce",
-        "arc_position_normalized": 0.22
-      },
-      "beat_type": "reveal",
-      "cast": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "presence": "memory"
-        },
-        {
-          "character_id": "char_槇島_主任_v1",
-          "presence": "memory"
-        }
-      ],
-      "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_槇島_主任_v1",
-            "text": "制度上、再鑑定は認められません。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_槇島_主任_v1",
-            "text": "判定は確定です。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          }
-        ]
-      },
-      "foreshadow_setup": [
-        {
-          "token": "F_dpc_makishima_strict_protocol",
-          "payoff_episode_hint": "later_in_volume"
-        }
-      ],
-      "foreshadow_payoff": [
-        "F_explorer_low_reward"
-      ],
-      "protagonist_arc_state": {
-        "belief": "十五歳で俺の上限は決まった、制度の側に立つ人間は俺を見捨てた",
-        "goal": "(回想内なので明確な goal なし、痛みの再確認)",
-        "emotion": "despair",
-        "delta_from_prev": "現在の諦観の根拠を回想で読者に提示、レン自身の心情は固定"
-      },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_槇島_主任_v1"
-          ],
-          "direction": "farther",
-          "intensity": -2,
-          "trigger": "再鑑定却下を槇島から告げられた過去の記憶"
-        }
-      ],
-      "time_axis": {
-        "label": "数年前、十五歳の鑑定却下",
-        "order": -1,
-        "is_flashback": true,
-        "is_flashforward": false,
-        "duration_hint": "moments"
-      },
-      "location_id": "loc_dpc_public_counter_v1",
-      "page_budget": {
-        "min": 1,
-        "max": 1,
-        "preferred": 1
-      },
-      "mode": "dialogue",
-      "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
-      },
-      "layout_pattern_id": null,
-      "subtype_directive": {
-        "external_social": false,
-        "gacha_ui": false,
-        "hybrid": false
-      },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "窓口の無機質な仕切り、赤い承認印、レンの背中"
-    },
-    {
-      "scene_id": "S05",
-      "scene_no": 5,
-      "prev_scene_id": "S04",
-      "next_scene_id": "S06",
-      "page_range": {
-        "start": 6,
-        "end": 7
-      },
-      "panel_range": {
-        "start_panel_no": 27,
-        "end_panel_no": 35
-      },
-      "arc_position": {
-        "volume": 1,
-        "episode_in_volume": 1,
-        "arc_phase": "introduce",
-        "arc_position_normalized": 0.3
-      },
-      "beat_type": "setup",
-      "cast": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "presence": "in_person"
-        }
-      ],
-      "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "Fランクには、これで十分らしい。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "明日も夜勤。明後日も夜勤。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "俺は、入口で止まったままだ。",
-            "uniqueness": "may_repeat",
-            "intent": "establish"
-          }
-        ]
-      },
-      "foreshadow_setup": [
-        {
-          "token": "F_ren_stuck_at_entrance",
-          "payoff_episode_hint": "this_episode"
-        }
-      ],
-      "foreshadow_payoff": [],
-      "protagonist_arc_state": {
-        "belief": "入口で止まったまま、何も変えられない",
-        "goal": "眠る",
-        "emotion": "despair",
-        "delta_from_prev": "回想を経て現在の閉塞感が強化される"
-      },
-      "relationship_state_delta": [],
-      "time_axis": {
-        "label": "午前5時半〜6時、自室",
-        "order": 3,
-        "is_flashback": false,
-        "is_flashforward": false,
-        "duration_hint": "minutes"
-      },
-      "location_id": "loc_ren_apartment_v1",
-      "page_budget": {
-        "min": 2,
-        "max": 2,
-        "preferred": 2
-      },
-      "mode": "introspection",
-      "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
-      },
-      "layout_pattern_id": null,
-      "subtype_directive": {
-        "external_social": false,
-        "gacha_ui": false,
-        "hybrid": false
-      },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "狭い1Kと中古装備、壁の経験値ログ、眠れないレンの片目",
-      "sub_locations": [
-        "loc_lawson_exterior_night_v1"
-      ]
-    },
-    {
-      "scene_id": "S06",
-      "scene_no": 6,
-      "prev_scene_id": "S05",
-      "next_scene_id": "S07",
-      "page_range": {
-        "start": 8,
-        "end": 10
-      },
-      "panel_range": {
-        "start_panel_no": 36,
-        "end_panel_no": 50
-      },
-      "arc_position": {
-        "volume": 1,
-        "episode_in_volume": 1,
-        "arc_phase": "rising",
-        "arc_position_normalized": 0.45
-      },
-      "beat_type": "reveal",
-      "cast": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "presence": "in_person"
-        },
-        {
-          "character_id": "char_獅童_響_v1",
-          "presence": "voice_off"
-        }
-      ],
-      "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "条件一致。案内を開始します。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "六時十四分三十二秒、北東通路で三体撃破。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "……抜け道、あるな。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "従えば、勝てるのか？",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "勝率ではなく、生存率が上昇します。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          }
-        ]
-      },
-      "foreshadow_setup": [
-        {
-          "token": "F_navi_existence",
-          "payoff_episode_hint": "next_episode"
-        },
-        {
-          "token": "F_navi_xp_multiplier_condition",
-          "payoff_episode_hint": "this_episode"
-        }
-      ],
-      "foreshadow_payoff": [
-        "F_navi_voice_existence"
-      ],
-      "protagonist_arc_state": {
-        "belief": "幻聴かもしれないが、条件は確かに合う。試す価値はある",
-        "goal": "新宿第三 1F北東通路で 6:14 にゴブリン三体を撃破する",
-        "emotion": "curiosity",
-        "delta_from_prev": "諦観から好奇心と試算思考へ転換、初の「攻める意思」の萌芽"
-      },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_獅童_響_v1"
-          ],
-          "direction": "trust+",
-          "intensity": 1,
-          "trigger": "ナビが時刻と座標を具体的に告げ、レンが計算してルートを確認"
-        }
-      ],
-      "time_axis": {
-        "label": "午前6時00分〜6時05分、自室",
-        "order": 4,
-        "is_flashback": false,
-        "is_flashforward": false,
-        "duration_hint": "minutes"
-      },
-      "location_id": "loc_ren_apartment_v1",
-      "page_budget": {
-        "min": 3,
-        "max": 3,
-        "preferred": 3
-      },
-      "mode": "dialogue",
-      "turn_anchor": {
-        "at_panel_no": 45,
-        "type": "reveal_turn"
-      },
-      "layout_pattern_id": null,
-      "subtype_directive": {
-        "external_social": false,
-        "gacha_ui": false,
-        "hybrid": false
-      },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "ヒビ入りスマホ縁の青光、レンの口角がわずかに上がる「抜け道、あるな」の瞬間"
+      "key_visual_intent": "薄明の新宿の路地を斜めに駆け抜けるレンの背中と、スマホの時計の残り秒数の合成"
     },
     {
       "scene_id": "S07",
@@ -604,18 +556,18 @@
       "prev_scene_id": "S06",
       "next_scene_id": "S08",
       "page_range": {
-        "start": 11,
-        "end": 14
+        "start": 15,
+        "end": 16
       },
       "panel_range": {
-        "start_panel_no": 51,
-        "end_panel_no": 70
+        "start_panel_no": 59,
+        "end_panel_no": 68
       },
       "arc_position": {
         "volume": 1,
         "episode_in_volume": 1,
         "arc_phase": "rising",
-        "arc_position_normalized": 0.6
+        "arc_position_normalized": 0.045
       },
       "beat_type": "setup",
       "cast": [
@@ -631,26 +583,8 @@
       "dialogue_plan": {
         "key_lines": [
           {
-            "speaker": "char_桐生_レン_v1",
-            "text": "認証で、八秒削る。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
             "speaker": "char_獅童_響_v1",
-            "text": "残り二十六秒。通過可能です。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "右壁沿い、四十三歩で停止。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "接敵まで、三、二、一。",
+            "text": "接敵まで、十二秒。半歩、左へ。",
             "uniqueness": "scene_exclusive",
             "intent": "establish"
           }
@@ -658,16 +592,16 @@
       },
       "foreshadow_setup": [
         {
-          "token": "F_wet_floor_at_corridor",
-          "payoff_episode_hint": "this_episode"
+          "token": "F_dpc_f_rank_only_first_floor",
+          "payoff_episode_hint": "later_in_volume"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "ナビの情報が正しければ、Fランクでも勝てる",
-        "goal": "認証時間を最短化、6:14 ぴったりに接敵地点に立つ",
+        "belief": "ナビの座標が当たれば、Fランクの俺でも一度は世界を覗ける",
+        "goal": "ゲートを認証で抜け、6:14 ぴったりに 1F北東通路の指定位置へ立つ",
         "emotion": "tension",
-        "delta_from_prev": "好奇心から実行モードへ、街が「攻略マップ」に見え始める"
+        "delta_from_prev": "走り始めた緊張から、ゲート通過と地形把握による『その場に立つ』集中へ"
       },
       "relationship_state_delta": [
         {
@@ -677,30 +611,133 @@
           ],
           "direction": "trust+",
           "intensity": 1,
-          "trigger": "ゲート通過の秒数と通路歩数の指示が逐次正確で、レンが従う"
+          "trigger": "ナビの秒単位指示でゲート認証の混雑を回避でき、レンが導線を信じ始める"
         }
       ],
       "time_axis": {
-        "label": "午前6時05分〜6時14分、ゲート→1F北東通路",
-        "order": 5,
+        "label": "一日目 朝6時12-14分、入域ゲート→1F北東通路",
+        "order": 7,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
+      "location_id": "loc_shinjuku_third_dungeon_gate_v1",
       "sub_locations": [
-        "loc_lawson_exterior_night_v1",
-        "loc_shinjuku_night_skyline_v1",
-        "loc_shinjuku_third_dungeon_gate_v1"
+        "loc_shinjuku_third_1f_northeast_corridor_v1"
       ],
       "page_budget": {
-        "min": 4,
-        "max": 4,
-        "preferred": 4
+        "min": 2,
+        "max": 2,
+        "preferred": 2
       },
       "mode": "action",
       "turn_anchor": {
-        "at_panel_no": 70,
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": true,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "Fランク列の最後尾と古い認証端末から、湿った地下通路の天井亀裂から差す朝6時14分の光、鉄パイプを構えるレンの半歩へ"
+    },
+    {
+      "scene_id": "S08",
+      "scene_no": 8,
+      "prev_scene_id": "S07",
+      "next_scene_id": "S09",
+      "page_range": {
+        "start": 17,
+        "end": 19
+      },
+      "panel_range": {
+        "start_panel_no": 69,
+        "end_panel_no": 83
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "climax",
+        "arc_position_normalized": 0.052
+      },
+      "beat_type": "turn",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": [
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "先制で頭部、お願いします。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "情報に、賭ける。",
+            "uniqueness": "scene_exclusive",
+            "intent": "hook"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "壁反射。足場の濡れを、使ってください。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          }
+        ]
+      },
+      "foreshadow_setup": [
+        {
+          "token": "F_ren_combat_terrain_use",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
+      "foreshadow_payoff": [
+        "F_iron_pipe_weapon_origin"
+      ],
+      "protagonist_arc_state": {
+        "belief": "ナビの座標が当たった、ならば撃破方法も信じて振る",
+        "goal": "ゴブリン三体の頭部を順に撃ち抜き、自分の手で結果を出す",
+        "emotion": "determination",
+        "delta_from_prev": "緊張下の集中から、湧きの的中を確認した直後に賭けて踏み込む決意へ転換"
+      },
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 2,
+          "trigger": "ナビが宣言した時刻と座標で実際にゴブリンが湧き、レンの全身が情報に従う"
+        }
+      ],
+      "time_axis": {
+        "label": "一日目 朝6時14分、1F北東通路、戦闘",
+        "order": 8,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "moments"
+      },
+      "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "action",
+      "turn_anchor": {
+        "at_panel_no": null,
         "type": "tension_turn"
       },
       "layout_pattern_id": null,
@@ -710,26 +747,26 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "Fランク列とSランク専用ゲートの格差、初心者通路の明るさと鉄パイプの貧弱さ"
+      "key_visual_intent": "通路奥の影が三つに割れる湧きの瞬間、壁反射と水跳ねを使う鉄パイプの三連撃と、頭部撃破の鋭い線"
     },
     {
-      "scene_id": "S08",
-      "scene_no": 8,
-      "prev_scene_id": "S07",
-      "next_scene_id": "S09",
+      "scene_id": "S09",
+      "scene_no": 9,
+      "prev_scene_id": "S08",
+      "next_scene_id": "S10",
       "page_range": {
-        "start": 15,
-        "end": 18
+        "start": 20,
+        "end": 21
       },
       "panel_range": {
-        "start_panel_no": 71,
-        "end_panel_no": 90
+        "start_panel_no": 84,
+        "end_panel_no": 91
       },
       "arc_position": {
         "volume": 1,
         "episode_in_volume": 1,
         "arc_phase": "climax",
-        "arc_position_normalized": 0.78
+        "arc_position_normalized": 0.058
       },
       "beat_type": "payoff",
       "cast": [
@@ -746,31 +783,13 @@
         "key_lines": [
           {
             "speaker": "char_獅童_響_v1",
-            "text": "対象三体。予測通りです。",
+            "text": "条件達成。経験値倍率2.4倍、加算済みです。",
             "uniqueness": "scene_exclusive",
             "intent": "reveal"
           },
           {
-            "speaker": "char_獅童_響_v1",
-            "text": "先制。右前方、頭部。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "左壁に当て、反射角を利用。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "足場。濡れを使ってください。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
             "speaker": "char_桐生_レン_v1",
-            "text": "ここだ。",
+            "text": "Fランクの一週間が……一発で。",
             "uniqueness": "scene_exclusive",
             "intent": "hook"
           }
@@ -778,14 +797,13 @@
       },
       "foreshadow_setup": [],
       "foreshadow_payoff": [
-        "F_navi_xp_multiplier_condition",
-        "F_wet_floor_at_corridor"
+        "F_navi_xp_multiplier_condition"
       ],
       "protagonist_arc_state": {
-        "belief": "情報が的中したなら、俺は弱くても勝てる",
-        "goal": "三体を頭部撃破で倒す",
-        "emotion": "tension",
-        "delta_from_prev": "緊張下で「ここだ」の主体的判断、Fランクから「情報強者」への自己像変化"
+        "belief": "情報だけで経験値倍率を変えられる、世界には隠しルールがある",
+        "goal": "震える手でスマホ画面の加算ログを最後まで読み切る",
+        "emotion": "elation",
+        "delta_from_prev": "撃破直後の決意から、想定を超える数字を見て笑うでも泣くでもなく震える状態へ"
       },
       "relationship_state_delta": [
         {
@@ -794,133 +812,16 @@
             "char_獅童_響_v1"
           ],
           "direction": "trust+",
-          "intensity": 2,
-          "trigger": "三体予測の的中、壁反射と濡れ床の的確な指示で連携が成立"
+          "intensity": 1,
+          "trigger": "ナビの宣言通り 2.4 倍の加算ログがアプリに表示され、ナビの情報源としての信頼が確定"
         }
       ],
       "time_axis": {
-        "label": "午前6時14分、戦闘",
-        "order": 6,
+        "label": "一日目 朝6時15分、1F北東通路 撃破直後",
+        "order": 9,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "moments"
-      },
-      "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
-      "page_budget": {
-        "min": 4,
-        "max": 4,
-        "preferred": 4
-      },
-      "mode": "action",
-      "turn_anchor": {
-        "at_panel_no": 90,
-        "type": "reveal_turn"
-      },
-      "layout_pattern_id": null,
-      "subtype_directive": {
-        "external_social": false,
-        "gacha_ui": false,
-        "hybrid": false
-      },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "壁反射の軌道、水しぶき、低い重心からの突き上げ — 情報強者として戦う Fランクの新しい姿"
-    },
-    {
-      "scene_id": "S09",
-      "scene_no": 9,
-      "prev_scene_id": "S08",
-      "next_scene_id": "S10",
-      "page_range": {
-        "start": 19,
-        "end": 20
-      },
-      "panel_range": {
-        "start_panel_no": 91,
-        "end_panel_no": 100
-      },
-      "arc_position": {
-        "volume": 1,
-        "episode_in_volume": 1,
-        "arc_phase": "falling",
-        "arc_position_normalized": 0.88
-      },
-      "beat_type": "aftermath",
-      "cast": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "presence": "in_person"
-        },
-        {
-          "character_id": "char_獅童_響_v1",
-          "presence": "voice_off"
-        }
-      ],
-      "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "俺が……倒した？",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "跳ねた。桁が、違う。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "条件達成。経験値倍率、適用済み。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "水分補給を推奨。三十秒、休んでください。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "明日の予定、組みますか？",
-            "uniqueness": "scene_exclusive",
-            "intent": "cliff"
-          }
-        ]
-      },
-      "foreshadow_setup": [
-        {
-          "token": "F_xp_multiplier_visible_log",
-          "payoff_episode_hint": "next_episode"
-        }
-      ],
-      "foreshadow_payoff": [
-        "F_navi_xp_multiplier_condition"
-      ],
-      "protagonist_arc_state": {
-        "belief": "情報があれば、俺は跳ねる",
-        "goal": "次の周回をどう組むか",
-        "emotion": "elation",
-        "delta_from_prev": "戦闘の緊張から放心 → 経験値ログを見て「これは続く」と認知"
-      },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_獅童_響_v1"
-          ],
-          "direction": "closer",
-          "intensity": 1,
-          "trigger": "ナビが水分補給を促すなど、戦闘外でも気遣いの指示を出した"
-        }
-      ],
-      "time_axis": {
-        "label": "戦闘直後、午前6時15分",
-        "order": 7,
-        "is_flashback": false,
-        "is_flashforward": false,
-        "duration_hint": "minutes"
       },
       "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
       "page_budget": {
@@ -928,19 +829,19 @@
         "max": 2,
         "preferred": 2
       },
-      "mode": "dialogue",
+      "mode": "introspection",
       "turn_anchor": {
-        "at_panel_no": 100,
-        "type": "cliff_turn"
+        "at_panel_no": null,
+        "type": "reveal_turn"
       },
       "layout_pattern_id": null,
       "subtype_directive": {
         "external_social": false,
-        "gacha_ui": false,
+        "gacha_ui": true,
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "震える指、空の経験値加算ログ、ゼリー飲料の生活感、口角がわずかに上がる"
+      "key_visual_intent": "倒れた三体のシルエットを背景に、公社アプリの加算ログ大ゴマと、画面の青光に染まるレンの震える手の二段構え"
     },
     {
       "scene_id": "S10",
@@ -948,18 +849,18 @@
       "prev_scene_id": "S09",
       "next_scene_id": null,
       "page_range": {
-        "start": 21,
+        "start": 22,
         "end": 22
       },
       "panel_range": {
-        "start_panel_no": 101,
-        "end_panel_no": 110
+        "start_panel_no": 92,
+        "end_panel_no": 93
       },
       "arc_position": {
         "volume": 1,
         "episode_in_volume": 1,
         "arc_phase": "climax",
-        "arc_position_normalized": 1.0
+        "arc_position_normalized": 0.062
       },
       "beat_type": "cliff",
       "cast": [
@@ -975,53 +876,35 @@
       "dialogue_plan": {
         "key_lines": [
           {
-            "speaker": "char_桐生_レン_v1",
-            "text": "頼む。次は、こっちから取りに行く。",
+            "speaker": "char_獅童_響_v1",
+            "text": "明日の予定、組みますか？",
             "uniqueness": "scene_exclusive",
             "intent": "cliff"
           },
           {
-            "speaker": "char_獅童_響_v1",
-            "text": "計算開始。最短成長経路を提示します。",
+            "speaker": "char_桐生_レン_v1",
+            "text": "──頼む。",
             "uniqueness": "scene_exclusive",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "隠し条件、達成。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "固有スキルを開示します。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
+            "intent": "cliff"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_unique_skill_layer_navigate",
-          "payoff_episode_hint": "later_in_volume"
-        },
-        {
-          "token": "F_dpc_anomaly_log_tracking",
+          "token": "F_dpc_monitor_anomaly_log",
           "payoff_episode_hint": "next_episode"
         },
         {
-          "token": "F_dpc_log_blackout_who_did_it",
-          "payoff_episode_hint": "later_in_volume"
+          "token": "F_descending_stairs_black_hood",
+          "payoff_episode_hint": "next_episode"
         }
       ],
-      "foreshadow_payoff": [
-        "F_ren_stuck_at_entrance"
-      ],
+      "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "次は、こっちから取りに行く (受け身から能動へ)",
-        "goal": "明日の予定をナビに任せ、次のダンジョンを攻める",
+        "belief": "耐えるだけの俺は今日で終わる、明日からは攻める側に行く",
+        "goal": "ナビに翌日の予定を任せ、下降階段の方角を意識に入れる",
         "emotion": "determination",
-        "delta_from_prev": "底辺として耐えるだけだった主人公が、世界の隠しルールを使って攻める側へ転換"
+        "delta_from_prev": "震えと興奮から、初めて世界へ攻める意志を声に出す転換"
       },
       "relationship_state_delta": [
         {
@@ -1031,43 +914,43 @@
           ],
           "direction": "trust+",
           "intensity": 2,
-          "trigger": "「頼む」と能動的に予定を委ね、ナビが固有スキルを開示する関係性確立"
+          "trigger": "レンがナビに翌日の予定を任せると返答し、相互依存の関係が成立"
         }
       ],
       "time_axis": {
-        "label": "戦闘直後、午前6時16分",
-        "order": 8,
+        "label": "一日目 朝6時16-20分、1F北東通路余韻 + DPCモニター管制室同時刻",
+        "order": 10,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "moments"
+        "duration_hint": "minutes"
       },
       "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
       "sub_locations": [
         "loc_dpc_monitor_room_v1"
       ],
       "page_budget": {
-        "min": 2,
-        "max": 2,
-        "preferred": 2
+        "min": 1,
+        "max": 1,
+        "preferred": 1
       },
       "mode": "dialogue",
       "turn_anchor": {
         "at_panel_no": 110,
         "type": "cliff_turn"
       },
-      "layout_pattern_id": "P_cliff_cross_cut_with_authority",
+      "layout_pattern_id": null,
       "subtype_directive": {
-        "external_social": false,
+        "external_social": true,
         "gacha_ui": false,
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "下降階段の影、青いステータス画面、DPC モニター室の cross-cut で「監視されている」気配"
+      "key_visual_intent": "下降階段を見下ろす黒フードのレンの背中と、無人のDPC監査室で異常ログだけが点滅するモニター壁の対比 (ep02 冒頭への接続)"
     }
   ],
   "pull_link": {
-    "current_episode_cliff": "ability_or_identity_glimpse",
-    "next_opening_hook_hint": "次話冒頭は、レンが『階層ナビゲート』の表示を確認し、隠し通路や敵配置が見えるのかを一階層で検証する。同時にDPC監査ログ側でも彼の異常値が追跡対象へ切り替わる。",
+    "current_episode_cliff": "ren_accepts_navi_partnership_and_descending_stairs_revealed",
+    "next_opening_hook_hint": "次話冒頭は、二日目朝のレンが自室でナビからの新条件 (1F南西通路、踏みつけ1.8倍) を受け取り、再現性を冷静に検証するモードから始まる。下降階段の黒フードはレン本人の後ろ姿として ep02 序盤で再提示。",
     "is_volume_end": false
   }
 }
