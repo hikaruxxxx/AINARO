@@ -1,7 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { BibleSnapshotV2 } from "../schemas-v2";
-import { findRoleEnumViolations, runMigration } from "./migrate-classify";
+import * as codexText from "../llm/codex-text";
+import {
+  findRoleEnumViolations,
+  runMigration,
+  runMigrationWithLlmRefine,
+} from "./migrate-classify";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("migrate-classify", () => {
   it("V2 → V3 で characters/locations の facts が生成される", () => {
@@ -56,6 +65,100 @@ describe("migrate-classify", () => {
       expect(result.roleEnumViolations.length).toBe(2);
     }
   );
+
+  it("LLM refine で aggregated_confidence を計算する", async () => {
+    vi.spyOn(codexText, "runCodexText").mockResolvedValue({
+      stdout:
+        '{"suggested_layer":"in_world_belief","suggested_aspect":"psychology","confidence":0.85,"rationale":"妥当"}',
+      parsed: {
+        suggested_layer: "in_world_belief",
+        suggested_aspect: "psychology",
+        confidence: 0.85,
+        rationale: "妥当",
+      },
+      attempts: 1,
+      totalDurationMs: 100,
+    });
+    const v2 = createMinimalV2();
+    const result = await runMigrationWithLlmRefine(v2, {
+      rounds: 1,
+      maxParallel: 1,
+    });
+    expect(result.llm_refine.fact_results.length).toBeGreaterThan(0);
+    expect(result.llm_refine.summary.avg_confidence).toBeCloseTo(0.85, 2);
+    expect(result.needsReview.length).toBe(0);
+  });
+
+  it("layer がばらついた fact は unstable 扱い", async () => {
+    const v2 = createMinimalV2();
+    const factsPerRound = runMigration(v2).v3.facts.length;
+    let callCount = 0;
+    vi.spyOn(codexText, "runCodexText").mockImplementation(async () => {
+      const isFirstRound = callCount++ < factsPerRound;
+      return {
+        stdout: "{}",
+        parsed: isFirstRound
+          ? {
+              suggested_layer: "in_world_belief",
+              suggested_aspect: "psychology",
+              confidence: 0.8,
+              rationale: "",
+            }
+          : {
+              suggested_layer: "meta_truth",
+              suggested_aspect: "psychology",
+              confidence: 0.6,
+              rationale: "",
+            },
+        attempts: 1,
+        totalDurationMs: 100,
+      };
+    });
+    const result = await runMigrationWithLlmRefine(v2, {
+      rounds: 2,
+      maxParallel: 1,
+    });
+    const unstable = result.llm_refine.fact_results.filter((f) => !f.stable);
+    expect(unstable.length).toBeGreaterThan(0);
+    expect(result.llm_refine.summary.unstable_facts).toBe(unstable.length);
+  });
+
+  it("existingProgress の完了済み round は Codex 呼び出しを skip する", async () => {
+    const v2 = createMinimalV2();
+    const deterministic = runMigration(v2);
+    const existingProgress = deterministic.v3.facts.map((fact) => ({
+      fact_id: fact.fact_id,
+      round: 1,
+      result: {
+        round: 1,
+        suggested_layer: fact.layer,
+        suggested_aspect: fact.aspect,
+        confidence: 0.9,
+        rationale: "resume",
+      },
+      ts: "2026-05-11T00:00:00.000Z",
+    }));
+    const spy = vi.spyOn(codexText, "runCodexText").mockResolvedValue({
+      stdout: "{}",
+      parsed: {
+        suggested_layer: "in_world_belief",
+        suggested_aspect: "psychology",
+        confidence: 0.1,
+        rationale: "",
+      },
+      attempts: 1,
+      totalDurationMs: 100,
+    });
+
+    const result = await runMigrationWithLlmRefine(v2, {
+      rounds: 1,
+      maxParallel: 1,
+      existingProgress,
+    });
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(result.llm_refine.summary.avg_confidence).toBeCloseTo(0.9, 2);
+  });
 });
 
 function createMinimalV2(): BibleSnapshotV2 {
