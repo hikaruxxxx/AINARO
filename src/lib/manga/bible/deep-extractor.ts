@@ -16,6 +16,7 @@
  *   - volume_synopsis.summary 500-1000字
  */
 import { runCodexText } from "../llm/codex-text";
+import type { ComplianceFinding } from "../compliance/types";
 import type {
   BibleSnapshotV2,
   CharacterEntryV2,
@@ -193,11 +194,25 @@ export type CrossRefPatch = {
   costume_patches?: CostumeDeepPatch[];
   relation_patches?: RelationDeepPatch[];
   volume_patch?: Partial<BibleSnapshotV2["volume_synopsis"]>;
-  compliance_replacements?: Array<{ field_path: string; from: string; to: string; reason?: string }>;
+  compliance_replacements?: ComplianceReplacement[];
+  compliance_post_check?: CompliancePostCheck;
   notes?: string[];
 };
 
 type DryRunResult = { dryRunPrompt: string };
+export type ComplianceReplacement = {
+  field_path: string;
+  from: string;
+  to: string;
+  reason?: string;
+  mode?: "id_rename" | "text_only";
+};
+export type CompliancePostCheck = {
+  fatal_count: number;
+  warn_count: number;
+  remaining_findings: CompliancePostCheckFinding[];
+};
+type CompliancePostCheckFinding = Pick<ComplianceFinding, "category" | "matched_term" | "field_path" | "text_excerpt">;
 type StageCommonArgs = {
   bible: BibleSnapshotV2;
   styleReferenceNote: string;
@@ -226,6 +241,46 @@ const COMPLIANCE_DIRECTIVE = [
   "- 不安なら『○○系の』『○○風の』+ 説明的記述で代替し、固有名は出さない",
   "- **重要**: 既存 bible に NG 語が含まれていたら、必ず patch で safe な架空名に置換すること",
   "- 代替名の発想: data/manga/compliance/blocklist.json の safe_substitutes セクションに各カテゴリの fictional_name_hint と description を用意してあるので、参考にしてよい",
+].join("\n");
+
+const STAGE9_COMPLIANCE_ERADICATION_DIRECTIVE = [
+  "## 最優先タスク: 全フィールド compliance 駆逐",
+  "",
+  "bible 全体を再走し、以下の **すべてのフィールド・id・key** で実在企業名・実在商標",
+  "の残存を検出して compliance_replacements に列挙してください。",
+  "",
+  "検査対象:",
+  "- characters[].id, characters[].name (架空名のはずだが確認)",
+  "- locations[].id, locations[].name, locations[].spec.* の各 string",
+  "- props[].id, props[].name, props[].spec.* の各 string",
+  "- costumes[].id, costumes[].character_id (id が NG 語を含む場合)",
+  "- costumes[].spec.outerwear / .top / .bottom / .accessories[] (NG 語 prefix/suffix)",
+  "- visual_motifs[].id, visual_motifs[].name, visual_motifs[].draw_directive 等",
+  "- continuity_seeds[].group_id, .target_id, .invariant_description",
+  "- relations[] の自由テキスト",
+  "- world.* / volume_synopsis.* の各 string",
+  "- characters[].voice_samples[].line / dialogue 例",
+  "",
+  "NG 語の例 (絶対残してはいけない):",
+  "- ローソン / Lawson / lawson / lawson_blue / lawson_uniform",
+  "- セブンイレブン / 7-Eleven / Apple / iPhone / LINE / Twitter / Instagram",
+  "- トヨタ / ホンダ / Tesla / GU (ファッション店)",
+  "- ポケモン / ガンダム / 鬼滅の刃 / ハリーポッター",
+  "- (data/manga/compliance/blocklist.json の全カテゴリ参照)",
+  "",
+  "各検出に対して compliance_replacements に以下の形式で列挙:",
+  "{",
+  '  "field_path": "costumes[1].id",',
+  '  "from": "costume_ren_lawson_uniform_v1",',
+  '  "to": "costume_ren_blueway_uniform_v1",',
+  '  "reason": "id 内の lawson を blueway (架空コンビニ) に置換"',
+  "}",
+  "",
+  "固有 id は **依存箇所も同期更新**してください:",
+  "- 例: locations[0].id = \"loc_lawson_*\" → \"loc_blueway_*\" に変えるなら、",
+  "  scene-graph や continuity_seeds の target_id も同じ rename を提案",
+  "- bible 内で参照される id は character_id / location_id / prop_id / costume_id / motif_id",
+  "- 同一 NG 語の複数箇所は **すべて列挙** (1 つでも漏れると render に NG が出る)",
 ].join("\n");
 
 const WORLD_ASPECT_TO_PATH: Record<WorldAspect, string[]> = {
@@ -521,14 +576,26 @@ export async function runStage9CrossReference(args: StageCommonArgs): Promise<Cr
     styleReferenceNote: args.styleReferenceNote,
     targetLabel: "cross_reference=whole_bible",
     rules: shallowDepthRules,
+    stagePreamble: STAGE9_COMPLIANCE_ERADICATION_DIRECTIVE,
     context: {
       full_bible_after_stage_1_to_8: args.bible,
       compliance_findings: complianceFindings,
     },
     instruction: "1コール = bible 全体の矛盾解消と最終 polish に集中する。protagonist.backstory と antagonist.dark_mirror_to_protagonist などの不整合、compliance 検出語の置換、depth-spec の per_match 未達項目への追記 patch を返す。",
-    outputSchema: "type CrossRefPatch = { character_patches?: CharacterDeepPatch[]; location_patches?: LocationDeepPatch[]; world_patch?: Partial<WorldSpec>; motif_patches?: MotifDeepPatch[]; prop_patches?: PropDeepPatch[]; costume_patches?: CostumeDeepPatch[]; relation_patches?: RelationDeepPatch[]; volume_patch?: Partial<VolumeSynopsis>; compliance_replacements?: Array<{ field_path: string; from: string; to: string; reason?: string }>; notes?: string[] }",
+    outputSchema: "type CrossRefPatch = { character_patches?: CharacterDeepPatch[]; location_patches?: LocationDeepPatch[]; world_patch?: Partial<WorldSpec>; motif_patches?: MotifDeepPatch[]; prop_patches?: PropDeepPatch[]; costume_patches?: CostumeDeepPatch[]; relation_patches?: RelationDeepPatch[]; volume_patch?: Partial<VolumeSynopsis>; compliance_replacements?: Array<{ field_path: string; from: string; to: string; reason?: string; mode?: \"id_rename\" | \"text_only\" }>; compliance_post_check?: { fatal_count: number; warn_count: number; remaining_findings: Array<{ category: string; matched_term: string; field_path: string; text_excerpt: string }> }; notes?: string[] }",
   });
-  return runStageJson<CrossRefPatch>(prompt, args, "stage9 cross-reference JSON 抽出失敗");
+  const patch = await runStageJson<CrossRefPatch>(prompt, args, "stage9 cross-reference JSON 抽出失敗");
+  if ("dryRunPrompt" in patch) return patch;
+
+  const updatedBible = applyCrossRefPatch(args.bible, patch);
+  const postFindings = scanBible(updatedBible, blocklist, fp);
+  const compliancePostCheck = buildCompliancePostCheck(postFindings);
+  if (compliancePostCheck.fatal_count > 0) {
+    console.warn(
+      `[runStage9CrossReference] compliance fatal remains after Stage 9: ${JSON.stringify(compliancePostCheck.remaining_findings)}`,
+    );
+  }
+  return { ...patch, compliance_post_check: compliancePostCheck };
 }
 
 export function applyCharacterPatch(bible: BibleSnapshotV2, patch: CharacterDeepPatch): BibleSnapshotV2 {
@@ -591,7 +658,42 @@ export function applyCrossRefPatch(bible: BibleSnapshotV2, patch: CrossRefPatch)
   for (const item of patch.costume_patches ?? []) out = applyCostumePatch(out, item);
   for (const item of patch.relation_patches ?? []) out = applyRelationPatch(out, item);
   if (patch.volume_patch) out = applyVolumePatch(out, { volume_no: 1, patch: patch.volume_patch });
+  out = applyComplianceReplacements(out, patch.compliance_replacements ?? []);
   return out;
+}
+
+export function applyComplianceReplacements(
+  bible: BibleSnapshotV2,
+  replacements: ComplianceReplacement[],
+): BibleSnapshotV2 {
+  if (replacements.length === 0) return cloneBible(bible);
+
+  let serialized = JSON.stringify(bible);
+  for (const replacement of replacements) {
+    if (replacement.from.length === 0 || replacement.from === replacement.to) continue;
+    serialized = serialized.replace(new RegExp(escapeRegExp(replacement.from), "g"), replacement.to);
+  }
+
+  return JSON.parse(serialized) as BibleSnapshotV2;
+}
+
+function buildCompliancePostCheck(findings: ComplianceFinding[]): CompliancePostCheck {
+  const fatalCount = findings.filter((finding) => finding.severity === "fatal").length;
+  const warnCount = findings.filter((finding) => finding.severity === "warn").length;
+  return {
+    fatal_count: fatalCount,
+    warn_count: warnCount,
+    remaining_findings: findings.map((finding) => ({
+      category: finding.category,
+      matched_term: finding.matched_term,
+      field_path: finding.field_path,
+      text_excerpt: finding.text_excerpt,
+    })),
+  };
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 async function runStageJson<T>(prompt: string, args: { dryRun?: boolean; cwd?: string; timeoutMs?: number }, errorMessage: string): Promise<T | DryRunResult> {
@@ -614,6 +716,7 @@ function buildStagePrompt(args: {
   styleReferenceNote: string;
   targetLabel: string;
   rules: DepthRule[];
+  stagePreamble?: string;
   focusedFields?: string[];
   enforcedTotalMinChars?: number;
   context: unknown;
@@ -635,6 +738,7 @@ function buildStagePrompt(args: {
     : [];
   return [
     COMPLIANCE_DIRECTIVE,
+    ...(args.stagePreamble ? ["", args.stagePreamble] : []),
     "",
     `# ${args.stageTitle}`,
     "",

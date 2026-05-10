@@ -1,7 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BibleSnapshotV2 } from "../schemas-v2";
+import { runCodexText } from "../llm/codex-text";
 import type { V2Concept } from "./v2-adapter";
 import {
+  applyComplianceReplacements,
+  applyCrossRefPatch,
   runStage1aCharacterBackground,
   runStage1bCharacterPsychology,
   runStage1Character,
@@ -10,7 +13,16 @@ import {
   runStage3World,
   runStage5Prop,
   runStage7Relation,
+  runStage9CrossReference,
 } from "./deep-extractor";
+
+vi.mock("../llm/codex-text", () => ({
+  runCodexText: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.mocked(runCodexText).mockReset();
+});
 
 describe("deep-extractor stage dry-run prompts", () => {
   it("Stage 1 character prompt starts with compliance and includes character depth targets", async () => {
@@ -177,6 +189,145 @@ describe("deep-extractor stage dry-run prompts", () => {
     expect(prompt).toContain("relations[*].description");
     expect(prompt).toContain("type RelationDeepPatch");
     expect(prompt).toContain("1 relation pair");
+  });
+
+  it("Stage 9 cross-reference prompt prioritizes all-field compliance eradication", async () => {
+    const result = await runStage9CrossReference({
+      bible: bible(),
+      styleReferenceNote: "style note",
+      dryRun: true,
+    });
+
+    const prompt = "dryRunPrompt" in result ? result.dryRunPrompt : "";
+    expect(prompt).toContain("## 最優先タスク: 全フィールド compliance 駆逐");
+    expect(prompt).toContain("costumes[].id, costumes[].character_id");
+    expect(prompt).toContain("continuity_seeds[].group_id, .target_id, .invariant_description");
+    expect(prompt).toContain("compliance_replacements");
+    expect(prompt).toContain("lawson_uniform");
+  });
+});
+
+describe("deep-extractor compliance replacements", () => {
+  it("cascades id rename across the whole bible snapshot", () => {
+    const source = bible();
+    source.locations[0].id = "loc_lawson_counter_v1";
+    source.locations[0].name = "Lawson counter";
+    source.continuity_seeds = [
+      {
+        group_id: "loc_lawson_counter_v1_layout_v1",
+        kind: "location_layout",
+        target_id: "loc_lawson_counter_v1",
+        invariant_description: "Lawson blue aisle",
+      },
+    ];
+    source.costumes = [
+      {
+        id: "costume_ren_lawson_uniform_v1",
+        character_id: "char_ren_v1",
+        valid_from_episode: 1,
+        valid_until_episode: null,
+        spec: {
+          outerwear: "lawson_blue short jacket",
+          top: "plain shirt",
+          bottom: "dark pants",
+          shoes: "sneakers",
+          accessories: ["Lawson name badge"],
+          state_description: "clean store shift uniform",
+        },
+      },
+    ];
+
+    const updated = applyComplianceReplacements(source, [
+      {
+        field_path: "locations[0].id",
+        from: "loc_lawson_counter_v1",
+        to: "loc_blueway_counter_v1",
+        reason: "id 内の lawson を架空名へ置換",
+        mode: "id_rename",
+      },
+      {
+        field_path: "costumes[0].id",
+        from: "costume_ren_lawson_uniform_v1",
+        to: "costume_ren_blueway_uniform_v1",
+        reason: "costume id rename",
+        mode: "id_rename",
+      },
+      {
+        field_path: "costumes[0].spec.outerwear",
+        from: "lawson_blue",
+        to: "blueway_blue",
+        reason: "uniform prefix rename",
+      },
+      {
+        field_path: "locations[0].name",
+        from: "Lawson",
+        to: "Blueway",
+        reason: "store name rename",
+      },
+    ]);
+
+    expect(updated.locations[0].id).toBe("loc_blueway_counter_v1");
+    expect(updated.locations[0].name).toBe("Blueway counter");
+    expect(updated.continuity_seeds[0].group_id).toBe("loc_blueway_counter_v1_layout_v1");
+    expect(updated.continuity_seeds[0].target_id).toBe("loc_blueway_counter_v1");
+    expect(updated.continuity_seeds[0].invariant_description).toBe("Blueway blue aisle");
+    expect(updated.costumes[0].id).toBe("costume_ren_blueway_uniform_v1");
+    expect(updated.costumes[0].spec.outerwear).toBe("blueway_blue short jacket");
+    expect(updated.costumes[0].spec.accessories).toEqual(["Blueway name badge"]);
+    expect(JSON.stringify(updated)).not.toMatch(/lawson|Lawson/);
+  });
+
+  it("applies compliance replacements through applyCrossRefPatch without dropping other patch behavior", () => {
+    const source = bible();
+    source.locations[0].name = "Lawson Gate";
+
+    const updated = applyCrossRefPatch(source, {
+      location_patches: [
+        {
+          location_id: "loc_gate_v1",
+          patch: { spec: { atmosphere: "quiet Lawson storefront" } },
+        },
+      ],
+      compliance_replacements: [
+        {
+          field_path: "locations[0].name",
+          from: "Lawson",
+          to: "Blueway",
+          reason: "架空コンビニ名へ置換",
+        },
+      ],
+    });
+
+    expect(updated.locations[0].name).toBe("Blueway Gate");
+    expect(updated.locations[0].spec.atmosphere).toBe("quiet Blueway storefront");
+  });
+
+  it("stores compliance_post_check when Stage 9 leaves fatal findings", async () => {
+    const source = bible();
+    source.locations[0].name = "Lawson Gate";
+    vi.mocked(runCodexText).mockResolvedValue({
+      stdout: "{}",
+      parsed: { notes: ["no replacement returned"] },
+      attempts: 1,
+      totalDurationMs: 1,
+    });
+
+    const result = await runStage9CrossReference({
+      bible: source,
+      styleReferenceNote: "style note",
+    });
+
+    expect("dryRunPrompt" in result).toBe(false);
+    if ("dryRunPrompt" in result) return;
+    expect(result.compliance_post_check?.fatal_count).toBeGreaterThan(0);
+    expect(result.compliance_post_check?.remaining_findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          matched_term: "Lawson",
+          field_path: "locations[0].name",
+        }),
+      ]),
+    );
   });
 });
 
