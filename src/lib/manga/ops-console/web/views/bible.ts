@@ -150,6 +150,14 @@ const CSS = `
 .bib-img-actions__btn--primary:hover { filter: brightness(1.08); }
 .bib-img-actions__btn--adopted { background: #16a34a; color: #fff; border-color: #16a34a; cursor: default; }
 .bib-img-actions__btn--adopted:disabled { opacity: 1; }
+.bib-fulltext-modal { align-items: flex-start; padding: 32px 16px; overflow-y: auto; }
+.bib-fulltext-card { width: min(96vw, 1080px); max-height: calc(100vh - 64px); overflow-y: auto; padding: var(--space-4); display: grid; gap: var(--space-3); }
+.bib-fulltext-card .bib-section h3 { font-size: var(--fs-md); border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-1); }
+.bib-fulltext-card p { margin: 0; }
+.bib-voice-sample { padding: 4px 0; border-bottom: 1px dashed var(--border-subtle); font-size: var(--fs-sm); line-height: 1.5; }
+.bib-voice-sample__intent { color: var(--text-tertiary); margin-right: var(--space-1); }
+.bib-childhood-episode { padding: var(--space-2) 0; border-bottom: 1px dashed var(--border-subtle); }
+.bib-childhood-episode h4 { margin: 0 0 var(--space-1) 0; font-size: var(--fs-md); }
 .bib-adopt-note { color: var(--text-secondary); font-size: var(--fs-xs, 11px); padding: 2px 6px; background: color-mix(in srgb, #16a34a 15%, transparent); border-radius: var(--radius-sm); }
 .bib-adopt-other { color: var(--text-tertiary); font-size: var(--fs-xs, 11px); }
 .bib-card { position: relative; }
@@ -228,6 +236,7 @@ type ViewState = {
     index: number;
     cacheBust?: number; // image src の cache 強制無効化用 (regen 後に更新)
   } | null;
+  characterFulltext: { id: string } | null;
   /** L02 1 variant 再生成 / L02_audit 単独再監査 / 一括再生成の進行 state */
   imageJob: {
     /** regen=単一 variant 再生成→単独再監査、audit=単独再監査、bulk_regen=複数 entity の再生成→全体再監査 */
@@ -365,6 +374,75 @@ function pickThumbFile(kind: AssetKind, files: string[]): string {
     }
   }
   return files[0];
+}
+
+function hasRenderableContent(value: unknown): boolean {
+  if (value === undefined || value === null) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "object") return Object.keys(asRecord(value)).length > 0;
+  return true;
+}
+
+function renderPreWrapParagraph(value: unknown): string {
+  return `<p style="white-space: pre-wrap; line-height: 1.6;">${escapeHtml(asText(value))}</p>`;
+}
+
+// dict の各 sub-key を <section class="bib-section"> で展開する。
+// string→<p style="white-space: pre-wrap;">、配列→asList、dict→asKeyValueTableWithLists。
+function renderDictSubsections(obj: Record<string, unknown>, keyLabels?: Record<string, string>): string {
+  const entries = Object.entries(obj);
+  if (entries.length === 0) return "";
+  return entries.map(([key, value]) => {
+    const label = keyLabels?.[key] ?? key;
+    let body: string;
+    if (typeof value === "string") {
+      body = `<p style="white-space: pre-wrap; line-height: 1.6;">${escapeHtml(value)}</p>`;
+    } else if (Array.isArray(value)) {
+      body = asList(value);
+    } else if (typeof value === "object" && value !== null) {
+      body = asKeyValueTableWithLists(asRecord(value));
+    } else {
+      body = `<p>${escapeHtml(asText(value))}</p>`;
+    }
+    return `<section class="bib-section"><h3>${escapeHtml(label)}</h3>${body}</section>`;
+  }).join("");
+}
+
+function renderDeepWorldValue(value: unknown): string {
+  if (typeof value === "string") return renderPreWrapParagraph(value);
+  if (Array.isArray(value)) return asList(value);
+  if (typeof value === "object" && value !== null) return renderDictSubsections(asRecord(value));
+  return `<p>${escapeHtml(asText(value))}</p>`;
+}
+
+function renderWorldCard(title: string, value: unknown): string {
+  if (!hasRenderableContent(value)) return "";
+  return `<section class="nc-card bib-section">
+    <h3>${escapeHtml(title)}</h3>
+    ${renderDeepWorldValue(value)}
+    ${detailsRaw("生 JSON", value)}
+  </section>`;
+}
+
+function renderHistoryTimeline(value: unknown): string {
+  if (!Array.isArray(value) || value.length === 0) return "";
+  return `<section class="nc-card bib-section">
+    <h3>歴史年表</h3>
+    <ol>${value.map((item) => {
+      const obj = asRecord(item);
+      const year = obj.year ?? "";
+      const event = obj.event ?? obj.summary ?? obj.description ?? item;
+      const rest = { ...obj };
+      delete rest.year;
+      delete rest.event;
+      const extra = Object.keys(rest).length > 0
+        ? `<details><summary>詳細</summary>${asKeyValueTable(asRecord(item))}</details>`
+        : "";
+      return `<li>${escapeHtml(`${asText(year)}: ${asText(event)}`)}${extra}</li>`;
+    }).join("")}</ol>
+    ${detailsRaw("生 JSON", value)}
+  </section>`;
 }
 
 // ============================================================
@@ -674,6 +752,9 @@ function renderAssetCards(
     const highlights = pickSpecHighlights(item, kind);
     const auditCard = renderEntityCardAudit(getEntityAudit(audit, kind, id));
     const choice = adoptedChoiceFor(adoptedVariants ?? null, kind, id);
+    const characterFulltextButton = kind === "characters"
+      ? `<div class="bib-img-actions"><button type="button" class="bib-img-actions__btn" data-bib-character-fulltext data-bib-character-id="${escapeHtml(id)}">全文表示</button></div>`
+      : "";
     const adoptedBadge = choice
       ? `<span class="bib-card__adopted" title="採用中: ${escapeHtml(choice.chosen_variant)}">★ ${escapeHtml(choice.chosen_variant)}</span>`
       : "";
@@ -686,6 +767,7 @@ function renderAssetCards(
         ${summary ? `<div class="bib-summary">${escapeHtml(summary)}</div>` : ""}
         ${renderSpecRows(highlights)}
         ${files.length > 1 ? `<button type="button" class="bib-meta bib-ref-count" ${lbAttrs}>${files.length} refs</button>` : ""}
+        ${characterFulltextButton}
         <details class="bib-card__raw"><summary>raw</summary><pre>${jsonHtml(item)}</pre></details>
       </article>`;
   }).join("")}</div>`;
@@ -705,6 +787,7 @@ function renderDisplayMode(active: DisplayMode): string {
 
 function renderWorldReader(world: unknown): string {
   const obj = asRecord(world);
+  const history = asRecord(obj.history);
   const factions = Array.isArray(obj.factions) ? obj.factions : [];
   const lexicon = asRecord(obj.lexicon);
   const { forbidden_terms_global, p1_opening_directive, ...lexiconRest } = lexicon;
@@ -746,6 +829,15 @@ function renderWorldReader(world: unknown): string {
       ${Array.isArray(obj.timeline) ? `<ol>${obj.timeline.map((item) => `<li>${escapeHtml(asText(item))}</li>`).join("")}</ol>` : `<p>${escapeHtml(asText(obj.timeline))}</p>`}
       ${detailsRaw("生 JSON", obj.timeline)}
     </section>
+    ${renderHistoryTimeline(history.timeline)}
+    ${renderWorldCard("pre-canon イベント", history.pre_canon_events)}
+    ${renderWorldCard("能力体系の論理", obj.power_system_logic)}
+    ${renderWorldCard("宇宙観", obj.cosmology)}
+    ${renderWorldCard("経済システム", obj.economic_system)}
+    ${renderWorldCard("社会階層", obj.social_strata)}
+    ${renderWorldCard("日常の質感", obj.daily_life_textures)}
+    ${renderWorldCard("言語と命名", obj.language_and_naming)}
+    ${renderWorldCard("禁忌のロア", obj.forbidden_lore)}
     <section class="nc-card bib-section">
       <h3>勢力 (Factions)</h3>
       <div class="bib-factions">${factions.map((item) => {
@@ -1398,6 +1490,116 @@ function renderLightbox(state: ViewState): string {
     </div>`;
 }
 
+function renderFulltextSection(title: string, value: unknown, renderer?: (value: unknown) => string): string {
+  if (!hasRenderableContent(value)) return "";
+  return `<section class="nc-card bib-section">
+    <h3>${escapeHtml(title)}</h3>
+    ${renderer ? renderer(value) : renderPreWrapParagraph(value)}
+  </section>`;
+}
+
+function renderChildhoodEpisodes(value: unknown): string {
+  if (!Array.isArray(value) || value.length === 0) return "";
+  return value.map((episode) => {
+    const obj = asRecord(episode);
+    return `<article class="bib-childhood-episode">
+      <h4>${escapeHtml(asText(obj.title ?? "エピソード"))}</h4>
+      ${renderPreWrapParagraph(obj.text ?? obj.summary ?? obj.description ?? episode)}
+    </article>`;
+  }).join("");
+}
+
+function renderVoiceSamples(value: unknown): string {
+  if (!Array.isArray(value) || value.length === 0) return "";
+  return value.map((sample) => {
+    const obj = asRecord(sample);
+    const intent = asText(obj.intent ?? obj.emotion ?? obj.context ?? "");
+    const line = asText(obj.line ?? obj.text ?? sample);
+    return `<div class="bib-voice-sample">
+      ${intent ? `<strong class="bib-voice-sample__intent">${escapeHtml(intent)}:</strong>` : ""}
+      「${escapeHtml(line)}」
+    </div>`;
+  }).join("");
+}
+
+function renderRelationshipPerPartner(value: unknown): string {
+  if (!Array.isArray(value) || value.length === 0) return "";
+  return value.map((relationship) => {
+    const obj = asRecord(relationship);
+    const partnerId = asText(obj.partner_id ?? obj.character_id ?? obj.id ?? "partner");
+    return `<section class="bib-section">
+      <h4>→ ${escapeHtml(partnerId)}</h4>
+      ${renderPreWrapParagraph(obj.summary ?? obj.description ?? relationship)}
+    </section>`;
+  }).join("");
+}
+
+function renderGrowthPerVolume(value: unknown): string {
+  if (!Array.isArray(value) || value.length === 0) return "";
+  return `<table class="nc-table"><thead><tr><th>vol</th><th>growth</th></tr></thead><tbody>${value.map((entry) => {
+    const obj = asRecord(entry);
+    return `<tr><td>${escapeHtml(asText(obj.vol ?? obj.volume ?? ""))}</td><td>${escapeHtml(asText(obj.growth ?? obj.summary ?? obj.description ?? entry))}</td></tr>`;
+  }).join("")}</tbody></table>`;
+}
+
+function renderObjectOrText(value: unknown): string {
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) return asKeyValueTableWithLists(asRecord(value));
+  if (Array.isArray(value)) return asList(value);
+  return renderPreWrapParagraph(value);
+}
+
+function renderCharacterFulltextModal(state: ViewState): string {
+  const characterFulltext = state.characterFulltext;
+  const bible = state.bible;
+  if (!characterFulltext || !bible) return "";
+  const character = bible.characters.find((item) => idOf(item) === characterFulltext.id);
+  if (!character) return "";
+  const obj = asRecord(character);
+  const spec = asRecord(obj.spec);
+  const id = idOf(character);
+  const name = nameOf(character);
+  const basic = {
+    role: obj.role ?? spec.role,
+    name_romaji: obj.name_romaji ?? spec.name_romaji,
+    occupation: obj.occupation ?? spec.occupation,
+    age_visual: obj.age_visual ?? spec.age_visual,
+  };
+  const basicClean = Object.fromEntries(Object.entries(basic).filter(([, value]) => value !== undefined));
+  return `
+    <div class="nc-modal is-open bib-fulltext-modal" id="bib-character-fulltext">
+      <div class="nc-modal__card bib-fulltext-card bib-modal-body" role="dialog" aria-modal="true" aria-label="${escapeHtml(name)} 全文">
+        <div class="bib-modal-head">
+          <h3 class="bib-modal-title">${escapeHtml(`${name} (${id}) 全文`)}</h3>
+          <span class="bib-spacer"></span>
+          <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-bib-character-fulltext-close>閉じる</button>
+        </div>
+        ${Object.keys(basicClean).length > 0 ? `<section class="nc-card bib-section"><h3>役割・基本</h3>${asKeyValueTable(basicClean)}</section>` : ""}
+        ${renderFulltextSection("外見メモ", obj.appearance_notes)}
+        ${renderFulltextSection("典型的な一日", obj.typical_day_in_life)}
+        ${renderFulltextSection("背景・経歴", obj.backstory)}
+        ${renderFulltextSection("幼少期エピソード", obj.childhood_episodes, renderChildhoodEpisodes)}
+        ${renderFulltextSection("深層心理", obj.psychology_deep)}
+        ${renderFulltextSection("防衛機制", obj.defense_mechanisms)}
+        ${renderFulltextSection("世界観フィルタ", obj.worldview_filter)}
+        ${renderFulltextSection("声サンプル", obj.voice_samples, renderVoiceSamples)}
+        ${renderFulltextSection("関係性 (per partner)", obj.relationship_per_partner, renderRelationshipPerPartner)}
+        ${renderFulltextSection("巻別成長", obj.growth_per_volume, renderGrowthPerVolume)}
+        ${renderFulltextSection("継続性アンカー", obj.continuity_anchors, asList)}
+        ${renderFulltextSection("継続性パッチノート", obj.continuity_patch_notes, asList)}
+        ${renderFulltextSection("起源の傷 (origin_wound_deep)", obj.origin_wound_deep)}
+        ${renderFulltextSection("思想論争 (ideology_argument)", obj.ideology_argument, renderObjectOrText)}
+        ${renderFulltextSection("主人公との対比 (dark_mirror_to_protagonist)", obj.dark_mirror_to_protagonist, renderObjectOrText)}
+        ${hasRenderableContent(obj.spec) ? `<section class="nc-card bib-section"><h3>生 spec</h3>${asKeyValueTable(spec)}</section>` : ""}
+        ${hasRenderableContent(obj.attribute_classifier) ? `<section class="nc-card bib-section"><h3>属性分類器</h3>${asKeyValueTable(asRecord(obj.attribute_classifier))}</section>` : ""}
+        ${renderFulltextSection("登場巻", obj.appears_in_volumes, asList)}
+        <section class="nc-card bib-section">
+          <h3>生 JSON 全体</h3>
+          ${detailsRaw("生 JSON", character)}
+        </section>
+      </div>
+    </div>`;
+}
+
 function render(container: HTMLElement, state: ViewState): void {
   container.innerHTML = `
     <div class="bib-view">
@@ -1416,6 +1618,7 @@ function render(container: HTMLElement, state: ViewState): void {
     </div>
     ${renderModal(state)}
     ${renderLightbox(state)}
+    ${renderCharacterFulltextModal(state)}
     ${state.toast ? `<div class="nc-toast nc-toast--${state.toast.kind}">${escapeHtml(state.toast.message)}</div>` : ""}
   `;
 }
@@ -1485,6 +1688,7 @@ export function mountBibleView(container: HTMLElement): () => void {
     runningLayer: null,
     log: [],
     lightbox: null,
+    characterFulltext: null,
     imageJob: null,
     toast: null,
     coreHookEditMode: false,
@@ -1547,6 +1751,18 @@ export function mountBibleView(container: HTMLElement): () => void {
     if (!(target instanceof HTMLElement)) return;
     if (target.closest<HTMLButtonElement>("[data-open-ai-edit]")) {
       void openAiEditModal({ scope: state.slug ?? "_console" });
+      return;
+    }
+    if (target.closest("[data-bib-character-fulltext-close]")) {
+      state.characterFulltext = null;
+      render(container, state);
+      return;
+    }
+    const characterFulltextTrigger = target.closest<HTMLElement>("[data-bib-character-fulltext]");
+    const characterFulltextId = characterFulltextTrigger?.dataset.bibCharacterId;
+    if (characterFulltextId) {
+      state.characterFulltext = { id: characterFulltextId };
+      render(container, state);
       return;
     }
     if (target.closest("[data-bib-lightbox-close]")) {
