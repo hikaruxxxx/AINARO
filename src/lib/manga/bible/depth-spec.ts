@@ -52,7 +52,11 @@ export const BIBLE_DEPTH_SPEC: DepthSpec = {
     { path: "locations[*].spec.who_typically_inhabits", label: "locations.main.who_typically_inhabits", scope: "location", metric: { kind: "min_chars", min: 500, ideal: 1500 } },
     { path: "locations[*].spec.iconic_objects", label: "locations.main.iconic_objects", scope: "location", metric: { kind: "min_count", min: 5, min_chars_each: 200 } },
 
+    { path: "world.premise", label: "world.premise", scope: "world", metric: { kind: "min_chars", min: 1500, ideal: 3000 } },
+    { path: "world.rules[*]", label: "world.rules_each", scope: "world", metric: { kind: "min_count", min: 30, min_chars_each: 100 } },
+    { path: "world.system", label: "world.system", scope: "world", metric: { kind: "min_chars", min: 2000, ideal: 5000 } },
     { path: "world.history.timeline", label: "world.history_timeline", scope: "world", metric: { kind: "min_count", min: 30, min_chars_each: 200 } },
+    // world.timeline (legacy 1 行 string) は世代を跨いで残置。world.history.timeline へ統合予定
     { path: "world.power_system_logic", label: "world.power_system_logic", scope: "world", metric: { kind: "min_chars", min: 5000, ideal: 15000 } },
     { path: "world.cosmology", label: "world.cosmology", scope: "world", metric: { kind: "min_chars", min: 1500, ideal: 5000 } },
     { path: "world.economic_system", label: "world.economic_system", scope: "world", metric: { kind: "min_chars", min: 3000, ideal: 8000 } },

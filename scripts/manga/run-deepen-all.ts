@@ -59,7 +59,7 @@ type StageStats = {
   outputChars: number;
 };
 
-const WORLD_ASPECTS: WorldAspect[] = ["history", "power_system", "cosmology", "economy", "social", "daily_life", "language", "forbidden_lore"];
+const WORLD_ASPECTS: WorldAspect[] = ["history", "power_system", "cosmology", "economy", "social", "daily_life", "language", "forbidden_lore", "foundation"];
 
 const DEFAULT_STYLE_REF_NOTE = `参考: 現代ダンジョン系なろうコミカライズ。線細め、白多め、人物優先、縦書き吹き出し、背景は establishing 以外ミニマル。`;
 

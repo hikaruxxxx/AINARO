@@ -161,6 +161,24 @@ describe("deep-extractor stage dry-run prompts", () => {
     expect(prompt).not.toContain("world.economic_system: 最低 3,000 字");
   });
 
+  it("Stage 3 foundation prompt includes premise, rules, and system targets", async () => {
+    const result = await runStage3World({
+      bible: bible(),
+      v2Concept: concept(),
+      aspect: "foundation",
+      styleReferenceNote: "style note",
+      dryRun: true,
+    });
+
+    const prompt = "dryRunPrompt" in result ? result.dryRunPrompt : "";
+    expect(prompt).toContain("world_aspect=foundation");
+    expect(prompt).toContain("world.premise: 最低 1,500 字、ideal 3,000 字");
+    expect(prompt).toContain("world.rules[*]: 最低 30 件、各 100 字以上");
+    expect(prompt).toContain("world.system: 最低 2,000 字、ideal 5,000 字");
+    expect(prompt).toContain("既存 rules をすべて含めた 30 件以上の完全版配列");
+    expect(prompt).not.toContain("world.power_system_logic: 最低 5,000 字");
+  });
+
   it("Stage 5 prop prompt includes owner context and prop depth rules", async () => {
     const result = await runStage5Prop({
       bible: bible(),

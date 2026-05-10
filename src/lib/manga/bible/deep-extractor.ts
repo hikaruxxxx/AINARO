@@ -153,7 +153,8 @@ export type WorldAspect =
   | "social"
   | "daily_life"
   | "language"
-  | "forbidden_lore";
+  | "forbidden_lore"
+  | "foundation";
 
 export type WorldDeepPatch = {
   aspect: WorldAspect;
@@ -292,6 +293,7 @@ const WORLD_ASPECT_TO_PATH: Record<WorldAspect, string[]> = {
   daily_life: ["world.daily_life_textures"],
   language: ["world.language_and_naming"],
   forbidden_lore: ["world.forbidden_lore"],
+  foundation: ["world.premise", "world.rules[*]", "world.system"],
 };
 
 /**
@@ -456,10 +458,20 @@ export async function runStage3World(args: StageCommonArgs & {
       core_hook: args.bible.meta.core_hook,
       characters_minimal: args.bible.characters.map(minimalCharacter),
     },
-    instruction: "1コール = 1 world aspect に集中し、他 aspect を薄く広げず指定 aspect だけを深掘りする。作中ルールと読者報酬が矛盾しない patch を返す。",
+    instruction: worldAspectInstruction(args.aspect),
     outputSchema: "type WorldDeepPatch = { aspect: WorldAspect; patch: Partial<BibleSnapshotV2['world']> }",
   });
   return runStageJson<WorldDeepPatch>(prompt, args, "stage3 world JSON 抽出失敗");
+}
+
+function worldAspectInstruction(aspect: WorldAspect): string {
+  const base = "1コール = 1 world aspect に集中し、他 aspect を薄く広げず指定 aspect だけを深掘りする。作中ルールと読者報酬が矛盾しない patch を返す。";
+  if (aspect !== "foundation") return base;
+  return [
+    base,
+    "foundation では premise は世界観の根本前提を 1,500-3,000 字、rules は実務で機能する作中ルールを 30 件以上かつ各 100 字以上、system はゲーム的ステータス/制度の詳細を 2,000-5,000 字で記述する。",
+    "rules は既存 rules をすべて含めた 30 件以上の完全版配列として返し、短い箇条書きではなく運用条件・例外・読者に見える効果まで書く。",
+  ].join("\n");
 }
 
 export async function runStage4Motif(args: StageCommonArgs & {
