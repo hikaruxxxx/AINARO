@@ -5,6 +5,7 @@
  *   段階A (deterministic): TODO/null/長さ/テンプレ反復/anchor 数 を機械的検出
  *   段階B (Codex CLI judge): セマンティックな浅さを LLM judge に依頼
  *   段階C (compliance): 商標・実在名などの混入を辞書検出
+ *   段階D (depth): 商業作家資料集レベルの記述深度に対する coverage 計測
  *
  * 出力: BibleLintReport (致命/警告/情報の3レベル)
  */
@@ -12,6 +13,7 @@ import { runCodexText } from "../llm/codex-text";
 import { loadBlocklist, loadFalsePositives, scanBible } from "../compliance/scanner";
 import type { ComplianceFinding } from "../compliance/types";
 import type { BibleSnapshotV2 } from "../schemas-v2";
+import { depthLint } from "../bible/depth-lint";
 
 export type LintSeverity = "fatal" | "warn" | "info";
 export type LintScope =
@@ -24,6 +26,7 @@ export type LintScope =
   | "motif"
   | "continuity_seed"
   | "volume_synopsis"
+  | "depth"
   | "global"
   | "compliance";
 
@@ -531,6 +534,7 @@ export async function lintBible(args: {
   bible: BibleSnapshotV2;
   skipLlm?: boolean;
   skipCompliance?: boolean;
+  skipDepth?: boolean;
   blocklistPath?: string;
   falsePositivesPath?: string;
   cwd?: string;
@@ -564,6 +568,18 @@ export async function lintBible(args: {
         scope: "compliance",
         rule: "compliance_load_failed",
         message: `compliance lint 失敗 (static/LLM lint のみ採用): ${errorMessage(e)}`,
+      });
+    }
+  }
+  if (!args.skipDepth) {
+    try {
+      findings.push(...depthLint(args.bible));
+    } catch (e) {
+      findings.push({
+        severity: "info",
+        scope: "depth",
+        rule: "depth_lint_failed",
+        message: `depth lint 失敗 (static/LLM/compliance lint のみ採用): ${errorMessage(e)}`,
       });
     }
   }

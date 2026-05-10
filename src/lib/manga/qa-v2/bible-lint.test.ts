@@ -168,9 +168,34 @@ describe("lintBible compliance integration", () => {
       bible: bibleWithLocationName("ローソン灯町店"),
       skipLlm: true,
       skipCompliance: true,
+      skipDepth: true,
     });
 
     expect(report.findings.some((finding) => finding.rule.startsWith("compliance:"))).toBe(false);
     expect(report.findings.some((finding) => finding.rule === "compliance_load_failed")).toBe(false);
+  });
+});
+
+describe("lintBible depth integration", () => {
+  it("skipDepth: true では depth findings が混入しない", async () => {
+    const report = await lintBible({
+      bible: baseBible(),
+      skipLlm: true,
+      skipCompliance: true,
+      skipDepth: true,
+    });
+
+    expect(report.findings.some((finding) => finding.rule.startsWith("depth:"))).toBe(false);
+  });
+
+  it("skipDepth なしでは 4段階目の depth findings を合算する", async () => {
+    const report = await lintBible({
+      bible: baseBible(),
+      skipLlm: true,
+      skipCompliance: true,
+    });
+
+    expect(report.findings.some((finding) => finding.rule === "depth:characters[role=protagonist].backstory")).toBe(true);
+    expect(report.summary).toMatch(/fatal=\d+ warn=\d+ info=\d+/u);
   });
 });
