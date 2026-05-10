@@ -46,6 +46,7 @@ import {
 import { handleStoryboardProposalsGet } from "./handlers/storyboard-proposals";
 import { handleBootstrap } from "./handlers/bootstrap";
 import { handleBible } from "./handlers/bible";
+import { handleBibleV3Preview } from "./handlers/bible-v3-preview";
 import { handleBibleMetaPut } from "./handlers/bible-meta";
 import {
   handleBibleAdoptedVariantsGet,
@@ -400,6 +401,15 @@ export async function handleApi(
       const slug = m[1];
       if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
       return handleBible(slug, res);
+    }
+  }
+  {
+    const m = p.match(/^\/api\/works\/([^/]+)\/bible\/v3-preview$/);
+    if (m) {
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
+      const slug = m[1];
+      if (!isValidSlug(slug)) return send(res, 400, { error: "作品 ID が不正です" });
+      return handleBibleV3Preview(slug, res);
     }
   }
   {

@@ -2,6 +2,7 @@ import {
   ApiError,
   apiGetBible,
   apiGetBibleAdoptedVariants,
+  apiGetBibleV3Preview,
   apiPostBibleAdoptedVariant,
   apiPutBibleMeta,
   apiPostJob,
@@ -18,10 +19,11 @@ import {
   type BibleCharacterRef,
   type BibleImagesAuditReport,
   type BiblePropsAuditReport,
+  type BibleV3PreviewResponse,
   type JobEvent,
   type LayerId,
 } from "../lib/api";
-import type { CoreHookV2, RewardMode } from "../../../schemas-v2";
+import type { CoreHookV2, FactNode, Layer, RewardMode } from "../../../schemas-v2";
 import {
   asKeyValueTable,
   asList,
@@ -35,10 +37,17 @@ import { openAiEditModal } from "../components/ai-edit-modal";
 
 type AuditEntity = BibleAuditLocation | BibleAuditCharacter | BibleAuditProp;
 type AnyAuditReport = BibleImagesAuditReport | BibleCharactersAuditReport | BiblePropsAuditReport;
-type BibleTab = "world" | "characters" | "locations" | "props" | "style" | "costumes" | "relations" | "nav" | "synopsis" | "core_hook" | "meta" | "raw";
+type BibleTab = "world" | "characters" | "locations" | "props" | "style" | "costumes" | "relations" | "nav" | "synopsis" | "core_hook" | "meta" | "v3_preview" | "raw";
 type ActionLayer = "L01" | "L01b" | "L01c";
 type DisplayMode = "reader" | "raw";
 type AssetKind = "characters" | "locations" | "props";
+const V3_LAYERS: Layer[] = [
+  "in_world_belief",
+  "revealed_at_volume",
+  "meta_truth",
+  "system_specification",
+  "character_arc_state",
+];
 
 const BIBLE_TAB_GROUPS: Array<{ groupLabel: string; tabs: Array<{ id: BibleTab; label: string }> }> = [
   {
@@ -60,6 +69,7 @@ const BIBLE_TAB_GROUPS: Array<{ groupLabel: string; tabs: Array<{ id: BibleTab; 
       { id: "synopsis", label: "巻シノプシス" },
       { id: "core_hook", label: "中核ギミック" },
       { id: "meta", label: "メタ・補足" },
+      { id: "v3_preview", label: "v3 preview" },
       { id: "raw", label: "生 JSON" },
     ],
   },
@@ -217,6 +227,21 @@ const CSS = `
 .bib-core-hook__radio-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .bib-core-hook__refs-edit { display: grid; gap: var(--space-2); }
 .bib-core-hook__ref-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
+.bib-v3 { display: grid; gap: var(--space-3); }
+.bib-v3__head { display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; }
+.bib-v3__head h3 { margin: 0; font-size: var(--fs-lg); }
+.bib-v3__filters { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.bib-v3__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-2); }
+.bib-v3__fact { display: grid; gap: var(--space-2); padding: var(--space-2); }
+.bib-v3__body { color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.45; overflow-wrap: anywhere; }
+.bib-v3__meta { display: flex; gap: 6px; flex-wrap: wrap; color: var(--text-tertiary); font-size: var(--fs-xs, 11px); font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+.bib-v3__findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-2); }
+.bib-v3__list { margin: 0; padding-left: 1.25rem; color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.45; }
+.bib-v3__list li { margin-bottom: 4px; overflow-wrap: anywhere; }
+.bib-v3-modal { align-items: flex-start; padding: 32px 16px; overflow-y: auto; }
+.bib-v3-modal__card { width: min(96vw, 1080px); max-height: calc(100vh - 64px); overflow-y: auto; padding: var(--space-4); display: grid; gap: var(--space-3); }
+.bib-v3-modal__pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 420px; overflow: auto; padding: var(--space-2); border-radius: var(--radius-sm); background: var(--surface-sunken); color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.5; }
+.bib-v3__links { display: flex; gap: var(--space-1); flex-wrap: wrap; }
 `;
 
 type CoreHookDraft = {
@@ -234,6 +259,13 @@ type ViewState = {
   bible: BibleAssetView | null;
   /** Phase A: 採用 variant 記録 (character / location / prop ごとに 1 chosen) */
   adoptedVariants: BibleAdoptedVariants | null;
+  v3PreviewState: {
+    loading: boolean;
+    data: BibleV3PreviewResponse | null;
+    error: string | null;
+    layerFilter: Set<Layer>;
+    selectedFactId: string | null;
+  } | null;
   tab: BibleTab;
   displayMode: DisplayMode;
   loading: boolean;
@@ -1279,6 +1311,7 @@ function renderMetaReader(bible: BibleAssetView): string {
 }
 
 function renderBibleContent(state: ViewState): string {
+  if (state.tab === "v3_preview") return renderV3Preview(state);
   const bible = state.bible;
   if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
   if (state.error && !bible) return `<div class="view-placeholder"><h2>設定資料 (Bible)</h2><p>${escapeHtml(state.error)}</p></div>`;
@@ -1327,6 +1360,158 @@ function renderBibleContent(state: ViewState): string {
     return `${renderDisplayMode(state.displayMode)}${state.displayMode === "raw" ? `<pre class="nc-code-block">${jsonHtml(raw)}</pre>` : renderMetaReader(bible)}`;
   }
   return `<pre class="nc-code-block">${jsonHtml(bible)}</pre>`;
+}
+
+function truncateText(value: string, max: number): string {
+  const chars = Array.from(value);
+  return chars.length > max ? `${chars.slice(0, max).join("")}...` : value;
+}
+
+function getV3State(state: ViewState): NonNullable<ViewState["v3PreviewState"]> {
+  if (!state.v3PreviewState) {
+    state.v3PreviewState = {
+      loading: false,
+      data: null,
+      error: null,
+      layerFilter: new Set(V3_LAYERS),
+      selectedFactId: null,
+    };
+  }
+  return state.v3PreviewState;
+}
+
+function generatedByLabel(fact: FactNode): string {
+  const generatedBy = fact.evidence?.generated_by;
+  if (!generatedBy) return "generated_by: -";
+  return [generatedBy.stage, generatedBy.model, generatedBy.ts].filter(Boolean).join(" / ");
+}
+
+function findFact(data: BibleV3PreviewResponse | null, factId: string | null): FactNode | null {
+  if (!data || !factId) return null;
+  return data.v3.facts.find((fact) => fact.fact_id === factId) ?? null;
+}
+
+function renderV3Preview(state: ViewState): string {
+  const v3State = getV3State(state);
+  if (v3State.loading) return `<div class="nc-empty">v3 preview 読み込み中...</div>`;
+  if (v3State.error) {
+    const guidance = v3State.error.includes("API 404")
+      ? `<p><code>npx tsx scripts/manga/migrate/v2-to-v3-classify.ts --slug ${escapeHtml(state.slug)}</code> を実行してください。</p>`
+      : "";
+    return `<div class="view-placeholder"><h2>V3 Preview</h2><p>${escapeHtml(v3State.error)}</p>${guidance}</div>`;
+  }
+  const data = v3State.data;
+  if (!data) return `<div class="nc-empty">v3 preview は未読み込みです。</div>`;
+
+  const allFacts = data.v3.facts ?? [];
+  const filteredFacts = allFacts.filter((fact) => v3State.layerFilter.has(fact.layer));
+  const generatedAt = data.generated_at ?? data.v3.generated_at;
+  const filters = V3_LAYERS.map((layer) => `
+    <label class="nc-pill nc-pill--check">
+      <input type="checkbox" data-v3-layer="${layer}"${v3State.layerFilter.has(layer) ? " checked" : ""}>
+      ${escapeHtml(layer)}
+    </label>`).join("");
+  const facts = filteredFacts.map((fact) => `
+    <article class="nc-card bib-v3__fact">
+      <div class="bib-v3__meta"><span>${escapeHtml(fact.fact_id)}</span></div>
+      <div class="bib-v3__meta">
+        <span>${escapeHtml(fact.entity_id ?? "global")}</span>
+        <span>${escapeHtml(fact.aspect)}</span>
+        <span>${escapeHtml(fact.layer)}</span>
+      </div>
+      <div class="bib-v3__body">${escapeHtml(truncateText(fact.body, 120))}</div>
+      <div class="bib-v3__meta">
+        <span>${escapeHtml(fact.evidence?.source_path ?? "-")}</span>
+        <span>confidence ${escapeHtml(String(fact.evidence?.confidence ?? fact.confidence ?? "-"))}</span>
+      </div>
+      <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-v3-provenance="${escapeHtml(fact.fact_id)}">provenance: ${escapeHtml(fact.evidence?.generated_by?.stage ?? "-")}</button>
+    </article>`).join("");
+
+  return `<div class="bib-v3">
+    <section class="nc-card bib-section">
+      <div class="bib-v3__head">
+        <h3>V3 Preview (Phase 5-A deterministic migration)</h3>
+        <span class="bib-meta">${escapeHtml(generatedAt ?? "-")}</span>
+        <span class="bib-meta">${filteredFacts.length} / ${allFacts.length} facts</span>
+      </div>
+      <div class="bib-v3__filters">${filters}</div>
+    </section>
+    <section class="bib-v3__grid">${facts || `<div class="nc-empty">選択中 layer の fact はありません</div>`}</section>
+    ${renderV3Findings(data)}
+  </div>`;
+}
+
+function renderV3Findings(data: BibleV3PreviewResponse): string {
+  const roleItems = data.roleEnumViolations.map((item) => `
+    <li>${escapeHtml(item.character_name)}: ${escapeHtml(item.current_role)} -> ${escapeHtml(item.recommended_role)}${item.recommended_subrole ? ` + ${escapeHtml(item.recommended_subrole)}` : ""}</li>`).join("");
+  const unresolved = data.unresolvedReferences.slice(0, 50).map((item) => `
+    <li><span class="bib-meta">${escapeHtml(item.source_path)}</span>: ${escapeHtml(item.matched_text)} <span class="bib-info">${escapeHtml(item.context_excerpt ?? "")}</span></li>`).join("");
+  const needsReview = data.needsReview.map((fact) => `
+    <li><button type="button" class="nc-linklike" data-v3-provenance="${escapeHtml(fact.fact_id)}">${escapeHtml(fact.fact_id)}</button> confidence ${escapeHtml(String(fact.evidence?.confidence ?? fact.confidence ?? "-"))}</li>`).join("");
+  return `<section class="bib-v3__findings">
+    <article class="nc-card bib-section">
+      <h3>Role enum violations</h3>
+      ${roleItems ? `<ul class="bib-v3__list">${roleItems}</ul>` : `<div class="nc-empty">role enum violation はありません</div>`}
+    </article>
+    <article class="nc-card bib-section">
+      <h3>Unresolved references</h3>
+      <p class="bib-info">上位 50 件を表示。現在の 16,181 件は detector 過検出を含みます。</p>
+      ${unresolved ? `<ul class="bib-v3__list">${unresolved}</ul>` : `<div class="nc-empty">unresolved reference はありません</div>`}
+    </article>
+    <article class="nc-card bib-section">
+      <h3>Needs review (confidence &lt; 0.7)</h3>
+      ${needsReview ? `<ul class="bib-v3__list">${needsReview}</ul>` : `<div class="nc-empty">needs review は空です</div>`}
+    </article>
+  </section>`;
+}
+
+function renderFactLinks(label: string, ids: string[] | undefined): string {
+  if (!ids?.length) return "";
+  return `<section class="bib-section">
+    <h3>${escapeHtml(label)}</h3>
+    <div class="bib-v3__links">${ids.map((id) => `<button type="button" class="nc-pill" data-v3-fact-link="${escapeHtml(id)}">${escapeHtml(id)}</button>`).join("")}</div>
+  </section>`;
+}
+
+function renderV3ProvenanceModal(state: ViewState): string {
+  const v3State = state.v3PreviewState;
+  const fact = findFact(v3State?.data ?? null, v3State?.selectedFactId ?? null);
+  if (!fact) return "";
+  const generatedBy = fact.evidence?.generated_by;
+  return `<div class="nc-modal bib-v3-modal" data-v3-provenance-overlay>
+    <div class="nc-card bib-v3-modal__card" role="dialog" aria-modal="true">
+      <div class="bib-modal-head">
+        <h2 class="bib-modal-title">${escapeHtml(fact.fact_id)}</h2>
+        <span class="bib-spacer"></span>
+        <button type="button" class="nc-button nc-button--ghost" data-v3-provenance-close>close</button>
+      </div>
+      <section class="bib-section">
+        <h3>Generated by</h3>
+        ${asKeyValueTable({
+          stage: generatedBy?.stage ?? "-",
+          model: generatedBy?.model ?? "-",
+          ts: generatedBy?.ts ?? "-",
+        })}
+      </section>
+      <section class="bib-section">
+        <h3>Evidence</h3>
+        ${asKeyValueTable({
+          source_path: fact.evidence?.source_path ?? "-",
+          json_pointer: fact.evidence?.json_pointer ?? "-",
+          source_span: fact.evidence?.source_span ? fact.evidence.source_span.join("..") : "-",
+          confidence: fact.evidence?.confidence ?? fact.confidence ?? "-",
+          generated_by: generatedByLabel(fact),
+        })}
+      </section>
+      <section class="bib-section">
+        <h3>Body</h3>
+        <pre class="bib-v3-modal__pre">${escapeHtml(fact.body)}</pre>
+      </section>
+      ${renderFactLinks("references", fact.references)}
+      ${renderFactLinks("invalidates", fact.invalidates)}
+      ${renderFactLinks("supersedes", fact.supersedes)}
+    </div>
+  </div>`;
 }
 
 function actionLabel(layer: ActionLayer): string {
@@ -1636,6 +1821,7 @@ function render(container: HTMLElement, state: ViewState): void {
     ${renderModal(state)}
     ${renderLightbox(state)}
     ${renderCharacterFulltextModal(state)}
+    ${renderV3ProvenanceModal(state)}
     ${state.toast ? `<div class="nc-toast nc-toast--${state.toast.kind}">${escapeHtml(state.toast.message)}</div>` : ""}
   `;
 }
@@ -1657,6 +1843,21 @@ async function refresh(state: ViewState, container: HTMLElement): Promise<void> 
     state.error = errorText(error);
   }
   state.loading = false;
+  render(container, state);
+}
+
+async function loadV3Preview(state: ViewState, container: HTMLElement): Promise<void> {
+  const v3State = getV3State(state);
+  if (v3State.loading || v3State.data) return;
+  v3State.loading = true;
+  v3State.error = null;
+  render(container, state);
+  try {
+    v3State.data = await apiGetBibleV3Preview(state.slug);
+  } catch (error) {
+    v3State.error = errorText(error);
+  }
+  v3State.loading = false;
   render(container, state);
 }
 
@@ -1697,6 +1898,7 @@ export function mountBibleView(container: HTMLElement): () => void {
     slug: app.currentSlug || app.defaultSlug,
     bible: null,
     adoptedVariants: null,
+    v3PreviewState: null,
     tab: "world",
     displayMode: "reader",
     loading: false,
@@ -1770,6 +1972,26 @@ export function mountBibleView(container: HTMLElement): () => void {
       void openAiEditModal({ scope: state.slug ?? "_console" });
       return;
     }
+    if (target.closest("[data-v3-provenance-close]")) {
+      const v3State = getV3State(state);
+      v3State.selectedFactId = null;
+      render(container, state);
+      return;
+    }
+    const v3FactLink = target.closest<HTMLElement>("[data-v3-fact-link]")?.dataset.v3FactLink;
+    if (v3FactLink) {
+      const v3State = getV3State(state);
+      v3State.selectedFactId = v3FactLink;
+      render(container, state);
+      return;
+    }
+    const v3Provenance = target.closest<HTMLElement>("[data-v3-provenance]")?.dataset.v3Provenance;
+    if (v3Provenance) {
+      const v3State = getV3State(state);
+      v3State.selectedFactId = v3Provenance;
+      render(container, state);
+      return;
+    }
     if (target.closest("[data-bib-character-fulltext-close]")) {
       state.characterFulltext = null;
       render(container, state);
@@ -1828,6 +2050,7 @@ export function mountBibleView(container: HTMLElement): () => void {
       state.coreHookEditMode = false;
       state.coreHookDraft = null;
       render(container, state);
+      if (tab === "v3_preview") void loadV3Preview(state, container);
       return;
     }
     const mode = target.closest<HTMLButtonElement>("[data-display-mode]")?.dataset.displayMode as DisplayMode | undefined;
@@ -2014,6 +2237,19 @@ export function mountBibleView(container: HTMLElement): () => void {
   };
   container.addEventListener("input", onCoreHookInput, { signal: controller.signal });
   container.addEventListener("change", onCoreHookInput, { signal: controller.signal });
+  container.addEventListener("change", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    const layer = target.dataset.v3Layer as Layer | undefined;
+    if (!layer || !V3_LAYERS.includes(layer)) return;
+    const v3State = getV3State(state);
+    if (target.checked) {
+      v3State.layerFilter.add(layer);
+    } else {
+      v3State.layerFilter.delete(layer);
+    }
+    render(container, state);
+  }, { signal: controller.signal });
 
   /**
    * kind に応じた L02 引数を組み立てる。

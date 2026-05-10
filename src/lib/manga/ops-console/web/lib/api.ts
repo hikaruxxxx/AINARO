@@ -24,6 +24,9 @@ import type {
 import type { StoryboardAuditReport } from "../../../qa-v2/storyboard-audit";
 import type { NameLintReport } from "../../../qa-v2/name-lint";
 import type { StoryboardProposal } from "../../../storyboard-v2/storyboard-alts";
+import type { RoleEnumViolation } from "../../../bible/migrate-classify";
+import type { UndefinedReference } from "../../../qa-v2/undefined-reference-detector";
+import type { BibleSnapshotV3, FactNode } from "../../../schemas-v2";
 
 export class ApiError extends Error {
   constructor(
@@ -727,6 +730,22 @@ export type BibleAssetView = {
 
 export function apiGetBible(slug: string): Promise<BibleAssetView> {
   return getJson<BibleAssetView>(`/api/works/${encodeURIComponent(slug)}/bible`);
+}
+
+export type BibleV3PreviewResponse = {
+  slug: string;
+  v3: BibleSnapshotV3;
+  unresolvedReferences: UndefinedReference[];
+  roleEnumViolations: RoleEnumViolation[];
+  needsReview: FactNode[];
+  factSourcePathIndex: Record<string, string>;
+  generated_at?: string;
+};
+
+export function apiGetBibleV3Preview(slug: string): Promise<BibleV3PreviewResponse> {
+  return getJson<BibleV3PreviewResponse>(
+    `/api/works/${encodeURIComponent(slug)}/bible/v3-preview`
+  );
 }
 
 export function apiGetBibleAdoptedVariants(slug: string): Promise<BibleAdoptedVariants> {

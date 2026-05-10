@@ -31,6 +31,7 @@ export type LintScope =
   | "depth"
   | "cli_runtime"
   | "atomic_write"
+  | "layer_consistency"
   | "global"
   | "compliance";
 
