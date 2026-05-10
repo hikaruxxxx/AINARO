@@ -684,11 +684,12 @@ function renderShell(
         <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L08.5">L08.5 Name Preview 生成</button>
         <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_1">L04.1 Hook 提案</button>
         <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_9">L04.9 Cliff 提案</button>
-        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI 編集</button>
-        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L04">L04 を AI で修正</button>
-        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L08.5">L08.5 を AI で修正</button>
-        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L08.6">L08.6 を AI で修正</button>
-        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L08.7">L08.7 を AI で修正</button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit
+                title="自由入力で AI 編集 modal を開く (target / prompt を手で書く)">AI 編集 (空)</button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L04"
+                title="storyboard.json (コマ構成・台詞・構図) を AI で修正する modal を開く">コマ構成を AI で修正 (L04)</button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L08.5"
+                title="SVG ネーム + name_audit.json を AI で修正する modal を開く">ネーム画像/監査を AI で修正 (L08.5)</button>
       </div>
       <div class="name-gate-help">
         <code>a</code> approve <code>r</code> reject <code>p</code> pending
