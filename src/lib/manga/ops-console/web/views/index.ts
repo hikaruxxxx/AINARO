@@ -190,6 +190,38 @@ function actionIcon(kind: NextActionItem["kind"]): string {
   }
 }
 
+// last_job.state の英語コードを日本語化 (running/queued/succeeded/failed/aborted)。
+function jobStateLabel(stateName: string | undefined): string {
+  switch (stateName) {
+    case "succeeded":
+      return "成功";
+    case "failed":
+      return "失敗";
+    case "aborted":
+      return "中止";
+    case "running":
+      return "実行中";
+    case "queued":
+      return "待機中";
+    default:
+      return stateName ?? "-";
+  }
+}
+
+// works_snapshot の state 列を日本語化。
+function snapshotStateLabel(stateName: WorkSnapshot["state"]): string {
+  switch (stateName) {
+    case "ok":
+      return "問題なし";
+    case "failed":
+      return "失敗あり";
+    case "stale":
+      return "再生成推奨";
+    case "not_started":
+      return "未着手";
+  }
+}
+
 function renderNextMeta(item: NextActionItem): string {
   const tags = [
     item.slug,
@@ -293,9 +325,9 @@ function renderSnapshot(state: ViewState): string {
                 <td>${escapeHtml(row.phase ?? "-")}</td>
                 <td><span class="idx-badge ${row.audit_failed_total > 0 ? "idx-badge--danger" : "idx-badge--ok"}">${row.audit_failed_total}</span></td>
                 <td><span class="idx-badge ${row.pending_name_total > 0 ? "idx-badge--warn" : "idx-badge--muted"}">${row.pending_name_total}</span></td>
-                <td><span class="idx-badge ${jobBadgeClass(row.last_job?.state)}">${escapeHtml(row.last_job ? `${row.last_job.state} ${row.last_job.layer}` : "-")}</span></td>
+                <td><span class="idx-badge ${jobBadgeClass(row.last_job?.state)}">${escapeHtml(row.last_job ? `${jobStateLabel(row.last_job.state)} ${row.last_job.layer}` : "-")}</span></td>
                 <td><span class="idx-badge ${ageBadgeClass(row.last_modified_at)}">${escapeHtml(formatDate(row.last_modified_at))}</span></td>
-                <td><span class="idx-badge ${stateBadgeClass(row.state)}">${escapeHtml(row.state)}</span></td>
+                <td><span class="idx-badge ${stateBadgeClass(row.state)}">${escapeHtml(snapshotStateLabel(row.state))}</span></td>
               </tr>`;
           })
           .join("");
@@ -306,13 +338,13 @@ function renderSnapshot(state: ViewState): string {
         <table class="idx-snapshot-table">
           <thead>
             <tr>
-              <th>title</th>
-              <th>phase</th>
-              <th>audit failed</th>
-              <th>pending name</th>
-              <th>直近 job</th>
+              <th>作品</th>
+              <th>進捗フェーズ</th>
+              <th>品質検査の失敗</th>
+              <th>ネーム判定待ち</th>
+              <th>直近のジョブ</th>
               <th>最終更新</th>
-              <th>state</th>
+              <th>状態</th>
             </tr>
           </thead>
           <tbody>${body}</tbody>
@@ -364,9 +396,9 @@ function renderGlossaryModal(state: ViewState): string {
   if (!state.glossaryOpen) return "";
   const rows = [
     ["GLOBAL", "全作品の一覧、ジョブ履歴、品質状況を俯瞰する場所。"],
-    ["WORK", "作品を選ぶと出る、概要・Bible / 参照素材・巻プロット・公開準備の場所。"],
+    ["WORK", "作品を選ぶと出る、概要・設定資料・巻プロット・公開準備の場所。"],
     ["EPISODE", "エピソードを選ぶと出る、パイプライン進捗から読者維持改善までの作業場所。"],
-    ["Utility", "個別 layer 起動など、通常フロー外の確認と再実行を扱う場所。"],
+    ["Utility", "個別の工程を起動するなど、通常フロー外の確認と再実行を扱う場所。"],
     ["AI 編集", "現時点では単独 view として残し、次 wave で modal 化する予定。"],
   ];
   return `
@@ -418,7 +450,7 @@ function render(container: HTMLElement, works: WorkInfo[], state: ViewState): vo
     <div class="idx-view">
       ${head}
       <div class="idx-head">
-        <p>エピソードを選んで操作 view (name-gate / revision / layers) に遷移します。</p>
+        <p>エピソードを選ぶと、ネーム / ページ修正 / 個別の工程を起動 へ遷移します。</p>
       </div>
       ${renderNextActions(state)}
       ${renderSnapshot(state)}

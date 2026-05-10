@@ -56,7 +56,7 @@ function gotoEpisode(slug: string, episode: number, view: ViewName): void {
 
 function auditBadge(ep: WorkQualityOverview["episodes"][number]): string {
   if (ep.audit_status === "missing") return `<span class="nc-badge nc-badge--neutral">未実行</span>`;
-  if (ep.audit_status === "stale") return `<span class="nc-badge nc-badge--warning">${ep.audit_failed_count} (stale)</span>`;
+  if (ep.audit_status === "stale") return `<span class="nc-badge nc-badge--warning">${ep.audit_failed_count} (再生成推奨)</span>`;
   if (ep.audit_failed_count > 0) return `<span class="nc-badge nc-badge--danger">${ep.audit_failed_count}</span>`;
   return `<span class="nc-badge nc-badge--success">0</span>`;
 }
@@ -77,7 +77,7 @@ function renderWork(work: WorkQualityOverview): string {
       <td><div class="qh-actions">
         <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-goto-view="name-gate" data-slug="${escapeHtml(work.slug)}" data-episode="${ep.episode}">ネーム判定</button>
         <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-goto-view="revision" data-slug="${escapeHtml(work.slug)}" data-episode="${ep.episode}">ページ修正</button>
-        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-goto-view="quality" data-slug="${escapeHtml(work.slug)}" data-episode="${ep.episode}">品質監査</button>
+        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-goto-view="quality" data-slug="${escapeHtml(work.slug)}" data-episode="${ep.episode}">品質検査</button>
       </div></td>
     </tr>`)
     .join("");
@@ -85,8 +85,8 @@ function renderWork(work: WorkQualityOverview): string {
     <h3>${escapeHtml(work.title || work.slug)} <span class="qh-slug">${escapeHtml(work.slug)}</span></h3>
     <div class="qh-table-wrap">
       <table class="qh-table">
-        <thead><tr><th>ep</th><th>audit failed</th><th>revision 未処理</th><th>未採用</th><th>最終 audit</th><th>actions</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="6">episode がありません</td></tr>'}</tbody>
+        <thead><tr><th>話</th><th>品質検査の失敗</th><th>未処理の修正指示</th><th>未採用</th><th>最終検査</th><th>操作</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="6">話がありません</td></tr>'}</tbody>
       </table>
     </div>
   </section>`;
@@ -113,8 +113,8 @@ function render(container: HTMLElement, state: ViewState): void {
       );
     return `
       <div class="qh-totals">
-        <section class="nc-card qh-total"><span>failed panel 合計</span><strong>${totals.audit_failed}</strong></section>
-        <section class="nc-card qh-total"><span>未処理 revision 合計</span><strong>${totals.revision_unresolved}</strong></section>
+        <section class="nc-card qh-total"><span>失敗 panel 合計</span><strong>${totals.audit_failed}</strong></section>
+        <section class="nc-card qh-total"><span>未処理の修正指示 合計</span><strong>${totals.revision_unresolved}</strong></section>
         <section class="nc-card qh-total"><span>未採用 panel 合計</span><strong>${totals.adopted_pending}</strong></section>
       </div>
       ${works.map(renderWork).join("") || '<div class="nc-empty">作品がありません。</div>'}`;

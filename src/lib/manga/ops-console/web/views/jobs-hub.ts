@@ -6,7 +6,7 @@ import {
   type FailureReason,
 } from "../lib/failure-recipes";
 import { store, type ViewName } from "../lib/store";
-import { layerLabel } from "../labels";
+import { formatLayerLabel, layerLabel, statusLabel, TERMS } from "../labels";
 import { openAiEditModal } from "../components/ai-edit-modal";
 
 const CSS = `
@@ -124,20 +124,20 @@ function failureGroupFor(job: JobSummary): { key: string; reason: FailureReason;
 function viewLabel(view: ViewName): string {
   const labels: Record<ViewName, string> = {
     index: "ホーム",
-    "jobs-hub": "ジョブ",
+    "jobs-hub": "全作品ジョブ",
     "quality-hub": "全作品品質",
-    pipeline: "パイプライン",
-    "name-gate": "ネーム",
+    pipeline: "パイプライン進捗",
+    "name-gate": TERMS.storyboard,
     revision: "ページ修正",
-    quality: "品質監査",
-    bible: "Bible",
-    "volume-plot": "巻プロット",
-    "kdp-metadata": "KDP メタ",
+    quality: TERMS.audit,
+    bible: TERMS.bible,
+    "volume-plot": TERMS.volumePlot,
+    "kdp-metadata": TERMS.kdp,
     "trademark-gate": "商標 / IP",
-    improvements: "品質改善",
+    improvements: "読者維持改善",
     "work-overview": "作品概要",
     volumes: "巻管理",
-    layers: "レイヤー",
+    layers: "個別の工程を起動",
   };
   return labels[view];
 }
@@ -167,13 +167,13 @@ function renderRunning(jobs: JobSummary[], now: number): string {
       return `<article class="nc-card jobs-card">
         <div class="jobs-card__head">
           <h4>${escapeHtml(label.title)}</h4>
-          <span class="nc-badge nc-badge--info">${escapeHtml(label.subtitle || job.layer)}</span>
+          <span class="nc-badge nc-badge--info">${escapeHtml(job.layer)}</span>
         </div>
         <div class="jobs-meta">${escapeHtml(scopeLabel(job))}</div>
         <div class="jobs-meta">経過 ${escapeHtml(duration(job, now))}</div>
-        <button type="button" class="nc-button nc-button--danger nc-button--sm" data-abort-job="${escapeHtml(job.id)}">abort</button>
+        <button type="button" class="nc-button nc-button--danger nc-button--sm" data-abort-job="${escapeHtml(job.id)}">${escapeHtml(TERMS.abort)}</button>
       </article>`;
-    }).join("")}</div>` : '<div class="nc-empty">実行中の job はありません。</div>'}
+    }).join("")}</div>` : '<div class="nc-empty">実行中のジョブはありません。</div>'}
   </section>`;
 }
 
@@ -183,15 +183,14 @@ function renderHistory(jobs: JobSummary[], now: number): string {
     <h3>履歴 (直近 ${recent.length} 件)</h3>
     <div class="jobs-table-wrap">
       <table class="jobs-table">
-        <thead><tr><th>時刻</th><th>作品</th><th>layer</th><th>state</th><th>duration</th><th>log</th></tr></thead>
+        <thead><tr><th>時刻</th><th>作品</th><th>工程</th><th>状態</th><th>経過</th><th>ログ末尾</th></tr></thead>
         <tbody>
           ${recent.map((job) => {
-            const label = layerLabel(job.layer);
             return `<tr>
               <td>${escapeHtml(fmtDate(job.startedAt))}</td>
               <td>${escapeHtml(scopeLabel(job))}</td>
-              <td>${escapeHtml(label.title)} <span class="jobs-meta">${escapeHtml(label.subtitle || job.layer)}</span></td>
-              <td><span class="nc-badge ${stateBadge(job.state)}">${escapeHtml(job.state)}</span></td>
+              <td>${formatLayerLabel(job.layer)}</td>
+              <td><span class="nc-badge ${stateBadge(job.state)}">${escapeHtml(statusLabel(job.state))}</span></td>
               <td>${escapeHtml(duration(job, now))}</td>
               <td class="jobs-log">${escapeHtml(lastLog(job))}</td>
             </tr>`;
@@ -220,7 +219,7 @@ function renderFailures(jobs: JobSummary[]): string {
         <details><summary>jobs</summary>
           <div class="jobs-failure-list">
             ${sorted.map((job) => `<div class="jobs-failure-item">
-              <div class="jobs-meta">${escapeHtml(job.id)} / ${escapeHtml(scopeLabel(job))} / ${escapeHtml(layerLabel(job.layer).title)} / ${escapeHtml(fmtDate(job.startedAt))}</div>
+              <div class="jobs-meta">${escapeHtml(job.id)} / ${escapeHtml(scopeLabel(job))} / ${escapeHtml(layerLabel(job.layer).title)} (${escapeHtml(job.layer)}) / ${escapeHtml(fmtDate(job.startedAt))}</div>
               ${renderFailureCtas(job)}
             </div>`).join("")}
           </div>
@@ -234,9 +233,9 @@ function renderFailures(jobs: JobSummary[]): string {
   return `<section class="jobs-section">
     <h3>失敗パターン (頻度降順)</h3>
     ${rows ? `<div class="jobs-table-wrap"><table class="jobs-table">
-      <thead><tr><th>pattern</th><th>件数</th><th>最近時刻</th></tr></thead>
+      <thead><tr><th>パターン</th><th>件数</th><th>最近時刻</th></tr></thead>
       <tbody>${rows}</tbody>
-    </table></div>` : '<div class="nc-empty">失敗 job はありません。</div>'}
+    </table></div>` : '<div class="nc-empty">失敗ジョブはありません。</div>'}
   </section>`;
 }
 
@@ -292,7 +291,7 @@ function render(container: HTMLElement, state: ViewState): void {
     <div class="jobs-view">
       <div class="nc-toolbar">
         <h2 class="nc-toolbar__title">全作品ジョブ</h2>
-        <span class="jobs-meta">${state.jobs.length} jobs</span>
+        <span class="jobs-meta">${state.jobs.length} 件</span>
         <span class="jobs-spacer"></span>
         <button type="button" class="nc-button nc-button--secondary" data-action="reload" ${state.loading ? "disabled" : ""}>再読込</button>
       </div>
@@ -348,7 +347,7 @@ export function mountJobsHubView(container: HTMLElement): () => void {
     if (jobId) {
       void apiAbortJob(jobId)
       .then(() => refresh(state, container))
-      .catch((error) => toast(state, container, `abort に失敗: ${errorText(error)}`, "warning"));
+      .catch((error) => toast(state, container, `中止に失敗: ${errorText(error)}`, "warning"));
       return;
     }
     const ctaButton = target.closest<HTMLElement>("[data-failure-job][data-failure-cta]");

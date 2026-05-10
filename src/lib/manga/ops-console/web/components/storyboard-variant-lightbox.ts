@@ -172,7 +172,7 @@ function currentAudit(
 function renderAuditPanel(audit: StoryboardAuditReport | null, variant: StoryboardAuditVariant | null): string {
   if (!audit || !variant) {
     return `<div class="sb-lightbox__audit sb-lightbox__audit--missing">
-      監査未実行。「再監査」ボタンから L04_audit を起動してください。
+      検査未実行。「再検査」ボタンから L04_audit を起動してください。
     </div>`;
   }
   const issues = variant.issues
@@ -316,12 +316,12 @@ export function openStoryboardVariantLightbox(
         .join("");
 
       root.innerHTML = `<div class="nc-modal is-open" data-sb-lightbox-overlay>
-  <div class="nc-modal__card nc-modal__card--lg sb-lightbox" role="dialog" aria-modal="true" aria-label="StoryBoard variants 比較">
+  <div class="nc-modal__card nc-modal__card--lg sb-lightbox" role="dialog" aria-modal="true" aria-label="ネーム案を比較">
     <div class="sb-lightbox__head">
-      <h2 class="sb-lightbox__title">StoryBoard variants 比較</h2>
+      <h2 class="sb-lightbox__title">ネーム案を比較</h2>
       <span class="sb-lightbox__counter">${currentIndex + 1} / ${config.proposals.length}</span>
       ${isAdopted ? '<span class="nc-badge nc-badge--success">★ 採用中</span>' : ""}
-      <span class="nc-badge ${severityClass(auditVariant)}">${escapeHtml(auditVariant?.severity ?? "auditなし")}</span>
+      <span class="nc-badge ${severityClass(auditVariant)}">${escapeHtml(auditVariant?.severity ?? "指摘なし")}</span>
       <button type="button" class="nc-button nc-button--ghost sb-lightbox__close" data-sb-action="close">閉じる (Esc)</button>
     </div>
     <div class="sb-lightbox__nav">
@@ -344,7 +344,7 @@ export function openStoryboardVariantLightbox(
     <div class="sb-lightbox__actions">
       <button type="button" class="nc-button nc-button--primary" data-sb-action="adopt">このバリエーションを採用 (a)</button>
       <button type="button" class="nc-button nc-button--secondary" data-sb-action="regen">再生成 3 案 (g)</button>
-      <button type="button" class="nc-button nc-button--ghost" data-sb-action="audit">再監査 (u)</button>
+      <button type="button" class="nc-button nc-button--ghost" data-sb-action="audit">再検査 (u)</button>
     </div>
   </div>
 </div>`;

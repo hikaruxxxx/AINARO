@@ -381,7 +381,7 @@ function renderPanelLines(panel: PanelV2): string {
 
 function renderStoryboardSection(storyboardPage: StoryboardPageV2 | undefined): string {
   if (!storyboardPage || storyboardPage.panels.length === 0) {
-    return `<details class="page-storyboard" open><summary>ストーリーボード <span class="sb-summary-count">[未生成]</span></summary><div class="sb-empty">storyboard.json にこのページの定義がありません</div></details>`;
+    return `<details class="page-storyboard" open><summary>ネーム構成 <span class="sb-summary-count">[未生成]</span></summary><div class="sb-empty">このページのネーム (storyboard.json) は未生成です</div></details>`;
   }
   const panelsHtml = storyboardPage.panels
     .map((panel) => {
@@ -408,7 +408,7 @@ function renderStoryboardSection(storyboardPage: StoryboardPageV2 | undefined): 
     })
     .join("");
   return `<details class="page-storyboard" open>
-    <summary>ストーリーボード <span class="sb-summary-count">[${storyboardPage.panels.length} panels]</span></summary>
+    <summary>ネーム構成 <span class="sb-summary-count">[${storyboardPage.panels.length} コマ]</span></summary>
     <div class="sb-panels">${panelsHtml}</div>
   </details>`;
 }
@@ -631,7 +631,7 @@ function renderPageCards(
       const pageNos = pageUnitPageNos(unit);
       const representativePageNo = unitRepresentativePageNo(unit);
       const unitPages = pageNos.join(" ");
-      const status = `<span class="status status-pending" data-unit-status="${pageNos.join(",")}">pending</span>`;
+      const status = `<span class="status status-pending" data-unit-status="${pageNos.join(",")}">判定待ち</span>`;
       if (unit.kind === "single") {
         return `<article class="page-card" data-page-no="${representativePageNo}" data-unit-pages="${unitPages}" tabindex="0" id="page-${representativePageNo}">
   <header>
@@ -690,24 +690,24 @@ function renderShell(
           <span class="ng-kpi ng-kpi--approved">承認 <strong id="ng-cnt-approved">0</strong></span>
           <span class="ng-kpi ng-kpi--rejected">却下 <strong id="ng-cnt-rejected">0</strong></span>
         </span>
-        <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L04">L04 Storyboard 生成</button>
+        <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L04">ネームを生成 <span class="nc-layer-label__sub" style="margin-left:4px">L04</span></button>
         <button type="button" class="nc-button nc-button--secondary nc-button--sm"
                 data-ng-action="open-variant-lightbox"
                 ${proposalCount > 0 ? "" : "disabled"}>
-          StoryBoard variants を比較 (${proposalCount})
+          ネーム案を比較 (${proposalCount})
         </button>
-        <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L08.5">L08.5 Name Preview 生成</button>
-        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_1">L04.1 Hook 提案</button>
-        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_9">L04.9 Cliff 提案</button>
+        <button type="button" class="nc-button nc-button--primary nc-button--sm" data-ng-run-layer="L08.5">ネーム可視化を生成 <span class="nc-layer-label__sub" style="margin-left:4px">L08.5</span></button>
+        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_1">冒頭の引き 提案 <span class="nc-layer-label__sub" style="margin-left:4px">L04.1</span></button>
+        <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-ng-run-layer="L04_9">次話への引き 提案 <span class="nc-layer-label__sub" style="margin-left:4px">L04.9</span></button>
         <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit
-                title="自由入力で AI 編集 modal を開く (target / prompt を手で書く)">AI 編集 (空)</button>
+                title="自由入力で AI 編集 modal を開く (target / prompt を手で書く)">AI で修正 (空)</button>
         <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L04"
-                title="storyboard.json (コマ構成・台詞・構図) を AI で修正する modal を開く">コマ構成を AI で修正 (L04)</button>
+                title="ネーム (storyboard.json: コマ構成・台詞・構図) を AI で修正する modal を開く">コマ構成を AI で修正 (L04)</button>
         <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-ng-layer-ai-edit="L08.5"
-                title="SVG ネーム + name_audit.json を AI で修正する modal を開く">ネーム画像/監査を AI で修正 (L08.5)</button>
+                title="SVG ネーム + 検査結果を AI で修正する modal を開く">ネーム画像/検査を AI で修正 (L08.5)</button>
       </div>
       <div class="name-gate-help">
-        <code>a</code> approve <code>r</code> reject <code>p</code> pending
+        <code>a</code> 承認 <code>r</code> 却下 <code>p</code> 判定待ち
         <code>↑/k</code> 前ページ <code>↓/j</code> 次ページ <code>1..6</code> reject 理由
       </div>
       ${renderNameLintEpisodeSummary(lintReport)}
@@ -744,7 +744,7 @@ function refreshStoryboardProposalButton(container: HTMLElement, state: ViewStat
   if (!button) return;
   const count = state.storyboardProposals?.proposals.length ?? 0;
   button.disabled = count === 0;
-  button.textContent = `StoryBoard variants を比較 (${count})`;
+  button.textContent = `ネーム案を比較 (${count})`;
 }
 
 function unitPageNosFromCard(card: HTMLElement): number[] {
@@ -755,7 +755,7 @@ function unitPageNosFromCard(card: HTMLElement): number[] {
 }
 
 function statusLabel(status: NamePageStatus): string {
-  return status === "approved" ? "ok" : status === "rejected" ? "reject" : "pending";
+  return status === "approved" ? "承認" : status === "rejected" ? "却下" : "判定待ち";
 }
 
 function refreshCard(
@@ -778,11 +778,11 @@ function refreshCard(
   const displayStatus = statuses.size === 1 ? unitDecisions[0]?.status ?? decision.status : "pending";
   status.className = `status status-${displayStatus}`;
   if (statuses.size > 1 && decisions) {
-    status.innerHTML = `split (${pageNos
+    status.innerHTML = `分割 (${pageNos
       .map((unitPageNo) => `P${unitPageNo} ${statusLabel(decisions.get(unitPageNo)?.status ?? "pending")}`)
-      .join(" / ")})${persistFailed ? '<span class="persist-error">(persist failed)</span>' : ""}`;
+      .join(" / ")})${persistFailed ? '<span class="persist-error">(保存失敗)</span>' : ""}`;
   } else {
-    status.innerHTML = `${displayStatus}${persistFailed ? '<span class="persist-error">(persist failed)</span>' : ""}`;
+    status.innerHTML = `${statusLabel(displayStatus)}${persistFailed ? '<span class="persist-error">(保存失敗)</span>' : ""}`;
   }
   card.classList.toggle("approved", statuses.size === 1 && displayStatus === "approved");
   card.classList.toggle("rejected", statuses.size === 1 && displayStatus === "rejected");

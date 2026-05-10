@@ -141,9 +141,9 @@ async function openModal(initialSlug: string, initialEpisode: number): Promise<v
       : `<option value="${state.episode}">ep${String(state.episode).padStart(2, "0")}</option>`;
     backdrop.innerHTML = `
       <div class="nc-scope-modal" role="dialog" aria-labelledby="nc-scope-modal-title">
-        <h3 id="nc-scope-modal-title">操作対象 (scope) を切り替え</h3>
+        <h3 id="nc-scope-modal-title">作業対象の切替</h3>
         <div class="nc-scope-modal__warn">
-          切替後、以後の <strong>書き込み・ジョブ起動</strong> は新しい scope に対して行われます。誤った作品に書かないよう確認してください。
+          切替後、以後の <strong>書き込み・ジョブ起動</strong> は新しい作業対象に対して行われます。誤った作品に書かないよう確認してください。
         </div>
         <div class="nc-scope-modal__row">
           <label for="nc-scope-modal-slug">作品 (slug)</label>
@@ -250,11 +250,11 @@ export function mountScopeSwitcher(root: HTMLElement): () => void {
     const title = work?.title || slug;
     // chip 内には slug + ep のみ。タイトルは tooltip だけに留める (タイトルは長い日本語のことが多く header を圧迫する)。
     const label = isEmpty
-      ? `<span class="nc-scope-chip__value">scope 未選択</span>`
-      : `<span class="nc-scope-chip__label">scope</span><span class="nc-scope-chip__value">${escapeHtml(slug)} / ep${String(episode).padStart(2, "0")}</span>`;
+      ? `<span class="nc-scope-chip__value">作業対象 未選択</span>`
+      : `<span class="nc-scope-chip__label">作業中</span><span class="nc-scope-chip__value">${escapeHtml(slug)} / ep${String(episode).padStart(2, "0")}</span>`;
     const tooltip = isEmpty
-      ? "クリックで scope を選択"
-      : `${title}\nslug: ${slug} / ep${String(episode).padStart(2, "0")}\nクリックで scope 切替`;
+      ? "クリックで作業対象を選択"
+      : `${title}\nslug: ${slug} / ep${String(episode).padStart(2, "0")}\nクリックで作業対象を切替`;
     root.innerHTML = `<button type="button" class="nc-scope-chip" data-role="open-scope" data-empty="${isEmpty}" title="${escapeHtml(tooltip)}">${label}</button>`;
   }
 

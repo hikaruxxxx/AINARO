@@ -130,7 +130,7 @@ function render(container: HTMLElement, state: ViewState): void {
   const kdp = state.meta?.kdp_metadata ?? {};
   const body = (() => {
     if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
-    if (state.error && !state.meta) return `<div class="view-placeholder"><h2>KDP メタデータ</h2><p>${escapeHtml(state.error)}</p></div>`;
+    if (state.error && !state.meta) return `<div class="view-placeholder"><h2>KDP 入稿メタ</h2><p>${escapeHtml(state.error)}</p></div>`;
     return `
       <form class="kdp-form" data-kdp-form>
         <section class="nc-card kdp-section">
@@ -164,13 +164,13 @@ function render(container: HTMLElement, state: ViewState): void {
   container.innerHTML = `
     <div class="kdp-view">
       <div class="nc-toolbar">
-        <h2 class="nc-toolbar__title">KDP メタデータ</h2>
+        <h2 class="nc-toolbar__title">KDP 入稿メタ</h2>
         <span class="kdp-info">${escapeHtml(state.slug)}</span>
         <span class="kdp-spacer"></span>
         <button type="button" class="nc-button nc-button--secondary" data-action="reload" ${state.loading || state.saving ? "disabled" : ""}>再読込</button>
         <button type="button" class="nc-button nc-button--primary" data-action="save" ${state.loading || state.saving ? "disabled" : ""}>${state.saving ? "保存中" : "保存"}</button>
-        <button type="button" class="nc-button nc-button--secondary" data-action="rerun-L13" title="L13 KDP package を再生成 (manuscript.pdf / cover.pdf)">L13 を再実行</button>
-        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L13" title="AI 編集 view へ遷移し、L13 KDP の context を prefill します">L13 を AI で修正</button>
+        <button type="button" class="nc-button nc-button--secondary" data-action="rerun-L13" title="KDP 入稿パッケージを再生成 (manuscript.pdf / cover.pdf)">KDP 入稿パッケージを再生成 <span class="nc-layer-label__sub" style="margin-left:4px">L13</span></button>
+        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L13" title="KDP 入稿パッケージ (L13) を AI で修正">L13 を AI で修正</button>
       </div>
       ${body}
     </div>
@@ -282,7 +282,7 @@ export function mountKdpMetadataView(container: HTMLElement): () => void {
         episode: store.state.currentEpisode || 1,
         callbacks: {
           onSuccess: () => {
-            setToast(state, container, "L13 KDP package 完了", "success");
+            setToast(state, container, "KDP 入稿パッケージ生成 完了", "success");
             void load(state, container);
           },
           onError: (msg) => setToast(state, container, msg, "danger"),

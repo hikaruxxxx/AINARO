@@ -7,17 +7,17 @@ export const MENU: Array<{ view: ViewName; label: string; group: MenuGroup }> = 
   { view: "jobs-hub", label: "全作品ジョブ", group: "global" },
   { view: "quality-hub", label: "全作品品質", group: "global" },
   { view: "work-overview", label: "作品概要", group: "work" },
-  { view: "bible", label: "Bible / 参照素材", group: "work" },
+  { view: "bible", label: "設定資料 (Bible)", group: "work" },
   { view: "volume-plot", label: "巻プロット", group: "work" },
   { view: "volumes", label: "巻管理", group: "work" },
-  { view: "kdp-metadata", label: "KDP メタ情報", group: "work" },
+  { view: "kdp-metadata", label: "KDP 入稿メタ", group: "work" },
   { view: "trademark-gate", label: "商標 / IP チェック", group: "work" },
   { view: "pipeline", label: "パイプライン進捗", group: "episode" },
   { view: "name-gate", label: "ネーム", group: "episode" },
   { view: "revision", label: "ページ修正", group: "episode" },
   { view: "quality", label: "品質監査", group: "episode" },
   { view: "improvements", label: "読者維持改善", group: "episode" },
-  { view: "layers", label: "個別 layer 起動", group: "utility" },
+  { view: "layers", label: "個別の工程を起動", group: "utility" },
 ];
 
 export const GROUP_LABELS: Record<MenuGroup, string> = {

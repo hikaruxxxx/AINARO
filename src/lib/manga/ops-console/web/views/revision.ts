@@ -517,13 +517,13 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
         <h2>ページ修正</h2>
         <span class="rv-info">${escapeHtml(slug)} / ${epLabel(episode)}</span>
         <span class="rv-summary">
-          修正待ち <strong id="rv-cnt-queue">0</strong> / 採用済 <strong id="rv-cnt-adopted">0</strong> / 監査NG <strong id="rv-cnt-failed">0</strong>
+          修正待ち <strong id="rv-cnt-queue">0</strong> / 採用済 <strong id="rv-cnt-adopted">0</strong> / 品質検査NG <strong id="rv-cnt-failed">0</strong>
           <span class="rv-resolved-badge" id="rv-badge-resolved"></span>
         </span>
         <div class="rv-controls">
-          <button type="button" class="rv-button" data-rv-rerun="L09" title="L09 Render を name gate skip + 新 version 採番で全 22 ページ再 render">全頁再生成</button>
-          <button type="button" class="rv-button" id="rv-btn-l12-apply" data-rv-rerun="L12" title="L12 Repair で revision_queue を適用" disabled>修正を反映</button>
-          <button type="button" class="rv-button" data-rv-ai-edit="L09" title="L09 (Render) を AI 編集 view へ">AI 編集</button>
+          <button type="button" class="rv-button" data-rv-rerun="L09" title="ネーム判定をスキップして新 version 採番で全ページを再生成 (L09 Render)">全頁再生成</button>
+          <button type="button" class="rv-button" id="rv-btn-l12-apply" data-rv-rerun="L12" title="L12 Repair で修正指示キューを適用" disabled>修正指示を反映</button>
+          <button type="button" class="rv-button" data-rv-ai-edit="L09" title="L09 (本番画像生成) を AI で修正">AI で修正</button>
         </div>
         <div class="rv-progress" id="rv-progress"></div>
       </div>
@@ -533,7 +533,7 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
       </div>
       <section class="rv-tab-panel" id="rv-tab-adoption" data-rv-tab-panel="adoption" role="tabpanel">
         <div class="rv-filters">
-          <label class="rv-filter-check"><input type="checkbox" data-rv-filter="failed"> 監査NGのみ</label>
+          <label class="rv-filter-check"><input type="checkbox" data-rv-filter="failed"> 品質検査NGのみ</label>
           <label class="rv-filter-check"><input type="checkbox" data-rv-filter="revised"> 修正済のみ</label>
           <label class="rv-filter-check"><input type="checkbox" data-rv-filter="notAdopted"> 採用済を隠す</label>
           <span id="rv-filter-summary"></span>
@@ -553,7 +553,7 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
             <div class="rv-tags">${tags}</div>
             <textarea id="rv-modal-instruction" maxlength="1000" placeholder="自由記述 (1000 字以内)"></textarea>
             <div class="rv-message" id="rv-modal-message"></div>
-            <p class="rv-modal-hint">送信しただけでは画像は変わりません。送信後ヘッダの『修正を反映』で再生成されます。</p>
+            <p class="rv-modal-hint">送信しただけでは画像は変わりません。送信後ヘッダの『修正指示を反映』で再生成されます。</p>
             <div class="rv-modal-actions">
               <button type="button" class="rv-secondary" id="rv-modal-cancel">キャンセル</button>
               <button type="button" class="rv-primary" id="rv-modal-submit">指示を送信</button>
@@ -895,7 +895,7 @@ function renderSummary(root: HTMLElement, state: ViewState): void {
   if (l12ApplyButton) {
     l12ApplyButton.disabled = unresolved === 0;
     l12ApplyButton.classList.toggle("rv-button-attention", unresolved > 0);
-    l12ApplyButton.textContent = unresolved > 0 ? `修正を反映 (${unresolved})` : "修正を反映";
+    l12ApplyButton.textContent = unresolved > 0 ? `修正指示を反映 (${unresolved})` : "修正指示を反映";
   }
   const badge = root.querySelector<HTMLElement>("#rv-badge-resolved");
   if (badge) {

@@ -10,18 +10,32 @@ import {
   type LayerId,
 } from "../lib/api";
 import { store } from "../lib/store";
+import { formatLayerLabel, statusLabel, TERMS } from "../labels";
 
 type LayerCard = {
   id: LayerId;
+  /** UI 表示用ラベル (formatLayerLabel が入る場合は HTML を含む)。空なら id を fallback。 */
   label: string;
   scope: "work" | "episode" | "volume";
   fields: Array<{ name: string; label: string; type: "text" | "number" | "select"; options?: string[]; required?: boolean; placeholder?: string }>;
 };
 
+// scope (work/episode/volume) を日本語表示。
+function scopeLabel(scope: LayerCard["scope"]): string {
+  switch (scope) {
+    case "work":
+      return "作品単位";
+    case "episode":
+      return "話単位";
+    case "volume":
+      return "巻単位";
+  }
+}
+
 const LAYERS: LayerCard[] = [
   {
     id: "L02",
-    label: "L02 Bible Images",
+    label: formatLayerLabel("L02"),
     scope: "work",
     fields: [
       { name: "--only", label: "only", type: "text", placeholder: "char_id,loc_id" },
@@ -31,7 +45,7 @@ const LAYERS: LayerCard[] = [
   },
   {
     id: "L09",
-    label: "L09 Render",
+    label: formatLayerLabel("L09"),
     scope: "episode",
     fields: [
       { name: "--pages", label: "pages", type: "text", placeholder: "1,2" },
@@ -39,10 +53,10 @@ const LAYERS: LayerCard[] = [
       { name: "--revision-id", label: "revision id", type: "text" },
     ],
   },
-  { id: "L11", label: "L11 Audit", scope: "episode", fields: [] },
+  { id: "L11", label: formatLayerLabel("L11"), scope: "episode", fields: [] },
   {
     id: "L12",
-    label: "L12 Repair",
+    label: formatLayerLabel("L12"),
     scope: "episode",
     fields: [
       { name: "--mode", label: "mode", type: "select", options: ["", "audit", "revision-queue"] },
@@ -51,7 +65,7 @@ const LAYERS: LayerCard[] = [
   },
   {
     id: "L13",
-    label: "L13 KDP",
+    label: formatLayerLabel("L13"),
     scope: "volume",
     fields: [
       { name: "volume", label: "volume", type: "number", required: true, placeholder: "1" },
@@ -63,8 +77,10 @@ const LAYERS: LayerCard[] = [
       { name: "--publication-date", label: "publication date", type: "text", placeholder: "2026-05-06" },
     ],
   },
-  { id: "kdp-dry-run", label: "KDP Dry Run", scope: "volume", fields: [{ name: "volume", label: "volume", type: "number", required: true, placeholder: "1" }] },
-  { id: "scrape-bsr", label: "Scrape BSR", scope: "work", fields: [] },
+  // 以下 2 件は LayerKey ではないので formatLayerLabel が ID 副表示なし扱い (showId=false 相当) で動く。
+  // 表示文字列だけ HTML エンコードして渡す。
+  { id: "kdp-dry-run", label: `<span class="nc-layer-label"><span class="nc-layer-label__main">KDP 入稿パッケージの試運転</span></span>`, scope: "volume", fields: [{ name: "volume", label: "volume", type: "number", required: true, placeholder: "1" }] },
+  { id: "scrape-bsr", label: `<span class="nc-layer-label"><span class="nc-layer-label__main">BSR (Amazon ランキング) 取得</span></span>`, scope: "work", fields: [] },
 ];
 
 const CSS = `
@@ -131,7 +147,7 @@ function errorText(error: unknown): string {
 }
 
 function statusBadge(state: JobState): string {
-  return `<span class="lyr-badge ${state}">${state}</span>`;
+  return `<span class="lyr-badge ${state}">${escapeHtml(statusLabel(state))}</span>`;
 }
 
 function fieldHtml(layer: LayerCard, field: LayerCard["fields"][number]): string {
@@ -155,29 +171,29 @@ function render(container: HTMLElement, state: ViewState): void {
     return `
       <section class="lyr-card lyr-card-${layer.id}">
         <div class="lyr-card-head">
-          <h3>${escapeHtml(layer.label)}</h3>
-          <span class="lyr-scope">${escapeHtml(layer.scope)}</span>
+          <h3>${layer.label}</h3>
+          <span class="lyr-scope">${escapeHtml(scopeLabel(layer.scope))}</span>
           ${job ? statusBadge(job.state) : ""}
         </div>
         ${layer.fields.length > 0 ? `<div class="lyr-fields">${layer.fields.map((f) => fieldHtml(layer, f)).join("")}</div>` : ""}
         <div class="lyr-actions">
           <button type="button" class="lyr-btn primary" data-start="${layer.id}" ${running ? "disabled" : ""}>${running ? "実行中" : "起動"}</button>
-          ${running && job ? `<button type="button" class="lyr-btn danger" data-abort="${job.id}">abort</button>` : ""}
-          ${job ? `<button type="button" class="lyr-btn" data-select-job="${job.id}">log</button>` : ""}
+          ${running && job ? `<button type="button" class="lyr-btn danger" data-abort="${job.id}">${escapeHtml(TERMS.abort)}</button>` : ""}
+          ${job ? `<button type="button" class="lyr-btn" data-select-job="${job.id}">ログ</button>` : ""}
         </div>
       </section>`;
   }).join("");
   const selected = state.jobs.find((job) => job.id === state.selectedJobId) ?? state.jobs[0] ?? null;
   if (selected && state.selectedJobId !== selected.id) state.selectedJobId = selected.id;
-  const tabs = state.jobs.map((job) => `<button type="button" class="lyr-job-tab ${job.id === state.selectedJobId ? "active" : ""}" data-select-job="${job.id}">${escapeHtml(job.layer)} ${escapeHtml(job.state)}</button>`).join("");
+  const tabs = state.jobs.map((job) => `<button type="button" class="lyr-job-tab ${job.id === state.selectedJobId ? "active" : ""}" data-select-job="${job.id}">${escapeHtml(job.layer)} ${escapeHtml(statusLabel(job.state))}</button>`).join("");
   const lines = selected?.events?.map((event) => `<div class="lyr-line ${event.channel}">[${escapeHtml(event.channel)}] ${escapeHtml(event.line)}</div>`).join("") ?? "";
   container.innerHTML = `
     <div class="lyr-view">
       <div class="lyr-cards">${cards}</div>
       <aside class="lyr-side">
-        <div class="lyr-side-head"><h3>Jobs</h3>${state.error ? `<span class="lyr-error">${escapeHtml(state.error)}</span>` : ""}</div>
+        <div class="lyr-side-head"><h3>ジョブ</h3>${state.error ? `<span class="lyr-error">${escapeHtml(state.error)}</span>` : ""}</div>
         <div class="lyr-jobs">${tabs || '<span class="lyr-empty">履歴なし</span>'}</div>
-        <div class="lyr-log" id="lyr-log">${lines || '<div class="lyr-empty">job を選択してください</div>'}</div>
+        <div class="lyr-log" id="lyr-log">${lines || '<div class="lyr-empty">ジョブを選択してください</div>'}</div>
       </aside>
     </div>`;
 }

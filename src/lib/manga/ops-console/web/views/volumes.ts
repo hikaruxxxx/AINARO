@@ -122,7 +122,7 @@ function renderModal(state: ViewState): string {
   const m = state.modal;
   return `<div class="nc-modal is-open">
     <form class="nc-modal__card nc-modal__card--md vol-modal-body" data-l13-form>
-      <h3>L13 KDP package 起動 (${vLabel(m.volume)})</h3>
+      <h3>KDP 入稿パッケージを生成 <span class="nc-layer-label__sub" style="margin-left:4px">L13</span> (${vLabel(m.volume)})</h3>
       <label class="nc-field"><span class="nc-field__label">episodes</span><input class="nc-field__input" name="episodes" required value="${escapeHtml(m.episodes)}"></label>
       <label class="nc-field"><span class="nc-field__label">author</span><input class="nc-field__input" name="author" required value="${escapeHtml(m.author)}"></label>
       <label class="nc-field"><span class="nc-field__label">publication-date</span><input class="nc-field__input" name="publication-date" required type="date" value="${escapeHtml(m.publicationDate)}"></label>
@@ -151,14 +151,14 @@ function renderVolume(slug: string, volume: VolumeInfo, running: boolean): strin
       ${fileCard("kdp-input.md", volume.kdp_status.kdp_input_md)}
     </div>
     <div class="vol-actions">
-      <button type="button" class="nc-button nc-button--primary" data-l13-volume="${volume.volume}" title="production は実際に manuscript.pdf / cover.pdf を出力" ${running ? "disabled" : ""}>L13 起動 (production)</button>
-      <button type="button" class="nc-button nc-button--secondary" data-start-layer="kdp-dry-run" data-volume="${volume.volume}" title="dry-run は L13 を起動するが PDF は捨てる、production は実際に出力" ${running ? "disabled" : ""}>dry-run</button>
-      <button type="button" class="nc-button nc-button--secondary" data-start-layer="scrape-bsr" data-volume="${volume.volume}" ${running ? "disabled" : ""}>BSR 取得</button>
+      <button type="button" class="nc-button nc-button--primary" data-l13-volume="${volume.volume}" title="本番モードは実際に manuscript.pdf / cover.pdf を出力" ${running ? "disabled" : ""}>KDP 入稿パッケージを生成 (本番)</button>
+      <button type="button" class="nc-button nc-button--secondary" data-start-layer="kdp-dry-run" data-volume="${volume.volume}" title="試運転モードは L13 を起動するが PDF は破棄。本番モードは実際に出力" ${running ? "disabled" : ""}>試運転 (dry-run)</button>
+      <button type="button" class="nc-button nc-button--secondary" data-start-layer="scrape-bsr" data-volume="${volume.volume}" ${running ? "disabled" : ""}>BSR (Amazon ランキング) 取得</button>
     </div>
     <details class="vol-kdp-meta">
-      <summary>KDP メタを編集</summary>
-      <div class="vol-meta">KDP メタ view でタイトル・キーワード・カテゴリを編集します。</div>
-      <button type="button" class="nc-button nc-button--primary nc-button--sm" data-open-kdp-meta>KDP メタ view を開く</button>
+      <summary>KDP 入稿メタを編集</summary>
+      <div class="vol-meta">KDP 入稿メタの画面でタイトル・キーワード・カテゴリを編集します。</div>
+      <button type="button" class="nc-button nc-button--primary nc-button--sm" data-open-kdp-meta>KDP 入稿メタを編集する画面へ</button>
     </details>
     ${renderPreview(slug, volume)}
   </section>`;
@@ -173,7 +173,7 @@ function render(container: HTMLElement, state: ViewState): void {
   container.innerHTML = `
     <div class="vol-view">
       <div class="nc-toolbar">
-        <h2 class="nc-toolbar__title">巻管理 (Volumes / KDP)</h2>
+        <h2 class="nc-toolbar__title">巻管理 (KDP 入稿)</h2>
         <span class="vol-info">${escapeHtml(state.slug)} / 全 ${state.volumes.length} 巻</span>
         <span class="vol-spacer"></span>
         <button type="button" class="nc-button nc-button--secondary" data-action="reload" ${state.loading ? "disabled" : ""}>再読込</button>

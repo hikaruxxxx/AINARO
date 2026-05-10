@@ -181,3 +181,125 @@ export function resolveAiEditHint(
     promptTemplate: expand(hint.promptTemplate),
   };
 }
+
+// =====================================================================
+// Console UI 用語辞書
+// 新規ユーザに不明な内部コード/英語を日本語に統一する SSoT。
+// 将来 i18n キー (i18next 等) に 1:1 移行しやすいよう named const で公開する。
+// =====================================================================
+
+export const TERMS = {
+  // scope (作業対象 = 作品×話)
+  scope: "作業中",
+  scopeSwitch: "作業対象の切替",
+  scopeUnset: "作業対象 未選択",
+  // ジョブ操作
+  abort: "中止",
+  // 品質監査
+  audit: "品質検査",
+  auditFinding: "指摘事項",
+  auditNone: "指摘なし",
+  auditFailed: "品質検査の失敗",
+  // 修正フロー
+  revision: "修正指示",
+  revisionPending: "未処理の修正指示",
+  // 成果物
+  manifest: "成果物一覧",
+  // 設定資料 (Bible)
+  bible: "設定資料",
+  bibleImages: "設定資料の参照画像",
+  // ネーム (storyboard)
+  storyboard: "ネーム",
+  storyboardVariants: "ネーム案",
+  storyboardVariantsCompare: "ネーム案を比較",
+  // 改善
+  failedOnly: "失敗のみ表示",
+  openingHook: "冒頭の引き",
+  cliffhanger: "次話への引き",
+  ecSuggestion: "改善提案",
+  // KDP (出版)
+  kdp: "KDP 入稿メタ", // ボタン用 (短)
+  kdpFull: "Amazon KDP (出版)", // 説明文・ヘッダ用 (長)
+  kdpPackage: "KDP 入稿パッケージ",
+  // 巻
+  volumePlot: "巻プロット",
+} as const;
+
+// =====================================================================
+// 次の一手 / ステータス用 snake_case → 日本語ラベル変換
+// =====================================================================
+
+export type DashboardActionKind =
+  | "job_failed"
+  | "pending_name"
+  | "audit_failed"
+  | "kdp_meta_missing"
+  | "new_work";
+
+const DASHBOARD_ACTION_LABEL: Record<DashboardActionKind, string> = {
+  job_failed: "ジョブが失敗しています",
+  pending_name: "ネーム判定が必要です",
+  audit_failed: "品質検査で失敗があります",
+  kdp_meta_missing: "KDP 入稿メタが未入力です",
+  new_work: "未着手の作品があります",
+};
+
+export function nextActionLabel(kind: string): string {
+  return DASHBOARD_ACTION_LABEL[kind as DashboardActionKind] ?? kind;
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: "判定待ち",
+  approved: "承認",
+  rejected: "却下",
+  failed: "失敗",
+  success: "成功",
+  running: "実行中",
+  queued: "待機中",
+  stale: "再生成推奨",
+  fresh: "最新",
+  ok: "問題なし",
+  warning: "注意",
+  error: "エラー",
+};
+
+export function statusLabel(status: string): string {
+  return STATUS_LABEL[status] ?? status;
+}
+
+// =====================================================================
+// Layer ID 併記 helper
+// 「日本語名」を主・「L0X」を薄字で副表示する共通フォーマッタ。
+// pipeline.ts の pipe-step__id/__label と同じ見た目を nc-layer-label__* に統一。
+// =====================================================================
+
+function escapeHtml(s: string): string {
+  return s
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+export type FormatLayerLabelOpts = {
+  /** inline = 横並び (デフォルト)、stacked = 縦積み (見出しなど) */
+  variant?: "inline" | "stacked";
+  /** ID 副表示を出すか (デフォルト true) */
+  showId?: boolean;
+};
+
+/**
+ * 「ネーム生成 <span class="…sub">L04</span>」形式の HTML を返す。
+ * 既知の layerId なら LAYER_LABELS の title を主表示、id を副表示として出す。
+ * 未知の id は title fallback (id そのまま) のみ。
+ */
+export function formatLayerLabel(id: string, opts: FormatLayerLabelOpts = {}): string {
+  const { variant = "inline", showId = true } = opts;
+  const info = layerLabel(id);
+  const wrapperClass = variant === "stacked" ? "nc-layer-label nc-layer-label--stacked" : "nc-layer-label";
+  const main = `<span class="nc-layer-label__main">${escapeHtml(info.title)}</span>`;
+  const isKnown = id in LAYER_LABELS;
+  const sub = showId && isKnown ? `<span class="nc-layer-label__sub">${escapeHtml(id)}</span>` : "";
+  return `<span class="${wrapperClass}">${main}${sub}</span>`;
+}

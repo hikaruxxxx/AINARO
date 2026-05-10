@@ -36,7 +36,7 @@ export async function handleVolumePlot(
   try {
     plot = JSON.parse(await fs.readFile(volumePlotPath(slug, volume), "utf-8"));
   } catch {
-    return send(res, 404, { error: "Volume Plot は未生成です" });
+    return send(res, 404, { error: "巻プロットは未生成です" });
   }
 
   return send(res, 200, { slug, volume, plot });

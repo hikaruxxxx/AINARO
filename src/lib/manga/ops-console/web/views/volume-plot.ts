@@ -320,7 +320,7 @@ function renderModal(state: ViewState): string {
     <div class="nc-modal is-open" id="vplot-modal">
       <form class="nc-modal__card nc-modal__card--md vplot-modal-body" data-vplot-form="1">
         <div class="vplot-modal-head">
-          <h3 class="vplot-modal-title">Volume Plot を構築</h3>
+          <h3 class="vplot-modal-title">巻プロットを構築</h3>
           <span class="vplot-info">${escapeHtml(state.slug)}</span>
           <span class="vplot-spacer"></span>
           <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-close-modal${disabled}>閉じる</button>
@@ -359,13 +359,13 @@ function render(container: HTMLElement, state: ViewState): void {
       }
       return renderReader(state.plot.plot);
     }
-    if (state.error) return `<div class="nc-empty">Volume Plot は未作成です。「Volume Plot を構築」ボタンから生成してください。</div>`;
-    return `<div class="nc-empty">Volume Plot は未作成です。「Volume Plot を構築」ボタンから生成してください。</div>`;
+    if (state.error) return `<div class="nc-empty">巻プロットは未作成です。「巻プロットを構築」ボタンから生成してください。</div>`;
+    return `<div class="nc-empty">巻プロットは未作成です。「巻プロットを構築」ボタンから生成してください。</div>`;
   })();
   container.innerHTML = `
     <div class="vplot-view">
       <div class="nc-toolbar">
-        <h2 class="nc-toolbar__title">巻あらすじ・章構成 (Volume Plot)</h2>
+        <h2 class="nc-toolbar__title">巻プロット (巻あらすじ・章構成)</h2>
         <span class="vplot-info">${escapeHtml(scope)}</span>
         <span class="vplot-spacer"></span>
         ${(() => {
@@ -381,9 +381,9 @@ function render(container: HTMLElement, state: ViewState): void {
             ${state.adoptingPlot ? " disabled" : ""}>${state.adoptingPlot ? "採用中…" : "この案を採用"}</button>`;
         })()}
         ${renderDisplayMode(state.displayMode)}
-        <button type="button" class="nc-button nc-button--primary" data-open-modal>Volume Plot を構築 (再生成)</button>
-        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI 編集</button>
-        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L02b" title="AI 編集 view へ遷移し、L02b Volume Plot の context を prefill します">L02b を AI で修正</button>
+        <button type="button" class="nc-button nc-button--primary" data-open-modal>巻プロットを構築 <span class="nc-layer-label__sub" style="margin-left:4px">L02b</span></button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI で修正</button>
+        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L02b" title="巻プロット (L02b) を AI で修正">L02b を AI で修正</button>
       </div>
       ${body}
     </div>
@@ -496,7 +496,7 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
           state.adoptedPlot = result.adopted;
           state.adoptingPlot = false;
           render(container, state);
-          setToast(state, container, "Volume Plot を採用しました", "success");
+          setToast(state, container, "巻プロットを採用しました", "success");
         })
         .catch((err) => {
           state.adoptingPlot = false;
@@ -530,7 +530,7 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
           state.plot = { slug: result.slug, volume: result.volume, plot: result.plot };
           state.editDraft = null;
           state.saving = false;
-          setToast(state, container, "Volume Plot を保存しました", "success");
+          setToast(state, container, "巻プロットを保存しました", "success");
         })
         .catch((error) => {
           state.saving = false;

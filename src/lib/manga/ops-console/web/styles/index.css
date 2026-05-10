@@ -17,3 +17,4 @@
 @import url("./components/code.css") layer(components);
 @import url("./components/toolbar.css") layer(components);
 @import url("./components/view-placeholder.css") layer(components);
+@import url("./components/layer-label.css") layer(components);

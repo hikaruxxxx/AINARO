@@ -91,11 +91,11 @@ function rerender(root: HTMLElement, state: AppState): void {
   }
   const currentWork = state.works.find((w) => w.slug === state.currentSlug);
   const episodes = currentWork?.episodes.length ? currentWork.episodes : [state.currentEpisode];
-  const scopeTitle = "scope 切替で別作品の閲覧ができます。書き込みは起動時 default scope に限定。";
+  const scopeTitle = "切替で別の作品/話を閲覧できます。書き込みは起動時の作業対象に限定。";
   root.innerHTML = `
     <div class="nc-scope-panel">
       <div class="nc-field-legacy">
-        <label for="scope-slug">work</label>
+        <label for="scope-slug">作品</label>
         <select id="scope-slug" title="${escapeHtml(scopeTitle)}">
           ${renderOptions(
             state.works.map((w) => ({ value: w.slug, label: w.title ? `${w.title} (${w.slug})` : w.slug })),
@@ -104,7 +104,7 @@ function rerender(root: HTMLElement, state: AppState): void {
         </select>
       </div>
       <div class="nc-field-legacy">
-        <label for="scope-episode">episode</label>
+        <label for="scope-episode">話</label>
         <select id="scope-episode" title="${escapeHtml(scopeTitle)}">
           ${renderOptions(
             episodes.map((n) => ({ value: String(n), label: episodeLabel(n) })),
@@ -112,7 +112,7 @@ function rerender(root: HTMLElement, state: AppState): void {
           )}
         </select>
       </div>
-      <p class="nc-scope-note">scope 切替は閲覧専用 (read)。承認・起動は起動時 default scope に限定。</p>
+      <p class="nc-scope-note">作業対象の切替は閲覧専用です。承認・起動は起動時の作業対象に限定されます。</p>
     </div>
     <nav class="menu" aria-label="ops views">
       ${groupedMenuHtml(state)}

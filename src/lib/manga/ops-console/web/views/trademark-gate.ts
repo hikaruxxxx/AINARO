@@ -184,7 +184,7 @@ function renderJudgement(state: ViewState): string {
       ${
         releaseExists
           ? ""
-          : `<div class="tmk-info">⚠️ kdp-release.json がまだ存在しません。先に L13 を実行してから人間判定を保存してください。</div>`
+          : `<div class="tmk-info">⚠️ KDP 入稿パッケージ (L13) をまだ生成していません。先に L13 を実行してから人間判定を保存してください。</div>`
       }
       <label class="tmk-checkrow">
         <input type="checkbox" data-tmk-toggle="trademark" ${tmChecked} ${state.saving ? "disabled" : ""}>

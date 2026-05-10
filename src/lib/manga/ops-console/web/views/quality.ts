@@ -151,7 +151,7 @@ function isFailedFinding(finding: AuditFinding): boolean {
 
 function renderKindFilters(selectedKinds: Set<string>, failedOnly: boolean): string {
   return `<div class="q-filters">
-    <button type="button" class="nc-pill${failedOnly ? " nc-pill--active" : ""}" data-q-failed-only="1">failed only</button>
+    <button type="button" class="nc-pill${failedOnly ? " nc-pill--active" : ""}" data-q-failed-only="1">失敗のみ表示</button>
     ${FILTER_KINDS.map((kind) => {
       const active = selectedKinds.has(kind);
       return `<button type="button" class="nc-pill${active ? " nc-pill--active" : ""}" data-q-kind="${escapeHtml(kind)}">${escapeHtml(kind)}</button>`;
@@ -166,7 +166,7 @@ function renderAudit(
   failedOnly: boolean
 ): string {
   const audit = manifest.audit;
-  if (!audit) return `<div class="nc-empty">audit.json はまだ生成されていません</div>`;
+  if (!audit) return `<div class="nc-empty">品質検査の結果 (audit.json) はまだ生成されていません。</div>`;
   const obj = asRecord(audit);
   const panels = Array.isArray(obj.panels) ? obj.panels : [];
   const failed = Array.isArray(obj.failed_panel_ids) ? obj.failed_panel_ids : [];
@@ -196,7 +196,7 @@ function renderAudit(
     return `<section class="nc-card q-card">
       <div class="q-card__head">
         <h4>${escapeHtml(panelId)}</h4>
-        <span class="nc-badge ${hasError ? "nc-badge--danger" : "nc-badge--warning"}">${panelFindings.length} findings</span>
+        <span class="nc-badge ${hasError ? "nc-badge--danger" : "nc-badge--warning"}">指摘 ${panelFindings.length} 件</span>
         <span class="q-panel-actions"><button type="button" class="nc-button nc-button--secondary nc-button--sm" data-q-revision-panel="${escapeHtml(panelId)}">修正指示する</button></span>
       </div>
       <div class="q-findings">
@@ -204,7 +204,7 @@ function renderAudit(
           const ov = overrides.get(overrideKey(finding.panel_id, finding.check_kind));
           const isOverridden = ov?.action === "ignore" || ov?.action === "fixed";
           const overrideTag = ov?.action === "ignore"
-            ? `<span class="q-finding__override-tag" title="${escapeHtml(ov.reason)}">false positive 扱い</span>`
+            ? `<span class="q-finding__override-tag" title="${escapeHtml(ov.reason)}">誤検出として除外</span>`
             : ov?.action === "fixed"
               ? `<span class="q-finding__override-tag" title="${escapeHtml(ov.reason)}">対応済み</span>`
               : "";
@@ -212,8 +212,8 @@ function renderAudit(
             ? `<div class="q-finding__reason">理由: ${escapeHtml(ov.reason)}</div>`
             : "";
           const actions = isOverridden
-            ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm" data-q-override="clear" data-q-panel="${escapeHtml(finding.panel_id)}" data-q-kind-id="${escapeHtml(finding.check_kind)}">override 解除</button>`
-            : `<button type="button" class="nc-button nc-button--secondary nc-button--sm" data-q-override="ignore" data-q-panel="${escapeHtml(finding.panel_id)}" data-q-kind-id="${escapeHtml(finding.check_kind)}">false positive</button>
+            ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm" data-q-override="clear" data-q-panel="${escapeHtml(finding.panel_id)}" data-q-kind-id="${escapeHtml(finding.check_kind)}">除外を解除</button>`
+            : `<button type="button" class="nc-button nc-button--secondary nc-button--sm" data-q-override="ignore" data-q-panel="${escapeHtml(finding.panel_id)}" data-q-kind-id="${escapeHtml(finding.check_kind)}">誤検出として除外</button>
                <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-q-override="fixed" data-q-panel="${escapeHtml(finding.panel_id)}" data-q-kind-id="${escapeHtml(finding.check_kind)}">対応済み</button>`;
           return `<div class="q-finding${isOverridden ? " q-finding--override" : ""}">
             <div class="q-finding__head">
@@ -235,7 +235,7 @@ function renderAudit(
         <div class="q-card__head">
           <h3>サマリ</h3>
           <span class="nc-badge ${failed.length > 0 ? "nc-badge--danger" : "nc-badge--success"}">失敗 ${failed.length} 件</span>
-          ${overriddenCount > 0 ? `<span class="nc-badge nc-badge--neutral">override 済 ${overriddenCount} 件</span>` : ""}
+          ${overriddenCount > 0 ? `<span class="nc-badge nc-badge--neutral">除外/対応済 ${overriddenCount} 件</span>` : ""}
         </div>
         <pre class="nc-code-block q-summary-pre">${jsonHtml(obj.summary ?? {})}</pre>
         <div class="q-meta">失敗 panel ID 一覧: ${escapeHtml(JSON.stringify(failed))}</div>
@@ -259,7 +259,7 @@ function renderAudit(
         }).join("")}
       </div>
       <details class="nc-card q-card">
-        <summary>監査結果の生 JSON</summary>
+        <summary>品質検査結果の生 JSON</summary>
         <pre class="nc-code-block">${jsonHtml(audit)}</pre>
       </details>
     </div>`;
@@ -269,13 +269,13 @@ function render(container: HTMLElement, state: ViewState): void {
   const scope = `${state.slug} / ep${String(state.episode).padStart(2, "0")}`;
   const body = (() => {
     if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
-    if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>品質監査 (Audit)</h2><p>${escapeHtml(state.error)}</p></div>`;
-    if (!state.manifest) return `<div class="nc-empty">manifest が読み込まれていません。</div>`;
+    if (state.error && !state.manifest) return `<div class="view-placeholder"><h2>品質検査 (L11 Audit)</h2><p>${escapeHtml(state.error)}</p></div>`;
+    if (!state.manifest) return `<div class="nc-empty">成果物一覧を読み込めませんでした。</div>`;
     return renderAudit(state.manifest, state.selectedKinds, state.overrides, state.failedOnly);
   })();
   const promptModal = state.overridePrompt
     ? `<div class="nc-modal is-open"><div class="nc-modal__card nc-modal__card--sm" style="padding: var(--space-4); display: grid; gap: var(--space-3);">
-        <h3 style="margin: 0;">${state.overridePrompt.action === "ignore" ? "false positive 扱いにする" : state.overridePrompt.action === "fixed" ? "対応済みにする" : "override を解除する"}</h3>
+        <h3 style="margin: 0;">${state.overridePrompt.action === "ignore" ? "誤検出として除外する" : state.overridePrompt.action === "fixed" ? "対応済みにする" : "除外を解除する"}</h3>
         <div class="q-meta">panel ${escapeHtml(state.overridePrompt.panelId)} / ${escapeHtml(state.overridePrompt.checkKind)}</div>
         <label class="nc-field"><span class="nc-field__label">理由 (audit_overrides.jsonl に残ります)</span>
           <input class="nc-field__input" id="q-override-reason" placeholder="例: 実画像は問題なし、検出側のしきい値ミス">
@@ -289,12 +289,12 @@ function render(container: HTMLElement, state: ViewState): void {
   container.innerHTML = `
     <div class="q-view">
       <div class="nc-toolbar">
-        <h2 class="nc-toolbar__title">品質監査 (Audit)</h2>
+        <h2 class="nc-toolbar__title">品質検査 <span class="nc-layer-label__sub" style="margin-left:6px">L11</span></h2>
         <span class="q-info">${escapeHtml(scope)}</span>
         <span class="q-spacer"></span>
         <button type="button" class="nc-button nc-button--secondary" data-action="reload" ${state.loading ? "disabled" : ""}>再読込</button>
-        <button type="button" class="nc-button nc-button--secondary" data-action="rerun-L11" title="L11 Audit を再実行">L11 を再実行</button>
-        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L11" title="AI 編集 view へ遷移し、L11 Audit の context を prefill します">L11 を AI で修正</button>
+        <button type="button" class="nc-button nc-button--secondary" data-action="rerun-L11" title="L11 品質検査を再実行">品質検査を再実行</button>
+        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L11" title="AI 編集 view へ遷移し、L11 品質検査の context を prefill します">AI で修正</button>
       </div>
       <div class="q-content">${body}</div>
     </div>${promptModal}`;
@@ -389,7 +389,7 @@ export function mountQualityView(container: HTMLElement): () => void {
           reason: "",
         })
           .then(() => refresh(state, container))
-          .catch((error) => alert(`override 解除に失敗: ${errorText(error)}`));
+          .catch((error) => alert(`除外解除に失敗: ${errorText(error)}`));
         return;
       }
       state.overridePrompt = { panelId, checkKind, action };
@@ -412,7 +412,7 @@ export function mountQualityView(container: HTMLElement): () => void {
         reason,
       })
         .then(() => refresh(state, container))
-        .catch((error) => alert(`override 保存に失敗: ${errorText(error)}`));
+        .catch((error) => alert(`除外/対応済の保存に失敗: ${errorText(error)}`));
       return;
     }
     if (target.closest("[data-q-revision-panel]")) {

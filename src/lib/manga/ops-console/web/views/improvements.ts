@@ -189,8 +189,8 @@ function renderAuditSummary(data: ImprovementsResponse): string {
     const hasFindings = a.findings_top10.length > 0;
     parts.push(`
       <div class="imp-section">
-        <h3><span class="imp-section-sub-num">①</span>機械検査の結果<span class="imp-section-techname">L11 audit</span></h3>
-        <p class="imp-section-sub">storyboard.json をルールベースで検査し、形式エラーや要修正点を検出した結果</p>
+        <h3><span class="imp-section-sub-num">①</span>機械検査の結果<span class="imp-section-techname">L11 品質検査</span></h3>
+        <p class="imp-section-sub">ネーム (storyboard.json) をルールベースで検査し、形式エラーや要修正点を検出した結果</p>
         <dl class="imp-stat-row">
           <div><dt>ページ数</dt><dd>${a.pages_total}</dd></div>
           <div><dt>検出件数</dt><dd>${a.findings_total}</dd></div>
@@ -295,7 +295,7 @@ function renderCompletionRisk(data: ImprovementsResponse): string {
   return `
     <div class="imp-section">
       <h3><span class="imp-section-sub-num">④</span>KU 完読率リスク (推定)<span class="imp-section-techname">v0 ヒューリスティック</span></h3>
-      <p class="imp-section-sub">audit findings + engagement_audit + 編集判断カード適用数 から自動算出。実 KENP データ取得後 (Phase Z) で v1 学習予定</p>
+      <p class="imp-section-sub">指摘事項 + 読者離脱リスク評価 + 編集判断カード適用数 から自動算出。実 KENP データ取得後 (Phase Z) で v1 学習予定</p>
       <div class="imp-finding imp-finding--${levelClass}">
         <strong>${escapeHtml(levelLabel)}</strong> (penalty: ${r.total_penalty})
         <div class="imp-finding-meta">${escapeHtml(r.summary)}</div>
@@ -330,13 +330,13 @@ function renderIntro(): string {
   return `
     <div class="imp-intro">
       <h3>このページについて</h3>
-      <div><span class="imp-intro__goal">目的:</span> 漫画の冒頭3ページ (Hook = 掴み) と最終ページ (Cliff = 引き) を改善し、KU 読者が離脱せずに次話へ進む流れを作る</div>
+      <div><span class="imp-intro__goal">目的:</span> 漫画の冒頭3ページ (Hook = 冒頭の引き) と最終ページ (Cliff = 次話への引き) を改善し、KU 読者が離脱せずに次話へ進む流れを作る</div>
       <div style="margin-top: 6px;"><span class="imp-intro__goal">使い方:</span></div>
       <ol>
         <li>下の <strong>「次の一手」</strong>パネルが現在地に応じた 1 アクションを提示。基本これに従う</li>
-        <li>「品質改善チェーン実行」 1 ボタンで「audit → Hook 適用 → Cliff 適用 → 再 audit」を一気通貫</li>
+        <li>「品質改善チェーン実行」 1 ボタンで「品質検査 → Hook 適用 → Cliff 適用 → 再検査」を一気通貫</li>
         <li>細かく走らせたいときだけ最下段の「個別実行」を開く (上級者向け)</li>
-        <li>用語: <strong>Hook</strong>=最初の3p で読者の興味を掴む、<strong>Cliff</strong>=末尾で次話を読みたくさせる、<strong>EC</strong>=編集判断カード (修正の処方箋)</li>
+        <li>用語: <strong>Hook (冒頭の引き)</strong> = 最初の3pで読者の興味を掴む、<strong>Cliff (次話への引き)</strong> = 末尾で次話を読みたくさせる、<strong>EC (編集判断カード)</strong> = 修正の処方箋</li>
       </ol>
     </div>
   `;
@@ -363,9 +363,9 @@ function deriveNextStep(data: ImprovementsResponse): {
   // Step 1: audit error が出ているなら最優先で解消
   if (errs > 0) {
     return {
-      title: "❌ まず L11 audit の error を解消",
-      hint: `audit findings に error が ${errs} 件残っています。下の「audit findings」一覧を見て、AI 編集で個別修正するか、再度 L04_1/L04_9 で生成しなおしてください。`,
-      primary: { label: "AI 編集を開く", action: "open-edit-modal" },
+      title: "❌ まず品質検査 (L11) の error を解消",
+      hint: `指摘事項に error が ${errs} 件残っています。下の「指摘事項」一覧を見て、AI で個別修正するか、再度 L04_1/L04_9 で生成しなおしてください。`,
+      primary: { label: "AI で修正", action: "open-edit-modal" },
     };
   }
 
@@ -373,56 +373,56 @@ function deriveNextStep(data: ImprovementsResponse): {
   if (!hasOpening && !hasCliff) {
     return {
       title: "▶ Hook / Cliff 提案を生成",
-      hint: "Opening Hook と Cliffhanger の提案がまだありません。下の「次のアクション」から両方の『提案を生成 (3案)』を実行してください (各 2-3分)。",
+      hint: "冒頭の引き (Hook) と次話への引き (Cliff) の提案がまだありません。下の「次のアクション」から両方の『提案を生成 (3案)』を実行してください (各 2-3分)。",
       primary: {
-        label: "🚀 チェーンを実行 (生成→適用→再audit を一気通貫)",
+        label: "🚀 チェーンを実行 (生成→適用→再検査を一気通貫)",
         action: "chain",
       },
     };
   }
   if (!hasOpening) {
     return {
-      title: "▶ Opening Hook 提案を生成",
-      hint: "Cliffhanger は揃っていますが、Opening Hook の提案がまだありません。",
-      primary: { label: "Opening Hook 提案を生成 (3案)", action: "run", layer: "L04_1", flags: { "--max-proposals": "3" } },
+      title: "▶ 冒頭の引き提案を生成",
+      hint: "次話への引き (Cliff) は揃っていますが、冒頭の引き (Hook) の提案がまだありません。",
+      primary: { label: "冒頭の引き 提案を生成 (3案)", action: "run", layer: "L04_1", flags: { "--max-proposals": "3" } },
     };
   }
   if (!hasCliff) {
     return {
-      title: "▶ Cliffhanger 提案を生成",
-      hint: "Opening Hook は揃っていますが、Cliffhanger の提案がまだありません。",
-      primary: { label: "Cliffhanger 提案を生成 (3案)", action: "run", layer: "L04_9", flags: { "--max-proposals": "3" } },
+      title: "▶ 次話への引き提案を生成",
+      hint: "冒頭の引き (Hook) は揃っていますが、次話への引き (Cliff) の提案がまだありません。",
+      primary: { label: "次話への引き 提案を生成 (3案)", action: "run", layer: "L04_9", flags: { "--max-proposals": "3" } },
     };
   }
 
   // Step 3: 提案ある → Engagement Audit でリスク評価がまだなら走らせる
   if (!hasEngagement) {
     return {
-      title: "🔍 Engagement Audit (LLM) で読者離脱リスクを採点",
+      title: "🔍 読者離脱リスクを LLM で採点",
       hint: "提案は揃いました。次は claude opus に全 22 page を採点させ、p4-7 みたいな『沈み』を検出します (12-20 分)。",
-      primary: { label: "Engagement Audit を実行 (LLM)", action: "run", layer: "L05_5", flags: {} },
+      primary: { label: "読者離脱リスク評価を実行 (LLM)", action: "run", layer: "L05_5", flags: {} },
     };
   }
 
   // Step 4: Engagement の結果に応じた誘導
   if (data.engagement_audit.human_review_required) {
     return {
-      title: "⚠️ Engagement Audit が要レビュー",
-      hint: `LLM が「人間レビュー要」と判定しました${ecCount > 0 ? `。EC suggestion ${ecCount} 件が下に並んでいるので、該当する EC を「AI 編集に流す」で適用` : ""}。または下の「チェーンを実行」で推奨案を一気通貫適用するのも有効。`,
+      title: "⚠️ 読者離脱リスク評価が要レビュー",
+      hint: `LLM が「人間レビュー要」と判定しました${ecCount > 0 ? `。改善提案 ${ecCount} 件が下に並んでいるので、該当する提案を「AI で修正」で適用` : ""}。または下の「チェーンを実行」で推奨案を一気通貫適用するのも有効。`,
       primary: ecCount > 0
-        ? { label: "EC suggestion を確認", action: "nav-layers", nav: "improvements" }
-        : { label: "チェーンを実行 (適用→再audit)", action: "chain" },
+        ? { label: "改善提案を確認", action: "nav-layers", nav: "improvements" }
+        : { label: "チェーンを実行 (適用→再検査)", action: "chain" },
     };
   }
 
   // Step 5: 完了状態 → 次の layer へ
   if (completionLevel === "low") {
     return {
-      title: "✅ 品質改善は十分。次の layer へ",
-      hint: `audit error 0 / Engagement レビュー不要 / KU 完読率リスク=低。これで Hook/Cliff の改善は完了。次は「パイプライン進捗」で L05.5 (engagement) 以降の layer を進めてください${warns > 0 ? ` (warn ${warns} 件は無視可能ですが気になれば AI 編集で潰す)` : ""}。`,
-      primary: { label: "パイプライン進捗 view へ", action: "nav-pipeline" },
+      title: "✅ 改善は十分。次の工程へ",
+      hint: `品質検査の error 0 / 読者離脱レビュー不要 / KU 完読率リスク=低。これで Hook/Cliff の改善は完了。次は「パイプライン進捗」で L05.5 (engagement) 以降の工程を進めてください${warns > 0 ? ` (warn ${warns} 件は無視可能ですが気になれば AI で修正)` : ""}。`,
+      primary: { label: "パイプライン進捗を開く", action: "nav-pipeline" },
       secondary: [
-        { label: "L11 audit を手動再実行", nav: "layers" },
+        { label: "品質検査を手動再実行", nav: "layers" },
         { label: "ネームを確認", nav: "name-gate" },
       ],
     };
@@ -430,7 +430,7 @@ function deriveNextStep(data: ImprovementsResponse): {
 
   return {
     title: "🔧 推奨案の適用が未完了",
-    hint: "提案は揃っているが、まだ storyboard.json に書き込まれていない or 完読率リスクが残っています。下の「Hook 推奨適用」「Cliff 推奨適用」を順に押すか、「チェーンを実行」で audit→適用→再audit を一気通貫してください。",
+    hint: "提案は揃っているが、まだネーム (storyboard.json) に書き込まれていない or 完読率リスクが残っています。下の「Hook 推奨適用」「Cliff 推奨適用」を順に押すか、「チェーンを実行」で 検査→適用→再検査 を一気通貫してください。",
     primary: { label: "🚀 チェーンを実行", action: "chain" },
   };
 }
@@ -489,11 +489,11 @@ function renderChain(state: ViewState): string {
   const hasOpening = state.data?.opening_hook_proposals.recommendation;
   const hasCliff = state.data?.cliffhanger_proposals.recommendation;
   const canChain = !!hasOpening || !!hasCliff;
-  const reason = !canChain ? "提案 (Opening Hook / Cliffhanger) が未生成です。先に L04_1 / L04_9 を実行してください" : "";
+  const reason = !canChain ? "提案 (冒頭の引き / 次話への引き) が未生成です。先に L04_1 / L04_9 を実行してください" : "";
 
   return `
     <div class="imp-chain">
-      <h3>🚀 品質改善チェーン実行 (おすすめ)</h3>
+      <h3>🚀 改善チェーン実行 (おすすめ)</h3>
       <p class="imp-section-sub">「機械検査 → Hook 推奨適用 → Cliff 推奨適用 → 再検査」を 1 ボタンで一気通貫実行。既に提案 (②③) が揃っている場合の最短ルート</p>
       <div class="imp-chain-controls">
         <button type="button" class="nc-button nc-button--primary" data-action="chain-start" ${(!canChain || state.chainRunning) ? "disabled" : ""}>
@@ -523,15 +523,15 @@ function renderEngagementEcSuggestions(data: ImprovementsResponse): string {
   if (!data.engagement_ec_suggestions || data.engagement_ec_suggestions.length === 0) return "";
   return `
     <div class="imp-section">
-      <h3><span class="imp-section-sub-num">⑥</span>EC (編集判断カード) 適用候補<span class="imp-section-techname">自動抽出</span></h3>
-      <p class="imp-section-sub">⑤ の LLM が「これを直そう」と言及したカード。専用 layer がある EC は <strong>L04_1 / L04_9 を直接実行 (推奨)</strong>、汎用編集は AI 編集 (Codex) フォールバック</p>
+      <h3><span class="imp-section-sub-num">⑥</span>改善提案 (編集判断カード) 適用候補<span class="imp-section-techname">自動抽出</span></h3>
+      <p class="imp-section-sub">⑤ の LLM が「これを直そう」と言及した編集判断カード。専用工程がある提案は <strong>L04_1 / L04_9 を直接実行 (推奨)</strong>、汎用編集は AI で修正 (Codex) フォールバック</p>
       ${data.engagement_ec_suggestions.map((s) => {
         const rec = s.recommended_layer;
         const primaryButton = rec
           ? `<button type="button" class="nc-button nc-button--primary nc-button--sm" data-action="apply-ec-layer" data-card-id="${escapeHtml(s.card_id)}" title="${escapeHtml(rec.note)}">${escapeHtml(rec.label)}</button>`
-          : `<button type="button" class="nc-button nc-button--primary nc-button--sm" data-action="apply-ec" data-card-id="${escapeHtml(s.card_id)}">AI 編集に流す (Codex)</button>`;
+          : `<button type="button" class="nc-button nc-button--primary nc-button--sm" data-action="apply-ec" data-card-id="${escapeHtml(s.card_id)}">AI で修正 (Codex)</button>`;
         const fallbackButton = rec
-          ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm" data-action="apply-ec" data-card-id="${escapeHtml(s.card_id)}" title="Codex CLI で自由編集 (時間がかかる場合あり)">AI 編集 (副)</button>`
+          ? `<button type="button" class="nc-button nc-button--ghost nc-button--sm" data-action="apply-ec" data-card-id="${escapeHtml(s.card_id)}" title="Codex CLI で自由編集 (時間がかかる場合あり)">AI で修正 (副)</button>`
           : "";
         return `
           <div class="imp-action-row">
@@ -553,15 +553,15 @@ function renderEngagementAudit(data: ImprovementsResponse): string {
     return `
       <div class="imp-section">
         <h3><span class="imp-section-sub-num">⑤</span>読者離脱リスク (LLM 判定)<span class="imp-section-techname">L5.5 Engagement Audit</span></h3>
-        <p class="imp-section-sub">storyboard を claude opus で「読者離脱リスク」採点。下の next_actions から実行</p>
-        <div class="imp-empty">未生成。「Engagement Audit を実行 (LLM)」ボタンから起動してください (12-20分)</div>
+        <p class="imp-section-sub">ネーム (storyboard) を claude opus で「読者離脱リスク」採点。下の「個別実行」から起動</p>
+        <div class="imp-empty">未生成。「読者離脱リスク評価を実行 (LLM)」ボタンから起動してください (12-20分)</div>
       </div>
     `;
   }
   const riskLevel = (e.overall_drop_off_risk ?? 0) >= 60 ? "danger" : (e.overall_drop_off_risk ?? 0) >= 30 ? "warning" : "info";
   return `
     <div class="imp-section">
-      <h3>L5.5 Engagement Audit (LLM 判定)</h3>
+      <h3>読者離脱リスク評価 (LLM 判定) <span class="nc-layer-label__sub" style="margin-left:6px">L5.5</span></h3>
       <p class="imp-section-sub">claude opus による「読者離脱リスク」採点。生成: ${escapeHtml(e.generated_at ?? "")}</p>
       <dl class="imp-stat-row">
         <div><dt>overall_drop_off_risk</dt><dd>${(e.overall_drop_off_risk ?? 0).toFixed(1)} / 100</dd></div>
@@ -588,9 +588,9 @@ function renderRelatedCards(data: ImprovementsResponse): string {
   // 全カタログは details で折り畳んで「参考資料」扱いにする。
   return `
     <details class="imp-collapsible">
-      <summary>📚 参考: 編集判断カード (EC) カタログ全 ${data.related_cards.length} 枚<span class="imp-collapsible-hint">findings に対応する修正パターン辞書</span></summary>
+      <summary>📚 参考: 編集判断カード (EC) カタログ全 ${data.related_cards.length} 枚<span class="imp-collapsible-hint">指摘事項に対応する修正パターン辞書</span></summary>
       <div class="imp-collapsible__body">
-        <p class="imp-section-sub">audit findings や engagement_audit で問題が出たときに自動 / 手動で適用される修正パターンの蓄積。⑥ で必要なものは自動抽出されているので、初見はここを開く必要はありません</p>
+        <p class="imp-section-sub">指摘事項や読者離脱リスク評価 (engagement_audit) で問題が出たときに自動 / 手動で適用される修正パターンの蓄積。⑥ で必要なものは自動抽出されているので、初見はここを開く必要はありません</p>
         ${data.related_cards.length === 0 ? '<div class="imp-empty">カードなし</div>' : `
           <div class="imp-card-list">
             ${data.related_cards.map((c) => `
@@ -638,7 +638,7 @@ function renderNextActions(data: ImprovementsResponse, state: ViewState): string
 function render(container: HTMLElement, state: ViewState): void {
   const head = `
     <div class="imp-head">
-      <h2>品質改善</h2>
+      <h2>読者維持改善</h2>
       <span class="imp-info">slug: ${escapeHtml(state.slug || "(未選択)")} / ep${String(state.episode).padStart(2, "0")}</span>
       <span class="imp-spacer"></span>
       <button type="button" class="nc-button nc-button--ghost" data-action="reload" ${state.loading ? "disabled" : ""}>
@@ -656,18 +656,18 @@ function render(container: HTMLElement, state: ViewState): void {
         ${renderAuditSummary(state.data)}
         <div class="imp-grid">
           ${renderProposalSection(
-            "②冒頭3p (Hook) の提案",
+            "②冒頭3p (Hook = 冒頭の引き) の提案",
             "最初の 3 ページを掴みパターン辞書 (7種) に従って再生成 — KU 棚で開いた最初の3pの品質向上",
             state.data.opening_hook_proposals,
             undefined,
-            "L4.1 Opening Hook",
+            "L4.1 冒頭の引き",
           )}
           ${renderProposalSection(
-            "③末尾ページ (Cliff) の提案",
+            "③末尾ページ (Cliff = 次話への引き) の提案",
             "末尾ページを引きパターン辞書 (7種) に従って再設計 + 次話冒頭との接続 — 次話/次巻 read-through 最大化",
             state.data.cliffhanger_proposals,
             state.data.cliffhanger_proposals.pull_link,
-            "L4.9 Cliffhanger",
+            "L4.9 次話への引き",
           )}
         </div>
         ${renderCompletionRisk(state.data)}
@@ -679,7 +679,7 @@ function render(container: HTMLElement, state: ViewState): void {
       `
       : state.loading
         ? `<div class="imp-empty">読込中…</div>`
-        : `<div class="imp-empty">slug / episode を作品一覧から選択してください</div>`;
+        : `<div class="imp-empty">作品 / 話 を作品一覧から選択してください</div>`;
 
   container.innerHTML = `
     <div class="imp-view">
@@ -702,7 +702,7 @@ function setToast(state: ViewState, container: HTMLElement, message: string, kin
 
 async function loadData(state: ViewState, container: HTMLElement): Promise<void> {
   if (!state.slug || !state.episode) {
-    state.error = "slug/episode が未設定。作品一覧から選択してください";
+    state.error = "作品/話が未設定。作品一覧から選択してください";
     state.data = null;
     render(container, state);
     return;

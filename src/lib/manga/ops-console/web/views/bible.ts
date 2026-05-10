@@ -1170,8 +1170,8 @@ function renderMetaReader(bible: BibleAssetView): string {
 function renderBibleContent(state: ViewState): string {
   const bible = state.bible;
   if (state.loading) return `<div class="nc-empty">読み込み中...</div>`;
-  if (state.error && !bible) return `<div class="view-placeholder"><h2>Bible</h2><p>${escapeHtml(state.error)}</p></div>`;
-  if (!bible) return `<div class="nc-empty">Bible snapshot は未作成です。「Bible 全体構築」から生成してください。</div>`;
+  if (state.error && !bible) return `<div class="view-placeholder"><h2>設定資料 (Bible)</h2><p>${escapeHtml(state.error)}</p></div>`;
+  if (!bible) return `<div class="nc-empty">設定資料 (Bible) はまだ作成されていません。「設定資料を一括生成」から作成してください。</div>`;
   const jobRunning = state.imageJob !== null;
   if (state.tab === "characters") return renderAssetCards(state.slug, "characters", bible.characters, bible.refs.characters, bible.image_audit_characters, jobRunning, state.imageJob, state.adoptedVariants);
   if (state.tab === "locations") return renderAssetCards(state.slug, "locations", bible.locations, bible.refs.locations, bible.image_audit, jobRunning, state.imageJob, state.adoptedVariants);
@@ -1219,9 +1219,9 @@ function renderBibleContent(state: ViewState): string {
 }
 
 function actionLabel(layer: ActionLayer): string {
-  if (layer === "L01") return "世界観・キャラ設定 (Bible) を構築";
-  if (layer === "L01b") return "Bible の文法チェック";
-  return "Bible の深掘り";
+  if (layer === "L01") return "設定資料 (Bible) を一括生成";
+  if (layer === "L01b") return "設定資料の文法チェック";
+  return "設定資料の深掘り";
 }
 
 function renderModal(state: ViewState): string {
@@ -1400,14 +1400,14 @@ function render(container: HTMLElement, state: ViewState): void {
   container.innerHTML = `
     <div class="bib-view">
       <div class="nc-toolbar">
-        <h2 class="nc-toolbar__title">世界観・設定 (Bible)</h2>
+        <h2 class="nc-toolbar__title">設定資料 (Bible)</h2>
         <span class="bib-info">${escapeHtml(state.slug)}</span>
         <span class="bib-spacer"></span>
-        <button type="button" class="nc-button nc-button--primary" data-action="L01">Bible 全体構築 (再生成)</button>
-        <button type="button" class="nc-button nc-button--secondary" data-action="L01b">文法チェック (Lint)</button>
-        <button type="button" class="nc-button nc-button--secondary" data-action="L01c">深掘り (Deepen)</button>
-        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI 編集</button>
-        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L01" title="AI 編集 view へ遷移し、L01 Bible の context を prefill します">L01 を AI で修正</button>
+        <button type="button" class="nc-button nc-button--primary" data-action="L01">設定資料を一括生成 <span class="nc-layer-label__sub" style="margin-left:4px">L01</span></button>
+        <button type="button" class="nc-button nc-button--secondary" data-action="L01b">文法チェック <span class="nc-layer-label__sub" style="margin-left:4px">L01b</span></button>
+        <button type="button" class="nc-button nc-button--secondary" data-action="L01c">深掘り <span class="nc-layer-label__sub" style="margin-left:4px">L01c</span></button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI で修正</button>
+        <button type="button" class="nc-button nc-button--ghost" data-ai-edit-layer="L01" title="設定資料 (L01 Bible) を AI で修正">L01 を AI で修正</button>
       </div>
       ${renderTabs(state.tab)}
       <div class="bib-content" data-tab="${escapeHtml(state.tab)}">${renderBibleContent(state)}</div>

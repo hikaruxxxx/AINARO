@@ -162,11 +162,9 @@ function renderLayer(layer: PipelineStatusLayer, state: ViewState): string {
   return `
     <li class="pipe-step${current}" title="${escapeHtml(title)}">
       <div class="pipe-step__head">
-        <div class="pipe-step__id-block">
-          <span class="pipe-step__id">${escapeHtml(label.subtitle)}</span>
-        </div>
         <div class="pipe-step__label-block">
           <span class="pipe-step__label">${escapeHtml(label.title)}</span>
+          <span class="pipe-step__id">${escapeHtml(layer.id)}</span>
         </div>
         <span class="nc-badge ${badgeClass(layer, running)}">${escapeHtml(badgeLabel(layer, running))}</span>
         ${ts ? `<span class="pipe-step__ts">${escapeHtml(ts)}</span>` : `<span class="pipe-step__ts"></span>`}
@@ -205,8 +203,8 @@ function render(container: HTMLElement, state: ViewState): void {
       <h2 class="nc-toolbar__title">パイプライン進捗</h2>
       <span class="pipe-info">${escapeHtml(scope)}</span>
       <span class="pipe-spacer"></span>
-      <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI 編集</button>
-      <button type="button" class="nc-button nc-button--ghost nc-button--sm" disabled title="L01 (--concept パス) や L02b (--volume + --concept) は引数指定が必要なため、各 layer の「起動」ボタンから個別に起動してください。完全自動化は将来対応 (作品の auto_run_args 定義が前提)">全自動 run は未対応</button>
+      <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI で修正</button>
+      <button type="button" class="nc-button nc-button--ghost nc-button--sm" disabled title="L01 (--concept パス) や L02b (--volume + --concept) は引数指定が必要なため、各工程の「生成」ボタンから個別に起動してください。完全自動化は将来対応 (作品の auto_run_args 定義が前提)">全工程の自動実行は未対応</button>
     </div>
     ${renderNextActionBanner(state.nextAction)}
     ${body}

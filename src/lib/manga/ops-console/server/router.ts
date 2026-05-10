@@ -117,12 +117,12 @@ function checkLegacyScope(
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
   if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-    return { ok: false, status: 400, error: "操作対象の作品が未選択です。ヘッダーの「scope 切替」から作品+話を選んでください" };
+    return { ok: false, status: 400, error: "操作対象の作品が未選択です。ヘッダーの「作業対象の切替」から作品+話を選んでください" };
   }
   const slug = url.searchParams.get("slug");
   const ep = Number(url.searchParams.get("episode"));
   if (slug !== defaults.defaultSlug || ep !== defaults.defaultEpisode) {
-    return { ok: false, status: 403, error: "現在の scope と異なる作品です。ヘッダーの「scope 切替」で対象を変更してください" };
+    return { ok: false, status: 403, error: "現在の作業対象と異なる作品です。ヘッダーの「作業対象の切替」で対象を変更してください" };
   }
   return { ok: true };
 }
@@ -132,11 +132,11 @@ function checkLegacyBodyScope(
   defaults: RouterDefaults
 ): { ok: true } | { ok: false; status: number; error: string } {
   if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-    return { ok: false, status: 400, error: "操作対象の作品が未選択です。ヘッダーの「scope 切替」から作品+話を選んでください" };
+    return { ok: false, status: 400, error: "操作対象の作品が未選択です。ヘッダーの「作業対象の切替」から作品+話を選んでください" };
   }
   const obj = asBodyRecord(body);
   if (obj.slug !== defaults.defaultSlug || Number(obj.episode) !== defaults.defaultEpisode) {
-    return { ok: false, status: 403, error: "現在の scope と異なる作品です。ヘッダーの「scope 切替」で対象を変更してください" };
+    return { ok: false, status: 403, error: "現在の作業対象と異なる作品です。ヘッダーの「作業対象の切替」で対象を変更してください" };
   }
   return { ok: true };
 }
@@ -163,14 +163,14 @@ function checkScopedWritePath(
     return {
       ok: false,
       status: 400,
-      error: "書き込みには scope (作品+話) の固定が必要です。ヘッダーの「scope 切替」から選択してください",
+      error: "書き込みには作業対象 (作品+話) の固定が必要です。ヘッダーの「作業対象の切替」から選択してください",
     };
   }
   if (scoped.slug !== defaults.defaultSlug || scoped.episode !== defaults.defaultEpisode) {
     return {
       ok: false,
       status: 403,
-      error: "現在の scope と異なる作品です。ヘッダーの「scope 切替」で対象を変更してください",
+      error: "現在の作業対象と異なる作品です。ヘッダーの「作業対象の切替」で対象を変更してください",
     };
   }
   return { ok: true };
@@ -293,7 +293,7 @@ export async function handleApi(
           !isAiEditWorkInListMode &&
           (defaults.defaultSlug === null || defaults.defaultEpisode === null)
         ) {
-          return send(res, 400, { error: "操作対象の作品が未選択です。ヘッダーの「scope 切替」から作品+話を選んでください" });
+          return send(res, 400, { error: "操作対象の作品が未選択です。ヘッダーの「作業対象の切替」から作品+話を選んでください" });
         }
         const scopedDefaults: ScopedRouterDefaults = isAiEditConsole
             ? { defaultSlug: "_console", defaultEpisode: 0, allowCrossScopeRead: defaults.allowCrossScopeRead }
@@ -322,7 +322,7 @@ export async function handleApi(
       }
       if (action === "abort" && req.method === "POST") {
         if (defaults.defaultSlug === null || defaults.defaultEpisode === null) {
-          return send(res, 400, { error: "操作対象の作品が未選択です。ヘッダーの「scope 切替」から作品+話を選んでください" });
+          return send(res, 400, { error: "操作対象の作品が未選択です。ヘッダーの「作業対象の切替」から作品+話を選んでください" });
         }
         const scopedDefaults: ScopedRouterDefaults = {
           defaultSlug: defaults.defaultSlug,

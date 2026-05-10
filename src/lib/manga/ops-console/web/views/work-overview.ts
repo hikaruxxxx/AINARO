@@ -119,10 +119,10 @@ function render(container: HTMLElement, state: ViewState): void {
         <section class="nc-card wo-card">
           <h3>クイックアクション</h3>
           <div class="wo-actions">
-            <button type="button" class="nc-button nc-button--secondary" data-view="bible">Bible 全体構築 (L01)</button>
-            <button type="button" class="nc-button nc-button--secondary" data-view="volume-plot">Volume Plot 構築 (L02b)</button>
-            <button type="button" class="nc-button nc-button--primary" data-view="kdp-metadata">KDP メタ編集</button>
-            <button type="button" class="nc-button nc-button--secondary" data-view="volumes">巻管理 (Volumes)</button>
+            <button type="button" class="nc-button nc-button--secondary" data-view="bible">設定資料を一括生成 <span class="nc-layer-label__sub" style="margin-left:4px">L01</span></button>
+            <button type="button" class="nc-button nc-button--secondary" data-view="volume-plot">巻プロットを構築 <span class="nc-layer-label__sub" style="margin-left:4px">L02b</span></button>
+            <button type="button" class="nc-button nc-button--primary" data-view="kdp-metadata">KDP 入稿メタを編集</button>
+            <button type="button" class="nc-button nc-button--secondary" data-view="volumes">巻管理</button>
           </div>
         </section>
       </div>
@@ -130,7 +130,7 @@ function render(container: HTMLElement, state: ViewState): void {
         <h3>エピソード一覧</h3>
         <div class="wo-table-wrap">
           <table class="wo-table">
-            <thead><tr><th>ep</th><th>title_working</th><th>audit failed</th><th>revision 未処理</th><th>採用済 panel</th><th>actions</th></tr></thead>
+            <thead><tr><th>話</th><th>仮タイトル</th><th>品質検査の失敗</th><th>未処理の修正指示</th><th>採用済 panel</th><th>操作</th></tr></thead>
             <tbody>${state.episodes.map((row) => `<tr>
               <td>${epLabel(row.episode)}</td>
               <td>${escapeHtml(row.title_working ?? "-")}</td>
@@ -140,9 +140,9 @@ function render(container: HTMLElement, state: ViewState): void {
               <td><div class="wo-actions">
                 <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-episode="${row.episode}" data-view="pipeline">パイプライン</button>
                 <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-episode="${row.episode}" data-view="revision">ページ修正</button>
-                <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-episode="${row.episode}" data-view="quality">品質監査</button>
+                <button type="button" class="nc-button nc-button--secondary nc-button--sm" data-episode="${row.episode}" data-view="quality">品質検査</button>
               </div></td>
-            </tr>`).join("") || '<tr><td colspan="6">episode がありません</td></tr>'}</tbody>
+            </tr>`).join("") || '<tr><td colspan="6">話がありません</td></tr>'}</tbody>
           </table>
         </div>
       </section>
@@ -150,7 +150,7 @@ function render(container: HTMLElement, state: ViewState): void {
         <h3>巻一覧</h3>
         <div class="wo-table-wrap">
           <table class="wo-table">
-            <thead><tr><th>v</th><th>episodes</th><th>KDP package</th><th>actions</th></tr></thead>
+            <thead><tr><th>巻</th><th>含まれる話</th><th>KDP 入稿パッケージ</th><th>操作</th></tr></thead>
             <tbody><tr><td>v01</td><td>${state.episodes.map((row) => epLabel(row.episode)).join(", ") || "-"}</td><td>Wave 6</td><td><button type="button" class="nc-button nc-button--secondary nc-button--sm" data-view="volume-plot">巻プロット</button></td></tr></tbody>
           </table>
         </div>
@@ -161,7 +161,7 @@ function render(container: HTMLElement, state: ViewState): void {
       <div class="nc-toolbar">
         <h2 class="nc-toolbar__title">${escapeHtml(title)}</h2>
         <span class="wo-spacer"></span>
-        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI 編集</button>
+        <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-open-ai-edit>AI で修正</button>
         <span class="nc-badge nc-badge--neutral">phase: ${escapeHtml(metaText(state.meta, "phase"))}</span>
       </div>
       ${body}
