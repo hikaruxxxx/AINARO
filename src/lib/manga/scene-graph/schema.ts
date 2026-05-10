@@ -79,6 +79,35 @@ export type Scene = {
 
   // === C 系: 選別ループ (B3 採点後に充填) ===
   selection?: SceneSelection;
+
+  // === D 系: bible 伝搬軸 (Phase 4 新設、すべて optional でローンチ) ===
+  wardrobe_state?: Array<{
+    character_id: string; // bible.characters[].id
+    costume_id: string; // bible.costumes[].id (active range 内)
+  }>;
+  visual_motif_anchors?: Array<{
+    motif_id: string; // bible.visual_motifs[].id (or name)
+    intensity: "subtle" | "clear" | "dominant";
+  }>;
+  world_rules_active?: string[]; // bible.world.rules[] の subset
+  props_in_play?: Array<{
+    prop_id: string; // bible.props[].id
+    held_by?: string; // bible.characters[].id (任意)
+  }>;
+  theme_subtext?: {
+    theme_id: string; // bible.themes_and_subtexts[].id (Phase 3 完了前提)
+    how_it_surfaces: string;
+  } | null;
+  attribute_tags_focus?: Record<string, string[]>; // character_id → active tags
+  panel_archetype_hint?: string | null; // bible.visual_grammar.panel_archetypes[].id (Phase 3 完了前提)
+  cliffhanger_pattern?: string | null; // bible.genre_grammar.cliffhanger_palette[].id (Phase 3 完了前提)
+  voice_bible_active_traits?: Record<
+    string,
+    {
+      characteristic_phrase?: string;
+      speech_register?: string;
+    }
+  >;
 };
 
 // ============================================================================
@@ -381,6 +410,76 @@ export function validateSceneGraph(
           exclusiveTextSeen.set(kl.text, sid);
         }
       }
+    }
+
+    // === Rule 12: wardrobe_state 整合 ===
+    // scene.wardrobe_state の character_id ⊂ scene.cast、costume_id ⊂ bible.costumes。
+    // active range check は episode_no が無いと不可、bible-coverage 側で扱う。
+    if (scene.wardrobe_state) {
+      for (const ws of scene.wardrobe_state) {
+        if (!sceneCastIds.includes(ws.character_id)) {
+          errors.push(`${sid}: wardrobe_state.character_id "${ws.character_id}" not in scene.cast`);
+        }
+        const costume = bible.costumes.find((c) => c.id === ws.costume_id);
+        if (!costume) {
+          errors.push(`${sid}: wardrobe_state.costume_id "${ws.costume_id}" not in bible.costumes`);
+        }
+      }
+    }
+
+    // === Rule 13: visual_motif_anchors 整合 ===
+    // motif_id ⊂ bible.visual_motifs[].id (または .name)。
+    if (scene.visual_motif_anchors) {
+      const motifIds = new Set(
+        bible.visual_motifs.map((m) => {
+          const withId = m as typeof m & { id?: string };
+          return withId.id ?? m.name;
+        })
+      );
+      for (const anchor of scene.visual_motif_anchors) {
+        if (!motifIds.has(anchor.motif_id)) {
+          errors.push(`${sid}: visual_motif_anchors.motif_id "${anchor.motif_id}" not in bible.visual_motifs`);
+        }
+      }
+    }
+
+    // === Rule 14: theme_subtext.theme_id 整合 ===
+    // Phase 3 前の bible ではフィールド自体が無いので warning に留める。
+    if (scene.theme_subtext) {
+      const themes =
+        (bible as unknown as { themes_and_subtexts?: Array<{ id: string }> }).themes_and_subtexts ?? [];
+      if (themes.length > 0 && !themes.some((t) => t.id === scene.theme_subtext!.theme_id)) {
+        warnings.push(`${sid}: theme_subtext.theme_id "${scene.theme_subtext.theme_id}" not in bible.themes_and_subtexts`);
+      }
+    }
+
+    // === Rule 15: props_in_play 整合 ===
+    if (scene.props_in_play) {
+      const propIds = new Set(bible.props.map((p) => p.id));
+      for (const p of scene.props_in_play) {
+        if (!propIds.has(p.prop_id)) {
+          errors.push(`${sid}: props_in_play.prop_id "${p.prop_id}" not in bible.props`);
+        }
+        if (p.held_by && !sceneCastIds.includes(p.held_by)) {
+          errors.push(`${sid}: props_in_play.held_by "${p.held_by}" not in scene.cast`);
+        }
+      }
+    }
+
+    // === Rule 16: panel_archetype_hint 整合 ===
+    // Phase 3 前の bible ではフィールド自体が無いので warning に留める。
+    if (scene.panel_archetype_hint) {
+      const archetypes =
+        (bible as unknown as { visual_grammar?: { panel_archetypes?: Array<{ id: string }> } }).visual_grammar
+          ?.panel_archetypes ?? [];
+      if (archetypes.length > 0 && !archetypes.some((a) => a.id === scene.panel_archetype_hint)) {
+        warnings.push(`${sid}: panel_archetype_hint "${scene.panel_archetype_hint}" not in bible.visual_grammar.panel_archetypes`);
+      }
+    }
+
+    // === Rule 17: cliffhanger_pattern は cliff scene のみ ===
+    if (scene.cliffhanger_pattern && scene.beat_type !== "cliff") {
+      errors.push(`${sid}: cliffhanger_pattern "${scene.cliffhanger_pattern}" specified but beat_type=${scene.beat_type} (cliff のみ可)`);
     }
   }
 
