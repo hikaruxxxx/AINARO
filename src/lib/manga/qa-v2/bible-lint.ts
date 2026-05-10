@@ -1,20 +1,35 @@
 /**
  * Bible Lint (怠惰検出)
  *
- * BibleSnapshotV2 を 2 段階でレビュー:
+ * BibleSnapshotV2 を 3 段階でレビュー:
  *   段階A (deterministic): TODO/null/長さ/テンプレ反復/anchor 数 を機械的検出
  *   段階B (Codex CLI judge): セマンティックな浅さを LLM judge に依頼
+ *   段階C (compliance): 商標・実在名などの混入を辞書検出
  *
  * 出力: BibleLintReport (致命/警告/情報の3レベル)
  */
 import { runCodexText } from "../llm/codex-text";
+import { loadBlocklist, loadFalsePositives, scanBible } from "../compliance/scanner";
+import type { ComplianceFinding } from "../compliance/types";
 import type { BibleSnapshotV2 } from "../schemas-v2";
 
 export type LintSeverity = "fatal" | "warn" | "info";
+export type LintScope =
+  | "world"
+  | "character"
+  | "location"
+  | "prop"
+  | "costume"
+  | "relation"
+  | "motif"
+  | "continuity_seed"
+  | "volume_synopsis"
+  | "global"
+  | "compliance";
 
 export type LintFinding = {
   severity: LintSeverity;
-  scope: "world" | "character" | "location" | "prop" | "costume" | "relation" | "motif" | "continuity_seed" | "volume_synopsis" | "global";
+  scope: LintScope;
   target_id?: string;
   rule: string;
   message: string;
@@ -426,12 +441,98 @@ export async function llmLintBible(args: {
 }
 
 // ============================================================
+// 段階C: コンプライアンス辞書検出 (商標・実在名混入検出)
+// ============================================================
+
+export async function complianceLint(args: {
+  bible: BibleSnapshotV2;
+  blocklistPath?: string;
+  falsePositivesPath?: string;
+}): Promise<LintFinding[]> {
+  try {
+    const [blocklist, fp] = await Promise.all([
+      loadBlocklist(args.blocklistPath),
+      loadFalsePositives(args.falsePositivesPath),
+    ]);
+    return scanBible(args.bible, blocklist, fp).map((finding) => mapComplianceToLintFinding(finding, args.bible));
+  } catch (e) {
+    return [
+      {
+        severity: "info",
+        scope: "compliance",
+        rule: "compliance_load_failed",
+        message: `compliance 辞書の読み込みに失敗しました: ${errorMessage(e)}`,
+      },
+    ];
+  }
+}
+
+function mapComplianceToLintFinding(c: ComplianceFinding, bible: BibleSnapshotV2): LintFinding {
+  const { scope, targetId } = scopeAndTargetFromFieldPath(c.field_path, bible);
+  return {
+    severity: c.severity,
+    scope,
+    ...(targetId ? { target_id: targetId } : {}),
+    rule: `compliance:${c.category}`,
+    message: `[${c.matched_term}] @ ${c.field_path} (line ${c.line ?? "?"}): ${c.text_excerpt}`,
+    hint: c.suggestion
+      ? `代替案: ${c.suggestion.fictional_name_hint ?? c.suggestion.type} — ${c.suggestion.description}`
+      : undefined,
+  };
+}
+
+function scopeAndTargetFromFieldPath(
+  fieldPath: string,
+  bible: BibleSnapshotV2,
+): { scope: LintScope; targetId?: string } {
+  const indexed = /^(characters|locations|props|costumes|relations|visual_motifs)\[(\d+)\](?:\.|$)/u.exec(fieldPath);
+  if (indexed) {
+    const index = Number(indexed[2]);
+    switch (indexed[1]) {
+      case "characters":
+        return { scope: "character", targetId: bible.characters[index]?.id };
+      case "locations":
+        return { scope: "location", targetId: bible.locations[index]?.id };
+      case "props":
+        return { scope: "prop", targetId: bible.props[index]?.id };
+      case "costumes":
+        return { scope: "costume", targetId: bible.costumes[index]?.id };
+      case "relations":
+        return { scope: "relation" };
+      case "visual_motifs":
+        return { scope: "motif", targetId: idFromUnknown(bible.visual_motifs[index]) };
+      default:
+        return { scope: "compliance" };
+    }
+  }
+
+  if (fieldPath === "world" || fieldPath.startsWith("world.")) return { scope: "world" };
+  if (fieldPath === "volume_synopsis" || fieldPath.startsWith("volume_synopsis.")) {
+    return { scope: "volume_synopsis" };
+  }
+  return { scope: "compliance" };
+}
+
+function idFromUnknown(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const id = (value as { id?: unknown }).id;
+  return typeof id === "string" ? id : undefined;
+}
+
+function errorMessage(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
+
+// ============================================================
 // 統合エントリ
 // ============================================================
 
 export async function lintBible(args: {
   bible: BibleSnapshotV2;
   skipLlm?: boolean;
+  skipCompliance?: boolean;
+  blocklistPath?: string;
+  falsePositivesPath?: string;
   cwd?: string;
 }): Promise<BibleLintReport> {
   const findings: LintFinding[] = [];
@@ -446,6 +547,23 @@ export async function lintBible(args: {
         scope: "global",
         rule: "llm_judge_failed",
         message: `LLM judge 失敗 (static lint のみ採用): ${(e as Error).message}`,
+      });
+    }
+  }
+  if (!args.skipCompliance) {
+    try {
+      const compliance = await complianceLint({
+        bible: args.bible,
+        blocklistPath: args.blocklistPath,
+        falsePositivesPath: args.falsePositivesPath,
+      });
+      findings.push(...compliance);
+    } catch (e) {
+      findings.push({
+        severity: "info",
+        scope: "compliance",
+        rule: "compliance_load_failed",
+        message: `compliance lint 失敗 (static/LLM lint のみ採用): ${errorMessage(e)}`,
       });
     }
   }
