@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { BibleSnapshotV2 } from "../schemas-v2";
+import type { BibleSnapshotV2, CharacterEntryV2 } from "../schemas-v2";
 import { runCodexText } from "../llm/codex-text";
 import type { V2Concept } from "./v2-adapter";
 import {
@@ -13,6 +13,7 @@ import {
   runStage3World,
   runStage5Prop,
   runStage7Relation,
+  runStage8Volume,
   runStage9CrossReference,
 } from "./deep-extractor";
 
@@ -209,6 +210,35 @@ describe("deep-extractor stage dry-run prompts", () => {
     expect(prompt).toContain("1 relation pair");
   });
 
+  it("Stage 8 prompt は volumeNo を context.target_volume_no に正しく渡す", async () => {
+    const result = await runStage8Volume({
+      bible: { ...bible(), meta: { ...bible().meta, estimated_volumes: 13 } },
+      v2Concept: concept(),
+      volumeNo: 5,
+      styleReferenceNote: "style note",
+      dryRun: true,
+    });
+
+    const prompt = "dryRunPrompt" in result ? result.dryRunPrompt : "";
+    expect(prompt).toContain("Stage 8 Volume 5/");
+    expect(prompt).toContain("target_volume_no");
+    expect(prompt).toContain('"target_volume_no": 5');
+  });
+
+  it("全 stage prompt に STYLE_GUARD_DIRECTIVE が注入される", async () => {
+    const result = await runStage1aCharacterBackground({
+      bible: bible(),
+      v2Concept: concept(),
+      characterId: "char_ren_v1",
+      styleReferenceNote: "style note",
+      dryRun: true,
+    });
+
+    const prompt = "dryRunPrompt" in result ? result.dryRunPrompt : "";
+    expect(prompt).toContain("文体規制");
+    expect(prompt).toContain("対比型「〜ではなく〜」");
+  });
+
   it("Stage 9 cross-reference prompt prioritizes all-field compliance eradication", async () => {
     const result = await runStage9CrossReference({
       bible: bible(),
@@ -221,7 +251,31 @@ describe("deep-extractor stage dry-run prompts", () => {
     expect(prompt).toContain("costumes[].id, costumes[].character_id");
     expect(prompt).toContain("continuity_seeds[].group_id, .target_id, .invariant_description");
     expect(prompt).toContain("compliance_replacements");
+    expect(prompt).toContain("entities_add");
+    expect(prompt).toContain("facts_add");
+    expect(prompt).toContain("facts_modify");
     expect(prompt).toContain("lawson_uniform");
+  });
+});
+
+describe("CharacterEntryV2 subrole", () => {
+  it("allows heroine as an optional subrole while role stays V2-compatible", () => {
+    const character: CharacterEntryV2 = {
+      id: "char_heroine_v1",
+      name: "Heroine",
+      role: "supporting",
+      subrole: "heroine",
+      spec: {
+        hair: { style: "bob", color: "black", specific: "clean silhouette" },
+        eyes: { shape: "round", color: "black", expression_default: "steady" },
+        outfit_default: { top: "jacket" },
+      },
+      attribute_classifier: { gender: "female", age_band: "teen", body_type: "average", hair_length: "medium", hair_color: "black", eye_shape: "round", archetype: "ally" },
+      continuity_anchors: ["clean silhouette"],
+      appears_in_volumes: [1],
+    };
+
+    expect(character.subrole).toBe("heroine");
   });
 });
 

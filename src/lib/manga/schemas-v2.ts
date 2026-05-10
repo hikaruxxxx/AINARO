@@ -120,12 +120,21 @@ export type NavFullSpecV2 = {
   [key: string]: unknown;
 };
 
+export type CharacterRoleV2 =
+  | CharacterRole
+  | "deuteragonist"
+  | "mentor"
+  | "rival"
+  | "love_interest";
+
 export type CharacterEntryV2 = {
   /** "char_ren_v1" 形式、bible 内ユニーク */
   id: string;
   name: string;
   name_romaji?: string;
-  role: CharacterRole;
+  role: CharacterRoleV2;
+  /** 副軸: heroine / villain_lieutenant / comic_relief 等。role と直交、UI/depth-spec で使う optional 拡張 */
+  subrole?: "heroine" | "villain_lieutenant" | "comic_relief" | "mentor_secondary" | "rival_secondary";
   age_visual?: string;
   spec: CharacterSpec;
   attribute_classifier: AttributeClassifierLabels;

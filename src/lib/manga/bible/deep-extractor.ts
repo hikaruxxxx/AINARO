@@ -29,6 +29,8 @@ import type {
   PropEntryV2,
   TextQualityLexiconV2,
   VisualMotifV2,
+  FactNode,
+  EntityKind,
 } from "../schemas-v2";
 import type { V2Concept } from "./v2-adapter";
 import type { BibleLintReport } from "../qa-v2/bible-lint";
@@ -195,6 +197,9 @@ export type CrossRefPatch = {
   costume_patches?: CostumeDeepPatch[];
   relation_patches?: RelationDeepPatch[];
   volume_patch?: Partial<BibleSnapshotV2["volume_synopsis"]>;
+  entities_add?: Array<{ id: string; kind: Extract<EntityKind, "event" | "rule" | "system_param">; name: string; spec?: unknown }>;
+  facts_add?: Array<Partial<FactNode>>;
+  facts_modify?: Array<{ fact_id: string; patch: Partial<FactNode> }>;
   compliance_replacements?: ComplianceReplacement[];
   compliance_post_check?: CompliancePostCheck;
   notes?: string[];
@@ -242,6 +247,32 @@ const COMPLIANCE_DIRECTIVE = [
   "- 不安なら『○○系の』『○○風の』+ 説明的記述で代替し、固有名は出さない",
   "- **重要**: 既存 bible に NG 語が含まれていたら、必ず patch で safe な架空名に置換すること",
   "- 代替名の発想: data/manga/compliance/blocklist.json の safe_substitutes セクションに各カテゴリの fictional_name_hint と description を用意してあるので、参考にしてよい",
+].join("\n");
+
+const STYLE_GUARD_DIRECTIVE = [
+  "## 文体規制 (warn/repair 方式)",
+  "",
+  "以下の症状を避けてください。違反は warn として lint に検出され、重大なら次回 stage で repair 対象になります。",
+  "",
+  "### 警告レベル (避けるべき)",
+  "- 対比型「〜ではなく〜」「〜のような〜ではない」を 1 fact 内 3 回以上使う",
+  "- 抽象語「象徴 / 本質 / 意味 / 核心 / 根源 / 真相」を 1 fact 内 3 回以上使う",
+  "- 同義反復: 直前 200 字以内に同じ名詞句を再出現させる",
+  "- 1 文 80 字超 (改行と読点で適切に区切る)",
+  "",
+  "### Reject レベル (出力破棄)",
+  "- 1 fact body が 2,000 字超 (目安超過)",
+  "- 未定義 entity_id を references で引く",
+  "",
+  "### aspect 別適用差",
+  "- system_param / world_rule / faction_dynamics: 「具体台詞 or 具体シーン必須」を **免除** (数値仕様のため)",
+  "- psychology / backstory / relationship: 「具体台詞 or 具体シーン 1 件以上」必須",
+  "- motif_directive: 抽象表現上限を緩和 (モチーフは抽象が本質)",
+  "",
+  "### 文体テクニック (推奨)",
+  "- 一人称代名詞「自分」を多用しない、固有名詞・職業名で指す",
+  "- 「〜なのである」「〜と言える」のような断定的説教を避ける",
+  "- 具体台詞 (鉤括弧つき) と具体場面 (時刻 + 場所 + 動作) を本文に埋める",
 ].join("\n");
 
 const STAGE9_COMPLIANCE_ERADICATION_DIRECTIVE = [
@@ -552,27 +583,34 @@ export async function runStage8Volume(args: StageCommonArgs & {
   v2Concept: V2Concept;
   volumeNo: number;
 }): Promise<VolumeDeepPatch | DryRunResult> {
+  const targetVolume = args.volumeNo;
+  const totalVolumes = args.bible.meta.estimated_volumes ?? 13;
   const prompt = buildStagePrompt({
-    stageTitle: "Stage 8 Volume Deepen",
+    stageTitle: `Stage 8 Volume ${targetVolume}/${totalVolumes} Deepen`,
     bible: args.bible,
     v2Concept: args.v2Concept,
     styleReferenceNote: args.styleReferenceNote,
-    targetLabel: `volume_no=${args.volumeNo}`,
+    targetLabel: `volume_no=${targetVolume}/${totalVolumes}`,
     rules: [],
     context: {
-      target_volume_no: args.volumeNo,
-      current_volume_synopsis: args.bible.volume_synopsis,
+      target_volume_no: targetVolume,
+      total_volumes: totalVolumes,
+      current_volume_synopsis_for_vol1_only: args.bible.volume_synopsis,
       core_hook: args.bible.meta.core_hook,
-      character_growth: args.bible.characters.map((character) => ({
+      character_growth_for_target_volume: args.bible.characters.map((character) => ({
         id: character.id,
         name: character.name,
+        growth_at_target_volume: character.growth_per_volume?.find((growth) => (growth.volume ?? 0) === targetVolume),
+      })),
+      character_growth_full_arc: args.bible.characters.map((character) => ({
+        id: character.id,
         growth_per_volume: character.growth_per_volume,
       })),
     },
-    instruction: "1コール = 1 volume に集中し、theme / summary / cliffhanger を商業単行本の設計密度まで深く書く。下流 schema にある volume_synopsis patch だけを返す。",
-    outputSchema: "type VolumeDeepPatch = { volume_no: number; patch: Partial<BibleSnapshotV2['volume_synopsis']> }",
+    instruction: `1コール = volume ${targetVolume} に集中し、theme / summary / cliffhanger を商業単行本の設計密度まで深く書く。volume ${targetVolume} 単独の VolumeDeepPatch を返す。`,
+    outputSchema: "type VolumeDeepPatch = { volume_no: number; patch: { theme: string; summary: string; cliffhanger?: string } }",
   });
-  return runStageJson<VolumeDeepPatch>(prompt, args, "stage8 volume JSON 抽出失敗");
+  return runStageJson<VolumeDeepPatch>(prompt, args, `stage8 volume ${targetVolume} JSON 抽出失敗`);
 }
 
 export async function runStage9CrossReference(args: StageCommonArgs): Promise<CrossRefPatch | DryRunResult> {
@@ -594,7 +632,23 @@ export async function runStage9CrossReference(args: StageCommonArgs): Promise<Cr
       compliance_findings: complianceFindings,
     },
     instruction: "1コール = bible 全体の矛盾解消と最終 polish に集中する。protagonist.backstory と antagonist.dark_mirror_to_protagonist などの不整合、compliance 検出語の置換、depth-spec の per_match 未達項目への追記 patch を返す。",
-    outputSchema: "type CrossRefPatch = { character_patches?: CharacterDeepPatch[]; location_patches?: LocationDeepPatch[]; world_patch?: Partial<WorldSpec>; motif_patches?: MotifDeepPatch[]; prop_patches?: PropDeepPatch[]; costume_patches?: CostumeDeepPatch[]; relation_patches?: RelationDeepPatch[]; volume_patch?: Partial<VolumeSynopsis>; compliance_replacements?: Array<{ field_path: string; from: string; to: string; reason?: string; mode?: \"id_rename\" | \"text_only\" }>; compliance_post_check?: { fatal_count: number; warn_count: number; remaining_findings: Array<{ category: string; matched_term: string; field_path: string; text_excerpt: string }> }; notes?: string[] }",
+    outputSchema: `type CrossRefPatch = {
+  character_patches?: CharacterDeepPatch[];
+  location_patches?: LocationDeepPatch[];
+  world_patch?: Partial<WorldSpec>;
+  motif_patches?: MotifDeepPatch[];
+  prop_patches?: PropDeepPatch[];
+  costume_patches?: CostumeDeepPatch[];
+  relation_patches?: RelationDeepPatch[];
+  volume_patch?: Partial<VolumeSynopsis>;
+  // V3 移行準備 (Phase 5 migration script で消費):
+  entities_add?: Array<{ id: string; kind: "event" | "rule" | "system_param"; name: string; spec?: unknown }>;
+  facts_add?: Array<Partial<FactNode>>;
+  facts_modify?: Array<{ fact_id: string; patch: Partial<FactNode> }>;
+  compliance_replacements?: Array<{ field_path: string; from: string; to: string; reason?: string; mode?: "id_rename" | "text_only" }>;
+  compliance_post_check?: { fatal_count: number; warn_count: number; remaining_findings: Array<{ category: string; matched_term: string; field_path: string; text_excerpt: string }> };
+  notes?: string[];
+}`,
   });
   const patch = await runStageJson<CrossRefPatch>(prompt, args, "stage9 cross-reference JSON 抽出失敗");
   if ("dryRunPrompt" in patch) return patch;
@@ -750,6 +804,7 @@ function buildStagePrompt(args: {
     : [];
   return [
     COMPLIANCE_DIRECTIVE,
+    STYLE_GUARD_DIRECTIVE,
     ...(args.stagePreamble ? ["", args.stagePreamble] : []),
     "",
     `# ${args.stageTitle}`,

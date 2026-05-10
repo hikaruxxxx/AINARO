@@ -50,6 +50,7 @@ type Args = {
   concurrency: number;
   styleRefNote?: string;
   styleRefNoteFile?: string;
+  targetVolumes?: number[];
 };
 
 type StageStats = {
@@ -77,6 +78,7 @@ function parseArgs(): Args {
     else if (key === "concurrency") out.concurrency = Math.max(1, Number(val));
     else if (key === "style-ref-note") out.styleRefNote = val;
     else if (key === "style-ref-note-file") out.styleRefNoteFile = val;
+    else if (key === "target-volumes") out.targetVolumes = val.split(",").map((v) => Number(v.trim())).filter((v) => Number.isFinite(v) && v > 0);
   }
   if (!out.slug || !out.concept) throw new Error("--slug and --concept required");
   return out as Args;
@@ -150,7 +152,8 @@ async function main(): Promise<void> {
   await finishStage(args.slug, bible, "7-relation");
 
   const volumeCount = Math.max(1, bible.meta.estimated_volumes ?? 1);
-  const volumePatches = await runStage("8-volume", Array.from({ length: volumeCount }, (_, index) => index + 1), args.concurrency, stats, (volumeNo) =>
+  const volumeTargets = args.targetVolumes ?? Array.from({ length: volumeCount }, (_, index) => index + 1);
+  const volumePatches = await runStage("8-volume", volumeTargets, args.concurrency, stats, (volumeNo) =>
     runStage8Volume({ bible, v2Concept: concept, volumeNo, styleReferenceNote: styleRefNote }) as Promise<VolumeDeepPatch>,
   );
   for (const patch of volumePatches) bible = applyVolumePatch(bible, patch);
