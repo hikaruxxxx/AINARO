@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest";
-import { lintName, staticLintName } from "./name-lint";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { runCodexText } from "../llm/codex-text";
+import { lintName, llmLintName, staticLintName } from "./name-lint";
+
+vi.mock("../llm/codex-text", () => ({
+  runCodexText: vi.fn(),
+}));
 
 type PanelPatch = Partial<{
   panel_no: number;
@@ -61,6 +66,27 @@ function rulesFor(panels: unknown[], pageRole = "buildup"): string[] {
   return staticLintName(input(panels, pageRole)).map((finding) => finding.rule);
 }
 
+function sceneGraph() {
+  return {
+    scenes: [
+      {
+        scene_id: "S01",
+        page_range: { start: 1, end: 1 },
+        panel_range: { start_panel_no: 1, end_panel_no: 2 },
+        beat_type: "introduce",
+        mode: "establishing",
+        arc_position: { arc_phase: "introduce", arc_position_normalized: 0.01 },
+        cast: [{ character_id: "char_ren", presence: "in_person" }],
+        dialogue_plan: { key_lines: [{ speaker: "char_ren", text: "夜勤明けだ。" }] },
+      },
+    ],
+  };
+}
+
+beforeEach(() => {
+  vi.mocked(runCodexText).mockReset();
+});
+
 describe("staticLintName", () => {
   it("detects placeholder_text in action", () => {
     const findings = staticLintName(
@@ -91,6 +117,15 @@ describe("staticLintName", () => {
       rulesFor([
         panel(1, { action: "レンがレジ横でスマホの通知を見る", key_visual: "青い画面の反射" }),
         panel(2, { action: "灯里のニュース映像が天井テレビに映る", key_visual: "白い字幕が揺れるテレビ" }),
+      ]),
+    ).not.toContain("panel_content_duplicate");
+  });
+
+  it("does not detect panel_content_duplicate for very short matching text", () => {
+    expect(
+      rulesFor([
+        panel(1, { action: "夜", key_visual: "廊下" }),
+        panel(2, { action: "夜", key_visual: "廊下" }),
       ]),
     ).not.toContain("panel_content_duplicate");
   });
@@ -206,6 +241,35 @@ describe("staticLintName", () => {
       ]),
     ).toContain("dialogue_overflow");
   });
+
+  it("detects monologue_repetition for three consecutive monologues by the same character", () => {
+    const findings = staticLintName(
+      input([
+        panel(1, { monologue: [{ speaker: "char_ren", text: "まだ終わらない。" }] }),
+        panel(2, { monologue: [{ speaker: "char_ren", text: "また同じだ。" }] }),
+        panel(3, { monologue: [{ speaker: "char_ren", text: "朝が遠い。" }] }),
+      ]),
+    );
+
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        severity: "info",
+        scope: "panel",
+        panel_no: 3,
+        rule: "monologue_repetition",
+      }),
+    );
+  });
+
+  it("does not detect monologue_repetition for two consecutive monologues", () => {
+    expect(
+      rulesFor([
+        panel(1, { monologue: [{ speaker: "char_ren", text: "まだ終わらない。" }] }),
+        panel(2, { monologue: [{ speaker: "char_ren", text: "また同じだ。" }] }),
+        panel(3, { monologue: [{ speaker: "char_akari", text: "急がないと。" }] }),
+      ]),
+    ).not.toContain("monologue_repetition");
+  });
 });
 
 describe("lintName", () => {
@@ -217,6 +281,7 @@ describe("lintName", () => {
       ]),
       slug: "test-slug",
       episode: 1,
+      skipLlm: true,
     });
 
     expect(report).toEqual(
@@ -230,5 +295,88 @@ describe("lintName", () => {
       }),
     );
     expect(report.findings).toContainEqual(expect.objectContaining({ rule: "placeholder_text" }));
+  });
+
+  it("does not call LLM when skipLlm is true", async () => {
+    await lintName({
+      ...input([panel(1), panel(2)]),
+      sceneGraph: sceneGraph(),
+      slug: "test-slug",
+      episode: 1,
+      skipLlm: true,
+    });
+
+    expect(runCodexText).not.toHaveBeenCalled();
+  });
+
+  it("adds an info finding when LLM judge fails", async () => {
+    vi.mocked(runCodexText).mockRejectedValue(new Error("codex unavailable"));
+
+    const report = await lintName({
+      ...input([panel(1), panel(2)]),
+      sceneGraph: sceneGraph(),
+      slug: "test-slug",
+      episode: 1,
+    });
+
+    expect(report.findings).toContainEqual(
+      expect.objectContaining({
+        severity: "info",
+        scope: "episode",
+        rule: "llm_judge_failed",
+      }),
+    );
+  });
+});
+
+describe("llmLintName", () => {
+  it("converts LlmJudgeOutput to NameLintFinding entries", async () => {
+    vi.mocked(runCodexText).mockResolvedValue({
+      stdout: "{}",
+      parsed: {
+        overall_assessment: "shallow",
+        rationale: "感情の変化が薄い。",
+        shallowness_findings: [
+          {
+            severity: "warn",
+            scope: "panel",
+            page_no: 1,
+            panel_no: 2,
+            rule: "emotion_arc_flat",
+            message: "レンの反応が説明に寄りすぎている。",
+            hint: "表情か手元の変化で感情を出す。",
+          },
+        ],
+      },
+      attempts: 1,
+      totalDurationMs: 1,
+    });
+
+    const findings = await llmLintName({
+      storyboard: input([panel(1), panel(2)]).storyboard,
+      sceneGraph: sceneGraph(),
+      bible: { meta: { genre: "modern_dungeon", subtype: "external_social", core_hook: { one_liner: "ナビだけが最短攻略を知る" } } },
+      cwd: "/tmp",
+    });
+
+    expect(runCodexText).toHaveBeenCalledTimes(1);
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        severity: "info",
+        scope: "episode",
+        scene_id: "S01",
+        rule: "overall_assessment",
+      }),
+    );
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        severity: "warn",
+        scope: "panel",
+        page_no: 1,
+        panel_no: 2,
+        scene_id: "S01",
+        rule: "emotion_arc_flat",
+      }),
+    );
   });
 });

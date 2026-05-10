@@ -35,6 +35,18 @@ const SEVERITY_RANK: Record<NameLintFinding["severity"], number> = {
 };
 
 const BOOLEAN_FLAGS = new Set(["skip-llm", "fail-on-fatal"]);
+const STATIC_RULES = new Set([
+  "panel_content_duplicate",
+  "placeholder_text",
+  "shot_type_diversity_low",
+  "camera_angle_static",
+  "importance_flat",
+  "importance_overload",
+  "establishing_misplaced",
+  "cliff_panel_too_many",
+  "action_panel_too_few",
+  "dialogue_overflow",
+]);
 
 function parseArgs(): Args {
   const a: Partial<Args> = { skipLlm: false, failOnFatal: false };
@@ -126,7 +138,14 @@ async function main() {
   const outPath = path.join(outDir, "lint_report.json");
   await fs.writeFile(outPath, JSON.stringify(report, null, 2));
 
+  const staticCount = report.findings.filter((finding) => STATIC_RULES.has(finding.rule)).length;
+  const llmCount = report.findings.length - staticCount;
+  const assessments = report.findings
+    .filter((finding) => finding.rule === "overall_assessment")
+    .map((finding) => finding.message.replace(/^LLM scene assessment: /, ""));
+
   console.log(`[L08.7] fatal=${report.fatal_count} warn=${report.warn_count} info=${report.info_count}`);
+  console.log(`[L08.7] summary: static=${staticCount} llm=${llmCount} overall_assessment=${assessments.length > 0 ? assessments.join(" | ") : "none"}`);
   console.log("");
   console.log("=== findings (max 20) ===");
   const sorted = [...report.findings].sort((a, b) => {

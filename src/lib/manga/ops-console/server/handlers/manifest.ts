@@ -15,6 +15,7 @@ import {
   pagePlanPath,
   auditPath,
   engagementAuditPath,
+  nameDir,
   renderManifestPath,
   revisionQueuePath,
   adoptedVersionsPath,
@@ -34,6 +35,7 @@ import type {
   EpisodeStoryboardV2,
   PagePlanV2,
 } from "../../../schemas-v2";
+import type { NameLintReport } from "../../../qa-v2/name-lint";
 
 async function loadJsonOpt<T>(p: string): Promise<T | null> {
   try {
@@ -80,6 +82,7 @@ export async function handleManifest(
     storyboard,
     pagePlan,
     audit,
+    nameLintReport,
     engagementAudit,
     renderManifest,
     revisionQueueRaw,
@@ -89,6 +92,7 @@ export async function handleManifest(
     loadJsonOpt<EpisodeStoryboardV2>(storyboardPath(slug, episode)),
     loadJsonOpt<PagePlanV2>(pagePlanPath(slug, episode)),
     loadJsonOpt<AuditReport>(auditPath(slug, episode)),
+    loadJsonOpt<NameLintReport>(path.join(nameDir(slug, episode), "lint_report.json")),
     loadJsonOpt<EngagementAudit>(engagementAuditPath(slug, episode)),
     readJsonl<RenderManifestEntry>(renderManifestPath(slug, episode)),
     readJsonl<RevisionEntry>(revisionQueuePath(slug, episode)),
@@ -116,6 +120,7 @@ export async function handleManifest(
       page_plan: pagePlan,
       storyboard,
       audit,
+      name_lint_report: nameLintReport,
       engagement_audit: engagementAudit,
       render_manifest: renderManifest,
       revision_queue: revisionQueue,

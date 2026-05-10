@@ -22,6 +22,7 @@ import type {
   PagePlanV2,
 } from "../../../schemas-v2";
 import type { StoryboardAuditReport } from "../../../qa-v2/storyboard-audit";
+import type { NameLintReport } from "../../../qa-v2/name-lint";
 import type { StoryboardProposal } from "../../../storyboard-v2/storyboard-alts";
 
 export class ApiError extends Error {
@@ -49,6 +50,7 @@ export type Manifest = {
   page_plan: PagePlanV2;
   storyboard: EpisodeStoryboardV2;
   audit: AuditReport | null;
+  name_lint_report?: NameLintReport | null;
   engagement_audit?: EngagementAudit | null;
   render_manifest: RenderManifestEntry[];
   revision_queue: RevisionEntry[];

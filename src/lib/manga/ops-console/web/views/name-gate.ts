@@ -19,6 +19,7 @@ import type {
   NameRejectReason,
   NameWarning,
 } from "../../../name-preview/types";
+import type { NameLintFinding, NameLintReport } from "../../../qa-v2/name-lint";
 import type { PagePlanPage, PanelV2, StoryboardPageV2 } from "../../../schemas-v2";
 
 type NamePage = NameManifest["pages"][number];
@@ -90,6 +91,7 @@ const NAME_GATE_CSS = `
   grid-template-areas:
     "header header"
     "name storyboard"
+    "name lint"
     "warnings warnings"
     "reasons reasons"
     "note note"
@@ -100,6 +102,7 @@ const NAME_GATE_CSS = `
 .name-gate-container .page-card > header { grid-area: header; }
 .name-gate-container .page-card > .svg-wrap { grid-area: name; align-self: start; }
 .name-gate-container .page-card > .page-storyboard { grid-area: storyboard; align-self: start; margin: 0; }
+.name-gate-container .page-card > .page-lint { grid-area: lint; align-self: start; margin: 0; }
 .name-gate-container .page-card > .warnings { grid-area: warnings; }
 .name-gate-container .page-card > .reasons { grid-area: reasons; }
 .name-gate-container .page-card > textarea.note { grid-area: note; }
@@ -226,6 +229,67 @@ const NAME_GATE_CSS = `
 .name-gate-container .sb-lines .line-narration { color: #6b7280; font-style: italic; }
 .name-gate-container .sb-lines .line-sfx { color: #b45309; font-family: ui-monospace, monospace; }
 .name-gate-container .sb-empty { padding: 6px 10px; color: #94a3b8; font-size: 12px; }
+.name-gate-container .page-lint {
+  margin: 6px 0 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff7ed;
+}
+.name-gate-container .page-lint > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.name-gate-container .page-lint > summary::-webkit-details-marker { display: none; }
+.name-gate-container .page-lint > summary::before {
+  content: "▶";
+  font-size: 10px;
+  color: #64748b;
+  transition: transform .12s;
+}
+.name-gate-container .page-lint[open] > summary::before { transform: rotate(90deg); }
+.name-gate-container .page-lint .lint-summary-count { color: #94a3b8; font-weight: 400; }
+.name-gate-container .lint-findings { display: grid; gap: 7px; padding: 0 10px 10px; }
+.name-gate-container .lint-finding { display: grid; gap: 2px; padding: 6px 8px; border-left: 3px solid #cbd5e1; background: #fff; font-size: 12px; line-height: 1.45; }
+.name-gate-container .lint-finding--fatal { border-left-color: #dc2626; }
+.name-gate-container .lint-finding--warn { border-left-color: #f59e0b; }
+.name-gate-container .lint-finding--info { border-left-color: #2563eb; }
+.name-gate-container .lint-head { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.name-gate-container .lint-icon { font-size: 10px; line-height: 1; }
+.name-gate-container .lint-icon--fatal { color: #dc2626; }
+.name-gate-container .lint-icon--warn { color: #f59e0b; }
+.name-gate-container .lint-icon--info { color: #2563eb; }
+.name-gate-container .lint-rule { font-family: ui-monospace, monospace; font-weight: 700; color: #0f172a; overflow-wrap: anywhere; }
+.name-gate-container .lint-target { color: #64748b; margin-left: auto; font-size: 11px; }
+.name-gate-container .lint-message { color: #0f172a; }
+.name-gate-container .lint-hint { color: #64748b; font-size: 11px; }
+.name-gate-container .lint-empty { padding: 6px 10px; color: #94a3b8; font-size: 12px; }
+.name-lint-episode {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #dbe1ea;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 12px;
+}
+.name-lint-episode__summary { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-weight: 700; }
+.name-lint-episode__title { color: #0f172a; margin-right: 4px; }
+.name-lint-episode__pill { display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: 999px; background: #e2e8f0; color: #334155; }
+.name-lint-episode__pill--fatal { background: #fee2e2; color: #991b1b; }
+.name-lint-episode__pill--warn { background: #fef3c7; color: #92400e; }
+.name-lint-episode__pill--info { background: #dbeafe; color: #1d4ed8; }
+.name-lint-episode__assessments { display: flex; gap: 6px; flex-wrap: wrap; color: #475569; }
+.name-lint-episode__assessment { padding: 2px 6px; border-radius: 4px; background: #fff; border: 1px solid #e5e7eb; }
+.name-lint-episode__global-findings { display: grid; gap: 6px; }
+.name-lint-episode__global-title { color: #475569; font-weight: 700; }
+.name-lint-episode__missing { color: #64748b; }
 .ng-section { display: grid; gap: 12px; }
 .ng-section-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; font-size: 16px; }
 .ng-modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 18px; background: rgba(15, 23, 42, .38); }
@@ -343,6 +407,110 @@ function renderStoryboardSection(storyboardPage: StoryboardPageV2 | undefined): 
   </details>`;
 }
 
+const LINT_SEVERITY_ORDER: Record<NameLintFinding["severity"], number> = {
+  fatal: 0,
+  warn: 1,
+  info: 2,
+};
+
+function lintSeverityIcon(severity: NameLintFinding["severity"]): string {
+  if (severity === "fatal") return "■";
+  if (severity === "warn") return "▲";
+  return "●";
+}
+
+function lintTarget(finding: NameLintFinding): string {
+  const parts: string[] = [];
+  if (finding.scene_id) parts.push(finding.scene_id);
+  if (finding.page_no !== undefined) parts.push(`p${finding.page_no}`);
+  if (finding.panel_no !== undefined) parts.push(`#${finding.panel_no}`);
+  return parts.join(" / ");
+}
+
+function sortLintFindings(findings: NameLintFinding[]): NameLintFinding[] {
+  return [...findings].sort((a, b) => {
+    const severityDiff = LINT_SEVERITY_ORDER[a.severity] - LINT_SEVERITY_ORDER[b.severity];
+    if (severityDiff !== 0) return severityDiff;
+    return (a.page_no ?? 9999) - (b.page_no ?? 9999) || (a.panel_no ?? 9999) - (b.panel_no ?? 9999);
+  });
+}
+
+function lintFindingsByPage(report: NameLintReport | null | undefined): Map<number, NameLintFinding[]> {
+  const map = new Map<number, NameLintFinding[]>();
+  for (const finding of report?.findings ?? []) {
+    if (finding.page_no === undefined) continue;
+    const pageFindings = map.get(finding.page_no) ?? [];
+    pageFindings.push(finding);
+    map.set(finding.page_no, pageFindings);
+  }
+  return map;
+}
+
+function renderLintFinding(finding: NameLintFinding): string {
+  const target = lintTarget(finding);
+  const hint = finding.hint ? `<div class="lint-hint">hint: ${escapeHtml(finding.hint)}</div>` : "";
+  return `<div class="lint-finding lint-finding--${escapeHtml(finding.severity)}">
+    <div class="lint-head">
+      <span class="lint-icon lint-icon--${escapeHtml(finding.severity)}">${lintSeverityIcon(finding.severity)}</span>
+      <span class="lint-rule">${escapeHtml(finding.rule)}</span>
+      ${target ? `<span class="lint-target">${escapeHtml(target)}</span>` : ""}
+    </div>
+    <div class="lint-message">${escapeHtml(finding.message)}</div>
+    ${hint}
+  </div>`;
+}
+
+function renderLintFindingsSection(findings: NameLintFinding[]): string {
+  if (findings.length === 0) return "";
+  const fatal = findings.filter((finding) => finding.severity === "fatal").length;
+  const warn = findings.filter((finding) => finding.severity === "warn").length;
+  const info = findings.filter((finding) => finding.severity === "info").length;
+  const findingsHtml = sortLintFindings(findings).map(renderLintFinding).join("");
+  const openAttr = findings.some((finding) => finding.severity !== "info") ? " open" : "";
+  return `<details class="page-lint"${openAttr}>
+    <summary>ネーム監査 <span class="lint-summary-count">[fatal ${fatal} / warn ${warn} / info ${info}]</span></summary>
+    <div class="lint-findings">${findingsHtml}</div>
+  </details>`;
+}
+
+function renderNameLintEpisodeSummary(report: NameLintReport | null | undefined): string {
+  if (!report) {
+    return `<div class="name-lint-episode">
+      <div class="name-lint-episode__missing">ネーム監査: lint_report.json はまだ生成されていません</div>
+    </div>`;
+  }
+  const assessments = report.findings
+    .filter((finding) => finding.rule === "overall_assessment")
+    .map((finding) => {
+      const scene = finding.scene_id ? `${finding.scene_id}: ` : "";
+      return `${scene}${finding.message.replace(/^LLM scene assessment: /, "")}`;
+    });
+  const assessmentHtml =
+    assessments.length > 0
+      ? assessments.map((text) => `<span class="name-lint-episode__assessment">${escapeHtml(text)}</span>`).join("")
+      : `<span class="name-lint-episode__missing">overall_assessment なし</span>`;
+  const globalFindings = sortLintFindings(
+    report.findings.filter((finding) => finding.page_no === undefined && finding.rule !== "overall_assessment")
+  );
+  const globalFindingsHtml =
+    globalFindings.length > 0
+      ? `<div class="name-lint-episode__global-findings">
+          <div class="name-lint-episode__global-title">scene / episode findings</div>
+          ${globalFindings.map(renderLintFinding).join("")}
+        </div>`
+      : "";
+  return `<div class="name-lint-episode">
+    <div class="name-lint-episode__summary">
+      <span class="name-lint-episode__title">ネーム監査</span>
+      <span class="name-lint-episode__pill name-lint-episode__pill--fatal">fatal ${report.fatal_count}</span>
+      <span class="name-lint-episode__pill name-lint-episode__pill--warn">warn ${report.warn_count}</span>
+      <span class="name-lint-episode__pill name-lint-episode__pill--info">info ${report.info_count}</span>
+    </div>
+    <div class="name-lint-episode__assessments">${assessmentHtml}</div>
+    ${globalFindingsHtml}
+  </div>`;
+}
+
 function warningHtml(warnings: NameWarning[], findings: NameAuditFindingLite[]): string {
   if (findings.length > 0) {
     return findings
@@ -409,7 +577,8 @@ function renderReasonInputs(): string {
 function renderPageInner(
   page: NamePage,
   episode: number,
-  storyboardPage: StoryboardPageV2 | undefined
+  storyboardPage: StoryboardPageV2 | undefined,
+  lintFindings: NameLintFinding[]
 ): string {
   return `<div class="page-card-inner">
   <header>
@@ -418,6 +587,7 @@ function renderPageInner(
     <span class="panel-count">${page.panel_count}コマ</span>
   </header>
   ${renderStoryboardSection(storyboardPage)}
+  ${renderLintFindingsSection(lintFindings)}
   <div class="svg-wrap"><img src="${escapeHtml(legacySvgPath(episode, page.svg_filename))}" alt="page ${page.page_no} preview"></div>
   <div class="warnings">${warningHtml(page.warnings ?? [], page.audit_findings ?? [])}</div>
 </div>`;
@@ -438,7 +608,8 @@ function renderDecisionControls(pageNo: number, spread: boolean): string {
 function renderPageCards(
   units: PageUnit[],
   episode: number,
-  storyboardByPage: Map<number, StoryboardPageV2>
+  storyboardByPage: Map<number, StoryboardPageV2>,
+  lintByPage: Map<number, NameLintFinding[]>
 ): string {
   return units
     .map((unit) => {
@@ -455,14 +626,15 @@ function renderPageCards(
     ${status}
   </header>
   ${renderStoryboardSection(storyboardByPage.get(unit.page.page_no))}
+  ${renderLintFindingsSection(lintByPage.get(unit.page.page_no) ?? [])}
   <div class="svg-wrap"><img src="${escapeHtml(legacySvgPath(episode, unit.page.svg_filename))}" alt="page ${unit.page.page_no} preview"></div>
   <div class="warnings">${warningHtml(unit.page.warnings ?? [], unit.page.audit_findings ?? [])}</div>
   ${renderDecisionControls(representativePageNo, false)}
 </article>`;
       }
       return `<article class="page-card is-spread" data-page-no="${representativePageNo}" data-unit-pages="${unitPages}" tabindex="0" id="page-${representativePageNo}">
-  ${renderPageInner(unit.left, episode, storyboardByPage.get(unit.left.page_no))}
-  ${renderPageInner(unit.right, episode, storyboardByPage.get(unit.right.page_no))}
+  ${renderPageInner(unit.left, episode, storyboardByPage.get(unit.left.page_no), lintByPage.get(unit.left.page_no) ?? [])}
+  ${renderPageInner(unit.right, episode, storyboardByPage.get(unit.right.page_no), lintByPage.get(unit.right.page_no) ?? [])}
   <div class="spread-decision">
     <header>
       <span class="page-no">P.${unit.left.page_no}+P.${unit.right.page_no}</span>
@@ -488,9 +660,11 @@ function renderShell(
   slug: string,
   episode: number,
   state: ViewState,
-  storyboardByPage: Map<number, StoryboardPageV2>
+  storyboardByPage: Map<number, StoryboardPageV2>,
+  lintReport: NameLintReport | null | undefined
 ): void {
   const proposalCount = state.storyboardProposals?.proposals.length ?? 0;
+  const lintByPage = lintFindingsByPage(lintReport);
   container.innerHTML = `
     <div class="name-gate-container">
       <div class="name-gate-toolbar">
@@ -520,9 +694,10 @@ function renderShell(
         <code>a</code> approve <code>r</code> reject <code>p</code> pending
         <code>↑/k</code> 前ページ <code>↓/j</code> 次ページ <code>1..6</code> reject 理由
       </div>
+      ${renderNameLintEpisodeSummary(lintReport)}
       <section class="ng-section" aria-labelledby="ng-approval-title">
         <h3 class="ng-section-title" id="ng-approval-title">判定</h3>
-      <div class="name-gate-grid" id="ng-grid">${renderPageCards(units, episode, storyboardByPage)}</div>
+      <div class="name-gate-grid" id="ng-grid">${renderPageCards(units, episode, storyboardByPage, lintByPage)}</div>
       </section>
       <div id="ng-overlay-root"></div>
     </div>
@@ -853,7 +1028,7 @@ async function loadNameGate(
     );
     const units = groupPagesIntoUnits(manifest.pages, planPages);
     const state: ViewState = { storyboardProposals: null };
-    renderShell(container, manifest, units, slug, episode, state, storyboardByPage);
+    renderShell(container, manifest, units, slug, episode, state, storyboardByPage, consoleManifest.name_lint_report);
     apiGetStoryboardProposals(slug, episode)
       .then((response) => {
         if (signal.aborted) return;

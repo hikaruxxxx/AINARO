@@ -1,9 +1,10 @@
 /**
  * Name Lint (ネーム監査)
  *
- * Phase 1: static rules only.
- * Phase 2 will add LLM judge integration in the same shape as bible-lint.
+ * Phase 1: static rules.
+ * Phase 2: scene-level LLM judge via Codex CLI.
  */
+import { runCodexText } from "../llm/codex-text";
 
 export type NameLintSeverity = "fatal" | "warn" | "info";
 
@@ -59,6 +60,33 @@ type RuntimePanel = {
 };
 
 const PLACEHOLDER_TEXT_RE = /^S\d+ \(.+\/.+\) panel \d+\/\d+:/;
+const LLM_CONCURRENCY = 5;
+
+const LLM_JUDGE_SCHEMA = `
+type LlmJudgeOutput = {
+  overall_assessment: "professional" | "passable" | "shallow" | "lazy";
+  rationale: string;
+  shallowness_findings: Array<{
+    severity: "fatal" | "warn" | "info";
+    scope: "panel" | "page" | "scene" | "episode";
+    page_no?: number;
+    panel_no?: number;
+    scene_id?: string;
+    rule:
+      | "shot_choice_unmotivated"
+      | "dialogue_unnatural"
+      | "key_visual_generic"
+      | "panel_logical_break"
+      | "emotion_arc_flat"
+      | "scene_pacing_off"
+      | "cliffhanger_weak"
+      | "opening_hook_weak"
+      | string;
+    message: string;
+    hint?: string;
+  }>;
+};
+`;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -155,8 +183,7 @@ function normalizePages(storyboard: unknown, pagePlan: unknown): RuntimePage[] {
 
 function charTrigrams(text: string): Set<string> {
   const normalized = text.replace(/\s+/g, "").trim();
-  if (normalized.length === 0) return new Set();
-  if (normalized.length <= 3) return new Set([normalized]);
+  if (normalized.length < 6) return new Set();
 
   const out = new Set<string>();
   for (let i = 0; i <= normalized.length - 3; i++) {
@@ -178,7 +205,7 @@ function jaccard3Gram(a: string, b: string): number {
   return union > 0 ? intersection / union : 0;
 }
 
-function dialogueTextLength(panel: RuntimePanel): number {
+function dialogueOnlyTextLength(panel: RuntimePanel): number {
   return panel.dialogue.map(extractText).join("").length;
 }
 
@@ -190,20 +217,298 @@ function pageLabel(pageNo: number): string {
   return `p${String(pageNo).padStart(2, "0")}`;
 }
 
-export function staticLintName(input: NameLintInput): NameLintFinding[] {
-  void input.sceneGraph;
-  void input.brief;
-  void input.bible;
+function monologueCharacterId(value: unknown): string {
+  if (!isRecord(value)) return "";
+  return asString(value.character_id) || asString(value.speaker) || asString(value.character);
+}
 
+function primaryMonologueCharacterId(panel: RuntimePanel): string {
+  for (const line of panel.monologue) {
+    const id = monologueCharacterId(line);
+    if (id) return id;
+  }
+  return "";
+}
+
+function truncate(value: string, max: number): string {
+  return value.length > max ? `${value.slice(0, max)}...` : value;
+}
+
+function extractBibleMeta(bible: unknown): Record<string, unknown> {
+  if (!isRecord(bible) || !isRecord(bible.meta)) return {};
+  const meta = bible.meta;
+  return {
+    genre: meta.genre,
+    subtype: meta.subtype,
+    core_hook: meta.core_hook,
+  };
+}
+
+function extractScenes(sceneGraph: unknown): Record<string, unknown>[] {
+  if (!isRecord(sceneGraph)) return [];
+  return asArray(sceneGraph.scenes).filter(isRecord);
+}
+
+function sceneId(scene: Record<string, unknown>, index: number): string {
+  return asString(scene.scene_id) || `scene_${index + 1}`;
+}
+
+function scenePageRange(scene: Record<string, unknown>): { start?: number; end?: number } {
+  const pageRange = isRecord(scene.page_range) ? scene.page_range : {};
+  return {
+    start: asNumber(pageRange.start),
+    end: asNumber(pageRange.end),
+  };
+}
+
+function scenePanelRange(scene: Record<string, unknown>): { start?: number; end?: number } {
+  const panelRange = isRecord(scene.panel_range) ? scene.panel_range : {};
+  return {
+    start: asNumber(panelRange.start_panel_no),
+    end: asNumber(panelRange.end_panel_no),
+  };
+}
+
+function panelsForScene(storyboard: unknown, scene: Record<string, unknown>): Array<RuntimePanel & { page_no: number }> {
+  const pages = normalizePages(storyboard, {});
+  const pageRange = scenePageRange(scene);
+  const panelRange = scenePanelRange(scene);
+  const out: Array<RuntimePanel & { page_no: number }> = [];
+
+  for (const page of pages) {
+    if (pageRange.start !== undefined && page.page_no < pageRange.start) continue;
+    if (pageRange.end !== undefined && page.page_no > pageRange.end) continue;
+
+    for (const panel of page.panels) {
+      if (panelRange.start !== undefined && panel.panel_no < panelRange.start) continue;
+      if (panelRange.end !== undefined && panel.panel_no > panelRange.end) continue;
+      out.push({ ...panel, page_no: page.page_no });
+    }
+  }
+
+  return out;
+}
+
+function compactDialogue(lines: unknown[]): string[] {
+  return lines.map(extractText).filter((text) => text.length > 0);
+}
+
+function formatScenePrompt(args: {
+  scene: Record<string, unknown>;
+  sceneIndex: number;
+  storyboard: unknown;
+  bible: unknown;
+}): string {
+  const id = sceneId(args.scene, args.sceneIndex);
+  const meta = extractBibleMeta(args.bible);
+  const pageRange = scenePageRange(args.scene);
+  const panelRange = scenePanelRange(args.scene);
+  const panels = panelsForScene(args.storyboard, args.scene);
+  const arcPosition = isRecord(args.scene.arc_position) ? args.scene.arc_position : {};
+  const dialoguePlan = isRecord(args.scene.dialogue_plan) ? args.scene.dialogue_plan : {};
+
+  const panelLines = panels.map((panel) => {
+    const dialogue = compactDialogue(panel.dialogue);
+    const monologue = compactDialogue(panel.monologue);
+    const narration = compactDialogue(panel.narration);
+    return [
+      `[panel #${panel.panel_no}] page=${panel.page_no} shot=${panel.shot_type ?? "unknown"}/${panel.camera ?? "unknown"} importance=${panel.importance ?? "unknown"}`,
+      `  action: ${truncate(panel.action, 240)}`,
+      `  key_visual: ${truncate(panel.key_visual, 240)}`,
+      `  dialogue: ${JSON.stringify(dialogue)}`,
+      `  monologue: ${JSON.stringify(monologue)}`,
+      `  narration: ${JSON.stringify(narration)}`,
+    ].join("\n");
+  });
+
+  return [
+    "あなたは商業漫画 (Young Ace / Comic Walker 系 ライトノベル原作) の編集者です。",
+    "以下の scene を商業漫画品質基準で audit してください。お世辞は不要です。",
+    "",
+    "## 作品メタ",
+    `- subtype: ${String(meta.subtype ?? "")}`,
+    `- core_hook: ${JSON.stringify(meta.core_hook ?? null)}`,
+    `- genre: ${String(meta.genre ?? "")}`,
+    "",
+    "## scene 概要",
+    `- scene_id: ${id}`,
+    `- beat_type: ${String(args.scene.beat_type ?? "")}`,
+    `- mode: ${String(args.scene.mode ?? "")}`,
+    `- arc_position: ${String(arcPosition.arc_phase ?? "")} ${String(arcPosition.arc_position_normalized ?? "")}`,
+    `- cast: ${JSON.stringify(args.scene.cast ?? [])}`,
+    `- page_range: ${pageRange.start ?? "?"}-${pageRange.end ?? "?"} (panel_range ${panelRange.start ?? "?"}-${panelRange.end ?? "?"})`,
+    `- dialogue_plan.key_lines: ${JSON.stringify(dialoguePlan.key_lines ?? [])}`,
+    `- key_visual_intent: ${String(args.scene.key_visual_intent ?? "")}`,
+    "",
+    `## panels (total ${panels.length})`,
+    panelLines.join("\n\n"),
+    "",
+    "## 評価観点",
+    "overall_assessment は次の基準で professional / passable / shallow / lazy のいずれかを選んでください。",
+    "- professional: 商業漫画として十分通用。場面切替・視線誘導・感情曲線・台詞の自然さがプロ水準",
+    "- passable: 大筋は読める。細部の cliché や説明過多が散見",
+    "- shallow: 場面構成や台詞が浅い、cliché 多用、emotion arc 不明瞭",
+    "- lazy: panel 内容が機械的、説明書き化、商業漫画として読めない",
+    "",
+    "shallowness_findings は商業漫画として浅い箇所を最大 10 件に絞ってください。",
+    "rule は shot_choice_unmotivated / dialogue_unnatural / key_visual_generic / panel_logical_break / emotion_arc_flat / scene_pacing_off / cliffhanger_weak / opening_hook_weak から選ぶか、必要なら string を追加してください。",
+    "message は具体的に、hint は修正方針を短く書いてください。",
+    "",
+    "## 出力スキーマ",
+    "```typescript",
+    LLM_JUDGE_SCHEMA,
+    "```",
+    "",
+    "## 出力形式",
+    "JSON のみを返してください。前置き・後書き・Markdown は不要です。",
+    "上記 schema は構造確認用です。そのままコピーせず、この scene の実際の判定内容で各フィールドを埋めてください。",
+  ].join("\n");
+}
+
+function toSeverity(value: unknown): NameLintSeverity {
+  return value === "fatal" || value === "warn" || value === "info" ? value : "info";
+}
+
+function toFindingScope(value: unknown): NameLintFinding["scope"] {
+  return value === "panel" || value === "page" || value === "scene" || value === "episode" || value === "global" ? value : "scene";
+}
+
+type LlmJudgeOutput = {
+  overall_assessment?: unknown;
+  rationale?: unknown;
+  shallowness_findings?: unknown;
+};
+
+function normalizeLlmFindings(parsed: LlmJudgeOutput, fallbackSceneId: string, fallbackPageNo?: number): NameLintFinding[] {
+  const assessment = asString(parsed.overall_assessment) || "unknown";
+  const rationale = asString(parsed.rationale);
+  const findings: NameLintFinding[] = [
+    {
+      severity: "info",
+      scope: "episode",
+      scene_id: fallbackSceneId,
+      rule: "overall_assessment",
+      message: `LLM scene assessment: ${assessment}${rationale ? ` - ${rationale}` : ""}`,
+    },
+  ];
+
+  for (const rawFinding of asArray(parsed.shallowness_findings).slice(0, 10)) {
+    if (!isRecord(rawFinding)) continue;
+    const scope = toFindingScope(rawFinding.scope);
+    const explicitPageNo = asNumber(rawFinding.page_no);
+    findings.push({
+      severity: toSeverity(rawFinding.severity),
+      scope,
+      page_no: explicitPageNo ?? (scope === "scene" ? fallbackPageNo : undefined),
+      panel_no: asNumber(rawFinding.panel_no),
+      scene_id: asString(rawFinding.scene_id) || fallbackSceneId,
+      rule: asString(rawFinding.rule) || "llm_shallowness",
+      message: asString(rawFinding.message) || "LLM judge が浅さを検出しました。",
+      hint: asString(rawFinding.hint) || undefined,
+    });
+  }
+
+  return findings;
+}
+
+export async function llmLintName(args: {
+  storyboard: unknown;
+  sceneGraph: unknown;
+  bible: unknown;
+  cwd?: string;
+  timeoutMs?: number;
+}): Promise<NameLintFinding[]> {
+  const scenes = extractScenes(args.sceneGraph);
   const findings: NameLintFinding[] = [];
-  const pages = normalizePages(input.storyboard, input.pagePlan);
+
+  for (let start = 0; start < scenes.length; start += LLM_CONCURRENCY) {
+    const chunk = scenes.slice(start, start + LLM_CONCURRENCY);
+    const chunkFindings = await Promise.allSettled(
+      chunk.map(async (scene, offset) => {
+        const sceneIndex = start + offset;
+        const id = sceneId(scene, sceneIndex);
+        const pageRange = scenePageRange(scene);
+        console.log(`[L08.7] llm judge: scene ${sceneIndex + 1}/${scenes.length} ${id}`);
+        const result = await runCodexText<LlmJudgeOutput>({
+          task: formatScenePrompt({
+            scene,
+            sceneIndex,
+            storyboard: args.storyboard,
+            bible: args.bible,
+          }),
+          format: "json",
+          cwd: args.cwd,
+          timeoutMs: args.timeoutMs ?? 120 * 1000,
+          maxRetries: 1,
+        });
+        if (!result.parsed) return [] satisfies NameLintFinding[];
+        return normalizeLlmFindings(result.parsed, id, pageRange.start);
+      }),
+    );
+    chunkFindings.forEach((result, offset) => {
+      const scene = chunk[offset];
+      const sceneIndex = start + offset;
+      const id = scene ? sceneId(scene, sceneIndex) : `scene_${sceneIndex + 1}`;
+      if (result.status === "fulfilled") {
+        findings.push(...result.value);
+        return;
+      }
+      findings.push({
+        severity: "info",
+        scope: "episode",
+        scene_id: id,
+        rule: "llm_judge_failed",
+        message: `LLM judge 失敗 (この scene は static lint のみ採用): ${
+          result.reason instanceof Error ? result.reason.message : String(result.reason)
+        }`,
+      });
+    });
+  }
+
+  return findings;
+}
+
+function staticLintPages(pages: RuntimePage[]): NameLintFinding[] {
+  const findings: NameLintFinding[] = [];
 
   for (const page of pages) {
     const panels = page.panels;
     const panelCount = panels.length;
+    let monologueRunCharacter = "";
+    let monologueRunCount = 0;
+    let monologueRunEndPanelNo: number | undefined;
+
+    const flushMonologueRun = () => {
+      if (monologueRunCharacter && monologueRunCount >= 3 && monologueRunEndPanelNo !== undefined) {
+        findings.push({
+          severity: "info",
+          scope: "panel",
+          page_no: page.page_no,
+          panel_no: monologueRunEndPanelNo,
+          rule: "monologue_repetition",
+          message: `${pageLabel(page.page_no)} で ${monologueRunCharacter} の monologue が ${monologueRunCount} 連続`,
+          hint: "同じキャラの内省が連続するとリズムが単調になります。dialogue や別キャラ monologue で挟んでください",
+        });
+      }
+      monologueRunCharacter = "";
+      monologueRunCount = 0;
+      monologueRunEndPanelNo = undefined;
+    };
 
     for (let i = 0; i < panels.length; i++) {
       const a = panels[i];
+      const monologueCharacter = primaryMonologueCharacterId(a);
+      if (!monologueCharacter) {
+        flushMonologueRun();
+      } else if (monologueCharacter === monologueRunCharacter) {
+        monologueRunCount++;
+        monologueRunEndPanelNo = a.panel_no;
+      } else {
+        flushMonologueRun();
+        monologueRunCharacter = monologueCharacter;
+        monologueRunCount = 1;
+        monologueRunEndPanelNo = a.panel_no;
+      }
 
       if (PLACEHOLDER_TEXT_RE.test(a.action) || PLACEHOLDER_TEXT_RE.test(a.key_visual)) {
         findings.push({
@@ -229,7 +534,8 @@ export function staticLintName(input: NameLintInput): NameLintFinding[] {
         });
       }
 
-      if (dialogueTextLength(a) > 60 || lineCount(a) > 4) {
+      // Character count intentionally covers dialogue.text only; monologue/narration are covered by lineCount.
+      if (dialogueOnlyTextLength(a) > 60 || lineCount(a) > 4) {
         findings.push({
           severity: "warn",
           scope: "panel",
@@ -259,6 +565,7 @@ export function staticLintName(input: NameLintInput): NameLintFinding[] {
         }
       }
     }
+    flushMonologueRun();
 
     if (panelCount >= 3) {
       const distinctShotTypes = new Set(panels.map((p) => p.shot_type).filter(Boolean)).size;
@@ -339,6 +646,14 @@ export function staticLintName(input: NameLintInput): NameLintFinding[] {
   return findings;
 }
 
+export function staticLintName(input: NameLintInput): NameLintFinding[] {
+  void input.sceneGraph;
+  void input.brief;
+  void input.bible;
+
+  return staticLintPages(normalizePages(input.storyboard, input.pagePlan));
+}
+
 export async function lintName(args: NameLintInput & {
   slug: string;
   episode: number;
@@ -348,23 +663,38 @@ export async function lintName(args: NameLintInput & {
   void args.cwd;
 
   const findings: NameLintFinding[] = [];
-  findings.push(...staticLintName(args));
+  const pages = normalizePages(args.storyboard, args.pagePlan);
+  findings.push(...staticLintPages(pages));
 
   if (!args.skipLlm) {
-    // TODO(Phase 2): add Codex CLI LLM judge integration, mirroring bible-lint.ts.
+    try {
+      const llm = await llmLintName({
+        storyboard: args.storyboard,
+        sceneGraph: args.sceneGraph,
+        bible: args.bible,
+        cwd: args.cwd,
+      });
+      findings.push(...llm);
+    } catch (e) {
+      findings.push({
+        severity: "info",
+        scope: "episode",
+        rule: "llm_judge_failed",
+        message: `LLM judge 失敗 (static lint のみ採用): ${(e as Error).message}`,
+      });
+    }
   }
 
   const fatal = findings.filter((x) => x.severity === "fatal").length;
   const warn = findings.filter((x) => x.severity === "warn").length;
   const info = findings.filter((x) => x.severity === "info").length;
-  const pagesTotal = normalizePages(args.storyboard, args.pagePlan).length;
 
   return {
     schema_version: 1,
     audited_at: new Date().toISOString(),
     slug: args.slug,
     episode: args.episode,
-    pages_total: pagesTotal,
+    pages_total: pages.length,
     fatal_count: fatal,
     warn_count: warn,
     info_count: info,
