@@ -1,13 +1,16 @@
 import {
   ApiError,
+  apiGetJobs,
   apiGetManifest,
   apiPostAdopted,
   apiPostRevisionQueue,
+  type JobSummary,
   type Manifest,
   type RevisionEntry,
 } from "../lib/api";
 import { store } from "../lib/store";
 import { isRunnableLayer, navigateToAiEdit, spawnLayerWithModal } from "../lib/layer-actions";
+import { extractL09FailedPages } from "../lib/data-display";
 import {
   REVISION_TAGS,
   isRevisionTag,
@@ -89,6 +92,7 @@ type VersionsModalContext = {
 
 type ViewState = {
   manifest: Manifest | null;
+  l09FailedPages: number[];
   tab: RevisionTab;
   filters: Filters;
   modal: ModalContext | null;
@@ -506,7 +510,12 @@ function renderError(root: HTMLElement, title: string, error: unknown): void {
   else root.innerHTML = html;
 }
 
-function renderShell(container: HTMLElement, slug: string, episode: number): void {
+function renderL09FailedButton(failedPages: number[]): string {
+  if (failedPages.length === 0) return "";
+  return `<button type="button" class="rv-button" data-rv-rerun-failed-l09 title="直前 L09 ジョブで失敗したページのみ --pages flag で再生成 (--skip-name-gate 既定)">失敗 ${failedPages.length} 頁のみ再生成</button>`;
+}
+
+function renderShell(container: HTMLElement, slug: string, episode: number, l09FailedPages: number[]): void {
   const tags = REVISION_TAGS.map(
     (tag) =>
       `<label><input type="checkbox" data-rv-tag="${escapeHtml(tag)}"> ${escapeHtml(TAG_LABELS[tag])}</label>`
@@ -522,6 +531,7 @@ function renderShell(container: HTMLElement, slug: string, episode: number): voi
         </span>
         <div class="rv-controls">
           <button type="button" class="rv-button" data-rv-rerun="L09" title="ネーム判定をスキップして新 version 採番で全ページを再生成 (L09 Render)">全頁再生成</button>
+          ${renderL09FailedButton(l09FailedPages)}
           <button type="button" class="rv-button" id="rv-btn-l12-apply" data-rv-rerun="L12" title="L12 Repair で修正指示キューを適用" disabled>修正指示を反映</button>
           <button type="button" class="rv-button" data-rv-ai-edit="L09" title="L09 (本番画像生成) を AI で修正">AI で修正</button>
         </div>
@@ -1404,6 +1414,24 @@ async function reloadManifest(state: ViewState, slug: string, episode: number): 
   state.manifest = await apiGetManifest(slug, episode);
 }
 
+function latestL09Job(jobs: JobSummary[]): JobSummary | null {
+  const candidates = jobs
+    .filter((job) => job.layer === "L09")
+    .sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt));
+  return candidates[0] ?? null;
+}
+
+async function loadL09FailedPages(slug: string, episode: number): Promise<number[]> {
+  try {
+    const result = await apiGetJobs({ slug, episode, layer: "L09" });
+    const job = latestL09Job(result.jobs);
+    if (!job || (job.state !== "failed" && job.state !== "succeeded")) return [];
+    return job?.events ? extractL09FailedPages(job.events) : [];
+  } catch {
+    return [];
+  }
+}
+
 function bindStaticListeners(
   root: HTMLElement,
   state: ViewState,
@@ -1474,6 +1502,32 @@ function bindStaticListeners(
                 confirmLabel: "新 version で再生成",
               }
             : undefined,
+          callbacks: {
+            onSuccess: () => refresh(root, state, slug, episode),
+            onError: (msg) => alert(msg),
+          },
+        });
+      },
+      { signal }
+    );
+  });
+  root.querySelectorAll<HTMLButtonElement>("[data-rv-rerun-failed-l09]").forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const failedPages = state.l09FailedPages;
+        if (failedPages.length === 0) return;
+        void spawnLayerWithModal({
+          layer: "L09",
+          slug,
+          episode,
+          // ネーム承認済みページの部分再生成なので name gate は再確認しない。
+          extraArgs: { "--pages": failedPages.join(","), "--skip-name-gate": "" },
+          modalOverrides: {
+            title: "L09 失敗ページのみ再生成",
+            description: `失敗した ${failedPages.length} ページだけ --pages で指定して L09 を再起動します。ネーム承認は既に通っている前提で --skip-name-gate を併用します。`,
+            confirmLabel: "失敗ページを再生成",
+          },
           callbacks: {
             onSuccess: () => refresh(root, state, slug, episode),
             onError: (msg) => alert(msg),
@@ -1770,12 +1824,15 @@ async function loadRevision(
   chains: Map<string, Promise<void>>
 ): Promise<void> {
   if (!slug || !episode) return;
-  renderShell(container, slug, episode);
+  const l09FailedPages = await loadL09FailedPages(slug, episode);
+  if (signal.aborted) return;
+  renderShell(container, slug, episode, l09FailedPages);
   const root = container.querySelector<HTMLElement>(".rv-container");
   if (!root) throw new Error("revision shell mount failed");
 
   const state: ViewState = {
     manifest: null,
+    l09FailedPages,
     tab: "adoption",
     filters: { failed: false, revised: false, notAdopted: false },
     modal: null,

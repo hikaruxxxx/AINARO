@@ -1,3 +1,5 @@
+import type { JobEvent } from "./api";
+
 export type AnyRecord = Record<string, unknown>;
 
 export function escapeHtml(value: string): string {
@@ -49,4 +51,14 @@ export function detailsRaw(label: string, value: unknown): string {
     <summary>${escapeHtml(label)}</summary>
     <pre class="nc-code-block">${jsonHtml(value)}</pre>
   </details>`;
+}
+
+export function extractL09FailedPages(events: JobEvent[]): number[] {
+  const pages = new Set<number>();
+  for (const event of events) {
+    // FAIL pXX: の行から失敗ページ番号を集める。
+    const match = event.channel === "stdout" ? event.line.match(/^\[L09\] FAIL p(\d+):/) : null;
+    if (match) pages.add(Number(match[1]));
+  }
+  return Array.from(pages).sort((a, b) => a - b);
 }
