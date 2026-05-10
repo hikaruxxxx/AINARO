@@ -26,7 +26,7 @@ import type { NameLintReport } from "../../../qa-v2/name-lint";
 import type { StoryboardProposal } from "../../../storyboard-v2/storyboard-alts";
 import type { RoleEnumViolation } from "../../../bible/migrate-classify";
 import type { UndefinedReference } from "../../../qa-v2/undefined-reference-detector";
-import type { BibleSnapshotV3, FactNode } from "../../../schemas-v2";
+import type { Aspect, BibleSnapshotV3, FactNode, Layer } from "../../../schemas-v2";
 
 export class ApiError extends Error {
   constructor(
@@ -740,6 +740,30 @@ export type BibleV3PreviewResponse = {
   needsReview: FactNode[];
   factSourcePathIndex: Record<string, string>;
   generated_at?: string;
+  llmRefine?: {
+    rounds: number;
+    fact_results: Array<{
+      fact_id: string;
+      rounds: Array<{
+        round: number;
+        suggested_layer: Layer | null;
+        suggested_aspect: Aspect | null;
+        confidence: number;
+        rationale: string;
+        failed?: boolean;
+      }>;
+      aggregated_confidence: number;
+      stable: boolean;
+    }>;
+    summary: {
+      total_facts: number;
+      stable_facts: number;
+      unstable_facts: number;
+      avg_confidence: number;
+      median_confidence: number;
+    };
+    generated_at?: string;
+  };
 };
 
 export function apiGetBibleV3Preview(slug: string): Promise<BibleV3PreviewResponse> {

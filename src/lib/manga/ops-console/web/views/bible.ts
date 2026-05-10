@@ -233,14 +233,24 @@ const CSS = `
 .bib-v3__filters { display: flex; gap: var(--space-1); flex-wrap: wrap; }
 .bib-v3__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-2); }
 .bib-v3__fact { display: grid; gap: var(--space-2); padding: var(--space-2); }
+.bib-v3__fact-head { display: flex; gap: var(--space-2); justify-content: space-between; align-items: flex-start; }
 .bib-v3__body { color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.45; overflow-wrap: anywhere; }
 .bib-v3__meta { display: flex; gap: 6px; flex-wrap: wrap; color: var(--text-tertiary); font-size: var(--fs-xs, 11px); font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+.bib-v3__refine { display: grid; gap: 2px; color: var(--text-secondary); font-size: var(--fs-sm); }
+.bib-v3__refine-badge { flex: 0 0 auto; border-radius: var(--radius-sm); padding: 3px 7px; font-size: var(--fs-xs, 11px); font-weight: 700; white-space: nowrap; }
+.bib-v3__refine-badge--stable { background: rgba(45, 164, 78, 0.16); color: #238636; }
+.bib-v3__refine-badge--unstable { background: rgba(187, 128, 9, 0.18); color: #9a6700; }
+.bib-v3__refine-badge--failed { background: rgba(248, 81, 73, 0.16); color: #cf222e; }
 .bib-v3__findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-2); }
 .bib-v3__list { margin: 0; padding-left: 1.25rem; color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.45; }
 .bib-v3__list li { margin-bottom: 4px; overflow-wrap: anywhere; }
 .bib-v3-modal { align-items: flex-start; padding: 32px 16px; overflow-y: auto; }
 .bib-v3-modal__card { width: min(96vw, 1080px); max-height: calc(100vh - 64px); overflow-y: auto; padding: var(--space-4); display: grid; gap: var(--space-3); }
 .bib-v3-modal__pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 420px; overflow: auto; padding: var(--space-2); border-radius: var(--radius-sm); background: var(--surface-sunken); color: var(--text-secondary); font-size: var(--fs-sm); line-height: 1.5; }
+.bib-v3-refine-round { border-radius: var(--radius-sm); padding: var(--space-2); display: grid; gap: 4px; background: var(--surface-sunken); }
+.bib-v3-refine-round--match { background: rgba(45, 164, 78, 0.10); }
+.bib-v3-refine-round--diff { background: rgba(187, 128, 9, 0.12); }
+.bib-v3-refine-round--failed { background: rgba(248, 81, 73, 0.10); }
 .bib-v3__links { display: flex; gap: var(--space-1); flex-wrap: wrap; }
 `;
 
@@ -264,6 +274,8 @@ type ViewState = {
     data: BibleV3PreviewResponse | null;
     error: string | null;
     layerFilter: Set<Layer>;
+    unstableOnly: boolean;
+    lowConfOnly: boolean;
     selectedFactId: string | null;
   } | null;
   tab: BibleTab;
@@ -1374,10 +1386,68 @@ function getV3State(state: ViewState): NonNullable<ViewState["v3PreviewState"]> 
       data: null,
       error: null,
       layerFilter: new Set(V3_LAYERS),
+      unstableOnly: false,
+      lowConfOnly: false,
       selectedFactId: null,
     };
   }
   return state.v3PreviewState;
+}
+
+type V3RefineResult = NonNullable<BibleV3PreviewResponse["llmRefine"]>["fact_results"][number];
+
+function buildRefineIndex(data: BibleV3PreviewResponse): Map<string, V3RefineResult> {
+  return new Map((data.llmRefine?.fact_results ?? []).map((result) => [result.fact_id, result]));
+}
+
+function isRefineFailed(result: V3RefineResult): boolean {
+  return result.rounds.length > 0 && result.rounds.every((round) => round.failed);
+}
+
+function fmtConfidence(value: number): string {
+  return Number.isFinite(value) ? value.toFixed(2) : "-";
+}
+
+function fmtPct(count: number, total: number): string {
+  if (!total) return "0.0%";
+  return `${((count / total) * 100).toFixed(1)}%`;
+}
+
+function fmtDateTime(value: string | undefined): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function renderV3RefineBadge(result: V3RefineResult | undefined): string {
+  if (!result) return "";
+  if (isRefineFailed(result)) {
+    return `<span class="bib-v3__refine-badge bib-v3__refine-badge--failed">refine failed</span>`;
+  }
+  const kind = result.stable ? "stable" : "unstable";
+  return `<span class="bib-v3__refine-badge bib-v3__refine-badge--${kind}">${kind} conf=${escapeHtml(fmtConfidence(result.aggregated_confidence))}</span>`;
+}
+
+function renderV3RefineSummary(data: BibleV3PreviewResponse): string {
+  const refine = data.llmRefine;
+  if (!refine) {
+    return `<div class="nc-empty">LLM refine 未実行 (<code>--with-llm-refine</code> で生成可能)</div>`;
+  }
+  const lowConf = refine.fact_results.filter((result) => result.aggregated_confidence < 0.7).length;
+  return `<div class="bib-v3__refine">
+    <div><strong>LLM Refine:</strong> ${escapeHtml(String(refine.rounds))} rounds (generated ${escapeHtml(fmtDateTime(refine.generated_at))})</div>
+    <div>total: ${escapeHtml(String(refine.summary.total_facts))} / stable: ${escapeHtml(String(refine.summary.stable_facts))} (${escapeHtml(fmtPct(refine.summary.stable_facts, refine.summary.total_facts))}) / unstable: ${escapeHtml(String(refine.summary.unstable_facts))} (${escapeHtml(fmtPct(refine.summary.unstable_facts, refine.summary.total_facts))})</div>
+    <div>avg confidence: ${escapeHtml(fmtConfidence(refine.summary.avg_confidence))}, median: ${escapeHtml(fmtConfidence(refine.summary.median_confidence))}</div>
+    <div>&lt; 0.7: ${escapeHtml(String(lowConf))} facts (${escapeHtml(fmtPct(lowConf, refine.summary.total_facts))})</div>
+  </div>`;
 }
 
 function generatedByLabel(fact: FactNode): string {
@@ -1404,16 +1474,37 @@ function renderV3Preview(state: ViewState): string {
   if (!data) return `<div class="nc-empty">v3 preview は未読み込みです。</div>`;
 
   const allFacts = data.v3.facts ?? [];
-  const filteredFacts = allFacts.filter((fact) => v3State.layerFilter.has(fact.layer));
+  const refineIndex = buildRefineIndex(data);
+  const filteredFacts = allFacts.filter((fact) => {
+    if (!v3State.layerFilter.has(fact.layer)) return false;
+    const refine = refineIndex.get(fact.fact_id);
+    if (v3State.unstableOnly && refine?.stable !== false) return false;
+    if (v3State.lowConfOnly && (refine?.aggregated_confidence ?? 1) >= 0.7) return false;
+    return true;
+  });
   const generatedAt = data.generated_at ?? data.v3.generated_at;
   const filters = V3_LAYERS.map((layer) => `
     <label class="nc-pill nc-pill--check">
       <input type="checkbox" data-v3-layer="${layer}"${v3State.layerFilter.has(layer) ? " checked" : ""}>
       ${escapeHtml(layer)}
     </label>`).join("");
-  const facts = filteredFacts.map((fact) => `
+  const refineFilters = `
+    <label class="nc-pill nc-pill--check">
+      <input type="checkbox" data-bib-v3-filter-unstable${v3State.unstableOnly ? " checked" : ""}>
+      unstable のみ
+    </label>
+    <label class="nc-pill nc-pill--check">
+      <input type="checkbox" data-bib-v3-filter-low-conf${v3State.lowConfOnly ? " checked" : ""}>
+      confidence &lt; 0.7 のみ
+    </label>`;
+  const facts = filteredFacts.map((fact) => {
+    const refine = refineIndex.get(fact.fact_id);
+    return `
     <article class="nc-card bib-v3__fact">
-      <div class="bib-v3__meta"><span>${escapeHtml(fact.fact_id)}</span></div>
+      <div class="bib-v3__fact-head">
+        <div class="bib-v3__meta"><span>${escapeHtml(fact.fact_id)}</span></div>
+        ${renderV3RefineBadge(refine)}
+      </div>
       <div class="bib-v3__meta">
         <span>${escapeHtml(fact.entity_id ?? "global")}</span>
         <span>${escapeHtml(fact.aspect)}</span>
@@ -1425,7 +1516,8 @@ function renderV3Preview(state: ViewState): string {
         <span>confidence ${escapeHtml(String(fact.evidence?.confidence ?? fact.confidence ?? "-"))}</span>
       </div>
       <button type="button" class="nc-button nc-button--ghost nc-button--sm" data-v3-provenance="${escapeHtml(fact.fact_id)}">provenance: ${escapeHtml(fact.evidence?.generated_by?.stage ?? "-")}</button>
-    </article>`).join("");
+    </article>`;
+  }).join("");
 
   return `<div class="bib-v3">
     <section class="nc-card bib-section">
@@ -1434,7 +1526,8 @@ function renderV3Preview(state: ViewState): string {
         <span class="bib-meta">${escapeHtml(generatedAt ?? "-")}</span>
         <span class="bib-meta">${filteredFacts.length} / ${allFacts.length} facts</span>
       </div>
-      <div class="bib-v3__filters">${filters}</div>
+      ${renderV3RefineSummary(data)}
+      <div class="bib-v3__filters">${filters}${refineFilters}</div>
     </section>
     <section class="bib-v3__grid">${facts || `<div class="nc-empty">選択中 layer の fact はありません</div>`}</section>
     ${renderV3Findings(data)}
@@ -1473,6 +1566,43 @@ function renderFactLinks(label: string, ids: string[] | undefined): string {
   </section>`;
 }
 
+function matchLabel<T extends string>(suggested: T | null, current: T): string {
+  if (!suggested) return "-";
+  return suggested === current ? "matches current" : "DIFFERS";
+}
+
+function renderV3RefineHistory(data: BibleV3PreviewResponse | null, fact: FactNode): string {
+  const refine = data?.llmRefine;
+  const result = refine?.fact_results.find((item) => item.fact_id === fact.fact_id);
+  if (!refine || !result) return "";
+  const rounds = result.rounds.map((round) => {
+    const failed = Boolean(round.failed);
+    const differs =
+      !failed &&
+      ((round.suggested_layer !== null && round.suggested_layer !== fact.layer) ||
+        (round.suggested_aspect !== null && round.suggested_aspect !== fact.aspect));
+    const className = failed ? "failed" : differs ? "diff" : "match";
+    return `<article class="bib-v3-refine-round bib-v3-refine-round--${className}">
+      <h4>round ${escapeHtml(String(round.round))}</h4>
+      ${asKeyValueTable({
+        suggested_layer: `${round.suggested_layer ?? "-"} (${matchLabel(round.suggested_layer, fact.layer)})`,
+        suggested_aspect: `${round.suggested_aspect ?? "-"} (${matchLabel(round.suggested_aspect, fact.aspect)})`,
+        confidence: round.confidence,
+        failed: failed ? "true" : "false",
+      })}
+      <pre class="bib-v3-modal__pre">${escapeHtml(round.rationale || "-")}</pre>
+    </article>`;
+  }).join("");
+  return `<section class="bib-section">
+    <h3>LLM Refine History (${escapeHtml(String(refine.rounds))} rounds)</h3>
+    ${rounds || `<div class="nc-empty">round history はありません</div>`}
+    ${asKeyValueTable({
+      aggregated_confidence: fmtConfidence(result.aggregated_confidence),
+      stable: result.stable ? "true" : "false",
+    })}
+  </section>`;
+}
+
 function renderV3ProvenanceModal(state: ViewState): string {
   const v3State = state.v3PreviewState;
   const fact = findFact(v3State?.data ?? null, v3State?.selectedFactId ?? null);
@@ -1507,6 +1637,7 @@ function renderV3ProvenanceModal(state: ViewState): string {
         <h3>Body</h3>
         <pre class="bib-v3-modal__pre">${escapeHtml(fact.body)}</pre>
       </section>
+      ${renderV3RefineHistory(v3State?.data ?? null, fact)}
       ${renderFactLinks("references", fact.references)}
       ${renderFactLinks("invalidates", fact.invalidates)}
       ${renderFactLinks("supersedes", fact.supersedes)}
@@ -2240,9 +2371,19 @@ export function mountBibleView(container: HTMLElement): () => void {
   container.addEventListener("change", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLInputElement)) return;
+    const v3State = getV3State(state);
+    if (target.matches("[data-bib-v3-filter-unstable]")) {
+      v3State.unstableOnly = target.checked;
+      render(container, state);
+      return;
+    }
+    if (target.matches("[data-bib-v3-filter-low-conf]")) {
+      v3State.lowConfOnly = target.checked;
+      render(container, state);
+      return;
+    }
     const layer = target.dataset.v3Layer as Layer | undefined;
     if (!layer || !V3_LAYERS.includes(layer)) return;
-    const v3State = getV3State(state);
     if (target.checked) {
       v3State.layerFilter.add(layer);
     } else {
