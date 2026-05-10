@@ -21,7 +21,9 @@ import {
   applyRelationPatch,
   applyVolumePatch,
   applyWorldPatch,
-  runStage1Character,
+  runStage1aCharacterBackground,
+  runStage1bCharacterPsychology,
+  runStage1cCharacterDailyAndRelations,
   runStage2Location,
   runStage3World,
   runStage4Motif,
@@ -92,11 +94,23 @@ async function main(): Promise<void> {
   console.log(`[deepen-all] slug=${args.slug} concurrency=${args.concurrency}`);
   await backup(args.slug, bible, "pre-deepen-all");
 
-  const characterPatches = await runStage("1-character", bible.characters, args.concurrency, stats, (character) =>
-    runStage1Character({ bible, v2Concept: concept, characterId: character.id, styleReferenceNote: styleRefNote }) as Promise<CharacterDeepPatch>,
+  const characterBackgroundPatches = await runStage("1a-character-background", bible.characters, args.concurrency, stats, (character) =>
+    runStage1aCharacterBackground({ bible, v2Concept: concept, characterId: character.id, styleReferenceNote: styleRefNote }) as Promise<CharacterDeepPatch>,
   );
-  for (const patch of characterPatches) bible = applyCharacterPatch(bible, patch);
-  await finishStage(args.slug, bible, "1-character");
+  for (const patch of characterBackgroundPatches) bible = applyCharacterPatch(bible, patch);
+  await finishStage(args.slug, bible, "1a-character-background");
+
+  const characterPsychologyPatches = await runStage("1b-character-psychology", bible.characters, args.concurrency, stats, (character) =>
+    runStage1bCharacterPsychology({ bible, v2Concept: concept, characterId: character.id, styleReferenceNote: styleRefNote }) as Promise<CharacterDeepPatch>,
+  );
+  for (const patch of characterPsychologyPatches) bible = applyCharacterPatch(bible, patch);
+  await finishStage(args.slug, bible, "1b-character-psychology");
+
+  const characterDailyPatches = await runStage("1c-character-daily-relations", bible.characters, args.concurrency, stats, (character) =>
+    runStage1cCharacterDailyAndRelations({ bible, v2Concept: concept, characterId: character.id, styleReferenceNote: styleRefNote }) as Promise<CharacterDeepPatch>,
+  );
+  for (const patch of characterDailyPatches) bible = applyCharacterPatch(bible, patch);
+  await finishStage(args.slug, bible, "1c-character-daily-relations");
 
   const locationPatches = await runStage("2-location", bible.locations, args.concurrency, stats, (location) =>
     runStage2Location({ bible, locationId: location.id, styleReferenceNote: styleRefNote }) as Promise<LocationDeepPatch>,

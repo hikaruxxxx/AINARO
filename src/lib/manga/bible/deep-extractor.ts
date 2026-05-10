@@ -239,6 +239,11 @@ const WORLD_ASPECT_TO_PATH: Record<WorldAspect, string[]> = {
   forbidden_lore: ["world.forbidden_lore"],
 };
 
+/**
+ * @deprecated Phase 1-2c-improved 以降は 1 character = 3 sub-stage
+ * (runStage1aCharacterBackground / runStage1bCharacterPsychology /
+ * runStage1cCharacterDailyAndRelations) を推奨。
+ */
 export async function runStage1Character(args: StageCommonArgs & {
   v2Concept: V2Concept;
   characterId: string;
@@ -263,6 +268,100 @@ export async function runStage1Character(args: StageCommonArgs & {
     outputSchema: "type CharacterDeepPatch = { character_id: string; patch: Partial<CharacterEntryV2> }",
   });
   return runStageJson<CharacterDeepPatch>(prompt, args, "stage1 character JSON 抽出失敗");
+}
+
+export async function runStage1aCharacterBackground(args: StageCommonArgs & {
+  v2Concept: V2Concept;
+  characterId: string;
+}): Promise<CharacterDeepPatch | DryRunResult> {
+  const character = requireEntity(args.bible.characters.find((item) => item.id === args.characterId), "character", args.characterId);
+  const relatedRelations = relatedRelationsForCharacter(args.bible, args.characterId);
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 1a Character Background",
+    bible: args.bible,
+    v2Concept: args.v2Concept,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `character_id=${args.characterId}`,
+    rules: characterSubStageRules(character.role, ["backstory", "childhood_episodes"]),
+    focusedFields: ["backstory", "childhood_episodes"],
+    enforcedTotalMinChars: 5000,
+    context: characterFocusedContext(args.bible, character, relatedRelations),
+    instruction: [
+      "この sub-stage では下記のフィールドのみに集中してください。他のフィールドは埋めない。",
+      "backstory は生年月日 / 家族構成 / 学歴 / 職歴 / 大きな転機 / 喪失体験を時系列で書く。",
+      "childhood_episodes は具体的な 1 場面を 400 字以上で 5 件以上書く。抽象要約ではなく、場所・相手・会話・身体反応・後年への影響まで含める。",
+    ].join("\n"),
+    outputSchema: "type CharacterDeepPatch = { character_id: string; patch: Pick<Partial<CharacterEntryV2>, 'backstory' | 'childhood_episodes'> }",
+  });
+  return runStageJson<CharacterDeepPatch>(prompt, args, "stage1a character background JSON 抽出失敗");
+}
+
+export async function runStage1bCharacterPsychology(args: StageCommonArgs & {
+  v2Concept: V2Concept;
+  characterId: string;
+}): Promise<CharacterDeepPatch | DryRunResult> {
+  const character = requireEntity(args.bible.characters.find((item) => item.id === args.characterId), "character", args.characterId);
+  const fields = [
+    "psychology_deep",
+    "defense_mechanisms",
+    "worldview_filter",
+    "appearance_notes",
+    ...(character.role === "antagonist" ? ["origin_wound_deep", "ideology_argument", "dark_mirror_to_protagonist"] : []),
+  ];
+  const relatedRelations = relatedRelationsForCharacter(args.bible, args.characterId);
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 1b Character Psychology + Appearance",
+    bible: args.bible,
+    v2Concept: args.v2Concept,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `character_id=${args.characterId}`,
+    rules: characterSubStageRules(character.role, fields),
+    focusedFields: fields,
+    enforcedTotalMinChars: 5000,
+    context: characterFocusedContext(args.bible, character, relatedRelations),
+    instruction: [
+      "この sub-stage では下記のフィールドのみに集中してください。他のフィールドは埋めない。",
+      "内面の論理を文学作品レベルで掘り下げ、表層 → 防衛機制 → 深層動機 → 世界観フィルタの 4 層構造で書く。",
+      "appearance_notes は作画者が同じ人物を再現できるよう、顔・髪・姿勢・服・癖・疲労や緊張が出る部位まで具体化する。",
+      character.role === "antagonist"
+        ? "antagonist は origin_wound_deep / ideology_argument / dark_mirror_to_protagonist も必ず含め、主人公への反論として成立する思想まで書く。"
+        : "supporting の場合は supporting 用の min を使い、主役を食わない範囲で役割に必要な深さを確保する。",
+    ].join("\n"),
+    outputSchema: "type CharacterDeepPatch = { character_id: string; patch: Pick<Partial<CharacterEntryV2>, 'psychology_deep' | 'defense_mechanisms' | 'worldview_filter' | 'appearance_notes' | 'origin_wound_deep' | 'ideology_argument' | 'dark_mirror_to_protagonist'> }",
+  });
+  return runStageJson<CharacterDeepPatch>(prompt, args, "stage1b character psychology JSON 抽出失敗");
+}
+
+export async function runStage1cCharacterDailyAndRelations(args: StageCommonArgs & {
+  v2Concept: V2Concept;
+  characterId: string;
+}): Promise<CharacterDeepPatch | DryRunResult> {
+  const character = requireEntity(args.bible.characters.find((item) => item.id === args.characterId), "character", args.characterId);
+  const fields = ["voice_samples", "typical_day_in_life", "relationship_per_partner", "growth_per_volume"];
+  const relatedRelations = relatedRelationsForCharacter(args.bible, args.characterId);
+  const prompt = buildStagePrompt({
+    stageTitle: "Stage 1c Character Daily + Relations + Voice",
+    bible: args.bible,
+    v2Concept: args.v2Concept,
+    styleReferenceNote: args.styleReferenceNote,
+    targetLabel: `character_id=${args.characterId}`,
+    rules: characterSubStageRules(character.role, fields),
+    focusedFields: fields,
+    enforcedTotalMinChars: 8000,
+    context: {
+      ...characterFocusedContext(args.bible, character, relatedRelations),
+      volume_synopsis: args.bible.volume_synopsis,
+    },
+    instruction: [
+      "この sub-stage では下記のフィールドのみに集中してください。他のフィールドは埋めない。",
+      "voice_samples は 30 件以上。各 item は 1-3 行のセリフ + intent タグを含め、平常時・緊張時・嘘・照れ・怒り・独白・戦闘時を分散する。",
+      "typical_day_in_life は 1日のタイムテーブル風に、朝・移動・作業/探索・休息・夜の反芻まで生活の癖が見えるように書く。",
+      "relationship_per_partner は relations[] の各 pair について 800 字以上、感情・葛藤・触媒イベントを含めて書く。",
+      "growth_per_volume は各巻 1,500 字以上を目安に、開始状態・失敗・獲得・次巻への傷を分けて書く。",
+    ].join("\n"),
+    outputSchema: "type CharacterDeepPatch = { character_id: string; patch: Pick<Partial<CharacterEntryV2>, 'voice_samples' | 'typical_day_in_life' | 'relationship_per_partner' | 'growth_per_volume'> }",
+  });
+  return runStageJson<CharacterDeepPatch>(prompt, args, "stage1c character daily relations JSON 抽出失敗");
 }
 
 export async function runStage2Location(args: StageCommonArgs & {
@@ -511,15 +610,25 @@ function buildStagePrompt(args: {
   styleReferenceNote: string;
   targetLabel: string;
   rules: DepthRule[];
+  focusedFields?: string[];
+  enforcedTotalMinChars?: number;
   context: unknown;
   instruction: string;
   outputSchema: string;
 }): string {
   const depthTargets = renderDepthTargets(args.rules);
-  const totalMin = args.rules.reduce((sum, rule) => sum + ruleMinChars(rule), 0);
+  const totalMin = Math.max(args.enforcedTotalMinChars ?? 0, args.rules.reduce((sum, rule) => sum + ruleMinChars(rule), 0));
   const totalIdeal = args.rules.reduce((sum, rule) => sum + ruleIdealChars(rule), 0);
   const minText = totalMin > 0 ? `${totalMin.toLocaleString("ja-JP")} 字` : "該当 stage の schema 最大限";
   const idealText = totalIdeal > 0 ? `${totalIdeal.toLocaleString("ja-JP")} 字` : "出力 token 上限まで";
+  const focusBlock = args.focusedFields && args.focusedFields.length > 0
+    ? [
+      "",
+      "## 集中フィールド",
+      "この sub-stage では下記のフィールドのみに集中してください。他のフィールドは埋めない。",
+      ...args.focusedFields.map((field) => `- ${field}`),
+    ]
+    : [];
   return [
     COMPLIANCE_DIRECTIVE,
     "",
@@ -530,8 +639,12 @@ function buildStagePrompt(args: {
     "",
     "## 量の原則",
     `- 1コール = 1対象に集中し、最低 ${minText}、ideal ${idealText} を目指す`,
+    ...(args.enforcedTotalMinChars
+      ? [`- **この sub-stage の合計出力は最低 ${args.enforcedTotalMinChars.toLocaleString("ja-JP")} 字を必ず超えること**`]
+      : []),
     "- 出力 token を最大限活用し、薄い全体網羅ではなく対象 1 つを深く書く",
     "- 既存 bible と矛盾する場合は、patch 側で矛盾解消案を含める",
+    ...focusBlock,
     "",
     "## depth-spec 由来の文字数・件数目安",
     depthTargets,
@@ -602,6 +715,68 @@ function rulesForCharacter(role: CharacterEntryV2["role"]): DepthRule[] {
 
 function rulesByPaths(paths: string[]): DepthRule[] {
   return BIBLE_DEPTH_SPEC.rules.filter((rule) => paths.includes(rule.path));
+}
+
+function characterSubStageRules(role: CharacterEntryV2["role"], fields: string[]): DepthRule[] {
+  return fields.map((field) => characterRuleForField(role, field)).filter((rule): rule is DepthRule => rule !== undefined);
+}
+
+function characterRuleForField(role: CharacterEntryV2["role"], field: string): DepthRule | undefined {
+  const roleRule = BIBLE_DEPTH_SPEC.rules.find((rule) =>
+    rule.scope === "character" && rule.applies_to_role === role && rule.path.endsWith(`.${field}`),
+  );
+  if (roleRule) return roleRule;
+
+  const protagonistRule = BIBLE_DEPTH_SPEC.rules.find((rule) =>
+    rule.scope === "character" && rule.applies_to_role === "protagonist" && rule.path.endsWith(`.${field}`),
+  );
+  if (!protagonistRule) return undefined;
+
+  if (role === "supporting") return scaleCharacterRule(protagonistRule, role, 1 / 3);
+  if (role === "antagonist") return scaleCharacterRule(protagonistRule, role, 1);
+  if (role === "heroine") return scaleCharacterRule(protagonistRule, role, 1);
+  return protagonistRule;
+}
+
+function scaleCharacterRule(rule: DepthRule, role: CharacterEntryV2["role"], scale: number): DepthRule {
+  return {
+    ...rule,
+    path: rule.path.replace("characters[role=protagonist]", `characters[role=${role}]`),
+    label: rule.label.replace("characters.protagonist", `characters.${role}`),
+    applies_to_role: role === "protagonist" || role === "supporting" || role === "antagonist" ? role : undefined,
+    metric: scaleMetric(rule.metric, scale),
+  };
+}
+
+function scaleMetric(ruleMetric: DepthRule["metric"], scale: number): DepthRule["metric"] {
+  if (ruleMetric.kind === "min_chars") {
+    return {
+      kind: "min_chars",
+      min: Math.max(1, Math.round(ruleMetric.min * scale)),
+      ideal: Math.max(1, Math.round(ruleMetric.ideal * scale)),
+    };
+  }
+  if (ruleMetric.kind === "min_count") {
+    return {
+      kind: "min_count",
+      min: Math.max(1, Math.round(ruleMetric.min * scale)),
+      min_chars_each: ruleMetric.min_chars_each,
+      ideal: ruleMetric.ideal ? Math.max(1, Math.round(ruleMetric.ideal * scale)) : undefined,
+    };
+  }
+  return { kind: "min_count_only", min: Math.max(1, Math.round(ruleMetric.min * scale)) };
+}
+
+function relatedRelationsForCharacter(bible: BibleSnapshotV2, characterId: string): CharacterRelationV2[] {
+  return bible.relations.filter((relation) => relation.from_character_id === characterId || relation.to_character_id === characterId);
+}
+
+function characterFocusedContext(bible: BibleSnapshotV2, character: CharacterEntryV2, relatedRelations: CharacterRelationV2[]): JsonRecord {
+  return {
+    target_character: character,
+    related_relations: relatedRelations,
+    related_characters_minimal: minimalCharacters(bible, relatedRelations, character.id),
+  };
 }
 
 function minimalCharacter(character: CharacterEntryV2): JsonRecord {

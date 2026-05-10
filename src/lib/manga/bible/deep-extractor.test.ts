@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { BibleSnapshotV2 } from "../schemas-v2";
 import type { V2Concept } from "./v2-adapter";
 import {
+  runStage1aCharacterBackground,
+  runStage1bCharacterPsychology,
   runStage1Character,
+  runStage1cCharacterDailyAndRelations,
   runStage2Location,
   runStage3World,
   runStage5Prop,
@@ -26,6 +29,93 @@ describe("deep-extractor stage dry-run prompts", () => {
     expect(prompt).toContain("characters[role=protagonist].backstory");
     expect(prompt).toContain("最低 3,000 字、ideal 8,000 字");
     expect(prompt).toContain("1コール = 1対象");
+  });
+
+  it("Stage 1a character background prompt focuses on backstory and childhood episodes", async () => {
+    const result = await runStage1aCharacterBackground({
+      bible: bible(),
+      v2Concept: concept(),
+      characterId: "char_ren_v1",
+      styleReferenceNote: "style note",
+      dryRun: true,
+    });
+
+    const prompt = "dryRunPrompt" in result ? result.dryRunPrompt : "";
+    expect(prompt.startsWith("## コンプライアンス")).toBe(true);
+    expect(prompt).toContain("この sub-stage では下記のフィールドのみに集中してください。他のフィールドは埋めない。");
+    expect(prompt).toContain("backstory");
+    expect(prompt).toContain("childhood_episodes");
+    expect(prompt).toContain("**この sub-stage の合計出力は最低 5,000 字を必ず超えること**");
+    expect(prompt).toContain("characters[role=protagonist].backstory");
+    expect(prompt).toContain("characters[role=protagonist].childhood_episodes");
+  });
+
+  it("Stage 1b character psychology prompt focuses on psychology, defenses, worldview, and appearance", async () => {
+    const result = await runStage1bCharacterPsychology({
+      bible: bible(),
+      v2Concept: concept(),
+      characterId: "char_ren_v1",
+      styleReferenceNote: "style note",
+      dryRun: true,
+    });
+
+    const prompt = "dryRunPrompt" in result ? result.dryRunPrompt : "";
+    expect(prompt.startsWith("## コンプライアンス")).toBe(true);
+    expect(prompt).toContain("psychology_deep");
+    expect(prompt).toContain("defense_mechanisms");
+    expect(prompt).toContain("worldview_filter");
+    expect(prompt).toContain("appearance_notes");
+    expect(prompt).toContain("表層 → 防衛機制 → 深層動機 → 世界観フィルタ");
+    expect(prompt).toContain("**この sub-stage の合計出力は最低 5,000 字を必ず超えること**");
+  });
+
+  it("Stage 1b character psychology prompt includes antagonist-only fields for antagonists", async () => {
+    const result = await runStage1bCharacterPsychology({
+      bible: bible(),
+      v2Concept: concept(),
+      characterId: "char_rival_v1",
+      styleReferenceNote: "style note",
+      dryRun: true,
+    });
+
+    const prompt = "dryRunPrompt" in result ? result.dryRunPrompt : "";
+    expect(prompt).toContain("origin_wound_deep");
+    expect(prompt).toContain("ideology_argument");
+    expect(prompt).toContain("dark_mirror_to_protagonist");
+    expect(prompt).toContain("characters[role=antagonist].origin_wound_deep");
+  });
+
+  it("Stage 1c character daily and relations prompt requires voice samples, daily life, relationships, and growth", async () => {
+    const result = await runStage1cCharacterDailyAndRelations({
+      bible: bible(),
+      v2Concept: concept(),
+      characterId: "char_ren_v1",
+      styleReferenceNote: "style note",
+      dryRun: true,
+    });
+
+    const prompt = "dryRunPrompt" in result ? result.dryRunPrompt : "";
+    expect(prompt.startsWith("## コンプライアンス")).toBe(true);
+    expect(prompt).toContain("voice_samples は 30 件以上");
+    expect(prompt).toContain("typical_day_in_life");
+    expect(prompt).toContain("relationship_per_partner");
+    expect(prompt).toContain("growth_per_volume");
+    expect(prompt).toContain("**この sub-stage の合計出力は最低 8,000 字を必ず超えること**");
+  });
+
+  it("Stage 1a total output target matches depth-spec minimums", async () => {
+    const result = await runStage1aCharacterBackground({
+      bible: bible(),
+      v2Concept: concept(),
+      characterId: "char_ren_v1",
+      styleReferenceNote: "style note",
+      dryRun: true,
+    });
+
+    const prompt = "dryRunPrompt" in result ? result.dryRunPrompt : "";
+    expect(prompt).toContain("最低 5,000 字、ideal");
+    expect(prompt).toContain("最低 3,000 字、ideal 8,000 字");
+    expect(prompt).toContain("最低 5 件、各 400 字以上");
   });
 
   it("Stage 2 location prompt passes only the target location as the main context", async () => {
@@ -139,6 +229,19 @@ function bible(): BibleSnapshotV2 {
         continuity_anchors: ["red ribbon"],
         appears_in_volumes: [1],
       },
+      {
+        id: "char_rival_v1",
+        name: "Rival",
+        role: "antagonist",
+        spec: {
+          hair: { style: "slick", color: "silver", specific: "sharp" },
+          eyes: { shape: "narrow", color: "gray", expression_default: "cold" },
+          outfit_default: { top: "coat", bottom: "pants" },
+        },
+        attribute_classifier: { gender: "male", age_band: "adult", body_type: "slender", hair_length: "short", hair_color: "silver", eye_shape: "narrow", archetype: "rival" },
+        continuity_anchors: ["silver hair"],
+        appears_in_volumes: [1],
+      },
     ],
     locations: [
       {
@@ -172,6 +275,12 @@ function bible(): BibleSnapshotV2 {
         to_character_id: "char_akari_v1",
         relation_type: "ally",
         description: "allies",
+      },
+      {
+        from_character_id: "char_ren_v1",
+        to_character_id: "char_rival_v1",
+        relation_type: "rival",
+        description: "rivals",
       },
     ],
     style_directives: { global: "manga", scene_overrides: {}, overlay_rules: [] },

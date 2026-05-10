@@ -20,7 +20,10 @@ import {
   applyRelationPatch,
   applyVolumePatch,
   applyWorldPatch,
+  runStage1aCharacterBackground,
+  runStage1bCharacterPsychology,
   runStage1Character,
+  runStage1cCharacterDailyAndRelations,
   runStage2Location,
   runStage3World,
   runStage4Motif,
@@ -43,6 +46,9 @@ import {
 
 type StageName =
   | "1-character"
+  | "1a-character-background"
+  | "1b-character-psychology"
+  | "1c-character-daily-relations"
   | "2-location"
   | "3-world"
   | "4-motif"
@@ -104,7 +110,20 @@ function parseArgs(): Args {
 }
 
 function parseStage(value: string): StageName {
-  const stages: StageName[] = ["1-character", "2-location", "3-world", "4-motif", "5-prop", "6-costume", "7-relation", "8-volume", "9-cross-reference"];
+  const stages: StageName[] = [
+    "1-character",
+    "1a-character-background",
+    "1b-character-psychology",
+    "1c-character-daily-relations",
+    "2-location",
+    "3-world",
+    "4-motif",
+    "5-prop",
+    "6-costume",
+    "7-relation",
+    "8-volume",
+    "9-cross-reference",
+  ];
   if (!stages.includes(value as StageName)) throw new Error(`unknown --stage: ${value}`);
   return value as StageName;
 }
@@ -170,6 +189,18 @@ async function runSingleStage(input: {
     const patch = await runStage1Character({ ...common, v2Concept: concept, characterId: requireValue(target, "--target") });
     if (isDryRun(patch)) return printDryRun(patch, input.bible);
     bible = applyCharacterPatch(bible, patch);
+  } else if (stage === "1a-character-background") {
+    const patch = await runStage1aCharacterBackground({ ...common, v2Concept: concept, characterId: requireValue(target, "--target") });
+    if (isDryRun(patch)) return printDryRun(patch, input.bible);
+    bible = applyCharacterPatch(bible, patch);
+  } else if (stage === "1b-character-psychology") {
+    const patch = await runStage1bCharacterPsychology({ ...common, v2Concept: concept, characterId: requireValue(target, "--target") });
+    if (isDryRun(patch)) return printDryRun(patch, input.bible);
+    bible = applyCharacterPatch(bible, patch);
+  } else if (stage === "1c-character-daily-relations") {
+    const patch = await runStage1cCharacterDailyAndRelations({ ...common, v2Concept: concept, characterId: requireValue(target, "--target") });
+    if (isDryRun(patch)) return printDryRun(patch, input.bible);
+    bible = applyCharacterPatch(bible, patch);
   } else if (stage === "2-location") {
     const patch = await runStage2Location({ ...common, locationId: requireValue(target, "--target") });
     if (isDryRun(patch)) return printDryRun(patch, input.bible);
@@ -220,7 +251,9 @@ async function runAllSequential(input: {
 }): Promise<BibleSnapshotV2> {
   let bible = input.bible;
   for (const character of bible.characters) {
-    bible = await runSingleStage({ args: { slug: input.slug, concept: "", stage: "1-character", target: character.id, all: false, dryRun: input.dryRun, reLint: false }, bible, concept: input.concept, styleRefNote: input.styleRefNote });
+    bible = await runSingleStage({ args: { slug: input.slug, concept: "", stage: "1a-character-background", target: character.id, all: false, dryRun: input.dryRun, reLint: false }, bible, concept: input.concept, styleRefNote: input.styleRefNote });
+    bible = await runSingleStage({ args: { slug: input.slug, concept: "", stage: "1b-character-psychology", target: character.id, all: false, dryRun: input.dryRun, reLint: false }, bible, concept: input.concept, styleRefNote: input.styleRefNote });
+    bible = await runSingleStage({ args: { slug: input.slug, concept: "", stage: "1c-character-daily-relations", target: character.id, all: false, dryRun: input.dryRun, reLint: false }, bible, concept: input.concept, styleRefNote: input.styleRefNote });
   }
   for (const location of bible.locations) {
     bible = await runSingleStage({ args: { slug: input.slug, concept: "", stage: "2-location", target: location.id, all: false, dryRun: input.dryRun, reLint: false }, bible, concept: input.concept, styleRefNote: input.styleRefNote });
