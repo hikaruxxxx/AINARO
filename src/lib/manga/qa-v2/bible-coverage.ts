@@ -162,8 +162,19 @@ function computeVoiceReflectionRate(
   bible: BibleSnapshotV2,
   panels: EpisodeStoryboardV2["pages"][number]["panels"]
 ): number {
+  // voice_samples は schema 上 Array<{ line: string; ... }> だが、Codex CLI が
+  // Array<string> や { line }/{ text }/{ utterance } 等の表記揺れで返すことが
+  // あるため defensive に複数フィールドから抽出する。
   const voiceLines = bible.characters.flatMap((character) =>
-    (character.voice_samples ?? []).map((sample) => sample.line.trim()).filter((line) => line.length > 0)
+    (character.voice_samples ?? []).map((sample) => {
+      if (typeof sample === "string") return sample.trim();
+      const candidate =
+        (sample as { line?: string; text?: string; utterance?: string }).line ??
+        (sample as { line?: string; text?: string; utterance?: string }).text ??
+        (sample as { line?: string; text?: string; utterance?: string }).utterance ??
+        "";
+      return typeof candidate === "string" ? candidate.trim() : "";
+    }).filter((line) => line.length > 0)
   );
   if (voiceLines.length === 0) return 0;
 

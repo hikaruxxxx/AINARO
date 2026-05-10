@@ -31,12 +31,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 1/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 1/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [
             {
@@ -71,12 +71,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 2/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 2/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -106,12 +106,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 3/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 3/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -141,12 +141,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 4/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 4/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -182,12 +182,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 5/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 5/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -217,12 +217,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 6/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 6/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -252,12 +252,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 7/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 7/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -287,12 +287,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 8/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 8/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -328,12 +328,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 9/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 9/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -363,12 +363,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 10/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 10/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -398,12 +398,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 11/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 11/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -433,12 +433,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S01 (introduce/establishing) panel 12/12: 墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
-          "key_visual": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "action": "S01 (introduce/establishing) panel 12/12: 墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
+          "key_visual": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -474,7 +474,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -514,7 +514,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -554,7 +554,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -589,7 +589,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -624,7 +624,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -665,7 +665,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -700,7 +700,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -735,7 +735,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -770,7 +770,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -805,7 +805,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_interior_v1",
+            "location_id": "loc_blueway_interior_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -846,12 +846,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_exterior_night_v1",
+            "location_id": "loc_blueway_exterior_night_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S03 (transition/transition_montage) panel 1/6: 深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
-          "key_visual": "深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "action": "S03 (transition/transition_montage) panel 1/6: 深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "key_visual": "深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
           "dialogue": [
             {
               "character_id": "char_槇島_主任_v1",
@@ -886,12 +886,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_exterior_night_v1",
+            "location_id": "loc_blueway_exterior_night_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S03 (transition/transition_montage) panel 2/6: 深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
-          "key_visual": "深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "action": "S03 (transition/transition_montage) panel 2/6: 深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "key_visual": "深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -921,12 +921,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_exterior_night_v1",
+            "location_id": "loc_blueway_exterior_night_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S03 (transition/transition_montage) panel 3/6: 深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
-          "key_visual": "深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "action": "S03 (transition/transition_montage) panel 3/6: 深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "key_visual": "深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -962,12 +962,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_exterior_night_v1",
+            "location_id": "loc_blueway_exterior_night_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S03 (transition/transition_montage) panel 4/6: 深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
-          "key_visual": "深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "action": "S03 (transition/transition_montage) panel 4/6: 深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "key_visual": "深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -997,12 +997,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_exterior_night_v1",
+            "location_id": "loc_blueway_exterior_night_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S03 (transition/transition_montage) panel 5/6: 深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
-          "key_visual": "深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "action": "S03 (transition/transition_montage) panel 5/6: 深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "key_visual": "深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -1032,12 +1032,12 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_exterior_night_v1",
+            "location_id": "loc_blueway_exterior_night_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "S03 (transition/transition_montage) panel 6/6: 深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
-          "key_visual": "深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "action": "S03 (transition/transition_montage) panel 6/6: 深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
+          "key_visual": "深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)",
           "dialogue": [],
           "monologue": [],
           "narration": [],
@@ -2074,7 +2074,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_exterior_night_v1",
+            "location_id": "loc_blueway_exterior_night_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -2109,7 +2109,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_exterior_night_v1",
+            "location_id": "loc_blueway_exterior_night_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
@@ -2144,7 +2144,7 @@
                 "expression": "default"
               }
             ],
-            "location_id": "loc_lawson_exterior_night_v1",
+            "location_id": "loc_blueway_exterior_night_v1",
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },

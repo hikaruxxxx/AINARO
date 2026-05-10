@@ -64,13 +64,13 @@
       },
       "relationship_state_delta": [],
       "time_axis": {
-        "label": "ep01 一日目 深夜2時、ローソン新宿西",
+        "label": "ep01 一日目 深夜2時、青空ローン新宿西",
         "order": 1,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_interior_v1",
+      "location_id": "loc_blueway_interior_v1",
       "sub_locations": [
         "loc_shinjuku_night_skyline_v1",
         "loc_shinjuku_third_5f_boss_room_v1"
@@ -92,7 +92,7 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "墨色の新宿夜景に浮かぶローソン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続"
+      "key_visual_intent": "墨色の新宿夜景に浮かぶ青空ローン看板から、白い蛍光灯下の黒パーカーのレンへ寄っていく序の連続"
     },
     {
       "scene_id": "S02",
@@ -173,7 +173,7 @@
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_interior_v1",
+      "location_id": "loc_blueway_interior_v1",
       "page_budget": {
         "min": 2,
         "max": 2,
@@ -264,7 +264,7 @@
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_exterior_night_v1",
+      "location_id": "loc_blueway_exterior_night_v1",
       "sub_locations": [
         "loc_dpc_public_counter_v1",
         "loc_ren_apartment_v1"
@@ -286,7 +286,7 @@
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "深夜のローソン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)"
+      "key_visual_intent": "深夜の青空ローン外観から路地へ、灰色の背中の上に白く差し込む3年前の窓口回想 (再鑑定同意書の赤印)"
     },
     {
       "scene_id": "S04",
@@ -525,7 +525,7 @@
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_exterior_night_v1",
+      "location_id": "loc_blueway_exterior_night_v1",
       "sub_locations": [
         "loc_shinjuku_night_skyline_v1",
         "loc_shinjuku_third_dungeon_gate_v1",
