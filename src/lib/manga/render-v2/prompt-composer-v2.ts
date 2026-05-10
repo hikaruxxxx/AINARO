@@ -19,6 +19,15 @@ import type {
   StoryboardPageV2,
   BibleSnapshotV2,
 } from "../schemas-v2";
+import {
+  scanPrompt,
+  scanText,
+} from "../compliance/scanner";
+import type {
+  Blocklist,
+  ComplianceFinding,
+  FalsePositives,
+} from "../compliance/types";
 
 const PAGE_W = 1748;
 const PAGE_H = 2480;
@@ -44,6 +53,8 @@ type ComposeArgs = {
   pageBackgroundTreatments?: Map<string, BackgroundTreatment>;
   /** page_one_shot 用。指定時は LAYOUT GEOMETRY セクションをプロンプトに注入 */
   pagePlanPage?: PagePlanPage;
+  /** Phase 0-5: panel text compliance hard fail を有効にする場合のみ渡す */
+  compliance?: { blocklist: Blocklist; fp: FalsePositives };
 };
 
 /**
@@ -160,7 +171,12 @@ function negativesBlock(): string {
 
 export type PanelTextValidationResult =
   | { ok: true }
-  | { ok: false; reason: string };
+  | {
+      ok: false;
+      reason: string;
+      severity: "fatal" | "warn";
+      findings?: ComplianceFinding[];
+    };
 
 export function extractForbiddenKeywords(term: string): string[] {
   const withoutNotes = term.replace(/[（(].*?[）)]/g, "");
@@ -173,6 +189,10 @@ export function extractForbiddenKeywords(term: string): string[] {
 export function validatePanelText(
   panel: PanelV2,
   bible: BibleSnapshotV2,
+  options?: {
+    /** 既定 false。true にすると forbidden_terms_global 違反を fatal severity で返す。 */
+    treatForbiddenAsFatal?: boolean;
+  },
 ): PanelTextValidationResult {
   const forbidden = bible.world.lexicon?.forbidden_terms_global ?? [];
   const textEntries: Array<{ field: string; text: string }> = [
@@ -189,6 +209,7 @@ export function validatePanelText(
           return {
             ok: false,
             reason: `forbidden term in ${entry.field}: ${term}`,
+            severity: options?.treatForbiddenAsFatal ? "fatal" : "warn",
           };
         }
       }
@@ -197,11 +218,98 @@ export function validatePanelText(
   return { ok: true };
 }
 
+function textComplianceEntries(panel: PanelV2): Array<{ fieldPath: string; text: string }> {
+  return [
+    ...panel.dialogue.map((d, index) => ({
+      fieldPath: `panel.${panel.panel_id}.dialogue[${index}]`,
+      text: d.text,
+    })),
+    ...panel.monologue.map((m, index) => ({
+      fieldPath: `panel.${panel.panel_id}.monologue[${index}]`,
+      text: m.text,
+    })),
+    ...panel.narration.map((text, index) => ({
+      fieldPath: `panel.${panel.panel_id}.narration[${index}]`,
+      text,
+    })),
+    ...panel.sfx.map((text, index) => ({
+      fieldPath: `panel.${panel.panel_id}.sfx[${index}]`,
+      text,
+    })),
+  ];
+}
+
+function complianceResult(
+  findings: ComplianceFinding[],
+  options?: { treatAsFatal?: boolean },
+): PanelTextValidationResult {
+  if (findings.length === 0) return { ok: true };
+
+  const hasFatal = findings.some((finding) => finding.severity === "fatal");
+  const severity = hasFatal && options?.treatAsFatal !== false ? "fatal" : "warn";
+  const summary = findings
+    .slice(0, 3)
+    .map((finding) => `${finding.field_path}: ${finding.matched_term} (${finding.category})`)
+    .join("; ");
+  const suffix = findings.length > 3 ? `; +${findings.length - 3} more` : "";
+  return {
+    ok: false,
+    severity,
+    reason: `compliance ${severity}: ${summary}${suffix}`,
+    findings,
+  };
+}
+
+export function validateAgainstCompliance(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+  blocklist: Blocklist,
+  fp: FalsePositives,
+  options?: {
+    /** false にすると warn 相当のみ (test/dev 用)、既定 true で fatal stop */
+    treatAsFatal?: boolean;
+  },
+): PanelTextValidationResult {
+  void bible;
+  const findings = textComplianceEntries(panel).flatMap((entry) =>
+    scanText(entry.text, blocklist, fp, { fieldPath: entry.fieldPath })
+  );
+  return complianceResult(findings, options);
+}
+
+export function validatePromptAgainstCompliance(
+  prompt: string,
+  blocklist: Blocklist,
+  fp: FalsePositives,
+  options?: { treatAsFatal?: boolean },
+): PanelTextValidationResult {
+  return complianceResult(
+    scanPrompt(prompt, blocklist, fp, { fieldPath: "render_prompt" }),
+    options,
+  );
+}
+
 function panelTextValidationWarning(
   panel: PanelV2,
   bible: BibleSnapshotV2,
+  compliance?: { blocklist: Blocklist; fp: FalsePositives },
 ): string | null {
   const validation = validatePanelText(panel, bible);
+  if (compliance) {
+    const complianceValidation = validateAgainstCompliance(
+      panel,
+      bible,
+      compliance.blocklist,
+      compliance.fp,
+      { treatAsFatal: true },
+    );
+    if (!complianceValidation.ok && complianceValidation.severity === "fatal") {
+      throw new Error(
+        `[prompt-composer-v2] panel ${panel.panel_id}: COMPLIANCE FATAL — ${complianceValidation.reason}`,
+      );
+    }
+  }
+
   if (validation.ok) return null;
   const message = `[prompt-composer-v2] panel ${panel.panel_id}: ${validation.reason}. Storyboard L4 text should be regenerated or corrected before render.`;
   console.warn(message);
@@ -342,7 +450,11 @@ function buildLayoutGeometryBlock(
  * panel.dialogue / monologue / narration / sfx を「画像内に直接描く」指示文に変換。
  * 吹き出し・ナレーション枠・擬音を AI 側で typeset させる方針 (旧 SVG overlay は撤回)。
  */
-function inPanelTextBlock(panel: PanelV2, bible: BibleSnapshotV2): string | null {
+function inPanelTextBlock(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+  compliance?: { blocklist: Blocklist; fp: FalsePositives },
+): string | null {
   const hasAny =
     panel.dialogue.length > 0 ||
     panel.monologue.length > 0 ||
@@ -354,7 +466,7 @@ function inPanelTextBlock(panel: PanelV2, bible: BibleSnapshotV2): string | null
   const lines: string[] = [
     "IN-PANEL TEXT (must be drawn INSIDE the image as part of the manga page):",
   ];
-  const warning = panelTextValidationWarning(panel, bible);
+  const warning = panelTextValidationWarning(panel, bible, compliance);
   if (warning) lines.push(warning);
 
   if (panel.dialogue.length > 0) {
@@ -420,7 +532,7 @@ export function composePanelPrompt(args: ComposeArgs): { prompt: string; refImag
     "",
     backgroundDirective(args.backgroundTreatment),
     "",
-    inPanelTextBlock(p, args.bible),
+    inPanelTextBlock(p, args.bible, args.compliance),
     "",
     "MUST PRESERVE invariants from continuity refs (face geometry, outfit details, location layout). Match line weight and screentone density of refs.",
     "",
@@ -463,7 +575,7 @@ export function composePagePrompt(args: ComposeArgs): { prompt: string; refImage
       `  Action: ${p.action}.`,
       `  Visual focus: ${p.key_visual}.`,
     ];
-    const warning = panelTextValidationWarning(p, args.bible);
+    const warning = panelTextValidationWarning(p, args.bible, args.compliance);
     if (warning) lines.push(`  ${warning.replace(/\n/g, "\n  ")}`);
     if (p.dialogue.length > 0) {
       lines.push(`  Speech bubbles (oval bubble + tail pointing to speaker, Japanese vertical text):`);

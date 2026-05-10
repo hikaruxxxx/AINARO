@@ -826,6 +826,26 @@ export type AuditReport = {
   checks: AuditCheckResult[];
   /** 任意の重い vision audit 結果。CLI opt-in 時のみ付与する */
   vision?: VisionAuditResult;
+  /** 任意の compliance scan 結果。L11 で商標等の残留を episode 単位で監査する */
+  compliance_report?: {
+    schema_version: 1;
+    fatal_count: number;
+    warn_count: number;
+    findings: Array<{
+      severity: "fatal" | "warn";
+      category: string;
+      matched_term: string;
+      source: "storyboard" | "page_plan" | "resolved_refs" | "scene_graph";
+      field_path: string;
+      line?: number;
+      text_excerpt: string;
+      suggestion?: {
+        type: string;
+        fictional_name_hint?: string;
+        description: string;
+      };
+    }>;
+  };
   failed_panel_ids: string[];
 };
 

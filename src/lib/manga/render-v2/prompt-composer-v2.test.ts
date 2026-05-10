@@ -4,10 +4,16 @@ import type {
   PanelV2,
   ResolvedRefPacket,
 } from "../schemas-v2";
+import type {
+  Blocklist,
+  FalsePositives,
+} from "../compliance/types";
 import {
   composePanelPrompt,
   extractForbiddenKeywords,
+  validateAgainstCompliance,
   validatePanelText,
+  validatePromptAgainstCompliance,
 } from "./prompt-composer-v2";
 
 function bible(): BibleSnapshotV2 {
@@ -119,11 +125,12 @@ describe("prompt-composer-v2 text validation", () => {
   it("detects forbidden terms before in-panel text render", () => {
     const result = validatePanelText(panel("世界記録なんて関係ない。"), bible());
 
-    expect(result).toEqual({
+    expect(result).toEqual(expect.objectContaining({
       ok: false,
       reason:
         "forbidden term in dialogue: 世界記録 (単独使用 / records.synonyms_forbidden_in_isolation)",
-    });
+      severity: "warn",
+    }));
   });
 
   it("keeps backward compatibility when lexicon is absent", () => {
@@ -147,5 +154,92 @@ describe("prompt-composer-v2 text validation", () => {
     expect(composed.prompt).toContain("Storyboard L4 text should be regenerated");
     expect(warnSpy).toHaveBeenCalledOnce();
     warnSpy.mockRestore();
+  });
+});
+
+const complianceBlocklist: Blocklist = {
+  schema_version: 1,
+  category_severity: {
+    fatal: ["brands.convenience_store", "consumer_tech.devices"],
+    warn: ["phrase_fragments"],
+  },
+  brands: {
+    convenience_store: ["ローソン"],
+  },
+  consumer_tech: {
+    devices: ["iPhone"],
+  },
+  phrase_fragments: ["ライ"],
+};
+
+const complianceFalsePositives: FalsePositives = {
+  schema_version: 1,
+  exact_term_excludes: [],
+  context_excludes: [],
+};
+
+describe("prompt-composer-v2 Phase 0-5 compliance validation", () => {
+  it("returns fatal findings for real company names in panel dialogue", () => {
+    const result = validateAgainstCompliance(
+      panel("ローソンで待ってる。"),
+      bible(),
+      complianceBlocklist,
+      complianceFalsePositives,
+    );
+
+    expect(result).toEqual(expect.objectContaining({
+      ok: false,
+      severity: "fatal",
+    }));
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.findings).toHaveLength(1);
+      expect(result.findings?.[0]).toEqual(expect.objectContaining({
+        matched_term: "ローソン",
+        field_path: "panel.p1.dialogue[0]",
+      }));
+    }
+  });
+
+  it("skips katakana fragment matches inside longer narration words", () => {
+    const target = panel("");
+    target.dialogue = [];
+    target.narration = ["物語はクライマックスへ向かう。"];
+
+    expect(validateAgainstCompliance(
+      target,
+      bible(),
+      complianceBlocklist,
+      complianceFalsePositives,
+    )).toEqual({ ok: true });
+  });
+
+  it("returns ok for clean panel text", () => {
+    expect(validateAgainstCompliance(
+      panel("ここで少し休もう。"),
+      bible(),
+      complianceBlocklist,
+      complianceFalsePositives,
+    )).toEqual({ ok: true });
+  });
+
+  it("returns fatal findings for brand terms in final render prompt", () => {
+    const result = validatePromptAgainstCompliance(
+      "主人公が最新の iPhone を取り出す。",
+      complianceBlocklist,
+      complianceFalsePositives,
+    );
+
+    expect(result).toEqual(expect.objectContaining({
+      ok: false,
+      severity: "fatal",
+    }));
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.findings?.[0]).toEqual(expect.objectContaining({
+        matched_term: "iPhone",
+        field_path: "render_prompt",
+      }));
+    }
   });
 });
