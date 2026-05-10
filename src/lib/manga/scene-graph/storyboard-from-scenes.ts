@@ -419,6 +419,16 @@ export type EnrichedPanelDetail = {
   monologue?: unknown;
 };
 
+export type PanelLintFeedback = {
+  panel_no: number;
+  findings: Array<{
+    rule: string;
+    severity: "warn" | "fatal";
+    message: string;
+    hint?: string;
+  }>;
+};
+
 type DialogueLikeLine = { character_id: string; text: string };
 
 function normalizeDialogueLike(items: unknown): DialogueLikeLine[] {
@@ -463,10 +473,17 @@ function normalizeDialogueLike(items: unknown): DialogueLikeLine[] {
 export async function enrichStoryboardWithLLM(
   storyboard: EpisodeStoryboardV2,
   sceneGraph: SceneGraphV1,
-  options?: { timeoutMsPerScene?: number; cwd?: string; generationProfileDirective?: string }
+  options?: {
+    timeoutMsPerScene?: number;
+    cwd?: string;
+    generationProfileDirective?: string;
+    lintFeedback?: PanelLintFeedback[];
+    targetSceneIds?: string[];
+  }
 ): Promise<EpisodeStoryboardV2> {
   const cwd = options?.cwd ?? process.env.AINARO_REPO_ROOT ?? process.cwd();
   const timeoutMs = options?.timeoutMsPerScene ?? 5 * 60 * 1000;
+  const targetSceneIds = options?.targetSceneIds ? new Set(options.targetSceneIds) : null;
 
   // panel_no -> Scene の逆引き
   const panelToScene = new Map<number, Scene>();
@@ -485,12 +502,16 @@ export async function enrichStoryboardWithLLM(
 
   // scene ごとに Codex 呼び出し
   for (const scene of sceneGraph.scenes) {
+    if (targetSceneIds && !targetSceneIds.has(scene.scene_id)) continue;
     const start = scene.panel_range.start_panel_no;
     const end = scene.panel_range.end_panel_no;
     const count = end - start + 1;
     if (count <= 0) continue;
 
-    const task = buildPanelDetailPrompt(scene, count, options?.generationProfileDirective);
+    const sceneLintFeedback = (options?.lintFeedback ?? []).filter(
+      (feedback) => feedback.panel_no >= start && feedback.panel_no <= end
+    );
+    const task = buildPanelDetailPrompt(scene, count, options?.generationProfileDirective, sceneLintFeedback);
     const result = await runCodexText<{ panels: EnrichedPanelDetail[] }>({
       task,
       format: "json",
@@ -543,7 +564,12 @@ export async function enrichStoryboardWithLLM(
  * scene の文脈 (key_visual_intent / beat / mode / dialogue_plan / protagonist_arc_state) を渡し、
  * 各 panel の action / key_visual / shot_type / camera / dialogue / monologue を返してもらう。
  */
-export function buildPanelDetailPrompt(scene: Scene, panelCount: number, generationProfileDirective?: string): string {
+export function buildPanelDetailPrompt(
+  scene: Scene,
+  panelCount: number,
+  generationProfileDirective?: string,
+  lintFeedback: PanelLintFeedback[] = []
+): string {
   const startNo = scene.panel_range.start_panel_no;
   const pageCount = Math.max(1, scene.page_range.end - scene.page_range.start + 1);
   const panelsPerPageHint = Math.max(1, Math.ceil(panelCount / pageCount));
@@ -608,6 +634,19 @@ export function buildPanelDetailPrompt(scene: Scene, panelCount: number, generat
   lines.push("");
   lines.push(`## beat_type 別の重点`);
   lines.push(beatSpecificPromptDirective(scene));
+  if (lintFeedback.length > 0) {
+    lines.push("");
+    lines.push(`## 修正指示 (前回 lint で指摘された問題)`);
+    lines.push(`以下の panel は前回 lint で fatal/warn 指摘があります。対象 panel の action / key_visual / shot_type / camera / dialogue / monologue を優先的に改善してください。`);
+    for (const feedback of lintFeedback) {
+      lines.push(`panel #${feedback.panel_no}:`);
+      for (const finding of feedback.findings) {
+        lines.push(`  - rule: ${finding.rule} (${finding.severity})`);
+        lines.push(`    指摘: ${finding.message}`);
+        if (finding.hint) lines.push(`    ヒント: ${finding.hint}`);
+      }
+    }
+  }
   if (generationProfileDirective) {
     lines.push("");
     lines.push(`## generation profile`);
