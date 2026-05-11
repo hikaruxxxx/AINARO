@@ -250,7 +250,7 @@ export async function subSplitFieldIntoLayers(
       task: buildSubSplitPrompt(args),
       format: "json",
       cwd: args.cwd,
-      timeoutMs: args.timeoutMs ?? 60_000,
+      timeoutMs: args.timeoutMs ?? 180_000,
       maxRetries: 0,
     });
     const facts = normalizeSubSplitResult(args, response.parsed);
@@ -281,7 +281,7 @@ export async function runMigrationWithSubSplit(
     10,
     Math.max(1, Math.floor(options.maxParallel ?? 5))
   );
-  const timeoutMs = options.timeoutMs ?? 60_000;
+  const timeoutMs = options.timeoutMs ?? 180_000;
   const candidates = collectSubSplitTargets(v2);
   const factBySourcePath = new Map(
     migration.v3.facts.map((fact) => [fact.evidence?.source_path ?? "", fact])
