@@ -13,6 +13,8 @@
 | e1784f3 | fix: contextForScene を cast-fair filter に変更 (各 cast 毎に per-budget query → merge) |
 | 2445be9 | docs: handoff に cast-fair filter 完了を反映 |
 | 3d85576 | feat: Wave 1 - USE_BIBLE_V3 default true + undefined-reference-detector 強化 |
+| bca7afb | docs: handoff に Wave 1 完了反映 |
+| 7dedb83 | fix: compliance scanner に positive_context を追加して「ライン」「LINE」の誤検出修正 |
 
 - handoff の **最優先タスク (L4 visibility 縛り)** 完了
 - 副産物として broker-v3 `applyCharBudget` のバグを発見・修正
@@ -42,9 +44,9 @@ V3 移行 plan の **残課題に着手**:
 4. ~~broker-v3.contextForScene の cast-fair filter~~ — **完了 (e1784f3、a07 ep01 S01 でレン 3 + 灯里 3 にバランス回復)**
 5. ~~USE_BIBLE_V3 default true 化~~ — **完了 (3d85576、USE_BIBLE_V3=false で V2 fallback、それ以外は V3)**
 6. ~~undefined-ref detector 改善~~ — **部分完了 (3d85576、a07 で 1,971 → 1,442 件 -26.8%、known_terms.json 拡張で更に削減可)**
-7. (任意・**新最優先候補**) a07 bible の depth 不足解消 — fatal lint 27 件のうち depth 系。主人公 growth_per_volume 未着手 / antagonist 心理 60-80% 不足 / location history 未着手 / visual_motifs 各種項目不足。LLM コール多のため background 必要
-8. (任意) bible-lint の「ライン」誤検出修正 — 床ライン/体のライン等が LINE 商標と誤判定される 3 件 (compliance:trademarks.tech_services rule の正規表現修正)
-9. (任意) L3.5 強化 — volume_plot 連動深化、巻またぎ伏線の自動配置、episode-patterns 辞書のカバー率向上
+7. (任意・**新最優先候補**) a07 bible の depth 不足解消 — fatal lint 27 件のうち depth 系。主人公 growth_per_volume 未着手 / antagonist 心理 60-80% 不足 / location history 未着手 / visual_motifs 各種項目不足。LLM コール多のため background 必要。**注意: 既存 run-deepen-all.ts / L01c-bible-deepen.ts は --concept ファイル必須で a07 には concept ファイル無し**。専用スクリプトの新規実装が必要 (snapshot 起点で指定 field だけ deepen する Codex CLI ラッパー)。または concept を snapshot から reverse engineer
+8. ~~bible-lint の「ライン」誤検出修正~~ — **完了 (7dedb83、a07 fatal 30→27)**
+9. (任意・**Wave 3 候補**) L3.5 強化 — a07 では volume_plot.json が**未作成**で cross-episode validator が弱動作。1. a07 用 volume_plot 生成、2. 巻またぎ伏線の自動配置、3. episode-patterns 辞書のカバー率向上、4. anchor pool scoring 統合 (4 子タスク)
 10. (任意) L11 audit / L12 repair の本格化 (現状は雛形のみ)
 11. (任意) L8.5/8.6/8.7 name gate UI 改善 (Console 中央コックピット化)
 
