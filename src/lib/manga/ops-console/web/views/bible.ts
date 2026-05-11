@@ -1483,6 +1483,9 @@ function renderV3Preview(state: ViewState): string {
     return true;
   });
   const generatedAt = data.generated_at ?? data.v3.generated_at;
+  const sourceLabel = data.source === "snapshot.v3.json"
+    ? "snapshot.v3.json - 本番置換済"
+    : "v3-classified-preview.json - Phase 5-A preview";
   const filters = V3_LAYERS.map((layer) => `
     <label class="nc-pill nc-pill--check">
       <input type="checkbox" data-v3-layer="${layer}"${v3State.layerFilter.has(layer) ? " checked" : ""}>
@@ -1522,7 +1525,7 @@ function renderV3Preview(state: ViewState): string {
   return `<div class="bib-v3">
     <section class="nc-card bib-section">
       <div class="bib-v3__head">
-        <h3>V3 Preview (Phase 5-A deterministic migration)</h3>
+        <h3>V3 Preview (source: ${escapeHtml(sourceLabel)})</h3>
         <span class="bib-meta">${escapeHtml(generatedAt ?? "-")}</span>
         <span class="bib-meta">${filteredFacts.length} / ${allFacts.length} facts</span>
       </div>

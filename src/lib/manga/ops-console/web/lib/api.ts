@@ -735,6 +735,7 @@ export function apiGetBible(slug: string): Promise<BibleAssetView> {
 export type BibleV3PreviewResponse = {
   slug: string;
   v3: BibleSnapshotV3;
+  source: "snapshot.v3.json" | "v3-classified-preview.json";
   unresolvedReferences: UndefinedReference[];
   roleEnumViolations: RoleEnumViolation[];
   needsReview: FactNode[];

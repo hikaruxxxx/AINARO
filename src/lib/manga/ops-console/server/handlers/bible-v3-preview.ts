@@ -2,15 +2,17 @@
  * GET /api/works/{slug}/bible/v3-preview
  *
  * Phase 7 Console UI 用の最小 preview endpoint。
- * Phase 8 の facts/ 分割ロードまでは v3-classified-preview.json をそのまま返す。
+ * snapshot.v3.json が存在する場合は facts/ 分割ロードから V3 を復元し、
+ * 未置換作品では v3-classified-preview.json の既存経路に fallback する。
  */
 import type http from "node:http";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { bibleSnapshotPath } from "../../../../../../scripts/manga/layers/_paths";
+import { loadBibleSnapshotV3FromDir } from "../../../bible/v3-loader";
 import type { LlmRefineFactResult, RoleEnumViolation } from "../../../bible/migrate-classify";
 import type { UndefinedReference } from "../../../qa-v2/undefined-reference-detector";
-import type { BibleSnapshotV3, FactNode } from "../../../schemas-v2";
+import { isBibleSnapshotV3, type BibleSnapshotV3, type FactNode } from "../../../schemas-v2";
 
 export type BibleV3LlmRefine = {
   rounds: number;
@@ -28,6 +30,7 @@ export type BibleV3LlmRefine = {
 export type BibleV3PreviewResponse = {
   slug: string;
   v3: BibleSnapshotV3;
+  source: "snapshot.v3.json" | "v3-classified-preview.json";
   unresolvedReferences: UndefinedReference[];
   roleEnumViolations: RoleEnumViolation[];
   needsReview: FactNode[];
@@ -54,28 +57,86 @@ async function readJsonOr<T>(fp: string, fallback: T): Promise<T> {
   }
 }
 
+async function statOrNull(fp: string): Promise<Awaited<ReturnType<typeof fs.stat>> | null> {
+  try {
+    return await fs.stat(fp);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  }
+}
+
+type PreviewPayload = {
+  v3?: BibleSnapshotV3;
+  unresolvedReferences?: UndefinedReference[];
+  roleEnumViolations?: RoleEnumViolation[];
+  needsReview?: FactNode[];
+  factSourcePathIndex?: Record<string, string>;
+};
+
+function asPreviewPayload(data: unknown): PreviewPayload {
+  if (isBibleSnapshotV3(data)) return { v3: data };
+  if (typeof data !== "object" || data === null) return {};
+  const payload = data as PreviewPayload;
+  return {
+    ...payload,
+    v3: payload.v3 && isBibleSnapshotV3(payload.v3) ? payload.v3 : undefined,
+  };
+}
+
+async function readPreviewPayloadOrNull(fp: string): Promise<PreviewPayload | null> {
+  try {
+    return asPreviewPayload(await readJson<unknown>(fp));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  }
+}
+
 export async function handleBibleV3Preview(slug: string, res: http.ServerResponse): Promise<void> {
   const bibleDir = path.dirname(bibleSnapshotPath(slug));
+  const snapshotV3Path = path.join(bibleDir, "snapshot.v3.json");
   const previewPath = path.join(bibleDir, "v3-classified-preview.json");
   const llmRefinePath = path.join(bibleDir, "v3-classified-llm-refine.json");
 
-  let v3: BibleSnapshotV3;
-  let stat: Awaited<ReturnType<typeof fs.stat>>;
-  try {
-    [v3, stat] = await Promise.all([
-      readJson<BibleSnapshotV3>(previewPath),
-      fs.stat(previewPath),
-    ]);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return send(res, 404, {
-        error: "v3 preview not generated. Run scripts/manga/migrate/v2-to-v3-classify.ts",
-      });
-    }
-    return send(res, 500, { error: error instanceof Error ? error.message : String(error) });
-  }
+  let v3: BibleSnapshotV3 | undefined;
+  let source: BibleV3PreviewResponse["source"] | undefined;
+  let generatedAt: string | undefined;
+  let previewPayload: PreviewPayload | null = null;
 
   try {
+    const snapshotStat = await statOrNull(snapshotV3Path);
+    if (snapshotStat) {
+      try {
+        v3 = await loadBibleSnapshotV3FromDir({ bibleDir });
+        source = "snapshot.v3.json";
+        generatedAt = snapshotStat.mtime.toISOString();
+        previewPayload = await readPreviewPayloadOrNull(previewPath);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn(`[bible-v3-preview] snapshot.v3.json load failed, falling back: ${message}`);
+      }
+    }
+
+    if (!v3) {
+      const [payload, previewStat] = await Promise.all([
+        readPreviewPayloadOrNull(previewPath),
+        statOrNull(previewPath),
+      ]);
+      previewPayload = payload;
+      if (payload?.v3) {
+        v3 = payload.v3;
+        source = "v3-classified-preview.json";
+        generatedAt = previewStat?.mtime.toISOString();
+      }
+    }
+
+    if (!v3 || !source) {
+      return send(res, 404, {
+        error: "no V3 snapshot found. Run scripts/manga/migrate/v2-to-v3-classify.ts",
+      });
+    }
+
     const [
       unresolvedReferences,
       roleEnumViolations,
@@ -83,21 +144,26 @@ export async function handleBibleV3Preview(slug: string, res: http.ServerRespons
       factSourcePathIndex,
       llmRefine,
     ] = await Promise.all([
-      readJsonOr<UndefinedReference[]>(path.join(bibleDir, "unresolved_references.json"), []),
-      readJsonOr<RoleEnumViolation[]>(path.join(bibleDir, "role_enum_violations.json"), []),
-      readJsonOr<FactNode[]>(path.join(bibleDir, "v3-classified-needs-review.json"), []),
-      readJsonOr<Record<string, string>>(path.join(bibleDir, "fact_source_path_index.json"), {}),
+      previewPayload?.unresolvedReferences
+        ?? readJsonOr<UndefinedReference[]>(path.join(bibleDir, "unresolved_references.json"), []),
+      previewPayload?.roleEnumViolations
+        ?? readJsonOr<RoleEnumViolation[]>(path.join(bibleDir, "role_enum_violations.json"), []),
+      previewPayload?.needsReview
+        ?? readJsonOr<FactNode[]>(path.join(bibleDir, "v3-classified-needs-review.json"), []),
+      previewPayload?.factSourcePathIndex
+        ?? readJsonOr<Record<string, string>>(path.join(bibleDir, "fact_source_path_index.json"), {}),
       readLlmRefine(llmRefinePath),
     ]);
 
     const body: BibleV3PreviewResponse = {
       slug,
       v3,
+      source,
       unresolvedReferences,
       roleEnumViolations,
       needsReview,
       factSourcePathIndex,
-      generated_at: stat.mtime.toISOString(),
+      generated_at: generatedAt,
       ...(llmRefine ? { llmRefine } : {}),
     };
     return send(res, 200, body);
