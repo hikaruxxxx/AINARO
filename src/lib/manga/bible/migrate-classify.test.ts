@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { BibleSnapshotV2 } from "../schemas-v2";
 import * as codexText from "../llm/codex-text";
 import {
+  buildSubSplitPrompt,
   findRoleEnumViolations,
   runMigration,
   runMigrationWithLlmRefine,
@@ -164,6 +165,20 @@ describe("migrate-classify", () => {
 
     expect(spy).not.toHaveBeenCalled();
     expect(result.llm_refine.summary.avg_confidence).toBeCloseTo(0.9, 2);
+  });
+
+  it("buildSubSplitPrompt の出力に 800 字制約と長文対応指示が含まれる", () => {
+    const task = buildSubSplitPrompt({
+      v2: createMinimalV2(),
+      entity_id: "char_ren",
+      source_path: "characters[0].relationship_per_partner[0].summary",
+      body: "長い関係性メモ。".repeat(500),
+      default_aspect: "relationship",
+    });
+
+    expect(task).toContain("800 字以内");
+    expect(task).toContain("同 layer/aspect 内で意味段落・話題単位に更に細分化");
+    expect(task).toContain("合計 1-20 sub-facts");
   });
 
   it("subSplitFieldIntoLayers が複数 sub-fact を返す", async () => {

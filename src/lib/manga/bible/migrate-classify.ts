@@ -527,7 +527,7 @@ function normalizeSubSplitResult(
     .filter((fact): fact is FactNode => fact !== null);
 }
 
-function buildSubSplitPrompt(args: SubSplitArgs): string {
+export function buildSubSplitPrompt(args: SubSplitArgs): string {
   return `あなたは AINARO 漫画 bible V3 fact-based schema の sub-split エージェントです。
 
 ## 入力 V2 field
@@ -551,7 +551,11 @@ ${args.body}
 
 ### 指示
 1. body 内の文章を意味単位で読み、上記 layer 別に分割
-2. 各 layer 1 sub-fact、合計 1-5 sub-facts
+2. 各 sub_fact body は **800 字以内** を目安に分割する。
+   - 元 body が短ければ「各 layer 1 sub-fact」のままで OK
+   - 元 body が長い (>800 字) 場合、**同 layer/aspect 内で意味段落・話題単位に更に細分化** する
+   - 結果として 1 layer から 2-5 sub-facts に増えてよい (合計 1-20 sub-facts 程度)
+   - 段落の途中で機械的に切らず、必ず意味の切れ目 (改行 / 句点 / 話題転換) で分ける
 3. body は trim 不要、原文の該当部分をそのまま抽出 (重複可)
 4. body を見て layer 判定が難しい場合は最初に default_aspect を採用
 5. revealed_at_volume / arc_at_volume が body 内に書かれていれば併記、不明なら null
