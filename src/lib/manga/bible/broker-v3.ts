@@ -123,11 +123,24 @@ export function contextForScene(
     char_budget: charBudget,
   };
 
-  const characters = queryBible(bible, {
-    ...base,
-    entity_ids: castIds,
-    aspects: ["identity", "appearance", "psychology", "backstory", "relationship", "speech"],
-  }).facts;
+  const perCastBudget =
+    charBudget && castIds.length > 1
+      ? {
+          min: Math.max(50, Math.floor(charBudget.min / castIds.length)),
+          max: Math.max(100, Math.floor(charBudget.max / castIds.length)),
+        }
+      : charBudget;
+  const characters: FactNode[] = [];
+  for (const castId of castIds) {
+    characters.push(
+      ...queryBible(bible, {
+        ...base,
+        char_budget: perCastBudget,
+        entity_ids: [castId],
+        aspects: ["identity", "appearance", "psychology", "backstory", "relationship", "speech"],
+      }).facts,
+    );
+  }
   const location = scene.location_id
     ? queryBible(bible, {
         ...base,

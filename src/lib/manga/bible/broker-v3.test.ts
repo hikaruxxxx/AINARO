@@ -214,6 +214,17 @@ describe("contextForScene smoke test", () => {
     expect(result.active_costumes).toEqual([{ character_id: "char_a", costume_id: "costume_a_active" }]);
     expect(result.premise_excerpt).toContain("地下都市");
   });
+
+  it("cast 複数のシーンで各 cast から fact が拾われる (cast-fair)", () => {
+    const v3 = createCastFairV3();
+    const result = contextForScene(v3, sceneStub(), "author_omniscient", {
+      char: { min: 0, max: 170 },
+    });
+
+    const characterIds = new Set(result.characters.map((fact) => fact.entity_id));
+    expect(characterIds.has("char_a")).toBe(true);
+    expect(characterIds.has("char_b")).toBe(true);
+  });
 });
 
 describe("broker-v3 fact-based logic", () => {
@@ -505,6 +516,37 @@ function createPrimitiveV3(): BibleSnapshotV3 {
     continuity_seeds: [],
     generated_at: "2026-05-10T00:00:00.000Z",
   };
+}
+
+function createCastFairV3(): BibleSnapshotV3 {
+  const v3 = createPrimitiveV3();
+  v3.entities = [
+    { id: "char_a", kind: "character", name: "アオ", fact_ids: [], appears_in_volumes: [1] },
+    { id: "char_b", kind: "character", name: "ビー", fact_ids: [], appears_in_volumes: [1] },
+  ];
+  v3.facts = [
+    ...Array.from({ length: 5 }, (_, index) =>
+      fact(
+        `fact_char_a_${index + 1}`,
+        "char_a",
+        index % 2 === 0 ? "identity" : "appearance",
+        "in_world_belief",
+        `char_a visible cast fair fact ${index + 1}.`,
+        index,
+      ),
+    ),
+    ...Array.from({ length: 5 }, (_, index) =>
+      fact(
+        `fact_char_b_${index + 1}`,
+        "char_b",
+        index % 2 === 0 ? "identity" : "appearance",
+        "in_world_belief",
+        `char_b visible cast fair fact ${index + 1}.`,
+        100 + index,
+      ),
+    ),
+  ];
+  return v3;
 }
 
 function fact(
