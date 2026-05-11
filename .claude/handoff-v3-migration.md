@@ -17,7 +17,8 @@
 | 7dedb83 | fix: compliance scanner に positive_context を追加して「ライン」「LINE」の誤検出修正 |
 | d3cd17b | docs: handoff に Wave 2 + 2-C 調査結果反映 |
 | 6a6700e | feat: deepen-snapshot-field.ts (Codex CLI 経由 deepener、初回実走で課題判明) |
-| (次) | feat: apply-deepen-patch.ts (Claude Agent 経由の追記式 patch apply、a07 玲二 origin_wound_deep で実証成功 fatal 27→26) |
+| f493f8b | feat: apply-deepen-patch.ts (Claude Agent 経由の追記式 patch apply、a07 玲二 origin_wound_deep で実証成功 fatal 27→26) |
+| (次) | feat: evaluate-and-rewrite + apply-rewrite-patch (Claude Agent 評価+上書き式 rewrite インフラ、a07 で実走確認 + hallucination 課題判明) |
 
 - handoff の **最優先タスク (L4 visibility 縛り)** 完了
 - 副産物として broker-v3 `applyCharBudget` のバグを発見・修正
@@ -59,11 +60,17 @@ V3 移行 plan の **残課題に着手**:
      - apply-deepen-patch.ts で snapshot に追記
      - origin_wound_deep: 1,186 → 3,162 字 (+1,976、min=2000 クリア)
      - **fatal lint: 27 → 26 (確実に減少、後退ゼロ)**
-   - **次セッションでやるべきこと (Claude Agent 経由を基本路線に)**:
-     1. 残り fatal 26 件を Claude Agent 経由で一括処理 (各 field 毎に Agent prompt 生成 → apply-deepen-patch でループ apply)
-     2. deepen-snapshot-field.ts (Codex CLI) は補助路線、Claude Agent 路線がメインへ
-     3. Agent 並列呼び出しで効率化 (1 セッションで 26 件完走を目指す)
-     4. (deepen-snapshot-field 改善は二次タスク化、Claude 路線で十分なら deprecated)
+   - **評価+書き直しインフラ追加**: `evaluate-and-rewrite.ts` (Agent 用 prompt 生成) + `apply-rewrite-patch.ts` (上書き式 apply、backup あり)
+   - **a07 で 1 件実走 (psychology_deep) で hallucination 課題判明**:
+     - Agent が誤キャラ名「天野レン」を生成 (正: 桐生レン)
+     - 新規語彙 (偶然許可リスト / 信頼スコア / 国家直轄部隊 等) を context 無視で多数導入
+     - revert 済 (fatal=26 維持)
+   - **次セッションでやるべきこと (Claude Agent 路線継続 + quality gate 必須)**:
+     1. apply-rewrite-patch に `--diff-check` モード追加: 新文章の固有名詞を bible.characters/locations/props/motifs + known_terms.json と照合、未登録の固有名詞は exit 1 + 一覧表示
+     2. evaluate-and-rewrite prompt に「キャラ名は context にある氏名 (例: 桐生レン) 以外を絶対に使うな」「新規概念は既存 bible/known_terms に登録済みのもののみ」を強く明記
+     3. apply-rewrite-patch に `--interactive` モード (人間が新規語彙を確認して登録 or revert)
+     4. Quality gate が通った文章のみ apply、それ以外は警告 + revert
+     5. Quality gate 経由で残り fatal 26 件を Claude Agent 経由で一括処理
 8. ~~bible-lint の「ライン」誤検出修正~~ — **完了 (7dedb83、a07 fatal 30→27)**
 9. (任意・**Wave 3 候補**) L3.5 強化 — a07 では volume_plot.json が**未作成**で cross-episode validator が弱動作。1. a07 用 volume_plot 生成、2. 巻またぎ伏線の自動配置、3. episode-patterns 辞書のカバー率向上、4. anchor pool scoring 統合 (4 子タスク)
 10. (任意) L11 audit / L12 repair の本格化 (現状は雛形のみ)
