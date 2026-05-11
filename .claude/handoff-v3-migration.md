@@ -6,22 +6,39 @@
 |---|---|
 | a3b3fd7 | feat: L4 storyboard 詳細化 prompt に visibility 縛り + bible context 注入 |
 | d2a60bd | fix: applyCharBudget が先頭 fact 1 件の単独 max 超過で空配列を返すバグを skip ロジックで修正 |
+| 6726327 | docs: V3 移行 handoff を 2026-05-11 セッション成果で更新 |
+| 980737c | feat: sub-split prompt に長さ上限 800字 / 長文 field の段落分割指示を追加 |
+| b8c43ec | fix: sub-split default timeout を 60s→180s に拡張 (long prompt 出力対応) |
 
 - handoff の **最優先タスク (L4 visibility 縛り)** 完了
 - 副産物として broker-v3 `applyCharBudget` のバグを発見・修正
   - 修正前: cast character の最初の長文 fact 1 件で空配列を返し、character section が完全消滅
   - 修正後: a07 ep01 S01 で character section に psychology fact 1 件 (1,628 字) が正しく拾われる
-- 372 → 378 tests (+6: storyboard-visibility 4 + applyCharBudget 2)
-- 詳細 spec: `/tmp/v3-l4-spec/spec.md`, `/tmp/v3-l4-spec/spec-budget.md` (実装後も残してある)
+- 連鎖発見: a07 cast facts には relationship aspect の 5K-8K 字超長文 fact が複数存在 (sub-split が長さを意識していない設計)
+  - sub-split prompt を拡張 (980737c) し、新 prompt で 1 fact 検証: **8,323 字 → 5 sub-facts (各 120-203 字、すべて 800 字目安以下)、副次効果として revealed_at_volume layer に正しく分類**
+- 378 → 379 tests (+1: buildSubSplitPrompt 拡張指示確認)
+- 詳細 spec: `/tmp/v3-l4-spec/spec.md`, `/tmp/v3-l4-spec/spec-budget.md`, `/tmp/v3-l4-spec/spec-subsplit-len.md`
+- a07 全体再 sub-split 2 回目 (timeout 180s) で **190/190 成功 / failed=0**
+  - facts: 1,156 → 1,205 (+49)
+  - layer 分布: in_world_belief 706→724, revealed_at_volume 33→70 (2倍), character_arc_state 120→127, system_specification 142→155
+  - 平均 confidence 0.91、avg <0.7 fact=0
+  - **fatal lint 70 → 30 (半減)**
+- swap-v2-to-v3 で facts/ 反映済 (snapshot.json は V2 不変、snapshot.v3.json + facts/{characters,locations,motifs,props,world}/ 更新)
+- L4 visibility 縛り検証 (V3 直接読み込み path):
+  - characters facts 0/1 → **7 件** (appearance×5 + backstory×2、各 216-272 字)
+  - location facts → 6 件、world_rules → 31 件、motifs → 1 件
+  - prompt size: 7,515 → 9,922 chars (Codex 入力上限 32k 内、実用問題なし)
 
 ## このセッションのゴール
 
 V3 移行 plan の **残課題に着手**:
 1. ~~(最優先) L4 storyboard visibility 縛りの本格実装~~ — **完了 (a3b3fd7)**
 2. ~~b/c 系作品 (転生貴族・現代ダンジョン2 等) で V3 migration を実走~~ — **a07 以外の作品 bible が `data/manga/works/` 配下に存在しないため skip**
-3. (新規・最優先候補) Character 長文 fact の sub-split — Phase 9 sub-split が character 用に走っていない疑い。レン backstory 2,546字 / psychology 3,815字等の超長文 fact が複数あり、budget 1800 では 1 件しか拾えない
-4. (任意) undefined-ref detector 更改善 (1,971 → 数百件)
+3. ~~Character 長文 fact の sub-split~~ — **完了 (980737c + b8c43ec、a07 再 sub-split → swap 済)**
+4. (任意) **broker-v3.contextForScene の cast-fair filter** — 現状 entity_ids: castIds で 1 回 query → priority 順に詰めるため、レンの facts ばかり拾われ灯里 0 件。各 cast 毎に separate query にすると fair に取れる。優先度中
 5. (任意) USE_BIBLE_V3 を default true 化検討 (a07 で十分検証されたら)
+6. (任意) undefined-ref detector 更改善 (1,971 → 数百件)
+7. (任意) a07 cast の sub-split で残った fatal lint 30 件の根本対応 (前 70 件から半減済み)
 
 ## 前提 (前セッションで完了済)
 
