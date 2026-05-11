@@ -15,6 +15,8 @@
 | 3d85576 | feat: Wave 1 - USE_BIBLE_V3 default true + undefined-reference-detector 強化 |
 | bca7afb | docs: handoff に Wave 1 完了反映 |
 | 7dedb83 | fix: compliance scanner に positive_context を追加して「ライン」「LINE」の誤検出修正 |
+| d3cd17b | docs: handoff に Wave 2 + 2-C 調査結果反映 |
+| (次) | feat: deepen-snapshot-field.ts (snapshot 起点で field 別 deepen するインフラ、初回実走で課題判明 → 次セッション spec 改善) |
 
 - handoff の **最優先タスク (L4 visibility 縛り)** 完了
 - 副産物として broker-v3 `applyCharBudget` のバグを発見・修正
@@ -44,7 +46,17 @@ V3 移行 plan の **残課題に着手**:
 4. ~~broker-v3.contextForScene の cast-fair filter~~ — **完了 (e1784f3、a07 ep01 S01 でレン 3 + 灯里 3 にバランス回復)**
 5. ~~USE_BIBLE_V3 default true 化~~ — **完了 (3d85576、USE_BIBLE_V3=false で V2 fallback、それ以外は V3)**
 6. ~~undefined-ref detector 改善~~ — **部分完了 (3d85576、a07 で 1,971 → 1,442 件 -26.8%、known_terms.json 拡張で更に削減可)**
-7. (任意・**新最優先候補**) a07 bible の depth 不足解消 — fatal lint 27 件のうち depth 系。主人公 growth_per_volume 未着手 / antagonist 心理 60-80% 不足 / location history 未着手 / visual_motifs 各種項目不足。LLM コール多のため background 必要。**注意: 既存 run-deepen-all.ts / L01c-bible-deepen.ts は --concept ファイル必須で a07 には concept ファイル無し**。専用スクリプトの新規実装が必要 (snapshot 起点で指定 field だけ deepen する Codex CLI ラッパー)。または concept を snapshot から reverse engineer
+7. (任意・**新最優先候補**) a07 bible の depth 不足解消 — fatal lint 27 件のうち depth 系。主人公 growth_per_volume 未着手 / antagonist 心理 60-80% 不足 / location history 未着手 / visual_motifs 各種項目不足。
+   - **インフラ完成**: `scripts/manga/bible/deepen-snapshot-field.ts` (snapshot 起点で character/location/motif の指定 field を Codex CLI で deepen するスクリプト) を実装済
+   - **初回実走で課題判明** (玲二 psychology):
+     - Stage 1b は 7 field 同時生成で `enforcedTotalMinChars: 5000` だが各 field 個別 min 未強制
+     - 結果: 出力が分散して全 field を min 達成できず、`ideology_argument` が **既存値より短い patch で上書きされて後退** (1192→1090 字)
+     - a07 snapshot は backup から revert 済 (fatal 27 維持)
+   - **次セッションでやるべき改善**:
+     1. deepen-snapshot-field に「既存より短い patch は採用せず warning」ロジック追加
+     2. 1-field-per-call モード追加 (`--field origin_wound_deep` 等で 1 field だけ深く生成、min 字数を prompt で強く enforce)
+     3. retry 機構 (min 未達なら再生成)
+     4. deep-extractor 側で per-field 専用 stage 関数の用意 (Stage 1b-1 / 1b-2 / 1b-3 等)
 8. ~~bible-lint の「ライン」誤検出修正~~ — **完了 (7dedb83、a07 fatal 30→27)**
 9. (任意・**Wave 3 候補**) L3.5 強化 — a07 では volume_plot.json が**未作成**で cross-episode validator が弱動作。1. a07 用 volume_plot 生成、2. 巻またぎ伏線の自動配置、3. episode-patterns 辞書のカバー率向上、4. anchor pool scoring 統合 (4 子タスク)
 10. (任意) L11 audit / L12 repair の本格化 (現状は雛形のみ)
