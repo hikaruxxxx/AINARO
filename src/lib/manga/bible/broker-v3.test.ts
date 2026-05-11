@@ -1,3 +1,7 @@
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 import type { BibleSnapshotV2, BibleSnapshotV3, FactNode, Layer } from "../schemas-v2";
 import type { Scene } from "../scene-graph/schema";
@@ -23,20 +27,27 @@ import {
   relationshipStateAtV3,
   relevantMotifsV3,
   relevantWorldRulesV3,
+  relevantWorldRulesV3FromV2,
   sceneOverrideTextForV3,
   summarizeCharacterForEpisodeV3,
+  summarizeCharacterForEpisodeV3FromV2,
   summarizeLocationForSceneV3,
   summarizeMotifForPanelV3,
   summarizeWorldRulesForSceneV3,
 } from "./broker-v3";
+import { writeSnapshotV3Atomic } from "./atomic-write";
 import { v2ToV3 } from "./v3-adapter";
+import { loadBibleSnapshotV3FromDir } from "./v3-loader";
 
 describe("broker-v3 read-only mirror parity with legacy broker", () => {
-  it("summarizeCharacterForEpisode の出力が一致する", () => {
+  it("V3 経由 summarizeCharacterForEpisode は V2 と同じキャラ情報を含む", () => {
     const v2 = createMinimalV2();
-    expect(summarizeCharacterForEpisodeV3(v2, 1, "char_a", { tier: "minimal" })).toBe(
-      summarizeCharacterForEpisode(v2, 1, "char_a", { tier: "minimal" }),
-    );
+    const v2Result = summarizeCharacterForEpisode(v2, 1, "char_a", { tier: "minimal" });
+    const v3Result = summarizeCharacterForEpisodeV3FromV2(v2, 1, "char_a", { tier: "minimal" });
+    expect(v3Result).toContain("アオ");
+    expect(v3Result).toContain("char_a");
+    expect(v3Result.length).toBeGreaterThan(v2Result.length * 0.5);
+    expect(v3Result.length).toBeLessThan(v2Result.length * 2.0);
   });
 
   it("activeCostumeFor の出力が一致する", () => {
@@ -44,10 +55,19 @@ describe("broker-v3 read-only mirror parity with legacy broker", () => {
     expect(activeCostumeForV3(v2, 2, "char_a")).toEqual(activeCostumeFor(v2, 2, "char_a"));
   });
 
-  it("relevantWorldRules の出力配列が一致する", () => {
+  it("relevantWorldRulesV3FromV2 は 4 件 hard-clip を超えて取れる", () => {
+    const v2 = createMinimalV2WithManyRules(10);
+    const scene = sceneStub();
+    const v2Result = relevantWorldRules(v2, scene);
+    const v3Result = relevantWorldRulesV3FromV2(v2, scene, { charBudget: { min: 0, max: 2000 } });
+    expect(v2Result).toHaveLength(4);
+    expect(v3Result.length).toBeGreaterThan(4);
+  });
+
+  it("relevantWorldRulesV3 は V3 facts から world_rule を読む", () => {
     const v2 = createMinimalV2();
     const scene = sceneStub();
-    expect(relevantWorldRulesV3(v2, scene)).toEqual(relevantWorldRules(v2, scene));
+    expect(relevantWorldRulesV3(v2ToV3(v2), scene)).toContain("青いゲートは登録者だけが通れる");
   });
 
   it("relevantMotifs の出力配列が一致する", () => {
@@ -150,8 +170,38 @@ describe("contextForScene smoke test", () => {
   });
 });
 
+describe("broker-v3 fact-based logic", () => {
+  it("summarizeCharacterForEpisodeV3 は V3 facts の visibility を反映する", () => {
+    const result = summarizeCharacterForEpisodeV3(createPrimitiveV3(), 15, "char_a", { tier: "minimal" });
+    expect(result).toContain("アオ");
+    expect(result).toContain("short black hair");
+    expect(result).toContain("volume two reveal");
+    expect(result).not.toContain("volume three reveal");
+    expect(result).not.toContain("author only truth");
+  });
+
+  it("loadBibleSnapshotV3FromDir は snapshot.v3.json + facts/ を再構築する", async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "ainaro-v3-loader-"));
+    const source = createPrimitiveV3();
+    source.entities[0].fact_ids = source.facts
+      .filter((fact) => fact.entity_id === "char_a")
+      .map((fact) => fact.fact_id);
+
+    const writeResult = await writeSnapshotV3Atomic(source, {
+      bibleDir: tmpDir,
+      stageLabel: "loader-test",
+      splitFacts: true,
+    });
+    expect(writeResult.ok).toBe(true);
+
+    const loaded = await loadBibleSnapshotV3FromDir({ bibleDir: tmpDir });
+    expect(loaded.facts.map((fact) => fact.fact_id)).toEqual(source.facts.map((fact) => fact.fact_id));
+    expect(loaded.entities[0].fact_ids.length).toBeGreaterThan(0);
+  });
+});
+
 it.skipIf(!process.env.RUN_REAL_BIBLE_TEST)(
-  "a07 で全 legacy broker function が V3 経由と同一 string を返す",
+  "a07 で V3 経路 summarizeCharacterForEpisode が legacy と意味的に等価",
   async () => {
     const fs = await import("node:fs/promises");
     const v2 = JSON.parse(
@@ -161,9 +211,11 @@ it.skipIf(!process.env.RUN_REAL_BIBLE_TEST)(
       ),
     ) as BibleSnapshotV2;
     for (const c of v2.characters) {
-      expect(summarizeCharacterForEpisodeV3(v2, 1, c.id, { tier: "minimal" })).toBe(
-        summarizeCharacterForEpisode(v2, 1, c.id, { tier: "minimal" }),
-      );
+      const v2Result = summarizeCharacterForEpisode(v2, 1, c.id, { tier: "minimal" });
+      const v3Result = summarizeCharacterForEpisodeV3FromV2(v2, 1, c.id, { tier: "minimal" });
+      expect(v3Result).toContain(c.name);
+      expect(v3Result.length).toBeGreaterThan(v2Result.length * 0.5);
+      expect(v3Result.length).toBeLessThan(v2Result.length * 2.0);
     }
     expect(summarizeWorldRulesForSceneV3(v2, sceneStub(), { tier: "minimal" })).toBe(
       summarizeWorldRulesForScene(v2, sceneStub(), { tier: "minimal" }),
@@ -302,6 +354,15 @@ function createMinimalV2(): BibleSnapshotV2 {
     continuity_seeds: [],
     volume_synopsis: { theme: "配送と自立", summary: "新人が地下都市の秘密に触れる。", cliffhanger: "ゲートの警報が沈黙する。" },
   };
+}
+
+function createMinimalV2WithManyRules(count: number): BibleSnapshotV2 {
+  const v2 = createMinimalV2();
+  v2.world.rules = Array.from(
+    { length: count },
+    (_, index) => `青いゲート rule ${index + 1}: 登録配送の制約 ${index + 1}`,
+  );
+  return v2;
 }
 
 function createPrimitiveV3(): BibleSnapshotV3 {

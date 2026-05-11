@@ -14,7 +14,6 @@ import {
   continuityAnchorTextFor,
   relationshipStateAt,
   relevantMotifs,
-  relevantWorldRules,
   sceneOverrideTextFor,
   summarizeCharacterForEpisode,
   summarizeLocationForScene,
@@ -46,6 +45,14 @@ export type BibleQueryResult = {
   truncated: boolean;
   layer_breakdown: Record<Layer, number>;
   warnings: string[];
+};
+
+type SummaryTier = "deep" | "medium" | "minimal";
+
+const TIER_LIMITS: Record<SummaryTier, { min: number; max: number }> = {
+  deep: { min: 800, max: 1500 },
+  medium: { min: 400, max: 800 },
+  minimal: { min: 150, max: 250 },
 };
 
 const LAYERS: Layer[] = [
@@ -171,13 +178,76 @@ export function contextForSceneV2(
 }
 
 export function summarizeCharacterForEpisodeV3(
+  v3: BibleSnapshotV3,
+  episodeNo: number,
+  characterId: string,
+  options?: { tier?: "deep" | "medium" | "minimal" },
+): string {
+  const tier = options?.tier ?? "minimal";
+  const limits = TIER_LIMITS[tier];
+  const character = v3.entities.find((entity) => entity.kind === "character" && entity.id === characterId);
+  if (!character) {
+    return fitSummary(`Character ${characterId}: bible entry missing. Keep identity conservative.`, limits);
+  }
+
+  const volume = volumeForEpisode(v3, episodeNo);
+  const visibleFacts = v3.facts
+    .filter((fact) => fact.entity_id === characterId)
+    .filter((fact) => visibleCharacterFactAtVolume(fact, volume))
+    .sort(compareFacts);
+
+  const appearance = factsByAspectText(visibleFacts, "appearance");
+  const psychology = factsByAspectText(visibleFacts, "psychology");
+  const backstory = factsByAspectText(visibleFacts, "backstory");
+  const identity = factsByAspectText(visibleFacts, "identity");
+  const speechSamples = visibleFacts
+    .filter((fact) => fact.aspect === "speech")
+    .slice(0, 3)
+    .map((fact) => fact.body);
+  const relationships = visibleFacts
+    .filter((fact) => fact.aspect === "relationship")
+    .slice(0, tier === "minimal" ? 1 : 2)
+    .map((fact) => fact.body);
+  const role = entityRole(character);
+  const psychologyFallback = joinNonEmpty([psychology, backstory, identity], " ") || specIdentity(character);
+
+  if (tier === "minimal") {
+    return fitSummary(
+      joinNonEmpty(
+        [
+          `${character.name} (${character.id}, ${role}) ep.${episodeNo}.`,
+          `外見: ${firstChars(appearance || identity || specIdentity(character), 78)}`,
+          `心理: ${firstChars(psychologyFallback, 78)}`,
+        ],
+        "\n",
+      ),
+      limits,
+    );
+  }
+
+  return fitSummary(
+    joinNonEmpty(
+      [
+        `${character.name} (${character.id}, ${role}) ep.${episodeNo} vol.${volume}.`,
+        `外見記号: ${appearance || identity || specIdentity(character)}`,
+        `心理/背景: ${psychologyFallback}`,
+        speechSamples.length > 0 ? `声: ${speechSamples.join(" / ")}` : null,
+        relationships.length > 0 ? `関係: ${relationships.map((body) => firstChars(body, 120)).join(" / ")}` : null,
+        identity ? `固定アンカー: ${firstChars(identity, tier === "deep" ? 260 : 180)}` : null,
+      ],
+      "\n",
+    ),
+    limits,
+  );
+}
+
+export function summarizeCharacterForEpisodeV3FromV2(
   v2: BibleSnapshotV2,
   episodeNo: number,
   characterId: string,
   options?: { tier?: "deep" | "medium" | "minimal" },
 ): string {
-  v2ToV3(v2);
-  return summarizeCharacterForEpisode(v2, episodeNo, characterId, options);
+  return summarizeCharacterForEpisodeV3(v2ToV3(v2), episodeNo, characterId, options);
 }
 
 export function activeCostumeForV3(v2: BibleSnapshotV2, episodeNo: number, characterId: string) {
@@ -191,11 +261,38 @@ export function relationshipStateAtV3(v2: BibleSnapshotV2, episodeNo: number, pa
 }
 
 export function relevantWorldRulesV3(
+  v3: BibleSnapshotV3,
+  scene: Pick<Scene, "location_id" | "beat_type" | "mode">,
+  options?: { charBudget?: { min: number; max: number } },
+): string[] {
+  const worldRuleFacts = v3.facts
+    .filter((fact) => fact.entity_id === null && fact.aspect === "world_rule")
+    .filter((fact) => fact.layer === "in_world_belief" || fact.layer === "system_specification");
+  const query = sceneTokens(v3, { ...scene, key_visual_intent: "" });
+  const visible = worldRuleFacts.sort(compareFacts);
+  const scored = visible
+    .map((fact, index) => ({ fact, index, score: tokenScore(fact.body, query) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index);
+  const budget = options?.charBudget?.max ?? 800;
+  const result: string[] = [];
+  let totalChars = 0;
+
+  for (const { fact } of scored) {
+    if (result.length > 0 && totalChars + fact.body.length > budget) break;
+    if (result.length === 0 && fact.body.length > budget) continue;
+    result.push(fact.body);
+    totalChars += fact.body.length;
+  }
+
+  return result.length > 0 ? result : visible.slice(0, 4).map((fact) => fact.body);
+}
+
+export function relevantWorldRulesV3FromV2(
   v2: BibleSnapshotV2,
   scene: Pick<Scene, "location_id" | "beat_type" | "mode">,
+  options?: { charBudget?: { min: number; max: number } },
 ): string[] {
-  v2ToV3(v2);
-  return relevantWorldRules(v2, scene);
+  return relevantWorldRulesV3(v2ToV3(v2), scene, options);
 }
 
 export function relevantMotifsV3(
@@ -371,6 +468,70 @@ function activeCostumesFromV3(
 
 function firstFactBody(bible: BibleSnapshotV3, sourcePath: string): string {
   return bible.facts.find((fact) => fact.evidence.source_path === sourcePath)?.body ?? "";
+}
+
+function visibleCharacterFactAtVolume(fact: FactNode, volume: number): boolean {
+  if (fact.layer === "in_world_belief") return true;
+  if (fact.layer === "revealed_at_volume") {
+    return (fact.revealed_at_volume ?? Number.POSITIVE_INFINITY) <= volume;
+  }
+  if (fact.layer === "character_arc_state") {
+    return fact.arc_at_volume === volume;
+  }
+  return false;
+}
+
+function factsByAspectText(facts: FactNode[], aspect: Aspect): string {
+  return facts
+    .filter((fact) => fact.aspect === aspect)
+    .map((fact) => fact.body)
+    .join(" / ");
+}
+
+function volumeForEpisode(bible: BibleSnapshotV3, episodeNo: number): number {
+  const perVolume = Math.max(1, bible.meta.target_episodes_per_volume);
+  return Math.max(1, Math.ceil(Math.max(1, episodeNo) / perVolume));
+}
+
+function entityRole(entity: EntityNode): string {
+  const spec = entity.spec as { role?: unknown } | undefined;
+  return typeof spec?.role === "string" && spec.role.trim().length > 0 ? spec.role : "character";
+}
+
+function specIdentity(entity: EntityNode): string {
+  const spec = entity.spec as { appearance_notes?: unknown; spec?: unknown } | undefined;
+  if (typeof spec?.appearance_notes === "string" && spec.appearance_notes.trim().length > 0) {
+    return spec.appearance_notes.trim();
+  }
+  return stringify(entity.spec) || "existing V3 entity spec";
+}
+
+function joinNonEmpty(values: Array<string | null | undefined>, separator: string): string {
+  return values
+    .map((value) => value?.trim())
+    .filter((value): value is string => value !== undefined && value.length > 0)
+    .join(separator);
+}
+
+function firstChars(text: string, max: number): string {
+  const normalized = text.replace(/\s+/gu, " ").trim();
+  if (normalized.length <= max) return normalized;
+  return `${normalized.slice(0, Math.max(0, max - 3))}...`;
+}
+
+function fitSummary(text: string, limits: { min: number; max: number }): string {
+  const normalized = text.replace(/[ \t]+/gu, " ").replace(/\n{3,}/gu, "\n\n").trim();
+  if (normalized.length > limits.max) {
+    return `${normalized.slice(0, Math.max(0, limits.max - 3)).trimEnd()}...`;
+  }
+  if (normalized.length >= limits.min) return normalized;
+
+  const padding = " 補足: 未着手の深掘り項目は既存 spec と continuity anchor を優先し、顔・髪・衣装・関係距離の同一性を崩さない。";
+  let out = normalized;
+  while (out.length < limits.min && out.length + padding.length <= limits.max) {
+    out += padding;
+  }
+  return out;
 }
 
 function tokens(values: Array<string | undefined | null>): Set<string> {

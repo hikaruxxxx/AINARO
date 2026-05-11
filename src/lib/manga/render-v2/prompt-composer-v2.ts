@@ -30,7 +30,7 @@ import {
 import {
   activeCostumeForV3,
   sceneOverrideTextForV3,
-  summarizeCharacterForEpisodeV3,
+  summarizeCharacterForEpisodeV3FromV2,
   summarizeLocationForSceneV3,
   summarizeMotifForPanelV3,
   summarizeWorldRulesForSceneV3,
@@ -204,7 +204,7 @@ function characterRefDescription(
   const blocks: string[] = [];
   for (const ch of panel.entities.characters) {
     const summary = useBibleV3()
-      ? summarizeCharacterForEpisodeV3(
+      ? summarizeCharacterForEpisodeV3FromV2(
           bible,
           args.episodeNo,
           ch.character_id,

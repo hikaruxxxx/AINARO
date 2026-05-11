@@ -649,7 +649,7 @@ describe("prompt-composer-v2 Phase 2-2 bible broker composition", () => {
 });
 
 describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
-  it("composePanelPrompt returns identical output for legacy and V3 broker paths", () => {
+  it("composePanelPrompt returns semantically equivalent output for legacy and V3 broker paths", () => {
     const args = {
       panel: panel("出口が見える。"),
       packet,
@@ -663,12 +663,17 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     const legacy = withUseBibleV3("false", () => composePanelPrompt(args));
     const v3 = withUseBibleV3("true", () => composePanelPrompt(args));
 
-    expect(v3.prompt).toBe(legacy.prompt);
+    expect(v3.prompt).toContain("桐生 レン");
+    expect(v3.prompt).toContain("char_ren");
+    expect(v3.prompt).toContain("外見");
+    expect(v3.prompt).toContain("心理");
+    expect(v3.prompt.length).toBeGreaterThan(legacy.prompt.length * 0.5);
+    expect(v3.prompt.length).toBeLessThan(legacy.prompt.length * 2.0);
     expect(v3.refImagePaths).toEqual(legacy.refImagePaths);
     expect(v3.tierUsed).toBe(legacy.tierUsed);
   });
 
-  it("composePagePrompt returns identical output for legacy and V3 broker paths", () => {
+  it("composePagePrompt returns semantically equivalent output for legacy and V3 broker paths", () => {
     const args = {
       page: page(2),
       packet,
@@ -682,7 +687,12 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     const legacy = withUseBibleV3("false", () => composePagePrompt(args));
     const v3 = withUseBibleV3("true", () => composePagePrompt(args));
 
-    expect(v3.prompt).toBe(legacy.prompt);
+    expect(v3.prompt).toContain("桐生 レン");
+    expect(v3.prompt).toContain("char_ren");
+    expect(v3.prompt).toContain("PANEL #1 BIBLE");
+    expect(v3.prompt).toContain("WORLD CONSTRAINTS");
+    expect(v3.prompt.length).toBeGreaterThan(legacy.prompt.length * 0.5);
+    expect(v3.prompt.length).toBeLessThan(legacy.prompt.length * 2.0);
     expect(v3.refImagePaths).toEqual(legacy.refImagePaths);
     expect(v3.tierUsed).toBe(legacy.tierUsed);
   });
