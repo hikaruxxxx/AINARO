@@ -16,7 +16,8 @@
 | bca7afb | docs: handoff に Wave 1 完了反映 |
 | 7dedb83 | fix: compliance scanner に positive_context を追加して「ライン」「LINE」の誤検出修正 |
 | d3cd17b | docs: handoff に Wave 2 + 2-C 調査結果反映 |
-| (次) | feat: deepen-snapshot-field.ts (snapshot 起点で field 別 deepen するインフラ、初回実走で課題判明 → 次セッション spec 改善) |
+| 6a6700e | feat: deepen-snapshot-field.ts (Codex CLI 経由 deepener、初回実走で課題判明) |
+| (次) | feat: apply-deepen-patch.ts (Claude Agent 経由の追記式 patch apply、a07 玲二 origin_wound_deep で実証成功 fatal 27→26) |
 
 - handoff の **最優先タスク (L4 visibility 縛り)** 完了
 - 副産物として broker-v3 `applyCharBudget` のバグを発見・修正
@@ -52,11 +53,17 @@ V3 移行 plan の **残課題に着手**:
      - Stage 1b は 7 field 同時生成で `enforcedTotalMinChars: 5000` だが各 field 個別 min 未強制
      - 結果: 出力が分散して全 field を min 達成できず、`ideology_argument` が **既存値より短い patch で上書きされて後退** (1192→1090 字)
      - a07 snapshot は backup から revert 済 (fatal 27 維持)
-   - **次セッションでやるべき改善**:
-     1. deepen-snapshot-field に「既存より短い patch は採用せず warning」ロジック追加
-     2. 1-field-per-call モード追加 (`--field origin_wound_deep` 等で 1 field だけ深く生成、min 字数を prompt で強く enforce)
-     3. retry 機構 (min 未達なら再生成)
-     4. deep-extractor 側で per-field 専用 stage 関数の用意 (Stage 1b-1 / 1b-2 / 1b-3 等)
+   - **追加実装**: `scripts/manga/bible/apply-deepen-patch.ts` (Claude Agent 経由の追記式 patch apply、Codex CLI 経由と独立)
+   - **a07 玲二 origin_wound_deep で実証成功**:
+     - Claude Agent (general-purpose) で追加段落 3 つ (約 2,000 字) を生成
+     - apply-deepen-patch.ts で snapshot に追記
+     - origin_wound_deep: 1,186 → 3,162 字 (+1,976、min=2000 クリア)
+     - **fatal lint: 27 → 26 (確実に減少、後退ゼロ)**
+   - **次セッションでやるべきこと (Claude Agent 経由を基本路線に)**:
+     1. 残り fatal 26 件を Claude Agent 経由で一括処理 (各 field 毎に Agent prompt 生成 → apply-deepen-patch でループ apply)
+     2. deepen-snapshot-field.ts (Codex CLI) は補助路線、Claude Agent 路線がメインへ
+     3. Agent 並列呼び出しで効率化 (1 セッションで 26 件完走を目指す)
+     4. (deepen-snapshot-field 改善は二次タスク化、Claude 路線で十分なら deprecated)
 8. ~~bible-lint の「ライン」誤検出修正~~ — **完了 (7dedb83、a07 fatal 30→27)**
 9. (任意・**Wave 3 候補**) L3.5 強化 — a07 では volume_plot.json が**未作成**で cross-episode validator が弱動作。1. a07 用 volume_plot 生成、2. 巻またぎ伏線の自動配置、3. episode-patterns 辞書のカバー率向上、4. anchor pool scoring 統合 (4 子タスク)
 10. (任意) L11 audit / L12 repair の本格化 (現状は雛形のみ)
