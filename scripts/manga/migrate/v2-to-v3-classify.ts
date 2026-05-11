@@ -7,8 +7,11 @@ import {
   type LlmRefineProgressRecord,
   type MigrationResult,
   type MigrationWithLlmRefineResult,
+  type MigrationWithSubSplitResult,
+  refineMigrationWithLlm,
   runMigration,
   runMigrationWithLlmRefine,
+  runMigrationWithSubSplit,
 } from "../../../src/lib/manga/bible/migrate-classify";
 import { bibleDir, bibleSnapshotPath } from "../layers/_paths";
 
@@ -16,6 +19,7 @@ type Args = {
   slug?: string;
   outputDir?: string;
   withLlmRefine: boolean;
+  withSubSplit: boolean;
   rounds: number;
   maxParallel: number;
 };
@@ -23,6 +27,7 @@ type Args = {
 const OUTPUT_FILES = {
   preview: "v3-classified-preview.json",
   needsReview: "v3-classified-needs-review.json",
+  subSplit: "v3-classified-sub-split.json",
   llmRefine: "v3-classified-llm-refine.json",
   llmProgress: "v3-classified-llm-progress.jsonl",
   unresolvedReferences: "unresolved_references.json",
@@ -42,13 +47,39 @@ async function main(): Promise<void> {
 
   await fs.mkdir(outputDir, { recursive: true });
   const progressPath = path.join(outputDir, OUTPUT_FILES.llmProgress);
-  const result = args.withLlmRefine
-    ? await runMigrationWithLlmRefine(v2, {
+  let result:
+    | MigrationResult
+    | MigrationWithSubSplitResult
+    | MigrationWithLlmRefineResult = args.withSubSplit
+    ? await runMigrationWithSubSplit(v2, {
+        maxParallel: args.maxParallel,
+        cwd: process.cwd(),
+        onProgress: createSubSplitProgressLogger(),
+      })
+    : runMigration(v2);
+
+  if (args.withLlmRefine) {
+    result = args.withSubSplit
+      ? await refineMigrationWithLlm(result, {
+          rounds: args.rounds,
+          maxParallel: args.maxParallel,
+          cwd: process.cwd(),
+          existingProgress: await readProgress(progressPath),
+          onProgress: createLlmProgressLogger(result, args.rounds),
+          onRoundResult: async (record) => {
+            await fs.appendFile(
+              progressPath,
+              `${JSON.stringify(record)}\n`,
+              "utf-8"
+            );
+          },
+        })
+      : await runMigrationWithLlmRefine(v2, {
         rounds: args.rounds,
         maxParallel: args.maxParallel,
         cwd: process.cwd(),
         existingProgress: await readProgress(progressPath),
-        onProgress: createLlmProgressLogger(v2, args.rounds),
+        onProgress: createLlmProgressLogger(result, args.rounds),
         onRoundResult: async (record) => {
           await fs.appendFile(
             progressPath,
@@ -56,11 +87,14 @@ async function main(): Promise<void> {
             "utf-8"
           );
         },
-      })
-    : runMigration(v2);
+      });
+  }
 
   await writeJson(path.join(outputDir, OUTPUT_FILES.preview), result.v3);
   await writeJson(path.join(outputDir, OUTPUT_FILES.needsReview), result.needsReview);
+  if (hasSubSplit(result)) {
+    await writeJson(path.join(outputDir, OUTPUT_FILES.subSplit), result);
+  }
   if (hasLlmRefine(result)) {
     await writeJson(path.join(outputDir, OUTPUT_FILES.llmRefine), result);
   }
@@ -81,14 +115,26 @@ async function main(): Promise<void> {
   if (hasLlmRefine(result)) {
     logLlmSummary(result);
   }
+  if (hasSubSplit(result)) {
+    logSubSplitSummary(result);
+  }
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { withLlmRefine: false, rounds: 3, maxParallel: 5 };
+  const args: Args = {
+    withLlmRefine: false,
+    withSubSplit: false,
+    rounds: 3,
+    maxParallel: 5,
+  };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--with-llm-refine") {
       args.withLlmRefine = true;
+      continue;
+    }
+    if (arg === "--with-sub-split") {
+      args.withSubSplit = true;
       continue;
     }
     if (arg === "--slug") {
@@ -196,9 +242,11 @@ function countEntities(
   return v3.entities.filter((entity) => entity.kind === kind).length;
 }
 
-function createLlmProgressLogger(v2: BibleSnapshotV2, totalRounds: number) {
-  const deterministic = runMigration(v2);
-  const facts = deterministic.v3.facts;
+function createLlmProgressLogger(
+  migration: MigrationResult,
+  totalRounds: number
+) {
+  const facts = migration.v3.facts;
   const indexByFact = new Map(
     facts.map((fact, index) => [fact.fact_id, { fact, index }])
   );
@@ -224,10 +272,39 @@ function createLlmProgressLogger(v2: BibleSnapshotV2, totalRounds: number) {
   };
 }
 
+function createSubSplitProgressLogger() {
+  let done = 0;
+  let failed = 0;
+  return (event: {
+    source_path: string;
+    status: "start" | "ok" | "failed";
+    sub_count?: number;
+  }): void => {
+    if (event.status === "start") return;
+    done++;
+    if (event.status === "failed") failed++;
+    console.log(
+      `[migrate-sub-split] field ${done}: ${event.source_path} → sub_facts=${event.sub_count ?? 0} (${event.status}, failed=${failed})`
+    );
+  };
+}
+
 function hasLlmRefine(
-  result: MigrationResult | MigrationWithLlmRefineResult
+  result:
+    | MigrationResult
+    | MigrationWithSubSplitResult
+    | MigrationWithLlmRefineResult
 ): result is MigrationWithLlmRefineResult {
   return "llm_refine" in result;
+}
+
+function hasSubSplit(
+  result:
+    | MigrationResult
+    | MigrationWithSubSplitResult
+    | MigrationWithLlmRefineResult
+): result is MigrationWithSubSplitResult {
+  return "sub_split" in result;
 }
 
 function logLlmSummary(result: MigrationWithLlmRefineResult): void {
@@ -250,6 +327,13 @@ function logLlmSummary(result: MigrationWithLlmRefineResult): void {
   );
   console.log(
     `[migrate-llm] confidence < 0.7: ${lowConfidence} facts (${formatPct(lowConfidence, summary.total_facts)})`
+  );
+}
+
+function logSubSplitSummary(result: MigrationWithSubSplitResult): void {
+  const { summary, failed_fields: failed } = result.sub_split;
+  console.log(
+    `[migrate-sub-split] original=${summary.original_facts}, after_sub_split=${summary.after_sub_split}, expansion_ratio=${summary.expansion_ratio.toFixed(2)}, failed=${failed}`
   );
 }
 

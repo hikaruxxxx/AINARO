@@ -9,7 +9,10 @@ import {
   findRoleEnumViolations,
   runMigration,
   runMigrationWithLlmRefine,
+  runMigrationWithSubSplit,
+  subSplitFieldIntoLayers,
 } from "./migrate-classify";
+import { deriveFactId } from "./v3-adapter";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -161,6 +164,105 @@ describe("migrate-classify", () => {
 
     expect(spy).not.toHaveBeenCalled();
     expect(result.llm_refine.summary.avg_confidence).toBeCloseTo(0.9, 2);
+  });
+
+  it("subSplitFieldIntoLayers が複数 sub-fact を返す", async () => {
+    vi.spyOn(codexText, "runCodexText").mockResolvedValue({
+      stdout: "{}",
+      parsed: {
+        sub_facts: [
+          {
+            layer: "in_world_belief",
+            aspect: "backstory",
+            body: "出生地 X",
+            revealed_at_volume: null,
+            arc_at_volume: null,
+            rationale: "",
+          },
+          {
+            layer: "revealed_at_volume",
+            aspect: "backstory",
+            body: "母の真実",
+            revealed_at_volume: 7,
+            arc_at_volume: null,
+            rationale: "",
+          },
+        ],
+      },
+      attempts: 1,
+      totalDurationMs: 100,
+    });
+
+    const result = await subSplitFieldIntoLayers({
+      v2: createMinimalV2(),
+      entity_id: "char_a",
+      source_path: "characters[0].backstory",
+      body: "出生地 X。母の真実。",
+      default_aspect: "backstory",
+    });
+
+    expect(result.facts.length).toBe(2);
+    expect(result.facts[0].layer).toBe("in_world_belief");
+    expect(result.facts[1].revealed_at_volume).toBe(7);
+    expect(result.facts[0].evidence.generated_by?.stage).toBe("v9-sub-split");
+  });
+
+  it("runMigrationWithSubSplit が fact 数を expand する", async () => {
+    vi.spyOn(codexText, "runCodexText").mockResolvedValue({
+      stdout: "{}",
+      parsed: {
+        sub_facts: [
+          {
+            layer: "in_world_belief",
+            aspect: "backstory",
+            body: "公開情報",
+            revealed_at_volume: null,
+            arc_at_volume: null,
+            rationale: "",
+          },
+          {
+            layer: "meta_truth",
+            aspect: "backstory",
+            body: "裏の真実",
+            revealed_at_volume: null,
+            arc_at_volume: null,
+            rationale: "",
+          },
+        ],
+      },
+      attempts: 1,
+      totalDurationMs: 100,
+    });
+    const v2 = createMinimalV2();
+    const original = runMigration(v2).v3.facts.length;
+    const result = await runMigrationWithSubSplit(v2, { maxParallel: 1 });
+
+    expect(result.sub_split.fields_processed).toBeGreaterThan(0);
+    expect(result.sub_split.failed_fields).toBe(0);
+    expect(result.sub_split.sub_facts_total).toBe(
+      result.sub_split.fields_processed * 2
+    );
+    expect(result.v3.facts.length).toBeGreaterThan(original);
+    expect(result.sub_split.summary.after_sub_split).toBe(result.v3.facts.length);
+  });
+
+  it("deriveFactId が segment_index で衝突回避", () => {
+    const id1 = deriveFactId({
+      entity_id: "char_a",
+      aspect: "backstory",
+      layer: "in_world_belief",
+      source_path: "x",
+      segment_index: 0,
+    });
+    const id2 = deriveFactId({
+      entity_id: "char_a",
+      aspect: "backstory",
+      layer: "in_world_belief",
+      source_path: "x",
+      segment_index: 1,
+    });
+
+    expect(id1).not.toBe(id2);
   });
 
   it("swap script dry-run で v3 stats を出力し atomic write を呼ばない", async () => {

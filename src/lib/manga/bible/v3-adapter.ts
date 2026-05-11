@@ -30,14 +30,17 @@ export function deriveFactId(args: {
   layer: string;
   source_path?: string;
   source_span?: [number, number];
+  segment_index?: number;
 }): string {
+  const segment =
+    args.segment_index !== undefined ? `|seg${args.segment_index}` : "";
   const seed = [
     args.entity_id ?? "_world",
     args.aspect,
     args.layer,
     args.source_path ?? "",
     args.source_span?.[0] ?? 0,
-    args.source_span?.[1] ?? 0,
+    `${args.source_span?.[1] ?? 0}${segment}`,
   ].join("|");
   const hash = createHash("sha1").update(seed).digest("hex").slice(0, 12);
   return `fact_${args.entity_id ?? "world"}_${args.aspect}_${args.layer}_${hash}`;
