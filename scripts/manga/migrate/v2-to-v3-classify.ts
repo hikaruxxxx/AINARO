@@ -44,6 +44,9 @@ async function main(): Promise<void> {
   const v2 = JSON.parse(
     await fs.readFile(snapshotPath, "utf-8")
   ) as BibleSnapshotV2;
+  const knownTerms = await readKnownTerms(
+    path.join(bibleDir(args.slug), "known_terms.json")
+  );
 
   await fs.mkdir(outputDir, { recursive: true });
   const progressPath = path.join(outputDir, OUTPUT_FILES.llmProgress);
@@ -52,11 +55,12 @@ async function main(): Promise<void> {
     | MigrationWithSubSplitResult
     | MigrationWithLlmRefineResult = args.withSubSplit
     ? await runMigrationWithSubSplit(v2, {
+        knownTerms,
         maxParallel: args.maxParallel,
         cwd: process.cwd(),
         onProgress: createSubSplitProgressLogger(),
       })
-    : runMigration(v2);
+    : runMigration(v2, { knownTerms });
 
   if (args.withLlmRefine) {
     result = args.withSubSplit
@@ -75,6 +79,7 @@ async function main(): Promise<void> {
           },
         })
       : await runMigrationWithLlmRefine(v2, {
+        knownTerms,
         rounds: args.rounds,
         maxParallel: args.maxParallel,
         cwd: process.cwd(),
@@ -187,6 +192,22 @@ function parsePositiveInt(name: string, value: string | undefined): number {
 
 async function writeJson(filePath: string, value: unknown): Promise<void> {
   await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf-8");
+}
+
+async function readKnownTerms(filePath: string): Promise<string[]> {
+  try {
+    const raw = await fs.readFile(filePath, "utf-8");
+    const json = JSON.parse(raw) as { terms?: Array<{ term?: unknown }> };
+    return (json.terms ?? [])
+      .map((entry) => entry.term)
+      .filter(
+        (term): term is string =>
+          typeof term === "string" && term.trim().length > 0
+      );
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw error;
+  }
 }
 
 async function readProgress(filePath: string): Promise<LlmRefineProgressRecord[]> {

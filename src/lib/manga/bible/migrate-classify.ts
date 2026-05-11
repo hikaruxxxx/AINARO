@@ -31,6 +31,10 @@ export type MigrationResult = {
   factSourcePathIndex: Record<string, string>;
 };
 
+export type MigrationOptions = {
+  knownTerms?: string[];
+};
+
 export type LlmRefineRoundResult = {
   round: number;
   suggested_layer: Layer | null;
@@ -57,6 +61,7 @@ export type LlmRefineProgressRecord = {
 };
 
 export type LlmRefineOptions = {
+  knownTerms?: string[];
   rounds?: number;
   maxParallel?: number;
   cwd?: string;
@@ -105,6 +110,7 @@ export type SubSplitResult = {
 };
 
 export type SubSplitOptions = {
+  knownTerms?: string[];
   maxParallel?: number;
   cwd?: string;
   timeoutMs?: number;
@@ -128,9 +134,14 @@ export type MigrationWithSubSplitResult = MigrationResult & {
   };
 };
 
-export function runMigration(v2: BibleSnapshotV2): MigrationResult {
+export function runMigration(
+  v2: BibleSnapshotV2,
+  options: MigrationOptions = {}
+): MigrationResult {
   const v3 = v2ToV3(v2);
-  const unresolvedReferences = detectUndefinedReferences(v2);
+  const unresolvedReferences = detectUndefinedReferences(v2, {
+    knownTerms: options.knownTerms,
+  });
   const roleEnumViolations = findRoleEnumViolations(v2);
   const needsReview = v3.facts.filter(
     (fact) => (fact.evidence?.confidence ?? fact.confidence ?? 1.0) < 0.7
@@ -152,7 +163,10 @@ export async function runMigrationWithLlmRefine(
   v2: BibleSnapshotV2,
   options: LlmRefineOptions = {}
 ): Promise<MigrationWithLlmRefineResult> {
-  return refineMigrationWithLlm(runMigration(v2), options);
+  return refineMigrationWithLlm(
+    runMigration(v2, { knownTerms: options.knownTerms }),
+    options
+  );
 }
 
 export async function refineMigrationWithLlm(
@@ -275,7 +289,7 @@ export async function runMigrationWithSubSplit(
   v2: BibleSnapshotV2,
   options: SubSplitOptions = {}
 ): Promise<MigrationWithSubSplitResult> {
-  const migration = runMigration(v2);
+  const migration = runMigration(v2, { knownTerms: options.knownTerms });
   const originalFacts = migration.v3.facts.length;
   const maxParallel = Math.min(
     10,

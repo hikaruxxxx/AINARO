@@ -109,7 +109,7 @@ type ComposeResult = {
 };
 
 function useBibleV3(): boolean {
-  return process.env.USE_BIBLE_V3 === "true";
+  return process.env.USE_BIBLE_V3 !== "false";
 }
 
 /**

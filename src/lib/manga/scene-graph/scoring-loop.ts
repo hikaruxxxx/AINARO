@@ -190,7 +190,7 @@ export async function generateSceneCandidates(
     );
   }
 
-  const useBibleV3 = process.env.USE_BIBLE_V3 === "true";
+  const useBibleV3 = process.env.USE_BIBLE_V3 !== "false";
   const bible = await loadBibleSnapshot(context.bibleSnapshotPath);
   const bibleContext = buildBibleContextForSlot(bible, slot, useBibleV3);
 

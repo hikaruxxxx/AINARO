@@ -218,10 +218,8 @@ async function runWithConcurrency<T>(items: T[], n: number, worker: (it: T) => P
 
 async function main() {
   const args = parseArgs();
-  const USE_BIBLE_V3 = process.env.USE_BIBLE_V3 === "true";
-  if (USE_BIBLE_V3) {
-    console.log("[L09] USE_BIBLE_V3=true (broker-v3 経路、Phase 8 で本格化)");
-  }
+  const USE_BIBLE_V3 = process.env.USE_BIBLE_V3 !== "false";
+  console.log(`[L09] USE_BIBLE_V3=${USE_BIBLE_V3} (broker-v3 経路 default、明示的に USE_BIBLE_V3=false で V2 fallback)`);
   const bible = JSON.parse(await fs.readFile(bibleSnapshotPath(args.slug), "utf-8")) as BibleSnapshotV2;
   const storyboard = JSON.parse(await fs.readFile(storyboardPath(args.slug, args.episode), "utf-8")) as EpisodeStoryboardV2;
   // Compliance 辞書を 1 度だけ読み込み (panel/page 単位で使い回す)

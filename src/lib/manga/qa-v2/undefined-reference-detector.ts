@@ -304,13 +304,83 @@ const COMMON_TERMS = new Set([
   "世界",
   "都市",
   "能力",
+  "主任",
+  "部長",
+  "課長",
+  "係長",
+  "店員",
+  "配送員",
+  "店長",
+  "客員",
+  "窓口担当",
+  "警備員",
+  "職員",
+  "社員",
+  "自動ドア",
+  "ジャケット",
+  "タブレット",
+  "クリップボード",
+  "レジカウンター",
+  "自販機",
+  "防犯カメラ",
+  "改札",
+  "踏切",
+  "ホッチキス",
+  "紙袋",
+  "テープ",
+  "シャッター",
+  "出入口",
+  "エントランス",
+  "廊下",
+  "踊り場",
+  "エレベーター",
+  "エスカレーター",
+  "屋上",
+  "地下",
+  "駐車場",
+  "始業",
+  "終業",
+  "深夜帯",
+  "未明",
+  "夕方",
+  "早朝",
+  "終電",
+  "終バス",
+  "同意書",
+  "申請書",
+  "決裁",
+  "伝票",
+  "控え",
+  "印鑑",
+  "認印",
+  "署名欄",
+  "記入欄",
 ]);
 
 const PARTICLE_SUFFIX = /[のはをがにへでと、。！？\s]/u;
 const KANJI_CHAR = /[\p{Script=Han}]/u;
+const HONORIFICS = [
+  "さん",
+  "くん",
+  "ちゃん",
+  "先輩",
+  "後輩",
+  "主任",
+  "部長",
+  "課長",
+  "先生",
+  "氏",
+];
 
-export function detectUndefinedReferences(bible: BibleSnapshotV2): UndefinedReference[] {
-  const known = buildKnownEntityNames(bible);
+export type UndefinedReferenceDetectorOptions = {
+  knownTerms?: string[];
+};
+
+export function detectUndefinedReferences(
+  bible: BibleSnapshotV2,
+  options: UndefinedReferenceDetectorOptions = {}
+): UndefinedReference[] {
+  const known = buildKnownEntityNames(bible, options);
   const seen = new Set<string>();
   const out: UndefinedReference[] = [];
 
@@ -335,7 +405,10 @@ export function detectUndefinedReferences(bible: BibleSnapshotV2): UndefinedRefe
   return out;
 }
 
-function buildKnownEntityNames(bible: BibleSnapshotV2): Set<string> {
+function buildKnownEntityNames(
+  bible: BibleSnapshotV2,
+  options: UndefinedReferenceDetectorOptions = {}
+): Set<string> {
   const known = new Set<string>();
   const add = (value: unknown): void => {
     if (typeof value !== "string") return;
@@ -364,6 +437,9 @@ function buildKnownEntityNames(bible: BibleSnapshotV2): Set<string> {
   for (const motif of bible.visual_motifs) {
     add(motif.name);
   }
+  for (const term of options.knownTerms ?? []) {
+    add(term);
+  }
 
   return known;
 }
@@ -373,7 +449,15 @@ function expandCharacterNames(name: string): string[] {
   const compact = name.replace(/\s+/gu, "");
   if (compact !== name) out.add(compact);
   const parts = name.split(/[\s　]+/u).filter((part) => Array.from(part).length >= 2);
-  for (const part of parts) out.add(part);
+  for (const part of parts) {
+    out.add(part);
+    for (const h of HONORIFICS) {
+      out.add(`${part}${h}`);
+    }
+  }
+  for (const h of HONORIFICS) {
+    out.add(`${compact}${h}`);
+  }
   return Array.from(out);
 }
 
