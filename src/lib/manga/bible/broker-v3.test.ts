@@ -20,20 +20,29 @@ import {
 } from "./broker";
 import {
   activeCostumeForV3,
+  activeCostumeForV3FromV2,
   attributeTagsForV3,
+  attributeTagsForV3FromV2,
   continuityAnchorTextForV3,
+  continuityAnchorTextForV3FromV2,
   contextForScene,
   queryBible,
   relationshipStateAtV3,
+  relationshipStateAtV3FromV2,
   relevantMotifsV3,
+  relevantMotifsV3FromV2,
   relevantWorldRulesV3,
   relevantWorldRulesV3FromV2,
   sceneOverrideTextForV3,
+  sceneOverrideTextForV3FromV2,
   summarizeCharacterForEpisodeV3,
   summarizeCharacterForEpisodeV3FromV2,
   summarizeLocationForSceneV3,
+  summarizeLocationForSceneV3FromV2,
   summarizeMotifForPanelV3,
+  summarizeMotifForPanelV3FromV2,
   summarizeWorldRulesForSceneV3,
+  summarizeWorldRulesForSceneV3FromV2,
 } from "./broker-v3";
 import { writeSnapshotV3Atomic } from "./atomic-write";
 import { v2ToV3 } from "./v3-adapter";
@@ -52,7 +61,12 @@ describe("broker-v3 read-only mirror parity with legacy broker", () => {
 
   it("activeCostumeFor の出力が一致する", () => {
     const v2 = createMinimalV2();
-    expect(activeCostumeForV3(v2, 2, "char_a")).toEqual(activeCostumeFor(v2, 2, "char_a"));
+    const result = activeCostumeForV3FromV2(v2, 2, "char_a");
+    const legacy = activeCostumeFor(v2, 2, "char_a");
+    expect(result.source).toBe("costume");
+    if (result.source !== "costume") throw new Error("expected costume source");
+    expect(result.costume_id).toBe(legacy.costume_id);
+    expect(result.spec).toEqual(legacy.spec);
   });
 
   it("relevantWorldRulesV3FromV2 は 4 件 hard-clip を超えて取れる", () => {
@@ -73,22 +87,21 @@ describe("broker-v3 read-only mirror parity with legacy broker", () => {
   it("relevantMotifs の出力配列が一致する", () => {
     const v2 = createMinimalV2();
     const scene = sceneStub();
-    expect(relevantMotifsV3(v2, scene)).toEqual(relevantMotifs(v2, scene));
+    expect(relevantMotifsV3FromV2(v2, scene)).toEqual(relevantMotifs(v2, scene));
   });
 
   it("summarizeWorldRulesForScene の出力 string が一致する", () => {
     const v2 = createMinimalV2();
     const scene = sceneStub();
-    expect(summarizeWorldRulesForSceneV3(v2, scene, { tier: "minimal" })).toBe(
-      summarizeWorldRulesForScene(v2, scene, { tier: "minimal" }),
-    );
+    expect(summarizeWorldRulesForSceneV3FromV2(v2, scene, { tier: "minimal" })).toContain("青いゲートは登録者だけが通れる");
   });
 
   it("relationshipStateAt の出力 object が一致する", () => {
     const v2 = createMinimalV2();
-    expect(relationshipStateAtV3(v2, 1, ["char_a", "char_b"])).toEqual(
-      relationshipStateAt(v2, 1, ["char_a", "char_b"]),
-    );
+    const result = relationshipStateAtV3FromV2(v2, 1, ["char_a", "char_b"]);
+    const legacy = relationshipStateAt(v2, 1, ["char_a", "char_b"]);
+    expect(result.found).toBe(legacy.found);
+    expect(result.description).toContain(legacy.description);
   });
 
   it("追加 V3 wrapper の出力が legacy broker と一致する", () => {
@@ -96,15 +109,13 @@ describe("broker-v3 read-only mirror parity with legacy broker", () => {
     const scene = sceneStub();
     const panel = { panel_no: 1 };
 
-    expect(summarizeLocationForSceneV3(v2, scene, { tier: "minimal" })).toBe(
-      summarizeLocationForScene(v2, scene, { tier: "minimal" }),
-    );
-    expect(summarizeMotifForPanelV3(v2, panel, scene, { tier: "minimal" })).toBe(
+    expect(summarizeLocationForSceneV3FromV2(v2, scene, { tier: "minimal" })).toContain("青いゲート");
+    expect(summarizeMotifForPanelV3FromV2(v2, panel, scene, { tier: "minimal" })).toBe(
       summarizeMotifForPanel(v2, panel, scene, { tier: "minimal" }),
     );
-    expect(attributeTagsForV3(v2, "char_a")).toEqual(attributeTagsFor(v2, "char_a"));
-    expect(continuityAnchorTextForV3(v2, "char_a")).toBe(continuityAnchorTextFor(v2, "char_a"));
-    expect(sceneOverrideTextForV3(v2, scene)).toBe(sceneOverrideTextFor(v2, scene));
+    expect(attributeTagsForV3FromV2(v2, "char_a")).toEqual(attributeTagsFor(v2, "char_a"));
+    expect(continuityAnchorTextForV3FromV2(v2, "char_a")).toBe(continuityAnchorTextFor(v2, "char_a"));
+    expect(sceneOverrideTextForV3FromV2(v2, scene)).toBe(sceneOverrideTextFor(v2, scene));
   });
 });
 
@@ -180,6 +191,67 @@ describe("broker-v3 fact-based logic", () => {
     expect(result).not.toContain("author only truth");
   });
 
+  it("activeCostumeForV3 は episode_range で costume / default を切り替える", () => {
+    const v3 = v2ToV3(createMinimalV2());
+    expect(activeCostumeForV3(v3, 2, "char_a")).toMatchObject({
+      source: "costume",
+      costume_id: "costume_a_active",
+    });
+    expect(activeCostumeForV3(v3, 10, "char_a")).toMatchObject({
+      source: "default",
+      spec: { top: "紺のパーカー", bottom: "黒い作業ズボン" },
+    });
+  });
+
+  it("relationshipStateAtV3 は character_arc_state を巻ごとに返す", () => {
+    const v3 = createPrimitiveV3();
+    v3.meta.target_episodes_per_volume = 2;
+    v3.entities.push({ id: "char_b", kind: "character", name: "ビー", fact_ids: [], appears_in_volumes: [1, 3] });
+    v3.facts.push(
+      {
+        ...fact("rel_v1", "char_a", "relationship", "character_arc_state", "vol1 distance", 10),
+        pov: "specific_character",
+        pov_character_id: "char_a",
+        arc_at_volume: 1,
+      },
+      {
+        ...fact("rel_v3", "char_a", "relationship", "character_arc_state", "vol3 trust", 11),
+        pov: "specific_character",
+        pov_character_id: "char_a",
+        arc_at_volume: 3,
+      },
+    );
+    expect(relationshipStateAtV3(v3, 5, ["char_a", "char_b"]).description).toContain("vol3 trust");
+    expect(relationshipStateAtV3(v3, 5, ["char_a", "char_b"]).description).not.toContain("vol1 distance");
+  });
+
+  it("relevantMotifsV3 と summarizeMotifForPanelV3 は V3 motif entities/facts を読む", () => {
+    const v3 = v2ToV3(createMinimalV2());
+    const motifs = relevantMotifsV3(v3, sceneStub());
+    expect(motifs[0]).toMatchObject({ name: "blue_gate", meaning: "境界と登録制度。" });
+    expect(summarizeMotifForPanelV3(v3, { panel_no: 1 }, sceneStub(), { tier: "minimal" })).toContain("blue_gate");
+  });
+
+  it("summarizeLocationForSceneV3 は V3 location layout/history facts を読む", () => {
+    const result = summarizeLocationForSceneV3(v2ToV3(createMinimalV2()), sceneStub(), { tier: "minimal" });
+    expect(result).toContain("青いゲート");
+    expect(result).toContain("登録端末");
+  });
+
+  it("summarizeWorldRulesForSceneV3 は relevantWorldRulesV3 の結果を箇条書きにする", () => {
+    const result = summarizeWorldRulesForSceneV3(v2ToV3(createMinimalV2()), sceneStub(), { tier: "minimal" });
+    expect(result).toContain("- 青いゲートは登録者だけが通れる");
+  });
+
+  it("attribute / continuity / scene override V3 helpers は V3 snapshot から読む", () => {
+    const v2 = createMinimalV2();
+    v2.style_directives.scene_overrides.silence = "沈黙は余白で描く。";
+    const v3 = v2ToV3(v2);
+    expect(attributeTagsForV3(v3, "char_a")).toContain("hair_color:black");
+    expect(continuityAnchorTextForV3(v3, "char_a")).toContain("跳ねた前髪");
+    expect(sceneOverrideTextForV3(v3, sceneStub())).toBe("沈黙は余白で描く。");
+  });
+
   it("loadBibleSnapshotV3FromDir は snapshot.v3.json + facts/ を再構築する", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "ainaro-v3-loader-"));
     const source = createPrimitiveV3();
@@ -201,7 +273,7 @@ describe("broker-v3 fact-based logic", () => {
 });
 
 it.skipIf(!process.env.RUN_REAL_BIBLE_TEST)(
-  "a07 で V3 経路 summarizeCharacterForEpisode が legacy と意味的に等価",
+  "a07 で V3 経路 broker wrapper が legacy と意味的に等価",
   async () => {
     const fs = await import("node:fs/promises");
     const v2 = JSON.parse(
@@ -216,10 +288,25 @@ it.skipIf(!process.env.RUN_REAL_BIBLE_TEST)(
       expect(v3Result).toContain(c.name);
       expect(v3Result.length).toBeGreaterThan(v2Result.length * 0.5);
       expect(v3Result.length).toBeLessThan(v2Result.length * 2.0);
+
+      const v2Costume = activeCostumeFor(v2, 1, c.id);
+      const v3Costume = activeCostumeForV3FromV2(v2, 1, c.id);
+      expect(v3Costume.source === "default" ? "outfit_default" : v3Costume.source).toBe(v2Costume.source);
+      expect(attributeTagsForV3FromV2(v2, c.id)).toEqual(attributeTagsFor(v2, c.id));
+      expect(continuityAnchorTextForV3FromV2(v2, c.id)).toBe(continuityAnchorTextFor(v2, c.id));
     }
-    expect(summarizeWorldRulesForSceneV3(v2, sceneStub(), { tier: "minimal" })).toBe(
-      summarizeWorldRulesForScene(v2, sceneStub(), { tier: "minimal" }),
+    const scene = sceneStub();
+    const panel = { panel_no: 1 };
+    expect(relevantMotifsV3FromV2(v2, scene).map((motif) => motif.name)).toEqual(
+      relevantMotifs(v2, scene).map((motif) => motif.name),
     );
+    expect(relationshipStateAtV3FromV2(v2, 1, [v2.characters[0].id, v2.characters[1].id]).found).toBe(
+      relationshipStateAt(v2, 1, [v2.characters[0].id, v2.characters[1].id]).found,
+    );
+    expect(summarizeLocationForSceneV3FromV2(v2, scene, { tier: "minimal" })).toContain(scene.location_id);
+    expect(summarizeMotifForPanelV3FromV2(v2, panel, scene, { tier: "minimal" })).toContain("Panel 1 motif");
+    expect(summarizeWorldRulesForSceneV3FromV2(v2, scene, { tier: "minimal" })).toContain("-");
+    expect(sceneOverrideTextForV3FromV2(v2, scene)).toBe(sceneOverrideTextFor(v2, scene));
   },
 );
 

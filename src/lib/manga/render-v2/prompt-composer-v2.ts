@@ -28,12 +28,12 @@ import {
   summarizeWorldRulesForScene,
 } from "../bible/broker";
 import {
-  activeCostumeForV3,
-  sceneOverrideTextForV3,
+  activeCostumeForV3FromV2,
+  sceneOverrideTextForV3FromV2,
   summarizeCharacterForEpisodeV3FromV2,
-  summarizeLocationForSceneV3,
-  summarizeMotifForPanelV3,
-  summarizeWorldRulesForSceneV3,
+  summarizeLocationForSceneV3FromV2,
+  summarizeMotifForPanelV3FromV2,
+  summarizeWorldRulesForSceneV3FromV2,
 } from "../bible/broker-v3";
 import {
   scanPrompt,
@@ -231,7 +231,7 @@ function locationSceneForPanel(panel: PanelV2, scene?: PromptScene): Pick<Scene,
 
 function locationDescription(panel: PanelV2, bible: BibleSnapshotV2, scene?: PromptScene, tier: BibleTier = "minimal"): string {
   return useBibleV3()
-    ? summarizeLocationForSceneV3(bible, locationSceneForPanel(panel, scene), { tier })
+    ? summarizeLocationForSceneV3FromV2(bible, locationSceneForPanel(panel, scene), { tier })
     : summarizeLocationForScene(bible, locationSceneForPanel(panel, scene), { tier });
 }
 
@@ -239,7 +239,7 @@ function styleOverrideBlock(scene: Pick<Scene, "mode" | "beat_type"> | undefined
   const blocks = [bible.style_directives.global];
   if (scene) {
     const override = useBibleV3()
-      ? sceneOverrideTextForV3(bible, scene)
+      ? sceneOverrideTextForV3FromV2(bible, scene)
       : sceneOverrideTextFor(bible, scene);
     if (override) blocks.push(override);
   }
@@ -256,7 +256,7 @@ function motifBlock(
 ): string | null {
   if (!scene) return null;
   const summary = useBibleV3()
-    ? summarizeMotifForPanelV3(bible, panel, scene, { tier })
+    ? summarizeMotifForPanelV3FromV2(bible, panel, scene, { tier })
     : summarizeMotifForPanel(bible, panel, scene, { tier });
   if (!summary) return null;
   return [
@@ -274,7 +274,7 @@ function costumeBlock(
   const lines: string[] = [];
   for (const ch of panel.entities.characters) {
     const active = useBibleV3()
-      ? activeCostumeForV3(bible, episodeNo, ch.character_id)
+      ? activeCostumeForV3FromV2(bible, episodeNo, ch.character_id)
       : activeCostumeFor(bible, episodeNo, ch.character_id);
     if (active.source === "costume" && active.spec) {
       const outfit = [active.spec.outerwear, active.spec.top].filter(Boolean).join(" ");
@@ -298,7 +298,7 @@ function worldRuleBlock(
 ): string | null {
   if (!scene) return null;
   const summary = useBibleV3()
-    ? summarizeWorldRulesForSceneV3(bible, scene, { tier })
+    ? summarizeWorldRulesForSceneV3FromV2(bible, scene, { tier })
     : summarizeWorldRulesForScene(bible, scene, { tier });
   if (!summary) return null;
   return [

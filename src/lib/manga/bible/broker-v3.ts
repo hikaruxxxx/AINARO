@@ -8,18 +8,7 @@ import type {
   Layer,
 } from "../schemas-v2";
 import type { Scene } from "../scene-graph/schema";
-import {
-  activeCostumeFor,
-  attributeTagsFor,
-  continuityAnchorTextFor,
-  relationshipStateAt,
-  relevantMotifs,
-  sceneOverrideTextFor,
-  summarizeCharacterForEpisode,
-  summarizeLocationForScene,
-  summarizeMotifForPanel,
-  summarizeWorldRulesForScene,
-} from "./broker";
+import { summarizeCharacterForEpisode } from "./broker";
 import { v2ToV3 } from "./v3-adapter";
 
 export type Visibility =
@@ -48,6 +37,10 @@ export type BibleQueryResult = {
 };
 
 type SummaryTier = "deep" | "medium" | "minimal";
+type CostumeSpecLike = BibleSnapshotV2["costumes"][number]["spec"];
+type DefaultOutfitSpecLike = NonNullable<BibleSnapshotV2["characters"][number]["spec"]["outfit_default"]>;
+type MotifEntryLike = BibleSnapshotV2["visual_motifs"][number];
+type RelationshipStateLike = ReturnType<typeof import("./broker").relationshipStateAt>;
 
 const TIER_LIMITS: Record<SummaryTier, { min: number; max: number }> = {
   deep: { min: 800, max: 1500 },
@@ -250,14 +243,89 @@ export function summarizeCharacterForEpisodeV3FromV2(
   return summarizeCharacterForEpisodeV3(v2ToV3(v2), episodeNo, characterId, options);
 }
 
-export function activeCostumeForV3(v2: BibleSnapshotV2, episodeNo: number, characterId: string) {
-  v2ToV3(v2);
-  return activeCostumeFor(v2, episodeNo, characterId);
+export function activeCostumeForV3(
+  v3: BibleSnapshotV3,
+  episodeNo: number,
+  characterId: string,
+): {
+  source: "costume";
+  costume_id?: string;
+  spec?: CostumeSpecLike;
+} | {
+  source: "default";
+  spec?: DefaultOutfitSpecLike;
+} | {
+  source: "missing";
+} {
+  const matchingFacts = v3.facts
+    .filter((fact) => fact.aspect === "identity" && fact.entity_id === characterId && fact.episode_range)
+    .filter((fact) => {
+      const range = fact.episode_range;
+      if (!range) return false;
+      const until = range.to ?? Number.POSITIVE_INFINITY;
+      return range.from <= episodeNo && episodeNo <= until;
+    })
+    .sort((a, b) => (b.episode_range?.from ?? 0) - (a.episode_range?.from ?? 0) || compareFacts(a, b));
+
+  const costumeFact = matchingFacts[0];
+  if (costumeFact) {
+    const costume = costumeFromFact(v3, costumeFact);
+    return {
+      source: "costume",
+      costume_id: costume?.id,
+      spec: costume?.spec ?? costumeSpecFromFact(costumeFact),
+    };
+  }
+
+  const defaultSpec = defaultOutfitFor(v3, characterId);
+  if (defaultSpec) return { source: "default", spec: defaultSpec };
+  return { source: "missing" };
 }
 
-export function relationshipStateAtV3(v2: BibleSnapshotV2, episodeNo: number, pair: [string, string]) {
-  v2ToV3(v2);
-  return relationshipStateAt(v2, episodeNo, pair);
+export function activeCostumeForV3FromV2(v2: BibleSnapshotV2, episodeNo: number, characterId: string) {
+  return activeCostumeForV3(v2ToV3(v2), episodeNo, characterId);
+}
+
+export function relationshipStateAtV3(
+  v3: BibleSnapshotV3,
+  episodeNo: number,
+  pair: [string, string],
+): RelationshipStateLike {
+  const volume = volumeForEpisode(v3, episodeNo);
+  const facts = v3.facts
+    .filter((fact) => fact.aspect === "relationship")
+    .filter((fact) => fact.pov === "specific_character")
+    .filter((fact) => pair.includes(fact.pov_character_id ?? ""))
+    .filter((fact) => relationshipFactMatchesPair(fact, pair))
+    .filter((fact) => visibleRelationshipFactAtVolume(fact, volume))
+    .sort(compareFacts);
+
+  if (facts.length === 0) return { found: false };
+
+  const firstRelation = relationObjectFromFact(facts[0]);
+  const reversed =
+    firstRelation?.from_character_id === pair[1] &&
+    firstRelation?.to_character_id === pair[0];
+
+  return {
+    found: true,
+    description: facts.map((fact) => relationshipDescription(fact)).filter(Boolean).join(" / "),
+    bidirectional_a_to_b: firstRelation
+      ? reversed
+        ? firstRelation.bidirectional_b_to_a
+        : firstRelation.bidirectional_a_to_b
+      : undefined,
+    bidirectional_b_to_a: firstRelation
+      ? reversed
+        ? firstRelation.bidirectional_a_to_b
+        : firstRelation.bidirectional_b_to_a
+      : undefined,
+    per_volume_delta: firstRelation?.per_volume_delta,
+  };
+}
+
+export function relationshipStateAtV3FromV2(v2: BibleSnapshotV2, episodeNo: number, pair: [string, string]) {
+  return relationshipStateAtV3(v2ToV3(v2), episodeNo, pair);
 }
 
 export function relevantWorldRulesV3(
@@ -296,32 +364,157 @@ export function relevantWorldRulesV3FromV2(
 }
 
 export function relevantMotifsV3(
+  v3: BibleSnapshotV3,
+  scene: Pick<Scene, "beat_type" | "location_id" | "mode" | "key_visual_intent">,
+): MotifEntryLike[] {
+  const location = v3.entities.find((entity) => entity.kind === "location" && entity.id === scene.location_id);
+  const locationSpec = location?.spec as { atmosphere?: string; location_type?: string } | undefined;
+  const query = tokens([
+    scene.beat_type,
+    scene.mode,
+    scene.key_visual_intent,
+    scene.location_id,
+    location?.name,
+    locationSpec?.atmosphere,
+    locationSpec?.location_type,
+  ]);
+  const motifs = v3.entities
+    .filter((entity) => entity.kind === "motif")
+    .map((entity) => motifFromEntity(v3, entity))
+    .filter((motif): motif is MotifEntryLike => motif !== null);
+
+  const scored = motifs
+    .map((motif, index) => ({ motif, index, score: motifScoreV3(motif, query, scene.mode) }))
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, 3)
+    .map((item) => item.motif);
+
+  return scored.length > 0 ? scored : motifs.slice(0, 3);
+}
+
+export function relevantMotifsV3FromV2(
   v2: BibleSnapshotV2,
   scene: Pick<Scene, "beat_type" | "location_id" | "mode" | "key_visual_intent">,
-) {
-  v2ToV3(v2);
-  return relevantMotifs(v2, scene);
+): MotifEntryLike[] {
+  return relevantMotifsV3(v2ToV3(v2), scene);
 }
 
 export function summarizeWorldRulesForSceneV3(
+  v3: BibleSnapshotV3,
+  scene: Pick<Scene, "location_id" | "beat_type" | "mode" | "time_axis">,
+  options?: { tier?: "deep" | "medium" | "minimal" },
+): string {
+  const tier = options?.tier ?? "minimal";
+  const rules = relevantWorldRulesV3(v3, scene, { charBudget: { min: 100, max: tier === "minimal" ? 400 : 800 } });
+  return rules.length > 0 ? rules.map((rule) => `- ${rule}`).join("\n") : "";
+}
+
+export function summarizeWorldRulesForSceneV3FromV2(
   v2: BibleSnapshotV2,
   scene: Pick<Scene, "location_id" | "beat_type" | "mode" | "time_axis">,
   options?: { tier?: "deep" | "medium" | "minimal" },
 ): string {
-  v2ToV3(v2);
-  return summarizeWorldRulesForScene(v2, scene, options);
+  return summarizeWorldRulesForSceneV3(v2ToV3(v2), scene, options);
 }
 
 export function summarizeLocationForSceneV3(
+  v3: BibleSnapshotV3,
+  scene: Pick<Scene, "location_id" | "mode" | "beat_type">,
+  options?: { tier?: "deep" | "medium" | "minimal" },
+): string {
+  const tier = options?.tier ?? "minimal";
+  const locationId = scene.location_id ?? "";
+  const location = v3.entities.find((entity) => entity.kind === "location" && entity.id === locationId);
+  if (!location) return `Location ${locationId}: bible entry missing. Mode=${scene.mode}, beat=${scene.beat_type}.`;
+
+  const spec = location.spec as {
+    spec?: {
+      atmosphere?: string;
+      lighting_default?: string;
+      visual_description?: string;
+      sensory_textures?: string;
+      iconic_objects?: Array<{ name?: string; description?: string }>;
+    };
+    continuity_anchors?: string[];
+  } | undefined;
+  const layout = v3.facts
+    .filter((fact) => fact.entity_id === locationId && fact.aspect === "location_layout")
+    .map((fact) => fact.body)
+    .join(" / ");
+  const history = v3.facts
+    .filter((fact) => fact.entity_id === locationId && fact.aspect === "location_history")
+    .map((fact) => fact.body)
+    .join(" / ");
+
+  if (tier === "minimal") {
+    const atmosphere = joinNonEmpty(
+      [spec?.spec?.atmosphere, spec?.spec?.lighting_default, spec?.spec?.visual_description, layout, history],
+      " / ",
+    ) || "場所の雰囲気は既存 spec に従う。";
+    return fitSummary(`${location.name} (${location.id}). 雰囲気: ${firstChars(atmosphere, 150)}`, { min: 120, max: 220 });
+  }
+
+  const iconic = (spec?.spec?.iconic_objects ?? [])
+    .slice(0, 4)
+    .map((item) => joinNonEmpty([item.name, item.description], ": "))
+    .filter((item) => item.length > 0)
+    .join(" / ");
+  const fallback = joinNonEmpty([spec?.spec?.atmosphere, spec?.spec?.lighting_default], " / ");
+  return fitSummary(
+    joinNonEmpty(
+      [
+        `${location.name} (${location.id}) scene mode=${scene.mode}, beat=${scene.beat_type}.`,
+        spec?.spec?.visual_description || layout || fallback || "場所の視覚説明は未着手。既存 spec から雰囲気と照明を維持する。",
+        spec?.spec?.sensory_textures ? `感覚: ${spec.spec.sensory_textures}` : null,
+        iconic || layout ? `象徴物: ${joinNonEmpty([iconic, layout], " / ")}` : null,
+        history ? `履歴: ${history}` : null,
+        spec?.continuity_anchors && spec.continuity_anchors.length > 0 ? `固定: ${spec.continuity_anchors.slice(0, 4).join(" / ")}` : null,
+      ],
+      "\n",
+    ),
+    { min: 300, max: 600 },
+  );
+}
+
+export function summarizeLocationForSceneV3FromV2(
   v2: BibleSnapshotV2,
   scene: Pick<Scene, "location_id" | "mode" | "beat_type">,
   options?: { tier?: "deep" | "medium" | "minimal" },
 ): string {
-  v2ToV3(v2);
-  return summarizeLocationForScene(v2, scene, options);
+  return summarizeLocationForSceneV3(v2ToV3(v2), scene, options);
 }
 
 export function summarizeMotifForPanelV3(
+  v3: BibleSnapshotV3,
+  panel: { panel_no: number },
+  scene: Pick<Scene, "beat_type" | "location_id" | "mode" | "key_visual_intent"> & {
+    visual_motif_anchors?: Array<{ motif_id?: string; motif_name?: string; intensity?: number }>;
+  },
+  options?: { tier?: "deep" | "medium" | "minimal" },
+): string {
+  const tier = options?.tier ?? "minimal";
+  const anchored = motifsFromAnchorsV3(v3, scene.visual_motif_anchors);
+  const motifs = anchored.length > 0 ? anchored : relevantMotifsV3(v3, { ...scene, key_visual_intent: "" });
+  if (tier === "minimal") {
+    const motif = motifs[0];
+    if (!motif) return `Panel ${panel.panel_no} motif: restrained scene symbolism.`;
+    return fitSummary(
+      `Panel ${panel.panel_no} motif: ${motif.name}. draw=${firstChars(motif.draw_directive || motif.meaning, 150)}`,
+      { min: 100, max: 220 },
+    );
+  }
+  const text = motifs
+    .slice(0, 3)
+    .map((motif) => `${motif.name}: ${motif.meaning}. draw=${motif.draw_directive}`)
+    .join("\n");
+  return fitSummary(`Panel ${panel.panel_no} motif directives:\n${text || "No motif selected; keep scene symbolism restrained."}`, {
+    min: 200,
+    max: 400,
+  });
+}
+
+export function summarizeMotifForPanelV3FromV2(
   v2: BibleSnapshotV2,
   panel: { panel_no: number },
   scene: Pick<Scene, "beat_type" | "location_id" | "mode" | "key_visual_intent"> & {
@@ -329,26 +522,49 @@ export function summarizeMotifForPanelV3(
   },
   options?: { tier?: "deep" | "medium" | "minimal" },
 ): string {
-  v2ToV3(v2);
-  return summarizeMotifForPanel(v2, panel, scene, options);
+  return summarizeMotifForPanelV3(v2ToV3(v2), panel, scene, options);
 }
 
-export function attributeTagsForV3(v2: BibleSnapshotV2, characterId: string): string[] {
-  v2ToV3(v2);
-  return attributeTagsFor(v2, characterId);
+export function attributeTagsForV3(v3: BibleSnapshotV3, characterId: string): string[] {
+  const character = v3.entities.find((entity) => entity.kind === "character" && entity.id === characterId);
+  const spec = character?.spec as { attribute_classifier?: Record<string, unknown> } | undefined;
+  return Object.entries(spec?.attribute_classifier ?? {})
+    .filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim().length > 0)
+    .map(([key, value]) => `${key}:${value.trim()}`);
 }
 
-export function continuityAnchorTextForV3(v2: BibleSnapshotV2, characterId: string): string {
-  v2ToV3(v2);
-  return continuityAnchorTextFor(v2, characterId);
+export function attributeTagsForV3FromV2(v2: BibleSnapshotV2, characterId: string): string[] {
+  return attributeTagsForV3(v2ToV3(v2), characterId);
+}
+
+export function continuityAnchorTextForV3(v3: BibleSnapshotV3, characterId: string): string {
+  const character = v3.entities.find((entity) => entity.kind === "character" && entity.id === characterId);
+  if (!character) return `continuity: ${characterId}`;
+  const anchors = v3.facts
+    .filter((fact) => fact.entity_id === characterId && fact.aspect === "identity" && fact.layer === "in_world_belief" && !fact.episode_range)
+    .sort(compareFacts)
+    .slice(0, 5)
+    .map((fact) => fact.body);
+  return `${character.name} continuity: ${anchors.join(" / ") || "顔・髪・衣装の同一性を維持"}`;
+}
+
+export function continuityAnchorTextForV3FromV2(v2: BibleSnapshotV2, characterId: string): string {
+  return continuityAnchorTextForV3(v2ToV3(v2), characterId);
 }
 
 export function sceneOverrideTextForV3(
+  v3: BibleSnapshotV3,
+  scene: Pick<Scene, "mode" | "beat_type">,
+): string | null {
+  const overrides = v3.style_directives?.scene_overrides ?? {};
+  return overrides[scene.mode] ?? overrides[scene.beat_type] ?? null;
+}
+
+export function sceneOverrideTextForV3FromV2(
   v2: BibleSnapshotV2,
   scene: Pick<Scene, "mode" | "beat_type">,
 ): string | null {
-  v2ToV3(v2);
-  return sceneOverrideTextFor(v2, scene);
+  return sceneOverrideTextForV3(v2ToV3(v2), scene);
 }
 
 function visibleAt(fact: FactNode, q: BibleQuery): boolean {
@@ -466,6 +682,110 @@ function activeCostumesFromV3(
     .map((costume) => ({ character_id: costume.character_id, costume_id: costume.id }));
 }
 
+function costumeFromFact(
+  bible: BibleSnapshotV3,
+  fact: FactNode,
+): { id?: string; spec?: CostumeSpecLike } | null {
+  const parsed = parseRecord(fact.body);
+  const costumeId = stringField(parsed, "id");
+  const entity = costumeId ? bible.entities.find((item) => item.kind === "costume" && item.id === costumeId) : undefined;
+  const entitySpec = entity?.spec as { id?: string; spec?: CostumeSpecLike } | undefined;
+  const factSpec = recordField(parsed, "spec") as CostumeSpecLike | undefined;
+  return {
+    id: costumeId ?? entitySpec?.id,
+    spec: factSpec ?? entitySpec?.spec,
+  };
+}
+
+function costumeSpecFromFact(fact: FactNode): CostumeSpecLike | undefined {
+  const parsed = parseRecord(fact.body);
+  return recordField(parsed, "spec") as CostumeSpecLike | undefined;
+}
+
+function defaultOutfitFor(bible: BibleSnapshotV3, characterId: string): DefaultOutfitSpecLike | undefined {
+  const character = bible.entities.find((entity) => entity.kind === "character" && entity.id === characterId);
+  const spec = character?.spec as { spec?: { outfit_default?: DefaultOutfitSpecLike } } | undefined;
+  return spec?.spec?.outfit_default;
+}
+
+function visibleRelationshipFactAtVolume(fact: FactNode, volume: number): boolean {
+  if (fact.layer === "in_world_belief") return true;
+  if (fact.layer === "revealed_at_volume") return (fact.revealed_at_volume ?? Number.POSITIVE_INFINITY) <= volume;
+  if (fact.layer === "character_arc_state") return fact.arc_at_volume === volume;
+  return false;
+}
+
+function relationshipFactMatchesPair(fact: FactNode, pair: [string, string]): boolean {
+  const body = parseRecord(fact.body);
+  const from = stringField(body, "from_character_id") ?? fact.pov_character_id ?? fact.entity_id;
+  const to = stringField(body, "to_character_id") ?? stringField(body, "partner_id");
+  if (!from || !pair.includes(from)) return false;
+  if (!to) return true;
+  return pair.includes(to);
+}
+
+function relationObjectFromFact(fact: FactNode): BibleSnapshotV2["relations"][number] | null {
+  const body = parseRecord(fact.body);
+  if (!body) return null;
+  if (!stringField(body, "from_character_id") || !stringField(body, "to_character_id")) return null;
+  return body as unknown as BibleSnapshotV2["relations"][number];
+}
+
+function relationshipDescription(fact: FactNode): string {
+  const body = parseRecord(fact.body);
+  return stringField(body, "description") ?? fact.body;
+}
+
+function motifFromEntity(bible: BibleSnapshotV3, entity: EntityNode): MotifEntryLike | null {
+  const spec = entity.spec as Partial<MotifEntryLike> | undefined;
+  const facts = bible.facts.filter((fact) => fact.entity_id === entity.id && (fact.aspect === "motif_directive" || fact.aspect === "motif_meaning"));
+  const parsedFacts = facts.map((fact) => parseRecord(fact.body)).filter((value): value is Record<string, unknown> => value !== null);
+  const meaning =
+    spec?.meaning ??
+    stringField(parsedFacts.find((fact) => stringField(fact, "meaning")), "meaning") ??
+    facts.find((fact) => fact.aspect === "motif_meaning")?.body ??
+    "";
+  const drawDirective =
+    spec?.draw_directive ??
+    stringField(parsedFacts.find((fact) => stringField(fact, "draw_directive")), "draw_directive") ??
+    facts.find((fact) => fact.aspect === "motif_directive")?.body ??
+    "";
+  return {
+    name: spec?.name ?? entity.name,
+    meaning,
+    draw_directive: drawDirective,
+    symbolic_lineage: spec?.symbolic_lineage,
+    reference_scenes: spec?.reference_scenes,
+  };
+}
+
+function motifsFromAnchorsV3(
+  bible: BibleSnapshotV3,
+  anchors: Array<{ motif_id?: string; motif_name?: string; intensity?: number }> | undefined,
+): MotifEntryLike[] {
+  if (!anchors || anchors.length === 0) return [];
+  return anchors
+    .map((anchor) => {
+      const key = anchor.motif_id ?? anchor.motif_name;
+      if (!key) return null;
+      const entity = bible.entities.find((item) => item.kind === "motif" && (item.id === key || item.name === key));
+      return entity ? motifFromEntity(bible, entity) : null;
+    })
+    .filter((motif): motif is MotifEntryLike => motif !== null);
+}
+
+function motifScoreV3(motif: MotifEntryLike, query: Set<string>, mode: Scene["mode"]): number {
+  const motifTokens = tokens([motif.name, motif.meaning, motif.draw_directive, motif.symbolic_lineage, ...(motif.reference_scenes ?? [])]);
+  let score = 0;
+  for (const token of motifTokens) {
+    if (query.has(token)) score += 2;
+  }
+  if (mode === "silence" && intersects(motifTokens, new Set(["silence", "silent", "sleep", "眠", "睡眠", "沈黙", "無音"]))) {
+    score += 5;
+  }
+  return score;
+}
+
 function firstFactBody(bible: BibleSnapshotV3, sourcePath: string): string {
   return bible.facts.find((fact) => fact.evidence.source_path === sourcePath)?.body ?? "";
 }
@@ -551,6 +871,31 @@ function intersects(a: Set<string>, b: Set<string>): boolean {
     if (b.has(item)) return true;
   }
   return false;
+}
+
+function parseRecord(text: string): Record<string, unknown> | null {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("{")) return null;
+  try {
+    const parsed = JSON.parse(trimmed) as unknown;
+    return isRecord(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function stringField(record: Record<string, unknown> | null | undefined, key: string): string | undefined {
+  const value = record?.[key];
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
+}
+
+function recordField(record: Record<string, unknown> | null | undefined, key: string): Record<string, unknown> | undefined {
+  const value = record?.[key];
+  return isRecord(value) ? value : undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function stringify(value: unknown): string {
