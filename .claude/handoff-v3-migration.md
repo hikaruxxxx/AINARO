@@ -11,6 +11,8 @@
 | b8c43ec | fix: sub-split default timeout を 60s→180s に拡張 (long prompt 出力対応) |
 | 39f8a95 | docs: handoff を sub-split 再走完了 + L4 visibility 縛り本実証成果で更新 |
 | e1784f3 | fix: contextForScene を cast-fair filter に変更 (各 cast 毎に per-budget query → merge) |
+| 2445be9 | docs: handoff に cast-fair filter 完了を反映 |
+| 3d85576 | feat: Wave 1 - USE_BIBLE_V3 default true + undefined-reference-detector 強化 |
 
 - handoff の **最優先タスク (L4 visibility 縛り)** 完了
 - 副産物として broker-v3 `applyCharBudget` のバグを発見・修正
@@ -38,11 +40,13 @@ V3 移行 plan の **残課題に着手**:
 2. ~~b/c 系作品 (転生貴族・現代ダンジョン2 等) で V3 migration を実走~~ — **a07 以外の作品 bible が `data/manga/works/` 配下に存在しないため skip**
 3. ~~Character 長文 fact の sub-split~~ — **完了 (980737c + b8c43ec、a07 再 sub-split → swap 済)**
 4. ~~broker-v3.contextForScene の cast-fair filter~~ — **完了 (e1784f3、a07 ep01 S01 でレン 3 + 灯里 3 にバランス回復)**
-5. (任意) USE_BIBLE_V3 を default true 化検討 (a07 で十分検証されたら)
-6. (任意) undefined-ref detector 更改善 (1,971 → 数百件)
-7. (任意) a07 cast の sub-split で残った fatal lint 30 件の根本対応 (前 70 件から半減済み)
-8. (任意) L11 audit / L12 repair の本格化 (現状は雛形のみ)
-9. (任意) L8.5/8.6/8.7 name gate UI 改善 (Console 中央コックピット化)
+5. ~~USE_BIBLE_V3 default true 化~~ — **完了 (3d85576、USE_BIBLE_V3=false で V2 fallback、それ以外は V3)**
+6. ~~undefined-ref detector 改善~~ — **部分完了 (3d85576、a07 で 1,971 → 1,442 件 -26.8%、known_terms.json 拡張で更に削減可)**
+7. (任意・**新最優先候補**) a07 bible の depth 不足解消 — fatal lint 27 件のうち depth 系。主人公 growth_per_volume 未着手 / antagonist 心理 60-80% 不足 / location history 未着手 / visual_motifs 各種項目不足。LLM コール多のため background 必要
+8. (任意) bible-lint の「ライン」誤検出修正 — 床ライン/体のライン等が LINE 商標と誤判定される 3 件 (compliance:trademarks.tech_services rule の正規表現修正)
+9. (任意) L3.5 強化 — volume_plot 連動深化、巻またぎ伏線の自動配置、episode-patterns 辞書のカバー率向上
+10. (任意) L11 audit / L12 repair の本格化 (現状は雛形のみ)
+11. (任意) L8.5/8.6/8.7 name gate UI 改善 (Console 中央コックピット化)
 
 ## 前提 (前セッションで完了済)
 
