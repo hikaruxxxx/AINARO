@@ -109,10 +109,10 @@ export async function handleBibleV3Preview(slug: string, res: http.ServerRespons
 async function readLlmRefine(fp: string): Promise<BibleV3LlmRefine | undefined> {
   try {
     const [data, stat] = await Promise.all([
-      readJson<Omit<BibleV3LlmRefine, "generated_at">>(fp),
+      readJson<{ llm_refine: Omit<BibleV3LlmRefine, "generated_at"> }>(fp),
       fs.stat(fp),
     ]);
-    return { ...data, generated_at: stat.mtime.toISOString() };
+    return { ...data.llm_refine, generated_at: stat.mtime.toISOString() };
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
     throw error;
