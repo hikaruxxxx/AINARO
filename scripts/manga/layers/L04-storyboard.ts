@@ -180,6 +180,8 @@ async function buildStoryboard(args: Args, bible: BibleSnapshotV2, directive?: s
       const enrichStart = Date.now();
       storyboard = await enrichStoryboardWithLLM(storyboard, sceneGraph, {
         generationProfileDirective: directive,
+        bible,
+        enforceVisibility: true,
       });
       console.log(`[L04] enrich done in ${((Date.now() - enrichStart) / 1000).toFixed(1)}s`);
     }

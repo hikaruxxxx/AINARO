@@ -212,6 +212,8 @@ async function main() {
       lintFeedback: flattenFeedback(feedbackByScene),
       targetSceneIds: sceneIds,
       cwd: process.cwd(),
+      bible,
+      enforceVisibility: true,
     });
     await writeJson(afterPath, storyboard);
     await writeJson(sbPath, storyboard);

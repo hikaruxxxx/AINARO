@@ -29,9 +29,11 @@ import type {
   OnScreenVia,
   CliffhangerPatternId,
   PullLink as PullLinkV2,
+  FactNode,
 } from "../schemas-v2";
 import type { Scene, SceneGraphV1, CastEntry, KeyLine, SceneMode } from "./schema";
 import { runCodexText } from "../llm/codex-text";
+import { contextForSceneV2 } from "../bible/broker-v3";
 
 // ============================================================================
 // Top-level entry
@@ -429,6 +431,13 @@ export type PanelLintFeedback = {
   }>;
 };
 
+export type PromptBibleContext = {
+  characters: FactNode[];
+  location: FactNode[];
+  world_rules: FactNode[];
+  motifs: FactNode[];
+};
+
 type DialogueLikeLine = { character_id: string; text: string };
 
 function normalizeDialogueLike(items: unknown): DialogueLikeLine[] {
@@ -461,6 +470,57 @@ function normalizeDialogueLike(items: unknown): DialogueLikeLine[] {
   return out;
 }
 
+function buildPromptBibleContext(bible: BibleSnapshotV2, scene: Scene): PromptBibleContext {
+  const context = contextForSceneV2(bible, scene, "in_world_only", { char: { min: 400, max: 1800 } });
+  return {
+    characters: context.characters,
+    location: context.location,
+    world_rules: context.world_rules,
+    motifs: context.motifs,
+  };
+}
+
+function appendVisibilitySections(
+  lines: string[],
+  bibleContext: PromptBibleContext,
+  atVolume: number
+): void {
+  lines.push(`## visibility 制約 (重要・最優先)`);
+  lines.push(`この panel で書ける text 種別ごとに、参照していい知識層が違います。`);
+  lines.push("");
+  lines.push(`- **cast の monologue** (登場キャラの内面独白): cast が「自分視点で実感している」感情・観察に限定。in_world_belief 層 (キャラ本人や周囲が世界の中で信じている事実) のみ言及可。`);
+  lines.push(`- **cast の dialogue** (登場キャラの台詞): 同じく in_world_belief 層のみ。`);
+  lines.push(`- **narration** (作者地の文): 第 ${atVolume} 巻までに reveal された事実 (revealed_at_volume <= ${atVolume}) まで言及可。`);
+  lines.push("");
+  lines.push(`以下は dialogue / monologue / narration に**絶対に書かない**:`);
+  lines.push(`- キャラの origin_wound_deep / psychology_deep / dark_mirror_to_protagonist のような meta_truth 層の語彙`);
+  lines.push(`- 作者視点で初めて成立する逆説的・象徴的な内省 (例: 「自分が author の手駒である」「この世界はシステム仕様によって動いている」)`);
+  lines.push(`- そのキャラがまだ知らない他者の秘密・本心 (revealed_at_volume が現巻より後の事実、または別キャラの meta_truth)`);
+  lines.push(`- 後の巻で reveal される予定の固有名詞・概念`);
+  lines.push("");
+  lines.push(`逆に書いてよいもの:`);
+  lines.push(`- bible context (下の節) に列挙された in_world_belief 層の事実`);
+  lines.push(`- scene.protagonist_arc_state.belief / goal / emotion から自然に出る感情・判断`);
+  lines.push(`- scene 内の key_lines で示された text`);
+  lines.push("");
+  lines.push(`## bible context (cast 視点で知りうる事実 — visibility=in_world_only)`);
+  appendFactSection(lines, `### キャラクター (in_world_belief 層, cast のみ)`, bibleContext.characters);
+  appendFactSection(lines, `### この場所`, bibleContext.location);
+  appendFactSection(lines, `### 適用される世界ルール (in_world_belief / system_specification 層)`, bibleContext.world_rules);
+  appendFactSection(lines, `### モチーフ (描き方指示)`, bibleContext.motifs);
+  lines.push("");
+}
+
+function appendFactSection(lines: string[], heading: string, facts: FactNode[]): void {
+  if (facts.length === 0) return;
+  lines.push("");
+  lines.push(heading);
+  for (const fact of facts) {
+    const prefix = fact.entity_id ? `${fact.entity_id}: ` : "";
+    lines.push(`- ${prefix}${fact.body}`);
+  }
+}
+
 /**
  * B5-5a で生成された storyboard の placeholder panel を Codex CLI 経由で本番文に書き換える。
  *
@@ -479,11 +539,15 @@ export async function enrichStoryboardWithLLM(
     generationProfileDirective?: string;
     lintFeedback?: PanelLintFeedback[];
     targetSceneIds?: string[];
+    bible?: BibleSnapshotV2;
+    enforceVisibility?: boolean;
+    atVolume?: number;
   }
 ): Promise<EpisodeStoryboardV2> {
   const cwd = options?.cwd ?? process.env.AINARO_REPO_ROOT ?? process.cwd();
   const timeoutMs = options?.timeoutMsPerScene ?? 5 * 60 * 1000;
   const targetSceneIds = options?.targetSceneIds ? new Set(options.targetSceneIds) : null;
+  const enforceVisibility = options?.enforceVisibility ?? Boolean(options?.bible);
 
   // panel_no -> Scene の逆引き
   const panelToScene = new Map<number, Scene>();
@@ -511,7 +575,18 @@ export async function enrichStoryboardWithLLM(
     const sceneLintFeedback = (options?.lintFeedback ?? []).filter(
       (feedback) => feedback.panel_no >= start && feedback.panel_no <= end
     );
-    const task = buildPanelDetailPrompt(scene, count, options?.generationProfileDirective, sceneLintFeedback);
+    const atVolume = scene.arc_position?.volume ?? options?.atVolume ?? 1;
+    const bibleContext = options?.bible && enforceVisibility
+      ? buildPromptBibleContext(options.bible, scene)
+      : undefined;
+    const task = buildPanelDetailPrompt(
+      scene,
+      count,
+      options?.generationProfileDirective,
+      sceneLintFeedback,
+      bibleContext,
+      bibleContext ? { atVolume } : undefined
+    );
     const result = await runCodexText<{ panels: EnrichedPanelDetail[] }>({
       task,
       format: "json",
@@ -568,7 +643,9 @@ export function buildPanelDetailPrompt(
   scene: Scene,
   panelCount: number,
   generationProfileDirective?: string,
-  lintFeedback: PanelLintFeedback[] = []
+  lintFeedback: PanelLintFeedback[] = [],
+  bibleContext?: PromptBibleContext,
+  visibilityPolicy?: { atVolume: number }
 ): string {
   const startNo = scene.panel_range.start_panel_no;
   const pageCount = Math.max(1, scene.page_range.end - scene.page_range.start + 1);
@@ -605,6 +682,9 @@ export function buildPanelDetailPrompt(
       lines.push(`- [${kl.speaker}] 「${kl.text}」 (${kl.intent}, ${kl.uniqueness})`);
     }
     lines.push("");
+  }
+  if (bibleContext) {
+    appendVisibilitySections(lines, bibleContext, visibilityPolicy?.atVolume ?? scene.arc_position?.volume ?? 1);
   }
   lines.push(`## 制約`);
   lines.push(`1. panel_no は ${startNo} から ${scene.panel_range.end_panel_no} まで連番で必ず ${panelCount} 個。`);
