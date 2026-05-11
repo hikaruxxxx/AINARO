@@ -1,4 +1,4 @@
-import type { BibleSnapshotV2 } from "../schemas-v2";
+import type { Aspect, BibleSnapshotV2, Layer } from "../schemas-v2";
 
 export type DepthRule = {
   /** 計測対象の path (dynamic getter で解釈) */
@@ -12,6 +12,10 @@ export type DepthRule = {
     | { kind: "min_chars"; min: number; ideal: number }
     | { kind: "min_count"; min: number; min_chars_each?: number; ideal?: number }
     | { kind: "min_count_only"; min: number };
+  /** V3 経路のみ: 該当 layer のみ depth check 対象に */
+  layerFilter?: Layer[];
+  /** V3 経路のみ: 該当 aspect のみ depth check 対象に */
+  aspectFilter?: Aspect[];
   /** 主役・脇役・敵の区別 (character のみ、role による min/ideal の切替に使う) */
   applies_to_role?: "protagonist" | "supporting" | "antagonist";
 };

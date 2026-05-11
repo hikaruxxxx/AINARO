@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { BibleSnapshotV2 } from "../schemas-v2";
-import { depthCoverageReport, depthLint } from "./depth-lint";
+import type { Aspect, BibleSnapshotV2, BibleSnapshotV3, FactNode, Layer } from "../schemas-v2";
+import { depthCoverageReport, depthLint, depthLintV3, depthLintWithFlag, detectLayerReveals } from "./depth-lint";
 import { measureChars, measureCount, resolvePath } from "./depth-spec";
+import { v2ToV3 } from "./v3-adapter";
 
 function text(chars: number): string {
   return "あ".repeat(chars);
@@ -97,6 +98,47 @@ function reportFor(bible: BibleSnapshotV2, rule: string) {
   return report;
 }
 
+function createMinimalV2WithBackstory(args: { length: number }): BibleSnapshotV2 {
+  return baseBible({ backstory: text(args.length) });
+}
+
+function createMinimalV3WithMixedLayers(): BibleSnapshotV3 {
+  return v2ToV3(baseBible({ backstory: text(5000), psychology_deep: text(100) }));
+}
+
+function createMinimalV3WithReveal(args: {
+  character_id: string;
+  aspect: Aspect;
+  layers: Layer[];
+}): BibleSnapshotV3 {
+  const v3 = v2ToV3(baseBible({ backstory: text(5000) }));
+  v3.entities.push({
+    id: args.character_id,
+    kind: "character",
+    name: "Reveal Test",
+    spec: { id: args.character_id, role: "supporting" },
+    fact_ids: [],
+    appears_in_volumes: [1],
+  });
+  v3.facts.push(
+    ...args.layers.map((layer, index): FactNode => ({
+      fact_id: `fact_reveal_${index}`,
+      entity_id: args.character_id,
+      aspect: args.aspect,
+      layer,
+      body: `reveal fact ${index}`,
+      priority: index,
+      evidence: {
+        source_path: `test.reveal[${index}]`,
+        json_pointer: `/test/reveal/${index}`,
+        source_span: [0, 13],
+        confidence: 1,
+      },
+    })),
+  );
+  return v3;
+}
+
 describe("depthLint", () => {
   it("protagonist.backstory が 200字なら fatal", () => {
     const finding = findingFor(baseBible({ backstory: text(200) }), "depth:characters[role=protagonist].backstory");
@@ -153,5 +195,35 @@ describe("depth-spec helpers", () => {
     const values = resolvePath(baseBible(), "visual_motifs[*].meaning");
     expect(values).toHaveLength(1);
     expect(measureCount(resolvePath(baseBible(), "characters[*]"))).toBe(1);
+  });
+});
+
+describe("depthLintV3 (V3 fact-based depth check)", () => {
+  it("characters[*].backstory の depth check が V3 fact 経由で動く", () => {
+    const v2 = createMinimalV2WithBackstory({ length: 1000 });
+    const v3 = v2ToV3(v2);
+    const findings = depthLintV3(v3);
+    expect(findings.some((finding) => finding.rule.includes("backstory"))).toBe(true);
+  });
+
+  it("layerFilter で in_world_belief のみ check", () => {
+    const v3 = createMinimalV3WithMixedLayers();
+    const findings = depthLintV3(v3, { layerFilter: ["in_world_belief"] });
+    expect(findings.some((finding) => finding.rule === "depth:characters[role=protagonist].psychology_deep")).toBe(false);
+  });
+
+  it("detectLayerReveals が同 entity 同 aspect 複数 layer fact を info で報告", () => {
+    const v3 = createMinimalV3WithReveal({
+      character_id: "char_a",
+      aspect: "psychology",
+      layers: ["in_world_belief", "meta_truth"],
+    });
+    const findings = detectLayerReveals(v3);
+    expect(findings.some((finding) => finding.rule === "layer_reveal_present" && finding.scope === "layer_consistency")).toBe(true);
+  });
+
+  it("depthLintWithFlag(false) は legacy depthLint と同じ", () => {
+    const v2 = baseBible();
+    expect(depthLintWithFlag(v2, false)).toEqual(depthLint(v2));
   });
 });

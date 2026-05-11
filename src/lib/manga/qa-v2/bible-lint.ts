@@ -13,7 +13,7 @@ import { runCodexText } from "../llm/codex-text";
 import { loadBlocklist, loadFalsePositives, scanBible } from "../compliance/scanner";
 import type { ComplianceFinding } from "../compliance/types";
 import type { BibleSnapshotV2 } from "../schemas-v2";
-import { depthLint } from "../bible/depth-lint";
+import { depthLintWithFlag } from "../bible/depth-lint";
 import { createHash } from "node:crypto";
 import { detectUndefinedReferences } from "./undefined-reference-detector";
 
@@ -739,6 +739,7 @@ export async function lintBible(args: {
   executor?: LintExecutor;
   stagePosition?: LintStagePosition;
   snapshotHash?: string;
+  useBibleV3?: boolean;
 }): Promise<BibleLintReport> {
   const findings: LintFinding[] = [];
   let judgeModel = "skipped";
@@ -776,7 +777,7 @@ export async function lintBible(args: {
   }
   if (!args.skipDepth) {
     try {
-      findings.push(...depthLint(args.bible));
+      findings.push(...depthLintWithFlag(args.bible, args.useBibleV3 ?? false));
     } catch (e) {
       findings.push({
         severity: "info",
