@@ -4,7 +4,12 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { bibleSnapshotPath } from "../layers/_paths";
+import type { BibleSnapshotV2 } from "../../../src/lib/manga/schemas-v2";
+import {
+  detectUndefinedReferencesInText,
+  type UndefinedReference,
+} from "../../../src/lib/manga/qa-v2/undefined-reference-detector";
+import { bibleDir, bibleSnapshotPath } from "../layers/_paths";
 import { findTargetField, type Scope } from "./apply-deepen-patch";
 
 type Args = {
@@ -13,12 +18,15 @@ type Args = {
   scope: Scope;
   field: string;
   resultFile: string;
+  diffCheck: boolean;
   forceApply: boolean;
   dryRun: boolean;
 };
 
-type ApplyRewritePatchInput = Omit<Args, "slug"> & {
+type ApplyRewritePatchInput = Omit<Args, "slug" | "diffCheck"> & {
   snapshotPath: string;
+  diffCheck?: boolean;
+  knownTermsPath?: string;
 };
 
 type ApplyRewritePatchResult = {
@@ -29,6 +37,7 @@ type ApplyRewritePatchResult = {
   afterLen: number;
   evaluationSummary: string;
   issues: RewriteIssue[];
+  gate?: RewriteQualityGateResult;
 };
 
 type JsonRecord = Record<string, unknown>;
@@ -39,11 +48,22 @@ type RewriteIssue = {
   location_hint?: string;
 };
 
+type RewriteQualityGateResult = {
+  checked: boolean;
+  passed: boolean;
+  forced: boolean;
+  references: UndefinedReference[];
+};
+
 export function parseArgs(argv = process.argv.slice(2)): Args {
-  const out: Partial<Args> = { forceApply: false, dryRun: false };
+  const out: Partial<Args> = { diffCheck: false, forceApply: false, dryRun: false };
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
+    if (arg === "--diff-check") {
+      out.diffCheck = true;
+      continue;
+    }
     if (arg === "--force-apply") {
       out.forceApply = true;
       continue;
@@ -91,15 +111,35 @@ export async function applyRewritePatch(input: ApplyRewritePatchInput): Promise<
   }
 
   const afterLen = rewrittenText.length;
+  const gate = input.diffCheck
+    ? await runRewriteQualityGate({
+        rewrittenText,
+        bible: bible as BibleSnapshotV2,
+        knownTermsPath: input.knownTermsPath ?? path.join(path.dirname(input.snapshotPath), "known_terms.json"),
+        forceApply: input.forceApply,
+      })
+    : undefined;
+  if (gate && !gate.passed && !gate.forced) {
+    return {
+      applied: false,
+      skippedReason: "quality gate failed",
+      beforeLen,
+      afterLen,
+      evaluationSummary,
+      issues,
+      gate,
+    };
+  }
+
   if (input.dryRun) {
-    return { applied: false, skippedReason: "dry-run", beforeLen, afterLen, evaluationSummary, issues };
+    return { applied: false, skippedReason: "dry-run", beforeLen, afterLen, evaluationSummary, issues, gate };
   }
 
   const backupPath = await backupSnapshot(input.snapshotPath);
   target.target[input.field] = rewrittenText;
   await fs.writeFile(input.snapshotPath, `${JSON.stringify(bible, null, 2)}\n`);
 
-  return { applied: true, backupPath, beforeLen, afterLen, evaluationSummary, issues };
+  return { applied: true, backupPath, beforeLen, afterLen, evaluationSummary, issues, gate };
 }
 
 async function main(): Promise<void> {
@@ -110,9 +150,19 @@ async function main(): Promise<void> {
     scope: args.scope,
     field: args.field,
     resultFile: args.resultFile,
+    diffCheck: args.diffCheck,
     forceApply: args.forceApply,
     dryRun: args.dryRun,
+    knownTermsPath: path.join(bibleDir(args.slug), "known_terms.json"),
   });
+
+  if (result.gate && result.gate.references.length > 0) {
+    logGate(result.gate);
+    if (!result.gate.forced) {
+      process.exitCode = 1;
+      return;
+    }
+  }
 
   const delta = result.afterLen - result.beforeLen;
   const prefix = result.applied ? "[apply-rewrite]" : "[apply-rewrite] skip";
@@ -123,6 +173,63 @@ async function main(): Promise<void> {
   }
   if (result.backupPath) console.log(`[apply-rewrite] backup: ${result.backupPath}`);
   if (result.skippedReason) console.log(`[apply-rewrite] reason: ${result.skippedReason}`);
+}
+
+async function runRewriteQualityGate(input: {
+  rewrittenText: string;
+  bible: BibleSnapshotV2;
+  knownTermsPath: string;
+  forceApply: boolean;
+}): Promise<RewriteQualityGateResult> {
+  const knownTerms = await readKnownTerms(input.knownTermsPath);
+  const references = dedupeReferences(
+    detectUndefinedReferencesInText(input.rewrittenText, input.bible, { knownTerms })
+  );
+
+  return {
+    checked: true,
+    passed: references.length === 0,
+    forced: input.forceApply && references.length > 0,
+    references,
+  };
+}
+
+function logGate(gate: RewriteQualityGateResult): void {
+  console.error(`[apply-rewrite] gate: ${gate.references.length} 件の未定義固有名詞を検出`);
+  for (const ref of gate.references) {
+    console.error(`  - "${ref.matched_text}" (context: "${clip(ref.context_excerpt, 200)}")`);
+  }
+  if (gate.forced) {
+    console.error("[apply-rewrite] gate WARN: --force-apply により gate を bypass して apply します。");
+    return;
+  }
+  console.error("[apply-rewrite] gate FAIL: --force-apply なしで apply を拒否。");
+  console.error("[apply-rewrite] hint: 上記固有名詞を bible に登録するか、prompt を修正して再生成してください。");
+}
+
+function dedupeReferences(references: UndefinedReference[]): UndefinedReference[] {
+  const seen = new Set<string>();
+  const out: UndefinedReference[] = [];
+  for (const ref of references) {
+    const key = ref.matched_text;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(ref);
+  }
+  return out;
+}
+
+async function readKnownTerms(filePath: string): Promise<string[]> {
+  try {
+    const raw = await fs.readFile(filePath, "utf-8");
+    const json = JSON.parse(raw) as { terms?: Array<{ term?: unknown }> };
+    return (json.terms ?? [])
+      .map((entry) => entry.term)
+      .filter((term): term is string => typeof term === "string" && term.trim().length > 0);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw error;
+  }
 }
 
 async function readJson(filePath: string, label: string): Promise<unknown> {
@@ -156,6 +263,11 @@ function parseIssues(value: unknown): RewriteIssue[] {
 
 function formatDelta(value: number): string {
   return value >= 0 ? `+${value}` : String(value);
+}
+
+function clip(value: string, max: number): string {
+  const chars = Array.from(value);
+  return chars.length > max ? `${chars.slice(0, max).join("")}...` : value;
 }
 
 function asRecord(value: unknown, label: string): JsonRecord {

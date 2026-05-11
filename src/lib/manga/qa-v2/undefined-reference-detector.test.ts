@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { BibleSnapshotV2 } from "../schemas-v2";
-import { detectUndefinedReferences } from "./undefined-reference-detector";
+import { detectUndefinedReferences, detectUndefinedReferencesInText } from "./undefined-reference-detector";
 
 describe("detectUndefinedReferences", () => {
   it("knownTerms option の語を未定義参照から除外する", () => {
@@ -41,6 +41,29 @@ describe("detectUndefinedReferences", () => {
     const refs = detectUndefinedReferences(bible);
 
     expect(refs.some((ref) => ref.matched_text === "白瀬灯里主任")).toBe(false);
+  });
+
+  it("任意テキスト内の未定義固有名詞を rewritten_text として検出する", () => {
+    const refs = detectUndefinedReferencesInText(
+      "桐生レンは天野レンへの理解欲と偶然許可リストを隠した。",
+      createBible({
+        characters: [{ ...createBible().characters[0], name: "桐生 レン" }],
+      })
+    );
+
+    expect(refs.map((ref) => ref.matched_text)).toContain("天野レン");
+    expect(refs.map((ref) => ref.matched_text)).toContain("偶然許可リスト");
+    expect(refs.every((ref) => ref.source_path === "rewritten_text")).toBe(true);
+  });
+
+  it("任意テキストでも knownTerms option の語を未定義参照から除外する", () => {
+    const refs = detectUndefinedReferencesInText(
+      "鑑定石プロトコルは公社窓口で使う。",
+      createBible(),
+      { knownTerms: ["鑑定石プロトコル"] }
+    );
+
+    expect(refs.some((ref) => ref.matched_text === "鑑定石プロトコル")).toBe(false);
   });
 });
 

@@ -385,23 +385,43 @@ export function detectUndefinedReferences(
   const out: UndefinedReference[] = [];
 
   for (const field of collectTextFields(bible)) {
-    for (const match of extractCandidateMatches(field.text)) {
-      const normalized = normalizeName(match.text);
-      if (!normalized || known.has(normalized) || COMMON_TERMS.has(normalized)) continue;
-      if (isFalsePositiveCandidate(normalized)) continue;
-      if (isLikelyCommonTerm(normalized)) continue;
-
-      const key = `${field.path}:${normalized}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push({
-        source_path: field.path,
-        matched_text: match.text,
-        context_excerpt: excerptAround(field.text, match.index, match.text.length),
-      });
-    }
+    out.push(...detectUndefinedReferencesInField(field.path, field.text, known, seen));
   }
 
+  return out;
+}
+
+export function detectUndefinedReferencesInText(
+  text: string,
+  bible: BibleSnapshotV2,
+  options: UndefinedReferenceDetectorOptions = {}
+): UndefinedReference[] {
+  const known = buildKnownEntityNames(bible, options);
+  return detectUndefinedReferencesInField("rewritten_text", text, known, new Set<string>());
+}
+
+function detectUndefinedReferencesInField(
+  sourcePath: string,
+  text: string,
+  known: Set<string>,
+  seen: Set<string>
+): UndefinedReference[] {
+  const out: UndefinedReference[] = [];
+  for (const match of extractCandidateMatches(text)) {
+    const normalized = normalizeName(match.text);
+    if (!normalized || known.has(normalized) || COMMON_TERMS.has(normalized)) continue;
+    if (isFalsePositiveCandidate(normalized)) continue;
+    if (isLikelyCommonTerm(normalized)) continue;
+
+    const key = `${sourcePath}:${normalized}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({
+      source_path: sourcePath,
+      matched_text: match.text,
+      context_excerpt: excerptAround(text, match.index, match.text.length),
+    });
+  }
   return out;
 }
 

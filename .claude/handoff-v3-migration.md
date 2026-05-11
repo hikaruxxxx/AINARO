@@ -18,7 +18,8 @@
 | d3cd17b | docs: handoff に Wave 2 + 2-C 調査結果反映 |
 | 6a6700e | feat: deepen-snapshot-field.ts (Codex CLI 経由 deepener、初回実走で課題判明) |
 | f493f8b | feat: apply-deepen-patch.ts (Claude Agent 経由の追記式 patch apply、a07 玲二 origin_wound_deep で実証成功 fatal 27→26) |
-| (次) | feat: evaluate-and-rewrite + apply-rewrite-patch (Claude Agent 評価+上書き式 rewrite インフラ、a07 で実走確認 + hallucination 課題判明) |
+| 5cb85c4 | feat: evaluate-and-rewrite + apply-rewrite-patch (Claude Agent 評価+上書き式 rewrite インフラ、a07 で実走確認 + hallucination 課題判明) |
+| (次) | feat: Quality Gate (--diff-check + prompt 厳守ルール) - hallucination 検出 33 件で apply 阻止を実証 |
 
 - handoff の **最優先タスク (L4 visibility 縛り)** 完了
 - 副産物として broker-v3 `applyCharBudget` のバグを発見・修正
@@ -65,12 +66,16 @@ V3 移行 plan の **残課題に着手**:
      - Agent が誤キャラ名「天野レン」を生成 (正: 桐生レン)
      - 新規語彙 (偶然許可リスト / 信頼スコア / 国家直轄部隊 等) を context 無視で多数導入
      - revert 済 (fatal=26 維持)
-   - **次セッションでやるべきこと (Claude Agent 路線継続 + quality gate 必須)**:
-     1. apply-rewrite-patch に `--diff-check` モード追加: 新文章の固有名詞を bible.characters/locations/props/motifs + known_terms.json と照合、未登録の固有名詞は exit 1 + 一覧表示
-     2. evaluate-and-rewrite prompt に「キャラ名は context にある氏名 (例: 桐生レン) 以外を絶対に使うな」「新規概念は既存 bible/known_terms に登録済みのもののみ」を強く明記
-     3. apply-rewrite-patch に `--interactive` モード (人間が新規語彙を確認して登録 or revert)
-     4. Quality gate が通った文章のみ apply、それ以外は警告 + revert
-     5. Quality gate 経由で残り fatal 26 件を Claude Agent 経由で一括処理
+   - **Quality Gate 完成** (commit TBD):
+     - `apply-rewrite-patch --diff-check` で新文章の未登録固有名詞を検出 → exit 1
+     - `detectUndefinedReferencesInText(text, bible, knownTerms)` API 追加
+     - evaluate-and-rewrite prompt に厳守ルール 3 件追加 (キャラ名厳守 / 新規固有名詞禁止 / 既存設定優先)
+     - a07 玲二 psychology_deep で実証: 直前の hallucination 入り result (天野レン誤キャラ + 偶然許可リスト等新概念) → **gate が 33 件検出して apply 阻止**、snapshot 変更ゼロ
+   - **次セッションでやるべきこと**:
+     1. **known_terms.json を充実させて gate 通過率を上げる** (現状の gate は誤検出ぎみ、context 由来の妥当用語まで止める)
+     2. Quality gate 経由で残り fatal 26 件を Claude Agent 経由で一括処理 (gate 通過した文章のみ apply、通過しないなら known_terms 追加 → 再試行 or prompt 改善)
+     3. (任意) apply-rewrite-patch に `--interactive` モード追加 (人間が新規語彙を確認 + known_terms.json に登録)
+     4. (任意) 段落単位の部分置換 (issues の location_hint を活用して該当段落だけ置換)
 8. ~~bible-lint の「ライン」誤検出修正~~ — **完了 (7dedb83、a07 fatal 30→27)**
 9. (任意・**Wave 3 候補**) L3.5 強化 — a07 では volume_plot.json が**未作成**で cross-episode validator が弱動作。1. a07 用 volume_plot 生成、2. 巻またぎ伏線の自動配置、3. episode-patterns 辞書のカバー率向上、4. anchor pool scoring 統合 (4 子タスク)
 10. (任意) L11 audit / L12 repair の本格化 (現状は雛形のみ)

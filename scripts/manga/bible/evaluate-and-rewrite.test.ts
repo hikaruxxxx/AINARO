@@ -34,6 +34,10 @@ describe("evaluate-and-rewrite", () => {
     expect(prompt).toContain("現状テキスト");
     expect(prompt).toContain('"needs_rewrite": true');
     expect(prompt).toContain("rewritten_text は ideal 字数を目指す");
+    expect(prompt).toContain("## ⚠️ 厳守ルール (hallucination 防止)");
+    expect(prompt).toContain("**キャラ名厳守**");
+    expect(prompt).toContain("**新規固有名詞の禁止**");
+    expect(prompt).toContain("**既存設定の優先**");
   });
 
   it("parseArgs は emit-prompt default と required flags を扱う", () => {
