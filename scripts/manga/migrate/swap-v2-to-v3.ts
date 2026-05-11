@@ -5,7 +5,7 @@ import { stdin as defaultStdin, stdout as defaultStdout } from "node:process";
 
 import { bibleDir, bibleSnapshotPath } from "../layers/_paths";
 import type { BibleSnapshotV2, BibleSnapshotV3, FactNode } from "../../../src/lib/manga/schemas-v2";
-import { isBibleSnapshotV3 } from "../../../src/lib/manga/schemas-v2";
+import { isBibleSnapshotV2, isBibleSnapshotV3 } from "../../../src/lib/manga/schemas-v2";
 import * as atomicWrite from "../../../src/lib/manga/bible/atomic-write";
 import { lintBible } from "../../../src/lib/manga/qa-v2/bible-lint";
 
@@ -18,6 +18,7 @@ type Args = {
   dryRun: boolean;
   allowFatal: boolean;
   yes: boolean;
+  v2Overwrite: boolean;
 };
 
 type RunSwapOptions = {
@@ -38,6 +39,7 @@ export async function runSwap(options: RunSwapOptions): Promise<number> {
 
   const dir = bibleDir(args.slug);
   const snapshotPath = bibleSnapshotPath(args.slug);
+  const v3FileName = args.v2Overwrite ? "snapshot.json" : "snapshot.v3.json";
   const ts = safeTimestamp();
   const backupPath = path.join(dir, `snapshot.bak-pre-v3-swap-${ts}.json`);
   const finalV2Path = path.join(dir, "snapshot.v2-final.json");
@@ -64,7 +66,8 @@ export async function runSwap(options: RunSwapOptions): Promise<number> {
   const stats = computeStats(v3);
   if (args.dryRun) {
     log(out, "[swap] dry-run mode (writeSnapshotV3Atomic not called)");
-    log(out, `[swap] would write to: ${path.join(dir, "snapshot.json")} (split facts: ${args.splitFacts})`);
+    log(out, `[swap] would write to: ${path.join(dir, v3FileName)} (split facts: ${args.splitFacts})`);
+    if (!args.v2Overwrite) log(out, `[swap] would protect: ${snapshotPath} (V2 source remains untouched)`);
     log(out, `[swap] v3 stats: entities=${stats.entities}, facts=${stats.facts}, volumes=${stats.volumes}`);
     log(out, `[swap] would create backup: ${backupPath}`);
     log(out, `[swap] consistency check: ok=true, errors=${consistency.errors.length}, warnings=${consistency.warnings.length}`);
@@ -73,7 +76,7 @@ export async function runSwap(options: RunSwapOptions): Promise<number> {
   }
 
   if (!args.yes) {
-    const ok = await confirmOverwrite(options.stdin ?? defaultStdin, out);
+    const ok = await confirmOverwrite(options.stdin ?? defaultStdin, out, args.v2Overwrite);
     if (!ok) {
       log(out, "[swap] aborted by user");
       return 1;
@@ -88,6 +91,7 @@ export async function runSwap(options: RunSwapOptions): Promise<number> {
     bibleDir: dir,
     stageLabel: "phase-8-swap",
     splitFacts: args.splitFacts,
+    v3FileName,
   });
   if (!result.ok) {
     log(out, `[swap] atomic write failed: ${result.error ?? "unknown error"}`);
@@ -95,15 +99,22 @@ export async function runSwap(options: RunSwapOptions): Promise<number> {
     return 1;
   }
 
-  const verify = await verifyWrittenSnapshot(dir);
+  const verify = await verifyWrittenSnapshot(dir, v3FileName, !args.v2Overwrite);
   if (!verify.ok) {
     log(out, `[swap] post-swap verification failed: ${verify.error}`);
     log(out, `[swap] manual restore: cp ${backupPath} ${snapshotPath}`);
     return 2;
   }
+  log(out, `[swap] V3 verify ok: ${v3FileName} schema_version=3`);
+  if (!args.v2Overwrite) log(out, "[swap] V2 protected: snapshot.json schema_version=2 unchanged");
 
-  log(out, `[swap] V3 swap complete for ${args.slug}`);
-  log(out, `[swap]   v3 stats: entities=${stats.entities}, facts=${stats.facts} (${formatCounts(stats.layerCounts)})`);
+  log(out, args.v2Overwrite ? `[swap] V3 swap complete for ${args.slug}` : `[swap] V2/V3 並存保存完了 for ${args.slug}`);
+  if (!args.v2Overwrite) {
+    log(out, "[swap]   V2 (legacy): snapshot.json (schema_version=2) - broker / L4 / L9 default 読込");
+    log(out, "[swap]   V3 (new):    snapshot.v3.json (schema_version=3) - USE_BIBLE_V3=true 時読込");
+    if (args.splitFacts) log(out, "[swap]   V3 facts split: facts/{characters,locations,...}/<id>.json");
+  }
+  log(out, `[swap]   v3 stats: entities=${stats.entities}, facts=${stats.facts}, volumes=${stats.volumes} (${formatCounts(stats.layerCounts)})`);
   log(out, `[swap]   confidence breakdown: avg=${stats.confidence.avg}, median=${stats.confidence.median}, <0.7=${stats.confidence.lowCount} facts (${stats.confidence.lowPercent}%)`);
   log(out, `[swap]   pre-swap V2 fatal=${preLint.fatal_count}, post-swap V3 fatal=${v3Lint.fatal_count}`);
   log(out, "[swap]   files written:");
@@ -132,14 +143,25 @@ async function loadV3Snapshot(dir: string, requested: SourceKind): Promise<{ v3:
   throw lastError instanceof Error ? lastError : new Error(String(lastError));
 }
 
-async function verifyWrittenSnapshot(dir: string): Promise<{ ok: true } | { ok: false; error: string }> {
+async function verifyWrittenSnapshot(
+  dir: string,
+  v3FileName: string,
+  protectV2: boolean,
+): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
-    const snapshotPath = path.join(dir, "snapshot.json");
+    const snapshotPath = path.join(dir, v3FileName);
     const snapshot = JSON.parse(await fs.readFile(snapshotPath, "utf-8")) as unknown;
-    if (!isBibleSnapshotV3(snapshot)) return { ok: false, error: "snapshot.json is not recognized as V3" };
+    if (!isBibleSnapshotV3(snapshot)) return { ok: false, error: `${v3FileName} is not recognized as V3` };
     const v3 = await hydrateSplitFacts(dir, snapshot);
     const consistency = atomicWrite.validateSnapshotConsistency(v3);
     if (!consistency.ok) return { ok: false, error: consistency.errors.join("; ") };
+    if (protectV2) {
+      const v2Path = path.join(dir, "snapshot.json");
+      const v2Raw = JSON.parse(await fs.readFile(v2Path, "utf-8")) as unknown;
+      if (!isBibleSnapshotV2(v2Raw)) {
+        return { ok: false, error: "V2 protection failed: snapshot.json was modified or is not BibleSnapshotV2" };
+      }
+    }
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : String(error) };
@@ -170,7 +192,7 @@ async function listJsonFiles(dir: string): Promise<string[]> {
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { source: "refined", splitFacts: true, dryRun: false, allowFatal: false, yes: false };
+  const args: Args = { source: "refined", splitFacts: true, dryRun: false, allowFatal: false, yes: false, v2Overwrite: false };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--slug") args.slug = requireValue("--slug", argv[++i]);
@@ -182,6 +204,7 @@ function parseArgs(argv: string[]): Args {
     else if (arg === "--dry-run") args.dryRun = true;
     else if (arg === "--allow-fatal") args.allowFatal = true;
     else if (arg === "--yes") args.yes = true;
+    else if (arg === "--v2-overwrite") args.v2Overwrite = true;
     else throw new Error(`Unknown argument: ${arg}`);
   }
   return args;
@@ -231,7 +254,7 @@ function summarizeWrittenFiles(files: string[]): string[] {
   for (const file of files) {
     if (file.includes(`${path.sep}facts${path.sep}`)) {
       factsByDir.set(path.dirname(file), (factsByDir.get(path.dirname(file)) ?? 0) + 1);
-    } else if (path.basename(file) === "snapshot.json") {
+    } else if (path.basename(file) === "snapshot.json" || path.basename(file) === "snapshot.v3.json") {
       lines.push(`${file} (V3 schema_version=3)`);
     } else {
       lines.push(file);
@@ -243,10 +266,13 @@ function summarizeWrittenFiles(files: string[]): string[] {
   return lines;
 }
 
-async function confirmOverwrite(stdin: NodeJS.ReadStream, stdout: Pick<NodeJS.WriteStream, "write">): Promise<boolean> {
+async function confirmOverwrite(stdin: NodeJS.ReadStream, stdout: Pick<NodeJS.WriteStream, "write">, v2Overwrite: boolean): Promise<boolean> {
   const rl = readline.createInterface({ input: stdin, output: stdout as NodeJS.WritableStream });
   try {
-    const answer = await rl.question("[swap] WARNING: This will overwrite snapshot.json with V3 schema. Continue? (y/N) ");
+    const prompt = v2Overwrite
+      ? "[swap] WARNING: This will overwrite snapshot.json with V3 schema. Continue? (y/N) "
+      : "[swap] This will write V3 alongside V2. Continue? (y/N) ";
+    const answer = await rl.question(prompt);
     return answer.trim().toLowerCase() === "y";
   } finally {
     rl.close();

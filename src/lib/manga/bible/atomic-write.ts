@@ -15,8 +15,10 @@ export type AtomicWriteOptions = {
   bibleDir: string;
   /** rollback 用 .bak-pre-<stage>.json suffix */
   stageLabel: string;
-  /** facts/ 分割を有効にするか (false で snapshot.json 単一ファイル) */
+  /** facts/ 分割を有効にするか (false で V3 snapshot 単一ファイル) */
   splitFacts?: boolean;
+  /** V3 snapshot のファイル名。default は snapshot.v3.json */
+  v3FileName?: string;
 };
 
 export type ConsistencyCheckResult = {
@@ -49,10 +51,12 @@ export async function writeSnapshotV3Atomic(
 ): Promise<AtomicWriteResult> {
   const bibleDir = options.bibleDir;
   const splitFacts = options.splitFacts ?? true;
+  const snapshotFileName = options.v3FileName ?? "snapshot.v3.json";
   const timestamp = safeTimestamp();
   const tmpDir = path.join(bibleDir, `.tmp-write-${timestamp}`);
   const oldDir = path.join(bibleDir, `.old-${timestamp}`);
   const backupPath = path.join(bibleDir, `snapshot.bak-pre-${sanitizeStageLabel(options.stageLabel)}-${timestamp}.json`);
+  const snapshotPath = path.join(bibleDir, snapshotFileName);
   const writtenFiles: string[] = [];
   const oldMoves: MoveEntry[] = [];
   let backupCreated = false;
@@ -61,13 +65,12 @@ export async function writeSnapshotV3Atomic(
   try {
     await fs.mkdir(bibleDir, { recursive: true });
 
-    const snapshotPath = path.join(bibleDir, "snapshot.json");
     if (await exists(snapshotPath)) {
       await fs.copyFile(snapshotPath, backupPath);
       backupCreated = true;
     }
 
-    const plannedFiles = planSnapshotFiles(v3, splitFacts);
+    const plannedFiles = planSnapshotFiles(v3, splitFacts, snapshotFileName);
     await fs.mkdir(tmpDir, { recursive: true });
 
     for (const file of plannedFiles) {
@@ -84,7 +87,7 @@ export async function writeSnapshotV3Atomic(
     }
 
     await fs.mkdir(oldDir, { recursive: true });
-    for (const relativePath of ["snapshot.json", "facts", "fact_index.json"]) {
+    for (const relativePath of [snapshotFileName, "facts", "fact_index.json", "checksums.json"]) {
       const from = path.join(bibleDir, relativePath);
       if (await exists(from)) {
         const to = path.join(oldDir, relativePath);
@@ -114,7 +117,7 @@ export async function writeSnapshotV3Atomic(
       tmpDir,
       oldMoves,
       backupPath: backupCreated ? backupPath : null,
-      snapshotPath: path.join(bibleDir, "snapshot.json"),
+      snapshotPath,
       finalPaths: writtenFiles,
       renameStarted,
     });
@@ -199,12 +202,12 @@ export function validateSnapshotConsistency(v3: BibleSnapshotV3): ConsistencyChe
   };
 }
 
-function planSnapshotFiles(v3: BibleSnapshotV3, splitFacts: boolean): PlannedJsonFile[] {
+function planSnapshotFiles(v3: BibleSnapshotV3, splitFacts: boolean, snapshotFileName: string): PlannedJsonFile[] {
   if (!splitFacts) {
-    return [{ relativePath: "snapshot.json", data: v3 }];
+    return [{ relativePath: snapshotFileName, data: v3 }];
   }
 
-  const files: PlannedJsonFile[] = [{ relativePath: "snapshot.json", data: { ...v3, facts: [] } }];
+  const files: PlannedJsonFile[] = [{ relativePath: snapshotFileName, data: { ...v3, facts: [] } }];
   const factsByPath = new Map<string, FactNode[]>();
 
   for (const fact of v3.facts) {
