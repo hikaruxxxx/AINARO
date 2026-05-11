@@ -91,6 +91,15 @@ AINARO の `src/` `scripts/` を編集する作業は、原則として以下の
 - ユーザが「Novelis Console 開いて」と言ったら `/novelis-console` slash command を実行（health check → 必要なら起動 → `open`）
 - launchd 常駐は Phase 2 で導入予定。現状は本コマンドが起動口
 
+## 漫画 Bible V3 fact-based schema (移行進行中)
+- V2 (flat) と V3 (fact-based、Layer 5値 × Aspect 16値 × FactPov 5値) が **共存中**
+- 現在 a07 まで V3 migration preview 生成済 (snapshot.json 自体は V2、`bible/v3-classified-*.json` に preview)
+- USE_BIBLE_V3=true で broker / composer が V3 経由 (parity 保証 shim)、default は V2 経路
+- 手順書: `docs/architecture/bible_v3_migration_guide.md`
+- migration: `npx tsx scripts/manga/migrate/v2-to-v3-classify.ts --slug X [--with-llm-refine --rounds 3]`
+- 本番置換: `npx tsx scripts/manga/migrate/swap-v2-to-v3.ts --slug X [--dry-run]`
+- 設計 plan: `~/.claude/plans/wild-exploring-crescent.md` (Phase 1-8C 完了)
+
 ## ディレクトリ構成
 - docs/ — 事業計画・設計ドキュメント（strategy/, architecture/）
 - src/ — Next.js App Routerの標準構成
