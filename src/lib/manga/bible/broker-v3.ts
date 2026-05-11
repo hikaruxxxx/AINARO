@@ -601,18 +601,21 @@ function applyCharBudget(facts: FactNode[], budget: { min: number; max: number }
   if (!budget) return { facts, truncated: false };
   const out: FactNode[] = [];
   let length = 0;
+  let truncated = false;
   for (const fact of facts) {
-    const next = length + fact.body.length;
-    if (out.length > 0 && next > budget.max) {
-      return { facts: out, truncated: true };
+    if (fact.body.length > budget.max) {
+      truncated = true;
+      continue;
     }
+    const next = length + fact.body.length;
     if (next > budget.max) {
-      return { facts: [], truncated: true };
+      truncated = true;
+      break;
     }
     out.push(fact);
     length = next;
   }
-  return { facts: out, truncated: false };
+  return { facts: out, truncated };
 }
 
 function textLength(facts: FactNode[]): number {

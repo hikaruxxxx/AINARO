@@ -165,6 +165,41 @@ describe("queryBible primitive operations", () => {
     expect(result.truncated).toBe(true);
     expect(result.warnings).toContain("char_budget_truncated:20");
   });
+
+  it("先頭 fact が単独で max を超えても、後続の短い fact は拾われる", () => {
+    const v3 = createPrimitiveV3();
+    v3.facts = [
+      fact("fact_too_long", "char_a", "backstory", "in_world_belief", "x".repeat(50), 0),
+      fact("fact_short", "char_a", "identity", "in_world_belief", "x".repeat(10), 1),
+    ];
+
+    const result = queryBible(v3, {
+      visibility: "author_omniscient",
+      at_volume: 1,
+      char_budget: { min: 1, max: 30 },
+    });
+
+    expect(result.facts).toHaveLength(1);
+    expect(result.facts[0]?.fact_id).toBe("fact_short");
+    expect(result.truncated).toBe(true);
+  });
+
+  it("全 fact が max 超ならば空配列 + truncated:true を返す", () => {
+    const v3 = createPrimitiveV3();
+    v3.facts = [
+      fact("fact_too_long_a", "char_a", "backstory", "in_world_belief", "x".repeat(100), 0),
+      fact("fact_too_long_b", "char_a", "identity", "in_world_belief", "x".repeat(100), 1),
+    ];
+
+    const result = queryBible(v3, {
+      visibility: "author_omniscient",
+      at_volume: 1,
+      char_budget: { min: 1, max: 10 },
+    });
+
+    expect(result.facts).toHaveLength(0);
+    expect(result.truncated).toBe(true);
+  });
 });
 
 describe("contextForScene smoke test", () => {
