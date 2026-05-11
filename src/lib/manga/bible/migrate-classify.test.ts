@@ -1,3 +1,6 @@
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { BibleSnapshotV2 } from "../schemas-v2";
@@ -158,6 +161,50 @@ describe("migrate-classify", () => {
 
     expect(spy).not.toHaveBeenCalled();
     expect(result.llm_refine.summary.avg_confidence).toBeCloseTo(0.9, 2);
+  });
+
+  it("swap script dry-run で v3 stats を出力し atomic write を呼ばない", async () => {
+    const previousRoot = process.env.AINARO_REPO_ROOT;
+    const tmpRepo = await fs.mkdtemp(path.join(os.tmpdir(), "ainaro-swap-"));
+    process.env.AINARO_REPO_ROOT = tmpRepo;
+    vi.resetModules();
+
+    try {
+      const slug = "swap-test";
+      const biblePath = path.join(tmpRepo, "data", "manga", "works", slug, "bible");
+      await fs.mkdir(biblePath, { recursive: true });
+
+      const v2 = createMinimalV2();
+      v2.meta.slug = slug;
+      const migration = runMigration(v2);
+      await fs.writeFile(path.join(biblePath, "snapshot.json"), `${JSON.stringify(v2, null, 2)}\n`, "utf-8");
+      await fs.writeFile(
+        path.join(biblePath, "v3-classified-llm-refine.json"),
+        `${JSON.stringify({ ...migration, v3: { ...migration.v3, meta: { ...migration.v3.meta, slug } } }, null, 2)}\n`,
+        "utf-8",
+      );
+
+      const atomicWrite = await import("./atomic-write");
+      const writeSpy = vi.spyOn(atomicWrite, "writeSnapshotV3Atomic");
+      const { runSwap } = await import("../../../../scripts/manga/migrate/swap-v2-to-v3");
+      let stdout = "";
+      const code = await runSwap({
+        argv: ["--slug", slug, "--dry-run", "--allow-fatal"],
+        stdout: { write: (chunk: string | Uint8Array) => { stdout += String(chunk); return true; } },
+      });
+
+      expect(code).toBe(0);
+      expect(stdout).toContain("[swap] dry-run mode");
+      expect(stdout).toContain("would write to:");
+      expect(stdout).toContain("v3 stats:");
+      expect(writeSpy).not.toHaveBeenCalled();
+    } finally {
+      if (previousRoot === undefined) {
+        delete process.env.AINARO_REPO_ROOT;
+      } else {
+        process.env.AINARO_REPO_ROOT = previousRoot;
+      }
+    }
   });
 });
 
