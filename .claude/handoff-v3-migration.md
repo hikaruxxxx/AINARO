@@ -1,12 +1,27 @@
 # AINARO 漫画 bible V3 移行 — 次セッション引継ぎ
 
+## 前セッション (2026-05-11) の成果
+
+| commit | 内容 |
+|---|---|
+| a3b3fd7 | feat: L4 storyboard 詳細化 prompt に visibility 縛り + bible context 注入 |
+| d2a60bd | fix: applyCharBudget が先頭 fact 1 件の単独 max 超過で空配列を返すバグを skip ロジックで修正 |
+
+- handoff の **最優先タスク (L4 visibility 縛り)** 完了
+- 副産物として broker-v3 `applyCharBudget` のバグを発見・修正
+  - 修正前: cast character の最初の長文 fact 1 件で空配列を返し、character section が完全消滅
+  - 修正後: a07 ep01 S01 で character section に psychology fact 1 件 (1,628 字) が正しく拾われる
+- 372 → 378 tests (+6: storyboard-visibility 4 + applyCharBudget 2)
+- 詳細 spec: `/tmp/v3-l4-spec/spec.md`, `/tmp/v3-l4-spec/spec-budget.md` (実装後も残してある)
+
 ## このセッションのゴール
 
 V3 移行 plan の **残課題に着手**:
-1. (最優先) L4 storyboard visibility 縛りの本格実装
-2. b/c 系作品 (転生貴族・現代ダンジョン2 等) で V3 migration を実走、a07 を量産展開ロールモデルとして検証
-3. (任意) undefined-ref detector 更改善 (1,971 → 数百件)
-4. (任意) USE_BIBLE_V3 を default true 化検討 (a07 で十分検証されたら)
+1. ~~(最優先) L4 storyboard visibility 縛りの本格実装~~ — **完了 (a3b3fd7)**
+2. ~~b/c 系作品 (転生貴族・現代ダンジョン2 等) で V3 migration を実走~~ — **a07 以外の作品 bible が `data/manga/works/` 配下に存在しないため skip**
+3. (新規・最優先候補) Character 長文 fact の sub-split — Phase 9 sub-split が character 用に走っていない疑い。レン backstory 2,546字 / psychology 3,815字等の超長文 fact が複数あり、budget 1800 では 1 件しか拾えない
+4. (任意) undefined-ref detector 更改善 (1,971 → 数百件)
+5. (任意) USE_BIBLE_V3 を default true 化検討 (a07 で十分検証されたら)
 
 ## 前提 (前セッションで完了済)
 
@@ -84,59 +99,53 @@ USE_BIBLE_V3=true
 
 ## このセッションでやること (詳細)
 
-### 1. (最優先) L4 storyboard visibility 縛り
+### 1. (新規・最優先候補) Character 長文 fact の sub-split
 
-**現状:**
-- Phase 6 で `monologue-layer-check` audit 実装 (storyboard 生成後の検出)、a07 で fatal=0
-- ただし storyboard 生成 prompt 自体に visibility 制約は入っていない (cast が meta_truth fact を喋る monologue が出力されうる)
-- a07 では fatal=0 だが、これは「現状の bible が meta_truth phrase を含まない」なのか「LLM が運良く meta_truth を漏らさなかった」のか不明
+**背景:**
+前セッションで L4 visibility 縛り (a3b3fd7) + applyCharBudget 修正 (d2a60bd) を入れて、a07 ep01 S01 で character section に fact 1 件が拾われるようになった。
+
+しかし、a07 cast (レン) の facts を見ると、最初の数件が異常に長い (2,546 / 3,815 / 3,255 字)。これらは V2 の `psychology_deep` `personality_visual_detailed` `belief_system_full` 等の長大フィールドが Phase 9 sub-split で分割されていない疑い。
+
+```
+レン facts body length 上位:
+  fact 1: 2,546 chars (backstory)
+  fact 2: 3,815 chars (psychology)
+  fact 3: 3,255 chars (...)
+  fact 4: 1,345 chars
+  fact 5: 1,312 chars
+  fact 6: 2,316 chars
+  fact 7-46: 50-80 chars (speech 等、short fact)
+```
 
 **目指す状態:**
-- storyboard 生成 prompt に「cast は in_world_belief 層しか知らない、narration は at_volume までの reveal を許容」を明示
-- broker-v3.contextForSceneV2 を visibility="in_world_only" で呼び、 cast 視点の bible context を取得して生成
-- 結果: monologue が meta_truth を漏らさない構造的保証
+- character の長文 V2 source fields も sub-split 対象に追加
+- 各 character fact が ~500 字以下に分割される
+- L4 visibility 縛り prompt の character section に複数 fact (identity / appearance / psychology / backstory / relationship / speech) がバランスよく拾われる
 
-**対象ファイル:**
-- `scripts/manga/layers/L04-storyboard.ts`
-- `src/lib/manga/scene-graph/storyboard-from-scenes.ts` (主に enrichStoryboardWithLLM 関数)
-- `src/lib/manga/storyboard-v2/storyboard-extractor.ts`
-
-**実装方針:**
-- L4 内の LLM prompt に「visibility=in_world_only context」を明示挿入
-- broker-v3.contextForSceneV2 を呼んで visibility 別の bible context を取得
-- prompt template に「cast monologue は in_world_belief facts のみ言及可」「narration は revealed_at_volume <= current_vol まで可」明文化
-- 既存 monologue-layer-check と二重 guard
-
-**規模感:** 中-大 (storyboard 生成 path の調査が必要)。Codex に依頼するなら spec を厚めに準備。
-
-### 2. b/c 系作品で V3 migration 実走
-
-**前提:**
-- a07-modern-dungeon は完了
-- b/c 系 = Phase A 検証 3 作品 (転生貴族領地経営 / ダンジョン探索 / a07 含む) のうち a07 以外
-- `data/manga/works/` を見て他作品の bible 存在を確認
+**対象ファイル候補:**
+- `scripts/manga/migrate/v2-to-v3-classify.ts` (Phase 9 sub-split を駆動)
+- `src/lib/manga/migrate/llm-sub-split.ts` (推定: sub-split LLM ロジック)
+- 関連: `data/manga/works/a07-modern-dungeon/bible/facts/characters/` の現状確認
 
 **確認手順:**
 ```bash
-ls data/manga/works/  # a07 以外の作品が存在するか
-# 各作品で snapshot.json (V2) があれば migration 可能
-# 無ければ bible 構築から (run-deepen-all.ts)
+# 既存 fact body length を集計
+npx tsx -e "
+import { promises as fs } from 'node:fs';
+const dir = 'data/manga/works/a07-modern-dungeon/bible/facts/characters';
+const files = await fs.readdir(dir);
+for (const f of files.filter(n => n.endsWith('.json'))) {
+  const fact = JSON.parse(await fs.readFile(dir + '/' + f, 'utf-8'));
+  console.log(\`\${f}: body=\${fact.body?.length ?? 0} chars\`);
+}
+"
 ```
 
-**bible が完成していれば即実行可能:**
-```bash
-# Phase 5-A deterministic 1 周回
-npx tsx scripts/manga/migrate/v2-to-v3-classify.ts --slug <slug>
+**規模感:** 中。`v2-to-v3-classify.ts --with-sub-split` の動作確認 + 必要なら sub-split target field の拡張 + a07 で再 migrate (LLM コール多)。
 
-# Phase 9 sub-split + Phase 5-B refine (推定 2-3h)
-npx tsx scripts/manga/migrate/v2-to-v3-classify.ts --slug <slug> --with-sub-split --with-llm-refine --rounds 3 --max-parallel 5
+### 2. ~~b/c 系作品で V3 migration 実走~~ skip 確定
 
-# Phase 8 本番置換 (V2/V3 並存)
-npx tsx scripts/manga/migrate/swap-v2-to-v3.ts --slug <slug> --allow-fatal --yes
-
-# 検証
-USE_BIBLE_V3=true npx tsx scripts/manga/layers/L09-render.ts --slug <slug> --episode 1 --pages 1 --skip-name-gate --auto-version --concurrency 1
-```
+`data/manga/works/` 配下に a07-modern-dungeon 以外の bible は存在しない (2026-05-11 確認)。b/c 系 = 「ダンジョン探索」「転生貴族領地経営」は bible 構築自体が未着手。bible 構築は別ワーク扱い (`run-deepen-all.ts` 等)。
 
 ### 3. (任意) undefined-reference-detector 更改善
 
@@ -166,11 +175,11 @@ a07 で十分検証 → `process.env.USE_BIBLE_V3 === "true"` を default true �
 
 ## 着手順
 
-1. `git log --oneline -30` で 27 commits 確認
-2. `npx vitest run` で 372 tests 全 pass を確認
+1. `git log --oneline -30` で commits 確認 (前セッションで a3b3fd7 / d2a60bd 追加)
+2. `npx vitest run` で 378 tests 全 pass を確認
 3. `npm run console -- --no-open` で Console 起動 (port 5174、必要なら open)
-4. a07 で USE_BIBLE_V3=true 経路の動作再確認 (p1 だけでも render してみる)
-5. **L4 visibility 縛り着手** から始める (最優先)
+4. a07 で `npx tsx /tmp/v3-l4-spec/preview-prompt.ts` で L4 visibility 縛り後の prompt を再確認 (前セッションの試験 script、残してある)
+5. **Character 長文 fact の sub-split 着手** から始める (新最優先候補)
 
 ## 注意点
 
