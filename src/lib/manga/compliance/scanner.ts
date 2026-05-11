@@ -254,6 +254,10 @@ function shouldSkipByFalsePositive(
   const windowStart = Math.max(0, start - EXCERPT_RADIUS);
   const windowEnd = Math.min(normalizedText.length, end + EXCERPT_RADIUS);
   const windowText = normalizedText.slice(windowStart, windowEnd);
+  if (contextRule.positive_context && contextRule.positive_context.length > 0) {
+    return !contextRule.positive_context.some((term) => windowText.includes(normalizeForMatch(term)));
+  }
+
   return !COMMERCIAL_CONTEXT_TERMS.some((term) => windowText.includes(normalizeForMatch(term)));
 }
 

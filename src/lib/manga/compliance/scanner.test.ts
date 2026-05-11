@@ -107,11 +107,18 @@ describe("manga compliance scanner", () => {
   it("detects LINE in commercial app context", async () => {
     // Phase 1-2 後、bible 本文中の「白いライン」「直線ライン」等の一般語を skip するため
     // false-positives.json で context_check_required=true にした。
-    // 商業文脈語 (アプリ/会社/サービス等) があるときだけ fatal として検出する。
+    // positive_context に指定した明示文脈があるときだけ fatal として検出する。
     const { blocklist, fp } = await dictionaries();
-    const findings = scanText("LINE アプリで連絡が来た", blocklist, fp);
+    const findings = scanText("LINEアプリで連絡が来た", blocklist, fp);
 
     expect(findings.some((f) => f.matched_term === "LINE")).toBe(true);
+  });
+
+  it("skips ライン near unrelated app context unless positive_context matches", async () => {
+    const { blocklist, fp } = await dictionaries();
+    const findings = scanText("公社アプリの通知音が鳴り、床ラインが白く光った", blocklist, fp);
+
+    expect(findings.some((f) => f.matched_term === "LINE" || f.matched_term === "ライン")).toBe(false);
   });
 
   it("skips ライン as general term (no commercial context)", async () => {

@@ -36,6 +36,7 @@ export type FalsePositiveContextExclude = {
   term: string;
   reason: string;
   context_check_required?: boolean;
+  positive_context?: string[];
   added_at?: string;
 };
 

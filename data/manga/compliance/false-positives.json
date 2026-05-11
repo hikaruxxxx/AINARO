@@ -58,12 +58,14 @@
       "term": "ライン",
       "reason": "「線」「直線」「白いライン」等の一般語としての使用は OK。LINE 社/LINE アプリの文脈では NG",
       "context_check_required": true,
+      "positive_context": ["LINE", "ライン公式", "ライン株式会社", "LINEヤフー", "LINEアプリ", "ライン Pay", "ライン社"],
       "added_at": "2026-05-10"
     },
     {
       "term": "LINE",
       "reason": "「ライン」表記の英字版。SNS アプリ LINE の文脈以外 (ファッションのライン、戦線、台詞 line 等) は OK",
       "context_check_required": true,
+      "positive_context": ["LINE公式", "LINEヤフー", "LINEアプリ", "LINE社", "LINE株式会社", "@line.me"],
       "added_at": "2026-05-10"
     },
     {
