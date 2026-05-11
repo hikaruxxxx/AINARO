@@ -9,6 +9,8 @@
 | 6726327 | docs: V3 移行 handoff を 2026-05-11 セッション成果で更新 |
 | 980737c | feat: sub-split prompt に長さ上限 800字 / 長文 field の段落分割指示を追加 |
 | b8c43ec | fix: sub-split default timeout を 60s→180s に拡張 (long prompt 出力対応) |
+| 39f8a95 | docs: handoff を sub-split 再走完了 + L4 visibility 縛り本実証成果で更新 |
+| e1784f3 | fix: contextForScene を cast-fair filter に変更 (各 cast 毎に per-budget query → merge) |
 
 - handoff の **最優先タスク (L4 visibility 縛り)** 完了
 - 副産物として broker-v3 `applyCharBudget` のバグを発見・修正
@@ -35,10 +37,12 @@ V3 移行 plan の **残課題に着手**:
 1. ~~(最優先) L4 storyboard visibility 縛りの本格実装~~ — **完了 (a3b3fd7)**
 2. ~~b/c 系作品 (転生貴族・現代ダンジョン2 等) で V3 migration を実走~~ — **a07 以外の作品 bible が `data/manga/works/` 配下に存在しないため skip**
 3. ~~Character 長文 fact の sub-split~~ — **完了 (980737c + b8c43ec、a07 再 sub-split → swap 済)**
-4. (任意) **broker-v3.contextForScene の cast-fair filter** — 現状 entity_ids: castIds で 1 回 query → priority 順に詰めるため、レンの facts ばかり拾われ灯里 0 件。各 cast 毎に separate query にすると fair に取れる。優先度中
+4. ~~broker-v3.contextForScene の cast-fair filter~~ — **完了 (e1784f3、a07 ep01 S01 でレン 3 + 灯里 3 にバランス回復)**
 5. (任意) USE_BIBLE_V3 を default true 化検討 (a07 で十分検証されたら)
 6. (任意) undefined-ref detector 更改善 (1,971 → 数百件)
 7. (任意) a07 cast の sub-split で残った fatal lint 30 件の根本対応 (前 70 件から半減済み)
+8. (任意) L11 audit / L12 repair の本格化 (現状は雛形のみ)
+9. (任意) L8.5/8.6/8.7 name gate UI 改善 (Console 中央コックピット化)
 
 ## 前提 (前セッションで完了済)
 
