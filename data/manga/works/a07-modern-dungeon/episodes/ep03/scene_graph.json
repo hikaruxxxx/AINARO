@@ -1,13 +1,6 @@
 {
   "schema_version": 1,
   "episode_id": "a07-modern-dungeon-ep03",
-  "generated_at": "2026-05-07T03:30:00+09:00",
-  "source": {
-    "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep03/_brief.v2.md",
-    "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep03/shotlist.json",
-    "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
-  },
-  "_note": "Phase β B5-5 検証 #3 - a07-ep03 を 7 scene で手動切り出し。便利さ→不気味さの反転、ナビ沈黙 cliff。",
   "scenes": [
     {
       "scene_id": "S01",
@@ -26,8 +19,9 @@
         "volume": 1,
         "episode_in_volume": 3,
         "arc_phase": "introduce",
-        "arc_position_normalized": 0.20
+        "arc_position_normalized": 0.2
       },
+      "location_id": "loc_ren_apartment_v1",
       "beat_type": "introduce",
       "cast": [
         {
@@ -42,31 +36,35 @@
       "dialogue_plan": {
         "key_lines": [
           {
-            "speaker": "char_桐生_レン_v1",
-            "text": "俺の一日が、攻略チャートみたいになっていく。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
+            "speaker": "char_獅童_響_v1",
+            "text": "生活最適化案、提示します。採取、解錠、売却、夜勤シフトを同時に組み替えます。",
+            "uniqueness": "may_repeat",
+            "intent": "hook"
           },
           {
-            "speaker": "char_獅童_響_v1",
-            "text": "3F隠し採取棚、売却窓口の混雑回避、夜勤シフトの組み替えを提案します。",
+            "speaker": "char_桐生_レン_v1",
+            "text": "……一週間で、夜勤を一日減らせる？",
             "uniqueness": "scene_exclusive",
-            "intent": "establish"
+            "intent": "hook"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_navi_lifestyle_optimization",
+          "token": "F_navi_daily_disclosure_budget_life_advice_counts",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_life_optimization_invades_non_dungeon_hours",
           "payoff_episode_hint": "this_episode"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "ナビは便利な攻略音声、収入と生活を改善できそうだ",
-        "goal": "提案を受けて 1 日の動きを最適化する",
-        "emotion": "curiosity",
-        "delta_from_prev": "ep02 末の Nm 警戒から、ナビの便利さを再評価する朝へ"
+        "belief": "ナビは戦闘だけでなく生活費と時間まで改善できる便利な攻略音声だと思い始めている。",
+        "goal": "採取と売却の手順を詰め、夜勤シフトを一日減らせる現実的な根拠を作る。",
+        "emotion": "elation",
+        "delta_from_prev": "収入改善の手応えが、半信半疑から具体的な生活変更の期待へ進む。"
       },
       "relationship_state_delta": [
         {
@@ -76,35 +74,89 @@
           ],
           "direction": "trust+",
           "intensity": 1,
-          "trigger": "戦闘以外の領域 (採取/売却/シフト) まで具体的な提案がナビから来た"
+          "trigger": "ナビがダンジョン外の生活設計まで精密に組み替え、レンが初めて休める可能性を見る。"
         }
       ],
       "time_axis": {
-        "label": "三日目早朝、自室、壁の手書き予定表",
+        "label": "早朝、夜勤明けの六畳間",
         "order": 1,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_ren_apartment_v1",
       "page_budget": {
         "min": 3,
         "max": 3,
         "preferred": 3
       },
-      "mode": "dialogue",
+      "mode": "external_social",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 12,
+        "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "phone-ledger-montage-3p",
       "subtype_directive": {
-        "external_social": false,
+        "external_social": true,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "壁に貼った手書き予定表とヒビ入りスマホの画面、青光が淡く文字を撫でる"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "ヒビ入り端末のシフト表に薄青の点が並び、レンの生活時間そのものが攻略対象へ変わる。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "dominant"
+        }
+      ],
+      "world_rules_active": [
+        "地上の日常では、ダンジョン由来の数値加算は起きない。ナビが睡眠、食事、夜勤シフト、装備購入、支出配分を最適化しても、それは入域成功率を上げる準備であってレベル上昇ではない。この線を守ることで、生活改善の便利さと、加算域へ入る危険を両立させる",
+        "ナビの開示には一日単位の上限がある。戦闘条件、採取条件、生活最適化、警告、感情に近い発話のいずれも残量を削る。序盤は便利な制限として、終盤は人格を持つ相棒が話すほど削れていく痛みとして扱う。開示量を使い切ると沈黙モードに入り、レンは本当にF",
+        "作中の記録名は、必ず対象と尺度を含める。『世界最速レベルアップ記録』『未踏破階層討伐記録』『最速踏破記録』『単独討伐記録更新』のように、何がどの基準で更新されたかを明示する。単独で曖昧な記録表現に逃げると、ダンジョン固有の制度感が薄れるため"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "生活が攻略対象になる怖い快感",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n7332im_1d32d8",
+            "n2562ir_becda7"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.72
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T14:59:00.992Z"
+        }
+      }
     },
     {
       "scene_id": "S02",
@@ -123,8 +175,9 @@
         "volume": 1,
         "episode_in_volume": 3,
         "arc_phase": "rising",
-        "arc_position_normalized": 0.30
+        "arc_position_normalized": 0.3
       },
+      "location_id": "loc_shinjuku_third_3f_hidden_cache_v1",
       "beat_type": "setup",
       "cast": [
         {
@@ -139,59 +192,128 @@
       "dialogue_plan": {
         "key_lines": [
           {
-            "speaker": "char_桐生_レン_v1",
-            "text": "ナビの答えを、俺の目で裏取りする。",
-            "uniqueness": "scene_exclusive",
+            "speaker": "char_獅童_響_v1",
+            "text": "三歩先、右壁の湿り。指先だけで確認してください。",
+            "uniqueness": "may_repeat",
             "intent": "establish"
           },
           {
             "speaker": "char_桐生_レン_v1",
-            "text": "壁の湿りと足跡。湧き周期は、合っている。",
-            "uniqueness": "scene_exclusive",
-            "intent": "callback"
+            "text": "公開ログの周期と、足跡の乾きが合ってない。",
+            "uniqueness": "may_repeat",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "ナビの答えを、俺の目で裏取りする。",
+            "uniqueness": "may_repeat",
+            "intent": "hook"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_ren_verification_protocol_advances",
+          "token": "F_ep03_hidden_rule_observation_plus_navi",
+          "payoff_episode_hint": "next_episode"
+        },
+        {
+          "token": "F_navi_disclosure_limit_regulation_owner",
           "payoff_episode_hint": "later_in_volume"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "従うだけでなく、自分の目で裏取りすれば俺の判断にできる",
-        "goal": "3F 隠し採取棚で公開 wiki 外の素材を入手",
+        "belief": "ナビは便利だが、自分の観察で検証して初めて武器になる。",
+        "goal": "3F隠し採取棚の湧き周期を成立させ、夜勤を減らせる収入根拠を作る。",
         "emotion": "determination",
-        "delta_from_prev": "便利さに依存せず、情報強者としての主体性を獲得"
+        "delta_from_prev": "生活改善への期待が、攻略情報を自分で検証する能動性へ変わる。"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "ナビの座標指示にレン自身の観察を重ねて採取条件へ近づく。"
+        }
+      ],
       "time_axis": {
-        "label": "三日目朝、3F 採取エリア",
+        "label": "午前の低層探索",
         "order": 2,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "hours"
+        "duration_hint": "minutes"
       },
-      "location_id": "loc_shinjuku_third_3f_hidden_cache_v1",
       "page_budget": {
         "min": 4,
         "max": 4,
         "preferred": 4
       },
-      "mode": "action",
+      "mode": "introspection",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 27,
+        "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "rising_hidden_cache_observation_grid",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "壁の苔の影と湿り、ナビ青光に重なる足跡、レンの瞳が裏取りモードに切り替わる"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "壁の湿り、先行者の足跡、レンの指先にだけ薄青が差し、答えを自分で確かめる姿を見せる。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_dungeon_explorer_v1"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "costume_id": null
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "隠しルールは攻略の裏技ではなく、ダンジョン側の観測規約に含まれる未公開項目である。公社内では都市伝説扱いだが、Sランクの一部と内部監査室の一部は、未分類加算の異常値として存在を黙認している。作劇上は必ず事前に水滴、時刻、光の明滅、心拍表示な",
+        "【ナビ最適解（オプティマル・ナビゲート）】の補正は、ナビが事前に開示した手順にレンが従っている瞬間だけ成立する。『左に半歩』なら半歩であり、足りない移動や余計な踏み込みでは失効する。補正中の出力が高く見えても、素の戦闘力が上がったわけではな",
+        "ナビの失敗条件は、誤読、未開示、過信の三つに分ける。誤読はレンが秒数や方向を外すこと、未開示はナビが規約上言えないこと、過信はレンが指示外の行動まで補正されると誤解することである。失敗は必ず痛みを伴わせ、軽ければ素材破損、重ければ負傷や仲間"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_iron_pipe_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "正解は借り物でも、踏むのは自分の目",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n2562ir_becda7",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.74
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:03:38.696Z"
+        }
+      }
     },
     {
       "scene_id": "S03",
@@ -210,9 +332,10 @@
         "volume": 1,
         "episode_in_volume": 3,
         "arc_phase": "rising",
-        "arc_position_normalized": 0.40
+        "arc_position_normalized": 0.4
       },
-      "beat_type": "transition",
+      "location_id": "loc_dpc_public_counter_v1",
+      "beat_type": "setup",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -226,48 +349,118 @@
       "dialogue_plan": {
         "key_lines": [
           {
+            "speaker": "char_桐生_レン_v1",
+            "text": "レベルの線だけ、変に跳ねてる。",
+            "uniqueness": "may_repeat",
+            "intent": "reveal"
+          },
+          {
             "speaker": "char_獅童_響_v1",
-            "text": "売却窓口、東口は午前10時から12時まで混雑。西口へ。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
+            "text": "基礎値の確認は、帰宅後を推奨します。",
+            "uniqueness": "may_repeat",
+            "intent": "hook"
           }
         ]
       },
-      "foreshadow_setup": [],
+      "foreshadow_setup": [
+        {
+          "token": "F_level_curve_rises_but_base_stats_remain_F",
+          "payoff_episode_hint": "this_episode"
+        },
+        {
+          "token": "F_dpc_public_graph_notices_unclassified_growth",
+          "payoff_episode_hint": "next_episode"
+        }
+      ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "最適化は時間も金も生む",
-        "goal": "素材を最短で売却し、収入を増やす",
-        "emotion": "elation",
-        "delta_from_prev": "情報強者としての裏取り成功の余韻、収入が伸び始める実感"
+        "belief": "稼ぎは増えているが、伸び方が普通ではない",
+        "goal": "売却額と公社アプリの推移を確認し、夜勤交渉の材料にする",
+        "emotion": "tension",
+        "delta_from_prev": "収入改善の高揚に、公的ログへ残る不穏さが混ざり始める"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "tense",
+          "intensity": 1,
+          "trigger": "ナビが基礎値確認を先送りし、便利な声に隠し事の気配が出る"
+        }
+      ],
       "time_axis": {
-        "label": "三日目昼、売却窓口へ移動 → 西口で売却",
+        "label": "三日目昼、DPC公共端末前",
         "order": 3,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "hours"
+        "duration_hint": "minutes"
       },
-      "location_id": "loc_dpc_public_counter_v1",
       "page_budget": {
         "min": 3,
         "max": 3,
         "preferred": 3
       },
-      "mode": "transition_montage",
+      "mode": "external_social",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 50,
+        "type": "reveal_turn"
       },
       "layout_pattern_id": null,
       "subtype_directive": {
-        "external_social": false,
+        "external_social": true,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "売却窓口の混雑カットと西口の空いた窓口、レンの足取りが軽くなる"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "割れたスマホ越しの急上昇グラフと、DPC窓口の朱色受付番号が同じ角度でレンを挟む",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_dungeon_explorer_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "公社アプリに表示されるステータスは、公社が発生させた数値ではなく、ダンジョン側が返した観測結果をDPC形式へ翻訳したものである。したがってDPCは表示形式、同期時刻、報奨処理を管理できるが、加算そのものは作れない。レンの未分類加算を公社が消",
+        "本作の力の根幹は『強い肉体を得る』ではなく『ダンジョンが正解と認める行為を、正しい条件で成立させる』ことにある。読者に返す報酬は、底辺Fランクのレンが突然万能化する快感ではない。公社もSランクも見落としていた条件をナビだけが開示し、レンが震",
+        "匿名IDは探索者保護のために存在するが、完全な隠れ蓑ではない。DPC内部監査室は、入域ゲートの通過時刻、公社アプリ同期、素材袋の重量、監視映像の死角、未分類加算の発生間隔から候補者を狭める。読者には『数値で世界を揺らすほど、生活ログが危険に"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "増えた数字が足跡にもなる",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n2562ir_becda7",
+            "n7332im_1d32d8"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.66
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:07:36.733Z"
+        }
+      }
     },
     {
       "scene_id": "S04",
@@ -288,63 +481,149 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.55
       },
-      "beat_type": "setup",
+      "location_id": "loc_lawson_interior_v1",
+      "beat_type": "turn",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
           "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
         "key_lines": [
           {
             "speaker": "char_桐生_レン_v1",
-            "text": "週3にしたい。売上が落ちる時間帯の棚卸しは、俺が先回りで片づけます。",
-            "uniqueness": "scene_exclusive",
+            "text": "週三に、できます。代わりに棚卸し、俺が先に潰します",
+            "uniqueness": "may_repeat",
             "intent": "establish"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "休憩順、再計算します。糖質を先に、たんぱく質は後です",
+            "uniqueness": "may_repeat",
+            "intent": "hook"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "最適解の外に出たら、俺はただのFランクだ",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_ren_negotiation_skill",
+          "token": "F_navi_life_optimization_invades_shiftwork",
+          "payoff_episode_hint": "this_episode"
+        },
+        {
+          "token": "F_navi_disclosure_quota_counts_lifestyle_advice",
           "payoff_episode_hint": "later_in_volume"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "条件を提示すれば、俺の時間も最適化できる",
-        "goal": "夜勤を週4から週3に減らす交渉を成立させる",
-        "emotion": "determination",
-        "delta_from_prev": "売却の収入アップを背景に、時間の取り戻しを攻める"
+        "belief": "ナビは生活を救うが、手順の外にいる自分の弱さまでは消していない",
+        "goal": "週3夜勤への交渉を成立させつつ、異常なレベル上昇の正体を確認する",
+        "emotion": "fear",
+        "delta_from_prev": "売却額で浮いた気分から、基礎値が伸びない現実へ引き戻される"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "tense",
+          "intensity": 1,
+          "trigger": "ナビが勤務中の食事や休憩まで最適化し、助かるほど距離が近すぎると感じる"
+        }
+      ],
       "time_axis": {
-        "label": "三日目夕方、コンビニのレジ前で店長と交渉",
+        "label": "同日深夜、青白堂24の夜勤中",
         "order": 4,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "minutes"
+        "duration_hint": "hours"
       },
-      "location_id": "loc_lawson_interior_v1",
       "page_budget": {
-        "min": 4,
+        "min": 3,
         "max": 4,
         "preferred": 4
       },
       "mode": "dialogue",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 64,
+        "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "l3_5_backyard_negotiation_to_phone_reveal",
       "subtype_directive": {
-        "external_social": false,
+        "external_social": true,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "店長の渋面と、棚卸し先回りの提案を手で示すレン、レジ越しの交渉"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "バックヤードの白い蛍光灯下、割れた端末の急上昇グラフと動かないF基礎値をレンの疲れた顔に重ねる",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "ナビ青光",
+          "intensity": "clear"
+        }
+      ],
+      "world_rules_active": [
+        "地上の日常では、ダンジョン由来の数値加算は起きない。ナビが睡眠、食事、夜勤シフト、装備購入、支出配分を最適化しても、それは入域成功率を上げる準備であってレベル上昇ではない。この線を守ることで、生活改善の便利さと、加算域へ入る危険を両立させる",
+        "公社アプリに表示されるステータスは、公社が発生させた数値ではなく、ダンジョン側が返した観測結果をDPC形式へ翻訳したものである。したがってDPCは表示形式、同期時刻、報奨処理を管理できるが、加算そのものは作れない。レンの未分類加算を公社が消",
+        "【ナビ最適解（オプティマル・ナビゲート）】の補正は、ナビが事前に開示した手順にレンが従っている瞬間だけ成立する。『左に半歩』なら半歩であり、足りない移動や余計な踏み込みでは失効する。補正中の出力が高く見えても、素の戦闘力が上がったわけではな",
+        "レンの勤務先や日常商業施設は、すべて架空名と視覚記号で扱う。青と白の看板、24h営業、入口チャイム二音、温かい総菜什器を持つ架空深夜小売チェーンへ統一し、実在企業や実在商標を想起させる名称、ロゴ、商品名は使わない。黒端末や短文投稿網も同じく"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "便利さは弱さを消さず、輪郭だけを照らす",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 0.5,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n2562ir_becda7",
+            "n7332im_1d32d8"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.74
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:12:52.563Z"
+        }
+      }
     },
     {
       "scene_id": "S05",
@@ -363,47 +642,83 @@
         "volume": 1,
         "episode_in_volume": 3,
         "arc_phase": "climax",
-        "arc_position_normalized": 0.70
+        "arc_position_normalized": 0.7
       },
-      "beat_type": "reveal",
+      "location_id": "loc_lawson_interior_v1",
+      "beat_type": "payoff",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
           "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
         "key_lines": [
           {
             "speaker": "char_桐生_レン_v1",
-            "text": "最適解の外に出た瞬間、俺はただのFだ。",
+            "text": "レベルは伸びる。体は、追いつかない。なら声だけは――",
+            "uniqueness": "may_repeat",
+            "intent": "callback"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "条件開示を停止します。",
             "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "停止？　俺が間違えたからか。",
+            "uniqueness": "may_repeat",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "いいえ。上限です。あなたの失敗ではありません。",
+            "uniqueness": "may_repeat",
             "intent": "reveal"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_level_vs_base_stats_gap",
-          "payoff_episode_hint": "next_episode"
+          "token": "F_navi_protective_silence_not_failure",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_navi_has_fear_behind_protocol",
+          "payoff_episode_hint": "later_in_volume"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "レベルだけが上がっても、俺の素ステータスはFのまま、ナビが消えれば無力",
-        "goal": "公社アプリの曲線を読み解き、自分の現在地を確認",
+        "belief": "沈黙は故障でも罰でもなく、ナビ側にも守れない線がある証拠だ。",
+        "goal": "規約が誰を守り、誰を縛っているのかを確かめる。",
         "emotion": "fear",
-        "delta_from_prev": "便利さの陶酔から、依存の脆さへ気づく"
+        "delta_from_prev": "自分のFランクの限界から、ナビ自身の限界と恐れへ視線が移る。"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "closer",
+          "intensity": 1,
+          "trigger": "ナビが『あなたの失敗ではない』と補い、レンが声を道具ではなく相手として受け取り始める。"
+        }
+      ],
       "time_axis": {
-        "label": "三日目夜、コンビニ夜勤前、バックヤードでスマホを見る",
+        "label": "夜勤終盤・店内が途切れる数十秒",
         "order": 5,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "minutes"
+        "duration_hint": "moments"
       },
-      "location_id": "loc_lawson_interior_v1",
       "page_budget": {
         "min": 2,
         "max": 2,
@@ -411,17 +726,68 @@
       },
       "mode": "introspection",
       "turn_anchor": {
-        "at_panel_no": 80,
+        "at_panel_no": 75,
         "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "introspection_white_panel_payoff_2p",
       "subtype_directive": {
-        "external_social": false,
-        "gacha_ui": false,
-        "hybrid": false
+        "external_social": true,
+        "gacha_ui": true,
+        "hybrid": true
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "レベル曲線が急上昇するグラフと、F平均で動かない筋力/耐久/敏捷の数値、対比"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "世界記録級の推移グラフ空枠と白い沈黙コマを隣接させ、伸びる数値と消える声を衝突させる。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "公社アプリに表示されるステータスは、公社が発生させた数値ではなく、ダンジョン側が返した観測結果をDPC形式へ翻訳したものである。したがってDPCは表示形式、同期時刻、報奨処理を管理できるが、加算そのものは作れない。レンの未分類加算を公社が消",
+        "【ナビ最適解（オプティマル・ナビゲート）】の補正は、ナビが事前に開示した手順にレンが従っている瞬間だけ成立する。『左に半歩』なら半歩であり、足りない移動や余計な踏み込みでは失効する。補正中の出力が高く見えても、素の戦闘力が上がったわけではな",
+        "ナビの開示には一日単位の上限がある。戦闘条件、採取条件、生活最適化、警告、感情に近い発話のいずれも残量を削る。序盤は便利な制限として、終盤は人格を持つ相棒が話すほど削れていく痛みとして扱う。開示量を使い切ると沈黙モードに入り、レンは本当にF",
+        "大ナビが隠した規約には、ナビ自身も触れられない領域がある。回答権限がない、開示すると契約が揺らぐ、言葉にすると記憶が欠ける、といった形で制限を見せる。読者には、ナビが全知ではなく、むしろ最も重要な場所で縛られている相棒だと理解させる。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "数値が伸びるほど、声の不在が重くなる。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n2562ir_becda7",
+            "n7332im_1d32d8"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.78
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:17:37.766Z"
+        }
+      }
     },
     {
       "scene_id": "S06",
@@ -442,7 +808,8 @@
         "arc_phase": "falling",
         "arc_position_normalized": 0.85
       },
-      "beat_type": "turn",
+      "location_id": "loc_lawson_interior_v1",
+      "beat_type": "cliff",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -456,33 +823,43 @@
       "dialogue_plan": {
         "key_lines": [
           {
-            "speaker": "char_獅童_響_v1",
-            "text": "栄養配分は、現在の予算内で炭水化物を減らし、たんぱく質を優先してください。",
-            "uniqueness": "scene_exclusive",
-            "intent": "establish"
+            "speaker": "char_桐生_レン_v1",
+            "text": "誰のための規約なんだよ、それ",
+            "uniqueness": "may_repeat",
+            "intent": "reveal"
           },
           {
             "speaker": "char_獅童_響_v1",
-            "text": "帰宅ルートは、夜勤後は東口より西口の方が街灯密度で5分速くなります。",
+            "text": "私の、ではない誰かの、ためです。",
+            "uniqueness": "may_repeat",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "あなたに、私を見つけてほしくはないのですが。",
             "uniqueness": "scene_exclusive",
-            "intent": "establish"
+            "intent": "cliff"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_navi_overreach_warning",
-          "payoff_episode_hint": "this_episode"
+          "token": "F_navi_daily_disclosure_limit_owned_by_other",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_navi_identity_fears_discovery",
+          "payoff_episode_hint": "later_in_volume"
         }
       ],
       "foreshadow_payoff": [
-        "F_navi_lifestyle_optimization"
+        "F_ep3_navi_disclosure_limit_and_terms"
       ],
       "protagonist_arc_state": {
-        "belief": "ナビの距離が近すぎる、便利さが不気味さに反転していく",
-        "goal": "ナビの過剰な助言を一旦切り離し、自分の境界を保つ",
-        "emotion": "tension",
-        "delta_from_prev": "Fランクの脆さへの恐怖から、ナビとの距離の違和感へ"
+        "belief": "ナビは便利な攻略音声ではなく、誰かの規約に縛られ、発見を恐れている相手だ。",
+        "goal": "レベル上げだけでなく、声が何に縛られているのかを確かめる。",
+        "emotion": "fear",
+        "delta_from_prev": "規約への苛立ちが、ナビ自身を守るべき相手として見る戸惑いへ変わる。"
       },
       "relationship_state_delta": [
         {
@@ -490,37 +867,77 @@
             "char_桐生_レン_v1",
             "char_獅童_響_v1"
           ],
-          "direction": "tense",
-          "intensity": -1,
-          "trigger": "栄養配分や帰宅ルートまでナビが助言、距離の近さが反転して怖さに変わる"
+          "direction": "closer",
+          "intensity": 2,
+          "trigger": "ナビが自分の発見を恐れる本音を漏らし、レンが機能ではなく人格として受け取る。"
         }
       ],
       "time_axis": {
-        "label": "三日目深夜、コンビニのバックヤードで廃棄弁当を食べる",
+        "label": "夜勤中の未明",
         "order": 6,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "minutes"
+        "duration_hint": "moments"
       },
-      "location_id": "loc_lawson_interior_v1",
       "page_budget": {
         "min": 3,
         "max": 3,
         "preferred": 3
       },
-      "mode": "introspection",
+      "mode": "silence",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 94,
+        "type": "cliff_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "silence-white-panel-cliff-3p",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "廃棄弁当を箸で持つ手と、スマホから流れるナビの助言、距離の近さを画面の侵食で表現"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "蛍光灯の白い売場にレンだけを残し、空の吹き出しからナビの恐れをにじませる。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "ナビの開示には一日単位の上限がある。戦闘条件、採取条件、生活最適化、警告、感情に近い発話のいずれも残量を削る。序盤は便利な制限として、終盤は人格を持つ相棒が話すほど削れていく痛みとして扱う。開示量を使い切ると沈黙モードに入り、レンは本当にF",
+        "大ナビが隠した規約には、ナビ自身も触れられない領域がある。回答権限がない、開示すると契約が揺らぐ、言葉にすると記憶が欠ける、といった形で制限を見せる。読者には、ナビが全知ではなく、むしろ最も重要な場所で縛られている相棒だと理解させる。",
+        "ナビは人間の本心を完全には読めない。条件、時刻、座標、規約抵触度は開示できても、レンが最後に何を選ぶか、灯里が罪悪感をどう扱うか、玲二が努力をどう再定義するかは確定できない。ここが主人公と仲間の意思の置き場であり、ナビ万能化を防ぐ公平性にな"
+      ],
+      "props_in_play": [],
+      "theme_subtext": "便利な声にも守れない沈黙がある",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n2562ir_becda7",
+            "n7332im_1d32d8"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.78
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:21:36.673Z"
+        }
+      }
     },
     {
       "scene_id": "S07",
@@ -539,9 +956,10 @@
         "volume": 1,
         "episode_in_volume": 3,
         "arc_phase": "climax",
-        "arc_position_normalized": 1.0
+        "arc_position_normalized": 1
       },
-      "beat_type": "cliff",
+      "location_id": "loc_ren_apartment_v1",
+      "beat_type": "aftermath",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -555,53 +973,43 @@
       "dialogue_plan": {
         "key_lines": [
           {
-            "speaker": "char_獅童_響_v1",
-            "text": "一日の開示量、上限を超えました。明朝までお待ちください。",
+            "speaker": "char_桐生_レン_v1",
+            "text": "見つけるなって、攻略対象はダンジョンじゃないのかよ",
             "uniqueness": "scene_exclusive",
             "intent": "reveal"
           },
           {
+            "speaker": "char_獅童_響_v1",
+            "text": "回答権限が、ありません。",
+            "uniqueness": "may_repeat",
+            "intent": "reveal"
+          },
+          {
             "speaker": "char_桐生_レン_v1",
-            "text": "誰のための規約だ。",
-            "uniqueness": "scene_exclusive",
-            "intent": "cliff"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "私の、ではない誰かの、ためです。",
-            "uniqueness": "scene_exclusive",
-            "intent": "cliff"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "あなたに、私を見つけてほしくはないのですが。",
-            "uniqueness": "scene_exclusive",
-            "intent": "cliff"
+            "text": "じゃあ、誰の権限だ",
+            "uniqueness": "may_repeat",
+            "intent": "hook"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_navi_disclosure_limit",
-          "payoff_episode_hint": "next_episode"
-        },
-        {
-          "token": "F_navi_serves_someone_else",
+          "token": "F_navi_disclosure_limit_owner",
           "payoff_episode_hint": "later_in_volume"
         },
         {
-          "token": "F_navi_doesnt_want_to_be_found",
-          "payoff_episode_hint": "next_episode"
+          "token": "F_navi_fears_being_found",
+          "payoff_episode_hint": "later_in_volume"
         }
       ],
       "foreshadow_payoff": [
-        "F_navi_overreach_warning"
+        "F_ep3_navi_disclosure_limit_and_terms_seed"
       ],
       "protagonist_arc_state": {
-        "belief": "ナビは道具ではない。私を見つけてほしくない誰かが、声の向こうにいる",
-        "goal": "ナビの正体と「私を見つけないで」の意味を解明する",
-        "emotion": "despair",
-        "delta_from_prev": "便利さの陶酔から、ナビ自身を相手として認識する転換"
+        "belief": "ナビは便利な攻略音声ではなく、規約に縛られた相手だと認識し始める。",
+        "goal": "レベル上げだけでなく、声を縛る規約の所有者を確かめる。",
+        "emotion": "fear",
+        "delta_from_prev": "発見を恐れる言葉を聞き、攻略情報の出どころそのものへ疑いが移る。"
       },
       "relationship_state_delta": [
         {
@@ -610,18 +1018,17 @@
             "char_獅童_響_v1"
           ],
           "direction": "tense",
-          "intensity": -1,
-          "trigger": "ナビが規約と「見つけてほしくない」を口にし、距離が大きく開く"
+          "intensity": 2,
+          "trigger": "響が答えられない権限の存在を示し、レンが声を道具として扱えなくなる。"
         }
       ],
       "time_axis": {
-        "label": "三日目深夜→四日未明、自室、青光の消えた部屋",
+        "label": "夜勤明けの早朝、自室",
         "order": 7,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "moments"
+        "duration_hint": "minutes"
       },
-      "location_id": "loc_ren_apartment_v1",
       "page_budget": {
         "min": 3,
         "max": 3,
@@ -629,22 +1036,83 @@
       },
       "mode": "silence",
       "turn_anchor": {
-        "at_panel_no": 110,
-        "type": "cliff_turn"
+        "at_panel_no": 104,
+        "type": "tension_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "loc_ren_apartment_v1_layout_v1",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "空白の吹き出し連続、スマホの光だけ、レンの顔だけ、青光の消えた自室"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "白い自室の余白に、空の吹き出しと割れた端末だけを残して声の不在を読ませる。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "沈黙の白コマ",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "clear"
+        },
+        {
+          "motif_id": "ナビ青光",
+          "intensity": "subtle"
+        }
+      ],
+      "world_rules_active": [
+        "ナビの開示には一日単位の上限がある。戦闘条件、採取条件、生活最適化、警告、感情に近い発話のいずれも残量を削る。序盤は便利な制限として、終盤は人格を持つ相棒が話すほど削れていく痛みとして扱う。開示量を使い切ると沈黙モードに入り、レンは本当にF",
+        "大ナビが隠した規約には、ナビ自身も触れられない領域がある。回答権限がない、開示すると契約が揺らぐ、言葉にすると記憶が欠ける、といった形で制限を見せる。読者には、ナビが全知ではなく、むしろ最も重要な場所で縛られている相棒だと理解させる。",
+        "ナビの台詞は事務的・短文・敬体で統一する。『経験値倍化条件、開示します』『左に半歩、お願いします』『一日の開示量、上限を超えました。明朝までお待ちください』のように、命令ではなく手順提示にする。感情が出る"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "声の不在が、相手の輪郭を作る",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n2562ir_becda7",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.78
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:26:26.738Z"
+        }
+      }
     }
   ],
-  "pull_link": {
-    "current_episode_cliff": "ability_or_identity_glimpse",
-    "next_opening_hook_hint": "次話冒頭は、レンが「見つけてほしくない」の意味を考えながら、ナビ不在の朝を迎える。情報なしで動けるか、自分の素ステータスとどう向き合うか。",
-    "is_volume_end": false
+  "generated_at": "2026-05-12T15:26:26.738Z",
+  "source": {
+    "brief_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep03/_brief.v2.md",
+    "shotlist_path": "",
+    "bible_snapshot_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/bible/snapshot.json",
+    "volume_plot_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/volumes/v01/plot.json"
   }
 }

@@ -1,13 +1,6 @@
 {
   "schema_version": 1,
   "episode_id": "a07-modern-dungeon-ep06",
-  "generated_at": "2026-05-07T05:00:00+09:00",
-  "source": {
-    "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep06/_brief.v2.md",
-    "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep06/shotlist.json",
-    "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
-  },
-  "_note": "Phase β B5-5 ep06 - DPC 出頭、槇島再会、再鑑定拒否、追跡許可申請 cliff",
   "scenes": [
     {
       "scene_id": "S01",
@@ -26,13 +19,18 @@
         "volume": 1,
         "episode_in_volume": 6,
         "arc_phase": "introduce",
-        "arc_position_normalized": 0.50
+        "arc_position_normalized": 0.5
       },
-      "beat_type": "introduce",
+      "location_id": "loc_lawson_interior_v1",
+      "beat_type": "setup",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
           "presence": "in_person"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "presence": "phone_screen"
         },
         {
           "character_id": "char_獅童_響_v1",
@@ -42,59 +40,151 @@
       "dialogue_plan": {
         "key_lines": [
           {
-            "speaker": "char_獅童_響_v1",
-            "text": "任意形式ですが、拒否時の不利益が大きいです。",
-            "uniqueness": "scene_exclusive",
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "開けたら、まず写真。次に文面を読まないで差出だけ見て。",
+            "uniqueness": "may_repeat",
             "intent": "establish"
           },
           {
+            "speaker": "char_獅童_響_v1",
+            "text": "参考人出頭。内部監査室の照合対象です。",
+            "uniqueness": "may_repeat",
+            "intent": "reveal"
+          },
+          {
             "speaker": "char_桐生_レン_v1",
-            "text": "任意って言葉ほど、断らせる気がない。",
+            "text": "俺の名前まで来たのか。",
             "uniqueness": "scene_exclusive",
-            "intent": "establish"
+            "intent": "hook"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_dpc_subpoena_received",
+          "token": "F_nanami_question_prep_short_answers",
           "payoff_episode_hint": "this_episode"
+        },
+        {
+          "token": "F_internal_audit_trace_from_anonymous_id",
+          "payoff_episode_hint": "this_episode"
+        },
+        {
+          "token": "F_reappraisal_exception_voice_suppression_protocol",
+          "payoff_episode_hint": "later_in_volume"
         }
       ],
-      "foreshadow_payoff": [],
+      "foreshadow_payoff": [
+        "F_ep02_unclassified_gain_warning_to_dpc_audit_pressure"
+      ],
       "protagonist_arc_state": {
-        "belief": "任意の参考人聴取という名の召喚状、断れる仕掛けではない",
-        "goal": "封書の意図を読み解き、出頭の準備に入る",
+        "belief": "公社の圧力は怖いが、ナナミとナビの助言があれば準備して臨める。",
+        "goal": "封書の文言を記録し、出頭前の想定問答に必要な材料を揃える。",
         "emotion": "tension",
-        "delta_from_prev": "ep05 末の共犯成立から、公的圧力の正面衝突へ"
+        "delta_from_prev": "怯えたまま固まるのではなく、記録と準備へ意識が切り替わり始める。"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_九条_ナナミ_v1",
+            "char_桐生_レン_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "ナナミが封書の扱いを即座に手順化し、共犯としての実務能力を示す。"
+        },
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "unchanged",
+          "intensity": 0,
+          "trigger": "ナビは危険を告げるが、まだ声そのものの危機までは明かさない。"
+        }
+      ],
       "time_axis": {
-        "label": "六日目朝、ローソン休憩室、夜勤明け",
+        "label": "夜勤明け、休憩終了直前",
         "order": 1,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_interior_v1",
       "page_budget": {
-        "min": 3,
+        "min": 2,
         "max": 3,
         "preferred": 3
       },
-      "mode": "introspection",
+      "mode": "dialogue",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 12,
+        "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "phone-call_document-reveal_3p",
       "subtype_directive": {
-        "external_social": false,
+        "external_social": true,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "廃棄弁当の横に開いた DPC 封書、参考人として出頭を求めるの一行"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "割れた端末越しのナナミと、封筒の白い文面が同じ机上でレンを挟む。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "costume_id": "costume_nanami_field_info_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レン",
+        "公社アプリに表示されるステータスは、公社が発生させた数値ではなく、ダンジョン側が返した観測結果をDPC形式へ翻訳したものである。したがってDPCは表示形式、同期時刻、報奨処理を管理できるが、加算そのものは作れない。レンの未分類加算を公社が消",
+        "匿名IDは探索者保護のために存在するが、完全な隠れ蓑ではない。DPC内部監査室は、入域ゲートの通過時刻、公社アプリ同期、素材袋の重量、監視映像の死角、未分類加算の発生間隔から候補者を狭める。読者には『数値で世界を揺らすほど、生活ログが危険に"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_nanami_tablet_bag_v1",
+          "held_by": "char_九条_ナナミ_v1"
+        },
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "情報の共犯だけが呼出状に抗う",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n7332im_1d32d8",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.72
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T14:59:49.431Z"
+        }
+      }
     },
     {
       "scene_id": "S02",
@@ -115,6 +205,7 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.55
       },
+      "location_id": "loc_lawson_interior_v1",
       "beat_type": "setup",
       "cast": [
         {
@@ -124,58 +215,152 @@
         {
           "character_id": "char_九条_ナナミ_v1",
           "presence": "phone_screen"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
         "key_lines": [
           {
             "speaker": "char_九条_ナナミ_v1",
-            "text": "嘘を作るな。事実を短く区切って、推測を渡すな。",
+            "text": "そこ、答えを増やしたら負け。",
             "uniqueness": "scene_exclusive",
             "intent": "establish"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "事実だけ。時刻、勤務、入域記録。",
+            "uniqueness": "may_repeat",
+            "intent": "callback"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "不明点は、不明と返答してください。",
+            "uniqueness": "may_repeat",
+            "intent": "reveal"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_ren_audit_response_protocol",
+          "token": "F_dpc_internal_audit_realname_matching",
           "payoff_episode_hint": "this_episode"
+        },
+        {
+          "token": "F_navi_opening_limit_under_inquiry_pressure",
+          "payoff_episode_hint": "later_in_volume"
         }
       ],
-      "foreshadow_payoff": [],
+      "foreshadow_payoff": [
+        "F_public_app_unclassified_gain_warning"
+      ],
       "protagonist_arc_state": {
-        "belief": "嘘ではなく、短く区切った事実で答える",
-        "goal": "ナナミと想定問答を整理、答える範囲・沈黙する範囲を決める",
-        "emotion": "calm",
-        "delta_from_prev": "圧力への怯えから、共犯と組んだ準備モードへ"
+        "belief": "匿名IDは盾だが、生活ログを重ねられると穴が開く。",
+        "goal": "ナナミの画面越しの想定問答を暗記し、照合される情報を最小限に抑える。",
+        "emotion": "fear",
+        "delta_from_prev": "出頭封書の圧が、匿名が剥がされる具体的な恐怖へ変わる。"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_九条_ナナミ_v1",
+            "char_桐生_レン_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "ナナミが遠隔で回答文を削り、レンがその削除を受け入れる。"
+        },
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "trust-",
+          "intensity": -1,
+          "trigger": "ナビの助言が短くなり、全てを聞けない不安が増す。"
+        }
+      ],
       "time_axis": {
-        "label": "六日目午前、ローソン休憩室で通話",
+        "label": "出頭前日の早朝",
         "order": 2,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_interior_v1",
       "page_budget": {
         "min": 2,
         "max": 2,
         "preferred": 2
       },
-      "mode": "dialogue",
+      "mode": "external_social",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 22,
+        "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "cracked_phone_script_overlay_v1",
       "subtype_directive": {
-        "external_social": false,
+        "external_social": true,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "ヒビ入りスマホでナナミとの通話、シフト表コピーを手に持つレン"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "割れた端末越しのナナミの添削が、レンの言葉を一行ずつ削っていく。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "costume_id": "costume_nanami_field_info_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "ひび割れた画面越しの世界",
+          "intensity": "dominant"
+        },
+        {
+          "motif_id": "ナビ青光",
+          "intensity": "subtle"
+        }
+      ],
+      "world_rules_active": [
+        "公社アプリに表示されるステータスは、公社が発生させた数値ではなく、ダンジョン側が返した観測結果をDPC形式へ翻訳したものである。したがってDPCは表示形式、同期時刻、報奨処理を管理できるが、加算そのものは作れない。レンの未分類加算を公社が消",
+        "記録更新は探索者の市場価値と社会信用を一夜で変えるが、同時に追跡の首輪にもなる。世界最速レベルアップ記録、未踏破階層討伐記録、最速踏破記録、単独討伐記録更新はDPC基盤に保存され、階層、時刻、入域者数、素材買取時刻と結びつく。レンは匿名ID",
+        "物語内の用語は、行政語、現場語、ナビ語の三層で分ける。DPCは『入域資格を確認しました』のように硬く、探索者は『北東通路が閉じた』のように短く、ナビは『条件、開示します』のように対象名詞から始める。禁則語や実在名へ流れず、同じ制度を別の声で"
+      ],
+      "props_in_play": [],
+      "theme_subtext": "つながるほど、逃げ道も記録される。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n7332im_1d32d8",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.74
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:04:01.992Z"
+        }
+      }
     },
     {
       "scene_id": "S03",
@@ -196,7 +381,8 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.65
       },
-      "beat_type": "transition",
+      "location_id": "loc_dpc_public_counter_v1",
+      "beat_type": "turn",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -205,63 +391,158 @@
         {
           "character_id": "char_槇島_主任_v1",
           "presence": "in_person"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "presence": "phone_screen"
         }
       ],
       "dialogue_plan": {
         "key_lines": [
           {
             "speaker": "char_槇島_主任_v1",
-            "text": "Fランクは入口を磨いてればいい、が口癖だったよな。",
+            "text": "……桐生レン。お前の記録じゃないだろ。",
             "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "参考人として、事実だけ答えます。",
+            "uniqueness": "may_repeat",
             "intent": "establish"
+          },
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "推測は渡さない。時刻だけ。",
+            "uniqueness": "may_repeat",
+            "intent": "callback"
           }
         ]
       },
-      "foreshadow_setup": [],
-      "foreshadow_payoff": [],
+      "foreshadow_setup": [
+        {
+          "token": "F_reappraisal_exception_route_internal_audit",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_makishima_red_folder_voice_suppression",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
+      "foreshadow_payoff": [
+        "F_unclassified_gain_warning_to_dpc_audit"
+      ],
       "protagonist_arc_state": {
-        "belief": "元上司の槇島がここで呼び出す、過去の判定の延長で潰しに来ている",
-        "goal": "槇島の意図を冷静に観察",
+        "belief": "準備した答えなら、公社の窓口でも少しは耐えられる。",
+        "goal": "匿名IDと自分の生活ログを直接結びつける言質を渡さない。",
         "emotion": "tension",
-        "delta_from_prev": "想定問答準備から、対面の緊張へ"
+        "delta_from_prev": "ナナミとの想定問答が、実際の制度圧力に初めて試される。"
       },
       "relationship_state_delta": [
+        {
+          "pair": [
+            "char_九条_ナナミ_v1",
+            "char_桐生_レン_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "画面越しの短い助言をレンが窓口で実行する。"
+        },
         {
           "pair": [
             "char_桐生_レン_v1",
             "char_槇島_主任_v1"
           ],
           "direction": "tense",
-          "intensity": -1,
-          "trigger": "再鑑定却下の過去から続く力関係、再会で再び距離が開く"
+          "intensity": 2,
+          "trigger": "元上司が窓口側に立ち、レン本人を記録の所有者として疑う。"
         }
       ],
       "time_axis": {
-        "label": "六日目午後、DPC 新宿支部 窓口フロア",
+        "label": "出頭当日 午前",
         "order": 3,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_dpc_public_counter_v1",
       "page_budget": {
-        "min": 4,
+        "min": 3,
         "max": 4,
         "preferred": 4
       },
       "mode": "dialogue",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 35,
+        "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "counter_confrontation_crosscut_v1",
       "subtype_directive": {
-        "external_social": false,
+        "external_social": true,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "白く明るい行政空間、番号札、Fランク窓口の端で立つレンと冷たい槇島"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "受付ガラス越しに槇島の顔が現れ、レンの黒い襟と朱色の受付番号が同じ枠に閉じ込められる。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "costume_id": "costume_nanami_field_info_v1"
+        },
+        {
+          "character_id": "char_槇島_主任_v1",
+          "costume_id": null,
+          "note": "bible.costumesに専用costume_id未定義。visual group char_槇島_主任_v1_outfit_v1 を参照。"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "匿名IDは探索者保護のために存在するが、完全な隠れ蓑ではない。DPC内部監査室は、入域ゲートの通過時刻、公社アプリ同期、素材袋の重量、監視映像の死角、未分類加算の発生間隔から候補者を狭める。読者には『数値で世界を揺らすほど、生活ログが危険に",
+        "DPC内部監査室は、レンを最初から英雄候補として見ない。彼らにとって未分類加算の連続は、不正、外部干渉、鑑定石異常、外部音声型の疑いであり、記録基盤の信用を守るための調査対象である。戦闘で追うのではなく、書類、ログ、例外審査、素材買取の差分",
+        "記録更新は探索者の市場価値と社会信用を一夜で変えるが、同時に追跡の首輪にもなる。世界最速レベルアップ記録、未踏破階層討伐記録、最速踏破記録、単独討伐記録更新はDPC基盤に保存され、階層、時刻、入域者数、素材買取時刻と結びつく。",
+        "DPCは悪意で成立した組織ではなく、初期被害を抑えるために必要だった管理機関である。ただし安全管理の合理性が20年続いた結果、低ランク層を切り捨てることで制度が安定する構造になった。"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        },
+        {
+          "prop_id": "prop_appraisal_stone_counter_v1",
+          "held_by": "char_槇島_主任_v1"
+        }
+      ],
+      "theme_subtext": "測定の窓口が、生活を証拠に変える。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n7332im_1d32d8",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.74
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:09:21.359Z"
+        }
+      }
     },
     {
       "scene_id": "S04",
@@ -282,7 +563,8 @@
         "arc_phase": "climax",
         "arc_position_normalized": 0.75
       },
-      "beat_type": "setup",
+      "location_id": "loc_dpc_public_counter_v1",
+      "beat_type": "reveal",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -291,37 +573,80 @@
         {
           "character_id": "char_槇島_主任_v1",
           "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
         "key_lines": [
           {
             "speaker": "char_槇島_主任_v1",
-            "text": "匿名 ID の異常加算、お前のはずがないよな。",
-            "uniqueness": "scene_exclusive",
+            "text": "例外監査です。署名すれば、あなたの適性を確認できます。",
+            "uniqueness": "may_repeat",
             "intent": "establish"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "受けないでください。あれは、私の声を消すための装置です。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "……任意、なんですね。",
+            "uniqueness": "may_repeat",
+            "intent": "hook"
           }
         ]
       },
-      "foreshadow_setup": [],
+      "foreshadow_setup": [
+        {
+          "token": "F_reanalysis_device_erases_external_voice",
+          "payoff_episode_hint": "cross_volume"
+        },
+        {
+          "token": "F_makishima_internal_audit_exception_route",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
       "foreshadow_payoff": [
-        "F_ren_audit_response_protocol"
+        "F_ep02_unclassified_gain_warning_becomes_dpc_pressure"
       ],
       "protagonist_arc_state": {
-        "belief": "嘘ではなく、短い事実だけで返す",
-        "goal": "想定問答に従い、最低限の事実だけ提示",
-        "emotion": "calm",
-        "delta_from_prev": "対面の緊張下で、共犯と組んだ準備が機能"
+        "belief": "制度の質問に答えるだけなら耐えられるが、署名はナビを失う境界だと理解する。",
+        "goal": "再鑑定同意書に署名せず、任意手続きとして拒否できる根拠を探す。",
+        "emotion": "fear",
+        "delta_from_prev": "匿名IDを守る受け答えから、ナビそのものを守る拒否へ重心が移る。"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_槇島_主任_v1"
+          ],
+          "direction": "tense",
+          "intensity": 2,
+          "trigger": "槇島が法律上禁止のはずの再鑑定を内部監査例外として差し出す。"
+        },
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "ナビが初めて自分の消失リスクを明確に告げる。"
+        }
+      ],
       "time_axis": {
-        "label": "六日目午後、Fランク窓口で参考人聴取",
+        "label": "DPC新宿支部窓口・照会中",
         "order": 4,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_dpc_public_counter_v1",
       "page_budget": {
         "min": 4,
         "max": 4,
@@ -329,17 +654,68 @@
       },
       "mode": "dialogue",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 56,
+        "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "counter-document-reveal-4p",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "シフト表コピーを差し出すレンの手と、入域履歴と買取記録を並べる槇島"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "白い窓口カウンター上の再鑑定同意書だけが、レンの喉元を締めるように見える。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "適性ランクは法律上、生涯固定として扱われ、鑑定石による再判定は禁止されている。しかし実体は、鑑定石プロトコルが初回接触時に割り振る初期アクセス権であり、大ナビ側の実仕様では書き換え可能である。この差は序盤では矛盾に見せ、中盤で再鑑定例外の不",
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レン",
+        "DPC内部監査室は、レンを最初から英雄候補として見ない。彼らにとって未分類加算の連続は、不正、外部干渉、鑑定石異常、外部音声型の疑いであり、記録基盤の信用を守るための調査対象である。戦闘で追うのではなく、書類、ログ、例外審査、素材買取の差分",
+        "記録更新は探索者の市場価値と社会信用を一夜で変えるが、同時に追跡の首輪にもなる。世界最速レベルアップ記録、未踏破階層討伐記録、最速踏破記録、単独討伐記録更新はDPC基盤に保存され、階層、時刻、入域者数、素材買取時刻と結びつく。レンは匿名ID"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_makishima_red_reanalysis_folder_v1",
+          "held_by": "char_槇島_主任_v1"
+        },
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "同意欄は救済ではなく首輪になる",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n3820ik_106753",
+            "n1105in_09d5c5",
+            "n7332im_1d32d8"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.76
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:14:37.001Z"
+        }
+      }
     },
     {
       "scene_id": "S05",
@@ -360,6 +736,7 @@
         "arc_phase": "climax",
         "arc_position_normalized": 0.85
       },
+      "location_id": "loc_dpc_public_counter_v1",
       "beat_type": "reveal",
       "cast": [
         {
@@ -378,71 +755,141 @@
       "dialogue_plan": {
         "key_lines": [
           {
+            "speaker": "char_槇島_主任_v1",
+            "text": "これは処分じゃない。内部監査室の保護手続きだ。",
+            "uniqueness": "may_repeat",
+            "intent": "reveal"
+          },
+          {
             "speaker": "char_獅童_響_v1",
-            "text": "再鑑定は受けないでください。あれは、私の声を消すための装置です。",
+            "text": "保護名目でも、接続切断の可能性があります。",
             "uniqueness": "scene_exclusive",
             "intent": "reveal"
           },
           {
             "speaker": "char_桐生_レン_v1",
-            "text": "ここで名前を書いたら、俺じゃなくて、この声が消される。",
+            "text": "保護なら、俺の声を先に奪うな。",
             "uniqueness": "scene_exclusive",
-            "intent": "reveal"
+            "intent": "hook"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_reappraisal_silences_navi",
+          "token": "F_protection_language_masks拘束",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_appraisal_stone_protocol_targets_voice_connection",
           "payoff_episode_hint": "cross_volume"
         }
       ],
       "foreshadow_payoff": [
-        "F_dpc_subpoena_received"
+        "F_ep2_unclassified_addition_warning",
+        "F_reappraisal_banned_but_exception_operated"
       ],
       "protagonist_arc_state": {
-        "belief": "再鑑定はナビを消す装置、署名は俺の声の自殺",
-        "goal": "再鑑定同意書を拒否する",
+        "belief": "公社の保護という言葉は、ナビを切り離す拘束にもなり得る。",
+        "goal": "保護手続きという名の再鑑定を拒み、自分と声を同じ側に置く。",
         "emotion": "fear",
-        "delta_from_prev": "想定通りの聴取から、ナビ消失を賭けた最大の選択へ"
+        "delta_from_prev": "侮蔑への恐怖より、声を制度に渡す恐怖が上回り、拒絶の核心が固まる。"
       },
       "relationship_state_delta": [
         {
           "pair": [
             "char_桐生_レン_v1",
+            "char_槇島_主任_v1"
+          ],
+          "direction": "tense",
+          "intensity": -2,
+          "trigger": "槇島が再鑑定を保護と呼び、レンがその言葉を拒否する。"
+        },
+        {
+          "pair": [
+            "char_桐生_レン_v1",
             "char_獅童_響_v1"
           ],
-          "direction": "trust+",
+          "direction": "closer",
           "intensity": 2,
-          "trigger": "ナビが規約境界で警告、レンが署名を止める信頼"
+          "trigger": "レンがナビを便利な機能ではなく、奪われる声として扱う。"
         }
       ],
       "time_axis": {
-        "label": "六日目午後、再鑑定同意書を突きつけられる瞬間",
+        "label": "内部監査例外の説明中",
         "order": 5,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "moments"
+        "duration_hint": "minutes"
       },
-      "location_id": "loc_dpc_public_counter_v1",
       "page_budget": {
-        "min": 4,
+        "min": 3,
         "max": 4,
         "preferred": 4
       },
-      "mode": "dialogue",
+      "mode": "introspection",
       "turn_anchor": {
-        "at_panel_no": 85,
+        "at_panel_no": 78,
         "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "appraisal_counter_voice_cut_4p",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "署名欄の大ゴマと、止まったレンの指、ナビ青光が手の上に走る"
+      "key_visual_intent": "鑑定石カウンターの手のひら型くぼみを署名欄の空白と重ね、測定が声の切断に見える構図にする。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "外部音声型は、契約者の内側から自然発生した能力ではない。大ナビ系統の観測端末が契約者へ接続し、条件、時刻、座標、手順、例外規約を音声として翻訳している状態である。契約者本人の意思が成立精度に影響するため、組織が声だけを奪っても同じ成果は出な",
+        "大ナビが隠した規約には、ナビ自身も触れられない領域がある。回答権限がない、開示すると契約が揺らぐ、言葉にすると記憶が欠ける、といった形で制限を見せる。読者には、ナビが全知ではなく、むしろ最も重要な場所で縛られている相棒だと理解させる。",
+        "DPCは悪意で成立した組織ではなく、初期被害を抑えるために必要だった管理機関である。ただし安全管理の合理性が20年続いた結果、低ランク層を切り捨てることで制度が安定する構造になった。現場職員は規則通りに動くだけで人を削るため、敵は怒鳴る悪役",
+        "匿名IDは探索者保護のために存在するが、完全な隠れ蓑ではない。DPC内部監査室は、入域ゲートの通過時刻、公社アプリ同期、素材袋の重量、監視映像の死角、未分類加算の発生間隔から候補者を狭める。読者には『数値で世界を揺らすほど、生活ログが危険に"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_appraisal_stone_counter_v1",
+          "held_by": "char_槇島_主任_v1"
+        },
+        {
+          "prop_id": "prop_makishima_red_reanalysis_folder_v1",
+          "held_by": "char_槇島_主任_v1"
+        }
+      ],
+      "theme_subtext": "保護の名で、声は切り離される。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n7332im_1d32d8",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.81
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:19:40.431Z"
+        }
+      }
     },
     {
       "scene_id": "S06",
@@ -463,7 +910,8 @@
         "arc_phase": "falling",
         "arc_position_normalized": 0.92
       },
-      "beat_type": "turn",
+      "location_id": "loc_dpc_public_counter_v1",
+      "beat_type": "aftermath",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -472,25 +920,52 @@
         {
           "character_id": "char_槇島_主任_v1",
           "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
         "key_lines": [
           {
             "speaker": "char_槇島_主任_v1",
-            "text": "お前は底辺で終わる側の人間だ。",
+            "text": "拒否した記録も、残るぞ。",
             "uniqueness": "scene_exclusive",
-            "intent": "establish"
+            "intent": "hook"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "残してください。署名はしない。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "背面カメラ、追尾しています。",
+            "uniqueness": "may_repeat",
+            "intent": "cliff"
           }
         ]
       },
-      "foreshadow_setup": [],
-      "foreshadow_payoff": [],
+      "foreshadow_setup": [
+        {
+          "token": "F_dpc_camera_back_tracking",
+          "payoff_episode_hint": "next_episode"
+        },
+        {
+          "token": "F_anonymous_id_real_name_matching",
+          "payoff_episode_hint": "later_in_volume"
+        }
+      ],
+      "foreshadow_payoff": [
+        "F_ep2_unclassified_gain_alert_to_internal_audit_pressure"
+      ],
       "protagonist_arc_state": {
-        "belief": "侮蔑を真正面で受け止め、目を逸らさない、初めて拒否で立つ",
-        "goal": "署名を拒否し退出",
-        "emotion": "determination",
-        "delta_from_prev": "署名を止める瞬間から、初めての公的拒否を成立させる"
+        "belief": "記録される恐怖より、署名して声を失う恐怖の方が大きい。",
+        "goal": "窓口から離脱し、ナナミと次の照合対策を組み直す。",
+        "emotion": "tension",
+        "delta_from_prev": "拒否はできたが、逃げ切れたわけではないと理解する。"
       },
       "relationship_state_delta": [
         {
@@ -498,37 +973,91 @@
             "char_桐生_レン_v1",
             "char_槇島_主任_v1"
           ],
-          "direction": "tense",
-          "intensity": -1,
-          "trigger": "拒否退出後にエレベーターホールで侮蔑、レンは目を逸らさない"
+          "direction": "farther",
+          "intensity": 2,
+          "trigger": "槇島が拒否記録そのものを圧力へ変える。"
+        },
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "ナビが戦闘ではなく制度上の追尾を警告する。"
         }
       ],
       "time_axis": {
-        "label": "六日目午後、エレベーターホール",
+        "label": "署名拒否直後",
         "order": 6,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "moments"
       },
-      "location_id": "loc_dpc_public_counter_v1",
       "page_budget": {
         "min": 2,
         "max": 2,
         "preferred": 2
       },
-      "mode": "dialogue",
+      "mode": "silence",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 95,
+        "type": "cliff_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "white-silence-camera-cutback",
       "subtype_directive": {
-        "external_social": false,
+        "external_social": true,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "閉じかけるエレベーター扉とレンの背中、追ってくる槇島の冷たい目"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "白い拒否の間から、監視カメラの黒いレンズへ視線を滑らせる。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "匿名IDは探索者保護のために存在するが、完全な隠れ蓑ではない。DPC内部監査室は、入域ゲートの通過時刻、公社アプリ同期、素材袋の重量、監視映像の死角、未分類加算の発生間隔から候補者を狭める。読者には『数値で世界を揺らすほど、生活ログが危険に",
+        "記録更新は探索者の市場価値と社会信用を一夜で変えるが、同時に追跡の首輪にもなる。世界最速レベルアップ記録、未踏破階層討伐記録、最速踏破記録、単独討伐記録更新はDPC基盤に保存され、階層、時刻、入域者数、素材買取時刻と結びつく。レンは匿名ID",
+        "DPCは悪意で成立した組織ではなく、初期被害を抑えるために必要だった管理機関である。ただし安全管理の合理性が20年続いた結果、低ランク層を切り捨てることで制度が安定する構造になった。現場職員は規則通りに動くだけで人を削るため、敵は怒鳴る悪役"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_app_nav_overlay_screen_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "拒否しても制度の視線は背中を離さない。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n3820ik_106753",
+            "n1105in_09d5c5",
+            "n7332im_1d32d8"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.76
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:23:48.930Z"
+        }
+      }
     },
     {
       "scene_id": "S07",
@@ -547,8 +1076,9 @@
         "volume": 1,
         "episode_in_volume": 6,
         "arc_phase": "climax",
-        "arc_position_normalized": 1.0
+        "arc_position_normalized": 1
       },
+      "location_id": "loc_dpc_monitor_room_v1",
       "beat_type": "cliff",
       "cast": [
         {
@@ -558,13 +1088,23 @@
         {
           "character_id": "char_槇島_主任_v1",
           "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
         "key_lines": [
           {
+            "speaker": "char_獅童_響_v1",
+            "text": "照合、開始されています。急いでください。",
+            "uniqueness": "may_repeat",
+            "intent": "hook"
+          },
+          {
             "speaker": "char_槇島_主任_v1",
-            "text": "追跡許可申請。",
+            "text": "追跡許可申請、送信。",
             "uniqueness": "scene_exclusive",
             "intent": "cliff"
           }
@@ -572,49 +1112,117 @@
       },
       "foreshadow_setup": [
         {
-          "token": "F_dpc_pursuit_authorization",
-          "payoff_episode_hint": "next_episode"
+          "token": "F_tracking_permission_real_name_match",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_external_voice_type_classification_absent",
+          "payoff_episode_hint": "cross_volume"
         }
       ],
-      "foreshadow_payoff": [],
+      "foreshadow_payoff": [
+        "F_ep2_unclassified_gain_public_log"
+      ],
       "protagonist_arc_state": {
-        "belief": "拒否したが、制度はもう個人を潰しに動き始めた",
-        "goal": "次の段階の対処を組み立てる",
-        "emotion": "fear",
-        "delta_from_prev": "拒否成功の余韻から、追跡発動の圧迫感へ"
+        "belief": "声を守る拒否は正しかったが、制度は声の存在に近づき始めた。",
+        "goal": "響の警告が続くうちに、次の一手を選ぶ場所まで離脱する。",
+        "emotion": "determination",
+        "delta_from_prev": "逃げるだけではなく、追跡される前提で動く覚悟へ一段進む。"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "響が再鑑定拒否後も、監査の開始を短く警告する。"
+        },
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_槇島_主任_v1"
+          ],
+          "direction": "farther",
+          "intensity": -2,
+          "trigger": "槇島が個人の侮蔑から制度的追跡へ手段を切り替える。"
+        }
+      ],
       "time_axis": {
-        "label": "六日目夕方、DPC 本部 モニター管制室",
+        "label": "DPC新宿支部前・同時刻",
         "order": 7,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "moments"
       },
-      "location_id": "loc_dpc_monitor_room_v1",
       "page_budget": {
         "min": 3,
         "max": 3,
         "preferred": 3
       },
-      "mode": "dialogue",
+      "mode": "silence",
       "turn_anchor": {
         "at_panel_no": 110,
         "type": "cliff_turn"
       },
-      "layout_pattern_id": "P_cliff_cross_cut_with_authority",
+      "layout_pattern_id": "silent_white_panel_to_audit_submit",
       "subtype_directive": {
-        "external_social": false,
+        "external_social": true,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "監視カメラ映像のレンの背中に重なる照準枠、槇島の指が送信ボタンを押す"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "空の吹き出しと監視画面の送信枠を対置し、声の弱さと制度の速さを同時に見せる。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レン",
+        "適性ランクは法律上、生涯固定として扱われ、鑑定石による再判定は禁止されている。しかし実体は、鑑定石プロトコルが初回接触時に割り振る初期アクセス権であり、大ナビ側の実仕様では書き換え可能である。この差は序盤では矛盾に見せ、中盤で再鑑定例外の不",
+        "大ナビが隠した規約には、ナビ自身も触れられない領域がある。回答権限がない、開示すると契約が揺らぐ、言葉にすると記憶が欠ける、といった形で制限を見せる。読者には、ナビが全知ではなく、むしろ最も重要な場所で縛られている相棒だと理解させる。",
+        "DPC内部監査室は、レンを最初から英雄候補として見ない。彼らにとって未分類加算の連続は、不正、外部干渉、鑑定石異常、外部音声型の疑いであり、記録基盤の信用を守るための調査対象である。戦闘で追うのではなく、書類、ログ、例外審査、素材買取の差分"
+      ],
+      "props_in_play": [],
+      "theme_subtext": "声が細るほど、制度の手は速くなる。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n7332im_1d32d8",
+            "n1105in_09d5c5",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.78
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:27:51.763Z"
+        }
+      }
     }
   ],
-  "pull_link": {
-    "current_episode_cliff": "unknown_threat_silhouette",
-    "next_opening_hook_hint": "次話冒頭は、追跡許可下のレンが街中の視線を意識しながら次の動きを組む。灯里の 20F 中継が同時に流れる対比で展開を起動。",
-    "is_volume_end": false
+  "generated_at": "2026-05-12T15:27:51.763Z",
+  "source": {
+    "brief_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep06/_brief.v2.md",
+    "shotlist_path": "",
+    "bible_snapshot_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/bible/snapshot.json",
+    "volume_plot_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/volumes/v01/plot.json"
   }
 }

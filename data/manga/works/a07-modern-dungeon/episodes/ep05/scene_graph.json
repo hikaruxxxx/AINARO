@@ -1,13 +1,6 @@
 {
   "schema_version": 1,
   "episode_id": "a07-modern-dungeon-ep05",
-  "generated_at": "2026-05-07T04:30:00+09:00",
-  "source": {
-    "brief_path": "data/manga/works/a07-modern-dungeon/episodes/ep05/_brief.v2.md",
-    "shotlist_path": "data/manga/works/a07-modern-dungeon/episodes/ep05/shotlist.json",
-    "bible_snapshot_path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json"
-  },
-  "_note": "Phase β B5-5 ep05 - ナナミ正体露見、Nm 共犯成立 cliff",
   "scenes": [
     {
       "scene_id": "S01",
@@ -26,8 +19,9 @@
         "volume": 1,
         "episode_in_volume": 5,
         "arc_phase": "introduce",
-        "arc_position_normalized": 0.40
+        "arc_position_normalized": 0.4
       },
+      "location_id": "loc_lawson_interior_v1",
       "beat_type": "introduce",
       "cast": [
         {
@@ -37,30 +31,50 @@
         {
           "character_id": "char_九条_ナナミ_v1",
           "presence": "in_person"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
         "key_lines": [
           {
             "speaker": "char_九条_ナナミ_v1",
-            "text": "Nm です。私が、あなたの翻訳を読んでいた人間です。",
+            "text": "Nmです。",
             "uniqueness": "scene_exclusive",
-            "intent": "reveal"
+            "intent": "hook"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "……袋、要りますか。",
+            "uniqueness": "may_repeat",
+            "intent": "establish"
+          },
+          {
+            "speaker": "char_獅童_響_v1",
+            "text": "会話継続は推奨しません。",
+            "uniqueness": "may_repeat",
+            "intent": "callback"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_nanami_reveals_nm_identity",
-          "payoff_episode_hint": "this_episode"
+          "token": "F_nanami_nm_wiki_back_admin_co_conspirator",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_anonymous_id_life_log_can_be_narrowed",
+          "payoff_episode_hint": "next_episode"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "ナナミは三日に一回の常連客、突然の Nm 名乗りで警戒モードへ",
-        "goal": "店内環境を確認し、ナナミの正体と意図を見極める",
-        "emotion": "tension",
-        "delta_from_prev": "ep04 末の DPC 監視への怯えから、店内に現れた予期せぬ情報強者へ"
+        "belief": "記録更新の快感より、匿名が破られた恐怖の方が今は大きい。",
+        "goal": "レジ業務を崩さず、ナナミが本物のNmか確認する。",
+        "emotion": "fear",
+        "delta_from_prev": "DPC監査への警戒が、身近な常連客への不信として具体化する。"
       },
       "relationship_state_delta": [
         {
@@ -69,18 +83,26 @@
             "char_桐生_レン_v1"
           ],
           "direction": "tense",
-          "intensity": -1,
-          "trigger": "Nm 名乗りで距離が縮まりつつ警戒される"
+          "intensity": 2,
+          "trigger": "常連客が匿名相談先Nmだと名乗り、レンの生活圏へ侵入していた事実が露呈する。"
+        },
+        {
+          "pair": [
+            "char_桐生_レン_v1",
+            "char_獅童_響_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "ナビの警告が、レンに店内確認と会話打ち切りを促す。"
         }
       ],
       "time_axis": {
-        "label": "五日目深夜2時、ローソン新宿西店内レジ",
+        "label": "深夜勤務中",
         "order": 1,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_interior_v1",
       "page_budget": {
         "min": 3,
         "max": 3,
@@ -88,17 +110,76 @@
       },
       "mode": "dialogue",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 7,
+        "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "cold_open_register_whisper_reveal",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "深夜のレジ越しに釣り銭を渡す手と、小声で囁く女性の口元"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "釣り銭を渡す数センチの距離で、常連客の笑顔が匿名IDへ反転する。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "costume_id": "costume_nanami_field_info_v1"
+        },
+        {
+          "character_id": "char_獅童_響_v1",
+          "costume_id": "costume_genzo_retired_field_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "ナビ青光",
+          "intensity": "subtle"
+        }
+      ],
+      "world_rules_active": [
+        "匿名IDは探索者保護のために存在するが、完全な隠れ蓑ではない。DPC内部監査室は、入域ゲートの通過時刻、公社アプリ同期、素材袋の重量、監視映像の死角、未分類加算の発生間隔から候補者を狭める。読者には『数値で世界を揺らすほど、生活ログが危険に",
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レン",
+        "レンの勤務先や日常商業施設は、すべて架空名と視覚記号で扱う。青と白の看板、24h営業、入口チャイム二音、温かい総菜什器を持つ架空深夜小売チェーンへ統一し、実在企業や実在商標を想起させる名称、ロゴ、商品名は使わない。黒端末や短文投稿網も同じく"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "匿名は守りではなく、誰かに辿られる傷になる。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n7332im_1d32d8",
+            "n6389ji_a6d54f"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.84
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T14:59:32.281Z"
+        }
+      }
     },
     {
       "scene_id": "S02",
@@ -119,10 +200,15 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.45
       },
+      "location_id": "loc_lawson_interior_v1",
       "beat_type": "setup",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
           "presence": "in_person"
         }
       ],
@@ -130,47 +216,132 @@
         "key_lines": [
           {
             "speaker": "char_桐生_レン_v1",
-            "text": "驚くのは後だ。まず、どこまで見られているかを数えろ。",
-            "uniqueness": "scene_exclusive",
+            "text": "声を落として。ここ、カメラ三つあります。",
+            "uniqueness": "may_repeat",
             "intent": "establish"
+          },
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "だから、釣り銭の音で隠したの。",
+            "uniqueness": "may_repeat",
+            "intent": "hook"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "本物なら、俺が聞いた質問の二つ目を言えるはずだ。",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
+          },
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "『匿名IDの加算時刻は、買取時刻と同期するのか』。違う？",
+            "uniqueness": "scene_exclusive",
+            "intent": "reveal"
           }
         ]
       },
-      "foreshadow_setup": [],
+      "foreshadow_setup": [
+        {
+          "token": "F_nanami_wiki_admin_story_device",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_dpc_audit_life_log_trace",
+          "payoff_episode_hint": "next_episode"
+        }
+      ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "情報強者として、まず盤面を数える",
-        "goal": "防犯カメラ・客の位置・店長の所在を確認",
-        "emotion": "calm",
-        "delta_from_prev": "驚きを後回しにし、情報強者の核ラインで自分を立て直す"
+        "belief": "匿名相手でも、ログと状況で検証しなければ信用できない。",
+        "goal": "レジ業務を崩さず、ナナミが本物のNmか確認する。",
+        "emotion": "tension",
+        "delta_from_prev": "正体暴露への動揺を、防犯カメラと質問照合の確認行動へ変える。"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_九条_ナナミ_v1",
+            "char_桐生_レン_v1"
+          ],
+          "direction": "tense",
+          "intensity": 1,
+          "trigger": "ナナミが匿名相談の具体文面を言い当て、レンは信用せず検証を始める。"
+        }
+      ],
       "time_axis": {
-        "label": "五日目深夜、ローソン店内 (盤面確認)",
+        "label": "深夜二時過ぎ、レジ接客直後",
         "order": 2,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "moments"
       },
-      "location_id": "loc_lawson_interior_v1",
       "page_budget": {
         "min": 2,
         "max": 2,
         "preferred": 2
       },
-      "mode": "introspection",
+      "mode": "dialogue",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 21,
+        "type": "tension_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "two_page_counter_standoff_tight_reaction",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "防犯カメラの位置、客の頭数、店長の影を視線で数えるレン"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "レジ台、監視カメラ、釣り銭を挟み、日常接客の姿勢のまま密談が始まる。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "costume_id": "costume_nanami_field_info_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "匿名IDは探索者保護のために存在するが、完全な隠れ蓑ではない。DPC内部監査室は、入域ゲートの通過時刻、公社アプリ同期、素材袋の重量、監視映像の死角、未分類加算の発生間隔から候補者を狭める。読者には『数値で世界を揺らすほど、生活ログが危険に",
+        "レンの勤務先や日常商業施設は、すべて架空名と視覚記号で扱う。青と白の看板、24h営業、入口チャイム二音、温かい総菜什器を持つ架空深夜小売チェーンへ統一し、実在企業や実在商標を想起させる名称、ロゴ、商品名は使わない。黒端末や短文投稿網も同じく"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "信用は、名乗りではなく検証から始まる。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 0.5,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n6389ji_a6d54f",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.78
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:04:15.293Z"
+        }
+      }
     },
     {
       "scene_id": "S03",
@@ -189,9 +360,10 @@
         "volume": 1,
         "episode_in_volume": 5,
         "arc_phase": "rising",
-        "arc_position_normalized": 0.50
+        "arc_position_normalized": 0.5
       },
-      "beat_type": "transition",
+      "location_id": "loc_lawson_interior_v1",
+      "beat_type": "setup",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -203,48 +375,128 @@
         }
       ],
       "dialogue_plan": {
-        "key_lines": []
+        "key_lines": [
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "続きはここでは聞けない。カメラが三つ、客が一人。",
+            "uniqueness": "scene_exclusive",
+            "intent": "establish"
+          },
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "いい判断。だから、時間だけ置いていく。",
+            "uniqueness": "may_repeat",
+            "intent": "hook"
+          }
+        ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_nanami_backdoor_meeting_arranged",
-          "payoff_episode_hint": "this_episode"
+          "token": "F_nanami_anonymous_record_broker",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_dpc_audit_lifestyle_log_trace",
+          "payoff_episode_hint": "next_episode"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "ナナミはレシート裏で会う時刻を指定、無言の合意で次の段へ進む",
-        "goal": "夜勤明けに裏口で会う準備",
+        "belief": "匿名相手でも、店内の死角と情報の出所を確認しなければ信用できない。",
+        "goal": "勤務を崩さず、ナナミを店外の検証可能な会話へ誘導する。",
         "emotion": "tension",
-        "delta_from_prev": "盤面確認を経て、ナナミの提案を受ける段取りへ"
+        "delta_from_prev": "質問への正答で動揺したが、即座にカメラと客数の確認へ切り替える。"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_九条_ナナミ_v1",
+            "char_桐生_レン_v1"
+          ],
+          "direction": "tense",
+          "intensity": 1,
+          "trigger": "ナナミが本物に近いと分かるほど、レンは会話場所の危険を意識する。"
+        }
+      ],
       "time_axis": {
-        "label": "五日目深夜、ナナミ去り際",
+        "label": "深夜コンビニ・レジ前",
         "order": 3,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "moments"
+        "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_interior_v1",
       "page_budget": {
-        "min": 3,
+        "min": 2,
         "max": 3,
         "preferred": 3
       },
-      "mode": "transition_montage",
+      "mode": "dialogue",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 34,
+        "type": "tension_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "b6_rising_register_15panel_tension",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "レシート裏に小さく書かれた時刻、ナナミの後ろ姿が自動ドアを抜ける"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "レジ台越しにレンの視線が防犯カメラ、客、ナナミの指先を順に走り、会話より検証が先に立つ。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "costume_id": "costume_nanami_field_info_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "沈黙の白コマ",
+          "intensity": "subtle"
+        }
+      ],
+      "world_rules_active": [
+        "匿名IDは探索者保護のために存在するが、完全な隠れ蓑ではない。DPC内部監査室は、入域ゲートの通過時刻、公社アプリ同期、素材袋の重量、監視映像の死角、未分類加算の発生間隔から候補者を狭める。読者には『数値で世界を揺らすほど、生活ログが危険に",
+        "レンの勤務先や日常商業施設は、すべて架空名と視覚記号で扱う。青と白の看板、24h営業、入口チャイム二音、温かい総菜什器を持つ架空深夜小売チェーンへ統一し、実在企業や実在商標を想起させる名称、ロゴ、商品名は使わない。黒端末や短文投稿網も同じく"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "信用の前に、まず逃げ道を数える。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n6389ji_a6d54f",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.76
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:09:40.121Z"
+        }
+      }
     },
     {
       "scene_id": "S04",
@@ -263,9 +515,10 @@
         "volume": 1,
         "episode_in_volume": 5,
         "arc_phase": "rising",
-        "arc_position_normalized": 0.60
+        "arc_position_normalized": 0.6
       },
-      "beat_type": "reveal",
+      "location_id": "loc_lawson_exterior_night_v1",
+      "beat_type": "turn",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -280,61 +533,123 @@
         "key_lines": [
           {
             "speaker": "char_九条_ナナミ_v1",
-            "text": "私、元 DPC 職員。今は攻略 wiki 裏管理人 Nm。",
+            "text": "監査はもう動いてる。だから隠すだけだと、先に向こうの物語にされる。",
             "uniqueness": "scene_exclusive",
-            "intent": "reveal"
+            "intent": "hook"
+          },
+          {
+            "speaker": "char_桐生_レン_v1",
+            "text": "物語にするな。俺はまだ、誰にも名前を渡してない。",
+            "uniqueness": "may_repeat",
+            "intent": "establish"
           },
           {
             "speaker": "char_九条_ナナミ_v1",
-            "text": "匿名ログ、加算時刻、入域者数、買取素材の偏り。あなたが新宿第三の更新者だと、絞れた。",
-            "uniqueness": "scene_exclusive",
+            "text": "名前はいらない。底辺Fランクのまま記録だけが上がる。それで十分刺さる。",
+            "uniqueness": "may_repeat",
             "intent": "reveal"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_nanami_dpc_ex_employee",
+          "token": "F_f_rank_record_as_public_counter_narrative",
           "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_dpc_audit_counterstory_pressure",
+          "payoff_episode_hint": "next_episode"
         }
       ],
-      "foreshadow_payoff": [
-        "F_nanami_reveals_nm_identity",
-        "F_nanami_backdoor_meeting_arranged"
-      ],
+      "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "ナナミは元 DPC 職員、内側を知っている、即信用は危険",
-        "goal": "ナナミの素性と意図を確認",
-        "emotion": "tension",
-        "delta_from_prev": "店内の警戒モードから、裏口での対面・聞き取りへ"
+        "belief": "隠れているだけでは監査に潰されるが、出方を誤れば名前を奪われる。",
+        "goal": "ナナミの提案をすぐには受けず、匿名記録を武器にできる条件を探る。",
+        "emotion": "determination",
+        "delta_from_prev": "ナナミを拒絶するだけの姿勢から、利用できる情報屋として測る姿勢へ変わる。"
       },
-      "relationship_state_delta": [],
+      "relationship_state_delta": [
+        {
+          "pair": [
+            "char_九条_ナナミ_v1",
+            "char_桐生_レン_v1"
+          ],
+          "direction": "trust+",
+          "intensity": 1,
+          "trigger": "ナナミが監査より先に匿名記録を世に出す発想を示し、レンが敵味方ではなく利用価値で見る。"
+        }
+      ],
       "time_axis": {
-        "label": "五日目夜勤明け、ローソン外観バックヤード裏口",
+        "label": "深夜勤務中・裏口前",
         "order": 4,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_exterior_night_v1",
       "page_budget": {
-        "min": 4,
+        "min": 3,
         "max": 4,
         "preferred": 4
       },
-      "mode": "dialogue",
+      "mode": "external_social",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 55,
+        "type": "reveal_turn"
       },
       "layout_pattern_id": null,
       "subtype_directive": {
-        "external_social": false,
+        "external_social": true,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "室外機の音、薄い街灯、深夜の湿気、レンとナナミの距離"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "青白堂の裏口の暗さに、まだ空白の記録告知枠だけが浮かび、レンの人生が匿名の見世物にも武器にもなり得ると示す。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "costume_id": "costume_nanami_field_info_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "記録更新は探索者の市場価値と社会信用を一夜で変えるが、同時に追跡の首輪にもなる。世界最速レベルアップ記録、未踏破階層討伐記録、最速踏破記録、単独討伐記録更新はDPC基盤に保存され、階層、時刻、入域者数、素材買取時刻と結びつく。レンは匿名ID",
+        "レンはFランクの肩書きが消えることで救われるのではなく、Fランクのまま制度が間違っていた証拠になる。彼の成果は『例外的な天才だった』で片付けず、初期アクセス権が狭くても正しい条件を踏めば到達できる判定が存在した、という反証として扱う。これが",
+        "隠しルールの公開には副作用がある。大ナビは人類全体が同じ未公開変数を一斉利用することを想定していないため、条件が広く共有されると数日から数週間で判定窓が閉じるか変質する。ナナミが情報公開を絞る理由になり、レンの力が単純な攻略共有で世界全員を",
+        "物語内の用語は、行政語、現場語、ナビ語の三層で分ける。DPCは『入域資格を確認しました』のように硬く、探索者は『北東通路が閉じた』のように短く、ナビは『条件、開示します』のように対象名詞から始める。禁則語や実在名へ流れず、同じ制度を別の声で"
+      ],
+      "props_in_play": [],
+      "theme_subtext": "隠れる弱さが、仕掛ける匿名へ変わる",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n6389ji_a6d54f",
+            "n1105in_09d5c5",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.74
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:13:40.832Z"
+        }
+      }
     },
     {
       "scene_id": "S05",
@@ -353,9 +668,10 @@
         "volume": 1,
         "episode_in_volume": 5,
         "arc_phase": "climax",
-        "arc_position_normalized": 0.70
+        "arc_position_normalized": 0.7
       },
-      "beat_type": "setup",
+      "location_id": "loc_lawson_exterior_night_v1",
+      "beat_type": "cliff",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -364,78 +680,128 @@
         {
           "character_id": "char_九条_ナナミ_v1",
           "presence": "in_person"
-        },
-        {
-          "character_id": "char_獅童_響_v1",
-          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
         "key_lines": [
           {
             "speaker": "char_九条_ナナミ_v1",
-            "text": "内部監査室はもう、新宿第三 F 級枠まで来ている。",
+            "text": "面白い。あなた、FランクのままSを踏み抜く気でしょ。",
             "uniqueness": "scene_exclusive",
-            "intent": "reveal"
+            "intent": "cliff"
           },
           {
-            "speaker": "char_獅童_響_v1",
-            "text": "情報開示対象の拡大は危険です。",
+            "speaker": "char_桐生_レン_v1",
+            "text": "やる。",
             "uniqueness": "scene_exclusive",
-            "intent": "establish"
+            "intent": "cliff"
+          },
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "じゃあ、名前は捨てない。隠したまま刺す。",
+            "uniqueness": "may_repeat",
+            "intent": "hook"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_dpc_audit_pinpointed_f_class",
-          "payoff_episode_hint": "next_episode"
+          "token": "F_nanami_anonymous_stream_weapon",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_f_rank_vs_s_rank_public_challenge",
+          "payoff_episode_hint": "later_in_volume"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "ナナミは正確に内側を知っている、信用しないと潰される",
-        "goal": "ナナミの真偽を細かく測り、共犯候補として評価",
-        "emotion": "tension",
-        "delta_from_prev": "情報を測り始め、共犯の輪郭が見え始める"
+        "belief": "名前を隠すことは敗北ではなく、Fランクのまま制度へ踏み込むための刃になる。",
+        "goal": "ナナミを共犯として使い、匿名記録を世界へ流す準備に入る。",
+        "emotion": "determination",
+        "delta_from_prev": "声の存在を抱え込む孤独から、匿名のまま世界に仕掛ける決意へ進む。"
       },
       "relationship_state_delta": [
         {
           "pair": [
-            "char_桐生_レン_v1",
-            "char_九条_ナナミ_v1"
+            "char_九条_ナナミ_v1",
+            "char_桐生_レン_v1"
           ],
-          "direction": "trust+",
-          "intensity": 1,
-          "trigger": "ナナミが素材買取改定情報・DPC 監査の動きを正確に答え、真偽が立った"
+          "direction": "closer",
+          "intensity": 2,
+          "trigger": "ナナミがレンの狙いを言語化し、レンが短く肯定して共犯関係を成立させる。"
         }
       ],
       "time_axis": {
-        "label": "五日目深夜、裏口で素性確認",
+        "label": "深夜、裏口の会話終端",
         "order": 5,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "minutes"
+        "duration_hint": "moments"
       },
-      "location_id": "loc_lawson_exterior_night_v1",
       "page_budget": {
-        "min": 4,
+        "min": 3,
         "max": 4,
         "preferred": 4
       },
-      "mode": "dialogue",
+      "mode": "silence",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 80,
+        "type": "cliff_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "silent_cliff_two_line_v1",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
       "render_strategy": "page_one_shot",
-      "key_visual_intent": "ナナミのタブレット光、レンの瞳の青光、二人の情報強者の対峙"
+      "key_visual_intent": "最後の白い間でレンの黒フードの袖口とナナミの笑みだけを残し、短い肯定を刃のように落とす。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "costume_id": "costume_nanami_field_info_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "レンはFランクの肩書きが消えることで救われるのではなく、Fランクのまま制度が間違っていた証拠になる。彼の成果は『例外的な天才だった』で片付けず、初期アクセス権が狭くても正しい条件を踏めば到達できる判定が存在した、という反証として扱う。これが",
+        "本作の力の根幹は『強い肉体を得る』ではなく『ダンジョンが正解と認める行為を、正しい条件で成立させる』ことにある。読者に返す報酬は、底辺Fランクのレンが突然万能化する快感ではない。公社もSランクも見落としていた条件をナビだけが開示し、レンが震",
+        "国家直轄エース部隊『朱（あかね）』は、Sランクの勝者集団であると同時に、安全神話を支える広告塔でもある。彼らは制度の内側では合理的に強いが、未公開規約や外部音声型には弱い。レンが彼らを上回る場面は、努力の否定ではなく、知らされていた条件の差"
+      ],
+      "props_in_play": [],
+      "theme_subtext": "隠れる少年が匿名の刃を持つ。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n6389ji_a6d54f",
+            "n1105in_09d5c5",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.78
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:17:28.444Z"
+        }
+      }
     },
     {
       "scene_id": "S06",
@@ -456,6 +822,7 @@
         "arc_phase": "climax",
         "arc_position_normalized": 0.85
       },
+      "location_id": "loc_lawson_exterior_night_v1",
       "beat_type": "turn",
       "cast": [
         {
@@ -471,68 +838,130 @@
         "key_lines": [
           {
             "speaker": "char_九条_ナナミ_v1",
-            "text": "顔は隠す、ログは改竄しない。F のまま記録を更新する事実だけ、世に流す。",
+            "text": "名前は出さない。出すのは、Fランクが記録欄を壊した事実だけ。",
             "uniqueness": "scene_exclusive",
-            "intent": "establish"
+            "intent": "reveal"
           },
           {
             "speaker": "char_桐生_レン_v1",
-            "text": "一人で黙ってたら、制度に消される。",
-            "uniqueness": "scene_exclusive",
+            "text": "全部は話さない。けど、俺の中に、手順を告げる声がある。",
+            "uniqueness": "may_repeat",
             "intent": "establish"
+          },
+          {
+            "speaker": "char_九条_ナナミ_v1",
+            "text": "それで十分。嘘を混ぜるより、伏せた場所を決める方が使える。",
+            "uniqueness": "may_repeat",
+            "intent": "callback"
           }
         ]
       },
       "foreshadow_setup": [
         {
-          "token": "F_anonymous_record_strategy",
+          "token": "F_nanami_anonymous_record_story_engine",
           "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_navi_partial_disclosure_risk",
+          "payoff_episode_hint": "next_episode"
         }
       ],
-      "foreshadow_payoff": [],
+      "foreshadow_payoff": [
+        "P_ep5_nanami_is_wiki_back_admin",
+        "P_ep5_ren_half_discloses_navi"
+      ],
       "protagonist_arc_state": {
-        "belief": "防御から仕掛けへ、匿名 ID を武器に世界へ出る",
-        "goal": "ナナミの戦略提案を共犯として受け入れる",
+        "belief": "完全に隠れるだけでは監査に潰されるが、全てを明かせば声を奪われる。",
+        "goal": "ナナミに半分だけ真実を渡し、匿名記録を制御された武器にする。",
         "emotion": "determination",
-        "delta_from_prev": "警戒から戦略合意へ、孤独から共犯へ"
+        "delta_from_prev": "ナナミを信用するのではなく、情報戦の共犯として条件付きで使う決断へ進む。"
       },
       "relationship_state_delta": [
         {
           "pair": [
-            "char_桐生_レン_v1",
-            "char_九条_ナナミ_v1"
+            "char_九条_ナナミ_v1",
+            "char_桐生_レン_v1"
           ],
-          "direction": "closer",
+          "direction": "trust+",
           "intensity": 1,
-          "trigger": "匿名 ID を物語として流す戦略で利害が一致"
+          "trigger": "レンがナビの存在を限定開示し、ナナミが匿名運用の条件へ落とす。"
         }
       ],
       "time_axis": {
-        "label": "五日目深夜、裏口で戦略合意",
+        "label": "深夜、青白堂24裏口",
         "order": 6,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_exterior_night_v1",
       "page_budget": {
-        "min": 3,
+        "min": 2,
         "max": 3,
         "preferred": 3
       },
       "mode": "dialogue",
       "turn_anchor": {
-        "at_panel_no": null,
-        "type": "none"
+        "at_panel_no": 90,
+        "type": "reveal_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "climax_dialogue_half_disclosure_3p",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "ナナミがタブレットに戦略案を書く手と、レンの目に走る決意"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "裏口の白い蛍光灯下で、レンの黒フードとナナミのタブレット光だけが向かい合う。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "costume_id": "costume_nanami_field_info_v1"
+        }
+      ],
+      "visual_motif_anchors": [],
+      "world_rules_active": [
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レン",
+        "匿名IDは探索者保護のために存在するが、完全な隠れ蓑ではない。DPC内部監査室は、入域ゲートの通過時刻、公社アプリ同期、素材袋の重量、監視映像の死角、未分類加算の発生間隔から候補者を狭める。読者には『数値で世界を揺らすほど、生活ログが危険に",
+        "記録更新は探索者の市場価値と社会信用を一夜で変えるが、同時に追跡の首輪にもなる。世界最速レベルアップ記録、未踏破階層討伐記録、最速踏破記録、単独討伐記録更新はDPC基盤に保存され、階層、時刻、入域者数、素材買取時刻と結びつく。レンは匿名ID"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_nanami_tablet_bag_v1",
+          "held_by": "char_九条_ナナミ_v1"
+        }
+      ],
+      "theme_subtext": "秘密は信頼ではなく条件で渡す。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n6389ji_a6d54f",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.78
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:22:17.017Z"
+        }
+      }
     },
     {
       "scene_id": "S07",
@@ -551,9 +980,10 @@
         "volume": 1,
         "episode_in_volume": 5,
         "arc_phase": "climax",
-        "arc_position_normalized": 1.0
+        "arc_position_normalized": 1
       },
-      "beat_type": "cliff",
+      "location_id": "loc_lawson_exterior_night_v1",
+      "beat_type": "turn",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -568,25 +998,19 @@
         "key_lines": [
           {
             "speaker": "char_桐生_レン_v1",
-            "text": "俺の頭の中に、声がする。",
+            "text": "声の正体は言わない。けど、条件だけは俺に聞こえる。",
             "uniqueness": "scene_exclusive",
             "intent": "reveal"
           },
           {
             "speaker": "char_九条_ナナミ_v1",
-            "text": "20 年で 3 例。あなたは 4 例目かもしれない。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_九条_ナナミ_v1",
-            "text": "面白い。あなた、F 級のまま S を踏み抜く気でしょ。",
-            "uniqueness": "scene_exclusive",
-            "intent": "cliff"
+            "text": "全部じゃなくていい。嘘を混ぜない範囲で、渡して。",
+            "uniqueness": "may_repeat",
+            "intent": "establish"
           },
           {
             "speaker": "char_桐生_レン_v1",
-            "text": "──やる。",
+            "text": "匿名で出す。俺の名前じゃなく、Fランクが踏んだ事実として。",
             "uniqueness": "scene_exclusive",
             "intent": "cliff"
           }
@@ -594,36 +1018,43 @@
       },
       "foreshadow_setup": [
         {
-          "token": "F_ren_navi_half_disclosed",
-          "payoff_episode_hint": "cross_volume"
+          "token": "F_nanami_anonymous_record_story_engine",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_navi_partial_disclosure_risk",
+          "payoff_episode_hint": "later_in_volume"
+        },
+        {
+          "token": "F_dpc_audit_next_contact",
+          "payoff_episode_hint": "next_episode"
         }
       ],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "孤独な最適化が共犯関係に変わる、F のまま S を踏み抜く",
-        "goal": "匿名 ID を武器に世界へ仕掛ける",
+        "belief": "全てを隠すだけでは監査に潰されるが、全てを明かせば声を失う。",
+        "goal": "ナナミへ渡す情報を絞り、匿名記録を制御された武器にする。",
         "emotion": "determination",
-        "delta_from_prev": "戦略合意から、声を半分明かしての本格共犯へ"
+        "delta_from_prev": "半分だけ真実を渡す恐怖から、条件付きの共犯化へ一歩進む。"
       },
       "relationship_state_delta": [
         {
           "pair": [
-            "char_桐生_レン_v1",
-            "char_九条_ナナミ_v1"
+            "char_九条_ナナミ_v1",
+            "char_桐生_レン_v1"
           ],
           "direction": "trust+",
-          "intensity": 2,
-          "trigger": "ナビ存在を半分明かし、ナナミも正面から受け止める"
+          "intensity": 1,
+          "trigger": "レンがナビの存在を能力名ではなく『聞こえる条件』として限定開示した。"
         }
       ],
       "time_axis": {
-        "label": "五日目深夜、共犯成立の瞬間",
+        "label": "深夜、裏口での密談終盤",
         "order": 7,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "moments"
+        "duration_hint": "minutes"
       },
-      "location_id": "loc_lawson_exterior_night_v1",
       "page_budget": {
         "min": 3,
         "max": 3,
@@ -631,22 +1062,88 @@
       },
       "mode": "dialogue",
       "turn_anchor": {
-        "at_panel_no": 110,
-        "type": "cliff_turn"
+        "at_panel_no": 105,
+        "type": "tension_turn"
       },
-      "layout_pattern_id": null,
+      "layout_pattern_id": "climax_backdoor_twohand_negotiation_v1",
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "page_one_shot",
-      "key_visual_intent": "青光とタブレット光が同じコマで並び、レンの「やる」と二人の輪郭"
+      "render_strategy": "panel_composite",
+      "key_visual_intent": "青白い裏口灯の下、レンの割れた端末を挟んで二人が情報の境界線を引く。",
+      "wardrobe_state": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "costume_id": "costume_ren_blueway_uniform_v1"
+        },
+        {
+          "character_id": "char_九条_ナナミ_v1",
+          "costume_id": "costume_nanami_field_info_v1"
+        }
+      ],
+      "visual_motif_anchors": [
+        {
+          "motif_id": "ヒビ入りのスマートフォン",
+          "intensity": "clear"
+        },
+        {
+          "motif_id": "ナビ青光",
+          "intensity": "subtle"
+        },
+        {
+          "motif_id": "沈黙の白コマ",
+          "intensity": "clear"
+        }
+      ],
+      "world_rules_active": [
+        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レン",
+        "ナビの開示には一日単位の上限がある。戦闘条件、採取条件、生活最適化、警告、感情に近い発話のいずれも残量を削る。序盤は便利な制限として、終盤は人格を持つ相棒が話すほど削れていく痛みとして扱う。開示量を使い切ると沈黙モードに入り、レンは本当にF",
+        "匿名IDは探索者保護のために存在するが、完全な隠れ蓑ではない。DPC内部監査室は、入域ゲートの通過時刻、公社アプリ同期、素材袋の重量、監視映像の死角、未分類加算の発生間隔から候補者を狭める。読者には『数値で世界を揺らすほど、生活ログが危険に",
+        "隠しルールの公開には副作用がある。大ナビは人類全体が同じ未公開変数を一斉利用することを想定していないため、条件が広く共有されると数日から数週間で判定窓が閉じるか変質する。ナナミが情報公開を絞る理由になり、レンの力が単純な攻略共有で世界全員を"
+      ],
+      "props_in_play": [
+        {
+          "prop_id": "prop_smartphone_cracked_v1",
+          "held_by": "char_桐生_レン_v1"
+        }
+      ],
+      "theme_subtext": "秘密は孤独ではなく、条件付きの刃になる。",
+      "selection": {
+        "tier": 1,
+        "iterations": 1,
+        "candidate_count": 3,
+        "pairwise_score": 1,
+        "predict_hit": {
+          "v12_ep1": 0,
+          "v12_longform": 0,
+          "ensemble": 0
+        },
+        "anchor_diff": {
+          "top3_anchor_ids": [
+            "n1105in_09d5c5",
+            "n6389ji_a6d54f",
+            "n3820ik_106753"
+          ],
+          "cosine_avg": 0,
+          "llm_score": 0.74
+        },
+        "template_collision": {
+          "collision_rate": 0,
+          "nearest_template": null
+        },
+        "decision_log": {
+          "selected_at": "2026-05-12T15:26:46.692Z"
+        }
+      }
     }
   ],
-  "pull_link": {
-    "current_episode_cliff": "protagonist_resolve_monologue",
-    "next_opening_hook_hint": "次話冒頭は、共犯関係を得たレンが DPC からの呼び出し封書を受け取る。匿名の盾と公的な圧力が正面衝突する展開へ。",
-    "is_volume_end": false
+  "generated_at": "2026-05-12T15:26:46.692Z",
+  "source": {
+    "brief_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep05/_brief.v2.md",
+    "shotlist_path": "",
+    "bible_snapshot_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/bible/snapshot.json",
+    "volume_plot_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/volumes/v01/plot.json"
   }
 }
