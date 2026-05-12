@@ -711,25 +711,23 @@ function buildLayoutGeometryBlock(
 
   const panelLabel = (s: Slot) => `panel#${s.panelNo}`;
   const lines: string[] = [
-    "## LAYOUT GEOMETRY (CRITICAL — page is NOT a uniform grid):",
-    "",
+    "Geometry (panel# = importance/5, row col, area W%xH%, tags):",
   ];
 
+  // 2026-05-13 圧縮: 旧 1 行 130-170字 → 記号化で 50-70字に。
+  // row: TOP/MIDDLE/BOTTOM → T/M/B、col: LEFT/RIGHT/CENTER/FULL_WIDTH → L/R/C/FW、
+  // size: FULL-PAGE SPLASH/LARGE/medium/SMALL inset → XL/L/M/S。
+  const shortRow = (r: string) => r === "TOP" ? "T" : r === "MIDDLE" ? "M" : r === "BOTTOM" ? "B" : r;
+  const shortCol = (c: string) => c === "LEFT" ? "L" : c === "RIGHT" ? "R" : c === "CENTER" ? "C" : c === "FULL_WIDTH" ? "FW" : c;
   for (const s of slots) {
-    const polyTag = s.poly > 4 ? `, IRREGULAR ${s.poly}-SIDED POLYGON edge` : "";
-    const bleedTag = (s.bleed || s.bleedPoly) ? ", BLEEDS to page edge (no margin)" : "";
-    const tiltTag = (s.tilt && Math.abs(s.tilt) >= 1) ? `, TILTED ${s.tilt > 0 ? "+" : ""}${s.tilt}° (slanted frame)` : "";
-    const borderlessTag = s.borderless ? ", BORDERLESS (no frame line)" : "";
-    const heroTag = s.isHero ? " ← HERO PANEL (largest, most prominent)" : "";
-    const sizeWord = s.areaPct >= 50
-      ? "FULL-PAGE SPLASH"
-      : s.areaPct >= 25
-        ? "LARGE"
-        : s.areaPct >= 12
-          ? "medium"
-          : "SMALL inset";
+    const polyTag = s.poly > 4 ? `,poly${s.poly}` : "";
+    const bleedTag = (s.bleed || s.bleedPoly) ? ",bleed" : "";
+    const tiltTag = (s.tilt && Math.abs(s.tilt) >= 1) ? `,tilt${s.tilt > 0 ? "+" : ""}${s.tilt}°` : "";
+    const borderlessTag = s.borderless ? ",borderless" : "";
+    const heroTag = s.isHero ? " HERO" : "";
+    const sizeWord = s.areaPct >= 50 ? "XL" : s.areaPct >= 25 ? "L" : s.areaPct >= 12 ? "M" : "S";
     lines.push(
-      `- ${panelLabel(s)} (importance ${s.imp}/5${heroTag}): ${s.row} ${s.col}, ${sizeWord} (${s.wPct}% width × ${s.hPct}% height)${polyTag}${tiltTag}${bleedTag}${borderlessTag}.`,
+      `- ${panelLabel(s)} ${s.imp}/5${heroTag} ${shortRow(s.row)}${shortCol(s.col)} ${sizeWord} ${s.wPct}x${s.hPct}${polyTag}${tiltTag}${bleedTag}${borderlessTag}`,
     );
   }
 
@@ -887,9 +885,10 @@ function formatRefLabel(
   r: ResolvedRefPacket["refs"][number],
   index: number,
 ): string {
-  const target = r.target_entity_id ? ` for ${r.target_entity_id}` : "";
-  const weight = r.weight >= 0.999 ? "" : `, weight ${r.weight.toFixed(2)}`;
-  return `<ref#${index + 1}> (${r.role}${target}${weight})`;
+  // 2026-05-13 圧縮: "<ref#1> (style)" → "ref1=style"、weight=1.0 は省略
+  const target = r.target_entity_id ? `:${r.target_entity_id}` : "";
+  const weight = r.weight >= 0.999 ? "" : `@${r.weight.toFixed(2)}`;
+  return `ref${index + 1}=${r.role}${target}${weight}`;
 }
 
 function buildPageSceneContextBlock(
@@ -967,23 +966,24 @@ function renderPageEmbedText(
   panel: PanelV2,
   bible: BibleSnapshotV2,
 ): string[] {
+  // 2026-05-13 圧縮: 旧 4 ヘッダー行を 1 行ずつ短縮 (style 系説明は STYLE digest と
+  // CONSTRAINTS で扱い済み)。
   const lines: string[] = [];
   const charName = (id: string) => bible.characters.find((c) => c.id === id)?.name ?? id;
   if (panel.dialogue.length > 0) {
-    lines.push(`- Speech bubbles (oval bubble + tail toward speaker, Japanese vertical text):`);
+    lines.push(`- Speech:`);
     for (const d of panel.dialogue) lines.push(`  - ${charName(d.character_id)}: 「${d.text}」`);
   }
   if (panel.monologue.length > 0) {
-    lines.push(`- Inner monologue (square/thought bubble, vertical Japanese):`);
-    for (const m of panel.monologue) lines.push(`  - ${charName(m.character_id)} (thinks): 「${m.text}」`);
+    lines.push(`- Monologue:`);
+    for (const m of panel.monologue) lines.push(`  - ${charName(m.character_id)}: 「${m.text}」`);
   }
   if (panel.narration.length > 0) {
-    lines.push(`- Narration boxes (rectangular caption, vertical Japanese):`);
+    lines.push(`- Narration:`);
     for (const n of panel.narration) lines.push(`  - ${n}`);
   }
   if (panel.sfx.length > 0) {
-    lines.push(`- Sound effects (hand-drawn katakana/hiragana, integrated into artwork):`);
-    for (const s of panel.sfx) lines.push(`  - ${s}`);
+    lines.push(`- SFX: ${panel.sfx.join(", ")}`);
   }
   return lines;
 }
@@ -1051,7 +1051,8 @@ function renderPagePanelBlock(args: {
   const { panel, localNo, bible, bgTreatment, typesetMode, compliance, sharedEntities } = args;
   const screentoneTag = panel.screentone_intensity ? `, screentone=${panel.screentone_intensity}` : "";
   const lines: string[] = [
-    `### panel#${localNo} (reading_order=${panel.reading_order}, ${panel.shot_type}, ${panel.camera}${panel.bleed ? ", BLEED" : ""}${panel.silence ? ", SILENT" : ""}${screentoneTag})`,
+    // 2026-05-13 圧縮: "reading_order=N" → "ro=N"、長い ", " 区切りを単一空白に
+    `### panel#${localNo} (ro=${panel.reading_order} ${panel.shot_type} ${panel.camera}${panel.bleed ? " BLEED" : ""}${panel.silence ? " SILENT" : ""}${screentoneTag})`,
   ];
   if (sharedEntities) {
     // shared 経路: expression のみ panel に出す (Characters/Location は page-shared header に集約済み)
@@ -1127,8 +1128,9 @@ function buildPageContinuityBlock(
         },
       };
       const summary = characterRefDescription(tempPanel, bible, { episodeNo, tier });
-      // characterRefDescription は先頭に "- " を付ける。改行は出ない想定。
-      lines.push(summary);
+      // 2026-05-13: 1 キャラあたり 200 字以内に truncate (顔/服の継続性 anchor として
+      // 必要な要素は冒頭にあるので末尾を切っても継続性ハッシュとして機能する)
+      lines.push(firstChars(summary.replace(/\n/g, " / "), 200));
     }
   }
 
