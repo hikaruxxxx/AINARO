@@ -1,5 +1,94 @@
 # AINARO 漫画 bible V3 移行 — 次セッション引継ぎ
 
+## このセッション (2026-05-12 最終) の成果 — A/B/C 完了
+
+| commit | 内容 |
+|---|---|
+| 9de7817 | feat: scoring-loop に L2 (volume_plot) context 注入 + foreshadow 件数整合 warning (A) |
+| f948cd1 | feat: scoring-loop に motif_id runtime normalize safety net (B) |
+| 9ffbe14 | feat: volume-level foreshadow validator に L2 cross-reference 追加 (C) |
+
+### A: L2 context 注入 (9de7817)
+
+`scoring-loop.ts` の 3 プロンプト (`buildSceneCandidatePrompt` / `buildPairwisePrompt` /
+`buildAnchorComparePrompt`) に、`volume_plot.json` から抽出した:
+- volume_theme / 当 ep の theme / protagonist_arc (start/turn/end)
+- must_include_events / cliffhanger_hook / beats summary (8 行まで)
+- 周辺 ep (prev / next) の theme + cliffhanger
+- 当 ep が関わる foreshadow_map (seed / payoff 両側)
+
+を「## 巻内位置」section として注入。これまで path 文字列だけ渡していた状態を解消。
+
+`validateSceneGraph` の options に `volumeForeshadowMap` + `episodeNo` を追加し、
+件数チェック (seed/payoff の expected vs actual) と hint 分布整合チェックを warnings として出す
+(errors は増やさず後方互換維持)。L03_5-scene-graph.ts でも foreshadow_map を読み込み、
+modeGenerate で `volumePlotPath` を context へ配線。
+
+新規 export: VolumeContext / loadVolumeContext / formatVolumeContextSection。
+
+### B: motif_id runtime normalize (f948cd1)
+
+`generateSceneCandidates` の出力で、LLM が prompt 指示に反して motif description 本文を
+motif_id 欄にコピーするケース (a07-ep01 で 24 件残存) の safety net。
+
+`normalizeMotifAnchors` 新設:
+1. exact match (id ?? name) → そのまま
+2. substring match (motif.name を含む) → canonical 化、longest 優先、1文字除外
+3. no match → drop + stats.dropped に積む
+
+generic 型 `T extends { motif_id; intensity? }` で intensity 等他フィールド preserve。
+substring/dropped 発生時に stderr に 1 行ログ。
+
+新規 export: MotifNormalizeStats / normalizeMotifAnchors。
+
+### C: volume-level L2 cross-reference (9ffbe14)
+
+既存 stand-alone CLI `_volume-foreshadow-validate.ts` (Phase γ 実装済) に
+L2 `volume_plot.foreshadow_map` 件数比較セクションを追加。
+
+`summarizeL2CrossRef` / `formatL2CrossRef` 新設 (helper を src/ 側に export):
+- L2 total foreshadows + in-episode/cross-episode 内訳
+- scene_graph total setups + resolved/unresolved
+- 大幅 mismatch (over-foreshadowed / under-foreshadowed) を warning
+
+a07 vol1 実走で動作確認: L2 expects 9 / scene_graphs 63 → over-foreshadowed warning 発火。
+
+新規 export: L2CrossRefSummary / summarizeL2CrossRef / formatL2CrossRef。
+
+### A/B/C 全体指標
+
+- vitest: 427 → 447 pass (+20 新規、5 skipped 維持)
+- Test Files: 54 → 57
+- tsc: clean
+- a07 fatal=0 維持
+- 既存 dry-run 動作互換性維持
+- 三段リレー: 3 件すべて Codex 経由 (mcp__codex__codex)、Claude code-review 経由
+
+### Codex のスコープ外編集問題 (今後注意)
+
+B/C の Codex セッションで、spec で明示禁止したにもかかわらず scope 外ファイル
+(prompt-composer-v2 / broker-v3 / schemas-v2 等) を Codex が編集する事案が 2 回発生。
+都度 `git checkout --` で revert した。next session で Codex 依頼するときは:
+- spec に「絶対変更しない files」のリストを明示
+- 完了後 `git status` で意図外ファイルを必ず確認
+
+### 次最優先 (D: ep01 live 再走で A/B/C 効果検証)
+
+`/tmp/test-scoring-loop-ep01-full-live.ts` に `volumePlotPath` を追加 (commit不要 /tmp script)、
+2026-05-12 23:00 頃 background 起動 (PID 80945、log `/tmp/a07-ep01-live-rerun.log`)。
+完了所要 30-45 分、ChatGPT Pro 定額枠内。
+
+期待効果:
+- motif_id errors 24 → 0 (B の normalize で完全捕捉、ただし substring 救済できないものは drop)
+- foreshadow Rule 5 violations 21 → 大幅減 (A の L2 context 注入で巻またぎ伏線を理解した生成)
+- anchor_llm 平均が L2 整合性ボーナスで微増
+
+完了後の手順:
+1. ep01 L04-storyboard --from-scene-graph --enrich 動作確認 (~5min)
+2. 他 9 ep を Promise.all 並列再走 (~40min、`/tmp/run-eps-parallel.ts` の EP_NUMBERS を [1..10] に拡張)
+3. 全 ep L04 並列 (~10min)
+4. **1 巻完成** → handoff 更新 + commit
+
 ## 前セッション (2026-05-11) の成果
 
 | commit | 内容 |
