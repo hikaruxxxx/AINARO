@@ -21,7 +21,7 @@
         "arc_phase": "introduce",
         "arc_position_normalized": 0.3
       },
-      "location_id": "loc_lawson_exterior_night_v1",
+      "location_id": "loc_bluewhite_mart_exterior_night_v1",
       "beat_type": "reveal",
       "cast": [
         {
@@ -172,7 +172,7 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.4
       },
-      "location_id": "loc_lawson_interior_v1",
+      "location_id": "loc_blueway_interior_v1",
       "beat_type": "turn",
       "cast": [
         {

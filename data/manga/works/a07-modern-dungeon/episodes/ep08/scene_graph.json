@@ -21,7 +21,7 @@
         "arc_phase": "introduce",
         "arc_position_normalized": 0.65
       },
-      "location_id": "loc_lawson_exterior_night_v1",
+      "location_id": "loc_bluewhite_mart_exterior_night_v1",
       "beat_type": "reveal",
       "cast": [
         {
@@ -159,7 +159,7 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.7
       },
-      "location_id": "loc_lawson_exterior_night_v1",
+      "location_id": "loc_bluewhite_mart_exterior_night_v1",
       "beat_type": "turn",
       "cast": [
         {
@@ -301,7 +301,7 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.75
       },
-      "location_id": "loc_lawson_exterior_night_v1",
+      "location_id": "loc_bluewhite_mart_exterior_night_v1",
       "beat_type": "turn",
       "cast": [
         {
@@ -444,7 +444,7 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.82
       },
-      "location_id": "loc_lawson_exterior_night_v1",
+      "location_id": "loc_bluewhite_mart_exterior_night_v1",
       "beat_type": "reveal",
       "cast": [
         {
@@ -572,7 +572,7 @@
         "arc_phase": "climax",
         "arc_position_normalized": 0.88
       },
-      "location_id": "loc_lawson_exterior_night_v1",
+      "location_id": "loc_bluewhite_mart_exterior_night_v1",
       "beat_type": "payoff",
       "cast": [
         {
@@ -710,7 +710,7 @@
         "arc_phase": "climax",
         "arc_position_normalized": 0.94
       },
-      "location_id": "loc_lawson_exterior_night_v1",
+      "location_id": "loc_bluewhite_mart_exterior_night_v1",
       "beat_type": "cliff",
       "cast": [
         {
@@ -858,7 +858,7 @@
         "arc_phase": "climax",
         "arc_position_normalized": 1
       },
-      "location_id": "loc_lawson_exterior_night_v1",
+      "location_id": "loc_bluewhite_mart_exterior_night_v1",
       "beat_type": "cliff",
       "cast": [
         {

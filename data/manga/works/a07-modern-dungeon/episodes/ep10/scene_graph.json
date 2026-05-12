@@ -403,8 +403,8 @@
       },
       "location_id": "loc_shinjuku_third_5f_boss_room_v1",
       "sub_locations": [
-        "loc_lawson_interior_v1",
-        "loc_lawson_exterior_night_v1"
+        "loc_blueway_interior_v1",
+        "loc_bluewhite_mart_exterior_night_v1"
       ],
       "beat_type": "turn",
       "cast": [

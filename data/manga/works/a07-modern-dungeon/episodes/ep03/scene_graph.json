@@ -481,7 +481,7 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.55
       },
-      "location_id": "loc_lawson_interior_v1",
+      "location_id": "loc_blueway_interior_v1",
       "beat_type": "turn",
       "cast": [
         {
@@ -644,7 +644,7 @@
         "arc_phase": "climax",
         "arc_position_normalized": 0.7
       },
-      "location_id": "loc_lawson_interior_v1",
+      "location_id": "loc_blueway_interior_v1",
       "beat_type": "payoff",
       "cast": [
         {
@@ -808,7 +808,7 @@
         "arc_phase": "falling",
         "arc_position_normalized": 0.85
       },
-      "location_id": "loc_lawson_interior_v1",
+      "location_id": "loc_blueway_interior_v1",
       "beat_type": "cliff",
       "cast": [
         {

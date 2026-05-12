@@ -21,7 +21,7 @@
         "arc_phase": "introduce",
         "arc_position_normalized": 0.55
       },
-      "location_id": "loc_lawson_interior_v1",
+      "location_id": "loc_blueway_interior_v1",
       "beat_type": "introduce",
       "cast": [
         {
@@ -200,7 +200,7 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.62
       },
-      "location_id": "loc_lawson_interior_v1",
+      "location_id": "loc_blueway_interior_v1",
       "beat_type": "reveal",
       "cast": [
         {
@@ -355,7 +355,7 @@
         "arc_phase": "rising",
         "arc_position_normalized": 0.68
       },
-      "location_id": "loc_lawson_interior_v1",
+      "location_id": "loc_blueway_interior_v1",
       "beat_type": "turn",
       "cast": [
         {
