@@ -315,6 +315,25 @@ export function v2ToV3(v2: BibleSnapshotV2): BibleSnapshotV3 {
       appears_in_episodes: location.appears_in_episodes ?? [],
     });
     const spec = location.spec as JsonishRecord;
+    const locationStringFields: Array<{ field: string; aspect: Aspect }> = [
+      { field: "visual_description", aspect: "location_layout" },
+      { field: "history", aspect: "location_history" },
+      { field: "socioeconomic_context", aspect: "location_history" },
+      { field: "sensory_textures", aspect: "location_layout" },
+    ];
+    locationStringFields.forEach(({ field, aspect }) => {
+      const value = spec[field];
+      if (typeof value !== "string" || value.length === 0) return;
+      addFact({
+        entity_id: location.id,
+        aspect,
+        layer: "in_world_belief",
+        body: value,
+        source_path: `locations[${i}].spec.${field}`,
+        json_pointer: `/locations/${i}/spec/${field}`,
+        priority: priority++,
+      });
+    });
     addFact({
       entity_id: location.id,
       aspect: "location_history",
@@ -400,15 +419,11 @@ export function v2ToV3(v2: BibleSnapshotV2): BibleSnapshotV3 {
       fact_ids: [],
       appears_in_volumes: [],
     });
-    addFact({
-      entity_id: id,
-      aspect: "motif_directive",
-      layer: "in_world_belief",
-      body: motif,
-      source_path: `visual_motifs[${i}]`,
-      json_pointer: `/visual_motifs/${i}`,
-      priority: priority++,
-    });
+    addMotifStringFact(motif.meaning, "meaning", id, i, addFact, () => priority++);
+    addMotifStringFact(motif.draw_directive, "draw_directive", id, i, addFact, () => priority++);
+    addMotifStringFact(motif.symbolic_lineage, "symbolic_lineage", id, i, addFact, () => priority++);
+    addMotifArrayFacts(motif.reference_scenes, "reference_scenes", id, i, addFact, () => priority++);
+    addMotifArrayFacts(motif.negative_examples, "negative_examples", id, i, addFact, () => priority++);
   });
 
   v2.relations.forEach((relation, i) => {
@@ -592,18 +607,20 @@ function addCharacterFacts(
       pov_character_id: charId,
     })
   );
-  character.growth_per_volume?.forEach((growth, i) =>
+  character.growth_per_volume?.forEach((growth, i) => {
+    const body = typeof growth.description === "string" ? growth.description : (growth.growth ?? "");
+    const arcAt = typeof growth.volume === "number" ? growth.volume : growth.vol;
     addFact({
       entity_id: charId,
       aspect: "psychology",
       layer: "character_arc_state",
-      body: growth.description,
+      body,
       source_path: `${base}.growth_per_volume[${i}]`,
       json_pointer: `${ptr}/growth_per_volume/${i}`,
       priority: nextPriority(),
-      arc_at_volume: growth.volume,
-    })
-  );
+      ...(typeof arcAt === "number" ? { arc_at_volume: arcAt } : {}),
+    });
+  });
   character.childhood_episodes?.forEach((episode, i) =>
     addFact({
       entity_id: charId,
@@ -655,6 +672,65 @@ function addCharacterFacts(
       priority: nextPriority(),
     });
   }
+}
+
+function addMotifStringFact(
+  value: unknown,
+  field: "meaning" | "draw_directive" | "symbolic_lineage",
+  entityId: string,
+  motifIndex: number,
+  addFact: (args: {
+    entity_id: string | null;
+    aspect: Aspect;
+    layer: Layer;
+    body: unknown;
+    source_path: string;
+    json_pointer: string;
+    priority: number;
+  }) => FactNode | null,
+  nextPriority: () => number
+): void {
+  if (typeof value !== "string" || value.length === 0) return;
+  addFact({
+    entity_id: entityId,
+    aspect: "motif_directive",
+    layer: "in_world_belief",
+    body: value,
+    source_path: `visual_motifs[${motifIndex}].${field}`,
+    json_pointer: `/visual_motifs/${motifIndex}/${field}`,
+    priority: nextPriority(),
+  });
+}
+
+function addMotifArrayFacts(
+  values: unknown,
+  field: "reference_scenes" | "negative_examples",
+  entityId: string,
+  motifIndex: number,
+  addFact: (args: {
+    entity_id: string | null;
+    aspect: Aspect;
+    layer: Layer;
+    body: unknown;
+    source_path: string;
+    json_pointer: string;
+    priority: number;
+  }) => FactNode | null,
+  nextPriority: () => number
+): void {
+  if (!Array.isArray(values)) return;
+  values.forEach((value, index) => {
+    if (typeof value !== "string" || value.length === 0) return;
+    addFact({
+      entity_id: entityId,
+      aspect: "motif_directive",
+      layer: "in_world_belief",
+      body: value,
+      source_path: `visual_motifs[${motifIndex}].${field}[${index}]`,
+      json_pointer: `/visual_motifs/${motifIndex}/${field}/${index}`,
+      priority: nextPriority(),
+    });
+  });
 }
 
 function addObjectOrScalarFacts(args: {

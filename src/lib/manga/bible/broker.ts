@@ -186,7 +186,15 @@ export function summarizeCharacterForEpisode(
     .map((item) => `関係 ${nameForCharacter(bible, item.partner_id)}: ${item.description}`);
 
   const growth = (character.growth_per_volume ?? [])
-    .filter((item) => item.volume === volume || item.volume === volume - 1)
+    .map((item) => ({
+      volume: item.volume ?? item.vol,
+      description: item.description ?? item.growth,
+    }))
+    .filter((item): item is { volume: number; description: string } =>
+      typeof item.volume === "number" &&
+      typeof item.description === "string" &&
+      (item.volume === volume || item.volume === volume - 1)
+    )
     .sort((a, b) => a.volume - b.volume)
     .map((item) => `vol.${item.volume}: ${item.description}`);
 

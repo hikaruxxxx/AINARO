@@ -7,11 +7,11 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { bibleSnapshotPath } from "../layers/_paths";
 
-export type Scope = "character" | "location" | "motif";
+export type Scope = "character" | "location" | "motif" | "world";
 
 type Args = {
   slug: string;
-  targetId: string;
+  targetId?: string;
   scope: Scope;
   field: string;
   additionFile: string;
@@ -23,11 +23,19 @@ type JsonRecord = Record<string, unknown>;
 export type TargetField = {
   target: JsonRecord;
   current: string;
-  collection: "characters" | "locations" | "visual_motifs";
+  collection: "characters" | "locations" | "visual_motifs" | "world";
   index: number;
+  leafKey: string;
 };
 
-export function findTargetField(bible: unknown, scope: Scope, targetId: string, field: string): TargetField {
+export function findTargetField(bible: unknown, scope: Scope, targetId: string | undefined, field: string): TargetField {
+  if (scope === "world") {
+    const root = asRecord(bible, "bible");
+    const world = asRecord(root.world, "bible.world");
+    return findDottedField(world, "world", "world", field, "world", -1);
+  }
+
+  if (!targetId) throw new Error("--target-id required");
   const collection = collectionForScope(scope);
   const root = asRecord(bible, "bible");
   const items = root[collection];
@@ -37,10 +45,7 @@ export function findTargetField(bible: unknown, scope: Scope, targetId: string, 
   if (index < 0) throw new Error(`target ${scope} not found: ${targetId}`);
 
   const target = asRecord(items[index], `${collection}[${index}]`);
-  const value = target[field];
-  if (value === undefined || value === null || value === "") return { target, current: "", collection, index };
-  if (typeof value !== "string") throw new Error(`${targetId}.${field} is not a string field`);
-  return { target, current: value, collection, index };
+  return findDottedField(target, targetId, targetId, field, collection, index);
 }
 
 export function parseArgs(argv = process.argv.slice(2)): Args {
@@ -65,8 +70,8 @@ export function parseArgs(argv = process.argv.slice(2)): Args {
   }
 
   if (!out.slug) throw new Error("--slug required");
-  if (!out.targetId) throw new Error("--target-id required");
   if (!out.scope) throw new Error("--scope required");
+  if (out.scope !== "world" && !out.targetId) throw new Error("--target-id required");
   if (!out.field) throw new Error("--field required");
   if (!out.additionFile) throw new Error("--addition-file required");
   return out as Args;
@@ -85,16 +90,16 @@ async function main(): Promise<void> {
   const afterLen = next.length;
 
   if (args.dryRun) {
-    console.log(`[dry-run] ${args.targetId}.${args.field}: ${beforeLen} → ${afterLen} chars (+${afterLen - beforeLen})`);
+    console.log(`[dry-run] ${targetLabel(args)}.${args.field}: ${beforeLen} → ${afterLen} chars (+${afterLen - beforeLen})`);
     console.log(next);
     return;
   }
 
   const backupPath = await backupSnapshot(snapshotPath);
-  target.target[args.field] = next;
+  target.target[target.leafKey] = next;
   await fs.writeFile(snapshotPath, `${JSON.stringify(bible, null, 2)}\n`);
 
-  console.log(`[apply] ${args.targetId}.${args.field}: ${beforeLen} → ${afterLen} chars (+${afterLen - beforeLen})`);
+  console.log(`[apply] ${targetLabel(args)}.${args.field}: ${beforeLen} → ${afterLen} chars (+${afterLen - beforeLen})`);
   console.log(`[apply] backup: ${backupPath}`);
 }
 
@@ -122,15 +127,51 @@ async function backupSnapshot(snapshotPath: string): Promise<string> {
 }
 
 function parseScope(value: string): Scope {
-  if (value === "character" || value === "location" || value === "motif") return value;
+  if (value === "character" || value === "location" || value === "motif" || value === "world") return value;
   throw new Error(`unknown --scope: ${value}`);
 }
 
-function collectionForScope(scope: Scope): TargetField["collection"] {
+function collectionForScope(scope: Exclude<Scope, "world">): Exclude<TargetField["collection"], "world"> {
   if (scope === "character") return "characters";
   if (scope === "location") return "locations";
   if (scope === "motif") return "visual_motifs";
   throw new Error(`unknown --scope: ${scope}`);
+}
+
+function findDottedField(
+  target: JsonRecord,
+  targetLabel: string,
+  errorPrefix: string,
+  field: string,
+  collection: TargetField["collection"],
+  index: number,
+): TargetField {
+  const path = field.split(".");
+  if (path.some((part) => part.length === 0)) throw new Error(`${errorPrefix}.${field} is not a valid field path`);
+
+  let parent = target;
+  for (let i = 0; i < path.length - 1; i++) {
+    const key = path[i];
+    const next = parent[key];
+    if (next === undefined || next === null) {
+      const fresh: JsonRecord = {};
+      parent[key] = fresh;
+      parent = fresh;
+      continue;
+    }
+    if (!isRecord(next)) throw new Error(`${errorPrefix}.${path.slice(0, i + 1).join(".")} is not an object`);
+    parent = next;
+  }
+
+  const leafKey = path[path.length - 1];
+  const value = parent[leafKey];
+  if (value === undefined || value === null || value === "") return { target: parent, current: "", collection, index, leafKey };
+  if (typeof value !== "string") throw new Error(`${targetLabel}.${field} is not a string field`);
+  return { target: parent, current: value, collection, index, leafKey };
+}
+
+function targetLabel(args: Args): string {
+  return args.scope === "world" ? "world" : (args.targetId ?? "");
 }
 
 function matchesTarget(item: JsonRecord, scope: Scope, targetId: string, index: number): boolean {

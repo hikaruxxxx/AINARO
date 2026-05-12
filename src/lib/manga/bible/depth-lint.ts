@@ -218,7 +218,7 @@ function pathFilterForRule(path: string): ((fact: FactNode) => boolean) | undefi
   if (path.startsWith("props[")) return (fact) => fact.aspect === "prop_function" && sourcePathStartsWith(fact, "props[");
   if (path.startsWith("costumes[")) return (fact) => fact.aspect === "identity" && sourcePathStartsWith(fact, "costumes[");
   if (path.startsWith("relations[")) return (fact) => fact.aspect === "relationship" && sourcePathStartsWith(fact, "relations[");
-  if (path.startsWith("visual_motifs[")) return (fact) => fact.aspect === "motif_directive" && sourcePathStartsWith(fact, "visual_motifs[");
+  if (path.startsWith("visual_motifs[")) return motifPathFilter(path);
   return undefined;
 }
 
@@ -249,10 +249,23 @@ function characterPathFilter(path: string): (fact: FactNode) => boolean {
 }
 
 function locationPathFilter(path: string): (fact: FactNode) => boolean {
+  if (path.endsWith(".visual_description")) return (fact) => fact.aspect === "location_layout" && sourcePathIncludes(fact, ".spec.visual_description");
   if (path.endsWith(".who_typically_inhabits")) return (fact) => fact.aspect === "location_history" && sourcePathIncludes(fact, ".spec.who_typically_inhabits");
   if (path.endsWith(".iconic_objects")) return (fact) => fact.aspect === "location_layout" && sourcePathIncludes(fact, ".spec.iconic_objects[");
   if (path.endsWith(".history")) return (fact) => fact.aspect === "location_history" && sourcePathIncludes(fact, ".spec.history");
+  if (path.endsWith(".socioeconomic_context")) return (fact) => fact.aspect === "location_history" && sourcePathIncludes(fact, ".spec.socioeconomic_context");
+  if (path.endsWith(".sensory_textures")) return (fact) => fact.aspect === "location_layout" && sourcePathIncludes(fact, ".spec.sensory_textures");
   return (fact) => (fact.aspect === "location_layout" || fact.aspect === "location_history") && sourcePathStartsWith(fact, "locations[");
+}
+
+function motifPathFilter(path: string): (fact: FactNode) => boolean {
+  const field = path.split(".").at(-1) ?? "";
+  return (fact) => {
+    if (fact.aspect !== "motif_directive") return false;
+    const sourcePath = fact.evidence.source_path ?? "";
+    if (!sourcePath.startsWith("visual_motifs[")) return false;
+    return sourcePath.endsWith(`.${field}`) || sourcePath.includes(`.${field}[`);
+  };
 }
 
 function worldPath(aspect: Aspect, layer: Layer, sourcePath: string): (fact: FactNode) => boolean {

@@ -171,8 +171,10 @@ export type CharacterEntryV2 = {
   }>;
   /** bible 深掘り: 巻ごとの成長変化 */
   growth_per_volume?: Array<{
-    volume: number;
-    description: string;
+    volume?: number;
+    vol?: number;
+    description?: string;
+    growth?: string;
   }>;
   /** antagonist 深掘り: 原初の傷 */
   origin_wound_deep?: string;

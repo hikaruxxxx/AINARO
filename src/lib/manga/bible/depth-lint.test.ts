@@ -222,6 +222,38 @@ describe("depthLintV3 (V3 fact-based depth check)", () => {
     expect(findings.some((finding) => finding.rule === "layer_reveal_present" && finding.scope === "layer_consistency")).toBe(true);
   });
 
+  it("motif の reference_scenes が5件なら V3 depth lint で fatal にならない", () => {
+    const v3 = v2ToV3({
+      ...baseBible(),
+      visual_motifs: [{
+        name: "参照場面",
+        meaning: "",
+        draw_directive: "",
+        reference_scenes: ["s0", "s1", "s2", "s3", "s4"],
+      }],
+    });
+
+    const finding = depthLintV3(v3).find((item) => item.rule === "depth:visual_motifs[*].reference_scenes");
+    expect(finding).toEqual(expect.objectContaining({ severity: "warn", scope: "motif" }));
+    expect(finding?.message).toContain("count=5");
+  });
+
+  it("motif の reference_scenes が3件なら V3 depth lint で fatal", () => {
+    const v3 = v2ToV3({
+      ...baseBible(),
+      visual_motifs: [{
+        name: "参照場面",
+        meaning: "",
+        draw_directive: "",
+        reference_scenes: ["s0", "s1", "s2"],
+      }],
+    });
+
+    const finding = depthLintV3(v3).find((item) => item.rule === "depth:visual_motifs[*].reference_scenes");
+    expect(finding).toEqual(expect.objectContaining({ severity: "fatal", scope: "motif" }));
+    expect(finding?.message).toContain("count=3");
+  });
+
   it("depthLintWithFlag(false) は legacy depthLint と同じ", () => {
     const v2 = baseBible();
     expect(depthLintWithFlag(v2, false)).toEqual(depthLint(v2));
