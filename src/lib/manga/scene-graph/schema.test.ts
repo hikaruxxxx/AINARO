@@ -85,10 +85,14 @@ function scene(patch: Partial<Scene> = {}): Scene {
 }
 
 function graph(scenePatch: Partial<Scene> = {}): SceneGraphV1 {
+  return graphWithScenes([scene(scenePatch)]);
+}
+
+function graphWithScenes(scenes: Scene[]): SceneGraphV1 {
   return {
     schema_version: 1,
     episode_id: "ep01",
-    scenes: [scene(scenePatch)],
+    scenes,
     generated_at: "2026-05-10T00:00:00.000Z",
     source: { brief_path: "brief", shotlist_path: "shotlist", bible_snapshot_path: "bible" },
   };
@@ -96,6 +100,10 @@ function graph(scenePatch: Partial<Scene> = {}): SceneGraphV1 {
 
 function validate(scenePatch: Partial<Scene>, biblePatch: Partial<BibleSnapshotV2> = {}) {
   return validateSceneGraph(graph(scenePatch), bible(biblePatch), { episode_id: "ep01", cast: ["char_a", "char_b"] });
+}
+
+function validateScenes(scenes: Scene[]) {
+  return validateSceneGraph(graphWithScenes(scenes), bible(), { episode_id: "ep01", cast: ["char_a", "char_b"] });
 }
 
 describe("validateSceneGraph D 系 bible 伝搬軸", () => {
@@ -163,6 +171,105 @@ describe("validateSceneGraph D 系 bible 伝搬軸", () => {
 
   it("Rule 17: cliff scene では cliffhanger_pattern を許可する", () => {
     const result = validate({ cliffhanger_pattern: "daily_intrusion", beat_type: "cliff" });
+
+    expect(result.ok).toBe(true);
+  });
+});
+
+describe("validateSceneGraph Rule 4 scene_exclusive text uniqueness", () => {
+  it("scene_exclusive text が他 scene の may_repeat key_line に出たら error", () => {
+    const result = validateScenes([
+      scene({
+        scene_id: "S01",
+        scene_no: 1,
+        next_scene_id: "S02",
+        dialogue_plan: {
+          key_lines: [{ speaker: "char_a", text: "経験値倍化条件、開示します。", uniqueness: "scene_exclusive", intent: "reveal" }],
+        },
+      }),
+      scene({
+        scene_id: "S02",
+        scene_no: 2,
+        prev_scene_id: "S01",
+        cast: [{ character_id: "char_a", presence: "in_person" }],
+        dialogue_plan: {
+          key_lines: [{ speaker: "char_a", text: "経験値倍化条件、開示します。", uniqueness: "may_repeat", intent: "callback" }],
+        },
+      }),
+    ]);
+
+    expect(result.errors).toContain(
+      'scene_exclusive text "経験値倍化条件、開示します。" (owned by S01) は S02 でも出現 (uniqueness 問わず禁止)'
+    );
+  });
+
+  it("scene_exclusive text が他 scene の scene_exclusive key_line に出ても error", () => {
+    const result = validateScenes([
+      scene({
+        scene_id: "S01",
+        scene_no: 1,
+        next_scene_id: "S02",
+        dialogue_plan: {
+          key_lines: [{ speaker: "char_a", text: "ここで終わりだ。", uniqueness: "scene_exclusive", intent: "cliff" }],
+        },
+      }),
+      scene({
+        scene_id: "S02",
+        scene_no: 2,
+        prev_scene_id: "S01",
+        dialogue_plan: {
+          key_lines: [{ speaker: "char_a", text: "ここで終わりだ。", uniqueness: "scene_exclusive", intent: "cliff" }],
+        },
+      }),
+    ]);
+
+    expect(result.errors).toContain(
+      'scene_exclusive text "ここで終わりだ。" (owned by S01) は S02 でも出現 (uniqueness 問わず禁止)'
+    );
+  });
+
+  it("may_repeat 同士の同一 text は通す", () => {
+    const result = validateScenes([
+      scene({
+        scene_id: "S01",
+        scene_no: 1,
+        next_scene_id: "S02",
+        dialogue_plan: {
+          key_lines: [{ speaker: "char_a", text: "了解。", uniqueness: "may_repeat", intent: "callback" }],
+        },
+      }),
+      scene({
+        scene_id: "S02",
+        scene_no: 2,
+        prev_scene_id: "S01",
+        dialogue_plan: {
+          key_lines: [{ speaker: "char_a", text: "了解。", uniqueness: "may_repeat", intent: "callback" }],
+        },
+      }),
+    ]);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("scene_exclusive text が他 scene に無ければ通す", () => {
+    const result = validateScenes([
+      scene({
+        scene_id: "S01",
+        scene_no: 1,
+        next_scene_id: "S02",
+        dialogue_plan: {
+          key_lines: [{ speaker: "char_a", text: "ここだけの合図だ。", uniqueness: "scene_exclusive", intent: "hook" }],
+        },
+      }),
+      scene({
+        scene_id: "S02",
+        scene_no: 2,
+        prev_scene_id: "S01",
+        dialogue_plan: {
+          key_lines: [{ speaker: "char_a", text: "別の言い方にする。", uniqueness: "may_repeat", intent: "callback" }],
+        },
+      }),
+    ]);
 
     expect(result.ok).toBe(true);
   });

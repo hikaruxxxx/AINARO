@@ -122,6 +122,76 @@ describe("scoring-loop bible context parity (V2 legacy vs V3 broker)", () => {
     expect(promptWithFeedback).toContain("key visual が抽象的");
   });
 
+  it("buildSceneCandidatePrompt は確定済み scene_exclusive 台詞 section を出す", () => {
+    const slot = createMinimalSlot();
+    const finalizedSlot = { ...slot, scene_id: "S03", scene_no: 3 };
+    const finalized = createMinimalScene(finalizedSlot);
+    finalized.dialogue_plan = {
+      key_lines: [
+        { speaker: "char_a", text: "経験値倍化条件、開示します。", uniqueness: "scene_exclusive", intent: "reveal" },
+        { speaker: "char_a", text: "これは繰り返してよい。", uniqueness: "may_repeat", intent: "callback" },
+      ],
+    };
+
+    const prompt = buildSceneCandidatePrompt(
+      slot,
+      { ...createMinimalContext(), finalizedScenes: [finalized] },
+      2,
+      createMinimalBibleContext(),
+    );
+
+    expect(prompt).toContain("## 過去 scene で確定済みの scene_exclusive 台詞 (絶対重複禁止)");
+    expect(prompt).toContain("- [S03 char_a] 「経験値倍化条件、開示します。」");
+    expect(prompt).toContain("uniqueness を may_repeat にしても禁止");
+    expect(prompt).not.toContain("これは繰り返してよい。");
+  });
+
+  it("buildSceneCandidatePrompt は finalizedScenes が空または排他台詞なしなら section を出さない", () => {
+    const slot = createMinimalSlot();
+    const finalized = createMinimalScene({ ...slot, scene_id: "S01", scene_no: 1 });
+    finalized.dialogue_plan = {
+      key_lines: [{ speaker: "char_a", text: "通常台詞です。", uniqueness: "may_repeat", intent: "establish" }],
+    };
+
+    const emptyPrompt = buildSceneCandidatePrompt(slot, createMinimalContext(), 2, createMinimalBibleContext());
+    const noExclusivePrompt = buildSceneCandidatePrompt(
+      slot,
+      { ...createMinimalContext(), finalizedScenes: [finalized] },
+      2,
+      createMinimalBibleContext(),
+    );
+
+    expect(emptyPrompt).not.toContain("過去 scene で確定済みの scene_exclusive 台詞");
+    expect(noExclusivePrompt).not.toContain("過去 scene で確定済みの scene_exclusive 台詞");
+  });
+
+  it("buildSceneCandidatePrompt の排他台詞 section は feedback section と独立して出る", () => {
+    const slot = createMinimalSlot();
+    const finalized = createMinimalScene({ ...slot, scene_id: "S07", scene_no: 7 });
+    finalized.dialogue_plan = {
+      key_lines: [{ speaker: "char_a", text: "ここだ。", uniqueness: "scene_exclusive", intent: "hook" }],
+    };
+    const feedback: Tier2Feedback = {
+      prev_selected: createMinimalScene(slot),
+      prev_anchor_score: 0.41,
+      prev_pairwise_score: 0.7,
+      iteration: 2,
+    };
+
+    const prompt = buildSceneCandidatePrompt(
+      slot,
+      { ...createMinimalContext(), finalizedScenes: [finalized] },
+      2,
+      createMinimalBibleContext(),
+      feedback,
+    );
+
+    expect(prompt).toContain("## 過去 scene で確定済みの scene_exclusive 台詞 (絶対重複禁止)");
+    expect(prompt).toContain("- [S07 char_a] 「ここだ。」");
+    expect(prompt).toContain("## 再生成 (Tier 2 / 周回 2)");
+    expect(prompt).toContain("scene_exclusive 台詞も候補間で重複させない");
+  });
+
   it("DEFAULT_SCORING_CONFIG は Tier 2 閾値 0.50 を使う", () => {
     expect(DEFAULT_SCORING_CONFIG.tier2_threshold_pct).toBe(0.5);
   });

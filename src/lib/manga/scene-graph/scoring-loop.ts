@@ -266,6 +266,23 @@ export function buildSceneCandidatePrompt(
         `  - ${s.scene_id} (${s.beat_type}, ${s.location_id}): "${s.protagonist_arc_state.belief}" → "${s.protagonist_arc_state.goal}"`
     )
     .join("\n");
+  const finalizedExclusiveLines = context.finalizedScenes.flatMap((s) =>
+    s.dialogue_plan.key_lines
+      .filter((kl) => kl.uniqueness === "scene_exclusive" && kl.text.length > 0)
+      .map((kl) => `- [${s.scene_id} ${kl.speaker}] 「${kl.text}」`)
+  );
+  const finalizedExclusiveSection =
+    finalizedExclusiveLines.length > 0
+      ? [
+          `## 過去 scene で確定済みの scene_exclusive 台詞 (絶対重複禁止)`,
+          "",
+          finalizedExclusiveLines.join("\n"),
+          "",
+          `**重要**: 上記の text と完全一致する text を当 scene の key_lines に含めてはいけません`,
+          `(uniqueness を may_repeat にしても禁止)。意図的な callback の場合は、台詞を 1 字以上`,
+          `変えるか、別の表現に置き換えてください。`,
+        ].join("\n")
+      : null;
   const feedbackSection = feedback ? buildTier2FeedbackSection(feedback) : null;
   return [
     `あなたは AINARO 漫画 v2 scene-graph の scene 候補生成エージェントです。`,
@@ -287,6 +304,8 @@ export function buildSceneCandidatePrompt(
     `## 周辺シーン (採用済み、prev → ...)`,
     finalized || "  (no prev scenes yet)",
     "",
+    finalizedExclusiveSection,
+    finalizedExclusiveSection ? "" : null,
     `## bible 抜粋 (D 系参照用)`,
     "",
     `### 登場可能キャラクター (bible.characters)`,
@@ -321,7 +340,7 @@ export function buildSceneCandidatePrompt(
     `5. cast は brief.cast の subset とし、bible.characters に存在する character_id のみを使用してください。`,
     `6. dialogue_plan.key_lines の uniqueness は cliffhanger 等の決め台詞のみ "scene_exclusive" とし、それ以外は "may_repeat" としてください。`,
     `7. foreshadow_setup の payoff_episode_hint は "this_episode" / "next_episode" / "later_in_volume" / "cross_volume" から選んでください。`,
-    `8. 候補間で beat 解釈・演出 mode・key_visual_intent を変えて多様性を確保してください。`,
+    `8. 候補間で beat 解釈・演出 mode・key_visual_intent を変えて多様性を確保してください (scene_exclusive 台詞も候補間で重複させない)。`,
     `9. 仕様詳細: docs/plans/manga/scene-graph-l3-5.md`,
     "",
     feedbackSection,

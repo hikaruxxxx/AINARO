@@ -360,8 +360,38 @@ export function validateSceneGraph(
   // === Rule 1: scene.location_id ⊂ bible.locations ===
   // === Rule 2: scene.cast ⊂ bible.characters かつ ⊂ brief.cast ===
   // === Rule 3: dialogue_plan.key_lines[].speaker ⊂ scene.cast ===
-  // === Rule 4: scene_exclusive uniqueness の text が scene-graph 内で一意 ===
-  const exclusiveTextSeen = new Map<string, string>(); // text -> first scene_id
+  // === Rule 4: scene_exclusive text は所有 scene 以外で再出現不可 ===
+  const keyLineTextScenes = new Map<
+    string,
+    Map<string, { scene_id: string; hasSceneExclusive: boolean }>
+  >();
+  for (const scene of sceneGraph.scenes) {
+    for (const kl of scene.dialogue_plan.key_lines) {
+      if (!kl.text) continue;
+      const scenesForText = keyLineTextScenes.get(kl.text) ?? new Map();
+      const entry = scenesForText.get(scene.scene_id) ?? {
+        scene_id: scene.scene_id,
+        hasSceneExclusive: false,
+      };
+      if (kl.uniqueness === "scene_exclusive") {
+        entry.hasSceneExclusive = true;
+      }
+      scenesForText.set(scene.scene_id, entry);
+      keyLineTextScenes.set(kl.text, scenesForText);
+    }
+  }
+
+  for (const [text, scenesForText] of keyLineTextScenes) {
+    if (scenesForText.size <= 1) continue;
+    const owner = Array.from(scenesForText.values()).find((entry) => entry.hasSceneExclusive);
+    if (!owner) continue;
+    for (const sceneEntry of scenesForText.values()) {
+      if (sceneEntry.scene_id === owner.scene_id) continue;
+      errors.push(
+        `scene_exclusive text "${text}" (owned by ${owner.scene_id}) は ${sceneEntry.scene_id} でも出現 (uniqueness 問わず禁止)`
+      );
+    }
+  }
 
   for (const scene of sceneGraph.scenes) {
     const sid = scene.scene_id;
@@ -395,20 +425,6 @@ export function validateSceneGraph(
         errors.push(
           `${sid}: key_line speaker "${kl.speaker}" not in scene.cast`
         );
-      }
-    }
-
-    // Rule 4: scene_exclusive uniqueness
-    for (const kl of scene.dialogue_plan.key_lines) {
-      if (kl.uniqueness === "scene_exclusive") {
-        const existing = exclusiveTextSeen.get(kl.text);
-        if (existing && existing !== sid) {
-          errors.push(
-            `${sid}: scene_exclusive text duplicated with ${existing}: "${kl.text}"`
-          );
-        } else {
-          exclusiveTextSeen.set(kl.text, sid);
-        }
       }
     }
 
