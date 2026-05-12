@@ -794,4 +794,34 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     const result = composePagePrompt(args);
     expect(result.prompt).not.toContain("weight 1.00");
   });
+
+  it("composePagePrompt prefers style_directives.digest when present (falls back to global otherwise)", () => {
+    const bibleWithDigest = brokerBible();
+    // brokerBible() の style_directives.global を一旦保存して、digest を別文字列で注入
+    const originalGlobal = bibleWithDigest.style_directives.global;
+    bibleWithDigest.style_directives = {
+      ...bibleWithDigest.style_directives,
+      global: originalGlobal,
+      digest: "DIGEST_SENTINEL_STYLE: compact 100 char rule.",
+    };
+    const args = {
+      page: page(1),
+      packet,
+      bible: bibleWithDigest,
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).toContain("DIGEST_SENTINEL_STYLE");
+    expect(result.prompt).not.toContain(originalGlobal);
+
+    // digest を消すと global にフォールバック
+    const bibleNoDigest = brokerBible();
+    const argsNoDigest = { ...args, bible: bibleNoDigest };
+    const fallback = composePagePrompt(argsNoDigest);
+    expect(fallback.prompt).toContain(bibleNoDigest.style_directives.global);
+    expect(fallback.prompt).not.toContain("DIGEST_SENTINEL_STYLE");
+  });
 });

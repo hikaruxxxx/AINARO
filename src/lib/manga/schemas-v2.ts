@@ -269,8 +269,14 @@ export type PrimaryAppealMode =
   | "mystery";
 
 export type StyleDirectivesV2 = {
-  /** 全話通底の画風 1-2文 */
+  /** 全話通底の画風 1-2文 (audit / fallback 用に full text を保持) */
   global: string;
+  /**
+   * 2026-05-12 追加: prompt 注入用の圧縮版 (目標 800-1100 字)。
+   * composer は digest があればそれを使い、なければ global にフォールバック。
+   * load-bearing でない命題・他セクション重複は digest 側で削る。
+   */
+  digest?: string;
   /** "daily" | "dungeon" | "battle" | "flashback" | "news_broadcast" 等 */
   scene_overrides: Record<string, string>;
   /** UI/オーバーレイ要素の禁則 */

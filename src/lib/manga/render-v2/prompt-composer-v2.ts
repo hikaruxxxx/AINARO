@@ -242,7 +242,11 @@ function locationDescription(panel: PanelV2, bible: BibleSnapshotV2, scene?: Pro
 }
 
 function styleOverrideBlock(scene: Pick<Scene, "mode" | "beat_type"> | undefined, bible: BibleSnapshotV2): string {
-  const blocks = [bible.style_directives.global];
+  // 2026-05-12: digest があれば優先、無ければ global (full text) にフォールバック
+  const base = (bible.style_directives.digest && bible.style_directives.digest.trim().length > 0)
+    ? bible.style_directives.digest
+    : bible.style_directives.global;
+  const blocks = [base];
   if (scene) {
     const override = useBibleV3()
       ? sceneOverrideTextForV3FromV2(bible, scene)
