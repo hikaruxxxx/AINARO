@@ -11,7 +11,7 @@
  */
 import "../_env";
 import { promises as fs } from "node:fs";
-import { sceneGraphPath } from "./_paths";
+import { sceneGraphPath, volumePlotPath } from "./_paths";
 import {
   isSceneGraphV1,
   type SceneGraphV1,
@@ -20,6 +20,11 @@ import {
   computeVolumeForeshadowDag,
   formatVolumeDagReport,
 } from "../../../src/lib/manga/scene-graph/episode-metrics";
+import {
+  formatL2CrossRef,
+  summarizeL2CrossRef,
+} from "../../../src/lib/manga/scene-graph/volume-foreshadow-l2-crossref";
+import type { VolumePlot } from "../../../src/lib/manga/storyboard-v2/volume-plot";
 
 type Args = { slug: string; volume: number; episodes: number[] };
 
@@ -97,6 +102,21 @@ async function main() {
   console.log("");
   console.log("=== Volume DAG Summary ===");
   console.log(formatVolumeDagReport(result.dag));
+
+  // L2 cross-reference は任意。plot.json が無くても validator 全体は失敗させない。
+  try {
+    const vpPath = volumePlotPath(args.slug, args.volume);
+    const vpRaw = await fs.readFile(vpPath, "utf-8");
+    const vp = JSON.parse(vpRaw) as VolumePlot;
+    const crossRef = summarizeL2CrossRef(vp.foreshadow_map, result);
+    console.log("");
+    console.log("=== L2 (volume_plot) Cross-Reference ===");
+    console.log(formatL2CrossRef(crossRef));
+  } catch {
+    console.log("");
+    console.log("=== L2 (volume_plot) Cross-Reference ===");
+    console.log("(volume_plot.json not found or unreadable, skipping L2 cross-ref)");
+  }
 
   if (!result.ok) process.exit(2);
 }
