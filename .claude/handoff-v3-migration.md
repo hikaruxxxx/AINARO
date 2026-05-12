@@ -27,7 +27,51 @@
 | 9d191e5 | docs: handoff に Wave 3 進捗反映 |
 | 09ca178 | docs: handoff に a07-ep01 全 10 scene live 結果と Tier 3 escalation 課題反映 |
 | 5ae70dd | feat: scoring-loop Tier 2 feedback prompt + 閾値 0.50 化 (Tier 3 escalation 50%→0%、ep01 9/1/0・ep02 並列 6/0/0) |
-| (本コミット) | docs: handoff に Tier 2 feedback 効果実証反映、Wave 3 主要課題解消 |
+| f975bef | docs: handoff に Tier 2 feedback 効果実証反映、Wave 3 主要課題解消 |
+| (本コミット) | docs: handoff に a07-v01 全 10 ep scoring-loop live 完成反映 (8 ep 並列 42.6 分、Tier 3 = 0) |
+
+## a07-v01 第 1 巻 全 10 ep scoring-loop live 完成 (2026-05-12 末)
+
+ep03-ep10 を 8 ep Promise.all 並列で live 実走、**1 巻全 72 scene の scene-graph が
+scoring-loop B3 採点ループ経由で確定**。
+
+| ep | scenes | time | tier 1/2/3 | anchor min-max (avg) |
+|---|---|---|---|---|
+| 01 | 10 | 32.5 分 (単独) | 9/1/0 | 0.52-0.74 |
+| 02 | 6 | 18.3 分 (並列 ep01) | 6/0/0 | 0.61-0.74 |
+| 03 | 7 | 38.6 分 (並列 8) | 6/1/0 | 0.63-0.71 (avg 0.66) |
+| 04 | 7 | 33.8 分 (並列 8) | **7/0/0** | 0.64-0.76 (avg 0.71) |
+| 05 | 7 | 42.6 分 (並列 8) | 6/1/0 | 0.58-0.76 (avg 0.66) |
+| 06 | 7 | 39.0 分 (並列 8) | 6/1/0 | 0.56-0.72 (avg 0.64) |
+| 07 | 7 | 35.4 分 (並列 8) | **7/0/0** | 0.56-0.73 (avg 0.66) |
+| 08 | 7 | 31.5 分 (並列 8) | **7/0/0** | 0.58-0.72 (avg 0.64) |
+| 09 | 7 | 34.7 分 (並列 8) | **7/0/0** | 0.62-0.74 (avg 0.67) |
+| 10 | 7 | 33.9 分 (並列 8) | **7/0/0** | 0.58-0.74 (avg 0.67) |
+| **合計** | **72** | **(並列で 42.6 分)** | **65/4/0** | (全 ep 合算 avg 0.66) |
+
+### 並列運用の知見
+
+- 8 ep Promise.all 並列起動で全 ep 42.6 分 (sequential 換算 4.8 時間)
+- ep ごとに Codex CLI を多数 spawn (1 ep = candidate gen + C(N,2) pairwise + N anchor)
+- 途中 1 回「Selected model is at capacity」エラー発生、retry で自動回復、結果に影響なし
+- ChatGPT Pro 定額枠内 (cost ~2M tokens 合計、API 課金ゼロ)
+- 結果ダンプ: `/tmp/a07-epNN-scoring-result.json` (ep03-ep10)
+
+### scene 採用品質サマリ
+
+- Tier 1 採用: 65/72 (90.3%)
+- Tier 2 採用: 4/72 (5.6%、ep03/ep05/ep06 で各 1 + ep01 で 1)
+- Tier 3 escalation: **0/72 (完全解消)**
+- anchor_llm 平均 0.66 (Tier 2 fix 後の妥当範囲)
+- key_visual_intent は bible motifs (黒フード、ヒビ端末、Fランク ID、青光、朱色公的光、空枠オーバーレイ) を全 ep で多用、world.premise の哲学を反映
+
+### 次セッション最優先候補 (a07-v01 1 巻完成後)
+
+1. **L4 storyboard を新しい scene-graph で再展開** — 今回 scoring-loop が出した scene-graph (`/tmp/a07-epNN-scoring-result.json`) を `data/manga/works/a07-modern-dungeon/episodes/epNN/scene_graph.json` に反映 → L4 storyboard を `--from-scene-graph --enrich` で再生成 → 1 巻全 panel + 描画準備完成
+2. **漫画用 episode_patterns 辞書構築 (B4 pattern_match wire)** — 既存 yaml は小説用。漫画用は新規設計が必要 (4 論点: ソース / 粒度 / 比較方式 / agent 漫画版)
+3. **L4-1 / L4-9 を scene-swap に置換** — legacy panel patch 廃止、`swapScenes()` 呼び出しに置換
+4. **anchor pool 改善** — 全 ep avg 0.66 は妥当だが、anchor source の見直しでさらに品質改善余地
+5. **scene 間並列化検討** — 1 ep 内の scene 間 sequential を緩めれば ep 単独実走も 2-3 倍加速可能性
 
 ## 続きセッション (2026-05-12 後半) の成果
 
@@ -385,9 +429,9 @@ a07 で十分検証 → `process.env.USE_BIBLE_V3 === "true"` を default true �
 2. `npx vitest run` で 413 tests pass を確認
 3. `npx tsx /tmp/v3-l4-spec/scan-lint.ts` で a07 fatal=0 を再確認
 4. **次の最優先タスク (推奨順)**:
-   - **A. a07-v01 残り 8 ep (ep03-ep10) 並列 live 実走** — ep01+ep02 で量産耐性確認済、残り 8 ep を 2-4 並列で実走すれば 1 巻完成 (cost ~2M tokens、定額枠内)。並列起動例: `npx tsx /tmp/test-scoring-loop-epNN-full-live.ts` を ep ごとに background 起動
-   - **B. pattern_match の B4 wire + 漫画用 episode_patterns 辞書構築** — 既存 yaml は小説用、漫画用は新規設計が必要。Plan で 4 論点 (ソース / 粒度 / 比較方式 / agent 漫画版) を固めてから着手
-   - **C. L4-1 / L4-9 を scene-swap に置換** (5-6h) — legacy panel patch 廃止、`swapScenes()` 呼び出しに置換
+   - **A. L4 storyboard を新しい scene-graph で再展開 → 1 巻完成** — `/tmp/a07-epNN-scoring-result.json` を `data/manga/works/a07-modern-dungeon/episodes/epNN/scene_graph.json` に反映 → `L04-storyboard --from-scene-graph --enrich` で全 panel + 描画準備
+   - **B. 漫画用 episode_patterns 辞書構築 (B4 pattern_match wire)** — 既存 yaml は小説用、漫画用は新規設計が必要。Plan で 4 論点 (ソース / 粒度 / 比較方式 / agent 漫画版) を固めてから着手
+   - **C. L4-1 / L4-9 を scene-swap に置換** — legacy panel patch 廃止、`swapScenes()` 呼び出しに置換
 5. 上記いずれも完走後、handoff を更新し、Wave 3 完成度を表に追記
 
 ## 注意点
