@@ -582,10 +582,12 @@ describe("prompt-composer-v2 Phase 2-2 bible broker composition", () => {
       episodeNo: 5,
     });
 
-    expect(composed.prompt).toContain("SCENE WARDROBE STATE (must match):");
-    expect(composed.prompt).toContain("ACTIVE WORLD RULES IN THIS SCENE");
-    expect(composed.prompt).toContain("PROPS IN PLAY (include if visually relevant):");
-    expect(composed.prompt).toContain("SCENE EMOTIONAL THEME");
+    // 2026-05-13 SCENE 圧縮後: 旧長いヘッダー (SCENE WARDROBE STATE / ACTIVE WORLD RULES /
+    // PROPS IN PLAY / SCENE EMOTIONAL THEME) は短縮形 (Active rules / Props / Theme) に変更。
+    // SCENE WARDROBE は CONTINUITY (Active costumes) と重複するので SCENE からは削除。
+    expect(composed.prompt).toContain("Active rules this scene");
+    expect(composed.prompt).toContain("Props:");
+    expect(composed.prompt).toContain("Theme:");
     expect(composed.prompt.length).toBeLessThanOrEqual(8000);
   });
 
@@ -716,7 +718,8 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     // 2026-05-13 page-level CONTINUITY 統合後: panel#N CONTINUITY は出ず
     // "Characters (face/outfit invariants across this page)" 形式に
     expect(v3.prompt).toContain("Characters (face/outfit invariants");
-    expect(v3.prompt).toContain("WORLD CONSTRAINTS");
+    // 2026-05-13: WORLD CONSTRAINTS ヘッダーは "World rules:" に短縮
+    expect(v3.prompt).toContain("World rules:");
     expect(v3.prompt.length).toBeGreaterThan(legacy.prompt.length * 0.5);
     expect(v3.prompt.length).toBeLessThan(legacy.prompt.length * 2.0);
     expect(v3.refImagePaths).toEqual(legacy.refImagePaths);

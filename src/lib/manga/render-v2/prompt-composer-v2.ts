@@ -899,23 +899,45 @@ function buildPageSceneContextBlock(
   tier: BibleTier,
 ): string | null {
   if (!scene) return null;
-  const blocks: string[] = [];
+  // 2026-05-13 圧縮: 旧 5 sub-block (各 100-200字) を 1 行ずつに集約。
+  // SCENE WARDROBE STATE は CONTINUITY (Active costumes) と被るので削除。
+  // World rules / Active rules は長文 1 件 130字 × 2 → 70字 × 2 に切り詰め。
+  const lines: string[] = [];
+
+  // World rules (worldRuleBlock のヘッダーを剥がし bullet を 1 行ずつ truncate)
   const wr = worldRuleBlock(scene, bible, tier);
-  if (wr) blocks.push(wr);
-  if (representativePanel) {
-    const ws = wardrobeStateBlock(scene, bible, representativePanel, tier);
-    if (ws) blocks.push(ws);
+  if (wr) {
+    const bullets = wr.split("\n").filter((l) => l.startsWith("- "));
+    const truncated = bullets.slice(0, 2).map((b) => firstChars(b, 90));
+    if (truncated.length > 0) lines.push(`World rules:\n${truncated.join("\n")}`);
   }
+
+  // Active world rules
   const awr = activeWorldRulesBlock(scene, tier);
-  if (awr) blocks.push(awr);
+  if (awr) {
+    const bullets = awr.split("\n").filter((l) => l.startsWith("- "));
+    const truncated = bullets.slice(0, 2).map((b) => firstChars(b, 90));
+    if (truncated.length > 0) lines.push(`Active rules this scene:\n${truncated.join("\n")}`);
+  }
+
+  // Props (元から短い、1-2 行)
   if (representativePanel) {
     const props = propsInPlayBlock(scene, bible, representativePanel);
-    if (props) blocks.push(props);
+    if (props) {
+      const bullets = props.split("\n").filter((l) => l.startsWith("- "));
+      if (bullets.length > 0) lines.push(`Props: ${bullets.map((b) => b.replace(/^- /, "")).join("; ")}`);
+    }
   }
+
+  // Theme (1 行)
   const theme = themeSubtextBlock(scene);
-  if (theme) blocks.push(theme);
-  if (blocks.length === 0) return null;
-  return blocks.join("\n\n");
+  if (theme) {
+    const body = theme.split("\n").filter((l) => l.startsWith("- ")).map((l) => l.replace(/^- /, "")).join(" / ");
+    if (body) lines.push(`Theme: ${body}`);
+  }
+
+  if (lines.length === 0) return null;
+  return lines.join("\n");
 }
 
 function renderPageShellsOnlyText(
