@@ -72,22 +72,73 @@ B/C の Codex セッションで、spec で明示禁止したにもかかわら�
 - spec に「絶対変更しない files」のリストを明示
 - 完了後 `git status` で意図外ファイルを必ず確認
 
-### 次最優先 (D: ep01 live 再走で A/B/C 効果検証)
+### D: 1 巻ネーム完成達成 (commit 21326c4)
 
-`/tmp/test-scoring-loop-ep01-full-live.ts` に `volumePlotPath` を追加 (commit不要 /tmp script)、
-2026-05-12 23:00 頃 background 起動 (PID 80945、log `/tmp/a07-ep01-live-rerun.log`)。
-完了所要 30-45 分、ChatGPT Pro 定額枠内。
+全 10 ep を A/B/C 後 pipeline で再生成、第 1 巻 a07-v01 ネーム完成。
 
-期待効果:
-- motif_id errors 24 → 0 (B の normalize で完全捕捉、ただし substring 救済できないものは drop)
-- foreshadow Rule 5 violations 21 → 大幅減 (A の L2 context 注入で巻またぎ伏線を理解した生成)
-- anchor_llm 平均が L2 整合性ボーナスで微増
+実走サマリ:
+- ep01 単独 live 再走 (commit bf7b1fd, 40.6min)
+- ep02-10 並列 live 再走 (commit fc6df6c, 33.2min Promise.all 9 ep)
+- ep02 Rule 4 違反修正 (S01 may_repeat と S02 scene_exclusive が同 text、jq で S01 から削除)
+- 全 ep で `loc_lawson_*` (LLM hallucination) を `loc_bluewhite_mart_exterior_night_v1` /
+  `loc_blueway_interior_v1` へ sed 置換 (commit b93b40f で lawson 駆逐済の所を LLM が知らず再出現)
+- L04 並列 enrich を 2 回実行 (1 回目 ep10 のみ成功、lawson fix 後の 2 回目で残り 7 ep 成功)
+- 最終 commit 21326c4 で全 10 ep storyboard + scene_graph 確定 (220 pages, 1093 panels)
 
-完了後の手順:
-1. ep01 L04-storyboard --from-scene-graph --enrich 動作確認 (~5min)
-2. 他 9 ep を Promise.all 並列再走 (~40min、`/tmp/run-eps-parallel.ts` の EP_NUMBERS を [1..10] に拡張)
-3. 全 ep L04 並列 (~10min)
-4. **1 巻完成** → handoff 更新 + commit
+A/B/C 効果実証 (ep01 単独 live):
+- motif Rule 13 errors: 47 → 0 (B の normalize で 100% 削減)
+- foreshadow Rule 5 errors: 21 → 9 (A の L2 context 注入で 57% 削減)
+- foreshadow_setup hint 分布: 全 this_episode → cross-episode 73% (L2 foreshadow_map 理解)
+- anchor_llm 範囲拡大 0.66-0.84 (前回 0.66 最高 → 0.84 最高)
+
+品質指標 (全 10 ep volume-level):
+- panel-scene inheritance: 全 ep ok
+- foreshadow hint_violations: 0 (hint と実位置の不整合ゼロ)
+- volume-level foreshadow: 195 items, resolved 53, cross_volume 22 (ep08-10 末尾、設計通り)
+- per-episode Rule 5 errors 計 95 件は coarse check 限界 (token vs description 機械照合不能)、
+  volume-level では hint_violations=0 で実害なし
+
+## 次セッション最優先候補 (1 巻完成後)
+
+### α: scoring-loop の foreshadow 設計の絞り込み (品質改善、最優先候補)
+
+現状: L2 expects 9 foreshadows in volume vs scene_graph generated 142 setups (15.8 倍過剰)。
+LLM が「foreshadow_setup を積極的に作る」傾向で、payoff_without_setup 53 件、duplicated 7 件が発生。
+
+改善案:
+1. `buildSceneCandidatePrompt` の foreshadow 指示を「3-5 件/scene」「volume_plot.foreshadow_map に
+   ある seed のみ拡張」に厳格化
+2. payoff token は「他 scene にある setup token と完全一致のみ許可」を prompt で明示
+3. validateSceneGraph で per-ep setup 過剰 (>5/scene) を warning 化
+4. scoring-loop に validateSceneGraph を generate 後 fire し、Rule 5 違反含む候補は自動 reject
+
+### β: motif_id LLM 遵守の根本改善
+
+現状: 全 scene で exact match=0、substring 救済 13-17 件/ep、drop が大半 (B の normalize で捕捉)。
+LLM が motif_id 欄に description 本文を入れ続ける。
+
+改善案:
+1. motif anchor の prompt 提示を「id だけのリスト + description は別 section」に分離
+2. motif_id 出力例 (例: `motif_id: "黒のフードジャケット"`) を prompt 内に 3 サンプル提示
+3. JSON schema で motif_id を enum 制限 (Codex の structured output mode)
+
+### γ: 漫画用 episode_patterns 辞書構築 (B4 pattern_match wire)
+
+handoff の H にあった残課題。現状 hardcoded stub のため pattern_match metric が無効。
+スコープ大 (4 論点: ソース / 粒度 / 比較方式 / agent 漫画版) のため別 plan 必要。
+
+### δ: L4-1 / L4-9 を scene-swap に置換 (legacy panel patch 廃止)
+
+handoff の F にあった残課題。`L04-1-opening-hook.ts` / `L04-9-cliffhanger.ts` を `swapScenes()`
+呼び出しに置換、legacy panel patch 廃止。
+
+### ε: L2 改善ロードマップ (別セッション、user 指示済)
+
+- foreshadow_map に `token_hint?: string` フィールド追加 (機械照合可能化、最優先)
+- 複数案生成 + 選別 (anchor pool + pairwise)
+- L2 品質評価 validator (`validateVolumePlot`)
+- 読者リテンション 6 レバー (`feedback_reader_retention_levers`) 明示化
+- L3.5 → L2 フィードバックループ
 
 ## 前セッション (2026-05-11) の成果
 
