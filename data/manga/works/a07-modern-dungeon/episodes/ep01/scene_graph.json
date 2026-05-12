@@ -338,7 +338,7 @@
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_blueway_exterior_night_v1",
+      "location_id": "loc_bluewhite_mart_exterior_night_v1",
       "sub_locations": [
         "loc_dpc_public_counter_v1",
         "loc_ren_apartment_v1"
@@ -699,7 +699,7 @@
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "location_id": "loc_blueway_exterior_night_v1",
+      "location_id": "loc_bluewhite_mart_exterior_night_v1",
       "sub_locations": [
         "loc_shinjuku_night_skyline_v1",
         "loc_shinjuku_third_dungeon_gate_v1",
