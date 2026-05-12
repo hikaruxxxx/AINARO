@@ -24,6 +24,10 @@
 | 0ac325e | feat: v3-adapter D1-3 修正 + apply-deepen-patch dotted/world 拡張 (a07 fatal 25→0、L1 bible 完成、tests 398→413) |
 | b889742 | docs: handoff を a07 L1 完成で更新、Wave 3 (L3.5 強化) を次最優先に |
 | 5fe6666 | feat: L03_5-scene-graph.ts に --live flag 追加 (scoring-loop B3 live 動作確認、a07-ep01 S01 で 154.7s 実走成功) |
+| 9d191e5 | docs: handoff に Wave 3 進捗反映 |
+| 09ca178 | docs: handoff に a07-ep01 全 10 scene live 結果と Tier 3 escalation 課題反映 |
+| 5ae70dd | feat: scoring-loop Tier 2 feedback prompt + 閾値 0.50 化 (Tier 3 escalation 50%→0%、ep01 9/1/0・ep02 並列 6/0/0) |
+| (本コミット) | docs: handoff に Tier 2 feedback 効果実証反映、Wave 3 主要課題解消 |
 
 ## 続きセッション (2026-05-12 後半) の成果
 
@@ -74,12 +78,24 @@ LLM 出力は良質だが、`tier2_threshold_pct: 0.30` (デフォルト) で an
 
 scene_graph 結果 dump: `/tmp/a07-ep01-scoring-result.json`
 
+### Tier 3 escalation 解消 検証結果 (2026-05-12 後半セッション、commit 5ae70dd)
+
+閾値 0.50 化 + Tier 2 feedback prompt 実装で、ep01/ep02 並列 live 再走 (Codex CLI 別 process):
+
+| 指標 | ep01 (初回) | ep01 (Tier 2 fix 後) | ep02 (並列) |
+|---|---|---|---|
+| 実走時間 | 62 分 | 32.5 分 | 18.3 分 |
+| total_candidates | 69 | 33 | 18 |
+| tier_breakdown | 3/2/5 | **9/1/0** | **6/0/0** |
+| Tier 1 採用率 | 30% | 90% | **100%** |
+| Tier 3 escalation | 50% | **0%** | **0%** |
+| anchor_llm 範囲 | 0.42-0.74 | 0.52-0.74 | 0.61-0.74 |
+
+両 ep で Tier 3 escalation 完全解消。Wave 3 B3 採点ループの量産耐性確保。
+
 ### 残課題 (次セッション以降、優先順)
 
-1. **(最優先) Tier 3 escalation 50% 問題の解消**
-   - 即効策: `DEFAULT_SCORING_CONFIG.tier2_threshold_pct` を 0.30 → 0.50 に調整 (1 line 変更)
-   - 根本策: **Tier 2 feedback prompt 実装** ([scoring-loop.ts:1039](src/lib/manga/scene-graph/scoring-loop.ts#L1039)) — 「前回の anchor_llm が低い理由」を context に含めて再生成、現状は runTier1 単純再実行
-   - anchor_llm caliblation — LLM が厳しすぎる可能性、複数 anchor の中央値や percentile 化
+1. ~~**Tier 3 escalation 50% 問題の解消**~~ — **完了 (5ae70dd)**
 2. **template_collision の B4 wire** ([scoring-loop.ts:1010](src/lib/manga/scene-graph/scoring-loop.ts#L1010)) — episode-metrics の TODO
 3. **pattern_match metric の hardcoded stub 解消** ([episode-metrics.ts:49](src/lib/manga/scene-graph/episode-metrics.ts#L49)) — 漫画用 episode_patterns 辞書が未構築
    - 既存 `data/generation/profiles/{hellmode,light_recovery}_type/episode_patterns.yaml` は **長編小説用** (phase/words 単位)、漫画は scene/page 単位なので新規設計が必要
@@ -369,7 +385,7 @@ a07 で十分検証 → `process.env.USE_BIBLE_V3 === "true"` を default true �
 2. `npx vitest run` で 413 tests pass を確認
 3. `npx tsx /tmp/v3-l4-spec/scan-lint.ts` で a07 fatal=0 を再確認
 4. **次の最優先タスク (推奨順)**:
-   - **(最優先) Tier 3 escalation 50% 問題の解消** — ep01 全実走で判明した運用課題。Tier 2 feedback prompt を実 LLM 呼び出しに変更し、「前回 anchor_llm が低かった理由」を context として再生成 prompt に含める。即効策として閾値調整 (0.30 → 0.50) も検討
+   - **A. a07-v01 残り 8 ep (ep03-ep10) 並列 live 実走** — ep01+ep02 で量産耐性確認済、残り 8 ep を 2-4 並列で実走すれば 1 巻完成 (cost ~2M tokens、定額枠内)。並列起動例: `npx tsx /tmp/test-scoring-loop-epNN-full-live.ts` を ep ごとに background 起動
    - **B. pattern_match の B4 wire + 漫画用 episode_patterns 辞書構築** — 既存 yaml は小説用、漫画用は新規設計が必要。Plan で 4 論点 (ソース / 粒度 / 比較方式 / agent 漫画版) を固めてから着手
    - **C. L4-1 / L4-9 を scene-swap に置換** (5-6h) — legacy panel patch 廃止、`swapScenes()` 呼び出しに置換
 5. 上記いずれも完走後、handoff を更新し、Wave 3 完成度を表に追記
