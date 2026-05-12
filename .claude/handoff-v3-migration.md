@@ -20,7 +20,63 @@
 | f493f8b | feat: apply-deepen-patch.ts (Claude Agent 経由の追記式 patch apply、a07 玲二 origin_wound_deep で実証成功 fatal 27→26) |
 | 5cb85c4 | feat: evaluate-and-rewrite + apply-rewrite-patch (Claude Agent 評価+上書き式 rewrite インフラ、a07 で実走確認 + hallucination 課題判明) |
 | f199fb1 | feat: Quality Gate (--diff-check + prompt 厳守ルール) - hallucination 検出 33 件で apply 阻止を実証 |
-| (次) | docs: ワークフロー実証 + known_terms 第3バッチ反映 (a07 玲二 ideology_argument を Agent rewrite → gate 通過 → apply、fatal 26→25) |
+| 158f956 | docs: ワークフロー実証完了 - 玲二 ideology_argument を Agent rewrite → gate 通過 → apply、a07 fatal 26→25 |
+| 0ac325e | feat: v3-adapter D1-3 修正 + apply-deepen-patch dotted/world 拡張 (a07 fatal 25→0、L1 bible 完成、tests 398→413) |
+| (本コミット) | docs: handoff を a07 L1 完成で更新、Wave 3 (L3.5 強化) を次最優先に |
+
+## このセッション (2026-05-12) の成果
+
+**ゴール達成: a07 fatal lint 25 → 0 (L1 bible 完成)**
+
+### Phase 1: 既存インフラ路線 (4 件)
+- 玲二 `dark_mirror_to_protagonist`: 1192 → 4592 字 (Claude Agent + apply-deepen-patch、新規 7 軸展開)
+- motif_02f386de9770 (数値オーバーレイの空枠) 3 fields:
+  - meaning 57 → 914 字
+  - draw_directive 179 → 1705 字
+  - symbolic_lineage 0 → 1428 字 (**新規 field 追加、apply-deepen-patch は current="" でも動作確認**)
+
+### Phase 2: 真因調査 — 残り 21 件は lint バグと apply 機能不足
+- `v3-adapter.ts` バグ 3 件発見:
+  - D-1: growth_per_volume の `body: growth.description` 参照だが、実 snapshot は `{vol, growth}` 形式 → fact 化失敗
+  - D-2: motif を 1 fact にまとめており、`reference_scenes[]` / `negative_examples[]` を要素ごと fact 化していない
+  - D-3: location.spec の `history` / `visual_description` / `socioeconomic_context` / `sensory_textures` を fact 化していない
+- `apply-deepen-patch.ts` 機能不足 2 件:
+  - 拡張A: `spec.who_typically_inhabits` のような dotted path に非対応
+  - 拡張B: `scope: world` (world.premise 用) に非対応
+
+### Phase 3: Codex 一括修正 (commit 次1 候補)
+- mcp__codex__codex に仕様書 `/tmp/v3-l4-spec/spec-v3adapter-and-apply-extensions.md` で依頼
+- 修正 8 ファイル (+260/-34、新規テスト 15 件):
+  - `src/lib/manga/bible/v3-adapter.ts` (D-1/D-2/D-3)
+  - `src/lib/manga/bible/v3-adapter.test.ts` (新規)
+  - `src/lib/manga/bible/depth-lint.ts` (motif/location の pathFilter 追加)
+  - `src/lib/manga/bible/depth-lint.test.ts`
+  - `src/lib/manga/schemas-v2.ts` (growth_per_volume の両形式 union)
+  - `src/lib/manga/bible/broker.ts` (consumer 側の両形式対応、副次的必要修正)
+  - `scripts/manga/bible/apply-deepen-patch.ts` (拡張 A/B)
+  - `scripts/manga/bible/apply-deepen-patch.test.ts`
+- `npx vitest run`: 413 tests pass + 5 skipped (398→+15)
+- `npx tsc --noEmit`: pass
+- D-3 適用で他 location の visual_description 不足が表面化 (元 21 件 → 8 件、想定の 4 件より多い)
+
+### Phase 4: 残り 8 件のデータ追記 (8 Agent 出力)
+| target | field | before | after |
+|---|---|---|---|
+| world.premise | (global) | 1497 | 3254 |
+| loc_shinjuku_third_dungeon_gate_v1 | spec.who_typically_inhabits | 470 | 1571 |
+| loc_bluewhite_mart_exterior_night_v1 | spec.visual_description | 1277 | 3992 |
+| loc_shinjuku_third_3f_hidden_cache_v1 | spec.visual_description | 1289 | 3291 |
+| loc_shinjuku_third_3f_hidden_cache_v1 | spec.history | 521 | 2677 |
+| loc_shinjuku_third_3f_hidden_cache_v1 | spec.socioeconomic_context | 451 | 2469 |
+| loc_shinjuku_third_3f_hidden_cache_v1 | spec.sensory_textures | 675 | 2792 |
+| loc_shinjuku_third_3f_hidden_cache_v1 | spec.who_typically_inhabits | 397 | 2226 |
+
+**最終: `npx tsx /tmp/v3-l4-spec/scan-lint.ts` → fatal=0, warn=2210 達成**
+
+### 残懸念 (本タスクスコープ外、次回検討)
+- `undefined-reference-detector.ts:530` は growth_per_volume の `description` のみ参照、`{vol, growth}` 形式に未対応 → false negative の可能性 (false negative なので bible 品質に影響なし、優先度低)
+
+
 
 - handoff の **最優先タスク (L4 visibility 縛り)** 完了
 - 副産物として broker-v3 `applyCharBudget` のバグを発見・修正
@@ -50,7 +106,7 @@ V3 移行 plan の **残課題に着手**:
 4. ~~broker-v3.contextForScene の cast-fair filter~~ — **完了 (e1784f3、a07 ep01 S01 でレン 3 + 灯里 3 にバランス回復)**
 5. ~~USE_BIBLE_V3 default true 化~~ — **完了 (3d85576、USE_BIBLE_V3=false で V2 fallback、それ以外は V3)**
 6. ~~undefined-ref detector 改善~~ — **部分完了 (3d85576、a07 で 1,971 → 1,442 件 -26.8%、known_terms.json 拡張で更に削減可)**
-7. (任意・**新最優先候補**) a07 bible の depth 不足解消 — fatal lint 27 件のうち depth 系。主人公 growth_per_volume 未着手 / antagonist 心理 60-80% 不足 / location history 未着手 / visual_motifs 各種項目不足。
+7. ~~(任意・**新最優先候補**) a07 bible の depth 不足解消~~ — **完了 (このセッション、fatal 25→0)**。当時の fatal lint 27 件のうち depth 系。主人公 growth_per_volume 未着手 / antagonist 心理 60-80% 不足 / location history 未着手 / visual_motifs 各種項目不足。
    - **インフラ完成**: `scripts/manga/bible/deepen-snapshot-field.ts` (snapshot 起点で character/location/motif の指定 field を Codex CLI で deepen するスクリプト) を実装済
    - **初回実走で課題判明** (玲二 psychology):
      - Stage 1b は 7 field 同時生成で `enforcedTotalMinChars: 5000` だが各 field 個別 min 未強制
@@ -86,7 +142,7 @@ V3 移行 plan の **残課題に着手**:
      5. (任意) apply-rewrite-patch に `--interactive` モード追加 (人間が新規語彙を確認 + known_terms.json に登録)
      6. (任意) 段落単位の部分置換 (issues の location_hint を活用して該当段落だけ置換)
 8. ~~bible-lint の「ライン」誤検出修正~~ — **完了 (7dedb83、a07 fatal 30→27)**
-9. (任意・**Wave 3 候補**) L3.5 強化 — a07 では volume_plot.json が**未作成**で cross-episode validator が弱動作。1. a07 用 volume_plot 生成、2. 巻またぎ伏線の自動配置、3. episode-patterns 辞書のカバー率向上、4. anchor pool scoring 統合 (4 子タスク)
+9. (**Wave 3 — 新最優先候補**) L3.5 強化 — a07 では volume_plot.json が**未作成**で cross-episode validator が弱動作。1. a07 用 volume_plot 生成、2. 巻またぎ伏線の自動配置、3. episode-patterns 辞書のカバー率向上、4. anchor pool scoring 統合 (4 子タスク)
 10. (任意) L11 audit / L12 repair の本格化 (現状は雛形のみ)
 11. (任意) L8.5/8.6/8.7 name gate UI 改善 (Console 中央コックピット化)
 
@@ -240,13 +296,16 @@ a07 で十分検証 → `process.env.USE_BIBLE_V3 === "true"` を default true �
 - LLM コール (Codex CLI 経由) は ChatGPT Pro 定額枠内、追加課金なし
 - ANTHROPIC_API_KEY 課金前提にしない (`feedback_no_anthropic_api` メモリ参照)
 
-## 着手順
+## 着手順 (次セッション、Wave 3 = L3.5 強化)
 
-1. `git log --oneline -30` で commits 確認 (前セッションで a3b3fd7 / d2a60bd 追加)
-2. `npx vitest run` で 378 tests 全 pass を確認
-3. `npm run console -- --no-open` で Console 起動 (port 5174、必要なら open)
-4. a07 で `npx tsx /tmp/v3-l4-spec/preview-prompt.ts` で L4 visibility 縛り後の prompt を再確認 (前セッションの試験 script、残してある)
-5. **Character 長文 fact の sub-split 着手** から始める (新最優先候補)
+1. `git log --oneline -10` で 158f956 以降の 2 commit を確認
+2. `npx vitest run` で 413 tests pass を確認
+3. `npx tsx /tmp/v3-l4-spec/scan-lint.ts` で a07 fatal=0 を再確認
+4. **Wave 3 (L3.5 強化) に着手** — `docs/plans/manga/pipeline-v2.md` で L3.5 の項目確認後、4 子タスクの順序を決める
+   - a07 用 volume_plot.json 生成 (現状未作成)
+   - 巻またぎ伏線の自動配置
+   - episode-patterns 辞書のカバー率向上
+   - anchor pool scoring 統合
 
 ## 注意点
 
