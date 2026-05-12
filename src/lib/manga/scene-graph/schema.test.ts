@@ -274,3 +274,40 @@ describe("validateSceneGraph Rule 4 scene_exclusive text uniqueness", () => {
     expect(result.ok).toBe(true);
   });
 });
+
+describe("validateSceneGraph Rule 5 volume foreshadow_map 連携", () => {
+  it("volumeForeshadowMap 渡しで件数不足 warning が出る", () => {
+    const result = validateSceneGraph(
+      graph({ foreshadow_setup: [] }),
+      bible(),
+      { episode_id: "ep01", cast: ["char_a", "char_b"] },
+      {
+        episodeNo: 1,
+        volumeForeshadowMap: [
+          { seed_in_episode: 1, payoff_in_episode: 5, description: "seed one" },
+          { seed_in_episode: 1, payoff_in_episode: 10, description: "seed two" },
+        ],
+      }
+    );
+
+    expect(result.warnings).toContain("volume_plot expects 2 seeds in ep1 but scene_graph only sets up 0");
+  });
+
+  it("volumeForeshadowMap 渡しで hint 不整合 warning が出る", () => {
+    const result = validateSceneGraph(
+      graph({
+        foreshadow_setup: [{ token: "F_future", payoff_episode_hint: "this_episode" }],
+      }),
+      bible(),
+      { episode_id: "ep01", cast: ["char_a", "char_b"] },
+      {
+        episodeNo: 1,
+        volumeForeshadowMap: [
+          { seed_in_episode: 1, payoff_in_episode: 10, description: "future payoff" },
+        ],
+      }
+    );
+
+    expect(result.warnings.some((w) => w.includes("expects cross-episode payoff"))).toBe(true);
+  });
+});

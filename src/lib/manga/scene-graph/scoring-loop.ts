@@ -34,6 +34,7 @@ import {
 } from "../bible/broker";
 import { contextForSceneV2 } from "../bible/broker-v3";
 import { runCodexText } from "../llm/codex-text";
+import type { VolumeEpisodePlan, VolumePlot } from "../storyboard-v2/volume-plot";
 
 // ============================================================================
 // Configuration
@@ -125,6 +126,175 @@ export type BibleContextForSlot = {
   propCandidates: Array<{ id: string; name: string }>;
 };
 
+// ============================================================================
+// L2 (volume_plot) context (prompt 注入用)
+// ============================================================================
+
+/**
+ * volume_plot.json から当 episode に関係する section を抽出した中間表現。
+ * generateSceneCandidates / buildPairwisePrompt / compareToAnchorPool の prompt に共通注入する。
+ */
+export type VolumeContext = {
+  volume_no: number;
+  title_working?: string;
+  volume_theme: string;
+  /** 当 ep の VolumeEpisodePlan (見つからなければ null) */
+  current_episode: {
+    episode_no: number;
+    title_working: string;
+    theme: string;
+    protagonist_arc: { start: string; turn: string; end: string };
+    core_hook_usage?: string;
+    pairing_progression?: string;
+    must_include_events: string[];
+    cliffhanger_hook: string;
+    /** beats summary を 1 行/beat で連結 (空文字許容) */
+    beats_summary_lines: string[];
+  } | null;
+  /** 周辺 ep (prev / next) の theme + cliffhanger だけ短く */
+  prev_episode_brief: { episode_no: number; title_working?: string; theme: string; cliffhanger_hook: string } | null;
+  next_episode_brief: { episode_no: number; title_working?: string; theme: string; cliffhanger_hook: string } | null;
+  /** 当 ep が seed 側に出現する foreshadow_map 要素 */
+  foreshadows_seeded_here: Array<{ payoff_in_episode: number; description: string }>;
+  /** 当 ep が payoff 側に出現する foreshadow_map 要素 */
+  foreshadows_paid_off_here: Array<{ seed_in_episode: number; description: string }>;
+};
+
+/**
+ * volume_plot.json を fs から読み、当 episode に関係する section を抽出する。
+ * 失敗時 (ファイル無し / parse 失敗) は null を返す。
+ */
+export async function loadVolumeContext(
+  volumePlotPath: string | undefined,
+  episodeNo: number
+): Promise<VolumeContext | null> {
+  if (!volumePlotPath) return null;
+  try {
+    const raw = await fs.readFile(volumePlotPath, "utf-8");
+    const volumePlot = JSON.parse(raw) as VolumePlot;
+    const current = volumePlot.episodes.find((ep) => ep.episode_no === episodeNo);
+    const prev = volumePlot.episodes.find((ep) => ep.episode_no === episodeNo - 1);
+    const next = volumePlot.episodes.find((ep) => ep.episode_no === episodeNo + 1);
+    if (!current) {
+      return {
+        volume_no: volumePlot.volume_no,
+        title_working: volumePlot.title_working,
+        volume_theme: volumePlot.volume_theme,
+        current_episode: null,
+        prev_episode_brief: null,
+        next_episode_brief: null,
+        foreshadows_seeded_here: [],
+        foreshadows_paid_off_here: [],
+      };
+    }
+    return {
+      volume_no: volumePlot.volume_no,
+      title_working: volumePlot.title_working,
+      volume_theme: volumePlot.volume_theme,
+      current_episode: toCurrentVolumeEpisode(current),
+      prev_episode_brief: prev ? toEpisodeBrief(prev) : null,
+      next_episode_brief: next ? toEpisodeBrief(next) : null,
+      foreshadows_seeded_here: volumePlot.foreshadow_map
+        .filter((f) => f.seed_in_episode === episodeNo)
+        .map((f) => ({ payoff_in_episode: f.payoff_in_episode, description: f.description })),
+      foreshadows_paid_off_here: volumePlot.foreshadow_map
+        .filter((f) => f.payoff_in_episode === episodeNo)
+        .map((f) => ({ seed_in_episode: f.seed_in_episode, description: f.description })),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function toCurrentVolumeEpisode(ep: VolumeEpisodePlan): NonNullable<VolumeContext["current_episode"]> {
+  return {
+    episode_no: ep.episode_no,
+    title_working: ep.title_working,
+    theme: ep.theme,
+    protagonist_arc: ep.protagonist_arc,
+    core_hook_usage: ep.core_hook_usage,
+    pairing_progression: ep.pairing_progression,
+    must_include_events: ep.must_include_events,
+    cliffhanger_hook: ep.cliffhanger_hook,
+    beats_summary_lines: ep.beats.map((b) => `[${b.label}] ${b.summary}`),
+  };
+}
+
+function toEpisodeBrief(ep: VolumeEpisodePlan): NonNullable<VolumeContext["prev_episode_brief"]> {
+  return {
+    episode_no: ep.episode_no,
+    title_working: ep.title_working,
+    theme: ep.theme,
+    cliffhanger_hook: ep.cliffhanger_hook,
+  };
+}
+
+/**
+ * VolumeContext を prompt 用 markdown section (## 巻内位置) に整形する。
+ * vc が null か current_episode が null なら空文字を返す。
+ */
+export function formatVolumeContextSection(vc: VolumeContext | null): string {
+  if (!vc?.current_episode) return "";
+  const ep = vc.current_episode;
+  const prev = vc.prev_episode_brief;
+  const next = vc.next_episode_brief;
+  const foreshadowLines = [
+    ...vc.foreshadows_seeded_here.map(
+      (f) => `- (seed in ep${ep.episode_no}) → payoff in ep${f.payoff_in_episode}: ${f.description}`
+    ),
+    ...vc.foreshadows_paid_off_here.map(
+      (f) => `- (payoff in ep${ep.episode_no}) ← seed in ep${f.seed_in_episode}: ${f.description}`
+    ),
+  ];
+  return [
+    `## 巻内位置 (L2 volume_plot より)`,
+    "",
+    `### 巻全体`,
+    `- volume_no: ${vc.volume_no}`,
+    vc.title_working ? `- title: ${vc.title_working}` : null,
+    `- volume_theme: ${truncatePromptText(vc.volume_theme, 400)}`,
+    "",
+    `### 当 episode の役割`,
+    `- episode_no: ${ep.episode_no}`,
+    `- title: ${ep.title_working}`,
+    `- theme: ${ep.theme}`,
+    `- protagonist_arc:`,
+    `  - start: ${ep.protagonist_arc.start}`,
+    `  - turn: ${ep.protagonist_arc.turn}`,
+    `  - end: ${ep.protagonist_arc.end}`,
+    ep.core_hook_usage ? `- core_hook_usage: ${ep.core_hook_usage}` : null,
+    ep.pairing_progression ? `- pairing_progression: ${ep.pairing_progression}` : null,
+    `- must_include_events:`,
+    ...ep.must_include_events.slice(0, 8).map((event) => `  - ${event}`),
+    `- cliffhanger_hook: ${ep.cliffhanger_hook}`,
+    `- beats:`,
+    ...ep.beats_summary_lines.slice(0, 8).map((line) => `  - ${line}`),
+    "",
+    `### 周辺 episode`,
+    prev ? `- prev: ep${prev.episode_no} 「${prev.title_working ?? ""}」` : `- prev: (none)`,
+    prev ? `  - theme: ${prev.theme}` : null,
+    prev ? `  - cliffhanger_hook: ${prev.cliffhanger_hook}` : null,
+    next ? `- next: ep${next.episode_no} 「${next.title_working ?? ""}」` : `- next: (none)`,
+    next ? `  - theme: ${next.theme}` : null,
+    next ? `  - cliffhanger_hook: ${next.cliffhanger_hook}` : null,
+    "",
+    `### 当 episode が関わる巻またぎ伏線 (volume_plot.foreshadow_map より)`,
+    foreshadowLines.length > 0 ? foreshadowLines.join("\n") : `- (none)`,
+    `- (※ payoff_in_episode > current の場合 = 巻またぎ伏線。setup 側 scene の foreshadow_setup.payoff_episode_hint`,
+    `  は "later_in_volume" / "cross_volume" を選び、当 ep 内で payoff させない)`,
+    "",
+    `### 使い方の指示`,
+    `- 当 scene が当 episode の beats のどの位置 (arc_position) に対応するかを意識する`,
+    `- 巻またぎ伏線は当 ep の foreshadow_setup として埋めるが、payoff_episode_hint は描写を当 ep に閉じさせない`,
+    `  (later_in_volume / cross_volume を選ぶ)`,
+    `- 当 ep が payoff 側になっている伏線がある場合、scene の foreshadow_payoff にそれを反映する`,
+  ].filter((line): line is string => line !== null).join("\n");
+}
+
+function truncatePromptText(s: string, max: number): string {
+  return s.length > max ? s.slice(0, max) : s;
+}
+
 export function buildBibleContextForSlot(
   bible: BibleSnapshotV2,
   slot: SceneSlot,
@@ -207,8 +377,9 @@ export async function generateSceneCandidates(
   const useBibleV3 = process.env.USE_BIBLE_V3 !== "false";
   const bible = await loadBibleSnapshot(context.bibleSnapshotPath);
   const bibleContext = buildBibleContextForSlot(bible, slot, useBibleV3);
+  const volumeContext = await loadVolumeContext(context.volumePlotPath, context.episode);
 
-  const task = buildSceneCandidatePrompt(slot, context, config.candidatesPerScene, bibleContext, feedback);
+  const task = buildSceneCandidatePrompt(slot, context, config.candidatesPerScene, bibleContext, feedback, volumeContext);
   const result = await runCodexText<{ candidates: Partial<Scene>[] }>({
     task,
     format: "json",
@@ -258,7 +429,8 @@ export function buildSceneCandidatePrompt(
   context: GenerationContext,
   candidates: number,
   bibleContext: BibleContextForSlot,
-  feedback?: Tier2Feedback
+  feedback?: Tier2Feedback,
+  volumeContext?: VolumeContext | null
 ): string {
   const finalized = context.finalizedScenes
     .map(
@@ -284,6 +456,7 @@ export function buildSceneCandidatePrompt(
         ].join("\n")
       : null;
   const feedbackSection = feedback ? buildTier2FeedbackSection(feedback) : null;
+  const volumeContextSection = formatVolumeContextSection(volumeContext ?? null);
   const motifListLines = bibleContext.motifCandidates
     .map((m) => (m.id ? `- ${m.id} | name="${m.name}"` : `- name="${m.name}"`))
     .join("\n");
@@ -303,6 +476,8 @@ export function buildSceneCandidatePrompt(
     `brief: ${context.briefPath}`,
     `volume_plot: ${context.volumePlotPath ?? "(none)"}`,
     "",
+    volumeContextSection || null,
+    volumeContextSection ? "" : null,
     `## scene slot (固定フィールド)`,
     `- scene_id: ${slot.scene_id} / scene_no: ${slot.scene_no}`,
     `- page_range: P${slot.page_range.start}-P${slot.page_range.end}`,
@@ -359,6 +534,16 @@ export function buildSceneCandidatePrompt(
     `7. foreshadow_setup の payoff_episode_hint は "this_episode" / "next_episode" / "later_in_volume" / "cross_volume" から選んでください。`,
     `8. 候補間で beat 解釈・演出 mode・key_visual_intent を変えて多様性を確保してください (scene_exclusive 台詞も候補間で重複させない)。`,
     `9. 仕様詳細: docs/plans/manga/scene-graph-l3-5.md`,
+    volumeContextSection ? `10. (L2 連携) 上記「## 巻内位置」が提供されている場合:` : null,
+    volumeContextSection ? `    - 各候補の protagonist_arc_state.belief / goal / delta_from_prev は` : null,
+    volumeContextSection ? `      当 episode の protagonist_arc (start/turn/end) に整合させる` : null,
+    volumeContextSection ? `    - foreshadow_setup の payoff_episode_hint は volume_plot.foreshadow_map の seed/payoff 距離に合わせる` : null,
+    volumeContextSection ? `      (seed と payoff が同 episode → "this_episode"、隣 episode → "next_episode"、` : null,
+    volumeContextSection ? `       同巻内別 episode → "later_in_volume"、別巻 → "cross_volume")` : null,
+    volumeContextSection ? `    - 当 episode が payoff 側になっている伏線 (## 当 episode が関わる巻またぎ伏線 で seed が` : null,
+    volumeContextSection ? `      過去 episode のもの) は、scene のどこかで foreshadow_payoff に対応 token を含める` : null,
+    volumeContextSection ? `    - cliffhanger 系 scene (arc_position.arc_phase=resolution / cliffhanger 等) では` : null,
+    volumeContextSection ? `      cliffhanger_hook の方向性 + pull_link.next_opening_hook_hint を反映する` : null,
     "",
     feedbackSection,
     feedbackSection ? "" : null,
@@ -402,8 +587,9 @@ function buildTier2FeedbackSection(feedback: Tier2Feedback): string {
     `3. dialogue_plan.key_lines の uniqueness と intent を吟味`,
     `4. bible motifs (黒フード、ヒビ端末、Fランク ID、青光、朱色公的光等) を確実に組み込む`,
     `5. world.premise の哲学 (情報持つ側の恐怖 / 持たない側の怒り、測定文化、制度の翻訳) と整合させる`,
+    `6. 巻内位置 (volume_theme + 当 ep の protagonist_arc + 周辺 ep) との整合をより強める`,
     feedback.anchor_feedback_text
-      ? `6. anchor 比較の指摘点も改善する: ${feedback.anchor_feedback_text}`
+      ? `7. anchor 比較の指摘点も改善する: ${feedback.anchor_feedback_text}`
       : null,
   ].filter((line): line is string => line !== null).join("\n");
 }
@@ -468,6 +654,7 @@ export async function runPairwiseTournament(
       win_rate: (candidates.length - 1 - i) / Math.max(1, candidates.length - 1),
     }));
   }
+  const volumeContext = await loadVolumeContext(context.volumePlotPath, context.episode);
   // 総当たり C(N,2) マッチを Codex に並列実行させる。
   // 1 マッチ = 2 候補のテキスト + scene 文脈 → 勝者を返す。
   const wins = new Array<number>(candidates.length).fill(0);
@@ -480,7 +667,7 @@ export async function runPairwiseTournament(
   }
   const results = await Promise.all(
     pairs.map(async ([i, j]) => {
-      const task = buildPairwisePrompt(candidates[i], candidates[j], i, j);
+      const task = buildPairwisePrompt(candidates[i], candidates[j], i, j, volumeContext);
       const r = await runCodexText<{ winner: "a" | "b"; reason?: string }>({
         task,
         format: "json",
@@ -518,12 +705,16 @@ export function buildPairwisePrompt(
   a: Scene,
   b: Scene,
   iA: number,
-  iB: number
+  iB: number,
+  volumeContext?: VolumeContext | null
 ): string {
+  const volumeContextSection = formatVolumeContextSection(volumeContext ?? null);
   return [
     `あなたは AINARO 漫画 v2 scene 候補の pairwise judge です。`,
     `同じ scene slot (${a.scene_id}) に対する 2 候補のうち、より「商業漫画として面白い」方を選んでください。`,
     "",
+    volumeContextSection || null,
+    volumeContextSection ? "" : null,
     `## 候補 a (idx=${iA})`,
     `beat: ${a.beat_type} / mode: ${a.mode}`,
     `key_visual: ${a.key_visual_intent}`,
@@ -547,12 +738,15 @@ export function buildPairwisePrompt(
     `2. 商業漫画品質: 「読める」B- ではなく「商業作家として通用する」A-`,
     `3. 演出: 1 ページめくり位置 / silence panel / 緊張ピークでのコマ形状`,
     `4. 独自性ではなく「ヒット型を質高く実行」`,
+    volumeContextSection ? `5. (L2 連携) 上記「## 巻内位置」が提供されている場合、当 episode の` : null,
+    volumeContextSection ? `   protagonist_arc (start/turn/end) と must_include_events、巻またぎ伏線への整合をより満たす方を優先する。` : null,
+    volumeContextSection ? `   巻全体テーマ (volume_theme) との一貫性も加味する。` : null,
     "",
     `## 出力形式`,
     `\`\`\`json`,
     `{ "winner": "a" | "b", "reason": "1-2 行" }`,
     `\`\`\``,
-  ].join("\n");
+  ].filter((line): line is string => line !== null).join("\n");
 }
 
 // ============================================================================
@@ -933,7 +1127,8 @@ export async function compareToAnchorPool(
       `[scoring-loop] compareToAnchorPool: no anchor with Layer3 found for sub-genre ${subGenreId}.`
     );
   }
-  const task = buildAnchorComparePrompt(candidate, subGenreId, usable);
+  const volumeContext = await loadVolumeContext(context.volumePlotPath, context.episode);
+  const task = buildAnchorComparePrompt(candidate, subGenreId, usable, volumeContext);
   const r = await runCodexText<{
     top3_anchor_ids: string[];
     cosine_avg?: number;
@@ -964,8 +1159,10 @@ export async function compareToAnchorPool(
 export function buildAnchorComparePrompt(
   candidate: Scene,
   subGenreId: string,
-  anchors: Array<{ anchor: AnchorEntry; layer3: string | null }>
+  anchors: Array<{ anchor: AnchorEntry; layer3: string | null }>,
+  volumeContext?: VolumeContext | null
 ): string {
+  const volumeContextSection = formatVolumeContextSection(volumeContext ?? null);
   const anchorBlocks = anchors
     .map(
       (x, idx) =>
@@ -977,6 +1174,8 @@ export function buildAnchorComparePrompt(
     `sub-genre: ${subGenreId}`,
     `候補 scene が同 sub-genre の hit anchor 群と比べて「商業漫画として通用する絶対品質」を 0..1 で採点します。`,
     "",
+    volumeContextSection || null,
+    volumeContextSection ? "" : null,
     `## 候補 scene (${candidate.scene_id}, ${candidate.beat_type}, ${candidate.mode}, ${candidate.location_id})`,
     `key_visual: ${candidate.key_visual_intent}`,
     `protagonist: belief="${candidate.protagonist_arc_state.belief}" / goal="${candidate.protagonist_arc_state.goal}" / emotion=${candidate.protagonist_arc_state.emotion}`,
@@ -992,13 +1191,16 @@ export function buildAnchorComparePrompt(
     `1. anchor pool は「ヒット作」のサンプル。anchor との類似度ではなく「同等品質か」を採点する (通過率ではなく絶対品質、feedback_quality_over_pass_rate)`,
     `2. 「漫画として読める」B- ではなく「商業作家として通用する」A- を 0.7 以上の基準とする (feedback_commercial_vs_readable)`,
     `3. 独自性は 0.0 〜 0.2 の補正に留め、「ヒット型を質高く実行」を主軸とする (feedback_quality_over_novelty)`,
+    volumeContextSection ? `4. (L2 連携) 上記「## 巻内位置」が提供されている場合、当 scene が「当 episode の` : null,
+    volumeContextSection ? `   protagonist_arc と must_include_events、巻全体テーマに沿っているか」も品質判断に加味する。` : null,
+    volumeContextSection ? `   anchor との比較は「同等品質か」を主軸とし、巻内位置整合は補助評価軸 (±0.1) として加える。` : null,
     "",
     `## 出力形式`,
     `\`\`\`json`,
     `{ "top3_anchor_ids": ["...", "...", "..."], "cosine_avg": 0.0, "llm_score": 0.0 }`,
     `\`\`\``,
     `※ cosine_avg は embedding 比較を実装していないため 0 でよい。llm_score を主指標とする。`,
-  ].join("\n");
+  ].filter((line): line is string => line !== null).join("\n");
 }
 
 // ============================================================================

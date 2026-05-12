@@ -19,6 +19,7 @@ import {
   episodeBriefV2Path,
   sceneGraphPath,
   storyboardPath,
+  volumePlotPath,
 } from "./_paths";
 import {
   validateSceneGraph,
@@ -34,6 +35,7 @@ import {
   formatMetricsReport,
 } from "../../../src/lib/manga/scene-graph/episode-metrics";
 import type { BibleSnapshotV2 } from "../../../src/lib/manga/schemas-v2";
+import type { VolumePlot } from "../../../src/lib/manga/storyboard-v2/volume-plot";
 
 type Mode = "validate" | "generate";
 type Args = { slug: string; episode: number; mode: Mode; live: boolean };
@@ -202,9 +204,21 @@ async function modeValidate(args: Args): Promise<void> {
     // storyboard 未生成なら Rule 7 と panel-scene 継承検査はスキップ
   }
 
+  let volumeForeshadowMap: VolumePlot["foreshadow_map"] | undefined;
+  try {
+    // TODO: 巻番号は arc_position から導出する。現状は v01 固定。
+    const vpRaw = await fs.readFile(volumePlotPath(args.slug, 1), "utf-8");
+    const vp = JSON.parse(vpRaw) as VolumePlot;
+    volumeForeshadowMap = vp.foreshadow_map;
+  } catch {
+    // volume_plot 無しは optional
+  }
+
   const result = validateSceneGraph(sceneGraph, bible, brief, {
     totalPages,
     totalPanels,
+    volumeForeshadowMap,
+    episodeNo: args.episode,
   });
   const dag = buildForeshadowDag(sceneGraph);
 
@@ -328,6 +342,7 @@ async function modeGenerate(args: Args): Promise<void> {
   for (const n of est.notes) console.log(`  - ${n}`);
 
   // 採点ループ (--live 未指定なら dry-run)
+  const vpPath = volumePlotPath(args.slug, 1); // TODO: 巻番号は arc_position から導出
   const result = await runEpisodeScoringLoop(
     slots,
     {
@@ -335,6 +350,7 @@ async function modeGenerate(args: Args): Promise<void> {
       episode: args.episode,
       bibleSnapshotPath: biblePath,
       briefPath,
+      volumePlotPath: vpPath,
       finalizedScenes: [],
     },
     config,

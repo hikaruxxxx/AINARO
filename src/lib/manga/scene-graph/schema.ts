@@ -347,7 +347,19 @@ export function validateSceneGraph(
   sceneGraph: SceneGraphV1,
   bible: BibleSnapshotV2,
   brief: EpisodeBriefMinimal,
-  options?: { totalPages?: number; totalPanels?: number }
+  options?: {
+    totalPages?: number;
+    totalPanels?: number;
+    /** 当 episode の volume foreshadow_map (seed/payoff 件数整合の coarse check 用) */
+    volumeForeshadowMap?: Array<{
+      seed_in_episode: number;
+      payoff_in_episode: number;
+      description: string;
+    }>;
+    /** validateSceneGraph 内で「当 episode の episode_no」を解決するための番号。
+        指定なしなら sceneGraph.scenes[0].arc_position.episode_in_volume を fallback。 */
+    episodeNo?: number;
+  }
 ): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -529,6 +541,41 @@ export function validateSceneGraph(
     } else if (info.hint !== "this_episode" && !paid) {
       // cross-episode pending: Rule 5 では warning ではなく metrics に積むが、validator では情報通知のみ
       // (errors / warnings には乗せない)
+    }
+  }
+  if (options?.volumeForeshadowMap) {
+    const episodeNo = options.episodeNo ?? sceneGraph.scenes[0]?.arc_position.episode_in_volume;
+    if (episodeNo != null) {
+      const expectedSeedCount = options.volumeForeshadowMap.filter((f) => f.seed_in_episode === episodeNo).length;
+      const expectedPayoffCount = options.volumeForeshadowMap.filter((f) => f.payoff_in_episode === episodeNo).length;
+      const actualSeedCount = sceneGraph.scenes.reduce((n, scene) => n + scene.foreshadow_setup.length, 0);
+      const actualPayoffCount = sceneGraph.scenes.reduce((n, scene) => n + scene.foreshadow_payoff.length, 0);
+      if (actualSeedCount < expectedSeedCount) {
+        warnings.push(`volume_plot expects ${expectedSeedCount} seeds in ep${episodeNo} but scene_graph only sets up ${actualSeedCount}`);
+      }
+      if (actualSeedCount > expectedSeedCount + 2) {
+        warnings.push(`volume_plot expects ${expectedSeedCount} seeds in ep${episodeNo} but scene_graph sets up ${actualSeedCount} (over-foreshadowed)`);
+      }
+      if (actualPayoffCount < expectedPayoffCount) {
+        warnings.push(`volume_plot expects ${expectedPayoffCount} payoffs in ep${episodeNo} but scene_graph only pays off ${actualPayoffCount}`);
+      }
+      if (actualPayoffCount > expectedPayoffCount + 1) {
+        warnings.push(`volume_plot expects ${expectedPayoffCount} payoffs in ep${episodeNo} but scene_graph pays off ${actualPayoffCount} (over-payoffed)`);
+      }
+
+      const expectedThisEpisodeCount = options.volumeForeshadowMap.filter(
+        (f) => f.seed_in_episode === episodeNo && f.payoff_in_episode === episodeNo
+      ).length;
+      const expectedCrossCount = options.volumeForeshadowMap.filter(
+        (f) => f.seed_in_episode === episodeNo && f.payoff_in_episode > episodeNo
+      ).length;
+      const setupHints = Array.from(setupTokenToScene.values()).map((info) => info.hint);
+      if (expectedThisEpisodeCount > 0 && setupHints.length > 0 && setupHints.every((hint) => hint !== "this_episode")) {
+        warnings.push(`volume_plot expects in-episode payoff for ${expectedThisEpisodeCount} foreshadow(s) in ep${episodeNo} but all foreshadow_setup hints are non-this_episode`);
+      }
+      if (expectedCrossCount > 0 && setupHints.length > 0 && setupHints.every((hint) => hint === "this_episode")) {
+        warnings.push(`volume_plot expects cross-episode payoff for ${expectedCrossCount} foreshadow(s) in ep${episodeNo} but all foreshadow_setup hints are this_episode`);
+      }
     }
   }
 
