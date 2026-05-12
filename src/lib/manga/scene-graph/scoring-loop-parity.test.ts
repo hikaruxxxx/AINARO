@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { promises as fs } from "node:fs";
-import { buildBibleContextForSlot, type SceneSlot } from "./scoring-loop";
+import {
+  DEFAULT_SCORING_CONFIG,
+  buildBibleContextForSlot,
+  buildSceneCandidatePrompt,
+  generateSceneCandidates,
+  needsTier2Regeneration,
+  type BibleContextForSlot,
+  type GenerationContext,
+  type SceneSlot,
+  type Tier2Feedback,
+} from "./scoring-loop";
+import type { Scene } from "./schema";
 import type { BibleSnapshotV2 } from "../schemas-v2";
 
 const A07_BIBLE_PATH =
@@ -68,6 +79,57 @@ describe("scoring-loop bible context parity (V2 legacy vs V3 broker)", () => {
     expect(ctxV3.characters).toEqual(ctxV2.characters);
     expect(ctxV3.costumes).toEqual(ctxV2.costumes);
   });
+
+  it("generateSceneCandidates は feedback 付き dry-run でも stub candidate を返す", async () => {
+    const slot = createMinimalSlot();
+    const prev = createMinimalScene(slot);
+    const feedback: Tier2Feedback = {
+      prev_selected: prev,
+      prev_anchor_score: 0.42,
+      prev_pairwise_score: 0.75,
+      iteration: 2,
+    };
+
+    const candidates = await generateSceneCandidates(
+      slot,
+      createMinimalContext(),
+      { ...DEFAULT_SCORING_CONFIG, candidatesPerScene: 3, dry_run: true },
+      feedback,
+    );
+
+    expect(candidates).toHaveLength(3);
+    expect(candidates[0].scene_id).toBe(slot.scene_id);
+    expect(candidates[0].key_visual_intent).toContain("[stub-cand-0]");
+  });
+
+  it("buildSceneCandidatePrompt は feedback の有無で再生成 section を切り替える", () => {
+    const slot = createMinimalSlot();
+    const context = createMinimalContext();
+    const bibleContext = createMinimalBibleContext();
+    const prev = createMinimalScene(slot);
+    const promptWithoutFeedback = buildSceneCandidatePrompt(slot, context, 2, bibleContext);
+    const promptWithFeedback = buildSceneCandidatePrompt(slot, context, 2, bibleContext, {
+      prev_selected: prev,
+      prev_anchor_score: 0.42,
+      prev_pairwise_score: 0.75,
+      iteration: 2,
+      anchor_feedback_text: "key visual が抽象的",
+    });
+
+    expect(promptWithoutFeedback).not.toContain("## 再生成 (Tier 2");
+    expect(promptWithFeedback).toContain("## 再生成 (Tier 2 / 周回 2)");
+    expect(promptWithFeedback).toContain("llm_score=0.42");
+    expect(promptWithFeedback).toContain("key visual が抽象的");
+  });
+
+  it("DEFAULT_SCORING_CONFIG は Tier 2 閾値 0.50 を使う", () => {
+    expect(DEFAULT_SCORING_CONFIG.tier2_threshold_pct).toBe(0.5);
+  });
+
+  it("needsTier2Regeneration はデフォルト閾値で llm_score 0.60 を通し 0.40 を再生成に回す", () => {
+    expect(needsTier2Regeneration(0.6, DEFAULT_SCORING_CONFIG)).toBe(false);
+    expect(needsTier2Regeneration(0.4, DEFAULT_SCORING_CONFIG)).toBe(true);
+  });
 });
 
 function slotFromScene(scene: unknown): SceneSlot {
@@ -101,6 +163,58 @@ function createMinimalSlot(): SceneSlot {
     },
     location_id: "loc_gate",
     sub_locations: [],
+  };
+}
+
+function createMinimalContext(): GenerationContext {
+  return {
+    slug: "a07-modern-dungeon",
+    episode: 1,
+    bibleSnapshotPath: "/tmp/bible-snapshot.json",
+    briefPath: "/tmp/brief.json",
+    finalizedScenes: [],
+  };
+}
+
+function createMinimalBibleContext(): BibleContextForSlot {
+  return {
+    characters: [{ id: "char_a", name: "アオ", role: "protagonist" }],
+    costumes: [{ id: "costume_a_active", character_id: "char_a", name: "訓練服" }],
+    motifCandidates: [{ id: "motif_blue_gate", name: "blue_gate", description: "青い境界光" }],
+    worldRuleCandidates: ["青いゲートは登録者だけが通れる"],
+    propCandidates: [{ id: "prop_bag", name: "古い配送鞄" }],
+  };
+}
+
+function createMinimalScene(slot: SceneSlot): Scene {
+  return {
+    ...slot,
+    beat_type: "transition",
+    cast: [],
+    dialogue_plan: { key_lines: [] },
+    foreshadow_setup: [],
+    foreshadow_payoff: [],
+    protagonist_arc_state: {
+      belief: "街は怖いが、道順は信じられる",
+      goal: "青いゲートを通る",
+      emotion: "tension",
+      delta_from_prev: "恐怖から小さな決意へ動く",
+    },
+    relationship_state_delta: [],
+    time_axis: {
+      label: "present",
+      order: 1,
+      is_flashback: false,
+      is_flashforward: false,
+      duration_hint: "moments",
+    },
+    page_budget: { min: 1, max: 1, preferred: 1 },
+    mode: "transition_montage",
+    turn_anchor: { at_panel_no: null, type: "none" },
+    layout_pattern_id: null,
+    subtype_directive: { external_social: false, gacha_ui: false, hybrid: false },
+    render_strategy: "page_one_shot",
+    key_visual_intent: "青いゲート前で古い配送鞄を握る",
   };
 }
 

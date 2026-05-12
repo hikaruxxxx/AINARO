@@ -4,7 +4,7 @@
  * 3 段ループ:
  *   Tier 1: candidates×5 → pairwise tournament → predict-hit (v12 アンサンブル)
  *           → anchor pool 比較 (cosine + LLM 採点) → 採用 1 個
- *   Tier 2: anchor 下位 30% で再生成発火、最大 2 周
+ *   Tier 2: anchor 下位 50% で再生成発火、最大 2 周
  *   Tier 3: 2 周しても閾値未達なら Console UI で人間 review (Phase γ)
  *
  * B3 skeleton (本ファイル): 型と関数 signature、dry-run 実装。
@@ -42,7 +42,7 @@ import { runCodexText } from "../llm/codex-text";
 export type ScoringLoopConfig = {
   /** Tier 1 で生成する候補数 (デフォルト 5) */
   candidatesPerScene: number;
-  /** Tier 2 を発火する anchor 下位パーセンタイル (デフォルト 0.30 = 下位 30%) */
+  /** Tier 2 を発火する anchor 下位パーセンタイル (デフォルト 0.50 = 下位 50%) */
   tier2_threshold_pct: number;
   /** Tier 2 の最大再生成回数 (デフォルト 2) */
   tier2_max_iterations: number;
@@ -58,7 +58,7 @@ export type ScoringLoopConfig = {
 
 export const DEFAULT_SCORING_CONFIG: ScoringLoopConfig = {
   candidatesPerScene: 5,
-  tier2_threshold_pct: 0.30,
+  tier2_threshold_pct: 0.50,
   tier2_max_iterations: 2,
   tier3_enabled: true,
   dry_run: true,
@@ -102,6 +102,19 @@ export type GenerationContext = {
   volumePlotPath?: string;
   /** 既に確定済みの周辺 scene (なければ空) */
   finalizedScenes: Scene[];
+};
+
+export type Tier2Feedback = {
+  /** 前周回で「採用したものの低スコア」だった候補 */
+  prev_selected: Scene;
+  /** 前周回 anchor_llm_score */
+  prev_anchor_score: number;
+  /** 前周回 pairwise_score (winner の win_rate) */
+  prev_pairwise_score: number;
+  /** 周回番号 (2 = 1 回目の Tier 2、3 = 2 回目) */
+  iteration: number;
+  /** anchor 比較で LLM が指摘した不足点 */
+  anchor_feedback_text?: string;
 };
 
 export type BibleContextForSlot = {
@@ -182,7 +195,8 @@ function motifNameForFact(bible: BibleSnapshotV2, jsonPointer: string | undefine
 export async function generateSceneCandidates(
   slot: SceneSlot,
   context: GenerationContext,
-  config: ScoringLoopConfig
+  config: ScoringLoopConfig,
+  feedback?: Tier2Feedback
 ): Promise<Scene[]> {
   if (config.dry_run) {
     return Array.from({ length: config.candidatesPerScene }, (_, i) =>
@@ -194,7 +208,7 @@ export async function generateSceneCandidates(
   const bible = await loadBibleSnapshot(context.bibleSnapshotPath);
   const bibleContext = buildBibleContextForSlot(bible, slot, useBibleV3);
 
-  const task = buildSceneCandidatePrompt(slot, context, config.candidatesPerScene, bibleContext);
+  const task = buildSceneCandidatePrompt(slot, context, config.candidatesPerScene, bibleContext, feedback);
   const result = await runCodexText<{ candidates: Partial<Scene>[] }>({
     task,
     format: "json",
@@ -243,7 +257,8 @@ export function buildSceneCandidatePrompt(
   slot: SceneSlot,
   context: GenerationContext,
   candidates: number,
-  bibleContext: BibleContextForSlot
+  bibleContext: BibleContextForSlot,
+  feedback?: Tier2Feedback
 ): string {
   const finalized = context.finalizedScenes
     .map(
@@ -251,6 +266,7 @@ export function buildSceneCandidatePrompt(
         `  - ${s.scene_id} (${s.beat_type}, ${s.location_id}): "${s.protagonist_arc_state.belief}" → "${s.protagonist_arc_state.goal}"`
     )
     .join("\n");
+  const feedbackSection = feedback ? buildTier2FeedbackSection(feedback) : null;
   return [
     `あなたは AINARO 漫画 v2 scene-graph の scene 候補生成エージェントです。`,
     `slug=${context.slug}, episode=${context.episode}, scene=${slot.scene_id}`,
@@ -308,6 +324,8 @@ export function buildSceneCandidatePrompt(
     `8. 候補間で beat 解釈・演出 mode・key_visual_intent を変えて多様性を確保してください。`,
     `9. 仕様詳細: docs/plans/manga/scene-graph-l3-5.md`,
     "",
+    feedbackSection,
+    feedbackSection ? "" : null,
     `## 出力形式`,
     `\`\`\`json`,
     `{`,
@@ -325,7 +343,33 @@ export function buildSceneCandidatePrompt(
     `  ]`,
     `}`,
     `\`\`\``,
-  ].join("\n");
+  ].filter((line): line is string => line !== null).join("\n");
+}
+
+function buildTier2FeedbackSection(feedback: Tier2Feedback): string {
+  const prev = feedback.prev_selected;
+  return [
+    `## 再生成 (Tier 2 / 周回 ${feedback.iteration})`,
+    "",
+    `前周回で生成した候補の最良は以下でしたが、anchor pool 採点が低く (llm_score=${feedback.prev_anchor_score})、`,
+    `再生成が発火しました。改善した候補を生成してください。`,
+    "",
+    `### 前回の最良候補`,
+    `- beat: ${prev.beat_type} / mode: ${prev.mode}`,
+    `- key_visual_intent: ${prev.key_visual_intent}`,
+    `- protagonist belief: ${prev.protagonist_arc_state.belief}`,
+    `- pairwise_win_rate: ${feedback.prev_pairwise_score}`,
+    "",
+    `### 改善方針`,
+    `1. 既存 anchor pool (商業漫画) と比べて何が不足だったかを推定`,
+    `2. key_visual_intent をより具体的・映像的に`,
+    `3. dialogue_plan.key_lines の uniqueness と intent を吟味`,
+    `4. bible motifs (黒フード、ヒビ端末、Fランク ID、青光、朱色公的光等) を確実に組み込む`,
+    `5. world.premise の哲学 (情報持つ側の恐怖 / 持たない側の怒り、測定文化、制度の翻訳) と整合させる`,
+    feedback.anchor_feedback_text
+      ? `6. anchor 比較の指摘点も改善する: ${feedback.anchor_feedback_text}`
+      : null,
+  ].filter((line): line is string => line !== null).join("\n");
 }
 
 function stubCandidate(slot: SceneSlot, idx: number): Scene {
@@ -950,9 +994,16 @@ export function resolveSubGenreId(slug: string, hint?: string): string {
 export type Tier1Outcome = {
   selected: Scene;
   selection: SceneSelection;
-  /** 採用候補が anchor 下位 30% にいたら true → Tier 2 発火 */
+  /** 採用候補が anchor 下位閾値にいたら true → Tier 2 発火 */
   needs_regeneration: boolean;
 };
+
+export function needsTier2Regeneration(
+  anchorLlmScore: number,
+  config: Pick<ScoringLoopConfig, "tier2_threshold_pct">
+): boolean {
+  return anchorLlmScore < (1 - config.tier2_threshold_pct);
+}
 
 /**
  * 1 scene slot に対して Tier 1 を 1 周回す。
@@ -974,9 +1025,10 @@ export async function runTier1(
   context: GenerationContext,
   config: ScoringLoopConfig,
   iteration = 1,
-  prevCandidateCount = 0
+  prevCandidateCount = 0,
+  feedback?: Tier2Feedback
 ): Promise<Tier1Outcome> {
-  const candidates = await generateSceneCandidates(slot, context, config);
+  const candidates = await generateSceneCandidates(slot, context, config, feedback);
   const pairwise = await runPairwiseTournament(candidates, context, config);
   const anchorDiffs = await Promise.all(
     candidates.map((c) => compareToAnchorPool(c, context, config))
@@ -1011,8 +1063,8 @@ export async function runTier1(
     decision_log: { selected_at: new Date().toISOString() },
   };
 
-  // anchor 下位 30% 判定: llm_score が config.tier2_threshold_pct 以下なら再生成発火
-  const needs_regeneration = anchorDiffs[bestIdx].llm_score < (1 - config.tier2_threshold_pct);
+  // anchor 下位閾値判定: llm_score が閾値未満なら再生成発火
+  const needs_regeneration = needsTier2Regeneration(anchorDiffs[bestIdx].llm_score, config);
 
   return {
     selected: { ...candidates[bestIdx], selection },
@@ -1023,7 +1075,7 @@ export async function runTier1(
 
 /**
  * Tier 1 が anchor 下位なら再生成 (Tier 2)。最大 config.tier2_max_iterations 周。
- * 各周回で「前回 anchor との差分」を feedback prompt として candidate 生成に渡す (B3 中盤で実装)。
+ * 各周回で「前回 anchor との差分」を feedback prompt として candidate 生成に渡す。
  */
 export async function runTier2(
   slot: SceneSlot,
@@ -1036,8 +1088,20 @@ export async function runTier2(
     if (!current.needs_regeneration) {
       return { outcome: current, tier: iter === 1 ? 1 : 2 };
     }
-    // feedback prompt は B3 中盤で実装。ここでは context にメタを乗せて再生成を回す
-    const newOutcome = await runTier1(slot, context, config, iter + 1, current.selection.candidate_count);
+    const feedback: Tier2Feedback = {
+      prev_selected: current.selected,
+      prev_anchor_score: current.selection.anchor_diff.llm_score,
+      prev_pairwise_score: current.selection.pairwise_score,
+      iteration: iter + 1,
+    };
+    const newOutcome = await runTier1(
+      slot,
+      context,
+      config,
+      iter + 1,
+      current.selection.candidate_count,
+      feedback,
+    );
     newOutcome.selection.tier = 2;
     current = newOutcome;
   }
