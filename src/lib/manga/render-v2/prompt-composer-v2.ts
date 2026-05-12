@@ -1068,6 +1068,75 @@ function renderPagePanelBlock(args: {
   return lines.join("\n");
 }
 
+/**
+ * 2026-05-13: page-level CONTINUITY block (NovelAI V4 base+character 方式)。
+ * page 内 unique character_id ごとに 1 回 summary、location は最初の panel から、
+ * motif は scene_graph から page-level に 1 回。
+ * panel 数だけ反復していた旧方式に比べ ~50-70% の文字数削減を狙う。
+ */
+function buildPageContinuityBlock(
+  page: StoryboardPageV2,
+  bible: BibleSnapshotV2,
+  scene: PromptScene | undefined,
+  tier: BibleTier,
+  episodeNo: number,
+): string {
+  const lines: string[] = [];
+
+  // unique characters (panel 横断で character_id を集約)
+  const seenIds = new Set<string>();
+  const uniqueChars: { character_id: string; firstPanel: PanelV2 }[] = [];
+  for (const p of page.panels) {
+    for (const c of p.entities.characters) {
+      if (!seenIds.has(c.character_id)) {
+        seenIds.add(c.character_id);
+        uniqueChars.push({ character_id: c.character_id, firstPanel: p });
+      }
+    }
+  }
+  if (uniqueChars.length > 0) {
+    lines.push("Characters (face/outfit invariants across this page):");
+    for (const { character_id, firstPanel } of uniqueChars) {
+      const tempPanel: PanelV2 = {
+        ...firstPanel,
+        entities: {
+          ...firstPanel.entities,
+          characters: firstPanel.entities.characters.filter((c) => c.character_id === character_id),
+        },
+      };
+      const summary = characterRefDescription(tempPanel, bible, { episodeNo, tier });
+      // characterRefDescription は先頭に "- " を付ける。改行は出ない想定。
+      lines.push(summary);
+    }
+  }
+
+  // location: 最初の panel から 1 回 (panel-shared の場合はこれが唯一の location)
+  const firstPanelLoc = locationDescription(page.panels[0], bible, scene, tier);
+  if (firstPanelLoc) lines.push(`Location: ${firstPanelLoc}`);
+
+  // costume: 全 panel で active costume を 1 回ずつ集約 (panel ごと反復しない)
+  const costumeLines = new Set<string>();
+  for (const p of page.panels) {
+    const c = costumeBlock(p, episodeNo, bible, tier);
+    if (c) {
+      // costumeBlock は "ACTIVE COSTUMES (override outfit_default):\n- ..." を返す
+      // header 行を除いて bullet だけ集約
+      const bullets = c.split("\n").filter((l) => l.startsWith("- "));
+      for (const b of bullets) costumeLines.add(b);
+    }
+  }
+  if (costumeLines.size > 0) {
+    lines.push("Active costumes:");
+    for (const b of costumeLines) lines.push(b);
+  }
+
+  // motif: page 単位 1 回。最初の panel の panel_no を代表値として渡す。
+  const motif = motifBlock(scene, bible, tier, { panel_no: page.panels[0].panel_no });
+  if (motif) lines.push(motif);
+
+  return lines.join("\n");
+}
+
 function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" }): string {
   // 2026-05-13 圧縮: 旧 5 行 689 字 → 3 行 ~300 字。
   // manga lettering 行は STYLE digest と被るので削除、background density は SCENE/panel BG に集約。
@@ -1099,30 +1168,10 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     .map((r, i) => formatRefLabel(r, i))
     .join("\n");
 
-  const bibleContextBudgetPerPanel = bibleTier === "minimal"
-    ? Math.max(180, Math.floor(1500 / Math.max(1, page.panels.length)))
-    : Number.POSITIVE_INFINITY;
-  const continuityBlocks = page.panels.map((p) => {
-    const localNo = localPanelNoByPanelId.get(p.panel_id) ?? p.panel_no;
-    if (bibleTier === "minimal") {
-      const body = compactPageBibleContext(p, args.bible, {
-        episodeNo,
-        scene: args.scene,
-        tier: bibleTier,
-        maxChars: bibleContextBudgetPerPanel,
-      });
-      return body.replace(/^PANEL #\d+ BIBLE:/u, `panel#${localNo} CONTINUITY:`);
-    }
-    const blocks = [
-      `panel#${localNo} CONTINUITY:`,
-      "Characters:",
-      characterRefDescription(p, args.bible, { episodeNo, tier: bibleTier }),
-      locationDescription(p, args.bible, args.scene, bibleTier),
-      costumeBlock(p, episodeNo, args.bible, bibleTier),
-      motifBlock(args.scene, args.bible, bibleTier, { panel_no: p.panel_no }),
-    ];
-    return blocks.filter(Boolean).join("\n");
-  }).join("\n\n");
+  // 2026-05-13: NovelAI V4 base+character 方式に再設計。
+  // 旧: 各 panel に同じキャラ summary を反復 (panel 数だけ重複) → ~1500字
+  // 新: page 内 unique character ごとに 1 回 summary (顔/服/役割) + location 1 回 + motif 1 回 → ~500-700字
+  const continuityBlocks = buildPageContinuityBlock(page, args.bible, args.scene, bibleTier, episodeNo);
 
   const representativePanel = page.panels[0];
   const sceneBlock = buildPageSceneContextBlock(args.scene, args.bible, representativePanel, bibleTier);
