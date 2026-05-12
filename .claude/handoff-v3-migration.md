@@ -22,7 +22,51 @@
 | f199fb1 | feat: Quality Gate (--diff-check + prompt 厳守ルール) - hallucination 検出 33 件で apply 阻止を実証 |
 | 158f956 | docs: ワークフロー実証完了 - 玲二 ideology_argument を Agent rewrite → gate 通過 → apply、a07 fatal 26→25 |
 | 0ac325e | feat: v3-adapter D1-3 修正 + apply-deepen-patch dotted/world 拡張 (a07 fatal 25→0、L1 bible 完成、tests 398→413) |
-| (本コミット) | docs: handoff を a07 L1 完成で更新、Wave 3 (L3.5 強化) を次最優先に |
+| b889742 | docs: handoff を a07 L1 完成で更新、Wave 3 (L3.5 強化) を次最優先に |
+| 5fe6666 | feat: L03_5-scene-graph.ts に --live flag 追加 (scoring-loop B3 live 動作確認、a07-ep01 S01 で 154.7s 実走成功) |
+
+## 続きセッション (2026-05-12 後半) の成果
+
+**ゴール達成: scoring-loop B3 live 動作確認 — Wave 3 L3.5 強化の主要マイルストーン**
+
+### Wave 3 真の現状判明 (Explore Agent 調査 + 直接確認)
+
+- `src/lib/manga/scene-graph/scoring-loop.ts` (1168 行) は **既にほぼ完全実装済**
+  - `generateSceneCandidates` (line 182-225): dry_run + 実 Codex CLI 両対応
+  - `runPairwiseTournament` (line 378-425): C(N,2) マッチを Codex CLI 並列実行
+  - `compareToAnchorPool` (line 823): anchor pool cosine + LLM 採点
+  - `runTier1` (line 972): candidate → pairwise → anchor → 採用判定
+  - `runTier2` (line 1028): 再生成ループ + Tier 3 escalation
+  - `runEpisodeScoringLoop` (line 1069): episode 全体オーケストレーション
+- 本当の bottleneck は **CLI entry が dry_run=true ハードコード** ([L03_5-scene-graph.ts:304](scripts/manga/layers/L03_5-scene-graph.ts#L304))
+- handoff の 4 子タスクのうち volume_plot 生成 + 巻またぎ伏線も既に完了 (`computeVolumeForeshadowDag` 実装済、a07 errors=0)
+
+### a07-ep01 S01 live 実走結果 (1 scene、candidates=3)
+
+| 項目 | 結果 |
+|---|---|
+| 実走時間 | 154.7s (約 2.5 min) |
+| 推定コスト | ~24k tokens (ChatGPT Pro 定額枠内) |
+| selected beat / mode | reveal / silence |
+| key_visual_intent | 「空の通知枠と右上ヒビだけが光る端末を見下ろすレンの目元に、薄い青の反射を一点だけ置く」 |
+| protagonist_belief | 「自分の疲労が幻聴を生んだだけかもしれないが、検証できる数字は無視できない」 |
+| cast | char_桐生_レン_v1(in_person), char_獅童_響_v1(voice_off) |
+| pairwise_score | 1.00 (完勝) |
+| anchor_llm_score | 0.64 |
+| needs_regeneration | true (Tier 2 発火条件成立) |
+
+candidate gen / pairwise / anchor pool 比較すべて live で動作確認。
+
+### 残課題 (次セッション以降)
+
+1. **a07-ep01 全 10 scene live 実走** (約 15 分 + ~720k tokens) — episode 全体での挙動確認
+2. **Tier 2 feedback prompt 実装** ([scoring-loop.ts:1039](src/lib/manga/scene-graph/scoring-loop.ts#L1039) コメント「B3 中盤で実装」) — 現状は runTier1 を単純再実行
+3. **template_collision の B4 wire** ([scoring-loop.ts:1010](src/lib/manga/scene-graph/scoring-loop.ts#L1010) コメント「B4 で埋める」) — episode-metrics の TODO
+4. **pattern_match metric の hardcoded stub 解消** ([episode-metrics.ts:49](src/lib/manga/scene-graph/episode-metrics.ts#L49)) — a07 用 episode_patterns 辞書未構築
+5. **L4-1 / L4-9 を scene-swap に置換** ([L04-1-opening-hook.ts](scripts/manga/layers/L04-1-opening-hook.ts)) — legacy panel patch 廃止
+6. **10 agent prompt の scene-graph 対応** (`.claude/commands/*.md`)
+
+
 
 ## このセッション (2026-05-12) の成果
 
@@ -296,16 +340,16 @@ a07 で十分検証 → `process.env.USE_BIBLE_V3 === "true"` を default true �
 - LLM コール (Codex CLI 経由) は ChatGPT Pro 定額枠内、追加課金なし
 - ANTHROPIC_API_KEY 課金前提にしない (`feedback_no_anthropic_api` メモリ参照)
 
-## 着手順 (次セッション、Wave 3 = L3.5 強化)
+## 着手順 (次セッション、Wave 3 = L3.5 強化の完成)
 
-1. `git log --oneline -10` で 158f956 以降の 2 commit を確認
+1. `git log --oneline -10` で 158f956 以降の 3 commit (0ac325e, b889742, 5fe6666) を確認
 2. `npx vitest run` で 413 tests pass を確認
 3. `npx tsx /tmp/v3-l4-spec/scan-lint.ts` で a07 fatal=0 を再確認
-4. **Wave 3 (L3.5 強化) に着手** — `docs/plans/manga/pipeline-v2.md` で L3.5 の項目確認後、4 子タスクの順序を決める
-   - a07 用 volume_plot.json 生成 (現状未作成)
-   - 巻またぎ伏線の自動配置
-   - episode-patterns 辞書のカバー率向上
-   - anchor pool scoring 統合
+4. **次の最優先 1〜2 を選んで着手**:
+   - **A. a07-ep01 全 10 scene live 実走** (15 分 + 720k tokens、定額枠内) — `npx tsx scripts/manga/layers/L03_5-scene-graph.ts --slug a07-modern-dungeon --episode 1 --mode generate --live` を background 起動して結果確認。完走すれば Tier 2 / Tier 3 の発火状況も把握できる
+   - **B. pattern_match の B4 wire + a07 episode_patterns 辞書構築** — handoff 4 子タスク #3、`build-episode-patterns` agent で a07-v01 ep01-10 の scene-graph から signature 抽出 → `data/generation/profiles/modern_dungeon/episode_patterns.json` を作成、`computeTemplateCollision` を実 辞書 wire
+   - **C. L4-1 / L4-9 を scene-swap に置換** (5-6h) — legacy panel patch 廃止、`swapScenes()` 呼び出しに置換
+5. 上記いずれも完走後、handoff を更新し、Wave 3 完成度を表に追記
 
 ## 注意点
 
