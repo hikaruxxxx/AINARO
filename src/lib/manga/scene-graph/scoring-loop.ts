@@ -284,6 +284,18 @@ export function buildSceneCandidatePrompt(
         ].join("\n")
       : null;
   const feedbackSection = feedback ? buildTier2FeedbackSection(feedback) : null;
+  const motifListLines = bibleContext.motifCandidates
+    .map((m) => (m.id ? `- ${m.id} | name="${m.name}"` : `- name="${m.name}"`))
+    .join("\n");
+  const motifRoleLines = bibleContext.motifCandidates
+    .filter((m) => m.description && m.description.trim().length > 0)
+    .map((m) => {
+      const motifLabel = m.id ? `${m.id} (${m.name})` : `name="${m.name}"`;
+      return `- ${motifLabel}: ${m.description}`;
+    })
+    .join("\n");
+  const motifRoleSection =
+    motifRoleLines.length > 0 ? [`#### motif の役割 (参考)`, motifRoleLines].join("\n") : null;
   return [
     `あなたは AINARO 漫画 v2 scene-graph の scene 候補生成エージェントです。`,
     `slug=${context.slug}, episode=${context.episode}, scene=${slot.scene_id}`,
@@ -317,9 +329,12 @@ export function buildSceneCandidatePrompt(
       .join("\n"),
     "",
     `### この場所で使用候補の visual motif (broker.relevantMotifs)`,
-    bibleContext.motifCandidates
-      .map((m) => `- name=${m.name}${m.id ? ` (id=${m.id})` : ""}${m.description ? `: ${m.description.slice(0, 80)}` : ""}`)
-      .join("\n"),
+    "",
+    `(motif_id は左側の id を「そのまま」使用してください。description / name 本文を motif_id に書き込んではいけません。)`,
+    "",
+    motifListLines,
+    "",
+    motifRoleSection,
     "",
     `### この場所で active な world.rules (broker.relevantWorldRules)`,
     bibleContext.worldRuleCandidates.map((r) => `- ${r.slice(0, 120)}`).join("\n"),
@@ -332,7 +347,9 @@ export function buildSceneCandidatePrompt(
     `2. 各候補は scene-graph schema の A 系 (beat_type / cast / dialogue_plan / foreshadow / protagonist_arc_state / relationship_state_delta / time_axis) と B 系 (mode / turn_anchor / layout_pattern_id / subtype_directive / render_strategy / key_visual_intent) を埋めてください。`,
     `3. (D 系) 各候補は以下の D 系軸も埋めてください。値は上記「bible 抜粋」内の候補から選んでください。bible に存在しない id を返してはいけません:`,
     `   - wardrobe_state: cast の各キャラについて、どの costume_id を着ているか (cast に含まれるキャラのみ)`,
-    `   - visual_motif_anchors: この scene で前景化する visual motif を 1-3 個。motif_id は bible 抜粋の motif name または id を使用、intensity は "subtle" / "clear" / "dominant" のいずれか`,
+    `   - visual_motif_anchors: この scene で前景化する visual motif を 1-3 個`,
+    `     * motif_id は上記「visual motif (broker.relevantMotifs)」 list の左側の id (motif_xxx 形式) を「そのまま」コピーして使う。description 文・name の本文・抜粋・要約を motif_id に書き込まない。id が示されていない motif は name (引用符内) をそのまま使う`,
+    `     * intensity は "subtle" / "clear" / "dominant" のいずれか`,
     `   - world_rules_active: この scene で読者に意識させる world rule の本文を最大 4 件 (bible 抜粋から選択、原文ママで複写)`,
     `   - props_in_play: この scene で実際に登場する prop。prop_id と held_by (cast 内のキャラ id) を指定`,
     `   - theme_subtext: この scene が情緒的に投影する 1 行の theme (15-40 字程度)`,

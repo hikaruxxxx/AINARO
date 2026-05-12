@@ -122,6 +122,43 @@ describe("scoring-loop bible context parity (V2 legacy vs V3 broker)", () => {
     expect(promptWithFeedback).toContain("key visual が抽象的");
   });
 
+  it("buildSceneCandidatePrompt は motif_id の注意書きを出す", () => {
+    const prompt = buildSceneCandidatePrompt(createMinimalSlot(), createMinimalContext(), 2, createMinimalBibleContext());
+
+    expect(prompt).toContain("motif_id は左側の id を「そのまま」使用してください");
+    expect(prompt).toContain(
+      "description 文・name の本文・抜粋・要約を motif_id に書き込まない",
+    );
+  });
+
+  it("buildSceneCandidatePrompt は motif 一覧と役割を分離し、一覧行に description を混ぜない", () => {
+    const prompt = buildSceneCandidatePrompt(createMinimalSlot(), createMinimalContext(), 2, createMinimalBibleContext());
+    const motifListLine = `- motif_blue_gate | name="blue_gate"`;
+
+    expect(prompt).toContain("### この場所で使用候補の visual motif (broker.relevantMotifs)");
+    expect(prompt).toContain("#### motif の役割 (参考)");
+    expect(prompt).toContain(motifListLine);
+    expect(prompt).toContain("- motif_blue_gate (blue_gate): 青い境界光");
+    expect(prompt).not.toContain(`${motifListLine}: 青い境界光`);
+  });
+
+  it("buildSceneCandidatePrompt は description や id がない motif でも壊れない", () => {
+    const bibleContext: BibleContextForSlot = {
+      ...createMinimalBibleContext(),
+      motifCandidates: [
+        { name: "名称だけのモチーフ" },
+        { id: "motif_no_description", name: "説明なしモチーフ" },
+      ],
+    };
+
+    const prompt = buildSceneCandidatePrompt(createMinimalSlot(), createMinimalContext(), 2, bibleContext);
+
+    expect(prompt).toContain(`- name="名称だけのモチーフ"`);
+    expect(prompt).toContain(`- motif_no_description | name="説明なしモチーフ"`);
+    expect(prompt).not.toContain("#### motif の役割 (参考)");
+    expect(prompt).not.toContain("(no id)");
+  });
+
   it("buildSceneCandidatePrompt は確定済み scene_exclusive 台詞 section を出す", () => {
     const slot = createMinimalSlot();
     const finalizedSlot = { ...slot, scene_id: "S03", scene_no: 3 };
