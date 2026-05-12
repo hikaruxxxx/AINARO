@@ -737,22 +737,16 @@ function buildLayoutGeometryBlock(
   lines.push("");
   lines.push(`READING FLOW (RTL, top→bottom): ${flow}.`);
   lines.push("");
-  lines.push("STRICT LAYOUT CONSTRAINTS:");
-  lines.push("- Panel SIZES vary deliberately. Reproduce the relative widths/heights above. Do NOT default to a regular 2x3 or 3x2 grid.");
-  lines.push("- HERO panel must visibly dominate the page (largest area, most rendered detail).");
-  lines.push("- SMALL insets must stay small — they are beat/reaction frames, not equal-weight panels.");
+  // 2026-05-13 圧縮: 汎用ルール (gutter / hero支配 / grid 回避) は CONSTRAINTS に
+  // 集約して page ごとには出さない。panel 固有 (polygon / bleed) のみ条件出力。
   const polyPanels = slots.filter((s) => s.poly > 4);
   if (polyPanels.length > 0) {
-    lines.push(`- Panels with IRREGULAR POLYGON edges (${polyPanels.map(panelLabel).join(", ")}) should have non-rectangular borders (angled cut, slanted edge, or bleeding into adjacent panel).`);
+    lines.push(`- ${polyPanels.map(panelLabel).join(", ")}: non-rectangular border (angled cut / slanted edge / bleeding into adjacent panel).`);
   }
   const bleedPanels = slots.filter((s) => s.bleed || s.bleedPoly);
   if (bleedPanels.length > 0) {
-    lines.push(`- BLEED panels (${bleedPanels.map(panelLabel).join(", ")}) extend artwork to the page edge with no white margin on the bleed side.`);
+    lines.push(`- ${bleedPanels.map(panelLabel).join(", ")}: artwork bleeds to the page edge on bleed side (no margin).`);
   }
-  lines.push("- BLEED panels are exempt from gutter rules ONLY on the bleed sides. Other sides still require 30px gutter.");
-  lines.push("- GUTTER (CRITICAL): Adjacent non-bleed panels MUST be separated by a clean WHITE STRIP of MINIMUM 30 pixels. Panel borders must NOT touch each other.");
-  lines.push("- Vertical gutters (between left/right panels in same row): minimum 30px white space.");
-  lines.push("- Horizontal gutters (between rows): minimum 30-50px white space, slightly wider for major scene transitions.");
 
   return lines.join("\n");
 }
@@ -1058,7 +1052,11 @@ function renderPagePanelBlock(args: {
     lines.push(`- Location: ${loc}`);
   }
   lines.push(`- Action: ${panel.action}`);
-  lines.push(`- Visual focus: ${panel.key_visual}`);
+  // 2026-05-13: Action と Visual focus が同一文字列のとき重複出力を抑制
+  // (a07 ep01 で 5 panel 全部同値ケース多発、storyboard 上流の variation 不足が真因)
+  if (panel.key_visual.trim() !== panel.action.trim()) {
+    lines.push(`- Visual focus: ${panel.key_visual}`);
+  }
   const warning = panelTextValidationWarning(panel, bible, compliance);
   if (warning) lines.push(`- ${warning.replace(/\n/g, "\n  ")}`);
   const textLines = typesetMode === "shells_only"
@@ -1071,16 +1069,16 @@ function renderPagePanelBlock(args: {
 }
 
 function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" }): string {
+  // 2026-05-13 圧縮: 旧 5 行 689 字 → 3 行 ~300 字。
+  // manga lettering 行は STYLE digest と被るので削除、background density は SCENE/panel BG に集約。
+  // STRICT LAYOUT CONSTRAINTS から移動した汎用ルール (gutter / hero / grid) を 1 行に統合。
   const lines = [
-    "Render with: black ink linework with weight modulation, screentone, hatching. Hard white highlights and strong black/white contrast. Vary screentone density by panel emotion; avoid uniform grey pages.",
-    "Preserve face geometry, outfit details, and location layout across panels via the continuity references.",
-    "Background density follows scene role: establishing/world panels can be moderate; dialogue-only panels stay minimal.",
-    "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, logos, English in-panel text, more than five fingers per hand.",
+    "Render: black ink linework + screentone + hatching, hard B/W contrast. Vary tone density by panel emotion.",
+    "Layout: reproduce panel sizes above (do NOT default to uniform grid); HERO panel dominates; non-bleed panels separated by >=30px white gutter.",
+    "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, English in-panel text, >5 fingers per hand.",
   ];
   if (opts.typesetMode === "shells_only") {
-    lines.push("Draw EMPTY speech bubble shells, narration frame outlines, and SFX outlines only. Do NOT typeset any text inside — leave the interior blank for the post-processing typesetter.");
-  } else {
-    lines.push("Japanese vertical text in thick manga lettering font; prioritize legibility over decoration. No English text.");
+    lines.push("Draw EMPTY speech bubble shells, narration outlines, SFX outlines only — no text inside (post-typeset adds it).");
   }
   return lines.join("\n");
 }
@@ -1155,7 +1153,7 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
 
   const sections: Array<string | null> = [
     `# PAGE`,
-    `B6 portrait Japanese light novel comicalization PAGE (${args.pageDimensions.width}x${args.pageDimensions.height} px), single page in BLACK AND WHITE only with screentone and hatching. Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (expressive character-driven art, large emotive eyes, light novel cover lineage), NOT seinen-realism.`,
+    `B6 portrait B&W manga page, ${args.pageDimensions.width}x${args.pageDimensions.height} px, narou-kei comicalization style (screentone + hatching, NOT seinen-realism).`,
     "",
     "## STYLE",
     styleOverrideBlock(args.scene, args.bible),

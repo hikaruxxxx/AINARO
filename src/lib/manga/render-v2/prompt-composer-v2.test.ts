@@ -759,8 +759,8 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     };
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("「台詞1」");
-    expect(result.prompt).toContain("Japanese vertical text in thick manga lettering font");
     expect(result.prompt).not.toContain("Speech bubble shells");
+    expect(result.prompt).not.toContain("EMPTY speech bubble shells");
   });
 
   it("composePagePrompt shells_only mode strips dialogue text and adds shell directive", () => {
