@@ -100,6 +100,12 @@ type ComposeArgs = {
   scene?: PromptScene;
   /** bible broker summary tier。未指定時は minimal */
   bibleTier?: BibleTier;
+  /**
+   * page_one_shot 用。未指定時 / "embed" の場合は既定挙動 (画像内に台詞テキストを描かせる)。
+   * "shells_only" の場合は台詞本文を prompt に出さず、空の吹き出し/ナレーション枠/SFX outline
+   * のみ生成させる (後段 post-typeset 層が text 合成する前提)。
+   */
+  typesetMode?: "embed" | "shells_only";
 };
 
 type ComposeResult = {
@@ -719,7 +725,7 @@ function buildLayoutGeometryBlock(
           ? "medium"
           : "SMALL inset";
     lines.push(
-      `- ${panelLabel(s)} (importance ${s.imp}/5${heroTag}): ${s.row} ${s.col}, ${sizeWord} (${s.wPct}% width × ${s.hPct}% height)${polyTag}${tiltTag}${bleedTag}${borderlessTag}.${s.bg ? ` bg_treatment=${s.bg}.` : ""}`,
+      `- ${panelLabel(s)} (importance ${s.imp}/5${heroTag}): ${s.row} ${s.col}, ${sizeWord} (${s.wPct}% width × ${s.hPct}% height)${polyTag}${tiltTag}${bleedTag}${borderlessTag}.`,
     );
   }
 
@@ -870,36 +876,178 @@ export function composePanelPrompt(args: ComposeArgs): ComposeResult {
   return composeWithSizeFallback(args, composePanelPromptCore);
 }
 
+// page_one_shot 専用ヘルパー (panel スコープには影響しない)
+function buildLocalPanelNumbers(page: StoryboardPageV2): Map<string, number> {
+  const map = new Map<string, number>();
+  page.panels.forEach((p, idx) => {
+    map.set(p.panel_id, idx + 1);
+  });
+  return map;
+}
+
+function formatRefLabel(
+  r: ResolvedRefPacket["refs"][number],
+  index: number,
+): string {
+  const target = r.target_entity_id ? ` for ${r.target_entity_id}` : "";
+  const weight = r.weight >= 0.999 ? "" : `, weight ${r.weight.toFixed(2)}`;
+  return `<ref#${index + 1}> (${r.role}${target}${weight})`;
+}
+
+function buildPageSceneContextBlock(
+  scene: PromptScene | undefined,
+  bible: BibleSnapshotV2,
+  representativePanel: PanelV2 | undefined,
+  tier: BibleTier,
+): string | null {
+  if (!scene) return null;
+  const blocks: string[] = [];
+  const wr = worldRuleBlock(scene, bible, tier);
+  if (wr) blocks.push(wr);
+  if (representativePanel) {
+    const ws = wardrobeStateBlock(scene, bible, representativePanel, tier);
+    if (ws) blocks.push(ws);
+  }
+  const awr = activeWorldRulesBlock(scene, tier);
+  if (awr) blocks.push(awr);
+  if (representativePanel) {
+    const props = propsInPlayBlock(scene, bible, representativePanel);
+    if (props) blocks.push(props);
+  }
+  const theme = themeSubtextBlock(scene);
+  if (theme) blocks.push(theme);
+  if (blocks.length === 0) return null;
+  return blocks.join("\n\n");
+}
+
+function renderPageShellsOnlyText(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+): string[] {
+  const lines: string[] = [];
+  const charName = (id: string) => bible.characters.find((c) => c.id === id)?.name ?? id;
+  if (panel.dialogue.length > 0) {
+    const list = panel.dialogue.map((d, i) => `${charName(d.character_id)} bubble #${i + 1}`).join(", ");
+    lines.push(`- Speech bubble shells: ${panel.dialogue.length} (${list}) — empty interior, no text`);
+  }
+  if (panel.monologue.length > 0) {
+    const list = panel.monologue.map((m, i) => `${charName(m.character_id)} thought #${i + 1}`).join(", ");
+    lines.push(`- Inner monologue shells: ${panel.monologue.length} (${list}) — empty interior, no text`);
+  }
+  if (panel.narration.length > 0) {
+    lines.push(`- Narration frame outlines: ${panel.narration.length} (rectangular outline only, no text inside)`);
+  }
+  if (panel.sfx.length > 0) {
+    lines.push(`- SFX glyph outlines: ${panel.sfx.length} (effect shape only, no katakana/hiragana letters)`);
+  }
+  return lines;
+}
+
+function renderPageEmbedText(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+): string[] {
+  const lines: string[] = [];
+  const charName = (id: string) => bible.characters.find((c) => c.id === id)?.name ?? id;
+  if (panel.dialogue.length > 0) {
+    lines.push(`- Speech bubbles (oval bubble + tail toward speaker, Japanese vertical text):`);
+    for (const d of panel.dialogue) lines.push(`  - ${charName(d.character_id)}: 「${d.text}」`);
+  }
+  if (panel.monologue.length > 0) {
+    lines.push(`- Inner monologue (square/thought bubble, vertical Japanese):`);
+    for (const m of panel.monologue) lines.push(`  - ${charName(m.character_id)} (thinks): 「${m.text}」`);
+  }
+  if (panel.narration.length > 0) {
+    lines.push(`- Narration boxes (rectangular caption, vertical Japanese):`);
+    for (const n of panel.narration) lines.push(`  - ${n}`);
+  }
+  if (panel.sfx.length > 0) {
+    lines.push(`- Sound effects (hand-drawn katakana/hiragana, integrated into artwork):`);
+    for (const s of panel.sfx) lines.push(`  - ${s}`);
+  }
+  return lines;
+}
+
+function renderPagePanelBlock(args: {
+  panel: PanelV2;
+  localNo: number;
+  bible: BibleSnapshotV2;
+  bgTreatment: BackgroundTreatment | undefined;
+  typesetMode: "embed" | "shells_only";
+  compliance?: { blocklist: Blocklist; fp: FalsePositives };
+}): string {
+  const { panel, localNo, bible, bgTreatment, typesetMode, compliance } = args;
+  const screentoneTag = panel.screentone_intensity ? `, screentone=${panel.screentone_intensity}` : "";
+  const cs = panel.entities.characters.map((c) => {
+    const ent = bible.characters.find((x) => x.id === c.character_id);
+    return `${ent?.name ?? c.character_id} (${c.role}, ${c.on_screen_via}, expr=${c.expression})`;
+  }).join("; ");
+  const loc = bible.locations.find((x) => x.id === panel.entities.location_id)?.name ?? panel.entities.location_id;
+  const lines: string[] = [
+    `### panel#${localNo} (reading_order=${panel.reading_order}, ${panel.shot_type}, ${panel.camera}${panel.bleed ? ", BLEED" : ""}${panel.silence ? ", SILENT" : ""}${screentoneTag})`,
+    `- Characters: ${cs || "none"}`,
+    `- Location: ${loc}`,
+    `- Action: ${panel.action}`,
+    `- Visual focus: ${panel.key_visual}`,
+  ];
+  const warning = panelTextValidationWarning(panel, bible, compliance);
+  if (warning) lines.push(`- ${warning.replace(/\n/g, "\n  ")}`);
+  const textLines = typesetMode === "shells_only"
+    ? renderPageShellsOnlyText(panel, bible)
+    : renderPageEmbedText(panel, bible);
+  for (const l of textLines) lines.push(l);
+  const bgLine = compactBackgroundDirective(bgTreatment);
+  if (bgLine) lines.push(`- ${bgLine}`);
+  return lines.join("\n");
+}
+
+function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" }): string {
+  const lines = [
+    "Render with: black ink linework with weight modulation, screentone, hatching. Hard white highlights and strong black/white contrast. Vary screentone density by panel emotion; avoid uniform grey pages.",
+    "Preserve face geometry, outfit details, and location layout across panels via the continuity references.",
+    "Background density follows scene role: establishing/world panels can be moderate; dialogue-only panels stay minimal.",
+    "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, logos, English in-panel text, more than five fingers per hand.",
+  ];
+  if (opts.typesetMode === "shells_only") {
+    lines.push("Draw EMPTY speech bubble shells, narration frame outlines, and SFX outlines only. Do NOT typeset any text inside — leave the interior blank for the post-processing typesetter.");
+  } else {
+    lines.push("Japanese vertical text in thick manga lettering font; prioritize legibility over decoration. No English text.");
+  }
+  return lines.join("\n");
+}
+
 function composePagePromptCore(args: ComposeArgs): ComposeResult {
   if (!args.page) throw new Error("composePagePrompt requires page");
   const page = args.page;
   const episodeNo = args.episodeNo ?? 1;
   const bibleTier = args.bibleTier ?? "minimal";
+  const typesetMode: "embed" | "shells_only" = args.typesetMode ?? "embed";
+  const localPanelNoByPanelId = buildLocalPanelNumbers(page);
+
   const geometryBlock: string | null = args.pagePlanPage
-    ? buildLayoutGeometryBlock(
-      args.pagePlanPage,
-      new Map(page.panels.map((p) => [p.panel_id, p.panel_no])),
-    )
+    ? buildLayoutGeometryBlock(args.pagePlanPage, localPanelNoByPanelId)
     : null;
+
   const inlineLabels = args.packet.refs
-    .map((r, i) => `<ref#${i + 1}> (${r.role}${r.target_entity_id ? ` for ${r.target_entity_id}` : ""}, weight ${r.weight.toFixed(2)})`)
+    .map((r, i) => formatRefLabel(r, i))
     .join("\n");
 
-  const charName = (id: string) => args.bible!.characters.find((c) => c.id === id)?.name ?? id;
   const bibleContextBudgetPerPanel = bibleTier === "minimal"
     ? Math.max(180, Math.floor(1500 / Math.max(1, page.panels.length)))
     : Number.POSITIVE_INFINITY;
-  const bibleContextBlocks = page.panels.map((p) => {
+  const continuityBlocks = page.panels.map((p) => {
+    const localNo = localPanelNoByPanelId.get(p.panel_id) ?? p.panel_no;
     if (bibleTier === "minimal") {
-      return compactPageBibleContext(p, args.bible, {
+      const body = compactPageBibleContext(p, args.bible, {
         episodeNo,
         scene: args.scene,
         tier: bibleTier,
         maxChars: bibleContextBudgetPerPanel,
       });
+      return body.replace(/^PANEL #\d+ BIBLE:/u, `panel#${localNo} CONTINUITY:`);
     }
     const blocks = [
-      `PANEL #${p.panel_no} BIBLE CONTEXT:`,
+      `panel#${localNo} CONTINUITY:`,
       "Characters:",
       characterRefDescription(p, args.bible, { episodeNo, tier: bibleTier }),
       locationDescription(p, args.bible, args.scene, bibleTier),
@@ -908,81 +1056,58 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     ];
     return blocks.filter(Boolean).join("\n");
   }).join("\n\n");
-  const panelLines = page.panels.map((p) => {
-    const screentoneTag = p.screentone_intensity ? `, screentone=${p.screentone_intensity}` : "";
-    const cs = p.entities.characters.map((c) => {
-      const ent = args.bible.characters.find((x) => x.id === c.character_id);
-      return `${ent?.name ?? c.character_id} (${c.role}, ${c.on_screen_via}, expr=${c.expression})`;
-    }).join("; ");
-    const loc = args.bible.locations.find((x) => x.id === p.entities.location_id)?.name ?? p.entities.location_id;
-    const lines = [
-      `PANEL #${p.panel_no} (reading order ${p.reading_order}, ${p.shot_type}, ${p.camera}${p.bleed ? ", BLEED" : ""}${p.silence ? ", SILENT" : ""}${screentoneTag}):`,
-      `  Characters: ${cs || "none"}.`,
-      `  Location: ${loc}.`,
-      `  Action: ${p.action}.`,
-      `  Visual focus: ${p.key_visual}.`,
-    ];
-    const warning = panelTextValidationWarning(p, args.bible, args.compliance);
-    if (warning) lines.push(`  ${warning.replace(/\n/g, "\n  ")}`);
-    if (p.dialogue.length > 0) {
-      lines.push(`  Speech bubbles (oval bubble + tail pointing to speaker, Japanese vertical text):`);
-      for (const d of p.dialogue) lines.push(`    - ${charName(d.character_id)}: 「${d.text}」`);
-    }
-    if (p.monologue.length > 0) {
-      lines.push(`  Inner monologue (square/thought bubble, vertical Japanese):`);
-      for (const m of p.monologue) lines.push(`    - ${charName(m.character_id)} (thinks): 「${m.text}」`);
-    }
-    if (p.narration.length > 0) {
-      lines.push(`  Narration boxes (rectangular caption, vertical Japanese):`);
-      for (const n of p.narration) lines.push(`    - ${n}`);
-    }
-    if (p.sfx.length > 0) {
-      lines.push(`  Sound effects (hand-drawn katakana/hiragana, integrated into artwork):`);
-      for (const s of p.sfx) lines.push(`    - ${s}`);
-    }
-    // 2026-05-06 追加: panel ごとの bg_treatment 指示 (page_one_shot 用)
-    const bg = args.pageBackgroundTreatments?.get(p.panel_id);
-    const bgLine = compactBackgroundDirective(bg);
-    if (bgLine) lines.push(`  ${bgLine}`);
-    return lines.join("\n");
-  }).join("\n\n");
-  const representativePanel = page.panels[0];
 
-  const sections = [
+  const representativePanel = page.panels[0];
+  const sceneBlock = buildPageSceneContextBlock(args.scene, args.bible, representativePanel, bibleTier);
+
+  const panelBlocks = page.panels.map((p) => {
+    const localNo = localPanelNoByPanelId.get(p.panel_id) ?? p.panel_no;
+    const bg = args.pageBackgroundTreatments?.get(p.panel_id);
+    return renderPagePanelBlock({
+      panel: p,
+      localNo,
+      bible: args.bible,
+      bgTreatment: bg,
+      typesetMode,
+      compliance: args.compliance,
+    });
+  }).join("\n\n");
+
+  const editorBlock = args.userInstructions && args.userInstructions.trim()
+    ? `## EDITOR\n${args.userInstructions.trim()}`
+    : null;
+
+  const sections: Array<string | null> = [
+    `# PAGE`,
     `B6 portrait Japanese light novel comicalization PAGE (${args.pageDimensions.width}x${args.pageDimensions.height} px), single page in BLACK AND WHITE only with screentone and hatching. Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (expressive character-driven art, large emotive eyes, light novel cover lineage), NOT seinen-realism.`,
     "",
-    "ART STYLE:",
+    "## STYLE",
     styleOverrideBlock(args.scene, args.bible),
     "",
-    "REFERENCE IMAGES (passed via image_inputs in this order):",
+    "## REFERENCES",
     inlineLabels,
     "",
-    `PAGE LAYOUT: ${page.panels.length} panels, RTL reading order, page_role=${page.page_role}.`,
-    "",
+    "## LAYOUT",
+    `${page.panels.length} panels, RTL reading order, page_role=${page.page_role}.`,
     geometryBlock,
     "",
-    "BIBLE CONTEXT SUMMARIES:",
-    bibleContextBlocks,
+    sceneBlock ? "## SCENE" : null,
+    sceneBlock,
+    sceneBlock ? "" : null,
+    "## CONTINUITY",
+    continuityBlocks,
     "",
-    worldRuleBlock(args.scene, args.bible, bibleTier),
+    "## PANELS",
+    panelBlocks,
     "",
-    representativePanel ? wardrobeStateBlock(args.scene, args.bible, representativePanel, bibleTier) : null,
-    "",
-    activeWorldRulesBlock(args.scene, bibleTier),
-    "",
-    representativePanel ? propsInPlayBlock(args.scene, args.bible, representativePanel) : null,
-    "",
-    themeSubtextBlock(args.scene),
-    "",
-    panelLines,
-    "",
-    "MUST PRESERVE invariants from continuity refs across all panels of this page (same character face/outfit, same location layout).",
-    "",
-    userInstructionsBlock(args.userInstructions),
-    mangaTechniqueMandatoryBlock(),
-    negativesBlock(),
+    editorBlock,
+    editorBlock ? "" : null,
+    "## CONSTRAINTS",
+    buildPageConstraintsBlock({ typesetMode }),
   ];
-  const prompt = sections.filter(Boolean).join("\n");
+  const prompt = sections
+    .filter((s): s is string => s !== null && s !== undefined)
+    .join("\n");
   warnIfPromptTooLarge(prompt);
 
   return {
