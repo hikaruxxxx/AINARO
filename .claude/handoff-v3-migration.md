@@ -28,7 +28,50 @@
 | 09ca178 | docs: handoff に a07-ep01 全 10 scene live 結果と Tier 3 escalation 課題反映 |
 | 5ae70dd | feat: scoring-loop Tier 2 feedback prompt + 閾値 0.50 化 (Tier 3 escalation 50%→0%、ep01 9/1/0・ep02 並列 6/0/0) |
 | f975bef | docs: handoff に Tier 2 feedback 効果実証反映、Wave 3 主要課題解消 |
-| (本コミット) | docs: handoff に a07-v01 全 10 ep scoring-loop live 完成反映 (8 ep 並列 42.6 分、Tier 3 = 0) |
+| 3601b01 | docs: handoff に a07-v01 全 10 ep scoring-loop live 完成反映 (8 ep 並列 42.6 分、Tier 3 = 0) |
+| 1eeddb9 | feat: scoring-loop scene_exclusive 重複防止 (prompt + validateSceneGraph Rule 4 強化、ep01 再走で tier 10/0/0 達成) |
+| (本コミット) | docs: handoff に L4 再展開試行と残課題 (motif_id description 誤注入 / location_id 不整合) 反映 |
+
+## L4 storyboard 再展開試行と発見した残課題 (2026-05-12 末)
+
+scoring-loop 出力を `data/.../scene_graph.json` に反映 → L04-storyboard --from-scene-graph
+--enrich で再展開を試行したが、3 段階の問題発生:
+
+### 問題 1: scene_exclusive 台詞重複 (解消済、commit 1eeddb9)
+- S03 の "経験値倍化条件、開示します。" が S08 で may_repeat 再出現
+- 原因: scoring-loop prompt が過去 scene_exclusive 台詞を後続 scene 生成 context に渡してない
+- 対応: buildSceneCandidatePrompt に「過去 scene_exclusive 台詞リスト」section 追加 + validateSceneGraph Rule 4 を text-level uniqueness 強化
+- ep01 再走結果: tier 10/0/0、scene_exclusive 重複なし (各 scene 1 つ、全 text 異なる)
+
+### 問題 2: location_id 既存不整合 (未対応)
+- ep01 scene_graph で S03 / S06 が `loc_blueway_exterior_night_v1` を参照、bible には未定義
+- bible には `loc_bluewhite_mart_exterior_night_v1` (正) と `loc_blueway_interior_v1` (内装) のみ
+- commit b93b40f (lawson 駆逐) で中途半端な rename が残った跡
+- L04 validation で「unknown location_id」9 panel で検出して停止
+- 対応: a07 全 ep の scene_graph で `loc_blueway_exterior_night_v1` を一括 sed 置換、または bible に正しい id 追加
+
+### 問題 3: motif_id に description 誤注入 (未対応)
+- scoring-loop が visual_motif_anchors.motif_id に motif の description 文章 (80字 prefix) を返す
+- 47 errors (10 scene 各 1-3 motif)
+- 原因: buildSceneCandidatePrompt の motif 提示形式 `- name=X (id=Y): description...` を LLM が分解できず description を motif_id として再利用
+- 対応: motif 提示形式の単純化 (description は別 section へ) + 「motif_id は必ず name または id」と明示
+- これも scoring-loop prompt の別欠陥
+
+### 次セッションで進める順序
+
+1. **scoring-loop motif prompt 修正** (Codex 依頼) → ep01 再走 (~45 分) で motif_id 問題解消確認
+2. **location_id 体系的修正** (a07 全 ep の scene_graph + storyboard で `loc_blueway_exterior_night_v1` を一括 sed 置換、または bible に正しい id 追加)
+3. **ep01 で L04 --enrich 再展開** → 動作確認 (1 巻完成への最後のピース)
+4. **他 9 ep 並列再走** → 1 巻完成
+
+### enrich 落ち skeleton state の発見
+
+Console の P.1 [buildup] 画面で「同じ S01 (introduce/establishing) panel N/12: 墨色の新宿夜景…」が
+4 panel 連続している現象を確認 (Phase 8 以降の commit eedf8f3 で「新 plot.json で再生成」したとき
+--enrich を通さずに skeleton state で上書きされた跡)。L04 --from-scene-graph --enrich を通せば
+panel.action / dialogue が具体になり scene_id も bind される。問題 2/3 解消後にこれが本来の姿に戻る。
+
+
 
 ## a07-v01 第 1 巻 全 10 ep scoring-loop live 完成 (2026-05-12 末)
 
@@ -429,9 +472,9 @@ a07 で十分検証 → `process.env.USE_BIBLE_V3 === "true"` を default true �
 2. `npx vitest run` で 413 tests pass を確認
 3. `npx tsx /tmp/v3-l4-spec/scan-lint.ts` で a07 fatal=0 を再確認
 4. **次の最優先タスク (推奨順)**:
-   - **A. L4 storyboard を新しい scene-graph で再展開 → 1 巻完成** — `/tmp/a07-epNN-scoring-result.json` を `data/manga/works/a07-modern-dungeon/episodes/epNN/scene_graph.json` に反映 → `L04-storyboard --from-scene-graph --enrich` で全 panel + 描画準備
-   - **B. 漫画用 episode_patterns 辞書構築 (B4 pattern_match wire)** — 既存 yaml は小説用、漫画用は新規設計が必要。Plan で 4 論点 (ソース / 粒度 / 比較方式 / agent 漫画版) を固めてから着手
-   - **C. L4-1 / L4-9 を scene-swap に置換** — legacy panel patch 廃止、`swapScenes()` 呼び出しに置換
+   - **A. scoring-loop motif prompt 修正 + location_id 体系修正 → L4 再展開 → 1 巻完成** — 現状最も詰まっている工程。Codex で buildSceneCandidatePrompt の motif 提示形式 (description 分離 + motif_id 厳守ルール) を修正、a07 全 ep scene_graph の `loc_blueway_exterior_night_v1` を sed 置換、ep01 から再走 → L04 --enrich
+   - **B. 漫画用 episode_patterns 辞書構築 (B4 pattern_match wire)** — 既存 yaml は小説用、漫画用は新規設計が必要
+   - **C. L4-1 / L4-9 を scene-swap に置換** — legacy panel patch 廃止
 5. 上記いずれも完走後、handoff を更新し、Wave 3 完成度を表に追記
 
 ## 注意点
