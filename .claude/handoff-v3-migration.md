@@ -57,14 +57,37 @@
 
 candidate gen / pairwise / anchor pool 比較すべて live で動作確認。
 
-### 残課題 (次セッション以降)
+### a07-ep01 全 10 scene live 実走結果 (2026-05-12)
 
-1. **a07-ep01 全 10 scene live 実走** (約 15 分 + ~720k tokens) — episode 全体での挙動確認
-2. **Tier 2 feedback prompt 実装** ([scoring-loop.ts:1039](src/lib/manga/scene-graph/scoring-loop.ts#L1039) コメント「B3 中盤で実装」) — 現状は runTier1 を単純再実行
-3. **template_collision の B4 wire** ([scoring-loop.ts:1010](src/lib/manga/scene-graph/scoring-loop.ts#L1010) コメント「B4 で埋める」) — episode-metrics の TODO
-4. **pattern_match metric の hardcoded stub 解消** ([episode-metrics.ts:49](src/lib/manga/scene-graph/episode-metrics.ts#L49)) — a07 用 episode_patterns 辞書未構築
-5. **L4-1 / L4-9 を scene-swap に置換** ([L04-1-opening-hook.ts](scripts/manga/layers/L04-1-opening-hook.ts)) — legacy panel patch 廃止
-6. **10 agent prompt の scene-graph 対応** (`.claude/commands/*.md`)
+| 指標 | 値 |
+|---|---|
+| 実走時間 | **3732.2s = 62 分** (1 scene 平均 373s) |
+| candidates 生成数 | 69 (30 base + 39 Tier 2 再生成) |
+| tier_breakdown | **tier1=3, tier2=2, tier3=5** |
+| anchor_llm 平均 | 0.66 (最低 S02=0.42 / 最高 S06=0.74) |
+| scene 採用品質 | 高 (bible motifs / world.premise 哲学を反映、商業作家レベル key_visual) |
+
+scene 採用品質は高いが、**Tier 3 escalation が 50%** という運用上の課題判明。
+LLM 出力は良質だが、`tier2_threshold_pct: 0.30` (デフォルト) で anchor_llm < 0.70 を
+「再生成」と判定するのが厳しめ、かつ Tier 2 feedback prompt が単純再実行のため Tier 2
+で改善せず Tier 3 (人間 review pending) に流れる。
+
+scene_graph 結果 dump: `/tmp/a07-ep01-scoring-result.json`
+
+### 残課題 (次セッション以降、優先順)
+
+1. **(最優先) Tier 3 escalation 50% 問題の解消**
+   - 即効策: `DEFAULT_SCORING_CONFIG.tier2_threshold_pct` を 0.30 → 0.50 に調整 (1 line 変更)
+   - 根本策: **Tier 2 feedback prompt 実装** ([scoring-loop.ts:1039](src/lib/manga/scene-graph/scoring-loop.ts#L1039)) — 「前回の anchor_llm が低い理由」を context に含めて再生成、現状は runTier1 単純再実行
+   - anchor_llm caliblation — LLM が厳しすぎる可能性、複数 anchor の中央値や percentile 化
+2. **template_collision の B4 wire** ([scoring-loop.ts:1010](src/lib/manga/scene-graph/scoring-loop.ts#L1010)) — episode-metrics の TODO
+3. **pattern_match metric の hardcoded stub 解消** ([episode-metrics.ts:49](src/lib/manga/scene-graph/episode-metrics.ts#L49)) — 漫画用 episode_patterns 辞書が未構築
+   - 既存 `data/generation/profiles/{hellmode,light_recovery}_type/episode_patterns.yaml` は **長編小説用** (phase/words 単位)、漫画は scene/page 単位なので新規設計が必要
+   - ソースは a07 自身 (self-circular) でなく、外部商業漫画 (kindle-test-1 等) からの手動 or LLM 抽出が筋
+   - スコープ大 (Plan で 4 論点 — ソース / 粒度 / 比較方式 / agent 漫画版 を固める必要あり)
+4. **L4-1 / L4-9 を scene-swap に置換** ([L04-1-opening-hook.ts](scripts/manga/layers/L04-1-opening-hook.ts)) — legacy panel patch 廃止
+5. **10 agent prompt の scene-graph 対応** (`.claude/commands/*.md`)
+6. **scene 間並列化検討** — 1 ep 62 分は許容範囲だが、巻全体 (10 ep) で 10 時間。episode 並列起動 (Codex CLI 別 process) で 1/4 短縮可
 
 
 
@@ -345,9 +368,9 @@ a07 で十分検証 → `process.env.USE_BIBLE_V3 === "true"` を default true �
 1. `git log --oneline -10` で 158f956 以降の 3 commit (0ac325e, b889742, 5fe6666) を確認
 2. `npx vitest run` で 413 tests pass を確認
 3. `npx tsx /tmp/v3-l4-spec/scan-lint.ts` で a07 fatal=0 を再確認
-4. **次の最優先 1〜2 を選んで着手**:
-   - **A. a07-ep01 全 10 scene live 実走** (15 分 + 720k tokens、定額枠内) — `npx tsx scripts/manga/layers/L03_5-scene-graph.ts --slug a07-modern-dungeon --episode 1 --mode generate --live` を background 起動して結果確認。完走すれば Tier 2 / Tier 3 の発火状況も把握できる
-   - **B. pattern_match の B4 wire + a07 episode_patterns 辞書構築** — handoff 4 子タスク #3、`build-episode-patterns` agent で a07-v01 ep01-10 の scene-graph から signature 抽出 → `data/generation/profiles/modern_dungeon/episode_patterns.json` を作成、`computeTemplateCollision` を実 辞書 wire
+4. **次の最優先タスク (推奨順)**:
+   - **(最優先) Tier 3 escalation 50% 問題の解消** — ep01 全実走で判明した運用課題。Tier 2 feedback prompt を実 LLM 呼び出しに変更し、「前回 anchor_llm が低かった理由」を context として再生成 prompt に含める。即効策として閾値調整 (0.30 → 0.50) も検討
+   - **B. pattern_match の B4 wire + 漫画用 episode_patterns 辞書構築** — 既存 yaml は小説用、漫画用は新規設計が必要。Plan で 4 論点 (ソース / 粒度 / 比較方式 / agent 漫画版) を固めてから着手
    - **C. L4-1 / L4-9 を scene-swap に置換** (5-6h) — legacy panel patch 廃止、`swapScenes()` 呼び出しに置換
 5. 上記いずれも完走後、handoff を更新し、Wave 3 完成度を表に追記
 
