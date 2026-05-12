@@ -36,25 +36,36 @@ import {
 import type { BibleSnapshotV2 } from "../../../src/lib/manga/schemas-v2";
 
 type Mode = "validate" | "generate";
-type Args = { slug: string; episode: number; mode: Mode };
+type Args = { slug: string; episode: number; mode: Mode; live: boolean };
 
 function parseArgs(): Args {
-  const a: Partial<Args> = { mode: "validate" };
+  const a: Partial<Args> = { mode: "validate", live: false };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     let key: string | null = null;
-    let val: string | null = null;
+    let val: string | boolean | null = null;
     const eq = arg.match(/^--([^=]+)=(.*)$/);
     if (eq) [, key, val] = eq;
     else {
       const flag = arg.match(/^--(.+)$/);
-      if (flag && i + 1 < argv.length) {
+      if (flag && i + 1 < argv.length && !argv[i + 1].startsWith("--")) {
         key = flag[1];
         val = argv[++i];
+      } else if (flag) {
+        key = flag[1];
+        val = true;
       }
     }
     if (!key || val === null) continue;
+    if (key === "live") {
+      if (val === true) a.live = true;
+      else if (val === "true") a.live = true;
+      else if (val === "false") a.live = false;
+      else throw new Error(`unknown --live "${val}", expected true|false`);
+      continue;
+    }
+    if (typeof val !== "string") continue;
     if (key === "slug") a.slug = val;
     else if (key === "episode") a.episode = Number(val);
     else if (key === "mode") {
@@ -251,7 +262,7 @@ async function modeValidate(args: Args): Promise<void> {
 }
 
 async function modeGenerate(args: Args): Promise<void> {
-  // B3 skeleton: dry-run のみ動作。実 LLM / predict-hit / anchor 比較は B3 中盤で wire。
+  // B3 scoring loop: dry-run by default; pass --live to run candidate/pairwise/anchor/predict-hit via Codex CLI.
   const { runEpisodeScoringLoop, estimateCost, DEFAULT_SCORING_CONFIG } = await import(
     "../../../src/lib/manga/scene-graph/scoring-loop"
   );
@@ -262,10 +273,10 @@ async function modeGenerate(args: Args): Promise<void> {
   const epId = `${args.slug}-ep${String(args.episode).padStart(2, "0")}`;
 
   console.log(`[L03.5] mode=generate slug=${args.slug} ep=${args.episode}`);
-  console.log(`[L03.5] dry-run mode (LLM/predict-hit/anchor not wired yet)`);
+  console.log(`[L03.5] ${args.live ? "LIVE" : "dry-run"} mode (use --live to run Codex CLI scoring)`);
 
   // 既存 scene_graph.json があれば slot として再利用 (panel_range / page_range / location_id を引き継ぐ)
-  // 無ければ shotlist / brief から slot を構築する必要があるが、それは B3 中盤で実装
+  // 無ければ shotlist / brief から slot を構築する必要があるため、現状は既存 scene_graph.json を slot source とする
   let slots;
   try {
     const existing = JSON.parse(await fs.readFile(sgPath, "utf-8"));
@@ -296,13 +307,18 @@ async function modeGenerate(args: Args): Promise<void> {
     console.log(`[L03.5] reusing ${slots.length} scene slots from existing scene_graph.json`);
   } catch {
     console.error(`[L03.5] generate-mode requires existing scene_graph.json (slot source) at this stage.`);
-    console.error(`[L03.5] B3 中盤で shotlist/brief から slot を新規構築する path を実装予定。`);
+    console.error(`[L03.5] Create or keep scene_graph.json first, then rerun generate mode.`);
     process.exit(3);
   }
 
   // コスト見積もり
-  const config = { ...DEFAULT_SCORING_CONFIG, dry_run: true };
+  const config = { ...DEFAULT_SCORING_CONFIG, dry_run: !args.live };
   const est = estimateCost(slots.length, config);
+  if (args.live) {
+    console.log(
+      `[L03.5] LIVE mode: candidates_per_scene=${config.candidatesPerScene}, total_candidates=${config.candidatesPerScene * slots.length}`
+    );
+  }
   console.log("");
   console.log("=== Cost Estimate ===");
   console.log(`scenes=${est.scenes}, candidates_per_scene=${est.candidates_per_scene}`);
@@ -311,7 +327,7 @@ async function modeGenerate(args: Args): Promise<void> {
   console.log(`fits_in_max5h: ${est.fits_in_max5h}`);
   for (const n of est.notes) console.log(`  - ${n}`);
 
-  // dry-run 採点ループ
+  // 採点ループ (--live 未指定なら dry-run)
   const result = await runEpisodeScoringLoop(
     slots,
     {
@@ -326,12 +342,12 @@ async function modeGenerate(args: Args): Promise<void> {
   );
 
   console.log("");
-  console.log("=== Scoring Loop Result (dry-run) ===");
+  console.log(`=== Scoring Loop Result (${args.live ? "live" : "dry-run"}) ===`);
   console.log(`tier_breakdown: tier1=${result.tier_breakdown.tier1}, tier2=${result.tier_breakdown.tier2}, tier3=${result.tier_breakdown.tier3}`);
   console.log(`total_candidates_generated: ${result.total_candidates_generated}`);
   console.log(`scenes_in_output: ${result.scene_graph.scenes.length}`);
   console.log("");
-  console.log("[L03.5] dry-run complete. To wire live mode, see scoring-loop.ts comments.");
+  console.log(`[L03.5] ${args.live ? "live" : "dry-run"} complete.`);
 }
 
 async function main() {
