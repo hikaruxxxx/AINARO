@@ -712,11 +712,86 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
 
     expect(v3.prompt).toContain("桐生 レン");
     expect(v3.prompt).toContain("char_ren");
-    expect(v3.prompt).toContain("PANEL #1 BIBLE");
+    expect(v3.prompt).toContain("panel#1 CONTINUITY");
     expect(v3.prompt).toContain("WORLD CONSTRAINTS");
     expect(v3.prompt.length).toBeGreaterThan(legacy.prompt.length * 0.5);
     expect(v3.prompt.length).toBeLessThan(legacy.prompt.length * 2.0);
     expect(v3.refImagePaths).toEqual(legacy.refImagePaths);
     expect(v3.tierUsed).toBe(legacy.tierUsed);
+  });
+
+  it("composePagePrompt outputs new markdown section structure with unified panel#N numbering", () => {
+    const args = {
+      page: page(3),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).toMatch(/^# PAGE\n/);
+    expect(result.prompt).toContain("## STYLE");
+    expect(result.prompt).toContain("## REFERENCES");
+    expect(result.prompt).toContain("## LAYOUT");
+    expect(result.prompt).toContain("## CONTINUITY");
+    expect(result.prompt).toContain("## PANELS");
+    expect(result.prompt).toContain("## CONSTRAINTS");
+    for (let n = 1; n <= 3; n += 1) {
+      expect(result.prompt).toContain(`### panel#${n}`);
+      expect(result.prompt).toContain(`panel#${n} CONTINUITY`);
+    }
+    const layoutChunk = result.prompt.split("## LAYOUT")[1]?.split("##")[0] ?? "";
+    expect(layoutChunk).not.toContain("bg_treatment=");
+    expect(result.prompt.length).toBeLessThanOrEqual(8000);
+  });
+
+  it("composePagePrompt embed mode (default) keeps Japanese dialogue text and lettering directive", () => {
+    const args = {
+      page: page(2),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).toContain("「台詞1」");
+    expect(result.prompt).toContain("Japanese vertical text in thick manga lettering font");
+    expect(result.prompt).not.toContain("Speech bubble shells");
+  });
+
+  it("composePagePrompt shells_only mode strips dialogue text and adds shell directive", () => {
+    const args = {
+      page: page(2),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+      typesetMode: "shells_only" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).not.toContain("「台詞1」");
+    expect(result.prompt).not.toContain("「台詞2」");
+    expect(result.prompt).toContain("Speech bubble shells");
+    expect(result.prompt).toContain("Draw EMPTY speech bubble shells");
+  });
+
+  it("composePagePrompt formatRefLabel omits weight when weight≈1.0", () => {
+    const args = {
+      page: page(1),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).not.toContain("weight 1.00");
   });
 });
