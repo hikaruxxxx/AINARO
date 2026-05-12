@@ -30,7 +30,57 @@
 | f975bef | docs: handoff に Tier 2 feedback 効果実証反映、Wave 3 主要課題解消 |
 | 3601b01 | docs: handoff に a07-v01 全 10 ep scoring-loop live 完成反映 (8 ep 並列 42.6 分、Tier 3 = 0) |
 | 1eeddb9 | feat: scoring-loop scene_exclusive 重複防止 (prompt + validateSceneGraph Rule 4 強化、ep01 再走で tier 10/0/0 達成) |
-| (本コミット) | docs: handoff に L4 再展開試行と残課題 (motif_id description 誤注入 / location_id 不整合) 反映 |
+| 571cadc | docs: handoff に L4 再展開試行と残課題 (motif_id description 誤注入 / location_id 不整合) 反映 |
+| dd04870 | feat: scoring-loop motif prompt 改善 (description 分離 + motif_id 厳守、ただし LLM 不遵守は残存) |
+| e5c3ca5 | fix: a07 ep01 scene_graph の location_id 不整合修正 (loc_blueway → loc_bluewhite_mart) |
+| (本コミット) | docs: handoff に L2 context 未注入の設計欠陥反映、次セッション最優先を切替 |
+
+## L2 context 未注入の設計欠陥 (2026-05-12 末、user 指摘で判明)
+
+`scoring-loop.ts` `buildSceneCandidatePrompt` は `volume_plot` を **path のみ** で
+プロンプトに含め、内容を読み込んでいない:
+
+```
+slug=a07-modern-dungeon, episode=1, scene=S01
+bible: /Users/.../bible/snapshot.json
+brief: /Users/.../episodes/ep01/_brief.v2.md
+volume_plot: /Users/.../volumes/v01/plot.json  ← path だけ
+```
+
+これは scoring-loop の **設計上の根本問題**:
+
+### 影響範囲
+
+1. **各 ep が「独立した場面集」として生成** — 巻全体での位置付け・他 ep との関係不明
+2. **foreshadow 単発化** — 巻またぎ伏線 (ep01 setup → ep05 payoff) の context がないため、LLM は当 ep 内で完結させる / 逆に payoff を起こす (今回 21 件の Rule 5 違反の原因)
+3. **採点 LLM も巻基準で判定不能** — pairwise / anchor 比較は各場面単独でしか評価できない
+4. **motif / 主人公 arc / 関係性 delta も巻設計から外れる** — L2 のテーマ整合が崩れやすい
+
+### user の指摘
+
+「L2 がちゃんとしていないと L3.5 を修正しても評価できなくない?」 — その通りで、
+L2 (a07 v01/plot.json) は内容良好だが、scoring-loop が L2 を消費していないため
+今回の Tier 2 feedback / motif prompt 修正の効果も半減状態。
+
+### 必要な対応 (次セッション最優先)
+
+- **`generateSceneCandidates` で `context.volumePlotPath` を fs 読み込み** → 当 ep の役割・テーマ・周辺 ep foreshadow を抽出 → prompt の「## 巻内位置」section に注入
+- **`buildPairwisePrompt` にも** 「この巻のテーマ X、当 ep の役割 Y を踏まえて判定」を追加
+- **`compareToAnchorPool` (anchor 比較 LLM) にも同様注入**
+- **`validateSceneGraph` の foreshadow 検査も `volume_plot.foreshadow_map` 参照** で当 ep の設計通りか機械的に検査
+
+### a07-ep01 で発覚した症状サマリ (今セッション再走後)
+
+motif prompt 修正 (dd04870) + Rule 4 強化 (1eeddb9) 後の ep01 再走で残った errors:
+
+| 種類 | 件数 | 原因 |
+|---|---|---|
+| motif_id に自由文 (description) | ~24 件 | LLM が prompt 指示遵守せず (Codex prompt 改善のみでは不十分、runtime normalize が必要) |
+| foreshadow Rule 5 違反 | ~21 件 | L2 context 未注入で巻全体の伏線設計を踏まえない自由生成 |
+
+## 次セッション最優先 (推奨順、再整理)
+
+
 
 ## L4 storyboard 再展開試行と発見した残課題 (2026-05-12 末)
 
@@ -471,10 +521,13 @@ a07 で十分検証 → `process.env.USE_BIBLE_V3 === "true"` を default true �
 1. `git log --oneline -10` で 158f956 以降の 3 commit (0ac325e, b889742, 5fe6666) を確認
 2. `npx vitest run` で 413 tests pass を確認
 3. `npx tsx /tmp/v3-l4-spec/scan-lint.ts` で a07 fatal=0 を再確認
-4. **次の最優先タスク (推奨順)**:
-   - **A. scoring-loop motif prompt 修正 + location_id 体系修正 → L4 再展開 → 1 巻完成** — 現状最も詰まっている工程。Codex で buildSceneCandidatePrompt の motif 提示形式 (description 分離 + motif_id 厳守ルール) を修正、a07 全 ep scene_graph の `loc_blueway_exterior_night_v1` を sed 置換、ep01 から再走 → L04 --enrich
-   - **B. 漫画用 episode_patterns 辞書構築 (B4 pattern_match wire)** — 既存 yaml は小説用、漫画用は新規設計が必要
-   - **C. L4-1 / L4-9 を scene-swap に置換** — legacy panel patch 廃止
+4. **次の最優先タスク (推奨順、2026-05-12 末再整理)**:
+   - **A. (最優先) scoring-loop に L2 context 注入** — generateSceneCandidates / buildPairwisePrompt / compareToAnchorPool / validateSceneGraph で `volume_plot.json` を fs 読み込み、当 ep の役割 + 巻 foreshadow_map を prompt context に注入。**これが他全ての改善の前提**。今回の Tier 2 feedback / motif prompt 修正の効果も L2 注入なしでは半減
+   - **B. motif_id runtime normalize** — LLM が prompt 指示を遵守しないため、generateSceneCandidates 後処理で「bible.visual_motifs に存在しない motif_id を best-match で fix or 削除」する safety net を実装。jq による暫定 normalize は実証済 (ただし「全部 first match」で精度低い、TypeScript で fuzzy match 実装が筋)
+   - **C. foreshadow 整合検査の L2 連携** — validateSceneGraph に L2 foreshadow_map との同期 (orphan_setup / unexpected_payoff の判定) を追加
+   - **D. ep01 再走 → L04 --enrich → 動作確認 → 他 9 ep 並列 → 1 巻完成**
+   - **E. (中期) 漫画用 episode_patterns 辞書構築 (B4 pattern_match wire)**
+   - **F. (中期) L4-1 / L4-9 を scene-swap に置換**
 5. 上記いずれも完走後、handoff を更新し、Wave 3 完成度を表に追記
 
 ## 注意点
