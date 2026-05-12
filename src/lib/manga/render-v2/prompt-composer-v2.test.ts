@@ -824,4 +824,51 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     expect(fallback.prompt).toContain(bibleNoDigest.style_directives.global);
     expect(fallback.prompt).not.toContain("DIGEST_SENTINEL_STYLE");
   });
+
+  it("composePagePrompt extracts page-shared Characters/Location when all panels share them", () => {
+    // fixture の page(N) は全 panel が char_ren + loc_dungeon を共有 → shared 認定されるはず
+    const args = {
+      page: page(3),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    // page-shared header が出ている
+    expect(result.prompt).toContain("All panels on this page share these characters and location");
+    expect(result.prompt).toContain("Shared characters:");
+    expect(result.prompt).toContain("Shared location:");
+    // panel block に Characters / Location 行は出ない (Expressions に置き換わる)
+    const panelsChunk = result.prompt.split("## PANELS")[1] ?? "";
+    expect(panelsChunk).toContain("Expressions:");
+    expect(panelsChunk).not.toMatch(/^- Characters: /m);
+    expect(panelsChunk).not.toMatch(/^- Location: /m);
+  });
+
+  it("composePagePrompt keeps per-panel Characters/Location when any panel differs", () => {
+    // panel#2 だけ Location を別にする → shared 不成立
+    const p = page(3);
+    p.panels[1].entities = {
+      ...p.panels[1].entities,
+      location_id: "loc_different_location",
+    };
+    const args = {
+      page: p,
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).not.toContain("All panels on this page share these characters and location");
+    // panel block で従来通り Characters/Location が並ぶ
+    const panelsChunk = result.prompt.split("## PANELS")[1] ?? "";
+    expect(panelsChunk).toMatch(/- Characters: /);
+    expect(panelsChunk).toMatch(/- Location: /);
+  });
 });

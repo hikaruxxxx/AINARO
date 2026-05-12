@@ -972,6 +972,57 @@ function renderPageEmbedText(
   return lines;
 }
 
+/**
+ * 2026-05-13: page 内の全 panel で entities (characters + location) が完全同一なら
+ * page-shared header に括り出して panel block の冗長を削る。
+ * 比較キー: character の (id, role, on_screen_via) tuple set + location_id。
+ * expression は panel ごとに変わるので shared 判定から除外し panel block に残す。
+ */
+type PageSharedEntities = {
+  characters: Array<{ character_id: string; role: string; on_screen_via: string; name: string }>;
+  location_id: string;
+  location_name: string;
+};
+
+function computePageSharedEntities(
+  page: StoryboardPageV2,
+  bible: BibleSnapshotV2,
+): PageSharedEntities | null {
+  if (page.panels.length < 2) return null;
+  const keyOf = (p: PanelV2) =>
+    p.entities.characters
+      .map((c) => `${c.character_id}|${c.role}|${c.on_screen_via}`)
+      .sort()
+      .join(",");
+  const firstKey = keyOf(page.panels[0]);
+  const firstLoc = page.panels[0].entities.location_id;
+  for (let i = 1; i < page.panels.length; i += 1) {
+    if (keyOf(page.panels[i]) !== firstKey) return null;
+    if (page.panels[i].entities.location_id !== firstLoc) return null;
+  }
+  return {
+    characters: page.panels[0].entities.characters.map((c) => ({
+      character_id: c.character_id,
+      role: c.role,
+      on_screen_via: c.on_screen_via,
+      name: bible.characters.find((x) => x.id === c.character_id)?.name ?? c.character_id,
+    })),
+    location_id: firstLoc,
+    location_name: bible.locations.find((x) => x.id === firstLoc)?.name ?? firstLoc,
+  };
+}
+
+function renderPageSharedEntitiesHeader(s: PageSharedEntities): string {
+  const charList = s.characters
+    .map((c) => `${c.name} (${c.role}, ${c.on_screen_via})`)
+    .join("; ");
+  return [
+    "(All panels on this page share these characters and location; expressions vary per panel.)",
+    `- Shared characters: ${charList}`,
+    `- Shared location: ${s.location_name}`,
+  ].join("\n");
+}
+
 function renderPagePanelBlock(args: {
   panel: PanelV2;
   localNo: number;
@@ -979,21 +1030,35 @@ function renderPagePanelBlock(args: {
   bgTreatment: BackgroundTreatment | undefined;
   typesetMode: "embed" | "shells_only";
   compliance?: { blocklist: Blocklist; fp: FalsePositives };
+  sharedEntities?: PageSharedEntities | null;
 }): string {
-  const { panel, localNo, bible, bgTreatment, typesetMode, compliance } = args;
+  const { panel, localNo, bible, bgTreatment, typesetMode, compliance, sharedEntities } = args;
   const screentoneTag = panel.screentone_intensity ? `, screentone=${panel.screentone_intensity}` : "";
-  const cs = panel.entities.characters.map((c) => {
-    const ent = bible.characters.find((x) => x.id === c.character_id);
-    return `${ent?.name ?? c.character_id} (${c.role}, ${c.on_screen_via}, expr=${c.expression})`;
-  }).join("; ");
-  const loc = bible.locations.find((x) => x.id === panel.entities.location_id)?.name ?? panel.entities.location_id;
   const lines: string[] = [
     `### panel#${localNo} (reading_order=${panel.reading_order}, ${panel.shot_type}, ${panel.camera}${panel.bleed ? ", BLEED" : ""}${panel.silence ? ", SILENT" : ""}${screentoneTag})`,
-    `- Characters: ${cs || "none"}`,
-    `- Location: ${loc}`,
-    `- Action: ${panel.action}`,
-    `- Visual focus: ${panel.key_visual}`,
   ];
+  if (sharedEntities) {
+    // shared 経路: expression のみ panel に出す (Characters/Location は page-shared header に集約済み)
+    const expr = panel.entities.characters
+      .map((c) => {
+        const name = bible.characters.find((x) => x.id === c.character_id)?.name ?? c.character_id;
+        return `${name}=${c.expression}`;
+      })
+      .join(", ");
+    if (expr) lines.push(`- Expressions: ${expr}`);
+  } else {
+    const cs = panel.entities.characters
+      .map((c) => {
+        const ent = bible.characters.find((x) => x.id === c.character_id);
+        return `${ent?.name ?? c.character_id} (${c.role}, ${c.on_screen_via}, expr=${c.expression})`;
+      })
+      .join("; ");
+    const loc = bible.locations.find((x) => x.id === panel.entities.location_id)?.name ?? panel.entities.location_id;
+    lines.push(`- Characters: ${cs || "none"}`);
+    lines.push(`- Location: ${loc}`);
+  }
+  lines.push(`- Action: ${panel.action}`);
+  lines.push(`- Visual focus: ${panel.key_visual}`);
   const warning = panelTextValidationWarning(panel, bible, compliance);
   if (warning) lines.push(`- ${warning.replace(/\n/g, "\n  ")}`);
   const textLines = typesetMode === "shells_only"
@@ -1064,6 +1129,12 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
   const representativePanel = page.panels[0];
   const sceneBlock = buildPageSceneContextBlock(args.scene, args.bible, representativePanel, bibleTier);
 
+  // 2026-05-13: page 内全 panel で characters + location が完全同一なら page-shared
+  // header に括り出し panel block では expression だけ出す。a07 ep01 で全 panel 同値
+  // ケースが多発 (page 17 で 5 panel 完全同値) → -800〜1500 字 / page 期待。
+  const sharedEntities = computePageSharedEntities(page, args.bible);
+  const sharedHeader = sharedEntities ? renderPageSharedEntitiesHeader(sharedEntities) : null;
+
   const panelBlocks = page.panels.map((p) => {
     const localNo = localPanelNoByPanelId.get(p.panel_id) ?? p.panel_no;
     const bg = args.pageBackgroundTreatments?.get(p.panel_id);
@@ -1074,6 +1145,7 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
       bgTreatment: bg,
       typesetMode,
       compliance: args.compliance,
+      sharedEntities,
     });
   }).join("\n\n");
 
@@ -1102,6 +1174,8 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     continuityBlocks,
     "",
     "## PANELS",
+    sharedHeader,
+    sharedHeader ? "" : null,
     panelBlocks,
     "",
     editorBlock,
