@@ -126,6 +126,88 @@ export type BibleContextForSlot = {
   propCandidates: Array<{ id: string; name: string }>;
 };
 
+/**
+ * Scene の visual_motif_anchors[].motif_id を bible.visual_motifs に対して正規化する。
+ *
+ * LLM が motif description 本文や周辺解説テキストを motif_id 欄に返すケースの safety net。
+ * 1. exact match (motif.id ?? motif.name) → そのまま
+ * 2. substring match: motif_id 文字列が motif.name を含む → motif.name に置換 (id があれば id 優先)
+ *    複数候補は longest name 優先 (最も特定的)
+ * 3. no match → entry を drop し、stats に積む
+ *
+ * 戻り値: 正規化後の anchors と統計。
+ */
+export type MotifNormalizeStats = {
+  exact: number;
+  substring: number;
+  dropped: number;
+  /** drop / substring の前後対応 (デバッグ用) */
+  details: Array<{
+    original_motif_id: string;
+    resolution: "exact" | "substring" | "dropped";
+    new_motif_id?: string;
+    matched_name?: string;
+  }>;
+};
+
+export function normalizeMotifAnchors<T extends { motif_id: string; intensity?: string }>(
+  anchors: T[],
+  bibleVisualMotifs: Array<{ id?: string | null; name: string }>
+): {
+  anchors: T[];
+  stats: MotifNormalizeStats;
+} {
+  const stats: MotifNormalizeStats = { exact: 0, substring: 0, dropped: 0, details: [] };
+  const validKeys = new Set<string>();
+  for (const motif of bibleVisualMotifs) {
+    if (motif.id) validKeys.add(motif.id);
+    if (motif.name) validKeys.add(motif.name);
+  }
+  // motif name の長さ降順 (longest first) でソートし、substring 検索の優先度に使う。
+  const sortedMotifs = [...bibleVisualMotifs].sort(
+    (a, b) => (b.name?.length ?? 0) - (a.name?.length ?? 0)
+  );
+
+  const out: T[] = [];
+  for (const a of anchors) {
+    const rawId = a.motif_id ?? "";
+    if (validKeys.has(rawId)) {
+      stats.exact++;
+      stats.details.push({ original_motif_id: rawId, resolution: "exact" });
+      out.push(a);
+      continue;
+    }
+
+    let matched: { id?: string | null; name: string } | null = null;
+    for (const motif of sortedMotifs) {
+      if (!motif.name) continue;
+      if (motif.name.length < 2) continue;
+      if (rawId.includes(motif.name)) {
+        matched = motif;
+        break;
+      }
+    }
+
+    if (matched) {
+      const canonical = matched.id ?? matched.name;
+      stats.substring++;
+      stats.details.push({
+        original_motif_id: rawId,
+        resolution: "substring",
+        new_motif_id: canonical,
+        matched_name: matched.name,
+      });
+      out.push({ ...a, motif_id: canonical });
+      continue;
+    }
+
+    stats.dropped++;
+    stats.details.push({ original_motif_id: rawId, resolution: "dropped" });
+  }
+
+  return { anchors: out, stats };
+}
+
 // ============================================================================
 // L2 (volume_plot) context (prompt 注入用)
 // ============================================================================
@@ -394,7 +476,7 @@ export async function generateSceneCandidates(
   }
   // codex 出力は scene のうち A 系・B 系フィールドを埋める想定。
   // 識別フィールド (scene_id / scene_no / panel_range / arc_position 等) は slot から継承。
-  return result.parsed.candidates.slice(0, config.candidatesPerScene).map((c) => ({
+  const candidates = result.parsed.candidates.slice(0, config.candidatesPerScene).map((c) => ({
     ...stubCandidate(slot, 0),
     ...c,
     scene_id: slot.scene_id,
@@ -407,6 +489,27 @@ export async function generateSceneCandidates(
     location_id: slot.location_id,
     sub_locations: slot.sub_locations,
   }));
+
+  const aggregateStats = { exact: 0, substring: 0, dropped: 0 };
+  for (const cand of candidates) {
+    if (cand.visual_motif_anchors && cand.visual_motif_anchors.length > 0) {
+      const { anchors: normAnchors, stats } = normalizeMotifAnchors(
+        cand.visual_motif_anchors,
+        bible.visual_motifs
+      );
+      cand.visual_motif_anchors = normAnchors;
+      aggregateStats.exact += stats.exact;
+      aggregateStats.substring += stats.substring;
+      aggregateStats.dropped += stats.dropped;
+    }
+  }
+  if (aggregateStats.substring > 0 || aggregateStats.dropped > 0) {
+    console.error(
+      `[scoring-loop] motif normalize for ${slot.scene_id}: exact=${aggregateStats.exact}, substring=${aggregateStats.substring}, dropped=${aggregateStats.dropped}`
+    );
+  }
+
+  return candidates;
 }
 
 async function loadBibleSnapshot(bibleSnapshotPath: string): Promise<BibleSnapshotV2> {
