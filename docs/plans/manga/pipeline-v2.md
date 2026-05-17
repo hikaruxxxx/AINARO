@@ -52,6 +52,7 @@
 > - `0c93d73` Sprint 12 案1+5: SCENE PANEL RESTRICTIONS に拡張 (wide shot_type 対応 + 文字数 800→300 字圧縮)
 > - `1a589c8` Sprint 13 案1: SCENE PANEL RESTRICTIONS の directive 強度を補強 (Max 0/1 細分化 + MUST not 格上げ)
 > - `366d2e7` Sprint 14 案1: BibleSnapshotV2.meta に quantitative_facts を追加し bible-facts-audit が優先参照
+> - `cce9743` Sprint 15 案4: bible-facts-audit に ranks 値検証を追加 (架空 rank「SS級」等の検出)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -112,14 +113,19 @@
 > - a07 bible に手動で `{years_ago: [20], judgement_age_max: 18, ranks: [...]}` を追加、audit 再走行で動作確認
 > - panel p022「三年前」誤検出は引き続き残存 (個人時間軸由来、`personal_timeline_facts` 拡張は Sprint 15 候補)
 >
-> ### Sprint 15 候補
+> ### Sprint 15 案4 結果 (a07 ep01 で audit 再走行)
+>
+> - rank_mismatch 0 件 (storyboard には S級 / F級 のみで ranks 内正規、AI 補完による架空 rank 混入は未発生)
+> - years_ago_mismatch 1 件 (前回同様 p022 個人時間軸誤検出、Sprint 16 で対応)
+> - 機能としては「SS級」「Sプラス級」「S+級」のような架空 rank が混入した瞬間に検出される検査網が完成
+>
+> ### Sprint 16 候補
 >
 > 1. **(高 ROI)** quantitative_facts に `personal_timeline_facts` 拡張 — キャラの個人時間軸 (例: レンが 18歳・3年前に鑑定) を別 facet で管理し、世界観事実との誤検出を自動区別
 > 2. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
 > 3. **(中)** PanelV2 型に effect_lines 正式追加 (schema + import 同期)
-> 4. **(中)** ranks 値を storyboard 内で audit (S級が想定外で SS級 等になっていないか)
-> 5. **(検証)** p12 v10 と V1 p12.png の比較で wide 拡張実効性再評価
-> 6. **(検証)** p19 を v11 で render、close_up + wide 混在 page での効果測定 (Pro 枠 +1)
+> 4. **(検証)** p12 v10 と V1 p12.png の比較で wide 拡張実効性再評価
+> 5. **(検証)** p19 を v11 で render、close_up + wide 混在 page での効果測定 (Pro 枠 +1)
 
 ## 設計原則
 
