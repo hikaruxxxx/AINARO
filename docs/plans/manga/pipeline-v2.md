@@ -48,6 +48,7 @@
 > - `316355f` Sprint 9 案A+B: storyboard narration を bible 準拠に修正 + L9 prompt に BIBLE FACTS section 追加
 > - `b18c404` Sprint 10 案1: bible-facts-audit を新設 (storyboard narration の bible 整合性検証 CLI)
 > - `1280fb5` Sprint 10 案2: ROW LAYOUT に行高 % と幅×高さの 2D 指定を追加
+> - `8359f3e` Sprint 11 案1: L9 prompt に ESTABLISHING RESTRICTIONS section を追加 (overlay 数制限 + negative list)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -78,14 +79,23 @@
 > - **案1 (bible-facts-audit)** ✓ 実用ツールとして機能: a07 ep01 走行で panel p022「三年前。公社、鑑定窓口。」を warning 検出 (これはレン 18 歳基準で 3年前=15歳鑑定の個人時間軸、誤検出として許容)、panel#1 (修正済) は OK
 > - **案2 (ROW LAYOUT 行高 %)** △ 構造は維持、area% 厳密一致は未達: v8 で「panel#2/3 が 50% width × 25% height」と指示しても実画像は 25% × 2 のまま (12% × 2 への矯正は AI が踏まえない)。AI の確率的揺らぎで描き込み密度は v7 比で再悪化
 >
-> ### Sprint 11 候補
+> ### Sprint 11 案1 結果 (a07 ep01 p01 v9、Pro 枠 +1 枚) ★ 本セッション最高品質
 >
-> 1. **(最高 ROI)** establishing panel 内の overlay 数制限 directive: 「panel#1 establishing は in-panel overlay (情報パネル/ラベル/ランキング表) を最大 1 個まで、他は地の建物/空のみ」を明示
-> 2. **(中)** bible.meta に `quantitative_facts` 構造化フィールド追加 — 個人時間軸 (キャラ年齢からの回想) と世界観事実を別 facet で管理、bible-facts-audit の誤検出を減らす
-> 3. **(中)** L11 audit に「panel area % が page_plan と実画像で乖離」検出ルール追加 (vision 解析必須、コスト高)
-> 4. **(中)** 残作品 (a07 以外) の storyboard で bible 逸脱を一括検出 (`audit-bible-facts.ts --all` 拡張)
-> 5. **(低)** PanelV2 型に `effect_lines?: EffectLineSpec | null` を正式追加
-> 6. **(検証)** p12 / p05 / p19 を v8 で再 render、Sprint 7-10 全効果を全 page 測定 (Pro 枠 +3 枚)
+> - **establishing overlay が劇的に整理**: v8 で 4-5 個あった補完 overlay (ランキング表/詳細統計/SNS/LIVE/報奨) が v9 で **1 個 (ホログラム広告)** に絞られた
+> - 「Less is more」directive + negative list (SNS/LIVE/ranking/statistics/fake brand) が極めて効果的
+> - 下段 panel#2 (close_up) も波及的に整理 — establishing 抑制で AI 全体が控えめに
+> - **商業漫画品質: v8 B+ → v9 A〜A-** (本セッション内 1-2 段階上昇)
+> - prompt size 8532 > 8000 threshold で警告、render 自体は成功
+>
+> ### Sprint 12 候補
+>
+> 1. **(高 ROI)** ESTABLISHING RESTRICTIONS の文字数圧縮 (現状 800 字、200-300 字目標)、または applies-to を panel 単位に分割
+> 2. **(中)** bible.meta に `quantitative_facts` 構造化フィールド追加 — 個人時間軸と世界観事実を別 facet で管理、audit 誤検出減
+> 3. **(中)** L11 audit に「panel area % が page_plan と実画像で乖離」検出 (vision 解析必須)
+> 4. **(中)** 残作品の storyboard 一括 audit
+> 5. **(中)** `wide` shot_type にも overlay 数制限を拡張 (establishing と同等の情景描写、不要 overlay の温床)
+> 6. **(低)** PanelV2 型に effect_lines 正式追加
+> 7. **(検証)** p12 / p05 / p19 を v9 で再 render、Sprint 7-11 全効果を全 page 測定 (Pro 枠 +3 枚)
 
 ## 設計原則
 
