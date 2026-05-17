@@ -750,6 +750,38 @@ function buildLayoutGeometryBlock(
 }
 
 /**
+ * bible の量的事実 (年代/年齢/段階数/期間等) を prompt に embed して AI の数値改変を抑制する。
+ *
+ * 2026-05-17 追加。a07 ep01 p001 の narration で storyboard 自体が
+ * 「三年前」(bible は 20年前)、「十五歳で受ける」(bible は 18歳までに) と
+ * bible 設定逸脱しているケースを検出。設定逸脱の根本対応は L04 storyboard
+ * 生成側の修正だが、L09 prompt 側でも bible 量的事実を明示することで AI に
+ * 「設定改変禁止」を伝え、prompt 段階での再生成防止層とする。
+ *
+ * 機械的事実抽出ではなく bible.world.timeline / system の先頭抜粋を embed
+ * する単純実装。AI に「これらと一致厳守、新規発明禁止」と明示。
+ */
+function buildBibleFactsBlock(bible: BibleSnapshotV2): string | null {
+  const timeline = (bible.world.timeline ?? "").trim();
+  const system = (bible.world.system ?? "").trim();
+  if (!timeline && !system) return null;
+
+  const MAX = 300;
+  const tShort = timeline.length > MAX ? `${timeline.slice(0, MAX)}…` : timeline;
+  const sShort = system.length > MAX ? `${system.slice(0, MAX)}…` : system;
+
+  const lines = [
+    "Quantitative facts excerpted from bible (narration / dialogue / SFX / in-panel text 内の年代・年齢・期間・段階数・人数・割合はこれらの抜粋値と一致厳守):",
+  ];
+  if (timeline) lines.push(`Timeline excerpt: ${tShort}`);
+  if (system) lines.push(`System excerpt: ${sShort}`);
+  lines.push(
+    "Do NOT invent alternative numbers (years, ages, ranks, percentages, counts). If a number is required and not present above, omit it rather than fabricate. Render text in panels exactly as specified in PANELS section — do not paraphrase or rewrite narration.",
+  );
+  return lines.join("\n");
+}
+
+/**
  * panel rect から行 (row) 構造を推定し、AI に「縦積み vs 横並び」を明示する。
  *
  * 2026-05-17 追加 (Sprint 8 案1 row-grouping)。Sprint 7 追加チューニング後も
@@ -1422,6 +1454,8 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     ? buildRowGroupingBlock(args.pagePlanPage, localPanelNoByPanelId)
     : null;
 
+  const bibleFactsBlock: string | null = buildBibleFactsBlock(args.bible);
+
   const inlineLabels = args.packet.refs
     .map((r, i) => formatRefLabel(r, i))
     .join("\n");
@@ -1494,6 +1528,9 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     rowGroupingBlock ? "## ROW LAYOUT" : null,
     rowGroupingBlock,
     rowGroupingBlock ? "" : null,
+    bibleFactsBlock ? "## BIBLE FACTS (must match exactly)" : null,
+    bibleFactsBlock,
+    bibleFactsBlock ? "" : null,
     "## MANGA CRAFT DIRECTIVES",
     MANGA_CRAFT_DIRECTIVES_V6,
   ];

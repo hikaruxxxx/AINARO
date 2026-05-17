@@ -1043,6 +1043,48 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     expect(result.prompt).not.toContain("HORIZONTAL ROW WARNING");
   });
 
+  it("emits BIBLE FACTS section with timeline/system excerpts and number-invention guard (Sprint 9 案B)", () => {
+    const bibleWithFacts = brokerBible();
+    bibleWithFacts.world.timeline =
+      "20年前、世界中の都市の地下に巨大な接続口が同時に開いた。封鎖・軍事投入が連続して失敗した。";
+    bibleWithFacts.world.system =
+      "全人類は18歳までに鑑定石でS/A/B/C/D/E/Fの七段階の適性ランクを判定される。判定値は公社アプリに同期される。";
+    const args = {
+      page: page(3),
+      packet,
+      bible: bibleWithFacts,
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).toContain("## BIBLE FACTS");
+    expect(result.prompt).toContain("Quantitative facts excerpted from bible");
+    expect(result.prompt).toContain("20年前");
+    expect(result.prompt).toContain("18歳まで");
+    expect(result.prompt).toContain("Do NOT invent alternative numbers");
+    expect(result.prompt).toContain("do not paraphrase or rewrite narration");
+  });
+
+  it("omits BIBLE FACTS section when bible.world.timeline and system are both empty", () => {
+    const bibleNoFacts = brokerBible();
+    bibleNoFacts.world.timeline = "";
+    bibleNoFacts.world.system = "";
+    const args = {
+      page: page(3),
+      packet,
+      bible: bibleNoFacts,
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).not.toContain("## BIBLE FACTS");
+    expect(result.prompt).not.toContain("Quantitative facts excerpted from bible");
+  });
+
   it("MANGA_CRAFT_DIRECTIVES_V6 no longer contains the legacy generic 'Panel size variation' directive", () => {
     // page-specific な PANEL SIZE OVERRIDE に役割が移ったため、汎用節は削除済
     const args = {
