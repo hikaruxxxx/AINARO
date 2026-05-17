@@ -106,7 +106,8 @@
           "dialogue": [],
           "monologue": [],
           "narration": [
-            "午前3時、新宿区。"
+            "午前3時、新宿区。",
+            "深夜二時、ブルーベル24・新宿西店。Fランクの夜勤は、世界と店内灯だけで進む。"
           ],
           "sfx": [
             "ジーー"
@@ -230,7 +231,12 @@
           },
           "action": "総菜什器の温度を機械的に確認する。",
           "key_visual": "湯気の薄い白、黒袖、疲れた手首だけを濃く描く。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "店長_off_frame",
+              "text": "桐生くん、温度ログ取ったらレジ頼める?"
+            }
+          ],
           "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
@@ -270,9 +276,16 @@
           },
           "action": "ニュース通知と勤務終了通知が同じ割れた画面に並ぶ。",
           "key_visual": "灯里の報道サムネ風枠と給与明細風の小枠を、ヒビが斜めに裂く。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "tv_news",
+              "text": "速報。Sランク探索者・朱、第三ダンジョン踏破完了。"
+            }
+          ],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "店内モニター、トップニュースが切り替わる。"
+          ],
           "sfx": [
             "ブブ"
           ]
@@ -301,7 +314,12 @@
           },
           "action": "レンが背中にニュース光を受けて立つ。",
           "key_visual": "店内画面の明るさが背中を照らし、顔はフード影に沈む。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "tv_news",
+              "text": "公社、史上最年少での偉業を発表。"
+            }
+          ],
           "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
@@ -335,7 +353,12 @@
           },
           "action": "入口チャイムの余韻だけが残る。",
           "key_visual": "白い余白に横顔だけ、口元は閉じ、目の下の影が残る。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "客_off_frame",
+              "text": "…お疲れさん。"
+            }
+          ],
           "monologue": [],
           "narration": [],
           "sfx": []
@@ -585,7 +608,12 @@
           "action": "端末を見たまま動きが止まる。",
           "key_visual": "白い余白、目だけに小さなハイライト、端末光が下から当たる。",
           "dialogue": [],
-          "monologue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "また、Fか。"
+            }
+          ],
           "narration": [],
           "sfx": []
         },
@@ -614,7 +642,12 @@
           "action": "部屋の狭さと生活の詰まりを俯瞰で見せる。",
           "key_visual": "布団、壁ログ、黒フード、食品袋が六畳に収まる。",
           "dialogue": [],
-          "monologue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "三年。何も変わってない。"
+            }
+          ],
           "narration": [],
           "sfx": [
             "カサ"
@@ -784,7 +817,12 @@
           },
           "action": "再判定不可の事務説明紙を見る。",
           "key_visual": "硬い行政文の矩形枠、押印欄、若いレンの影が紙に落ちる。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "公社_窓口員",
+              "text": "鑑定結果は生涯固定です。再判定は受け付けていません。"
+            }
+          ],
           "monologue": [],
           "narration": [],
           "sfx": []
@@ -817,7 +855,12 @@
           },
           "action": "FランクID証を受け取る。",
           "key_visual": "差し出される安いホルダー、受け取る手の震え、背景は白く省略。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "公社_窓口員",
+              "text": "Fランク。1F限定。装備ローンの審査も別途。"
+            }
+          ],
           "monologue": [],
           "narration": [],
           "sfx": [
@@ -848,7 +891,12 @@
           },
           "action": "若いレンが窓口から一人で出る。",
           "key_visual": "F列の椅子が少なく、床の導線から外れている。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "公社_窓口員_off_frame",
+              "text": "次の方どうぞ。"
+            }
+          ],
           "monologue": [],
           "narration": [],
           "sfx": [
@@ -969,7 +1017,7 @@
     },
     {
       "page_no": 7,
-      "page_role": "dialogue",
+      "page_role": "buildup",
       "panels": [
         {
           "panel_id": "p032",
@@ -997,7 +1045,9 @@
           "key_visual": "部屋の白い余白の中、黒フードだけが布団に沈む。",
           "dialogue": [],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "夜勤明けの六時前。Fランクの一日は、たいてい眠れない。"
+          ],
           "sfx": []
         },
         {
@@ -1605,7 +1655,9 @@
           "narration": [
             "夜明け前。街はまだ、俺を見ていない。"
           ],
-          "sfx": []
+          "sfx": [
+            "ダッ"
+          ]
         },
         {
           "panel_id": "p050",
@@ -1851,7 +1903,9 @@
             }
           ],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "新宿第三ダンジョン。Fランクの仮入域は、毎朝この瞬間にしか開かない。"
+          ],
           "sfx": [
             "ダン"
           ]
@@ -1916,7 +1970,12 @@
           },
           "action": "Fランク入域ID証を読み取り機へかざす。",
           "key_visual": "硬い電子音、薄灰色の表示枠、手だけが震える。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "公社ゲート_音声",
+              "text": "ID 確認。桐生 レン、Fランク。"
+            }
+          ],
           "monologue": [],
           "narration": [],
           "sfx": [
@@ -1951,7 +2010,12 @@
           },
           "action": "ゲート表示がFランク、1F限定、仮入域を告げる。",
           "key_visual": "中身後注入用の矩形枠、薄灰色の警告、レンの影が映る。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "公社ゲート_音声",
+              "text": "1階限定、仮入域 30 分を発行します。"
+            }
+          ],
           "monologue": [],
           "narration": [],
           "sfx": [
@@ -1983,7 +2047,12 @@
           "action": "薄灰色の表示を見て表情が沈む。",
           "key_visual": "白背景、目元の影、口元がかすかに硬くなる。",
           "dialogue": [],
-          "monologue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "毎日、同じ薄灰色の表示。"
+            }
+          ],
           "narration": [],
           "sfx": []
         },
@@ -2011,7 +2080,12 @@
           },
           "action": "ゲートを通る。",
           "key_visual": "背後の広告光と前方の暗い通路、黒フードが境界を抜ける。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "公社ゲート_音声",
+              "text": "上層階への通行は不可。違反時は補償対象外。"
+            }
+          ],
           "monologue": [],
           "narration": [],
           "sfx": [
@@ -2043,7 +2117,12 @@
           "action": "F列から1F通路へ導線で押し出される。",
           "key_visual": "F列から1F通路だけが細く伸び、レンが小さく流される。",
           "dialogue": [],
-          "monologue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "通路の幅まで、Fランク用に狭い。"
+            }
+          ],
           "narration": [],
           "sfx": []
         },
@@ -2306,7 +2385,12 @@
           },
           "action": "ナビが北東角までの秒読みを続ける。",
           "key_visual": "角の丸い細枠吹き出し、レンの横顔、背景は白く薄い。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "nav",
+              "text": "残り 18 秒。北東角。立ち止まらないでください。"
+            }
+          ],
           "monologue": [],
           "narration": [
             "北東角まで十五秒。減速しないでください。"
@@ -3367,6 +3451,10 @@
             {
               "character_id": "char_桐生_レン_v1",
               "text": "制度の欄が、俺を見た。"
+            },
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "未分類加算...?"
             }
           ],
           "narration": [],
@@ -3402,7 +3490,9 @@
           "key_visual": "補正切れの疲労、端末を握る手、黒フードの裾が床につく。",
           "dialogue": [],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "公社アプリ、Fランクの履歴に未分類の加算枠。前例なし。"
+          ],
           "sfx": [
             "ガク"
           ]
@@ -3516,7 +3606,9 @@
               "text": "一週間分が、一瞬。"
             }
           ],
-          "narration": [],
+          "narration": [
+            "未分類加算枠は空のまま、数字が浮かんで消える。"
+          ],
           "sfx": []
         },
         {
@@ -3655,6 +3747,10 @@
             {
               "character_id": "char_桐生_レン_v1",
               "text": "ナビ。"
+            },
+            {
+              "character_id": "nav",
+              "text": "はい、桐生 レンさん。"
             }
           ],
           "monologue": [],
@@ -3722,7 +3818,9 @@
           "key_visual": "白い余白の多い北東通路、非常灯の反射だけが残る。",
           "dialogue": [],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "通路の静けさに、ナビの声だけが残る。"
+          ],
           "sfx": []
         },
         {
@@ -3749,7 +3847,12 @@
           },
           "action": "ナビが次の提案を告げる。",
           "key_visual": "白い背景に細い角丸吹き出し、レンの目がわずかに戻る。",
-          "dialogue": [],
+          "dialogue": [
+            {
+              "character_id": "nav",
+              "text": "経験値倍化条件、明日 23:40、F4 区画。踏みますか?"
+            }
+          ],
           "monologue": [],
           "narration": [
             "明日の予定、組みますか？"
@@ -3826,7 +3929,9 @@
           "key_visual": "ヒビの向こうに白い記録枠、制度の事務的な冷たさ。",
           "dialogue": [],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "未分類加算ログ、システム上は『該当なし』と表示される。"
+          ],
           "sfx": []
         },
         {
@@ -3889,7 +3994,12 @@
           "action": "返事をする前に白い間を置く。",
           "key_visual": "レンの片目、乾いた唇、空の吹き出しのような余白。",
           "dialogue": [],
-          "monologue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "頼む。"
+            }
+          ],
           "narration": [],
           "sfx": []
         },
