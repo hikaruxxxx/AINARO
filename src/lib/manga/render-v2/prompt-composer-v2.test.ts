@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type {
   BibleSnapshotV2,
+  PagePlanPage,
   PanelV2,
   ResolvedRefPacket,
   StoryboardPageV2,
@@ -877,5 +878,94 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     const panelsChunk = result.prompt.split("## PANELS")[1] ?? "";
     expect(panelsChunk).toMatch(/- Characters: /);
     expect(panelsChunk).toMatch(/- Location: /);
+  });
+});
+
+describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニング)", () => {
+  // PAGE_W=1748, PAGE_H=2480 (prompt-composer-v2 内定数と一致させる)
+  // ratios を縦方向の h 比で割り付けた page_plan を返す
+  function pagePlanFromRatios(
+    storyPage: StoryboardPageV2,
+    ratios: number[],
+  ): PagePlanPage {
+    const PAGE_W = 1748;
+    const PAGE_H = 2480;
+    let y = 0;
+    const panels = storyPage.panels.map((p, i) => {
+      const ratio = ratios[i] ?? 1 / storyPage.panels.length;
+      const h = PAGE_H * ratio;
+      const rect = { x: 0, y, w: PAGE_W, h };
+      y += h;
+      return {
+        panel_id: p.panel_id,
+        slot_id: `s${i + 1}`,
+        rect,
+        reading_order: p.reading_order,
+        importance: (i === 0 ? 5 : 3) as 1 | 2 | 3 | 4 | 5,
+      };
+    });
+    return {
+      page_no: storyPage.page_no,
+      layout_template_id: "v4_test_variance",
+      page_role: storyPage.page_role,
+      render_strategy: "page_one_shot",
+      panels,
+    };
+  }
+
+  it("emits PANEL SIZE OVERRIDE with per-panel area% and FORBIDDEN warning when pagePlanPage is present", () => {
+    // 5 panel page、L05 enforceVarianceRule の targetRatios と同形 [0.4, 0.1, 0.1, 0.2, 0.2]
+    const storyPage = page(5);
+    const plan = pagePlanFromRatios(storyPage, [0.4, 0.1, 0.1, 0.2, 0.2]);
+    const args = {
+      page: storyPage,
+      pagePlanPage: plan,
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).toContain("## PANEL SIZE OVERRIDE");
+    expect(result.prompt).toContain("PANEL SIZE OVERRIDE (STRICT");
+    expect(result.prompt).toContain("panel#1 MUST occupy 40% of page area (DOMINANT");
+    expect(result.prompt).toContain("panel#2 MUST occupy 10% of page area (SMALL_INSET");
+    expect(result.prompt).toContain("panel#4 MUST occupy 20% of page area (MID");
+    // ratio = 40 / 10 = 4.0x
+    expect(result.prompt).toContain("Largest panel is 4.0x the area of smallest");
+    expect(result.prompt).toContain("FORBIDDEN");
+  });
+
+  it("omits PANEL SIZE OVERRIDE when pagePlanPage is not provided", () => {
+    const args = {
+      page: page(3),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).not.toContain("## PANEL SIZE OVERRIDE");
+    expect(result.prompt).not.toContain("PANEL SIZE OVERRIDE (STRICT");
+  });
+
+  it("MANGA_CRAFT_DIRECTIVES_V6 no longer contains the legacy generic 'Panel size variation' directive", () => {
+    // page-specific な PANEL SIZE OVERRIDE に役割が移ったため、汎用節は削除済
+    const args = {
+      page: page(3),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).not.toContain("Panel size variation (CRITICAL)");
+    expect(result.prompt).not.toContain("smallest <= 12%, largest >= 35%");
   });
 });

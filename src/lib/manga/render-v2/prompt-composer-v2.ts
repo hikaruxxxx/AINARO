@@ -750,6 +750,76 @@ function buildLayoutGeometryBlock(
 }
 
 /**
+ * panel rect の強制ディレクティブを page-specific に生成する。
+ *
+ * 2026-05-17 追加。Sprint 7 で L05 enforceVarianceRule により page_plan.json は
+ * variance ≥3.0x 達成済だが、L09 → image_gen で AI が rect を「ヒント」として
+ * 緩く解釈する事例多発 (a07 ep01 で 5 ページ中 3 ページが均等化したまま)。
+ *
+ * MANGA_CRAFT_DIRECTIVES_V6 内の汎用 "smallest <= 12%, largest >= 35%" 節では
+ * page-specific な数値と紐づかないため、ここで panel ごとに「MUST occupy X% of
+ * page area (ROLE_TAG)」と命令形で書き出す。
+ *
+ * 1 panel page (splash) は null を返してスキップ。
+ */
+function buildPanelSizeOverrideBlock(
+  pagePlanPage: PagePlanPage,
+  panelNoByPanelId: Map<string, number>,
+): string | null {
+  if (pagePlanPage.panels.length <= 1) return null;
+
+  type Entry = {
+    panelNo: number;
+    areaPct: number;
+    role: "DOMINANT" | "MID" | "SMALL_INSET";
+    roleNote: string;
+  };
+
+  const entries: Entry[] = pagePlanPage.panels
+    .map((pp: PagePlanPanel) => {
+      const areaPct = ((pp.rect.w * pp.rect.h) / (PAGE_W * PAGE_H)) * 100;
+      const role: Entry["role"] =
+        areaPct >= 35 ? "DOMINANT" : areaPct >= 12 ? "MID" : "SMALL_INSET";
+      const roleNote =
+        role === "DOMINANT"
+          ? "hero panel"
+          : role === "SMALL_INSET"
+            ? "tame/breath"
+            : "mid-rhythm";
+      return {
+        panelNo: panelNoByPanelId.get(pp.panel_id) ?? pp.reading_order,
+        areaPct,
+        role,
+        roleNote,
+      };
+    })
+    .sort((a, b) => a.panelNo - b.panelNo);
+
+  const areas = entries.map((e) => e.areaPct);
+  const largest = Math.max(...areas);
+  const smallest = Math.min(...areas);
+  const ratio = smallest > 0 ? largest / smallest : 0;
+
+  const lines: string[] = [
+    "PANEL SIZE OVERRIDE (STRICT — variance is the page's visual rhythm):",
+  ];
+  for (const e of entries) {
+    lines.push(
+      `- panel#${e.panelNo} MUST occupy ${Math.round(e.areaPct)}% of page area (${e.role}, ${e.roleNote})`,
+    );
+  }
+  if (ratio > 0 && Number.isFinite(ratio)) {
+    lines.push(
+      `Largest panel is ${ratio.toFixed(1)}x the area of smallest. Strictly preserve these proportions.`,
+    );
+  }
+  lines.push(
+    "Equalizing panels into a uniform grid is FORBIDDEN — it destroys manga reading rhythm.",
+  );
+  return lines.join("\n");
+}
+
+/**
  * panel.dialogue / monologue / narration / sfx を「画像内に直接描く」指示文に変換。
  * 吹き出し・ナレーション枠・擬音を AI 側で typeset させる方針 (旧 SVG overlay は撤回)。
  */
@@ -1227,10 +1297,6 @@ const MANGA_CRAFT_DIRECTIVES_V6 = `The following directives apply to ALL panels 
   - OR pure character expression close-up with NO background and NO text
 - TAME panels function as "breath" between information-dense panels.
 
-### Panel size variation (CRITICAL)
-- Within a 5-panel page, panel area sizes must span: smallest <= 12%, largest >= 35%.
-- Uniform 15-20% panels across the page are PROHIBITED; they produce "picture book" feel, not manga.
-
 ### Style refs interpretation
 - Style ref images attached are MANGA PAGE COMPOSITION references, NOT pure-illustration style guides.
 - Extract: line weight variation, screentone density, bubble-to-image area ratio.
@@ -1246,6 +1312,10 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
 
   const geometryBlock: string | null = args.pagePlanPage
     ? buildLayoutGeometryBlock(args.pagePlanPage, localPanelNoByPanelId)
+    : null;
+
+  const panelSizeOverrideBlock: string | null = args.pagePlanPage
+    ? buildPanelSizeOverrideBlock(args.pagePlanPage, localPanelNoByPanelId)
     : null;
 
   const inlineLabels = args.packet.refs
@@ -1314,6 +1384,9 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     "## CONSTRAINTS",
     buildPageConstraintsBlock({ typesetMode }),
     "",
+    panelSizeOverrideBlock ? "## PANEL SIZE OVERRIDE" : null,
+    panelSizeOverrideBlock,
+    panelSizeOverrideBlock ? "" : null,
     "## MANGA CRAFT DIRECTIVES",
     MANGA_CRAFT_DIRECTIVES_V6,
   ];
