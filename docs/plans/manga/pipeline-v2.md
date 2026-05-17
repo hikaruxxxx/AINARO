@@ -204,12 +204,13 @@
 > - BIBLE FACTS の timeline/system 抜粋 300→150 字、a07 では必要 facts (20年前/18歳まで/七段階) を概ね保持
 > - p3 v13 で warning 消失 + 品質維持を確認 (dialogue 4 + monologue + TV ニュース overlay 全描画)
 >
-> ### Sprint 22 完了 (案2, 案5, 案6 + 進行中の案3)
+> ### Sprint 22 完了 (案2, 案3, 案5, 案6 — 案1 は次セッション送り)
 >
 > - **案6 (compact 化)**: SCENE PANEL RESTRICTIONS + ROW LAYOUT prompt 出力 30-40% 削減、562 tests 維持
 > - **案5 (effect_lines schema)**: effect-lines/types.ts 切り出しで循環依存回避、detector の unsafe cast 解消
 > - **案2 (L03.5 key_lines floor)**: scene candidate prompt に panel 数別下限 directive、空 [] を生成失敗扱いに格上げ
-> - **案3 (残 22 page v13 render)**: background 実行中、Pro 枠 +22 消費見込み、結果は次セッションで集約
+> - **案3 (全 24 page v13 render)**: 23 gen + 1 skip + 0 fail、Pro 枠 +23 消費。代表 page (p6 鑑定回想 / p12 公社ゲート / p17 戦闘 / p24 cliffhanger) で全て **A-〜A 評価** (商業漫画レベル)、Sprint 19 案3 storyboard 補強 + Sprint 11-13 prompt 強化の累積効果が全 page で結実
+> - **案1 (L04 再走行)**: Codex MCP 不安定 + Claude 直編は時間大のため本セッション skip、Sprint 23 候補へ
 >
 > ### 三層 dialogue 密度防御 (完成形)
 >
