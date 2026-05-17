@@ -51,6 +51,7 @@
 > - `8359f3e` Sprint 11 案1: L9 prompt に ESTABLISHING RESTRICTIONS section を追加 (overlay 数制限 + negative list)
 > - `0c93d73` Sprint 12 案1+5: SCENE PANEL RESTRICTIONS に拡張 (wide shot_type 対応 + 文字数 800→300 字圧縮)
 > - `1a589c8` Sprint 13 案1: SCENE PANEL RESTRICTIONS の directive 強度を補強 (Max 0/1 細分化 + MUST not 格上げ)
+> - `366d2e7` Sprint 14 案1: BibleSnapshotV2.meta に quantitative_facts を追加し bible-facts-audit が優先参照
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -104,13 +105,21 @@
 > - **案4 (一括 audit 適用)**: `audit-bible-facts.ts --all` モードは既実装、対象作品が a07-modern-dungeon の 1 つしかないため実適用余地なし。将来作品増えてから
 > - **案5 (PanelV2 型 effect_lines)**: schema 拡張 + 3 ファイル import 同期で工数大、detector のテスト 5 ケースで挙動担保済みのため後回し
 >
-> ### Sprint 14 候補
+> ### Sprint 14 案1 結果 (a07 bible に quantitative_facts 手動追加で audit 再走行)
 >
-> 1. **(高 ROI)** bible.meta に `quantitative_facts` 構造化フィールド追加 — `{ years_ago: [20], judgement_age_max: 18, ranks: ["S","A","B","C","D","E","F"] }` 形式で bible-facts-audit が優先参照、regex fallback
+> - schema 拡張完了: `BibleSnapshotV2.meta.quantitative_facts?: { years_ago?: number[]; judgement_age_max?: number; ranks?: string[] }` (後方互換 optional)
+> - bible-facts-audit が構造化 facts を優先採用、regex 値とマージ
+> - a07 bible に手動で `{years_ago: [20], judgement_age_max: 18, ranks: [...]}` を追加、audit 再走行で動作確認
+> - panel p022「三年前」誤検出は引き続き残存 (個人時間軸由来、`personal_timeline_facts` 拡張は Sprint 15 候補)
+>
+> ### Sprint 15 候補
+>
+> 1. **(高 ROI)** quantitative_facts に `personal_timeline_facts` 拡張 — キャラの個人時間軸 (例: レンが 18歳・3年前に鑑定) を別 facet で管理し、世界観事実との誤検出を自動区別
 > 2. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
 > 3. **(中)** PanelV2 型に effect_lines 正式追加 (schema + import 同期)
-> 4. **(検証)** p12 v10 と V1 p12.png の比較で wide 拡張実効性再評価
-> 5. **(検証)** p19 を v11 で render、close_up + wide 混在 page での効果測定 (Pro 枠 +1)
+> 4. **(中)** ranks 値を storyboard 内で audit (S級が想定外で SS級 等になっていないか)
+> 5. **(検証)** p12 v10 と V1 p12.png の比較で wide 拡張実効性再評価
+> 6. **(検証)** p19 を v11 で render、close_up + wide 混在 page での効果測定 (Pro 枠 +1)
 
 ## 設計原則
 
