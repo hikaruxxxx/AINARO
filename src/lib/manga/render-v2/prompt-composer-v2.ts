@@ -806,6 +806,8 @@ function buildRowGroupingBlock(
     w: number;
     h: number;
     cx: number;
+    wPct: number;
+    hPct: number;
   };
 
   const entries: Entry[] = pagePlanPage.panels.map((pp: PagePlanPanel) => ({
@@ -815,6 +817,8 @@ function buildRowGroupingBlock(
     w: pp.rect.w,
     h: pp.rect.h,
     cx: pp.rect.x + pp.rect.w / 2,
+    wPct: (pp.rect.w / PAGE_W) * 100,
+    hPct: (pp.rect.h / PAGE_H) * 100,
   }));
 
   // y range overlap >= 50% を「同じ行」と判定
@@ -841,25 +845,28 @@ function buildRowGroupingBlock(
   if (rows.every((row) => row.length === 1)) return null;
 
   // 行内で RTL (右→左) に sort、表示用 row label を計算
-  const PAGE_W = 1748;
   const rowLines: string[] = [];
   rows.forEach((row, idx) => {
     row.sort((a, b) => b.cx - a.cx);
     const rowLabel =
       rows.length <= 2 ? (idx === 0 ? "TOP" : "BOTTOM") : idx === 0 ? "TOP" : idx === rows.length - 1 ? "BOTTOM" : `MIDDLE${rows.length > 3 ? `_${idx}` : ""}`;
+    // 行高は row 内の panel の最大 hPct (= 行全体の縦幅) を採用
+    const rowHeightPct = Math.round(Math.max(...row.map((p) => p.hPct)));
     if (row.length === 1) {
       const p = row[0];
       const widthNote = p.w >= PAGE_W * 0.85 ? "full width" : p.cx < PAGE_W * 0.5 ? "left half" : "right half";
-      rowLines.push(`- ROW ${idx + 1} (${rowLabel}): panel#${p.panelNo} (${widthNote})`);
+      rowLines.push(
+        `- ROW ${idx + 1} (${rowLabel}, height=${rowHeightPct}% of page): panel#${p.panelNo} (${widthNote}, ${Math.round(p.wPct)}% width × ${rowHeightPct}% height)`,
+      );
     } else {
       const items = row
         .map((p) => {
           const pos = p.cx < PAGE_W * 0.4 ? "LEFT" : p.cx > PAGE_W * 0.6 ? "RIGHT" : "CENTER";
-          return `panel#${p.panelNo} on ${pos}`;
+          return `panel#${p.panelNo} on ${pos} (${Math.round(p.wPct)}% width × ${Math.round(p.hPct)}% height)`;
         })
         .join(", ");
       rowLines.push(
-        `- ROW ${idx + 1} (${rowLabel}): ${row.length} panels SIDE-BY-SIDE — ${items} (RTL: right panel read first)`,
+        `- ROW ${idx + 1} (${rowLabel}, height=${rowHeightPct}% of page): ${row.length} panels SIDE-BY-SIDE — ${items} (RTL: right panel read first)`,
       );
     }
   });
@@ -869,7 +876,7 @@ function buildRowGroupingBlock(
     horizontalRows.length > 0
       ? `\nHORIZONTAL ROW WARNING: ROW${horizontalRows.length > 1 ? "s" : ""} ${horizontalRows
           .map((row, i) => `${rows.indexOf(row) + 1}`)
-          .join(", ")} contain${horizontalRows.length === 1 ? "s" : ""} side-by-side panels. Do NOT stack them vertically — they share the same row height.`
+          .join(", ")} contain${horizontalRows.length === 1 ? "s" : ""} side-by-side panels. Do NOT stack them vertically — they share the same row height. Each side-by-side panel MUST occupy exactly the indicated width × height percentages; do NOT expand a small panel to fill the row vertically.`
       : "";
 
   return [

@@ -1000,12 +1000,14 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("## ROW LAYOUT");
     expect(result.prompt).toContain("ROW LAYOUT (2 rows on this page)");
-    expect(result.prompt).toContain("ROW 1 (TOP): panel#1 (full width)");
-    expect(result.prompt).toContain("ROW 2 (BOTTOM): 2 panels SIDE-BY-SIDE");
-    expect(result.prompt).toContain("panel#2 on RIGHT");
-    expect(result.prompt).toContain("panel#3 on LEFT");
+    // 2026-05-17 Sprint 10 案2 で行高 % を追加
+    expect(result.prompt).toContain("ROW 1 (TOP, height=50% of page): panel#1 (full width");
+    expect(result.prompt).toContain("ROW 2 (BOTTOM, height=25% of page): 2 panels SIDE-BY-SIDE");
+    expect(result.prompt).toContain("panel#2 on RIGHT (50% width × 25% height)");
+    expect(result.prompt).toContain("panel#3 on LEFT (50% width × 25% height)");
     expect(result.prompt).toContain("HORIZONTAL ROW WARNING");
     expect(result.prompt).toContain("Do NOT stack them vertically");
+    expect(result.prompt).toContain("do NOT expand a small panel to fill the row vertically");
   });
 
   it("omits ROW LAYOUT when all panels stack vertically (1 panel per row)", () => {
