@@ -61,6 +61,8 @@
 > - `8660359` Sprint 22 案6: SCENE PANEL RESTRICTIONS + ROW LAYOUT を compact 化 (各 30-40% 文字数削減)
 > - `314e0da` Sprint 22 案5: PanelV2 schema に effect_lines を正式追加 (effect-lines/types.ts 切り出し、detector unsafe cast 解消)
 > - `3fb7d3d` Sprint 22 案2: L03.5 scene candidate prompt に key_lines 量 floor directive を追加 (中間表現>監視網 根本対応)
+> - `79256c1` Sprint 22 案A: a07 ep01 p24 cliffhanger 細部修正 (空吹き出し枠消失 + nav voice 化、ユーザ指摘から)
+> - `c2a02ad` Sprint 22 案B: panel block に effect_lines per-panel directive 追加 (集中線中心の AI 制御完成)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
