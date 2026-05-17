@@ -179,6 +179,58 @@ export function auditPageDensity(
   return findings;
 }
 
+/**
+ * L04 storyboard 生成 prompt 向けの directive 文字列を生成する。
+ *
+ * 2026-05-18 Sprint 20 案1 で新設。Sprint 18 で導入した audit 下限を
+ * 生成段階の prompt にも反映し、render 前段で問題発生を予防する。
+ *
+ * 既存の audit-dialogue-density は **検出網**、本 directive は **予防網**。
+ * 両者で同じ floor 値を共有することで生成 → 検証の整合性を担保。
+ */
+export function buildDialogueDensityFloorDirective(
+  floors: Record<PageRoleV2, DialogueDensityRule> = DEFAULT_DIALOGUE_DENSITY_FLOORS,
+): string {
+  const lines: string[] = [];
+  lines.push("## Page Role Density Floor (page_role 別 dialogue/text 下限)");
+  lines.push("");
+  lines.push("各 page の page_role に応じて以下の下限を **必ず満たす** よう dialogue/monologue/narration/sfx を配分してください。商業漫画 (page あたり text 5-12 行) より少なくならないこと、特に **dialogue page で dialogue=0 のような「会話していない会話シーン」は絶対禁止** です。");
+  lines.push("");
+  const roleLabels: Record<PageRoleV2, string> = {
+    opening_hook: "opening_hook (冒頭・世界観セットアップ)",
+    establishing: "establishing (情景・場所転換)",
+    dialogue: "dialogue (会話で物語進行)",
+    buildup: "buildup (緊張感の積み上げ)",
+    reveal: "reveal (認識転換)",
+    action: "action (戦闘・追跡・擬音中心)",
+    aftermath: "aftermath (余韻・回収)",
+    cliffhanger: "cliffhanger (引き)",
+  };
+  for (const role of Object.keys(roleLabels) as PageRoleV2[]) {
+    const rule = floors[role];
+    if (!rule) continue;
+    const parts: string[] = [];
+    if (rule.dialogue_min !== undefined) parts.push(`dialogue ≥ ${rule.dialogue_min}`);
+    if (rule.monologue_min !== undefined) parts.push(`monologue ≥ ${rule.monologue_min}`);
+    if (rule.narration_min !== undefined) parts.push(`narration ≥ ${rule.narration_min}`);
+    if (rule.sfx_min !== undefined) parts.push(`SFX ≥ ${rule.sfx_min}`);
+    if (rule.dialogue_or_monologue_min !== undefined)
+      parts.push(`dialogue+monologue ≥ ${rule.dialogue_or_monologue_min}`);
+    if (rule.text_total_min !== undefined)
+      parts.push(`text 合計 (dialogue+monologue+narration) ≥ ${rule.text_total_min}`);
+    lines.push(`- **${roleLabels[role]}**: ${parts.join(", ")}`);
+  }
+  lines.push("");
+  lines.push("**不足する場合の補強パターン (商業漫画で標準的)**:");
+  lines.push("- off-frame voice (画面外の声): TV / ラジオ / 隣室 / 通行人 / 同僚など");
+  lines.push("- システム音声 / アナウンス: 公社 / ナビ / ゲート / ID 端末など");
+  lines.push("- 状況描写 narration: 時刻 / 気温 / 場所 / 通知音の地の文");
+  lines.push("- リアクション dialogue: 短い応答 (「了解」「待って」「……は?」など)");
+  lines.push("");
+  lines.push("この directive は qa-v2/dialogue-density-floor の audit 基準と同期しており、生成後の audit-dialogue-density が検出する findings をゼロにできる水準で出力してください。");
+  return lines.join("\n");
+}
+
 export function auditStoryboardDensity(
   storyboard: EpisodeStoryboardV2,
   floors: Record<PageRoleV2, DialogueDensityRule> = DEFAULT_DIALOGUE_DENSITY_FLOORS,

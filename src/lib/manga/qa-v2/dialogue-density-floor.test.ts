@@ -3,6 +3,7 @@ import type { EpisodeStoryboardV2, PageRoleV2, StoryboardPageV2 } from "../schem
 import {
   auditPageDensity,
   auditStoryboardDensity,
+  buildDialogueDensityFloorDirective,
   DEFAULT_DIALOGUE_DENSITY_FLOORS,
 } from "./dialogue-density-floor";
 
@@ -130,5 +131,31 @@ describe("dialogue-density-floor", () => {
     for (const role of allRoles) {
       expect(DEFAULT_DIALOGUE_DENSITY_FLOORS[role]).toBeDefined();
     }
+  });
+
+  describe("Sprint 20 案1: buildDialogueDensityFloorDirective (L04 prompt 用)", () => {
+    it("page_role 全 8 種類の下限を含む directive を生成", () => {
+      const directive = buildDialogueDensityFloorDirective();
+      expect(directive).toContain("## Page Role Density Floor");
+      expect(directive).toContain("opening_hook");
+      expect(directive).toContain("dialogue (会話で物語進行)");
+      expect(directive).toContain("dialogue ≥ 3");
+      expect(directive).toContain("text 合計 (dialogue+monologue+narration) ≥ 5");
+      expect(directive).toContain("action");
+      expect(directive).toContain("SFX ≥ 3");
+    });
+
+    it("directive に不足時の補強パターン (off-frame voice / システム音声等) を含む", () => {
+      const directive = buildDialogueDensityFloorDirective();
+      expect(directive).toContain("off-frame voice");
+      expect(directive).toContain("システム音声");
+      expect(directive).toContain("リアクション dialogue");
+      expect(directive).toContain("会話していない会話シーン");
+    });
+
+    it("audit との同期メッセージを含む (生成 → 検証の整合性担保)", () => {
+      const directive = buildDialogueDensityFloorDirective();
+      expect(directive).toContain("audit-dialogue-density");
+    });
   });
 });

@@ -8,6 +8,7 @@ import { extractStructuredJson } from "../llm/codex-text";
 import { buildPanelCountHintTable, type GenerationProfile } from "../page-director-v2/panel-count-hint";
 import { buildCraftGuideDirectives } from "./craft-guide-directives";
 import { loadDensityProfile } from "./density-profile-loader";
+import { buildDialogueDensityFloorDirective } from "../qa-v2/dialogue-density-floor";
 import type {
   BibleSnapshotV2,
   EpisodeStoryboardV2,
@@ -100,6 +101,11 @@ function buildTextQualityPromptDirectives(bible: BibleSnapshotV2): string {
     lines.push("- character_speech_styles は該当キャラの dialogue / monologue 文体ガード。first_person / register / ban_phrases を必ず守る。");
     lines.push(JSON.stringify(materials.character_speech_styles, null, 2));
   }
+
+  // 2026-05-18 Sprint 20 案1: page_role 別 dialogue/text 下限 directive を追加。
+  // qa-v2/dialogue-density-floor の audit 基準と同期。
+  lines.push("");
+  lines.push(buildDialogueDensityFloorDirective());
 
   return lines.join("\n");
 }

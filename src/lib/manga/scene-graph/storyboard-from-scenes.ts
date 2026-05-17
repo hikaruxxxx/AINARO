@@ -34,6 +34,7 @@ import type {
 import type { Scene, SceneGraphV1, CastEntry, KeyLine, SceneMode } from "./schema";
 import { runCodexText } from "../llm/codex-text";
 import { contextForSceneV2 } from "../bible/broker-v3";
+import { buildDialogueDensityFloorDirective } from "../qa-v2/dialogue-density-floor";
 
 // ============================================================================
 // Top-level entry
@@ -755,6 +756,10 @@ export function buildPanelDetailPrompt(
   lines.push(`   NG: { "character_id": "X", "key_lines": ["..."] }`);
   lines.push(`   OK: { "character_id": "X", "text": "..." }`);
   lines.push(`6b. **台詞密度の目標 (商業 narou 系コミカライズ水準)**: この scene 全 ${panelCount} panel のうち、最低 ${Math.max(1, Math.ceil(panelCount * 0.6))} panel (60%) には何らかのテキスト (dialogue / monologue / narration のいずれか) を入れる。完全無音 page は禁止 (page をまたぐ scene の場合、自分の panel 範囲内では最低 1 panel には text を置く)。`);
+  // 2026-05-18 Sprint 20 案1: page_role 別 dialogue/text 下限 directive を追加 (qa-v2 audit と同期)
+  lines.push("");
+  lines.push(buildDialogueDensityFloorDirective());
+  lines.push("");
   lines.push(`   追加 text のパターン例:`);
   lines.push(`   - 反応モノローグ: 「……」「ふ」「やはり、か」「数字、合うのか」のような短い内心`);
   lines.push(`   - 状況説明 narration: 「午前六時十四分」「外気五度」「公社アプリ通知音」のような時刻・気温・音の地の文`);
