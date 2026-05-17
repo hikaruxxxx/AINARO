@@ -46,6 +46,8 @@
 > - `826acc7` Sprint 8 案1: L9 prompt に ROW LAYOUT 追加 (row-grouping で AI の縦積み bias を矯正)
 > - `3f5bd80` Sprint 8 案2: effect-lines detector で establishing 大コマの radial 誤発火を抑制
 > - `316355f` Sprint 9 案A+B: storyboard narration を bible 準拠に修正 + L9 prompt に BIBLE FACTS section 追加
+> - `b18c404` Sprint 10 案1: bible-facts-audit を新設 (storyboard narration の bible 整合性検証 CLI)
+> - `1280fb5` Sprint 10 案2: ROW LAYOUT に行高 % と幅×高さの 2D 指定を追加
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -71,14 +73,19 @@
 > - **効果**: v6 まで AI 補完で描かれていた架空ランキング表「S級 0.2% / A級 3.1% / F級 67.3%」が v7 で消失。narration が bible 準拠で正確に描画される。商業漫画品質 v6 B+ → v7 A-
 > - **未解決**: L04 storyboard 生成段階の bible 数値検証は未実装 (a07 ep01 のみ手動修正、他作品は同種逸脱の可能性)
 >
-> ### Sprint 10 候補
+> ### Sprint 10 案1+2 結果 (a07 ep01 で実走行、p01 v8 で render 検証、Pro 枠 +1 枚)
 >
-> 1. **(最高 ROI、構造課題)** L04 storyboard 生成段階で bible 量的事実から narration 数値を機械検証 (`scripts/generation/quantitative-audit.py` の漫画版に相当)
-> 2. **(中)** ROW LAYOUT に行の高さ % を明示 (例: "ROW 2 (BOTTOM, height=24%): each 50% width × 24% height") — area% 50/12/12 への厳密化
-> 3. **(中)** L11 audit に「panel area % が page_plan と画像で乖離」検出ルール追加
-> 4. **(中)** 残作品 (a07 以外) の storyboard で同種 bible 逸脱を一括検出するスクリプト
-> 5. **(低)** PanelV2 型に `effect_lines?: EffectLineSpec | null` を正式追加 (detector の unsafe access 解消)
-> 6. **(検証)** p12 / p05 / p19 を v7 で再 render (Pro 枠 +3 枚)、Sprint 7-add + 8 案1+2 + 9 案A+B の全 page 効果測定
+> - **案1 (bible-facts-audit)** ✓ 実用ツールとして機能: a07 ep01 走行で panel p022「三年前。公社、鑑定窓口。」を warning 検出 (これはレン 18 歳基準で 3年前=15歳鑑定の個人時間軸、誤検出として許容)、panel#1 (修正済) は OK
+> - **案2 (ROW LAYOUT 行高 %)** △ 構造は維持、area% 厳密一致は未達: v8 で「panel#2/3 が 50% width × 25% height」と指示しても実画像は 25% × 2 のまま (12% × 2 への矯正は AI が踏まえない)。AI の確率的揺らぎで描き込み密度は v7 比で再悪化
+>
+> ### Sprint 11 候補
+>
+> 1. **(最高 ROI)** establishing panel 内の overlay 数制限 directive: 「panel#1 establishing は in-panel overlay (情報パネル/ラベル/ランキング表) を最大 1 個まで、他は地の建物/空のみ」を明示
+> 2. **(中)** bible.meta に `quantitative_facts` 構造化フィールド追加 — 個人時間軸 (キャラ年齢からの回想) と世界観事実を別 facet で管理、bible-facts-audit の誤検出を減らす
+> 3. **(中)** L11 audit に「panel area % が page_plan と実画像で乖離」検出ルール追加 (vision 解析必須、コスト高)
+> 4. **(中)** 残作品 (a07 以外) の storyboard で bible 逸脱を一括検出 (`audit-bible-facts.ts --all` 拡張)
+> 5. **(低)** PanelV2 型に `effect_lines?: EffectLineSpec | null` を正式追加
+> 6. **(検証)** p12 / p05 / p19 を v8 で再 render、Sprint 7-10 全効果を全 page 測定 (Pro 枠 +3 枚)
 
 ## 設計原則
 
