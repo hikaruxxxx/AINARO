@@ -64,6 +64,7 @@
 > - `79256c1` Sprint 22 案A: a07 ep01 p24 cliffhanger 細部修正 (空吹き出し枠消失 + nav voice 化、ユーザ指摘から)
 > - `c2a02ad` Sprint 22 案B: panel block に effect_lines per-panel directive 追加 (集中線中心の AI 制御完成)
 > - `89744e4` Sprint 22 案C: p24 v15 の空 typeset 枠 5 個完全消去 (storyboard 強化 + page-level forbidden directive)
+> - `39c95cd` Sprint 22 修正: p24 panel#120 の過剰指示を撤回 (AI 委任で v18=A 級達成、メモリ feedback_ai_image_over_prompting.md 追加)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
