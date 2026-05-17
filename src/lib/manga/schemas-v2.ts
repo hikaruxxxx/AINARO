@@ -19,6 +19,8 @@ import type {
   CostumeSpec,
   AttributeClassifierLabels,
 } from "./schemas";
+// 2026-05-18 Sprint 22 案5: effect_lines を PanelV2 に正式追加 (effect-lines/types.ts から import)
+import type { EffectLineSpec } from "./effect-lines/types";
 
 // ============================================================
 // L1 出力: BibleSnapshotV2
@@ -706,6 +708,13 @@ export type PanelV2 = {
   silence: boolean;
   importance: 1 | 2 | 3 | 4 | 5;
   entities: PanelEntities;
+  /**
+   * 2026-05-18 Sprint 22 案5 で正式追加。
+   * - null: 設計者の明示的 opt-out (detector が他 rule を無視して null 返却)
+   * - EffectLineSpec: 設計者の明示的指定 (detector が auto-detect ルールより優先)
+   * - undefined: detector のヒューリスティック (importance/bleed/sfx/silence/expression) で判定
+   */
+  effect_lines?: EffectLineSpec | null;
   action: string;
   key_visual: string;
   dialogue: Array<{
