@@ -804,12 +804,12 @@ function buildScenePanelRestrictionBlock(page: StoryboardPageV2, localPanelNoByP
     .join(", ");
 
   return [
-    `SCENE PANEL RESTRICTIONS (applies to ${labels} — shot_type=establishing/wide):`,
-    "- Max 1 in-panel overlay (one information panel / one billboard / one signage cluster) per scene panel.",
-    "- DO NOT render: SNS feeds, LIVE broadcast tickers, hashtag trends, ranking charts, percentages, demographic statistics, fake brand logos, sponsored news feeds, fake corporate slogans.",
-    "- Ambient environmental light OK (distant neon, illegible signage at small scale must remain blurred/sub-readable).",
-    "- Narration boxes + speech bubbles are typeset over the panel — NOT counted as in-panel overlays.",
-    "- Information density LOW. Less is more.",
+    `SCENE PANEL RESTRICTIONS (applies to ${labels} — shot_type=establishing/wide). These rules are MANDATORY:`,
+    "- IN-PANEL OVERLAY COUNT (HARD LIMIT): atmospheric establishing/wide = ZERO overlays (no information panels at all). If a single key signage IS explicitly listed in PANELS section action/visual_focus as the panel's narrative subject, exactly 1 overlay is permitted — never 2 or more.",
+    "- MUST NOT render any of: SNS feeds, LIVE broadcast tickers, hashtag trends, ranking charts, percentages, demographic statistics, fake brand logos (beyond the bible-specified one), sponsored news feeds, fake corporate slogans, advertising posters with readable text.",
+    "- Ambient environmental light IS encouraged (distant neon, building window glow, dimmed street signage), but ALL text MUST remain blurred, illegible, or below ~12 px height so the reader senses atmosphere instead of reading it.",
+    "- Narration boxes + speech bubbles + SFX onomatopoeia are typeset elements OVER the panel surface — they do NOT count toward the overlay budget.",
+    "- Primary subject of scene panels = location atmosphere itself. Information density MUST stay LOW. Less is more — when in doubt, omit overlays entirely.",
   ].join("\n");
 }
 

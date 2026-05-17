@@ -1102,9 +1102,10 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("## SCENE PANEL RESTRICTIONS");
     expect(result.prompt).toContain("SCENE PANEL RESTRICTIONS (applies to panel#1");
-    expect(result.prompt).toContain("Max 1 in-panel overlay");
-    expect(result.prompt).toContain("DO NOT render: SNS feeds, LIVE broadcast tickers");
-    expect(result.prompt).toContain("Information density LOW. Less is more.");
+    expect(result.prompt).toContain("These rules are MANDATORY");
+    expect(result.prompt).toContain("ZERO overlays");
+    expect(result.prompt).toContain("MUST NOT render any of: SNS feeds, LIVE broadcast tickers");
+    expect(result.prompt).toContain("Less is more");
   });
 
   it("Sprint 12 拡張: wide shot_type も SCENE PANEL RESTRICTIONS の対象に含まれる", () => {
