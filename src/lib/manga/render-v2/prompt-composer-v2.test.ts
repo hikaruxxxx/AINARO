@@ -1087,9 +1087,8 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     expect(result.prompt).not.toContain("Quantitative facts excerpted from bible");
   });
 
-  it("emits ESTABLISHING RESTRICTIONS section when page contains an establishing panel (Sprint 11 案1)", () => {
+  it("emits SCENE PANEL RESTRICTIONS section when page contains an establishing panel (Sprint 11 案1 → Sprint 12 拡張)", () => {
     const storyPage = page(3);
-    // panel#1 を establishing に変更
     storyPage.panels[0].shot_type = "establishing";
     const args = {
       page: storyPage,
@@ -1101,14 +1100,33 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       bibleTier: "minimal" as const,
     };
     const result = composePagePrompt(args);
-    expect(result.prompt).toContain("## ESTABLISHING RESTRICTIONS");
-    expect(result.prompt).toContain("ESTABLISHING PANEL RESTRICTIONS (applies to panel#1)");
-    expect(result.prompt).toContain("Maximum 1 in-panel overlay");
-    expect(result.prompt).toContain("DO NOT render: SNS feed overlays, LIVE broadcast tickers");
-    expect(result.prompt).toContain("Information density should be LOW. Less is more.");
+    expect(result.prompt).toContain("## SCENE PANEL RESTRICTIONS");
+    expect(result.prompt).toContain("SCENE PANEL RESTRICTIONS (applies to panel#1");
+    expect(result.prompt).toContain("Max 1 in-panel overlay");
+    expect(result.prompt).toContain("DO NOT render: SNS feeds, LIVE broadcast tickers");
+    expect(result.prompt).toContain("Information density LOW. Less is more.");
   });
 
-  it("omits ESTABLISHING RESTRICTIONS when no panel is shot_type=establishing", () => {
+  it("Sprint 12 拡張: wide shot_type も SCENE PANEL RESTRICTIONS の対象に含まれる", () => {
+    const storyPage = page(3);
+    // panel#2 を wide に、panel#1 を medium のまま
+    storyPage.panels[1].shot_type = "wide";
+    const args = {
+      page: storyPage,
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).toContain("## SCENE PANEL RESTRICTIONS");
+    expect(result.prompt).toContain("applies to panel#2");
+    expect(result.prompt).toContain("shot_type=establishing/wide");
+  });
+
+  it("omits SCENE PANEL RESTRICTIONS when no panel is establishing or wide", () => {
     const storyPage = page(3);
     // 全 panel が medium (デフォルト)
     const args = {
@@ -1121,8 +1139,8 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       bibleTier: "minimal" as const,
     };
     const result = composePagePrompt(args);
-    expect(result.prompt).not.toContain("## ESTABLISHING RESTRICTIONS");
-    expect(result.prompt).not.toContain("ESTABLISHING PANEL RESTRICTIONS");
+    expect(result.prompt).not.toContain("## SCENE PANEL RESTRICTIONS");
+    expect(result.prompt).not.toContain("SCENE PANEL RESTRICTIONS");
   });
 
   it("MANGA_CRAFT_DIRECTIVES_V6 no longer contains the legacy generic 'Panel size variation' directive", () => {
