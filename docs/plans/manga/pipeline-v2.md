@@ -58,6 +58,9 @@
 > - `62d5303` Sprint 19 案3: a07 ep01 storyboard の dialogue/narration を補強 (12 page → findings 0、商業漫画レベル達成)
 > - `7b899d7` Sprint 20 案1: L04 storyboard 生成 prompt に density floor directive を注入 (生成段階での予防網)
 > - `2df5910` Sprint 21 案6: prompt size 警告閾値 8000→12000 + BIBLE FACTS 抜粋 300→150 字圧縮 (warning ノイズ解消)
+> - `8660359` Sprint 22 案6: SCENE PANEL RESTRICTIONS + ROW LAYOUT を compact 化 (各 30-40% 文字数削減)
+> - `314e0da` Sprint 22 案5: PanelV2 schema に effect_lines を正式追加 (effect-lines/types.ts 切り出し、detector unsafe cast 解消)
+> - `3fb7d3d` Sprint 22 案2: L03.5 scene candidate prompt に key_lines 量 floor directive を追加 (中間表現>監視網 根本対応)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -201,14 +204,34 @@
 > - BIBLE FACTS の timeline/system 抜粋 300→150 字、a07 では必要 facts (20年前/18歳まで/七段階) を概ね保持
 > - p3 v13 で warning 消失 + 品質維持を確認 (dialogue 4 + monologue + TV ニュース overlay 全描画)
 >
-> ### Sprint 22 候補
+> ### Sprint 22 完了 (案2, 案5, 案6 + 進行中の案3)
 >
-> 1. **(検証)** L04 を a07 ep01 で再走行 → Sprint 20 directive の実効性測定
-> 2. **(高 ROI)** L03.5 scene_graph の dialogue_plan 増強 (中間表現>監視網)
-> 3. **(中)** 残 22 page を v13 で render してフルエピソード品質測定 (Pro 枠 +22)
+> - **案6 (compact 化)**: SCENE PANEL RESTRICTIONS + ROW LAYOUT prompt 出力 30-40% 削減、562 tests 維持
+> - **案5 (effect_lines schema)**: effect-lines/types.ts 切り出しで循環依存回避、detector の unsafe cast 解消
+> - **案2 (L03.5 key_lines floor)**: scene candidate prompt に panel 数別下限 directive、空 [] を生成失敗扱いに格上げ
+> - **案3 (残 22 page v13 render)**: background 実行中、Pro 枠 +22 消費見込み、結果は次セッションで集約
+>
+> ### 三層 dialogue 密度防御 (完成形)
+>
+> ```
+> L03.5 scene candidate prompt (key_lines 量 floor) ← Sprint 22 案2
+>     ↓
+> scene_graph.json (dialogue_plan.key_lines)
+>     ↓
+> L04 storyboard 生成 prompt (page_role 別 density floor) ← Sprint 20 案1
+>     ↓
+> storyboard.json
+>     ↓
+> audit-dialogue-density (生成後の検出網) ← Sprint 18
+> ```
+>
+> ### Sprint 23 候補
+>
+> 1. **(検証)** L03.5 を a07 ep01 で再走行 → key_lines floor directive の実効性測定
+> 2. **(検証)** L04 を a07 ep01 で再走行 → density floor 反映の予防網実効性確認
+> 3. **(検証)** Sprint 22 案3 結果集約 → 全 page 品質測定 (商業漫画 24 page セット完成)
 > 4. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
-> 5. **(中)** PanelV2 型に effect_lines 正式追加
-> 6. **(中)** SCENE PANEL RESTRICTIONS / ROW LAYOUT の文字数を更に圧縮 (現状各 200-400 字)
+> 5. **(低)** effect_lines schema 拡張後の test fixture 整理 (cast 削除)
 
 ## 設計原則
 
