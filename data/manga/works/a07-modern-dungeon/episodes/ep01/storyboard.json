@@ -4142,24 +4142,14 @@
             "props": [],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "主人公の片目 (画面右側) に青光が戻る。ナビの narration_box (細枠の矩形) を 1 つだけ panel 左上に配置、同じ text を他形式 (oval バブル等) で重複描画しない。集中線は右目を中心に放射。",
+          "action": "片目に青光が戻り、ナビが次の条件を持つ気配を残す。",
           "key_visual": "レンの片目に細い青光が戻り、白い余白の奥に角丸吹き出しだけが浮く。",
-          "dialogue": [
-            {
-              "character_id": "nav",
-              "text": "次の経験値倍化条件、開示します。",
-              "bubble_shape": "narration_box"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
-          "narration": [],
-          "sfx": [],
-          "effect_lines": {
-            "type": "radial",
-            "intensity": "strong",
-            "centerX": 0.65,
-            "centerY": 0.4
-          }
+          "narration": [
+            "次の経験値倍化条件、開示します。"
+          ],
+          "sfx": []
         }
       ]
     }
