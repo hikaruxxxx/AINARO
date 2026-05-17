@@ -4072,7 +4072,7 @@
             ],
             "focus_entity_id": "char_桐生_レン_v1"
           },
-          "action": "未分類加算と返事を同じコマに置く。",
+          "action": "未分類加算と返事をひとつの thought bubble に集約する。空の吹き出し枠を周囲に描かない。主人公が壊れた携帯端末を見つめ、内省を 1 つだけ表示。",
           "key_visual": "壊れた画面越しの数値、黒フード、足元の薄い青線。",
           "dialogue": [],
           "monologue": [
@@ -4144,12 +4144,21 @@
           },
           "action": "片目に青光が戻り、ナビが次の条件を持つ気配を残す。",
           "key_visual": "レンの片目に細い青光が戻り、白い余白の奥に角丸吹き出しだけが浮く。",
-          "dialogue": [],
-          "monologue": [],
-          "narration": [
-            "次の経験値倍化条件、開示します。"
+          "dialogue": [
+            {
+              "character_id": "nav",
+              "text": "次の経験値倍化条件、開示します。"
+            }
           ],
-          "sfx": []
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "effect_lines": {
+            "type": "radial",
+            "intensity": "strong",
+            "centerX": 0.65,
+            "centerY": 0.4
+          }
         }
       ]
     }
