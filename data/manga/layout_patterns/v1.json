@@ -6725,6 +6725,309 @@
           "bleed": false
         }
       ]
+    },
+    {
+      "id": "M_variance_rich_5p",
+      "name": "variance-rich 5 panel commercial page",
+      "panel_count": 5,
+      "page_role_hints": [
+        "buildup",
+        "dialogue",
+        "action",
+        "reveal",
+        "opening_hook",
+        "establishing"
+      ],
+      "subtype_hints": [
+        "variance-rich"
+      ],
+      "purpose_summary": "5コマページに大40%、小10%、小10%、中20%、中20%の明確な大小差を作る商業漫画向けrect基準形",
+      "trigger_conditions": "panel_count=5 かつ uniform panel area を避けたい page",
+      "frequency": "low",
+      "example_pages": [
+        501
+      ],
+      "features": [
+        "variance_rich",
+        "hero_panel_40pct",
+        "small_panels_10pct_each",
+        "rect"
+      ],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "hero_large",
+          "size_class": "extra_large",
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              992
+            ],
+            [
+              0,
+              992
+            ]
+          ],
+          "is_borderless": false,
+          "bleed": false,
+          "background_treatment": "detailed_bg"
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "small_reaction",
+          "size_class": "small",
+          "polygon": [
+            [
+              874,
+              992
+            ],
+            [
+              1748,
+              992
+            ],
+            [
+              1748,
+              1488
+            ],
+            [
+              874,
+              1488
+            ]
+          ],
+          "is_borderless": false,
+          "bleed": false,
+          "background_treatment": "tone_back"
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "small_insert",
+          "size_class": "small",
+          "polygon": [
+            [
+              0,
+              992
+            ],
+            [
+              874,
+              992
+            ],
+            [
+              874,
+              1488
+            ],
+            [
+              0,
+              1488
+            ]
+          ],
+          "is_borderless": false,
+          "bleed": false,
+          "background_treatment": "solid_white"
+        },
+        {
+          "slot_id": "s4",
+          "reading_order": 4,
+          "role_hint": "medium_development",
+          "size_class": "medium",
+          "polygon": [
+            [
+              874,
+              1488
+            ],
+            [
+              1748,
+              1488
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              874,
+              2480
+            ]
+          ],
+          "is_borderless": false,
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
+        },
+        {
+          "slot_id": "s5",
+          "reading_order": 5,
+          "role_hint": "medium_resolution",
+          "size_class": "medium",
+          "polygon": [
+            [
+              0,
+              1488
+            ],
+            [
+              874,
+              1488
+            ],
+            [
+              874,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
+          "is_borderless": false,
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
+        }
+      ]
+    },
+    {
+      "id": "M_dramatic_4p",
+      "name": "dramatic 4 panel hero page",
+      "panel_count": 4,
+      "page_role_hints": [
+        "opening_hook",
+        "cliffhanger",
+        "reveal",
+        "action",
+        "buildup"
+      ],
+      "subtype_hints": [
+        "dramatic",
+        "variance-rich"
+      ],
+      "purpose_summary": "4コマページに大50%、小12%、小12%、中26%の強い視線誘導を作るrect基準形",
+      "trigger_conditions": "panel_count=4 かつ hero beat / reveal / cliffhanger を強調する page",
+      "frequency": "low",
+      "example_pages": [
+        502
+      ],
+      "features": [
+        "dramatic_hero",
+        "hero_panel_50pct",
+        "small_panels_12pct_each",
+        "rect"
+      ],
+      "slots": [
+        {
+          "slot_id": "s1",
+          "reading_order": 1,
+          "role_hint": "hero_large",
+          "size_class": "xx_large",
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              1748,
+              0
+            ],
+            [
+              1748,
+              1240
+            ],
+            [
+              0,
+              1240
+            ]
+          ],
+          "is_borderless": false,
+          "bleed": false,
+          "background_treatment": "detailed_bg"
+        },
+        {
+          "slot_id": "s2",
+          "reading_order": 2,
+          "role_hint": "small_reaction",
+          "size_class": "small",
+          "polygon": [
+            [
+              874,
+              1240
+            ],
+            [
+              1748,
+              1240
+            ],
+            [
+              1748,
+              1835
+            ],
+            [
+              874,
+              1835
+            ]
+          ],
+          "is_borderless": false,
+          "bleed": false,
+          "background_treatment": "tone_back"
+        },
+        {
+          "slot_id": "s3",
+          "reading_order": 3,
+          "role_hint": "small_insert",
+          "size_class": "small",
+          "polygon": [
+            [
+              0,
+              1240
+            ],
+            [
+              874,
+              1240
+            ],
+            [
+              874,
+              1835
+            ],
+            [
+              0,
+              1835
+            ]
+          ],
+          "is_borderless": false,
+          "bleed": false,
+          "background_treatment": "solid_white"
+        },
+        {
+          "slot_id": "s4",
+          "reading_order": 4,
+          "role_hint": "medium_resolution",
+          "size_class": "medium",
+          "polygon": [
+            [
+              0,
+              1835
+            ],
+            [
+              1748,
+              1835
+            ],
+            [
+              1748,
+              2480
+            ],
+            [
+              0,
+              2480
+            ]
+          ],
+          "is_borderless": false,
+          "bleed": false,
+          "background_treatment": "atmospheric_fade"
+        }
+      ]
     }
   ]
 }
