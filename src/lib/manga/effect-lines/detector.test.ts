@@ -104,4 +104,48 @@ describe("detectEffectLines", () => {
   it("どの条件にも当たらない panel は null", () => {
     expect(detectEffectLines(panel())).toBeNull();
   });
+
+  describe("Sprint 8 案2: storyboard 明示 + 静的 shot_type の保護", () => {
+    it("effect_lines: null が明示されたら他の rule を全部無視して null", () => {
+      // 旧実装では radial 発火する条件 (importance=5 + bleed) でも null になる
+      const p = panel({ importance: 5, bleed: true }) as PanelV2 & { effect_lines: null };
+      p.effect_lines = null;
+      expect(detectEffectLines(p)).toBeNull();
+    });
+
+    it("effect_lines に EffectLineSpec が明示されたらそれを優先返却", () => {
+      const p = panel() as PanelV2 & { effect_lines?: unknown };
+      p.effect_lines = { type: "focus", intensity: "subtle", centerX: 0.3, centerY: 0.7 };
+      expect(detectEffectLines(p)).toEqual({
+        type: "focus",
+        intensity: "subtle",
+        centerX: 0.3,
+        centerY: 0.7,
+      });
+    });
+
+    it("importance=5 + bleed でも shot_type=establishing なら radial を抑制", () => {
+      // a07 ep01 p001 (新宿夜景俯瞰 establishing) で誤発火した radial を防ぐ
+      expect(
+        detectEffectLines(panel({ importance: 5, bleed: true, shot_type: "establishing" })),
+      ).toBeNull();
+    });
+
+    it("importance=5 + bleed でも shot_type=wide なら radial を抑制", () => {
+      expect(
+        detectEffectLines(panel({ importance: 5, bleed: true, shot_type: "wide" })),
+      ).toBeNull();
+    });
+
+    it("importance=5 + impact SFX なら shot_type=establishing でも radial 発火 (爆発音は静的 shot でも有効)", () => {
+      expect(
+        detectEffectLines(
+          panel({ importance: 5, bleed: false, shot_type: "establishing", sfx: ["ドカ"] }),
+        ),
+      ).toMatchObject({
+        type: "radial",
+        intensity: "strong",
+      });
+    });
+  });
 });
