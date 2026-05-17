@@ -1055,7 +1055,9 @@ function inPanelTextBlock(
   }
   lines.push(
     "Each dialogue / monologue / narration / sfx item is associated with EXACTLY ONE panel (the one listed above). Do NOT duplicate the same bubble or caption across multiple panels — each speech bubble appears ONLY in its assigned panel.",
+    "Each text item in this panel MUST appear EXACTLY ONCE in EXACTLY ONE typeset shape. Do NOT render the same dialogue / monologue / narration text in two different bubble shapes (e.g. once as narration_box AND once as oval). If bubble_shape is specified above, use ONLY that shape.",
     "All text MUST be drawn INSIDE the image. Use authentic Japanese manga lettering style. Do NOT translate to English. Do NOT leave blank balloons.",
+    "Do NOT add empty typeset frames (white rectangles, blank UI cards, decorative bounding boxes) that are not listed above. Every typeset shape in the image MUST correspond to a specific text item above; speculative empty frames as 'UI atmosphere' are FORBIDDEN.",
   );
   return lines.join("\n");
 }
@@ -1508,7 +1510,12 @@ const MANGA_CRAFT_DIRECTIVES_V6 = `The following directives apply to ALL panels 
 ### Style refs interpretation
 - Style ref images attached are MANGA PAGE COMPOSITION references, NOT pure-illustration style guides.
 - Extract: line weight variation, screentone density, bubble-to-image area ratio.
-- If style refs show ~30-40% bubble area coverage, the generated page should match that density.`;
+- If style refs show ~30-40% bubble area coverage, the generated page should match that density.
+
+### Empty typeset frames (FORBIDDEN across all panels)
+- Do NOT add empty rectangles, blank UI cards, decorative bounding boxes, or speculative "atmosphere" frames in ANY panel — including silent panels and panels with no text specified.
+- A typeset shape (rectangle / oval / cloud / narration_box) must appear ONLY if the IN-PANEL TEXT section for that panel lists a corresponding text item.
+- This applies even when a panel's content is purely visual (silent, atmospheric, establishing). Silent panels are silent — no decorative empty frames.`;
 
 function composePagePromptCore(args: ComposeArgs): ComposeResult {
   if (!args.page) throw new Error("composePagePrompt requires page");
