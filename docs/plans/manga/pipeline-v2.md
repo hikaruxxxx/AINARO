@@ -56,6 +56,7 @@
 > - `e89883d` Sprint 16 案1: quantitative_facts に personal_timeline_facts を追加し個人時間軸誤検出を解消
 > - `be51418` Sprint 18: dialogue-density-floor を新設 (page_role 別 dialogue/text 下限 audit)
 > - `62d5303` Sprint 19 案3: a07 ep01 storyboard の dialogue/narration を補強 (12 page → findings 0、商業漫画レベル達成)
+> - `7b899d7` Sprint 20 案1: L04 storyboard 生成 prompt に density floor directive を注入 (生成段階での予防網)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -172,11 +173,32 @@
 > - **p3 v12 (A)**: 同僚/客/TVニュース dialogue が image overlay として描画、会話 page として商業漫画レベル
 > - **p22 v12 (A-)**: ナビ-レンの会話 dialogue が overlay、物語転換点が v11 比で明示
 >
-> ### Sprint 20 候補 (次セッション以降)
+> ### Sprint 20 案1 結果 (L04 prompt 生成段階での予防網完成)
 >
-> 1. **(最高 ROI、根本対応)** L04 storyboard 生成 prompt に density floor 明示 — 手動補強ではなく生成側で予防
-> 2. **(高 ROI)** scene_graph (L03.5) の dialogue_plan を増強 (中間表現>監視網 原則)
-> 3. **(中)** 残 22 page (p1, p2-p21 から p3/p22 除く + p23/p24) を v12 で render してフルエピソード品質測定 (Pro 枠 +22)
+> - shotlist 経路 (`extractStoryboardFromShotlist`) と scene_graph 経路 (`buildPanelDetailPrompt`) の両方に density floor directive を注入
+> - 既存 audit-dialogue-density (検出網) と同 floor 値を共有 — 生成 → 検証の双方向ループ完成
+> - 補強パターン (off-frame voice / システム音声 / 状況描写 / リアクション) も prompt に明示
+> - 562 tests 全 pass、tsc clean
+>
+> ### 生成 → 検証パイプライン (完成形)
+>
+> ```
+> L04 storyboard 生成 prompt (density floor directive 注入済)
+>     ↓
+> storyboard.json
+>     ↓
+> audit-dialogue-density (Sprint 18 で検出網)
+>     ↓ findings 0 ?
+> L09 render
+>     ↓
+> audit-bible-facts (年代/年齢/ランク整合性、Sprint 14-16)
+> ```
+>
+> ### Sprint 21 候補
+>
+> 1. **(検証)** L04 を a07 ep01 で再走行 (Codex/Claude 直編) → density floor 達成を実測 → 手動補強不要を実証
+> 2. **(高 ROI)** L03.5 scene_graph の dialogue_plan 増強 (中間表現>監視網 原則)
+> 3. **(中)** 残 22 page を v12 で render してフルエピソード品質測定 (Pro 枠 +22)
 > 4. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
 > 5. **(中)** PanelV2 型に effect_lines 正式追加
 > 6. **(中)** prompt size 警告解消 (現在 10000+ chars、BIBLE FACTS 圧縮 or tier 自動切替)
