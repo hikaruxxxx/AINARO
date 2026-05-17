@@ -815,12 +815,12 @@ function buildScenePanelRestrictionBlock(page: StoryboardPageV2, localPanelNoByP
     .join(", ");
 
   return [
-    `SCENE PANEL RESTRICTIONS (applies to ${labels} — shot_type=establishing/wide). These rules are MANDATORY:`,
-    "- IN-PANEL OVERLAY COUNT (HARD LIMIT): atmospheric establishing/wide = ZERO overlays (no information panels at all). If a single key signage IS explicitly listed in PANELS section action/visual_focus as the panel's narrative subject, exactly 1 overlay is permitted — never 2 or more.",
-    "- MUST NOT render any of: SNS feeds, LIVE broadcast tickers, hashtag trends, ranking charts, percentages, demographic statistics, fake brand logos (beyond the bible-specified one), sponsored news feeds, fake corporate slogans, advertising posters with readable text.",
-    "- Ambient environmental light IS encouraged (distant neon, building window glow, dimmed street signage), but ALL text MUST remain blurred, illegible, or below ~12 px height so the reader senses atmosphere instead of reading it.",
-    "- Narration boxes + speech bubbles + SFX onomatopoeia are typeset elements OVER the panel surface — they do NOT count toward the overlay budget.",
-    "- Primary subject of scene panels = location atmosphere itself. Information density MUST stay LOW. Less is more — when in doubt, omit overlays entirely.",
+    `SCENE PANEL RESTRICTIONS (${labels} — establishing/wide, MANDATORY):`,
+    "- Overlay budget: ZERO for atmospheric establishing/wide. Exactly 1 ONLY if PANELS action/visual_focus names a single key signage as the narrative subject. Never 2+.",
+    "- MUST NOT: SNS feeds, LIVE tickers, hashtag trends, ranking charts, percentages, statistics, fake brand logos (beyond bible-specified), corporate slogans, readable ad posters.",
+    "- Ambient light OK (distant neon, window glow), but ALL text must be blurred/illegible/≤12px.",
+    "- Narration boxes + speech bubbles + SFX are typeset OVER the panel — NOT counted toward overlay budget.",
+    "- Primary subject = location atmosphere itself. Information density LOW. Less is more — when in doubt, omit overlays.",
   ].join("\n");
 }
 
@@ -895,21 +895,24 @@ function buildRowGroupingBlock(
       rows.length <= 2 ? (idx === 0 ? "TOP" : "BOTTOM") : idx === 0 ? "TOP" : idx === rows.length - 1 ? "BOTTOM" : `MIDDLE${rows.length > 3 ? `_${idx}` : ""}`;
     // 行高は row 内の panel の最大 hPct (= 行全体の縦幅) を採用
     const rowHeightPct = Math.round(Math.max(...row.map((p) => p.hPct)));
+    // 2026-05-18 Sprint 22 案6: 1 行 compact 化。"BOTTOM,h=24%" のように短縮、
+    // 各 panel は "panel#N RIGHT 50%w×24%h" 形式。AI に対する意味は維持しつつ
+    // 30-40% 文字数削減。
     if (row.length === 1) {
       const p = row[0];
-      const widthNote = p.w >= PAGE_W * 0.85 ? "full width" : p.cx < PAGE_W * 0.5 ? "left half" : "right half";
+      const widthNote = p.w >= PAGE_W * 0.85 ? "full" : p.cx < PAGE_W * 0.5 ? "L" : "R";
       rowLines.push(
-        `- ROW ${idx + 1} (${rowLabel}, height=${rowHeightPct}% of page): panel#${p.panelNo} (${widthNote}, ${Math.round(p.wPct)}% width × ${rowHeightPct}% height)`,
+        `- ROW${idx + 1} (${rowLabel},h=${rowHeightPct}%): panel#${p.panelNo} ${widthNote} ${Math.round(p.wPct)}%w×${rowHeightPct}%h`,
       );
     } else {
       const items = row
         .map((p) => {
-          const pos = p.cx < PAGE_W * 0.4 ? "LEFT" : p.cx > PAGE_W * 0.6 ? "RIGHT" : "CENTER";
-          return `panel#${p.panelNo} on ${pos} (${Math.round(p.wPct)}% width × ${Math.round(p.hPct)}% height)`;
+          const pos = p.cx < PAGE_W * 0.4 ? "L" : p.cx > PAGE_W * 0.6 ? "R" : "C";
+          return `panel#${p.panelNo} ${pos} ${Math.round(p.wPct)}%w×${Math.round(p.hPct)}%h`;
         })
         .join(", ");
       rowLines.push(
-        `- ROW ${idx + 1} (${rowLabel}, height=${rowHeightPct}% of page): ${row.length} panels SIDE-BY-SIDE — ${items} (RTL: right panel read first)`,
+        `- ROW${idx + 1} (${rowLabel},h=${rowHeightPct}%) ${row.length}-up SIDE-BY-SIDE: ${items} (RTL: R first)`,
       );
     }
   });
@@ -917,13 +920,11 @@ function buildRowGroupingBlock(
   const horizontalRows = rows.filter((row) => row.length >= 2);
   const warning =
     horizontalRows.length > 0
-      ? `\nHORIZONTAL ROW WARNING: ROW${horizontalRows.length > 1 ? "s" : ""} ${horizontalRows
-          .map((row, i) => `${rows.indexOf(row) + 1}`)
-          .join(", ")} contain${horizontalRows.length === 1 ? "s" : ""} side-by-side panels. Do NOT stack them vertically — they share the same row height. Each side-by-side panel MUST occupy exactly the indicated width × height percentages; do NOT expand a small panel to fill the row vertically.`
+      ? `\nWARN: side-by-side rows ${horizontalRows.map((row) => `${rows.indexOf(row) + 1}`).join(",")} must NOT stack vertically — each panel must occupy exactly the indicated w×h%, do not expand a small panel to fill the row.`
       : "";
 
   return [
-    `ROW LAYOUT (${rows.length} row${rows.length > 1 ? "s" : ""} on this page):`,
+    `ROW LAYOUT (${rows.length} row${rows.length > 1 ? "s" : ""}):`,
     ...rowLines,
     warning,
   ]

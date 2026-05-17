@@ -999,15 +999,15 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     };
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("## ROW LAYOUT");
-    expect(result.prompt).toContain("ROW LAYOUT (2 rows on this page)");
-    // 2026-05-17 Sprint 10 案2 で行高 % を追加
-    expect(result.prompt).toContain("ROW 1 (TOP, height=50% of page): panel#1 (full width");
-    expect(result.prompt).toContain("ROW 2 (BOTTOM, height=25% of page): 2 panels SIDE-BY-SIDE");
-    expect(result.prompt).toContain("panel#2 on RIGHT (50% width × 25% height)");
-    expect(result.prompt).toContain("panel#3 on LEFT (50% width × 25% height)");
-    expect(result.prompt).toContain("HORIZONTAL ROW WARNING");
-    expect(result.prompt).toContain("Do NOT stack them vertically");
-    expect(result.prompt).toContain("do NOT expand a small panel to fill the row vertically");
+    // 2026-05-18 Sprint 22 案6 で 1 行 compact 化
+    expect(result.prompt).toContain("ROW LAYOUT (2 rows):");
+    expect(result.prompt).toContain("ROW1 (TOP,h=50%): panel#1 full 100%w×50%h");
+    expect(result.prompt).toContain("ROW2 (BOTTOM,h=25%) 2-up SIDE-BY-SIDE:");
+    expect(result.prompt).toContain("panel#2 R 50%w×25%h");
+    expect(result.prompt).toContain("panel#3 L 50%w×25%h");
+    expect(result.prompt).toContain("(RTL: R first)");
+    expect(result.prompt).toContain("WARN: side-by-side rows 2 must NOT stack vertically");
+    expect(result.prompt).toContain("do not expand a small panel to fill the row");
   });
 
   it("omits ROW LAYOUT when all panels stack vertically (1 panel per row)", () => {
@@ -1102,10 +1102,10 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     };
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("## SCENE PANEL RESTRICTIONS");
-    expect(result.prompt).toContain("SCENE PANEL RESTRICTIONS (applies to panel#1");
-    expect(result.prompt).toContain("These rules are MANDATORY");
-    expect(result.prompt).toContain("ZERO overlays");
-    expect(result.prompt).toContain("MUST NOT render any of: SNS feeds, LIVE broadcast tickers");
+    // 2026-05-18 Sprint 22 案6 で 1 行 compact 化
+    expect(result.prompt).toContain("SCENE PANEL RESTRICTIONS (panel#1 — establishing/wide, MANDATORY)");
+    expect(result.prompt).toContain("ZERO for atmospheric establishing/wide");
+    expect(result.prompt).toContain("MUST NOT: SNS feeds, LIVE tickers");
     expect(result.prompt).toContain("Less is more");
   });
 
@@ -1124,8 +1124,8 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     };
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("## SCENE PANEL RESTRICTIONS");
-    expect(result.prompt).toContain("applies to panel#2");
-    expect(result.prompt).toContain("shot_type=establishing/wide");
+    expect(result.prompt).toContain("panel#2");
+    expect(result.prompt).toContain("establishing/wide");
   });
 
   it("omits SCENE PANEL RESTRICTIONS when no panel is establishing or wide", () => {
