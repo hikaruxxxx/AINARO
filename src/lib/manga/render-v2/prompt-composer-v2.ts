@@ -45,6 +45,7 @@ import type {
   FalsePositives,
 } from "../compliance/types";
 import type { Scene } from "../scene-graph/schema";
+import type { EffectLineSpec } from "../effect-lines/types";
 
 const PAGE_W = 1748;
 const PAGE_H = 2480;
@@ -1341,7 +1342,31 @@ function renderPagePanelBlock(args: {
   for (const l of textLines) lines.push(l);
   const bgLine = compactBackgroundDirective(bgTreatment);
   if (bgLine) lines.push(`- ${bgLine}`);
+  // 2026-05-18 Sprint 22 案B: panel.effect_lines が明示されていれば AI に
+  // type/intensity/center 位置を per-panel block で明示する。
+  // a07 ep01 p24 v13 で「片目に青光が戻り」と action にあるのに集中線中心が
+  // panel 中央になっていた問題を解消する目的。
+  const effectLinesDirective = formatEffectLinesDirective(panel.effect_lines ?? undefined);
+  if (effectLinesDirective) lines.push(`- ${effectLinesDirective}`);
   return lines.join("\n");
+}
+
+/**
+ * panel.effect_lines を per-panel block で AI に伝える human-readable directive。
+ * undefined / null の場合は何も返さない (detector のヒューリスティック判定に委ねる)。
+ */
+function formatEffectLinesDirective(spec: EffectLineSpec | null | undefined): string | null {
+  if (!spec || typeof spec !== "object") return null;
+  const parts: string[] = [`Effect lines: type=${spec.type}, intensity=${spec.intensity}`];
+  if (typeof spec.centerX === "number" && typeof spec.centerY === "number") {
+    parts.push(
+      `center at (${Math.round(spec.centerX * 100)}%, ${Math.round(spec.centerY * 100)}%) of panel (origin = top-left)`,
+    );
+  }
+  if (typeof spec.direction === "number") {
+    parts.push(`direction=${spec.direction}° (0=right, 90=down)`);
+  }
+  return parts.join(", ");
 }
 
 /**
