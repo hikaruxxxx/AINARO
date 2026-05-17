@@ -9,8 +9,11 @@
  * 各 layer は別 tsx subprocess で起動 (cache + 失敗時 retry の境界が明確)。
  */
 import { spawn } from "node:child_process";
+import { promises as fs } from "node:fs";
 import path from "node:path";
 import "./_env";
+
+type QualityTier = "standard" | "premium";
 
 type Args = {
   slug: string;
@@ -29,13 +32,15 @@ type Args = {
   episodes?: number[];
   authorPenName?: string;
   publicationDate?: string;
+  qualityTier: QualityTier;
+  dryRun?: boolean;
 };
 
 /** boolean flags: 値を取らない */
-const BOOLEAN_FLAGS = new Set(["force", "skip-name-gate", "revision-queue"]);
+const BOOLEAN_FLAGS = new Set(["force", "skip-name-gate", "revision-queue", "dry-run"]);
 
 function parseArgs(): Args {
-  const a: Partial<Args> = {};
+  const a: Partial<Args> = { qualityTier: "standard" };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -53,6 +58,7 @@ function parseArgs(): Args {
         if (key === "force") a.force = true;
         else if (key === "skip-name-gate") a.skipNameGate = true;
         else if (key === "revision-queue") a.revisionQueue = true;
+        else if (key === "dry-run") a.dryRun = true;
         continue;
       }
       // 次 token が `--` で始まるなら値ではなくフラグ → スキップ
@@ -73,14 +79,20 @@ function parseArgs(): Args {
     else if (key === "episodes") a.episodes = val.split(",").map((s) => Number(s));
     else if (key === "author") a.authorPenName = val;
     else if (key === "publication-date") a.publicationDate = val;
+    else if (key === "quality-tier") {
+      if (val !== "premium" && val !== "standard") {
+        throw new Error(`invalid --quality-tier: ${val} (expected premium|standard)`);
+      }
+      a.qualityTier = val;
+    }
   }
   if (!a.slug) throw new Error("--slug required");
   return a as Args;
 }
 
 const ALL_LAYERS = [
-  "L01", "L01b", "L01c", "L02", "L02b",
-  "L03", "L04", "L05", "L06", "L07", "L08",
+  "L01", "L01b", "L01c", "L02", "L02_IMAGES_AUDIT", "L02b",
+  "L03", "L04", "L05", "L05_5", "L05b", "L05c", "L06", "L07", "L08",
   "L08_5",
   "L09", "L09b", "L11", "L12", "L13",
 ] as const;
@@ -94,10 +106,14 @@ const LAYER_SCRIPT: Record<LayerId, string> = {
   L01b: "scripts/manga/layers/L01b-bible-lint.ts",
   L01c: "scripts/manga/layers/L01c-bible-deepen.ts",
   L02: "scripts/manga/layers/L02-bible-images.ts",
+  L02_IMAGES_AUDIT: "scripts/manga/layers/L02b-bible-images-audit.ts",
   L02b: "scripts/manga/layers/L02b-volume-plot.ts",
   L03: "scripts/manga/layers/L03-shotlist.ts",
   L04: "scripts/manga/layers/L04-storyboard.ts",
   L05: "scripts/manga/layers/L05-page-director.ts",
+  L05_5: "scripts/manga/layers/L05-5-engagement-audit.ts",
+  L05b: "scripts/manga/layers/L05b-bootstrap-bg-treatment.ts",
+  L05c: "scripts/manga/layers/L05c-pattern-bg-learner.ts",
   L06: "scripts/manga/layers/L06-continuity-resolve.ts",
   L07: "scripts/manga/layers/L07-refs-resolution.ts",
   L08: "scripts/manga/layers/L08-incremental-refs.ts",
@@ -109,14 +125,33 @@ const LAYER_SCRIPT: Record<LayerId, string> = {
   L13: "scripts/manga/layers/L13-kdp.ts",
 };
 
-function workScopeForLayer(l: LayerId): "work" | "episode" | "volume" {
-  if (l === "L01" || l === "L01b" || l === "L01c" || l === "L02") return "work";
+function displayLayerName(l: LayerId): string {
+  if (l === "L02_IMAGES_AUDIT") return "L02b-images-audit";
+  if (l === "L05_5") return "L05.5";
+  if (l === "L08") return "L08-incr";
+  return l;
+}
+
+function normalizeLayerId(layer: string): LayerId {
+  if (layer === "L02b-images-audit" || layer === "L02_audit") return "L02_IMAGES_AUDIT";
+  if (layer === "L05.5" || layer === "L05_5") return "L05_5";
+  if (layer === "L08-incr") return "L08";
+  if ((ALL_LAYERS as readonly string[]).includes(layer)) return layer as LayerId;
+  throw new Error(`invalid layer id: ${layer}`);
+}
+
+function workScopeForLayer(l: LayerId): "none" | "work" | "episode" | "volume" {
+  if (l === "L05b" || l === "L05c") return "none";
+  if (l === "L01" || l === "L01b" || l === "L01c" || l === "L02" || l === "L02_IMAGES_AUDIT") return "work";
   if (l === "L02b" || l === "L13") return "volume";
   // L08_5 など、その他の layer は全て episode scope
   return "episode";
 }
 
 function buildLayerArgs(layer: LayerId, args: Args): string[] {
+  if (layer === "L05b") return [];
+  if (layer === "L05c") return ["--print-prompt"];
+
   const base: string[] = ["--slug", args.slug];
   const scope = workScopeForLayer(layer);
   if (scope === "episode") {
@@ -171,9 +206,9 @@ function spawnLayer(layer: LayerId, layerArgs: string[]): Promise<number> {
 }
 
 function selectLayers(args: Args): LayerId[] {
-  if (args.layer) return [args.layer as LayerId];
-  const fromIdx = args.from ? ALL_LAYERS.indexOf(args.from as LayerId) : 0;
-  const toIdx = args.to ? ALL_LAYERS.indexOf(args.to as LayerId) : ALL_LAYERS.length - 1;
+  if (args.layer) return [normalizeLayerId(args.layer)];
+  const fromIdx = args.from ? ALL_LAYERS.indexOf(normalizeLayerId(args.from)) : 0;
+  const toIdx = args.to ? ALL_LAYERS.indexOf(normalizeLayerId(args.to)) : ALL_LAYERS.length - 1;
   if (fromIdx < 0 || toIdx < 0) throw new Error("invalid --from or --to layer id");
   // L13 は volume scope なので明示指定がない限り含めない
   const layers = ALL_LAYERS.slice(fromIdx, toIdx + 1).filter((l) => {
@@ -182,27 +217,141 @@ function selectLayers(args: Args): LayerId[] {
     if (l === "L01" && !args.conceptPath && !args.layer && args.from !== "L01") return false;
     if (l === "L01c" && !args.conceptPath && !args.layer && args.from !== "L01c") return false;
     if (l === "L03" && !args.briefFile && !args.layer && args.from !== "L03") return false;
-    if (l === "L08") return false; // L08 は L07 で unresolved があれば手動で
-    if (l === "L09b") return false; // L09b は L09 から自動連鎖、orchestrator では明示指定時のみ
+    if ((l === "L05b" || l === "L05c") && args.qualityTier !== "premium") return false;
+    if (l === "L08" && args.qualityTier !== "premium") return false; // L08 は L07 で unresolved があれば手動で
+    if (l === "L09b" && args.qualityTier !== "premium") return false; // L09b は L09 から自動連鎖、orchestrator では明示指定時のみ
     return true;
   });
   return layers;
 }
 
+async function hasCharacterFirstAppearanceEpisode(args: Args): Promise<boolean> {
+  if (!args.episode) return false;
+  if (args.episode === 1) return true;
+
+  const currentEpisodeCharacters = await readShotlistCharacterIds(args.slug, args.episode);
+  if (currentEpisodeCharacters.size > 0) {
+    const previousEpisodeCharacters = new Set<string>();
+    for (let ep = 1; ep < args.episode; ep++) {
+      const ids = await readShotlistCharacterIds(args.slug, ep);
+      for (const id of ids) previousEpisodeCharacters.add(id);
+    }
+    for (const id of currentEpisodeCharacters) {
+      if (!previousEpisodeCharacters.has(id)) return true;
+    }
+    if (previousEpisodeCharacters.size > 0) return false;
+  }
+
+  const candidates = [
+    path.join("data", "manga", "works", args.slug, "bible", "snapshot.v2.json"),
+    path.join("data", "manga", "works", args.slug, "bible", "snapshot.json"),
+    path.join("data", "manga", "works", args.slug, "bible", "snapshot.v2-final.json"),
+  ];
+  for (const p of candidates) {
+    try {
+      const snapshot = JSON.parse(await fs.readFile(p, "utf-8")) as {
+        characters?: Array<{ appears_in_episodes?: unknown }>;
+      };
+      let sawEpisodeMetadata = false;
+      for (const c of snapshot.characters ?? []) {
+        if (!Array.isArray(c.appears_in_episodes)) continue;
+        sawEpisodeMetadata = true;
+        const episodes = c.appears_in_episodes
+          .map((v) => Number(v))
+          .filter((v) => Number.isInteger(v) && v > 0);
+        if (episodes.length > 0 && Math.min(...episodes) === args.episode) return true;
+      }
+      if (sawEpisodeMetadata) return false;
+    } catch {
+      // Try the next known snapshot path.
+    }
+  }
+  return false;
+}
+
+async function readShotlistCharacterIds(slug: string, episode: number): Promise<Set<string>> {
+  const shotlistPath = path.join(
+    "data",
+    "manga",
+    "works",
+    slug,
+    "episodes",
+    `ep${String(episode).padStart(2, "0")}`,
+    "shotlist.json",
+  );
+  try {
+    const shotlist = JSON.parse(await fs.readFile(shotlistPath, "utf-8")) as unknown;
+    const ids = new Set<string>();
+    collectShotlistCharacterIds(shotlist, ids);
+    return ids;
+  } catch {
+    return new Set();
+  }
+}
+
+function collectShotlistCharacterIds(value: unknown, ids: Set<string>): void {
+  if (Array.isArray(value)) {
+    for (const item of value) collectShotlistCharacterIds(item, ids);
+    return;
+  }
+  if (typeof value !== "object" || value === null) return;
+
+  const record = value as Record<string, unknown>;
+  for (const key of ["involved_character_ids", "characters"]) {
+    const maybeIds = record[key];
+    if (!Array.isArray(maybeIds)) continue;
+    for (const id of maybeIds) {
+      if (typeof id === "string" && id.startsWith("char_")) ids.add(id);
+    }
+  }
+  for (const item of Object.values(record)) collectShotlistCharacterIds(item, ids);
+}
+
+async function shouldSkipForQualityTier(layer: LayerId, args: Args): Promise<boolean> {
+  if (args.qualityTier !== "premium") return false;
+  if (
+    layer === "L02_IMAGES_AUDIT" ||
+    layer === "L05_5" ||
+    layer === "L05b" ||
+    layer === "L05c" ||
+    layer === "L09b"
+  ) {
+    return true;
+  }
+  if (layer === "L08") {
+    return !(await hasCharacterFirstAppearanceEpisode(args));
+  }
+  return false;
+}
+
 async function main() {
   const args = parseArgs();
   const layers = selectLayers(args);
-  console.log(`[pipeline] slug=${args.slug} layers=${layers.join(",")}`);
+  const skippedLayers: string[] = [];
+  console.log(
+    `[pipeline] slug=${args.slug} quality-tier=${args.qualityTier}${args.dryRun ? " dry-run=true" : ""} layers=${layers.map(displayLayerName).join(",")}`,
+  );
 
   for (const l of layers) {
-    console.log(`\n[pipeline] === ${l} ===`);
-    const code = await spawnLayer(l, buildLayerArgs(l, args));
+    const layerName = displayLayerName(l);
+    console.log(`\n[pipeline] === ${layerName} ===`);
+    if (await shouldSkipForQualityTier(l, args)) {
+      console.log(`[pipeline] SKIP ${layerName} (quality-tier=premium)`);
+      skippedLayers.push(layerName);
+      continue;
+    }
+    const layerArgs = buildLayerArgs(l, args);
+    if (args.dryRun) {
+      console.log(`[pipeline] DRY-RUN ${layerName}: npx tsx ${LAYER_SCRIPT[l]} ${layerArgs.join(" ")}`);
+      continue;
+    }
+    const code = await spawnLayer(l, layerArgs);
     if (code !== 0) {
-      console.error(`[pipeline] ${l} exited with code ${code}, stopping`);
+      console.error(`[pipeline] ${layerName} exited with code ${code}, stopping`);
       process.exit(code);
     }
   }
-  console.log(`\n[pipeline] DONE`);
+  console.log(`\n[pipeline] DONE skipped=${skippedLayers.length > 0 ? skippedLayers.join(",") : "(none)"}`);
 }
 
 main().catch((e) => { console.error("[pipeline] FAILED:", e); process.exit(1); });
