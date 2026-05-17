@@ -49,6 +49,13 @@ import type { Scene } from "../scene-graph/schema";
 const PAGE_W = 1748;
 const PAGE_H = 2480;
 const MAX_PROMPT_CHARS = 8000;
+/**
+ * 2026-05-18 Sprint 21 案6: warning 専用閾値。
+ * 実態として 8000-12000 chars の prompt でも render は問題なく成功している。
+ * MAX_PROMPT_CHARS (=8000) は tier=full → minimal の downgrade トリガーに据え置き、
+ * warning は実害が出やすい水準 (12000+) に引き上げて noise を削減。
+ */
+const PROMPT_WARN_THRESHOLD = 12000;
 
 type BibleTier = "deep" | "medium" | "minimal";
 type PromptScene = Pick<
@@ -424,9 +431,9 @@ function compactPageBibleContext(
 }
 
 function warnIfPromptTooLarge(prompt: string): void {
-  if (prompt.length > MAX_PROMPT_CHARS) {
+  if (prompt.length > PROMPT_WARN_THRESHOLD) {
     console.warn(
-      `[prompt-composer-v2] prompt size ${prompt.length} exceeds threshold ${MAX_PROMPT_CHARS}. Consider tier="minimal".`,
+      `[prompt-composer-v2] prompt size ${prompt.length} exceeds warn threshold ${PROMPT_WARN_THRESHOLD}. Consider trimming bible/scene context.`,
     );
   }
 }
@@ -766,7 +773,11 @@ function buildBibleFactsBlock(bible: BibleSnapshotV2): string | null {
   const system = (bible.world.system ?? "").trim();
   if (!timeline && !system) return null;
 
-  const MAX = 300;
+  // 2026-05-18 Sprint 21 案6: 300 → 150 字に圧縮。
+  // a07 timeline は冒頭 150 字で「20年前、地表世界の複数都市地下に...被害を止めたのは、
+  // 人類側の完全な勝利ではない。鑑定石...」と必要 facts を概ね含む。
+  // system は冒頭 150 字で「18歳まで判定 / S〜F 七段階」を含む。
+  const MAX = 150;
   const tShort = timeline.length > MAX ? `${timeline.slice(0, MAX)}…` : timeline;
   const sShort = system.length > MAX ? `${system.slice(0, MAX)}…` : system;
 

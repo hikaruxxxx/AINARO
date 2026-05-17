@@ -1045,8 +1045,9 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     expect(result.prompt).not.toContain("HORIZONTAL ROW WARNING");
   });
 
-  it("emits BIBLE FACTS section with timeline/system excerpts and number-invention guard (Sprint 9 案B)", () => {
+  it("emits BIBLE FACTS section with timeline/system excerpts and number-invention guard (Sprint 9 案B + Sprint 21 案6 圧縮)", () => {
     const bibleWithFacts = brokerBible();
+    // Sprint 21 案6: MAX=150 に圧縮、150字以内のテキストはそのまま含まれる
     bibleWithFacts.world.timeline =
       "20年前、世界中の都市の地下に巨大な接続口が同時に開いた。封鎖・軍事投入が連続して失敗した。";
     bibleWithFacts.world.system =
