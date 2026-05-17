@@ -46,6 +46,37 @@ export type BuildStoryboardOptions = {
   panelRangeProfile?: { byBeatType?: boolean };
 };
 
+/**
+ * L2b VolumePlot.episodes[ep].scenes[].directing_intent を SceneGraphV1.scenes[].directing_intent に
+ * 転記する。scene_no による位置マッチ (両者とも 1-based)。
+ *
+ * これにより L3.5 が L2b skeleton を継承していなくても L4 panel 詳細化プロンプトに
+ * directing_intent を流し込める (上流リカバリ)。
+ *
+ * 戻り値: 新しい SceneGraphV1 (immutable update)。元のオブジェクトは変更しない。
+ */
+export function mergeDirectingIntentFromVolumePlot(
+  sceneGraph: SceneGraphV1,
+  volumeEpisode: { scenes?: Array<{ scene_no: number; directing_intent?: unknown }> } | undefined,
+): SceneGraphV1 {
+  if (!volumeEpisode?.scenes || volumeEpisode.scenes.length === 0) return sceneGraph;
+  const intentByNo = new Map<number, unknown>();
+  for (const s of volumeEpisode.scenes) {
+    if (s.directing_intent) intentByNo.set(s.scene_no, s.directing_intent);
+  }
+  if (intentByNo.size === 0) return sceneGraph;
+  return {
+    ...sceneGraph,
+    scenes: sceneGraph.scenes.map((sc) => {
+      // 既に scene が directing_intent を持っている場合は L3.5 の判断を優先 (上書きしない)
+      if (sc.directing_intent) return sc;
+      const intent = intentByNo.get(sc.scene_no);
+      if (!intent) return sc;
+      return { ...sc, directing_intent: intent as Scene["directing_intent"] };
+    }),
+  };
+}
+
 export function buildStoryboardFromSceneGraph(
   sceneGraph: SceneGraphV1,
   bible: BibleSnapshotV2,
@@ -419,6 +450,8 @@ export type EnrichedPanelDetail = {
   camera?: CameraType;
   dialogue?: unknown;
   monologue?: unknown;
+  narration?: unknown;
+  sfx?: unknown;
 };
 
 export type PanelLintFeedback = {
@@ -439,6 +472,22 @@ export type PromptBibleContext = {
 };
 
 type DialogueLikeLine = { character_id: string; text: string };
+
+function normalizeStringArray(items: unknown): string[] {
+  if (!Array.isArray(items)) return [];
+  const out: string[] = [];
+  for (const item of items) {
+    if (typeof item === "string" && item.trim().length > 0) {
+      out.push(item.trim());
+    } else if (item && typeof item === "object") {
+      const o = item as Record<string, unknown>;
+      if (typeof o.text === "string" && o.text.trim().length > 0) {
+        out.push(o.text.trim());
+      }
+    }
+  }
+  return out;
+}
 
 function normalizeDialogueLike(items: unknown): DialogueLikeLine[] {
   if (!Array.isArray(items)) return [];
@@ -628,6 +677,8 @@ export async function enrichStoryboardWithLLM(
           camera: e.camera ?? panel.camera,
           dialogue: e.dialogue !== undefined ? normalizeDialogueLike(e.dialogue) : panel.dialogue,
           monologue: e.monologue !== undefined ? normalizeDialogueLike(e.monologue) : panel.monologue,
+          narration: e.narration !== undefined ? normalizeStringArray(e.narration) : panel.narration,
+          sfx: e.sfx !== undefined ? normalizeStringArray(e.sfx) : panel.sfx,
         };
       }),
     })),
@@ -670,6 +721,11 @@ export function buildPanelDetailPrompt(
   if (scene.turn_anchor.at_panel_no !== null) {
     lines.push(`- turn_anchor: panel#${scene.turn_anchor.at_panel_no} (${scene.turn_anchor.type})`);
   }
+  // L2b directing_intent 注入 (最優先反映)
+  if (scene.directing_intent && scene.directing_intent.kind !== "normal") {
+    lines.push("");
+    appendDirectingIntentSection(lines, scene, panelCount, startNo);
+  }
   lines.push("");
   lines.push(`## cast (panel.entities.characters と一致)`);
   for (const c of scene.cast) {
@@ -692,11 +748,19 @@ export function buildPanelDetailPrompt(
   lines.push(`3. key_visual は 1 行で「読者が最も覚える絵」を伝える。`);
   lines.push(`4. shot_type は close_up / medium / wide / establishing から選択。`);
   lines.push(`5. camera は eye_level / low_angle / high_angle / over_shoulder / birds_eye から選択。`);
-  lines.push(`6. dialogue / monologue の character_id は cast 内のもの限定。key_lines を panel に分配し、新規台詞を増やさない。`);
+  lines.push(`6. dialogue / monologue の character_id は cast 内のもの限定。key_lines は確実に panel に分配する (どの panel に置くかは LLM 判断、ただし全 key_lines を必ず使う)。`);
+  lines.push(`   key_lines に加えて、各 panel の状況に応じた短い反応セリフ・モノローグ・narration を追加してよい (visibility 制約は厳守)。新規追加分の長さガイド: dialogue は 8-30 字、monologue は 6-25 字、narration は 10-40 字。`);
   lines.push(`   dialogue / monologue の出力形式は必ず { "character_id": "...", "text": "..." }。text は単一 string、配列ではない。key_lines 配列を直接埋めるのは禁止。`);
   lines.push(`   複数台詞があれば配列の別要素に分ける: [{ "character_id": "X", "text": "..." }, { "character_id": "X", "text": "..." }]`);
   lines.push(`   NG: { "character_id": "X", "key_lines": ["..."] }`);
   lines.push(`   OK: { "character_id": "X", "text": "..." }`);
+  lines.push(`6b. **台詞密度の目標 (商業 narou 系コミカライズ水準)**: この scene 全 ${panelCount} panel のうち、最低 ${Math.max(1, Math.ceil(panelCount * 0.6))} panel (60%) には何らかのテキスト (dialogue / monologue / narration のいずれか) を入れる。完全無音 page は禁止 (page をまたぐ scene の場合、自分の panel 範囲内では最低 1 panel には text を置く)。`);
+  lines.push(`   追加 text のパターン例:`);
+  lines.push(`   - 反応モノローグ: 「……」「ふ」「やはり、か」「数字、合うのか」のような短い内心`);
+  lines.push(`   - 状況説明 narration: 「午前六時十四分」「外気五度」「公社アプリ通知音」のような時刻・気温・音の地の文`);
+  lines.push(`   - リアクション dialogue: 「……は？」「了解です」「待ってください」のような短い応答`);
+  lines.push(`   silent panel として残してよいのは: emotion 余韻の 1 panel (importance>=4 直後)、scene 冒頭の establishing 1 panel、scene mode=silence の panel のみ。それ以外で text 0 は禁止。`);
+  lines.push(`6c. **SFX (擬音) の使い分け**: 視覚的アクション (魔物撃破、ドア開閉、通知、走る) がある panel には sfx (擬音語) を 1-2 個入れる。例: 「ガコッ」「ザッ」「ピロン」。SFX は dialogue/monologue/narration とは別カウントで、追加することで panel の「漫画らしさ」が増す。`);
   lines.push(`7. scene_exclusive uniqueness の text は他 scene で使われていないため、この scene 内 panel でのみ書ける。`);
   lines.push(`8. importance / hero panel: 内部設計として panel ごとに importance 1-5 を割り振る。各 page 推定範囲ごとに最低 1 panel は importance >= 4 相当の hero panel にし、action/key_visual の密度と見せ場で明確に表現する。全部 3 のようなフラット配置は禁止。`);
   lines.push(`9. shot_type 多様性: 同 page 内で 2 種類以上の shot_type を使う。close_up / medium / wide / establishing を scene の意図に合わせて混ぜる。close_up 連続 3 panel 以上は禁止。`);
@@ -736,11 +800,106 @@ export function buildPanelDetailPrompt(
   lines.push(`## 出力形式`);
   lines.push("```json");
   lines.push(`{ "panels": [`);
-  lines.push(`  { "panel_no": ${startNo}, "action": "...", "key_visual": "...", "shot_type": "...", "camera": "...", "dialogue": [], "monologue": [] }`);
+  lines.push(`  { "panel_no": ${startNo}, "action": "...", "key_visual": "...", "shot_type": "...", "camera": "...", "dialogue": [], "monologue": [], "narration": ["..."], "sfx": ["..."] }`);
+  lines.push(`  // narration は string[] (例: ["午前六時十四分", "通り雨が止む"])。sfx も string[] (例: ["ガコッ", "ピロン"])。空配列なら省略可。`);
   lines.push(`  /* ${panelCount} 個 */`);
   lines.push(`]}`);
   lines.push("```");
   return lines.join("\n");
+}
+
+/**
+ * L2b SceneSkeleton.directing_intent を panel 詳細化プロンプトに注入する。
+ *
+ * - opening_hook: 最初 1-2 panel に narration_lines を必ず配置、key_visual を panel.key_visual に反映
+ * - world_anchor: いずれかの panel の narration として target_facts を必ず分配 (delivery に応じて手段選択)
+ * - midpoint_turn: scene 終盤 panel で reveal を ナレ or 台詞 で明示
+ * - cliffhanger_setup: scene 内で build_up を段階展開し、最終 panel に向けて緊張を上げる
+ * - final_pull: 最終 panel に pull_visual + next_episode_hook を配置
+ */
+function appendDirectingIntentSection(
+  lines: string[],
+  scene: Scene,
+  panelCount: number,
+  startNo: number,
+): void {
+  const di = scene.directing_intent;
+  if (!di || di.kind === "normal") return;
+  const endNo = startNo + panelCount - 1;
+  lines.push(`## ⚠️ L2b DIRECTING_INTENT (最優先反映、scene の演出指示)`);
+  switch (di.kind) {
+    case "opening_hook":
+      lines.push(`- kind: **opening_hook** (hook_pattern=${di.hook_pattern})`);
+      lines.push(`- key_visual: ${di.key_visual}`);
+      lines.push(
+        `- **配置ルール**: 最初の 1-2 panel (panel#${startNo}〜#${Math.min(startNo + 1, endNo)}) で必ず実現する。最初 panel の key_visual には上記 key_visual を反映し、強い引き絵にする。`,
+      );
+      if (di.narration_lines && di.narration_lines.length > 0) {
+        lines.push(`- **narration_lines (必須配置)**:`);
+        di.narration_lines.forEach((n, i) => {
+          lines.push(`  ${i + 1}. 「${n}」`);
+        });
+        lines.push(
+          `  → 上記 narration を最初 ${Math.min(di.narration_lines.length, 3)} panel の narration フィールドに必ず分配 (省略禁止、改変は意味を変えない範囲で軽微に)`,
+        );
+      }
+      break;
+    case "world_anchor":
+      lines.push(`- kind: **world_anchor** (delivery=${di.delivery})`);
+      lines.push(`- **target_facts (読者に伝える世界観事実、必須伝達)**:`);
+      di.target_facts.forEach((f, i) => {
+        lines.push(`  ${i + 1}. ${f}`);
+      });
+      switch (di.delivery) {
+        case "narration":
+          lines.push(
+            `- **配置ルール**: 上記 facts を narration として scene 内 panel に分配。ナレ枠 (text フィールドの narration) で読者に直接伝える。`,
+          );
+          break;
+        case "dialogue":
+          lines.push(
+            `- **配置ルール**: 上記 facts を登場人物の自然な台詞として scene 内に分配。説明セリフ感は避け、状況の中で必然性ある発話に変換する。`,
+          );
+          break;
+        case "visual_repetition":
+          lines.push(
+            `- **配置ルール**: 上記 facts を視覚 (看板/掲示/モニター/小道具反復) で間接的に伝達。文字情報無しでも読者が世界観を体感できる構図にする。`,
+          );
+          break;
+        case "system_text":
+          lines.push(
+            `- **配置ルール**: 上記 facts を UI/ステータス/通知/システム音声テキストの形で panel 上に描く。架空 UI のテロップとして提示。`,
+          );
+          break;
+      }
+      break;
+    case "midpoint_turn":
+      lines.push(`- kind: **midpoint_turn**`);
+      lines.push(`- reveal: ${di.reveal}`);
+      lines.push(`- emotional_shift: ${di.emotional_shift}`);
+      lines.push(
+        `- **配置ルール**: scene 中盤 panel (panel#${Math.floor(startNo + panelCount / 2)} 付近) で reveal を明示し、主人公の表情/視線/姿勢で emotional_shift を絵で表現する。`,
+      );
+      break;
+    case "cliffhanger_setup":
+      lines.push(`- kind: **cliffhanger_setup**`);
+      lines.push(`- build_up: ${di.build_up}`);
+      lines.push(
+        `- **配置ルール**: scene 全 panel を通じて段階的に緊張を上げる。最初 panel は小さな違和感、中盤で確信、最終 panel で次 scene/episode の引きへ繋ぐ build_up を描く。`,
+      );
+      break;
+    case "final_pull":
+      lines.push(`- kind: **final_pull** (episode 最終 scene)`);
+      lines.push(`- pull_visual: ${di.pull_visual}`);
+      lines.push(`- next_episode_hook: ${di.next_episode_hook}`);
+      lines.push(
+        `- **配置ルール**: 最終 panel (panel#${endNo}) に pull_visual を必ず反映。次話の謎/予兆を 1 行ナレ or 視覚要素として埋め込み、読者が「次を読みたい」状態で page を閉じさせる。`,
+      );
+      break;
+  }
+  lines.push(
+    `- 注意: 上記 directing_intent は L2b で物語設計上必須と判断された演出。panel 詳細化時に他の制約より優先して反映する。`,
+  );
 }
 
 function beatSpecificPromptDirective(scene: Scene): string {

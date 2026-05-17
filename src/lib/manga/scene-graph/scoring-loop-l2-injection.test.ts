@@ -11,9 +11,12 @@ import {
   type SceneSlot,
 } from "./scoring-loop";
 
+// a07 v1 構造を archive 移動 (2026-05-13 物語OS再設計) したため、
+// 旧 plot.json を archive 配下から読む。新 plot.json (schema_version 2) が
+// 生成されたら本テストもそちらへ向け直す。
 const a07VolPlotPath = path.join(
   process.cwd(),
-  "data/manga/works/a07-modern-dungeon/volumes/v01/plot.json"
+  "data/manga/works/a07-modern-dungeon/_volumes_v1_archive/v01/plot.json"
 );
 
 function slot(): SceneSlot {

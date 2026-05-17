@@ -553,6 +553,63 @@ export function isAllowedForProduction(entry: RefProvenanceEntry): boolean {
 }
 
 // ============================================================
+// L2b 出力: Story Hierarchy (SeriesPlan / ArcPlan)
+// ============================================================
+
+/**
+ * ArcPhase: 章の物語位相。
+ * 商業漫画の 5 段階。複数 arc が同じ phase を持つ場合もある (rising が 2 つ等)。
+ */
+export type ArcPhase = "prologue" | "rising" | "crisis" | "climax" | "epilogue";
+
+/**
+ * ArcPlan: 章レベル (商業漫画の "章 / 編 / saga")。
+ *
+ * 重要: 章境界 ≠ 巻境界。1 つの章は複数巻にまたがる (鬼滅「無限列車編」=Vol7-8 等)。
+ *   - volume_range で巻またぎを明示
+ *   - VolumePlot.belongs_to_arcs[].arc_id で参照される (1 巻が複数章にまたがるケースも可)
+ */
+export type ArcPlan = {
+  arc_id: string;                       // "arc_01_awakening" 形式 (kebab/snake どちらでも)
+  arc_name: string;                     // 表示名 (例: "ナビ覚醒編")
+  arc_phase: ArcPhase;
+  volume_range: [number, number];       // [1, 3] = vol 1-3 にまたがる
+  arc_theme: string;                    // 章テーマ 150字
+  protagonist_growth: string;            // この章で主人公が何を獲得/失うか 150字
+  turning_points: Array<{
+    volume: number;                     // どの巻で
+    episode: number;                    // どの話で
+    event: string;                      // 何が起きるか 80字
+  }>;
+  arc_opening: string;                  // 章開幕の hook 80字
+  arc_climax: string;                   // 章クライマックス 80字
+  arc_resolution: string;               // 章決着 80字
+};
+
+/**
+ * SeriesPlan: 本作レベルの長期計画 (1 シリーズに 1 つ、L2b --phase=series で生成)。
+ *
+ * bible.meta.estimated_volumes に従って全 N 巻の arc 配分・主人公成長弧・
+ * core_hook 進化を一括設計。各巻の VolumePlot 生成時に該当 arc を context
+ * として渡す。SeriesPlan が無いと VolumePlot は arc_position を埋められない。
+ */
+export type SeriesPlan = {
+  schema_version: 1;
+  slug: string;
+  total_volumes: number;                // bible.meta.estimated_volumes と一致
+  series_theme: string;                 // 全シリーズのテーマ 200字+
+  long_arc_outline: string;             // 全N巻でどう進むか 2000字
+  arcs: ArcPlan[];                      // 4-6 個推奨
+  protagonist_long_arc: {
+    starting_state: string;             // 第1巻冒頭の主人公状態 150字
+    arc_endings: string[];              // 各 arc 終了時の主人公状態 (各150字、arcs.length と同数)
+    final_state: string;                // 最終巻終了時の主人公状態 150字
+  };
+  core_hook_evolution: string;          // core_hook が全シリーズでどう進化するか 300字
+  generated_at: string;                 // ISO timestamp
+};
+
+// ============================================================
 // L4 出力: EpisodeStoryboardV2 (entity_id binding 強制)
 // ============================================================
 

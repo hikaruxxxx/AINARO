@@ -10,7 +10,16 @@
 - `bible/snapshot.json` — world / characters / locations / props
 - `episodes/epNN/shotlist.json` — L3 出力 (場面・カメラ・登場キャラの素案)
 - `episodes/epNN/_brief.v2.md` — episode brief (cast, must_include_events, cliffhanger)
-- `volumes/vNN/plot.json` — volume plot (arc 内位置、巻ごとの到達点)
+- `series_plan.json` — (L2b 物語OS再設計、2026-05-13 〜) 全N巻の長期 arc 配分。scoring-loop の VolumeContext.belongs_to_arcs 経由で arc 情報を取得
+- `volumes/vNN/plot.json` — volume plot (schema_version 2: arc 内位置・各 episode の scene skeleton 含む)
+  - `belongs_to_arcs[]` — この巻が属する arc (巻またぎ標準)
+  - `episodes[].arc_position` / `volume_position` — 各話の物語位相
+  - `episodes[].scenes[]` — L2b で設計された scene skeleton (5-7 個、scene_id/page_range/location_id/cast_ids/purpose/directing_intent)
+
+### L2b scene skeleton との契約
+- L3.5 は scenes 配列を `scene_no` で対応させ、各 scene の `scene_id` / `page_range` / `location_id` / `cast_ids` を踏襲する
+- L2b scene の `directing_intent` (opening_hook / world_anchor / midpoint_turn / cliffhanger_setup / final_pull) は scene_graph.scenes[].directing_intent にコピーされ、L4 panel 詳細化プロンプトに伝播する
+- L3.5 が独自判断で directing_intent を上書きする場合、scoring-loop の decision_log にその理由を残す
 
 ### 出力
 - `episodes/epNN/scene_graph.json` — 1 episode = 5-10 scene の中間表現

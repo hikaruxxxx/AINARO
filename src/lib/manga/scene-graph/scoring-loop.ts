@@ -34,7 +34,14 @@ import {
 } from "../bible/broker";
 import { contextForSceneV2 } from "../bible/broker-v3";
 import { runCodexText } from "../llm/codex-text";
-import type { VolumeEpisodePlan, VolumePlot } from "../storyboard-v2/volume-plot";
+import type {
+  VolumeEpisodePlan,
+  VolumePlot,
+  SceneSkeleton,
+  DirectingIntent,
+  EpisodeArcPosition,
+  EpisodeVolumePosition,
+} from "../storyboard-v2/volume-plot";
 
 // ============================================================================
 // Configuration
@@ -220,6 +227,15 @@ export type VolumeContext = {
   volume_no: number;
   title_working?: string;
   volume_theme: string;
+  /**
+   * schema_version 2 で追加。この巻が属する arc 一覧 (巻またぎ標準)。
+   * 旧 plot.json (v1) では未設定。
+   */
+  belongs_to_arcs?: Array<{
+    arc_id: string;
+    coverage: "full" | "partial_start" | "partial_mid" | "partial_end";
+    arc_progression: string;
+  }>;
   /** 当 ep の VolumeEpisodePlan (見つからなければ null) */
   current_episode: {
     episode_no: number;
@@ -232,6 +248,12 @@ export type VolumeContext = {
     cliffhanger_hook: string;
     /** beats summary を 1 行/beat で連結 (空文字許容) */
     beats_summary_lines: string[];
+    /** schema_version 2 で追加: 所属 arc 内での位置 */
+    arc_position?: EpisodeArcPosition;
+    /** schema_version 2 で追加: 巻内位置 */
+    volume_position?: EpisodeVolumePosition;
+    /** schema_version 2 で追加: L2b 設計の scene skeleton (5-7 個) */
+    scenes?: SceneSkeleton[];
   } | null;
   /** 周辺 ep (prev / next) の theme + cliffhanger だけ短く */
   prev_episode_brief: { episode_no: number; title_working?: string; theme: string; cliffhanger_hook: string } | null;
@@ -273,6 +295,7 @@ export async function loadVolumeContext(
       volume_no: volumePlot.volume_no,
       title_working: volumePlot.title_working,
       volume_theme: volumePlot.volume_theme,
+      belongs_to_arcs: volumePlot.belongs_to_arcs,
       current_episode: toCurrentVolumeEpisode(current),
       prev_episode_brief: prev ? toEpisodeBrief(prev) : null,
       next_episode_brief: next ? toEpisodeBrief(next) : null,
@@ -299,6 +322,9 @@ function toCurrentVolumeEpisode(ep: VolumeEpisodePlan): NonNullable<VolumeContex
     must_include_events: ep.must_include_events,
     cliffhanger_hook: ep.cliffhanger_hook,
     beats_summary_lines: ep.beats.map((b) => `[${b.label}] ${b.summary}`),
+    arc_position: ep.arc_position,
+    volume_position: ep.volume_position,
+    scenes: ep.scenes,
   };
 }
 
@@ -328,6 +354,48 @@ export function formatVolumeContextSection(vc: VolumeContext | null): string {
       (f) => `- (payoff in ep${ep.episode_no}) ← seed in ep${f.seed_in_episode}: ${f.description}`
     ),
   ];
+  // schema_version 2: arc/scene セクション (旧 plot.json では空)
+  const arcSection: string[] = [];
+  if (vc.belongs_to_arcs && vc.belongs_to_arcs.length > 0) {
+    arcSection.push(``, `### この巻が属する arc (SeriesPlan より)`);
+    for (const a of vc.belongs_to_arcs) {
+      arcSection.push(`- ${a.arc_id} (${a.coverage}): ${a.arc_progression}`);
+    }
+  }
+  if (ep.arc_position) {
+    arcSection.push(
+      ``,
+      `### 当 episode の arc 位置`,
+      `- arc_id: ${ep.arc_position.arc_id}`,
+      `- role_in_arc: ${ep.arc_position.role_in_arc}`,
+    );
+  }
+  if (ep.volume_position) {
+    arcSection.push(`- volume_position: ${ep.volume_position}`);
+  }
+  // scene skeleton セクション
+  const sceneSection: string[] = [];
+  if (ep.scenes && ep.scenes.length > 0) {
+    sceneSection.push(
+      ``,
+      `### 当 episode の scene skeleton (L2b 設計、必須遵守)`,
+      `- scene 数: ${ep.scenes.length}`,
+      `- scene_graph 生成時は scene_id を継承し、各 scene の location_id / cast_ids / purpose / emotional_beat を踏襲すること`,
+    );
+    for (const s of ep.scenes) {
+      const directing = s.directing_intent
+        ? ` 〔${formatDirectingIntent(s.directing_intent)}〕`
+        : "";
+      sceneSection.push(
+        `- **${s.scene_id}** (s${s.scene_no}, p${s.page_range[0]}-p${s.page_range[1]}, ${s.time_of_day}, @${s.location_id})${directing}`,
+        `  - cast: ${s.cast_ids.join(", ")}`,
+        `  - purpose: ${truncatePromptText(s.purpose, 200)}`,
+        `  - emotional_beat: ${truncatePromptText(s.emotional_beat, 150)}`,
+        `  - key_action: ${truncatePromptText(s.key_action, 200)}`,
+        `  - → next: ${truncatePromptText(s.connection_to_next, 120)}`,
+      );
+    }
+  }
   return [
     `## 巻内位置 (L2 volume_plot より)`,
     "",
@@ -335,6 +403,7 @@ export function formatVolumeContextSection(vc: VolumeContext | null): string {
     `- volume_no: ${vc.volume_no}`,
     vc.title_working ? `- title: ${vc.title_working}` : null,
     `- volume_theme: ${truncatePromptText(vc.volume_theme, 400)}`,
+    ...arcSection,
     "",
     `### 当 episode の役割`,
     `- episode_no: ${ep.episode_no}`,
@@ -351,6 +420,7 @@ export function formatVolumeContextSection(vc: VolumeContext | null): string {
     `- cliffhanger_hook: ${ep.cliffhanger_hook}`,
     `- beats:`,
     ...ep.beats_summary_lines.slice(0, 8).map((line) => `  - ${line}`),
+    ...sceneSection,
     "",
     `### 周辺 episode`,
     prev ? `- prev: ep${prev.episode_no} 「${prev.title_working ?? ""}」` : `- prev: (none)`,
@@ -367,10 +437,35 @@ export function formatVolumeContextSection(vc: VolumeContext | null): string {
     "",
     `### 使い方の指示`,
     `- 当 scene が当 episode の beats のどの位置 (arc_position) に対応するかを意識する`,
+    `- L2b scene skeleton がある場合は scene_id を継承し、location_id / cast_ids を踏襲する (架空 ID 禁止)`,
+    `- directing_intent が指定された scene (opening_hook / world_anchor / midpoint_turn / cliffhanger_setup / final_pull) は`,
+    `  その演出指示を panel/dialogue 設計に反映する (opening_hook の narration_lines は p1 panel に必ず置く等)`,
     `- 巻またぎ伏線は当 ep の foreshadow_setup として埋めるが、payoff_episode_hint は描写を当 ep に閉じさせない`,
     `  (later_in_volume / cross_volume を選ぶ)`,
     `- 当 ep が payoff 側になっている伏線がある場合、scene の foreshadow_payoff にそれを反映する`,
   ].filter((line): line is string => line !== null).join("\n");
+}
+
+/** DirectingIntent を 1 行表記で要約 (prompt 注入用) */
+function formatDirectingIntent(di: DirectingIntent): string {
+  switch (di.kind) {
+    case "opening_hook":
+      return `opening_hook:${di.hook_pattern}${
+        di.narration_lines?.length ? ` (narration=${di.narration_lines.length}個)` : ""
+      } — ${truncatePromptText(di.key_visual, 80)}`;
+    case "world_anchor":
+      return `world_anchor:${di.delivery} (facts=${di.target_facts.length}個): ${di.target_facts
+        .slice(0, 2)
+        .join(" / ")}`;
+    case "midpoint_turn":
+      return `midpoint_turn — reveal: ${truncatePromptText(di.reveal, 100)}`;
+    case "cliffhanger_setup":
+      return `cliffhanger_setup — ${truncatePromptText(di.build_up, 100)}`;
+    case "final_pull":
+      return `final_pull — ${truncatePromptText(di.pull_visual, 60)} → next: ${truncatePromptText(di.next_episode_hook, 60)}`;
+    case "normal":
+      return `normal`;
+  }
 }
 
 function truncatePromptText(s: string, max: number): string {

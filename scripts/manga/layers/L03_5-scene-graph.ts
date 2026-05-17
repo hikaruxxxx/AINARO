@@ -37,7 +37,7 @@ import {
 import type { BibleSnapshotV2 } from "../../../src/lib/manga/schemas-v2";
 import type { VolumePlot } from "../../../src/lib/manga/storyboard-v2/volume-plot";
 
-type Mode = "validate" | "generate";
+type Mode = "validate" | "generate" | "bootstrap";
 type Args = { slug: string; episode: number; mode: Mode; live: boolean };
 
 function parseArgs(): Args {
@@ -71,8 +71,8 @@ function parseArgs(): Args {
     if (key === "slug") a.slug = val;
     else if (key === "episode") a.episode = Number(val);
     else if (key === "mode") {
-      if (val === "validate" || val === "generate") a.mode = val;
-      else throw new Error(`unknown --mode "${val}", expected validate|generate`);
+      if (val === "validate" || val === "generate" || val === "bootstrap") a.mode = val;
+      else throw new Error(`unknown --mode "${val}", expected validate|generate|bootstrap`);
     }
   }
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
@@ -366,10 +366,57 @@ async function modeGenerate(args: Args): Promise<void> {
   console.log(`[L03.5] ${args.live ? "live" : "dry-run"} complete.`);
 }
 
+async function modeBootstrap(args: Args): Promise<void> {
+  // L2b 物語OS再設計: VolumePlot.episodes[].scenes (SceneSkeleton[]) から
+  // 最小限の SceneGraphV1 を組み立てて scene_graph.json に書き出す。
+  const { bootstrapSceneGraphFromVolumePlot } = await import(
+    "../../../src/lib/manga/scene-graph/bootstrap-from-skeleton"
+  );
+  const sgPath = sceneGraphPath(args.slug, args.episode);
+  // 既存ファイルがあれば backup を取って上書き
+  try {
+    await fs.access(sgPath);
+    const backupPath = `${sgPath}.pre-bootstrap.backup`;
+    await fs.copyFile(sgPath, backupPath);
+    console.log(`[L03.5] backup existing scene_graph: ${backupPath}`);
+  } catch {
+    // 無ければそのまま進む
+  }
+  // 巻番号: 当面 1 固定 (TODO: arc_position から導出)
+  const volumeNo = 1;
+  const vp = JSON.parse(
+    await fs.readFile(volumePlotPath(args.slug, volumeNo), "utf-8"),
+  ) as VolumePlot;
+  const sceneGraph = bootstrapSceneGraphFromVolumePlot({
+    volumePlot: vp,
+    episodeNo: args.episode,
+    bibleSnapshotPath: bibleSnapshotPath(args.slug),
+    briefPath: episodeBriefV2Path(args.slug, args.episode),
+    shotlistPath: storyboardPath(args.slug, args.episode).replace(
+      /storyboard\.json$/,
+      "shotlist.json",
+    ),
+  });
+  await fs.writeFile(sgPath, JSON.stringify(sceneGraph, null, 2));
+  console.log(
+    `[L03.5] bootstrap DONE: ${sgPath} (scenes=${sceneGraph.scenes.length} from L2b skeleton)`,
+  );
+  // bootstrap 後の summary
+  const diSummary = sceneGraph.scenes
+    .map(
+      (s) =>
+        `  - ${s.scene_id} (p${s.page_range.start}-p${s.page_range.end}, beat=${s.beat_type}, mode=${s.mode}, di=${(s.directing_intent as { kind?: string } | undefined)?.kind ?? "none"})`,
+    )
+    .join("\n");
+  console.log(`[L03.5] scenes:\n${diSummary}`);
+  console.log(`[L03.5] 次のステップ: --mode generate --live で scoring loop で肉付け可能`);
+}
+
 async function main() {
   const args = parseArgs();
   if (args.mode === "validate") await modeValidate(args);
   else if (args.mode === "generate") await modeGenerate(args);
+  else if (args.mode === "bootstrap") await modeBootstrap(args);
 }
 
 main().catch((e) => {
