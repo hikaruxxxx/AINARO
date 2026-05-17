@@ -953,6 +953,96 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     expect(result.prompt).not.toContain("PANEL SIZE OVERRIDE (STRICT");
   });
 
+  it("emits ROW LAYOUT with SIDE-BY-SIDE annotation for 3-panel page with horizontal bottom row (Sprint 8 案1)", () => {
+    // p01 を模倣: panel#1 = 上端全幅 (50%)、panel#2 = 右下 (12%)、panel#3 = 左下 (12%)
+    const storyPage = page(3);
+    const PAGE_W = 1748;
+    const PAGE_H = 2480;
+    const plan: PagePlanPage = {
+      page_no: storyPage.page_no,
+      layout_template_id: "v4_test_horizontal_row",
+      page_role: storyPage.page_role,
+      render_strategy: "page_one_shot",
+      panels: [
+        {
+          panel_id: storyPage.panels[0].panel_id,
+          slot_id: "s1",
+          rect: { x: 0, y: 0, w: PAGE_W, h: Math.floor(PAGE_H * 0.5) },
+          reading_order: 1,
+          importance: 5,
+        },
+        {
+          panel_id: storyPage.panels[1].panel_id,
+          slot_id: "s2",
+          rect: { x: PAGE_W / 2, y: Math.floor(PAGE_H * 0.5), w: PAGE_W / 2, h: Math.floor(PAGE_H * 0.25) },
+          reading_order: 2,
+          importance: 4,
+        },
+        {
+          panel_id: storyPage.panels[2].panel_id,
+          slot_id: "s3",
+          rect: { x: 0, y: Math.floor(PAGE_H * 0.5), w: PAGE_W / 2, h: Math.floor(PAGE_H * 0.25) },
+          reading_order: 3,
+          importance: 3,
+        },
+      ],
+    };
+    const args = {
+      page: storyPage,
+      pagePlanPage: plan,
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: PAGE_W, height: PAGE_H },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).toContain("## ROW LAYOUT");
+    expect(result.prompt).toContain("ROW LAYOUT (2 rows on this page)");
+    expect(result.prompt).toContain("ROW 1 (TOP): panel#1 (full width)");
+    expect(result.prompt).toContain("ROW 2 (BOTTOM): 2 panels SIDE-BY-SIDE");
+    expect(result.prompt).toContain("panel#2 on RIGHT");
+    expect(result.prompt).toContain("panel#3 on LEFT");
+    expect(result.prompt).toContain("HORIZONTAL ROW WARNING");
+    expect(result.prompt).toContain("Do NOT stack them vertically");
+  });
+
+  it("omits ROW LAYOUT when all panels stack vertically (1 panel per row)", () => {
+    // 縦積み 3 panel page: 全 panel が全幅、y が連続
+    const storyPage = page(3);
+    const PAGE_W = 1748;
+    const PAGE_H = 2480;
+    const rowH = Math.floor(PAGE_H / 3);
+    const plan: PagePlanPage = {
+      page_no: storyPage.page_no,
+      layout_template_id: "v4_test_vertical_stack",
+      page_role: storyPage.page_role,
+      render_strategy: "page_one_shot",
+      panels: storyPage.panels.map((p, i) => ({
+        panel_id: p.panel_id,
+        slot_id: `s${i + 1}`,
+        rect: { x: 0, y: rowH * i, w: PAGE_W, h: rowH },
+        reading_order: p.reading_order,
+        importance: 3 as const,
+      })),
+    };
+    const args = {
+      page: storyPage,
+      pagePlanPage: plan,
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: PAGE_W, height: PAGE_H },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).not.toContain("## ROW LAYOUT");
+    expect(result.prompt).not.toContain("SIDE-BY-SIDE");
+    expect(result.prompt).not.toContain("HORIZONTAL ROW WARNING");
+  });
+
   it("MANGA_CRAFT_DIRECTIVES_V6 no longer contains the legacy generic 'Panel size variation' directive", () => {
     // page-specific な PANEL SIZE OVERRIDE に役割が移ったため、汎用節は削除済
     const args = {

@@ -750,6 +750,106 @@ function buildLayoutGeometryBlock(
 }
 
 /**
+ * panel rect から行 (row) 構造を推定し、AI に「縦積み vs 横並び」を明示する。
+ *
+ * 2026-05-17 追加 (Sprint 8 案1 row-grouping)。Sprint 7 追加チューニング後も
+ * AI が「3 panel page = 上1 中1 下1」の縦積みプリミティブに引きずられて、
+ * page_plan の中下行 2 panel 横並び (例: panel#2=右半, panel#3=左半) を
+ * 「中段+下段の縦積み」に読み替える事例 (a07 ep01 p01) を解消するため。
+ *
+ * 行検出: y range overlap >= 50% かつ x range が重複しない panel 群を 1 行とみなす。
+ *
+ * 1 panel page、または全 panel が縦積み (1 panel/row × N rows) なら null。
+ */
+function buildRowGroupingBlock(
+  pagePlanPage: PagePlanPage,
+  panelNoByPanelId: Map<string, number>,
+): string | null {
+  if (pagePlanPage.panels.length <= 1) return null;
+
+  type Entry = {
+    panelNo: number;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    cx: number;
+  };
+
+  const entries: Entry[] = pagePlanPage.panels.map((pp: PagePlanPanel) => ({
+    panelNo: panelNoByPanelId.get(pp.panel_id) ?? pp.reading_order,
+    x: pp.rect.x,
+    y: pp.rect.y,
+    w: pp.rect.w,
+    h: pp.rect.h,
+    cx: pp.rect.x + pp.rect.w / 2,
+  }));
+
+  // y range overlap >= 50% を「同じ行」と判定
+  const yOverlapRatio = (a: Entry, b: Entry): number => {
+    const aTop = a.y;
+    const aBot = a.y + a.h;
+    const bTop = b.y;
+    const bBot = b.y + b.h;
+    const overlap = Math.max(0, Math.min(aBot, bBot) - Math.max(aTop, bTop));
+    const minH = Math.min(a.h, b.h);
+    return minH > 0 ? overlap / minH : 0;
+  };
+
+  // 行ごとに panels をグループ化 (greedy)
+  const rows: Entry[][] = [];
+  const sorted = [...entries].sort((a, b) => a.y - b.y);
+  for (const entry of sorted) {
+    const existingRow = rows.find((row) => row.some((member) => yOverlapRatio(member, entry) >= 0.5));
+    if (existingRow) existingRow.push(entry);
+    else rows.push([entry]);
+  }
+
+  // 全行が 1 panel ずつ (= 完全縦積み) なら row-grouping 情報は不要
+  if (rows.every((row) => row.length === 1)) return null;
+
+  // 行内で RTL (右→左) に sort、表示用 row label を計算
+  const PAGE_W = 1748;
+  const rowLines: string[] = [];
+  rows.forEach((row, idx) => {
+    row.sort((a, b) => b.cx - a.cx);
+    const rowLabel =
+      rows.length <= 2 ? (idx === 0 ? "TOP" : "BOTTOM") : idx === 0 ? "TOP" : idx === rows.length - 1 ? "BOTTOM" : `MIDDLE${rows.length > 3 ? `_${idx}` : ""}`;
+    if (row.length === 1) {
+      const p = row[0];
+      const widthNote = p.w >= PAGE_W * 0.85 ? "full width" : p.cx < PAGE_W * 0.5 ? "left half" : "right half";
+      rowLines.push(`- ROW ${idx + 1} (${rowLabel}): panel#${p.panelNo} (${widthNote})`);
+    } else {
+      const items = row
+        .map((p) => {
+          const pos = p.cx < PAGE_W * 0.4 ? "LEFT" : p.cx > PAGE_W * 0.6 ? "RIGHT" : "CENTER";
+          return `panel#${p.panelNo} on ${pos}`;
+        })
+        .join(", ");
+      rowLines.push(
+        `- ROW ${idx + 1} (${rowLabel}): ${row.length} panels SIDE-BY-SIDE — ${items} (RTL: right panel read first)`,
+      );
+    }
+  });
+
+  const horizontalRows = rows.filter((row) => row.length >= 2);
+  const warning =
+    horizontalRows.length > 0
+      ? `\nHORIZONTAL ROW WARNING: ROW${horizontalRows.length > 1 ? "s" : ""} ${horizontalRows
+          .map((row, i) => `${rows.indexOf(row) + 1}`)
+          .join(", ")} contain${horizontalRows.length === 1 ? "s" : ""} side-by-side panels. Do NOT stack them vertically — they share the same row height.`
+      : "";
+
+  return [
+    `ROW LAYOUT (${rows.length} row${rows.length > 1 ? "s" : ""} on this page):`,
+    ...rowLines,
+    warning,
+  ]
+    .filter((s) => s.length > 0)
+    .join("\n");
+}
+
+/**
  * panel rect の強制ディレクティブを page-specific に生成する。
  *
  * 2026-05-17 追加。Sprint 7 で L05 enforceVarianceRule により page_plan.json は
@@ -1318,6 +1418,10 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     ? buildPanelSizeOverrideBlock(args.pagePlanPage, localPanelNoByPanelId)
     : null;
 
+  const rowGroupingBlock: string | null = args.pagePlanPage
+    ? buildRowGroupingBlock(args.pagePlanPage, localPanelNoByPanelId)
+    : null;
+
   const inlineLabels = args.packet.refs
     .map((r, i) => formatRefLabel(r, i))
     .join("\n");
@@ -1387,6 +1491,9 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     panelSizeOverrideBlock ? "## PANEL SIZE OVERRIDE" : null,
     panelSizeOverrideBlock,
     panelSizeOverrideBlock ? "" : null,
+    rowGroupingBlock ? "## ROW LAYOUT" : null,
+    rowGroupingBlock,
+    rowGroupingBlock ? "" : null,
     "## MANGA CRAFT DIRECTIVES",
     MANGA_CRAFT_DIRECTIVES_V6,
   ];
