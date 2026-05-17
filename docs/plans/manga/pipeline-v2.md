@@ -57,6 +57,7 @@
 > - `be51418` Sprint 18: dialogue-density-floor を新設 (page_role 別 dialogue/text 下限 audit)
 > - `62d5303` Sprint 19 案3: a07 ep01 storyboard の dialogue/narration を補強 (12 page → findings 0、商業漫画レベル達成)
 > - `7b899d7` Sprint 20 案1: L04 storyboard 生成 prompt に density floor directive を注入 (生成段階での予防網)
+> - `2df5910` Sprint 21 案6: prompt size 警告閾値 8000→12000 + BIBLE FACTS 抜粋 300→150 字圧縮 (warning ノイズ解消)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -194,14 +195,20 @@
 > audit-bible-facts (年代/年齢/ランク整合性、Sprint 14-16)
 > ```
 >
-> ### Sprint 21 候補
+> ### Sprint 21 案6 結果 (warning ノイズ解消、Pro 枠 +1 枚)
 >
-> 1. **(検証)** L04 を a07 ep01 で再走行 (Codex/Claude 直編) → density floor 達成を実測 → 手動補強不要を実証
-> 2. **(高 ROI)** L03.5 scene_graph の dialogue_plan 増強 (中間表現>監視網 原則)
-> 3. **(中)** 残 22 page を v12 で render してフルエピソード品質測定 (Pro 枠 +22)
+> - PROMPT_WARN_THRESHOLD=12000 を新設、MAX_PROMPT_CHARS=8000 は tier downgrade トリガーとして据え置き (品質セーフティ機構維持)
+> - BIBLE FACTS の timeline/system 抜粋 300→150 字、a07 では必要 facts (20年前/18歳まで/七段階) を概ね保持
+> - p3 v13 で warning 消失 + 品質維持を確認 (dialogue 4 + monologue + TV ニュース overlay 全描画)
+>
+> ### Sprint 22 候補
+>
+> 1. **(検証)** L04 を a07 ep01 で再走行 → Sprint 20 directive の実効性測定
+> 2. **(高 ROI)** L03.5 scene_graph の dialogue_plan 増強 (中間表現>監視網)
+> 3. **(中)** 残 22 page を v13 で render してフルエピソード品質測定 (Pro 枠 +22)
 > 4. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
 > 5. **(中)** PanelV2 型に effect_lines 正式追加
-> 6. **(中)** prompt size 警告解消 (現在 10000+ chars、BIBLE FACTS 圧縮 or tier 自動切替)
+> 6. **(中)** SCENE PANEL RESTRICTIONS / ROW LAYOUT の文字数を更に圧縮 (現状各 200-400 字)
 
 ## 設計原則
 
