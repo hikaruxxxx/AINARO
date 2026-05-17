@@ -1176,6 +1176,66 @@ function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" 
   return lines.join("\n");
 }
 
+/**
+ * MANGA CRAFT DIRECTIVES (v6 lessons)
+ *
+ * 2026-05-17 追加。a07-novel manga_pilot_v5 で発生した「絵本的・吹き出し希薄・背景一律詳細・
+ * キャラ芝居静止」の問題を構造的に解消するための appendix。L9 全プロンプトに付与される。
+ *
+ * 由来:
+ * - v5 で 1P あたり吹き出し平均 4.2 個 (商業漫画標準 8-15 個の半分以下)
+ * - スタイル参照は線質には効くが「漫画文法 (吹き出し配置/コマ割り/背景省略)」までは伝わらない
+ * - ref 静止画では「視線下に逃がす」「指が一拍止まる」のような芝居が出ない
+ *
+ * したがってプロンプト側で明示的に補完する。
+ */
+const MANGA_CRAFT_DIRECTIVES_V6 = `The following directives apply to ALL panels on this page, supplementing the per-panel specs above.
+
+### Bubble density (REQUIRED)
+- This page must contain at minimum 8 speech bubbles / inner-thought bubbles / SFX combined; aim for 10-15 on conversation pages.
+- Each panel must contain at least one of: speech bubble, inner thought bubble, off-frame voice, SFX, or environmental sound.
+- Empty (zero-text) panels are reserved exclusively for explicit "TAME" panels (max 1 per page).
+
+### Bubble shape taxonomy (use deliberately, do NOT default to all rounded)
+- Speech: rounded smooth bubble.
+- Inner thought: cloud / wavy bubble.
+- Shout / exclamation: jagged spike bubble.
+- Radio / transmission: rough rectangular bubble.
+- TV broadcast: rounded with broadcast bar on top.
+- Off-frame voice: thin small rectangular.
+- Use varied shapes within the same page.
+
+### Background mer-hari (mandatory variation)
+- Expression close-up panels: WHITE background or single screentone only. NO detailed setting.
+- Pure object / TAME panels: WHITE background only. NO setting elements.
+- Establishing / wide shots: detailed background matching location refs.
+- Information panels (signage, documents, props CU): detailed background where relevant.
+- DO NOT render every panel at uniform background density. The reader needs visual rhythm.
+
+### Character acting (dynamic, not static)
+- Each panel showing a character must include at least one micro-acting beat:
+  - eyes drift down briefly
+  - hand grips an object one beat too long
+  - mouth half-opens before deciding not to speak
+  - shoulders drop before face shows recognition
+  - service-smile holds, then releases when off-camera
+- Static "neutral expression matching ref" is NOT sufficient by itself.
+
+### TAME panel requirement
+- At least one panel per page must be a TAME panel:
+  - pure object close-up (no character)
+  - OR pure character expression close-up with NO background and NO text
+- TAME panels function as "breath" between information-dense panels.
+
+### Panel size variation (CRITICAL)
+- Within a 5-panel page, panel area sizes must span: smallest <= 12%, largest >= 35%.
+- Uniform 15-20% panels across the page are PROHIBITED; they produce "picture book" feel, not manga.
+
+### Style refs interpretation
+- Style ref images attached are MANGA PAGE COMPOSITION references, NOT pure-illustration style guides.
+- Extract: line weight variation, screentone density, bubble-to-image area ratio.
+- If style refs show ~30-40% bubble area coverage, the generated page should match that density.`;
+
 function composePagePromptCore(args: ComposeArgs): ComposeResult {
   if (!args.page) throw new Error("composePagePrompt requires page");
   const page = args.page;
@@ -1253,6 +1313,9 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     editorBlock ? "" : null,
     "## CONSTRAINTS",
     buildPageConstraintsBlock({ typesetMode }),
+    "",
+    "## MANGA CRAFT DIRECTIVES",
+    MANGA_CRAFT_DIRECTIVES_V6,
   ];
   const prompt = sections
     .filter((s): s is string => s !== null && s !== undefined)
