@@ -14,6 +14,8 @@ import { spawn } from "child_process";
 import { existsSync, statSync } from "fs";
 import path from "path";
 
+import { checkAndReserveQuota, recordGeneration } from "../_ledger/quota";
+
 export type MangaImageSize = {
   width: number;
   height: number;
@@ -36,6 +38,13 @@ export type GenerateMangaImageOptions = {
   minFileSize?: number;
   /** リトライ回数 */
   maxRetries?: number;
+  /** ChatGPT Pro 枠 ledger 用コンテキスト */
+  ledgerContext?: {
+    slug: string;
+    episode?: number;
+    layer: string;
+    page?: number;
+  };
 };
 
 export type GenerateMangaImageResult = {
@@ -167,6 +176,17 @@ export async function generateMangaImage(
     ? options.outputPath
     : path.resolve(cwd, options.outputPath);
 
+  const ledgerDecision = options.ledgerContext
+    ? await checkAndReserveQuota({
+        ...options.ledgerContext,
+        estimatedCalls: 1,
+      })
+    : null;
+  const ledgerAccount = ledgerDecision?.account ?? "pro";
+  if (ledgerAccount === "api" && process.env.OPENAI_API_KEY_BACKUP) {
+    process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY_BACKUP;
+  }
+
   const task = buildTask({
     prompt: options.prompt,
     outputPath: absOutput,
@@ -176,6 +196,17 @@ export async function generateMangaImage(
 
   const startedAt = Date.now();
   let lastError: Error | null = null;
+
+  async function recordLedgerSuccess(durationMs: number, retryCount: number): Promise<void> {
+    if (!options.ledgerContext) return;
+    await recordGeneration({
+      ...options.ledgerContext,
+      account: ledgerAccount,
+      durationMs,
+      outputPath: absOutput,
+      retry_count: retryCount,
+    });
+  }
 
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     try {
@@ -205,13 +236,15 @@ export async function generateMangaImage(
         );
       }
 
+      const totalDurationMs = Date.now() - startedAt;
+      await recordLedgerSuccess(totalDurationMs, attempt - 1);
       return {
         outputPath: absOutput,
         sizeBytes: stat.size,
         width: options.size.width,
         height: options.size.height,
         attempts: attempt,
-        totalDurationMs: Date.now() - startedAt,
+        totalDurationMs,
       };
     } catch (err) {
       lastError = err as Error;
@@ -227,13 +260,15 @@ export async function generateMangaImage(
               `[manga-codex-image] 試行 ${attempt} が "${lastError.message}" で失敗したが、` +
                 `出力ファイルは保存済 (${(stat.size / 1024).toFixed(0)}KB)。成功扱いで返却。`
             );
+            const totalDurationMs = Date.now() - startedAt;
+            await recordLedgerSuccess(totalDurationMs, attempt - 1);
             return {
               outputPath: absOutput,
               sizeBytes: stat.size,
               width: options.size.width,
               height: options.size.height,
               attempts: attempt,
-              totalDurationMs: Date.now() - startedAt,
+              totalDurationMs,
             };
           }
         } catch {
