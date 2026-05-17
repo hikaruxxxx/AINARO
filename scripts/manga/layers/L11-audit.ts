@@ -6,7 +6,8 @@
 import "../_env";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { storyboardPath, pagePlanPath, rendersDir, auditPath, resolvedRefsPath, episodeDir } from "./_paths";
+import { pathToFileURL } from "node:url";
+import { storyboardPath, pagePlanPath, rendersDir, auditPath, resolvedRefsPath, episodeDir, sceneGraphPath } from "./_paths";
 import { auditEpisode } from "../../../src/lib/manga/qa-v2/audit";
 import {
   countMajorBgViolations,
@@ -20,7 +21,8 @@ import {
   scanText,
 } from "../../../src/lib/manga/compliance/scanner";
 import type { ComplianceFinding } from "../../../src/lib/manga/compliance/types";
-import type { EpisodeStoryboardV2, PagePlanV2, ResolvedRefs, AuditReport } from "../../../src/lib/manga/schemas-v2";
+import type { SceneGraphV1 } from "../../../src/lib/manga/scene-graph/schema";
+import type { EpisodeStoryboardV2, PagePlanPage, PagePlanV2, ResolvedRefs, AuditReport, StoryboardPageV2 } from "../../../src/lib/manga/schemas-v2";
 
 type Args = {
   slug: string;
@@ -30,9 +32,11 @@ type Args = {
   visionMajorViolationThreshold?: number;
   skipCompliance: boolean;
   allowComplianceWarn: boolean;
+  triage: boolean;
 };
 
 type ComplianceAuditSource = "storyboard" | "page_plan" | "resolved_refs" | "scene_graph";
+type TriagePage = PagePlanPage | StoryboardPageV2;
 
 function parseArgs(): Args {
   const a: Partial<Args> = {
@@ -40,6 +44,7 @@ function parseArgs(): Args {
     visionAuditDryRun: false,
     skipCompliance: false,
     allowComplianceWarn: false,
+    triage: false,
   };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
@@ -56,7 +61,8 @@ function parseArgs(): Args {
           key === "vision-audit" ||
           key === "vision-audit-dry-run" ||
           key === "skip-compliance" ||
-          key === "allow-compliance-warn"
+          key === "allow-compliance-warn" ||
+          key === "triage"
         ) val = "true";
         else if (i + 1 < argv.length) val = argv[++i];
       }
@@ -74,10 +80,175 @@ function parseArgs(): Args {
       a.skipCompliance = val !== "false";
     } else if (key === "allow-compliance-warn") {
       a.allowComplianceWarn = val !== "false";
+    } else if (key === "triage") {
+      a.triage = val !== "false";
     }
   }
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
   return a as Args;
+}
+
+function readCharacterId(value: unknown): string | null {
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+function addCharacterId(ids: Set<string>, value: unknown): void {
+  const id = readCharacterId(value);
+  if (id) ids.add(id);
+}
+
+function storyboardPageCharacterIds(page: StoryboardPageV2 | undefined): Set<string> {
+  const ids = new Set<string>();
+  if (!page) return ids;
+
+  for (const panel of page.panels) {
+    for (const character of panel.entities.characters) addCharacterId(ids, character.character_id);
+    for (const dialogue of panel.dialogue) addCharacterId(ids, dialogue.character_id);
+    for (const monologue of panel.monologue) addCharacterId(ids, monologue.character_id);
+    for (const prop of panel.entities.props) addCharacterId(ids, prop.held_by_character_id);
+    if (panel.entities.focus_entity_id.startsWith("char_")) addCharacterId(ids, panel.entities.focus_entity_id);
+  }
+
+  return ids;
+}
+
+function sceneCharacterIds(scene: SceneGraphV1["scenes"][number]): Set<string> {
+  const ids = new Set<string>();
+  for (const character of scene.cast) addCharacterId(ids, character.character_id);
+  for (const wardrobe of scene.wardrobe_state ?? []) addCharacterId(ids, wardrobe.character_id);
+  for (const prop of scene.props_in_play ?? []) addCharacterId(ids, prop.held_by);
+  for (const characterId of Object.keys(scene.attribute_tags_focus ?? {})) addCharacterId(ids, characterId);
+  for (const characterId of Object.keys(scene.voice_bible_active_traits ?? {})) addCharacterId(ids, characterId);
+  return ids;
+}
+
+function firstStoryboardCharacterPages(storyboard: EpisodeStoryboardV2): Map<string, number> {
+  const firstPages = new Map<string, number>();
+  for (const page of [...storyboard.pages].sort((a, b) => a.page_no - b.page_no)) {
+    for (const characterId of storyboardPageCharacterIds(page)) {
+      if (!firstPages.has(characterId)) firstPages.set(characterId, page.page_no);
+    }
+  }
+  return firstPages;
+}
+
+function firstSceneGraphCharacterPages(sceneGraph: SceneGraphV1 | undefined): Map<string, number> {
+  const firstPages = new Map<string, number>();
+  if (!sceneGraph) return firstPages;
+
+  for (const scene of [...sceneGraph.scenes].sort((a, b) => a.page_range.start - b.page_range.start)) {
+    for (const characterId of sceneCharacterIds(scene)) {
+      const current = firstPages.get(characterId);
+      if (current === undefined || scene.page_range.start < current) {
+        firstPages.set(characterId, scene.page_range.start);
+      }
+    }
+  }
+  return firstPages;
+}
+
+function pageSceneGraphCharacterIds(pageNo: number, sceneGraph: SceneGraphV1 | undefined): Set<string> {
+  const ids = new Set<string>();
+  if (!sceneGraph) return ids;
+
+  for (const scene of sceneGraph.scenes) {
+    if (pageNo < scene.page_range.start || pageNo > scene.page_range.end) continue;
+    for (const characterId of sceneCharacterIds(scene)) ids.add(characterId);
+  }
+  return ids;
+}
+
+function isPoint(value: unknown): value is [number, number] {
+  return (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    typeof value[0] === "number" &&
+    typeof value[1] === "number"
+  );
+}
+
+function readPolygon(value: unknown): [number, number][] | null {
+  return Array.isArray(value) && value.length >= 3 && value.every(isPoint)
+    ? value
+    : null;
+}
+
+function readRect(value: unknown): { x: number; y: number; w: number; h: number } | null {
+  if (!value || typeof value !== "object") return null;
+  const rect = value as { x?: unknown; y?: unknown; w?: unknown; h?: unknown };
+  return (
+    typeof rect.x === "number" &&
+    typeof rect.y === "number" &&
+    typeof rect.w === "number" &&
+    typeof rect.h === "number"
+  )
+    ? { x: rect.x, y: rect.y, w: rect.w, h: rect.h }
+    : null;
+}
+
+function pointKey(point: [number, number]): string {
+  return `${point[0].toFixed(4)},${point[1].toFixed(4)}`;
+}
+
+function polygonMatchesRect(polygon: [number, number][], rect: { x: number; y: number; w: number; h: number }): boolean {
+  if (polygon.length !== 4) return false;
+  const expected = new Set([
+    pointKey([rect.x, rect.y]),
+    pointKey([rect.x + rect.w, rect.y]),
+    pointKey([rect.x + rect.w, rect.y + rect.h]),
+    pointKey([rect.x, rect.y + rect.h]),
+  ]);
+  return polygon.every((point) => expected.has(pointKey(point)));
+}
+
+function hasPolygonPanel(page: TriagePage): boolean {
+  for (const panel of page.panels) {
+    const rawPanel = panel as unknown as { rect?: unknown; polygon?: unknown };
+    if (readPolygon(rawPanel.rect)) return true;
+
+    const polygon = readPolygon(rawPanel.polygon);
+    if (!polygon) continue;
+
+    const rect = readRect(rawPanel.rect);
+    if (!rect || !polygonMatchesRect(polygon, rect)) return true;
+  }
+  return false;
+}
+
+export function shouldAuditPage(
+  page: TriagePage,
+  sceneGraph: SceneGraphV1 | undefined,
+  storyboard: EpisodeStoryboardV2,
+  pagePlan: PagePlanV2
+): boolean {
+  const storyboardPage = storyboard.pages.find((p) => p.page_no === page.page_no);
+  const planPage = pagePlan.pages.find((p) => p.page_no === page.page_no);
+  const pageRole = page.page_role ?? storyboardPage?.page_role ?? planPage?.page_role;
+  if (pageRole === "opening_hook" || pageRole === "cliffhanger") return true;
+
+  const pageCharacterIds = new Set([
+    ...storyboardPageCharacterIds(storyboardPage),
+    ...pageSceneGraphCharacterIds(page.page_no, sceneGraph),
+  ]);
+  const firstStoryboardPages = firstStoryboardCharacterPages(storyboard);
+  const firstSceneGraphPages = firstSceneGraphCharacterPages(sceneGraph);
+  for (const characterId of pageCharacterIds) {
+    if (firstStoryboardPages.get(characterId) === page.page_no) return true;
+    if (firstSceneGraphPages.get(characterId) === page.page_no) return true;
+  }
+
+  if (hasPolygonPanel(page)) return true;
+  if (planPage && planPage !== page && hasPolygonPanel(planPage)) return true;
+
+  return false;
+}
+
+function filterStoryboard(storyboard: EpisodeStoryboardV2, pageNos: Set<number>): EpisodeStoryboardV2 {
+  return { ...storyboard, pages: storyboard.pages.filter((page) => pageNos.has(page.page_no)) };
+}
+
+function filterPagePlan(pagePlan: PagePlanV2, pageNos: Set<number>): PagePlanV2 {
+  return { ...pagePlan, pages: pagePlan.pages.filter((page) => pageNos.has(page.page_no)) };
 }
 
 function recomputePanelSummary(report: AuditReport): void {
@@ -96,6 +267,26 @@ async function main() {
   let complianceFatalCount = 0;
   const storyboard = JSON.parse(await fs.readFile(storyboardPath(args.slug, args.episode), "utf-8")) as EpisodeStoryboardV2;
   const pagePlan = JSON.parse(await fs.readFile(pagePlanPath(args.slug, args.episode), "utf-8")) as PagePlanV2;
+  let sceneGraph: SceneGraphV1 | undefined;
+  if (args.triage) {
+    sceneGraph = JSON.parse(await fs.readFile(sceneGraphPath(args.slug, args.episode), "utf-8")) as SceneGraphV1;
+  }
+
+  const triagePageNos = args.triage
+    ? new Set(
+        pagePlan.pages
+          .filter((page) => shouldAuditPage(page, sceneGraph, storyboard, pagePlan))
+          .map((page) => page.page_no)
+      )
+    : new Set(pagePlan.pages.map((page) => page.page_no));
+  const auditStoryboard = args.triage ? filterStoryboard(storyboard, triagePageNos) : storyboard;
+  const auditPagePlan = args.triage ? filterPagePlan(pagePlan, triagePageNos) : pagePlan;
+  if (args.triage) {
+    console.log(
+      `[L11] triage: pages=${auditPagePlan.pages.length}/${pagePlan.pages.length} (${auditPagePlan.pages.map((p) => p.page_no).join(", ")})`
+    );
+  }
+
   // resolved_refs.json があれば bg_treatment_compliance も実施 (任意、無くても従前挙動)
   let resolvedRefs: ResolvedRefs | undefined;
   try {
@@ -107,13 +298,13 @@ async function main() {
   }
 
   const report = await auditEpisode({
-    rendersDir: rendersDir(args.slug, args.episode), storyboard, pagePlan, resolvedRefs,
+    rendersDir: rendersDir(args.slug, args.episode), storyboard: auditStoryboard, pagePlan: auditPagePlan, resolvedRefs,
   });
 
   if (args.visionAudit) {
     const visionAuditDir = path.join(episodeDir(args.slug, args.episode), "_audit_vision");
     const vision = await runVisionAudit({
-      pagePlan,
+      pagePlan: auditPagePlan,
       rendersDir: rendersDir(args.slug, args.episode),
       auditDir: visionAuditDir,
       dryRun: args.visionAuditDryRun,
@@ -153,10 +344,10 @@ async function main() {
       const fp = await loadFalsePositives();
       const allFindings: Array<ComplianceFinding & { source: ComplianceAuditSource }> = [];
 
-      const storyboardFindings = scanStoryboard(storyboard, blocklist, fp);
+      const storyboardFindings = scanStoryboard(auditStoryboard, blocklist, fp);
       allFindings.push(...storyboardFindings.map((f) => ({ ...f, source: "storyboard" as const })));
 
-      const pagePlanText = JSON.stringify(pagePlan);
+      const pagePlanText = JSON.stringify(auditPagePlan);
       const pagePlanFindings = scanText(pagePlanText, blocklist, fp, { fieldPath: "page_plan" });
       allFindings.push(...pagePlanFindings.map((f) => ({ ...f, source: "page_plan" as const })));
 
@@ -223,4 +414,7 @@ async function main() {
   }
 }
 
-main().catch((e) => { console.error("[L11] FAILED:", e); process.exit(1); });
+const entrypoint = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
+if (import.meta.url === entrypoint) {
+  main().catch((e) => { console.error("[L11] FAILED:", e); process.exit(1); });
+}
