@@ -1,9 +1,54 @@
 # 漫画パイプライン v2 設計plan (SSoT)
 
-**Status**: Active (2026-05-02 〜)
+**Status**: Active (2026-05-02 〜、2026-05-17 9 ステージ構造に再編)
 **Predecessor**: `_archive/pipeline-v1-2026-05-02.md` (旧 v1、stage1-8 手作業含む)
 **Decision basis**: Codex + Claude エージェント red-team レビュー (2026-05-02)、L0-L17 大規模再設計を 12 layer に圧縮
 **上位戦略**: `strategy.md` — 投資配分 (厚く/薄く) と陳腐化耐性の判断基準。新規 layer 着手前に必ず参照
+
+> **2026-05-17 更新**: EXIT戦略前提変更 (月50本量産 → **月5-10本高品質**) に伴い、12 layer を **9 ステージ構造** に再編。詳細 plan は `~/.claude/plans/ainaro-ep1-bible-generic-shore.md`。実装は Sprint 0-7 (Phase A + 7 Sprint、9 commit) で完了。本ファイルの 12 layer 全体図は historical 記録として残す。
+>
+> ### 9 ステージへの変更点
+>
+> | 旧 | 新 | 変更 |
+> |---|---|---|
+> | L01-L02 | Stage 1 Bible/Asset Gate | 統合 |
+> | (なし) | **Stage 0 Source Adapter** | **新規 (L00-novel-adapter、小説→brief.v2.md)** |
+> | L02b-vol | Stage 2 Volume/Episode Design | 単独 |
+> | L03 + L03.5 | Stage 3 Manga IR | 両立 (統合せず) |
+> | L04 + L04.1 + L04.9 | Stage 4 Storyboard/Name | scene-swap 固定 |
+> | L05 | Stage 5 Page Direction + Sprint 7 enforceVarianceRule | **panel rect 強制 (variance ≥ 3.0x)** |
+> | L06 + L07 | Stage 5 L0607-resolve | **統合済** |
+> | L08.7 + L08.9 | Stage 6 Pre-render Gate | + RenderConstraints Rule 16-18 |
+> | L09 | Stage 7 Render | MANGA_CRAFT_DIRECTIVES_V6 統合 |
+> | L11 全 | Stage 8 Repair/Export | **triage モード追加** |
+> | L02b監査 / L05.5 / L05b/c / L09b | (削除候補) | --quality-tier=premium で skip |
+> | (なし) | **Pro 枠 ledger** | **新規 (data/manga/_ledger/pro-quota.sqlite)** |
+>
+> ### 運用ルール (月5-10本高品質)
+>
+> - 安全上限: 月 5-6 本 (24P + bible refs 拡充 + retry 込み)
+> - 攻めた上限: 月 7-8 本
+> - 月 10 本: OpenAI API バックアップ必須 (`OPENAI_API_KEY_BACKUP`)
+> - quota check は `src/lib/manga/_ledger/quota.ts` で自動化、80%/95% threshold で警告/切替
+>
+> ### 2026-05-17 関連 commit
+>
+> - `ae6e4e6` MANGA_CRAFT_DIRECTIVES_V6 統合
+> - `b2fc16f` scene-graph RenderConstraints + Rule 16-18
+> - `cb6b3d4` schemas-v2 L2b Story Hierarchy + scene-graph 整備
+> - `501e923` L00-novel-adapter (小説→brief.v2.md)
+> - `313f0a2` L0607-resolve (L06+L07統合)
+> - `c596606` L11 triage モード
+> - `3636cae` Pro 枠 ledger (SQLite + 自動切替)
+> - `f2bd5af` pipeline --quality-tier=premium
+> - `0c7fa8b` L05 enforceVarianceRule + variance-rich layout patterns
+> - `84681e1` Sprint 7 追加チューニング: L9 prompt に PANEL SIZE OVERRIDE 追加 (page-specific な panel rect 強制ディレクティブ)
+>
+> ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
+>
+> - **p12 (5 panel page、複雑 layout)**: v3 → v4 で微改善 (見せ場の奥のゲート panel がより大きく描かれる傾向)
+> - **p01 (3 panel page、page_plan ratios [50%, 12%, 12%])**: AI が中下段の小さい 2 panel を「均等 25% × 2」に読み替える傾向、prompt 強化だけでは矯正困難
+> - **Sprint 8 候補**: 3 panel page の row-grouping を geometry block で明示、または storyboard 段で 3 panel → 5 panel に細分化するルール、L11 audit に「panel area % が page_plan と画像で乖離している」検出ルール追加
 
 ## 設計原則
 
@@ -19,12 +64,26 @@
 
 ```
 ═══ PHASE 1: WORK SETUP (once / 作品) ═══
-L1  Bible Snapshot         V2企画書 → bible/snapshot.json
-L2  Bible Images           snapshot → bible/refs/{characters,locations,props}/
+L1   Bible Snapshot        V2企画書 → bible/snapshot.json
+L2   Bible Images          snapshot → bible/refs/{characters,locations,props}/
+L2b  Story Plot            (2026-05-13 物語OS再設計)
+                           --phase=series: snapshot + V2企画書 → series_plan.json
+                                            (全N巻の arc 配分・主人公長期成長・core_hook 進化)
+                           --phase=volume: snapshot + series_plan + V2企画書 → volumes/v{NN}/plot.json
+                                            (schema_version 2: belongs_to_arcs, episodes[].arc_position,
+                                             episodes[].volume_position, episodes[].scenes[] (5-7 個),
+                                             scenes[].directing_intent (opening_hook/world_anchor/
+                                             midpoint_turn/cliffhanger_setup/final_pull))
+                           2026-05-14 構造強化:
+                           - Episode Archetype Patterns (話型辞書): data/manga/episode_patterns/{subtype}.json
+                             Pass 1 で archetype_id 割当、Pass 2 で phase→scene 制約注入
+                           - Visual Channel Map: scene.primary_channels[] で情報伝達チャネル明示
+                           - Reader State Assertions: scene.reader_state_after で読者知識/感情/疑問を累積追跡
 
 ═══ PHASE 2: EPISODE PLANNING (per ep) ═══
 L3   Shotlist              bible + ep_text → episodes/epNN/shotlist.json
-L3.5 Scene-Graph           bible + shotlist + brief + volume_plot → episodes/epNN/scene_graph.json
+L3.5 Scene-Graph           bible + shotlist + brief + volume_plot (scenes 込み) → episodes/epNN/scene_graph.json
+                           L2b scene_skeleton.scene_no を継承、directing_intent を Scene に転記
                            物語論理 (arc/beat/cast/dialogue_plan/foreshadow/protagonist/relationship/time)
                            × 頁演出 (page_budget/mode/turn_anchor/layout_pattern/subtype/render_strategy)
                            × 選別ループ (candidates×5 → pairwise → predict-hit → anchor 比較 → 採用)
@@ -32,6 +91,10 @@ L3.5 Scene-Graph           bible + shotlist + brief + volume_plot → episodes/e
                            a07 第 1 巻 10 episode を新方式で生成済み (sequential 実走 41 分、errors=0)。
                            詳細: docs/plans/manga/scene-graph-l3-5.md
 L4   Storyboard            scene_graph + bible → storyboard.json (panel は scene_id を継承、entity_id binding hard required)
+L4.5 Reader Journey Sim    scene_graph + storyboard + bible → reader_journey.json (2026-05-14 新設)
+                           LLM で初見読者をページ順シミュレート、理解度/感情/離脱リスク/疑問を構造化 FB
+                           CLI: scripts/manga/layers/L04_5-reader-journey.ts
+                           Console: 読者ジャーニータブ (engagement 推移 + 改善提案)
 L5  Page Director          storyboard + capability → page_plan.json
 L6  Continuity Resolve     page_plan + bible → page_plan + continuity_group_ids
 L7  Refs Resolution        page_plan + bible/refs → resolved_refs.json
