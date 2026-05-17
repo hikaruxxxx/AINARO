@@ -184,4 +184,32 @@ describe("bible-facts-audit", () => {
       expect(yearsFinding?.expected).toContain(20);
     });
   });
+
+  describe("Sprint 15 案4: ranks 値の audit", () => {
+    it("auditBibleFacts: ranks 設定済の bible で storyboard 内「SS級」を検出 (S は OK)", () => {
+      const bible = bibleStub();
+      bible.meta.quantitative_facts = {
+        years_ago: [20],
+        judgement_age_max: 18,
+        ranks: ["S", "A", "B", "C", "D", "E", "F"],
+      };
+      const sb = storyboardWithNarration([
+        "S級朱 第三ダンジョン踏破完了。SS級昇格内定。",
+      ]);
+      const { findings } = auditBibleFacts(bible, sb);
+      const rankFindings = findings.filter((f) => f.kind === "rank_mismatch");
+      expect(rankFindings).toHaveLength(1);
+      expect(rankFindings[0].found).toBe("SS");
+      expect(rankFindings[0].expected).toContain("S");
+    });
+
+    it("auditBibleFacts: ranks 未設定の bible では rank_mismatch を検出しない", () => {
+      const bible = bibleStub();
+      bible.meta.quantitative_facts = { years_ago: [20], judgement_age_max: 18 };
+      const sb = storyboardWithNarration(["S級朱、SS級、Z級まで全部混在。"]);
+      const { findings } = auditBibleFacts(bible, sb);
+      const rankFindings = findings.filter((f) => f.kind === "rank_mismatch");
+      expect(rankFindings).toHaveLength(0);
+    });
+  });
 });

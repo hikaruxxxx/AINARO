@@ -29,6 +29,9 @@ export type BibleFacts = {
   yearsAgo: number[];
   /** 年齢「N歳」抽出 */
   ages: number[];
+  /** 制度上のランク一覧 (例: ["S","A","B","C","D","E","F"])。
+   *  bible.meta.quantitative_facts.ranks があれば優先採用。 */
+  ranks: string[];
 };
 
 export type StoryboardTextHit = {
@@ -39,6 +42,7 @@ export type StoryboardTextHit = {
   text: string;
   yearsAgo: number[];
   ages: number[];
+  ranks: string[];
 };
 
 export type Finding = {
@@ -47,9 +51,9 @@ export type Finding = {
   page_no: number;
   field: StoryboardTextHit["field"];
   text: string;
-  kind: "years_ago_mismatch" | "age_mismatch";
-  found: number;
-  expected: number[];
+  kind: "years_ago_mismatch" | "age_mismatch" | "rank_mismatch";
+  found: number | string;
+  expected: Array<number | string>;
   message: string;
 };
 
@@ -82,6 +86,10 @@ function kanjiToNumber(s: string): number | null {
 
 const YEARS_AGO_RE = /(\d+|[〇零一二三四五六七八九十百千]+)年前/g;
 const AGE_RE = /(\d+|[〇零一二三四五六七八九十]+)歳/g;
+// 「S級」「F級」「SS級」「Sプラス級」のような rank 表記。アルファベット連続 or
+// 漢数字混じり ("S+" "SS" "Sプラス") を 1 トークンとして拾う。数字 (例: 3級)
+// は別の制度 (簿記/英検) を指すこともあるため対象外。
+const RANK_RE = /([A-Z]{1,2}|[A-Z][\+ぁ-ヿ]*)級/g;
 
 function extractYearsAgo(text: string): number[] {
   const results: number[] = [];
@@ -97,6 +105,14 @@ function extractAges(text: string): number[] {
   for (const m of text.matchAll(AGE_RE)) {
     const n = kanjiToNumber(m[1]);
     if (n !== null && n > 0 && n < 200) results.push(n);
+  }
+  return results;
+}
+
+function extractRanks(text: string): string[] {
+  const results: string[] = [];
+  for (const m of text.matchAll(RANK_RE)) {
+    results.push(m[1]);
   }
   return results;
 }
@@ -120,8 +136,9 @@ export function extractBibleFacts(bible: BibleSnapshotV2): BibleFacts {
       ...regexAges,
     ]),
   );
+  const ranks = Array.from(new Set(structured?.ranks ?? []));
 
-  return { yearsAgo, ages };
+  return { yearsAgo, ages, ranks };
 }
 
 export function extractStoryboardHits(storyboard: EpisodeStoryboardV2): StoryboardTextHit[] {
@@ -132,7 +149,8 @@ export function extractStoryboardHits(storyboard: EpisodeStoryboardV2): Storyboa
         texts.forEach((text, index) => {
           const yearsAgo = extractYearsAgo(text);
           const ages = extractAges(text);
-          if (yearsAgo.length === 0 && ages.length === 0) return;
+          const ranks = extractRanks(text);
+          if (yearsAgo.length === 0 && ages.length === 0 && ranks.length === 0) return;
           hits.push({
             panel_id: panel.panel_id,
             page_no: page.page_no,
@@ -141,6 +159,7 @@ export function extractStoryboardHits(storyboard: EpisodeStoryboardV2): Storyboa
             text,
             yearsAgo,
             ages,
+            ranks,
           });
         });
       };
@@ -196,6 +215,25 @@ export function auditBibleFacts(
           expected: facts.ages,
           message: `「${n}歳」が bible.world で確認できる「${facts.ages.join("/")}歳」を超える。設定逸脱の可能性あり。`,
         });
+      }
+    }
+    // 2026-05-17 Sprint 15 案4: ranks の不一致検出。
+    // bible.meta.quantitative_facts.ranks が設定されている場合のみ走る。
+    if (facts.ranks.length > 0) {
+      for (const rank of hit.ranks) {
+        if (!facts.ranks.includes(rank)) {
+          findings.push({
+            severity: "warning",
+            panel_id: hit.panel_id,
+            page_no: hit.page_no,
+            field: hit.field,
+            text: hit.text,
+            kind: "rank_mismatch",
+            found: rank,
+            expected: facts.ranks,
+            message: `「${rank}級」が bible.meta.quantitative_facts.ranks の正式 rank 一覧 [${facts.ranks.join("/")}] に無い。AI 補完による架空 rank の可能性あり。`,
+          });
+        }
       }
     }
   }
