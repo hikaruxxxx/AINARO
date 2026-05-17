@@ -44,6 +44,7 @@
 > - `0c7fa8b` L05 enforceVarianceRule + variance-rich layout patterns
 > - `84681e1` Sprint 7 追加チューニング: L9 prompt に PANEL SIZE OVERRIDE 追加 (page-specific な panel rect 強制ディレクティブ)
 > - `826acc7` Sprint 8 案1: L9 prompt に ROW LAYOUT 追加 (row-grouping で AI の縦積み bias を矯正)
+> - `3f5bd80` Sprint 8 案2: effect-lines detector で establishing 大コマの radial 誤発火を抑制
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -54,7 +55,19 @@
 >
 > - **構造的成功**: v4 までは「上=50%、中段=25%、下段=25%」と AI が 3 panel page を縦積み 3 行に読み替えていたが、v5 で「上段=50% 全幅、下段=右下+左下 SIDE-BY-SIDE」と page_plan 本来の 2 行構成を認識
 > - **未解決**: panel area % の厳密一致 (12% × 2 ではなく 25% × 2 になる)。AI は「2 panel 横並び = その行の高さを使う」と読むため変動 h を尊重しない
-> - **Sprint 9 候補**: ROW LAYOUT に行の高さ % も明示 (例: "ROW 2 (BOTTOM, height=24% of page): each 50% width × 24% height")、L11 audit に「panel area % が page_plan と画像で乖離している」検出ルール追加
+>
+> ### Sprint 8 案2 (effect-lines detector 修正) 結果 (a07 ep01 p01 v6、Pro 枠 +1 枚)
+>
+> - **効果線誤発火の完全解消**: v5 まで上段全体に走っていた網目状放射線が消失。夜景の establishing が「静かな情景」として正しく描かれ、ダンジョンゲート青白光や手前のホログラム広告が初めて明確に視認できるように
+> - storyboard の `effect_lines: null` opt-out を尊重 + `shot_type=establishing/wide` での radial 自動発火を抑制
+> - 商業漫画品質: v5 B- → v6 B+ (1 段階上昇)
+>
+> ### Sprint 9 候補 (描き込み密度抑制 + area% 厳密化)
+>
+> 1. **(高 ROI)** establishing panel の情報密度抑制 directive: ナレーション 1 行のみ、内訳説明/ランキング表/架空情報パネル禁止
+> 2. **(中)** ROW LAYOUT に行の高さ % を明示 (例: "ROW 2 (BOTTOM, height=24%): each 50% width × 24% height")
+> 3. **(中)** L11 audit に「panel area % が page_plan と画像で乖離」検出ルール追加
+> 4. **(低)** PanelV2 型に `effect_lines?: EffectLineSpec | null` を正式追加 (現状 detector の unsafe access を解消)
 
 ## 設計原則
 
