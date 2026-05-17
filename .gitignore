@@ -41,6 +41,14 @@ yarn-error.log*
 !/data/manga/
 /data/manga/*
 !/data/manga/compliance/
+# 2026-05-17 追加: コード級アセット (L05/L00 辞書、model capability) を track
+!/data/manga/layout_patterns/
+!/data/manga/episode_patterns/
+!/data/manga/capability/
+# ただし draft / backup は除外
+/data/manga/layout_patterns/_drafts/
+/data/manga/layout_patterns/*.backup
+/data/manga/episode_patterns/_drafts/
 
 # vercel
 .vercel

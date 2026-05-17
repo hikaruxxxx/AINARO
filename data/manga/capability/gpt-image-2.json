@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "model": "gpt-image-2",
+  "profile_id": "gpt-image-2-2026-05-01",
+  "measured_at": "2026-05-01T00:00:00+09:00",
+  "source": "Week 0 Pilot 32枚 (2026-05-01完了) + Codex/Claudeレビュー (2026-05-02)",
+  "api_status": "via_codex_cli",
+  "api_endpoint_notes": "ChatGPT Pro $200/月の Codex CLI image_gen 経由。OpenAI 公式 image_gen ツール。Foundry先行 → 5月公式API開放で切替予定 (RenderAdapter で吸収)",
+
+  "size_options": [
+    { "width": 1748, "height": 2480, "label": "page_b6_350dpi", "mode": "fixed" },
+    { "width": 1024, "height": 1024, "label": "panel_square", "mode": "fixed" },
+    { "width": 1536, "height": 1024, "label": "panel_landscape", "mode": "fixed" },
+    { "width": 1024, "height": 1536, "label": "panel_portrait", "mode": "fixed" }
+  ],
+
+  "reference_image_max": 16,
+  "reference_image_optimal": 5,
+  "reference_image_degradation_note": "16枚詰め込みは顔の平均化が起きる。Pilot で4-8枚ゾーンが最良、5枚を推奨デフォルト",
+
+  "ref_api_capability": {
+    "ref_role_tagging": false,
+    "ref_role_tagging_note": "Codex CLI image_gen / OpenAI gpt-image-1.5 ともに refs はフラット配列。role/tag をAPI側で受け付けない。プロンプト内 inline label (\"ref#1=character face\") は読まれるが弱い",
+    "ref_weighting": false,
+    "ref_weighting_note": "weight パラメータ不在。順序が暗黙の優先度。重要 ref を先頭に置くのが現実的回避策",
+    "ref_mask_binding": false,
+    "ref_mask_binding_note": "Edit endpoint なら mask 1枚は受けられるが、複数refs と複数 mask の領域対応付けは不可",
+    "ref_negative": false,
+    "ref_negative_note": "negative refs API 不在。negative プロンプト文 (NEGATIVES: ...) でのみ排除可"
+  },
+
+  "prompt_style": "instruction_with_reasoning",
+  "prompt_max_chars_practical": 8000,
+
+  "usable_styles": [
+    "manga_bw_seinen_dark",
+    "manga_bw_seinen_urban",
+    "manga_bw_shoujo_classic",
+    "manga_bw_shounen",
+    "manga_bw_seinen"
+  ],
+
+  "allowed_shot_scales": ["close_up", "medium", "wide", "establishing", "over_shoulder"],
+  "weak_shot_scales": ["birds_eye_complex_crowd"],
+
+  "max_characters_per_panel": 3,
+  "multi_character_treatment": "averages_when_4plus",
+  "multi_character_treatment_note": "4人以上同時 face は平均化される。Codexレビュー: focus_entity を必須化、主役 face/full、脇役 full/outfit、その他 silhouette 推奨",
+
+  "reliable_effects": ["speed_lines", "focus_lines", "heavy_black", "negative_space", "screentone_uniform"],
+  "postprocess_required": [],
+  "postprocess_optional": ["screentone_density_adjust", "hatching_enhance"],
+  "postprocess_note": "Pilot で screentone そのものは出る。品質が必要なら post-tone 合成で補強",
+
+  "forbidden_panel_types": [
+    "complex_hand_to_hand_combat_close_up",
+    "10plus_distinct_faces_in_frame",
+    "screen_text_with_complex_japanese_dense_layout"
+  ],
+
+  "negative_space_success_rate": 0.85,
+  "character_consistency_success_rate": 0.92,
+  "page_one_shot_success_rate": 0.95,
+  "panel_composite_success_rate": 0.88,
+
+  "recommended_strategy": "hybrid",
+  "recommended_strategy_note": "F-2 (page_one_shot) を本命、F-1 (panel_composite) を補助。establishing/見開き/単純構成は F-2、多人数+複雑表情は F-1",
+
+  "recommended_page_constraints": {
+    "avg_panels_per_page": 5.5,
+    "max_panels_per_page": 8,
+    "max_dialogue_bubbles_per_panel": 2,
+    "max_closeups_per_page": 3,
+    "allow_action_pages": true,
+    "establishing_per_episode": 2
+  },
+
+  "cost_per_image_estimate": {
+    "via_codex_pro": { "yen": 0, "note": "ChatGPT Pro $200/月 定額枠内。月10作品まで実質ゼロ" },
+    "via_official_api_high_quality": { "usd": 0.08, "note": "5月API開放後の想定単価 (推測)、確定後更新" },
+    "via_official_api_medium_quality": { "usd": 0.04, "note": "推測値" }
+  },
+
+  "lora_phase3_required": false,
+  "lora_phase3_note": "Pilot 95%成立で Phase 3 LoRA 不要と判定 (2026-05-01)。Flux 2 + 自社 LoRA は AI判定が出る場合のみ Year 2+ で再検討",
+
+  "comparison_baseline": {
+    "flux-2-pro": {
+      "tested_on": "2026-05-02",
+      "ref_role_tagging": false,
+      "ref_weighting": false,
+      "ref_count_input_param": "image_inputs (flat array)",
+      "japanese_text_in_image_quality": "崩れ40-60% (ガベージ文字混入)",
+      "ref_face_drift": "high (参考画像の顔に強く引っ張られ別キャラ化)",
+      "verdict": "evaluation_only_not_production"
+    },
+    "qwen-image-2.0": {
+      "tested_on": null,
+      "verdict": "pending"
+    },
+    "niji-7": {
+      "tested_on": null,
+      "verdict": "manual_only_for_style_ceiling_reference"
+    }
+  },
+
+  "production_decision": {
+    "primary_model": "gpt-image-2",
+    "primary_invocation": "codex_cli_image_gen",
+    "fallback_model": null,
+    "decided_at": "2026-05-02",
+    "decision_basis": "Pilot 32/32 + Codex/Claudeレビュー red-team で確定"
+  }
+}
