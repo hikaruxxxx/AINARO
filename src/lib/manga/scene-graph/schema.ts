@@ -13,6 +13,7 @@
  */
 
 import type { BibleSnapshotV2 } from "../schemas-v2";
+import type { DirectingIntent } from "../storyboard-v2/volume-plot";
 
 // ============================================================================
 // Schema Version
@@ -75,6 +76,7 @@ export type Scene = {
   layout_pattern_id: string | null;
   subtype_directive: SubtypeDirective;
   render_strategy: RenderStrategy;
+  render_constraints?: RenderConstraints;
   key_visual_intent: string;
 
   // === C 系: 選別ループ (B3 採点後に充填) ===
@@ -108,6 +110,18 @@ export type Scene = {
       speech_register?: string;
     }
   >;
+
+  // === E 系: L2b directing_intent 継承 (Phase 物語OS再設計、optional) ===
+  /**
+   * L2b SceneSkeleton.directing_intent をそのまま継承する。
+   * 通常は L3.5 scoring-loop が scene_id 一致から自動コピーする。
+   *   - opening_hook: 当 scene の最初 panel に narration_lines / key_visual を強制反映
+   *   - world_anchor: 当 scene のいずれかの panel に target_facts のナレを必須配置
+   *   - midpoint_turn: scene 末で reveal を panel 化
+   *   - cliffhanger_setup: scene 内で build_up を段階展開
+   *   - final_pull: 最終 panel に pull_visual と次話 hook を配置
+   */
+  directing_intent?: DirectingIntent;
 };
 
 // ============================================================================
@@ -258,6 +272,15 @@ export type SubtypeDirective = {
 
 export type RenderStrategy = "page_one_shot" | "panel_composite";
 
+export type RenderConstraints = {
+  /** 1ページあたりの最小吹き出し数 (speech bubble + inner thought + SFX 合算)。default 8 */
+  bubble_density_min?: number;
+  /** 1ページ内 panel area の分散度 (max area - min area) / max area。default 0.5 (即ち 50% 以上のサイズ差) */
+  panel_size_variance_min?: number;
+  /** 1ページあたりの TAME パネル最小数 (background なし or pure object) default 1 */
+  tame_panel_count_min?: number;
+};
+
 // ============================================================================
 // C 系: 選別ループ
 // ============================================================================
@@ -339,6 +362,16 @@ export type ValidationResult = {
   warnings: string[];
 };
 
+export type RenderConstraintPageStats = {
+  page_no: number;
+  /** dialogue + monologue(inner thought) + sfx count for the page */
+  bubble_count?: number;
+  /** (max panel area - min panel area) / max panel area */
+  panel_size_variance?: number;
+  /** background なし or pure object panel count */
+  tame_panel_count?: number;
+};
+
 /**
  * Scene-graph 全体を検証する。
  * 11 ルールの実装は scene-graph-l3-5.md "5. validator" 章を参照。
@@ -359,6 +392,8 @@ export function validateSceneGraph(
     /** validateSceneGraph 内で「当 episode の episode_no」を解決するための番号。
         指定なしなら sceneGraph.scenes[0].arc_position.episode_in_volume を fallback。 */
     episodeNo?: number;
+    /** storyboard/page_plan から呼び出し側が計算した page-level stats。未指定なら Rule 16-18 は deferred として skip。 */
+    renderConstraintPageStats?: RenderConstraintPageStats[];
   }
 ): ValidationResult {
   const errors: string[] = [];
@@ -368,6 +403,9 @@ export function validateSceneGraph(
   const locSet = new Set(bible.locations.map((l) => l.id));
   const briefCastSet = new Set(brief.cast);
   const sceneIdSet = new Set(sceneGraph.scenes.map((s) => s.scene_id));
+  const renderConstraintPageStats = options?.renderConstraintPageStats
+    ? new Map(options.renderConstraintPageStats.map((stats) => [stats.page_no, stats]))
+    : null;
 
   // === Rule 1: scene.location_id ⊂ bible.locations ===
   // === Rule 2: scene.cast ⊂ bible.characters かつ ⊂ brief.cast ===
@@ -494,7 +532,55 @@ export function validateSceneGraph(
       }
     }
 
-    // === Rule 16: panel_archetype_hint 整合 ===
+    // === Rule 16: render_constraints.bubble_density_min ===
+    // Actual per-page counts require storyboard/page_plan and are supplied by caller.
+    if (scene.render_constraints?.bubble_density_min != null) {
+      const min = scene.render_constraints.bubble_density_min;
+      if (!Number.isFinite(min) || min < 0 || !Number.isInteger(min)) {
+        warnings.push(`${sid}: render_constraints.bubble_density_min must be a non-negative integer, got ${min}`);
+      } else if (renderConstraintPageStats) {
+        for (let pageNo = scene.page_range.start; pageNo <= scene.page_range.end; pageNo++) {
+          const bubbleCount = renderConstraintPageStats.get(pageNo)?.bubble_count;
+          if (bubbleCount != null && bubbleCount < min) {
+            warnings.push(`${sid}: Rule 16 bubble_density_min=${min} unmet on page ${pageNo}: bubble_count=${bubbleCount}`);
+          }
+        }
+      }
+    }
+
+    // === Rule 17: render_constraints.panel_size_variance_min ===
+    // Actual panel geometry is intentionally deferred unless page stats are supplied.
+    if (scene.render_constraints?.panel_size_variance_min != null) {
+      const min = scene.render_constraints.panel_size_variance_min;
+      if (!Number.isFinite(min) || min < 0 || min > 1) {
+        warnings.push(`${sid}: render_constraints.panel_size_variance_min must be between 0 and 1, got ${min}`);
+      } else if (renderConstraintPageStats) {
+        for (let pageNo = scene.page_range.start; pageNo <= scene.page_range.end; pageNo++) {
+          const variance = renderConstraintPageStats.get(pageNo)?.panel_size_variance;
+          if (variance != null && variance < min) {
+            warnings.push(`${sid}: Rule 17 panel_size_variance_min=${min} unmet on page ${pageNo}: panel_size_variance=${variance}`);
+          }
+        }
+      }
+    }
+
+    // === Rule 18: render_constraints.tame_panel_count_min ===
+    // TAME 判定 (background なし or pure object) も caller-provided stats がある時だけ検証する。
+    if (scene.render_constraints?.tame_panel_count_min != null) {
+      const min = scene.render_constraints.tame_panel_count_min;
+      if (!Number.isFinite(min) || min < 0 || !Number.isInteger(min)) {
+        warnings.push(`${sid}: render_constraints.tame_panel_count_min must be a non-negative integer, got ${min}`);
+      } else if (renderConstraintPageStats) {
+        for (let pageNo = scene.page_range.start; pageNo <= scene.page_range.end; pageNo++) {
+          const tamePanelCount = renderConstraintPageStats.get(pageNo)?.tame_panel_count;
+          if (tamePanelCount != null && tamePanelCount < min) {
+            warnings.push(`${sid}: Rule 18 tame_panel_count_min=${min} unmet on page ${pageNo}: tame_panel_count=${tamePanelCount}`);
+          }
+        }
+      }
+    }
+
+    // === Rule 19: panel_archetype_hint 整合 ===
     // Phase 3 前の bible ではフィールド自体が無いので warning に留める。
     if (scene.panel_archetype_hint) {
       const archetypes =
@@ -505,7 +591,7 @@ export function validateSceneGraph(
       }
     }
 
-    // === Rule 17: cliffhanger_pattern は cliff scene のみ ===
+    // === Rule 20: cliffhanger_pattern は cliff scene のみ ===
     if (scene.cliffhanger_pattern && scene.beat_type !== "cliff") {
       errors.push(`${sid}: cliffhanger_pattern "${scene.cliffhanger_pattern}" specified but beat_type=${scene.beat_type} (cliff のみ可)`);
     }
@@ -731,6 +817,8 @@ export type PanelLikeShape = {
   };
   dialogue?: Array<{ character_id?: string; text?: string }>;
   monologue?: Array<{ character_id?: string; text?: string }>;
+  narration?: string[];
+  key_visual?: string;
 };
 
 export type StoryboardLikeShape = {
@@ -739,6 +827,14 @@ export type StoryboardLikeShape = {
     panels: PanelLikeShape[];
   }>;
 };
+
+function extractKeywords(text: string): string[] {
+  return text
+    .replace(/[、。！？「」『』（）\s,.\-_:;/]+/g, " ")
+    .split(" ")
+    .map((w) => w.trim())
+    .filter((w) => w.length >= 2);
+}
 
 export function validatePanelSceneInheritance(
   storyboard: StoryboardLikeShape,
@@ -819,6 +915,107 @@ export function validatePanelSceneInheritance(
         if (owner && owner !== scene.scene_id) {
           errors.push(
             `${ref} (scene ${scene.scene_id}): contains scene_exclusive text "${t}" owned by ${owner}`
+          );
+        }
+      }
+
+      // Gap 4: page_range 逸脱チェック
+      if (
+        page.page_no < scene.page_range.start ||
+        page.page_no > scene.page_range.end
+      ) {
+        errors.push(
+          `${ref} (scene ${scene.scene_id}): placed on page ${page.page_no} but scene.page_range is ${scene.page_range.start}-${scene.page_range.end}`
+        );
+      }
+    }
+  }
+
+  // Gap 1: directing_intent.narration_lines 転記チェック
+  // Gap 2: key_lines 全量配置チェック
+  // Gap 3: key_visual キーワード重複チェック
+  // scene 単位で panel の narration/dialogue/monologue を集約して検証
+  for (const scene of sceneGraph.scenes) {
+    const scenePanels: PanelLikeShape[] = [];
+    const scenePanelPages: number[] = [];
+    for (const page of storyboard.pages) {
+      for (const panel of page.panels) {
+        if (
+          panel.panel_no >= scene.panel_range.start_panel_no &&
+          panel.panel_no <= scene.panel_range.end_panel_no
+        ) {
+          scenePanels.push(panel);
+          scenePanelPages.push(page.page_no);
+        }
+      }
+    }
+
+    // Gap 1: narration_lines
+    const di = scene.directing_intent;
+    if (di && di.kind !== "normal" && "narration_lines" in di && di.narration_lines) {
+      const allNarration = scenePanels.flatMap((p) => p.narration ?? []).join("\n");
+      for (const line of di.narration_lines) {
+        if (!allNarration.includes(line)) {
+          const nums = line.match(/[\d０-９一二三四五六七八九十百千万億]+/g) ?? [];
+          const hasNumberMatch = nums.length > 0 && nums.every((n) => allNarration.includes(n));
+          if (hasNumberMatch) {
+            warnings.push(
+              `scene ${scene.scene_id}: narration_line "${line}" — 文全体は不一致だが数値は一致 (軽微な改変の可能性)`
+            );
+          } else {
+            errors.push(
+              `scene ${scene.scene_id}: narration_line "${line}" が storyboard panels の narration に見つからない`
+            );
+          }
+        }
+      }
+    }
+
+    // Gap 1b: world_anchor target_facts
+    if (di && di.kind === "world_anchor") {
+      const allText = scenePanels
+        .flatMap((p) => [
+          ...(p.narration ?? []),
+          ...(p.dialogue ?? []).map((d) => d.text ?? ""),
+          ...(p.monologue ?? []).map((d) => d.text ?? ""),
+        ])
+        .join("\n");
+      for (const fact of di.target_facts) {
+        if (!allText.includes(fact)) {
+          warnings.push(
+            `scene ${scene.scene_id}: world_anchor target_fact "${fact}" が storyboard panels のテキストに見つからない`
+          );
+        }
+      }
+    }
+
+    // Gap 2: key_lines 全量配置
+    const allDialogueMonologue = scenePanels
+      .flatMap((p) => [
+        ...(p.dialogue ?? []).map((d) => d.text ?? ""),
+        ...(p.monologue ?? []).map((d) => d.text ?? ""),
+      ])
+      .filter((t) => t.length > 0);
+    for (const kl of scene.dialogue_plan.key_lines) {
+      if (!kl.text) continue;
+      if (!allDialogueMonologue.includes(kl.text)) {
+        errors.push(
+          `scene ${scene.scene_id}: key_line "${kl.text}" (speaker=${kl.speaker}) が storyboard panels の dialogue/monologue に見つからない`
+        );
+      }
+    }
+
+    // Gap 3: key_visual キーワード重複 (opening_hook のみ、warn)
+    if (di && di.kind === "opening_hook" && di.key_visual && scenePanels.length > 0) {
+      const firstPanel = scenePanels[0];
+      if (firstPanel.key_visual) {
+        const diKeywords = extractKeywords(di.key_visual);
+        const panelKeywords = extractKeywords(firstPanel.key_visual);
+        const overlap = diKeywords.filter((k) => panelKeywords.includes(k));
+        const overlapRate = diKeywords.length > 0 ? overlap.length / diKeywords.length : 1;
+        if (overlapRate < 0.3) {
+          warnings.push(
+            `scene ${scene.scene_id}: opening_hook key_visual のキーワード重複率が低い (${Math.round(overlapRate * 100)}%): DI="${di.key_visual}" vs panel="${firstPanel.key_visual}"`
           );
         }
       }

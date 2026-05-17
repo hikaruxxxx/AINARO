@@ -48,6 +48,10 @@ const STATIC_RULES = new Set([
   "dialogue_overflow",
 ]);
 
+// TODO(Sprint 2): scene_graph.render_constraints の panel-level 検証は
+// page_plan/storyboard stats を lintName 側で集約してから追加する。
+// Sprint 1 では schema validator の caller-provided stats 対応までに留める。
+
 function parseArgs(): Args {
   const a: Partial<Args> = { skipLlm: false, failOnFatal: false };
   const argv = process.argv.slice(2);

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { BibleSnapshotV2 } from "../schemas-v2";
 import type { Scene, SceneGraphV1 } from "./schema";
-import { validateSceneGraph } from "./schema";
+import { validateSceneGraph, validatePanelSceneInheritance } from "./schema";
+import type { StoryboardLikeShape } from "./schema";
 
 function bible(patch: Partial<BibleSnapshotV2> = {}): BibleSnapshotV2 {
   const base = {
@@ -153,7 +154,7 @@ describe("validateSceneGraph D 系 bible 伝搬軸", () => {
     );
   });
 
-  it("Rule 16: panel_archetype_hint 不一致は warning に留める", () => {
+  it("Rule 19: panel_archetype_hint 不一致は warning に留める", () => {
     const result = validate(
       { panel_archetype_hint: "arch_missing" },
       { visual_grammar: { panel_archetypes: [{ id: "arch_a" }] } } as unknown as Partial<BibleSnapshotV2>
@@ -163,16 +164,102 @@ describe("validateSceneGraph D 系 bible 伝搬軸", () => {
     expect(result.warnings).toContain('S01: panel_archetype_hint "arch_missing" not in bible.visual_grammar.panel_archetypes');
   });
 
-  it("Rule 17: cliffhanger_pattern は cliff scene 以外では error にする", () => {
+  it("Rule 20: cliffhanger_pattern は cliff scene 以外では error にする", () => {
     const result = validate({ cliffhanger_pattern: "daily_intrusion", beat_type: "setup" });
 
     expect(result.errors).toContain('S01: cliffhanger_pattern "daily_intrusion" specified but beat_type=setup (cliff のみ可)');
   });
 
-  it("Rule 17: cliff scene では cliffhanger_pattern を許可する", () => {
+  it("Rule 20: cliff scene では cliffhanger_pattern を許可する", () => {
     const result = validate({ cliffhanger_pattern: "daily_intrusion", beat_type: "cliff" });
 
     expect(result.ok).toBe(true);
+  });
+});
+
+describe("validateSceneGraph Rule 16-18 render_constraints", () => {
+  it("Rule 16: bubble_density_min を満たす page stats なら warning なし", () => {
+    const result = validateSceneGraph(
+      graph({ render_constraints: { bubble_density_min: 8 } }),
+      bible(),
+      { episode_id: "ep01", cast: ["char_a", "char_b"] },
+      { renderConstraintPageStats: [{ page_no: 1, bubble_count: 8 }] }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.warnings.some((w) => w.includes("Rule 16"))).toBe(false);
+  });
+
+  it("Rule 16: bubble_density_min 未満なら warning", () => {
+    const result = validateSceneGraph(
+      graph({ render_constraints: { bubble_density_min: 8 } }),
+      bible(),
+      { episode_id: "ep01", cast: ["char_a", "char_b"] },
+      { renderConstraintPageStats: [{ page_no: 1, bubble_count: 7 }] }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.warnings).toContain("S01: Rule 16 bubble_density_min=8 unmet on page 1: bubble_count=7");
+  });
+
+  it("Rule 17: panel_size_variance_min を満たす page stats なら warning なし", () => {
+    const result = validateSceneGraph(
+      graph({ render_constraints: { panel_size_variance_min: 0.5 } }),
+      bible(),
+      { episode_id: "ep01", cast: ["char_a", "char_b"] },
+      { renderConstraintPageStats: [{ page_no: 1, panel_size_variance: 0.5 }] }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.warnings.some((w) => w.includes("Rule 17"))).toBe(false);
+  });
+
+  it("Rule 17: panel_size_variance_min 未満なら warning", () => {
+    const result = validateSceneGraph(
+      graph({ render_constraints: { panel_size_variance_min: 0.5 } }),
+      bible(),
+      { episode_id: "ep01", cast: ["char_a", "char_b"] },
+      { renderConstraintPageStats: [{ page_no: 1, panel_size_variance: 0.25 }] }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.warnings).toContain("S01: Rule 17 panel_size_variance_min=0.5 unmet on page 1: panel_size_variance=0.25");
+  });
+
+  it("Rule 18: tame_panel_count_min を満たす page stats なら warning なし", () => {
+    const result = validateSceneGraph(
+      graph({ render_constraints: { tame_panel_count_min: 1 } }),
+      bible(),
+      { episode_id: "ep01", cast: ["char_a", "char_b"] },
+      { renderConstraintPageStats: [{ page_no: 1, tame_panel_count: 1 }] }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.warnings.some((w) => w.includes("Rule 18"))).toBe(false);
+  });
+
+  it("Rule 18: tame_panel_count_min 未満なら warning", () => {
+    const result = validateSceneGraph(
+      graph({ render_constraints: { tame_panel_count_min: 1 } }),
+      bible(),
+      { episode_id: "ep01", cast: ["char_a", "char_b"] },
+      { renderConstraintPageStats: [{ page_no: 1, tame_panel_count: 0 }] }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.warnings).toContain("S01: Rule 18 tame_panel_count_min=1 unmet on page 1: tame_panel_count=0");
+  });
+
+  it("render_constraints 未指定なら Rule 16-18 は skip", () => {
+    const result = validateSceneGraph(
+      graph({}),
+      bible(),
+      { episode_id: "ep01", cast: ["char_a", "char_b"] },
+      { renderConstraintPageStats: [{ page_no: 1, bubble_count: 0, panel_size_variance: 0, tame_panel_count: 0 }] }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.warnings.some((w) => /Rule 1[678]/.test(w))).toBe(false);
   });
 });
 
@@ -309,5 +396,313 @@ describe("validateSceneGraph Rule 5 volume foreshadow_map 連携", () => {
     );
 
     expect(result.warnings.some((w) => w.includes("expects cross-episode payoff"))).toBe(true);
+  });
+});
+
+// ============================================================================
+// validatePanelSceneInheritance Gap 1-4 テスト
+// ============================================================================
+
+function makeInheritanceScene(patch: Partial<Scene> = {}): Scene {
+  return {
+    scene_id: "S01",
+    scene_no: 1,
+    prev_scene_id: null,
+    next_scene_id: null,
+    page_range: { start: 1, end: 2 },
+    panel_range: { start_panel_no: 1, end_panel_no: 3 },
+    arc_position: { volume: 1, episode_in_volume: 1, arc_phase: "introduce", arc_position_normalized: 0 },
+    beat_type: "introduce",
+    cast: [{ character_id: "char_a", presence: "in_person" }],
+    dialogue_plan: { key_lines: [] },
+    foreshadow_setup: [],
+    foreshadow_payoff: [],
+    protagonist_arc_state: { belief: "b", goal: "g", emotion: "calm", delta_from_prev: "none" },
+    relationship_state_delta: [],
+    time_axis: { label: "now", order: 1, is_flashback: false, is_flashforward: false, duration_hint: "minutes" },
+    location_id: "loc_a",
+    page_budget: { min: 2, max: 2, preferred: 2 },
+    mode: "establishing",
+    turn_anchor: { at_panel_no: null, type: "none" },
+    layout_pattern_id: null,
+    subtype_directive: { external_social: false, gacha_ui: false, hybrid: false },
+    render_strategy: "page_one_shot",
+    key_visual_intent: "intent",
+    ...patch,
+  };
+}
+
+function makeInheritanceGraph(scenes: Scene[]): SceneGraphV1 {
+  return {
+    schema_version: 1,
+    episode_id: "ep01",
+    scenes,
+    generated_at: "2026-05-14T00:00:00.000Z",
+    source: { brief_path: "b", shotlist_path: "s", bible_snapshot_path: "bi" },
+  };
+}
+
+describe("validatePanelSceneInheritance Gap 1: narration_lines", () => {
+  it("narration_lines が正しく転記されていれば error なし", () => {
+    const sg = makeInheritanceGraph([
+      makeInheritanceScene({
+        directing_intent: {
+          kind: "opening_hook",
+          hook_pattern: "world_glimpse",
+          key_visual: "新宿の夜景",
+          narration_lines: ["三年前、ダンジョンが現れた。", "判定が人生を決める。"],
+        },
+      }),
+    ]);
+    const sb: StoryboardLikeShape = {
+      pages: [
+        {
+          page_no: 1,
+          panels: [
+            { panel_no: 1, entities: { location_id: "loc_a", characters: ["char_a"] }, narration: ["三年前、ダンジョンが現れた。"] },
+            { panel_no: 2, entities: { location_id: "loc_a", characters: ["char_a"] }, narration: ["判定が人生を決める。"] },
+          ],
+        },
+        {
+          page_no: 2,
+          panels: [
+            { panel_no: 3, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+      ],
+    };
+    const result = validatePanelSceneInheritance(sb, sg);
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it("narration_lines の年数が改変されたら error", () => {
+    const sg = makeInheritanceGraph([
+      makeInheritanceScene({
+        directing_intent: {
+          kind: "opening_hook",
+          hook_pattern: "world_glimpse",
+          key_visual: "新宿の夜景",
+          narration_lines: ["三年前、ダンジョンが現れた。"],
+        },
+      }),
+    ]);
+    const sb: StoryboardLikeShape = {
+      pages: [
+        {
+          page_no: 1,
+          panels: [
+            { panel_no: 1, entities: { location_id: "loc_a", characters: ["char_a"] }, narration: ["二十年前、ダンジョンが現れた。"] },
+            { panel_no: 2, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+        {
+          page_no: 2,
+          panels: [
+            { panel_no: 3, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+      ],
+    };
+    const result = validatePanelSceneInheritance(sb, sg);
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((e) => e.includes("narration_line") && e.includes("三年前"))).toBe(true);
+  });
+
+  it("narration_lines が完全に脱落したら error", () => {
+    const sg = makeInheritanceGraph([
+      makeInheritanceScene({
+        directing_intent: {
+          kind: "opening_hook",
+          hook_pattern: "world_glimpse",
+          key_visual: "夜景",
+          narration_lines: ["判定が人生を決める。"],
+        },
+      }),
+    ]);
+    const sb: StoryboardLikeShape = {
+      pages: [
+        {
+          page_no: 1,
+          panels: [
+            { panel_no: 1, entities: { location_id: "loc_a", characters: ["char_a"] }, narration: [] },
+            { panel_no: 2, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+        {
+          page_no: 2,
+          panels: [
+            { panel_no: 3, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+      ],
+    };
+    const result = validatePanelSceneInheritance(sb, sg);
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((e) => e.includes("narration_line") && e.includes("判定が人生を決める"))).toBe(true);
+  });
+});
+
+describe("validatePanelSceneInheritance Gap 2: key_lines 全量配置", () => {
+  it("key_lines が全て dialogue に配置されていれば error なし", () => {
+    const sg = makeInheritanceGraph([
+      makeInheritanceScene({
+        dialogue_plan: {
+          key_lines: [
+            { speaker: "char_a", text: "了解。", uniqueness: "may_repeat", intent: "callback" },
+          ],
+        },
+      }),
+    ]);
+    const sb: StoryboardLikeShape = {
+      pages: [
+        {
+          page_no: 1,
+          panels: [
+            {
+              panel_no: 1,
+              entities: { location_id: "loc_a", characters: ["char_a"] },
+              dialogue: [{ character_id: "char_a", text: "了解。" }],
+            },
+            { panel_no: 2, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+        {
+          page_no: 2,
+          panels: [
+            { panel_no: 3, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+      ],
+    };
+    const result = validatePanelSceneInheritance(sb, sg);
+    expect(result.ok).toBe(true);
+  });
+
+  it("key_line が脱落したら error", () => {
+    const sg = makeInheritanceGraph([
+      makeInheritanceScene({
+        dialogue_plan: {
+          key_lines: [
+            { speaker: "char_a", text: "経験値倍化条件、開示します。", uniqueness: "scene_exclusive", intent: "reveal" },
+          ],
+        },
+      }),
+    ]);
+    const sb: StoryboardLikeShape = {
+      pages: [
+        {
+          page_no: 1,
+          panels: [
+            {
+              panel_no: 1,
+              entities: { location_id: "loc_a", characters: ["char_a"] },
+              dialogue: [{ character_id: "char_a", text: "別のセリフです。" }],
+            },
+            { panel_no: 2, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+        {
+          page_no: 2,
+          panels: [
+            { panel_no: 3, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+      ],
+    };
+    const result = validatePanelSceneInheritance(sb, sg);
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((e) => e.includes("key_line") && e.includes("経験値倍化条件"))).toBe(true);
+  });
+});
+
+describe("validatePanelSceneInheritance Gap 3: key_visual キーワード重複", () => {
+  it("key_visual のキーワードが大きく乖離していれば warn", () => {
+    const sg = makeInheritanceGraph([
+      makeInheritanceScene({
+        directing_intent: {
+          kind: "opening_hook",
+          hook_pattern: "world_glimpse",
+          key_visual: "新宿の夜景を見下ろす俯瞰。ビル群の隙間にダンジョンゲートの青白い光が灯る。",
+          narration_lines: [],
+        },
+      }),
+    ]);
+    const sb: StoryboardLikeShape = {
+      pages: [
+        {
+          page_no: 1,
+          panels: [
+            {
+              panel_no: 1,
+              entities: { location_id: "loc_a", characters: ["char_a"] },
+              key_visual: "コンビニ店内の蛍光灯。棚に並ぶ弁当。",
+            },
+            { panel_no: 2, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+        {
+          page_no: 2,
+          panels: [
+            { panel_no: 3, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+      ],
+    };
+    const result = validatePanelSceneInheritance(sb, sg);
+    expect(result.warnings.some((w) => w.includes("key_visual") && w.includes("キーワード重複率"))).toBe(true);
+  });
+});
+
+describe("validatePanelSceneInheritance Gap 4: page_range 逸脱", () => {
+  it("panel が page_range 内なら error なし", () => {
+    const sg = makeInheritanceGraph([
+      makeInheritanceScene({ page_range: { start: 1, end: 2 } }),
+    ]);
+    const sb: StoryboardLikeShape = {
+      pages: [
+        {
+          page_no: 1,
+          panels: [
+            { panel_no: 1, entities: { location_id: "loc_a", characters: ["char_a"] } },
+            { panel_no: 2, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+        {
+          page_no: 2,
+          panels: [
+            { panel_no: 3, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+      ],
+    };
+    const result = validatePanelSceneInheritance(sb, sg);
+    expect(result.ok).toBe(true);
+  });
+
+  it("panel が page_range 外に配置されたら error", () => {
+    const sg = makeInheritanceGraph([
+      makeInheritanceScene({ page_range: { start: 1, end: 1 } }),
+    ]);
+    const sb: StoryboardLikeShape = {
+      pages: [
+        {
+          page_no: 1,
+          panels: [
+            { panel_no: 1, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+        {
+          page_no: 3,
+          panels: [
+            { panel_no: 2, entities: { location_id: "loc_a", characters: ["char_a"] } },
+            { panel_no: 3, entities: { location_id: "loc_a", characters: ["char_a"] } },
+          ],
+        },
+      ],
+    };
+    const result = validatePanelSceneInheritance(sb, sg);
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((e) => e.includes("page_range") || e.includes("placed on page"))).toBe(true);
   });
 });
