@@ -125,14 +125,29 @@
 > - **findings 0 件達成** (前回まで p022「三年前」が個人時間軸誤検出として残存していたが、reference_years_ago: [3] 登録で抑制成功)
 > - bible-facts-audit が「真の bible 逸脱」と「個人時間軸」を明確に区別、本番運用レベルへ
 >
-> ### Sprint 17 候補
+> ### Sprint 17 案4+5 結果 (検証のみ、Pro 枠 +1 枚)
 >
-> 1. **(高 ROI)** L11 audit に area % 乖離検出 — page_plan の panel rect と実画像の panel 境界を比較、12% × 2 が 25% × 2 に膨張するケース等を自動検出 (vision 解析必須、コスト高)
+> **案4 (p12 V1 vs v10 比較)**:
+> - V1 (Sprint 0 前) は 8 panel 構成、wide panel (公社入口ゲート) に overlay 詰め込み気味
+> - v10 (Sprint 12 案1+5 後) は 6 panel に整理、wide 抑制で公社ゲート panel がクリーンな環境描写に
+> - 品質: V1 B → v10 B+ (wide 拡張の実効性、複雑 layout page でも確認)
+>
+> **案5 (p19 v11 render)**:
+> - V1 は縦積み 5 panel、panel area ほぼ均等
+> - v11 は 2 列 grid 5 panel、上段 close_up DOMINANT (約 1/3) + 中下段で variance あり、主人公の右手 close_up が追加され余韻増
+> - 品質: V1 B → v11 B+〜A- (close_up + wide 混在 page でも構造改善累積)
+> - SCENE PANEL RESTRICTIONS の直接効果は見えず (establishing なし)、Sprint 7-10 (enforceVariance + ROW LAYOUT + effects 修正) の累積効果が支配的
+>
+> **案6 (ep02/ep03 一括 audit)**: 対象 storyboard 未生成のため skip
+>
+> ### Sprint 18 候補
+>
+> 1. **(高 ROI)** L11 audit に area % 乖離検出 (vision 解析必須、コスト高)
 > 2. **(中)** PanelV2 型に effect_lines 正式追加 (schema + 3 ファイル import 同期)
-> 3. **(中)** bible-facts-audit に「人物名+「歳」」マッチを個人 facet と判定するヒューリスティック追加 (personal_timeline_facts に依存しない自動分類)
-> 4. **(検証)** p12 v10 と V1 p12.png の比較で wide 拡張実効性再評価 (Pro 枠不要)
-> 5. **(検証)** p19 を v11 で render、close_up + wide 混在 page での効果測定 (Pro 枠 +1)
-> 6. **(検証)** ep02 / ep03 の storyboard も audit に通して bible 逸脱を一括検出 (Pro 枠不要)
+> 3. **(中)** bible-facts-audit に「人物名+「歳」」自動分類ヒューリスティック (personal_timeline_facts 手動登録の代替)
+> 4. **(中)** prompt size 警告 (8000 char 超過) の解消 — BIBLE FACTS の 300 字抜粋を更に圧縮、または "tier=minimal" 自動切替
+> 5. **(中)** ep02 / ep03 / ep04+ storyboard 生成 → 一括 audit で全 ep の bible 整合性を担保 (将来作品)
+> 6. **(検証)** 全 page (p01-p24) を v11 で render してフルエピソード品質測定 (Pro 枠 +24 枚、月内枠の 10% 消費)
 
 ## 設計原則
 
