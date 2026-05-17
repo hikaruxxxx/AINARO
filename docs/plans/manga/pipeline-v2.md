@@ -66,6 +66,7 @@
 > - `89744e4` Sprint 22 案C: p24 v15 の空 typeset 枠 5 個完全消去 (storyboard 強化 + page-level forbidden directive)
 > - `39c95cd` Sprint 22 修正: p24 panel#120 の過剰指示を撤回 (AI 委任で v18=A 級達成、メモリ feedback_ai_image_over_prompting.md 追加)
 > - `49a2b70` Sprint 22 仕上げ: p24 panel#120 の effect_lines を null に明示 (集中線完全消失、v19=A+ 達成、cliffhanger intimate 完成)
+> - **v20 全 24 page 再 render 完了** (Pro 枠 +24、gen=24/skip=0/fail=0、p01=A〜A+、p24=A+ で本セッション最高品質達成)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
