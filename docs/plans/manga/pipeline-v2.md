@@ -50,6 +50,7 @@
 > - `1280fb5` Sprint 10 案2: ROW LAYOUT に行高 % と幅×高さの 2D 指定を追加
 > - `8359f3e` Sprint 11 案1: L9 prompt に ESTABLISHING RESTRICTIONS section を追加 (overlay 数制限 + negative list)
 > - `0c93d73` Sprint 12 案1+5: SCENE PANEL RESTRICTIONS に拡張 (wide shot_type 対応 + 文字数 800→300 字圧縮)
+> - `1a589c8` Sprint 13 案1: SCENE PANEL RESTRICTIONS の directive 強度を補強 (Max 0/1 細分化 + MUST not 格上げ)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -94,15 +95,22 @@
 > - **a07 ep01 p12 v10**: wide 抑制効果で公社入口ゲート panel の描き込みが整理、本セッション初の p12 高品質出力 (B+ レベル)
 > - 文字数圧縮 (8532 → 8310) で p01 の prompt warning 緩和、p12 は依然 9995 字で超過
 >
-> ### Sprint 13 候補
+> ### Sprint 13 案1 結果 (a07 ep01 p01 v11 + p05 v11、Pro 枠 +2 枚)
 >
-> 1. **(高 ROI)** SCENE PANEL RESTRICTIONS の directive 強度補強 — 「Max 1」を「Max 0 for purely atmospheric establishing」のように細分化、または MUST not 表現格上げ
-> 2. **(中)** bible.meta に `quantitative_facts` 構造化フィールド追加 (audit 誤検出減)
-> 3. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
-> 4. **(中)** 残作品 storyboard 一括 audit
-> 5. **(低)** PanelV2 型に effect_lines 正式追加
-> 6. **(検証)** p05 / p19 を v10 で再 render、全 page 効果測定 (Pro 枠 +2 枚)
-> 7. **(検証)** p12 v10 と既存 V1 (p12.png) との比較で wide 拡張の実効性を再評価
+> - **p01 v11**: overlay 1 個に絞り戻し成功 (v10 の 2 個から 1 個へ、強化 directive 効果実証)。商業漫画品質 **A〜A-** (本セッション最高水準復活)
+> - **p05 v11 (初評価)**: 6 panel 構成、上段に意図的な集中線 (close_up なので Sprint 8 案2 除外対象外、storyboard 意図と整合)、中段ホテル/下段「適性ランクは一生固定」+ 鑑定結果 F の公社アプリ。**B+〜A-**
+>
+> ### Sprint 13 で skip 判断したもの
+> - **案4 (一括 audit 適用)**: `audit-bible-facts.ts --all` モードは既実装、対象作品が a07-modern-dungeon の 1 つしかないため実適用余地なし。将来作品増えてから
+> - **案5 (PanelV2 型 effect_lines)**: schema 拡張 + 3 ファイル import 同期で工数大、detector のテスト 5 ケースで挙動担保済みのため後回し
+>
+> ### Sprint 14 候補
+>
+> 1. **(高 ROI)** bible.meta に `quantitative_facts` 構造化フィールド追加 — `{ years_ago: [20], judgement_age_max: 18, ranks: ["S","A","B","C","D","E","F"] }` 形式で bible-facts-audit が優先参照、regex fallback
+> 2. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
+> 3. **(中)** PanelV2 型に effect_lines 正式追加 (schema + import 同期)
+> 4. **(検証)** p12 v10 と V1 p12.png の比較で wide 拡張実効性再評価
+> 5. **(検証)** p19 を v11 で render、close_up + wide 混在 page での効果測定 (Pro 枠 +1)
 
 ## 設計原則
 
