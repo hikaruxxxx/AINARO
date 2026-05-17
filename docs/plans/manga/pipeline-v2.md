@@ -43,12 +43,18 @@
 > - `f2bd5af` pipeline --quality-tier=premium
 > - `0c7fa8b` L05 enforceVarianceRule + variance-rich layout patterns
 > - `84681e1` Sprint 7 追加チューニング: L9 prompt に PANEL SIZE OVERRIDE 追加 (page-specific な panel rect 強制ディレクティブ)
+> - `826acc7` Sprint 8 案1: L9 prompt に ROW LAYOUT 追加 (row-grouping で AI の縦積み bias を矯正)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
 > - **p12 (5 panel page、複雑 layout)**: v3 → v4 で微改善 (見せ場の奥のゲート panel がより大きく描かれる傾向)
 > - **p01 (3 panel page、page_plan ratios [50%, 12%, 12%])**: AI が中下段の小さい 2 panel を「均等 25% × 2」に読み替える傾向、prompt 強化だけでは矯正困難
-> - **Sprint 8 候補**: 3 panel page の row-grouping を geometry block で明示、または storyboard 段で 3 panel → 5 panel に細分化するルール、L11 audit に「panel area % が page_plan と画像で乖離している」検出ルール追加
+>
+> ### Sprint 8 案1 (row-grouping) 結果 (a07 ep01 p01 v5、Pro 枠 +1 枚)
+>
+> - **構造的成功**: v4 までは「上=50%、中段=25%、下段=25%」と AI が 3 panel page を縦積み 3 行に読み替えていたが、v5 で「上段=50% 全幅、下段=右下+左下 SIDE-BY-SIDE」と page_plan 本来の 2 行構成を認識
+> - **未解決**: panel area % の厳密一致 (12% × 2 ではなく 25% × 2 になる)。AI は「2 panel 横並び = その行の高さを使う」と読むため変動 h を尊重しない
+> - **Sprint 9 候補**: ROW LAYOUT に行の高さ % も明示 (例: "ROW 2 (BOTTOM, height=24% of page): each 50% width × 24% height")、L11 audit に「panel area % が page_plan と画像で乖離している」検出ルール追加
 
 ## 設計原則
 
