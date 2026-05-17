@@ -53,6 +53,7 @@
 > - `1a589c8` Sprint 13 案1: SCENE PANEL RESTRICTIONS の directive 強度を補強 (Max 0/1 細分化 + MUST not 格上げ)
 > - `366d2e7` Sprint 14 案1: BibleSnapshotV2.meta に quantitative_facts を追加し bible-facts-audit が優先参照
 > - `cce9743` Sprint 15 案4: bible-facts-audit に ranks 値検証を追加 (架空 rank「SS級」等の検出)
+> - `e89883d` Sprint 16 案1: quantitative_facts に personal_timeline_facts を追加し個人時間軸誤検出を解消
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -119,13 +120,19 @@
 > - years_ago_mismatch 1 件 (前回同様 p022 個人時間軸誤検出、Sprint 16 で対応)
 > - 機能としては「SS級」「Sプラス級」「S+級」のような架空 rank が混入した瞬間に検出される検査網が完成
 >
-> ### Sprint 16 候補
+> ### Sprint 16 案1 結果 (a07 ep01 で audit 再走行)
 >
-> 1. **(高 ROI)** quantitative_facts に `personal_timeline_facts` 拡張 — キャラの個人時間軸 (例: レンが 18歳・3年前に鑑定) を別 facet で管理し、世界観事実との誤検出を自動区別
-> 2. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
-> 3. **(中)** PanelV2 型に effect_lines 正式追加 (schema + import 同期)
-> 4. **(検証)** p12 v10 と V1 p12.png の比較で wide 拡張実効性再評価
+> - **findings 0 件達成** (前回まで p022「三年前」が個人時間軸誤検出として残存していたが、reference_years_ago: [3] 登録で抑制成功)
+> - bible-facts-audit が「真の bible 逸脱」と「個人時間軸」を明確に区別、本番運用レベルへ
+>
+> ### Sprint 17 候補
+>
+> 1. **(高 ROI)** L11 audit に area % 乖離検出 — page_plan の panel rect と実画像の panel 境界を比較、12% × 2 が 25% × 2 に膨張するケース等を自動検出 (vision 解析必須、コスト高)
+> 2. **(中)** PanelV2 型に effect_lines 正式追加 (schema + 3 ファイル import 同期)
+> 3. **(中)** bible-facts-audit に「人物名+「歳」」マッチを個人 facet と判定するヒューリスティック追加 (personal_timeline_facts に依存しない自動分類)
+> 4. **(検証)** p12 v10 と V1 p12.png の比較で wide 拡張実効性再評価 (Pro 枠不要)
 > 5. **(検証)** p19 を v11 で render、close_up + wide 混在 page での効果測定 (Pro 枠 +1)
+> 6. **(検証)** ep02 / ep03 の storyboard も audit に通して bible 逸脱を一括検出 (Pro 枠不要)
 
 ## 設計原則
 
