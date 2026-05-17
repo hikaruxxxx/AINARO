@@ -54,6 +54,7 @@
 > - `366d2e7` Sprint 14 案1: BibleSnapshotV2.meta に quantitative_facts を追加し bible-facts-audit が優先参照
 > - `cce9743` Sprint 15 案4: bible-facts-audit に ranks 値検証を追加 (架空 rank「SS級」等の検出)
 > - `e89883d` Sprint 16 案1: quantitative_facts に personal_timeline_facts を追加し個人時間軸誤検出を解消
+> - `be51418` Sprint 18: dialogue-density-floor を新設 (page_role 別 dialogue/text 下限 audit)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -140,14 +141,28 @@
 >
 > **案6 (ep02/ep03 一括 audit)**: 対象 storyboard 未生成のため skip
 >
-> ### Sprint 18 候補
+> ### Sprint 18 結果 (a07 ep01 で dialogue-density-floor audit 実行) — render 中断契機
 >
-> 1. **(高 ROI)** L11 audit に area % 乖離検出 (vision 解析必須、コスト高)
-> 2. **(中)** PanelV2 型に effect_lines 正式追加 (schema + 3 ファイル import 同期)
-> 3. **(中)** bible-facts-audit に「人物名+「歳」」自動分類ヒューリスティック (personal_timeline_facts 手動登録の代替)
-> 4. **(中)** prompt size 警告 (8000 char 超過) の解消 — BIBLE FACTS の 300 字抜粋を更に圧縮、または "tier=minimal" 自動切替
-> 5. **(中)** ep02 / ep03 / ep04+ storyboard 生成 → 一括 audit で全 ep の bible 整合性を担保 (将来作品)
-> 6. **(検証)** 全 page (p01-p24) を v11 で render してフルエピソード品質測定 (Pro 枠 +24 枚、月内枠の 10% 消費)
+> ユーザーから「全 page render」を依頼された際、ネーム (storyboard) を確認したところ
+> セリフ/ナレーション量が全体的に少なく、特に dialogue page で物語進行が成立しない
+> 状態と指摘あり。集計と audit ツール (dialogue-density-floor) を新設して構造課題を可視化。
+>
+> - **a07 ep01 は 24 page 中 12 page で 21 findings** (商業漫画下限を下回る)
+> - **致命的 (dialogue page で dialogue ≤ 1)**: p3, p6, p7, p12, p22 — 「会話していない会話シーン」
+> - **準致命 (reveal で dialogue+mono ≤ 1)**: p5, p20, p23
+> - **text 不足**: p2, p10, p11, p14, p21
+> - 全 24 page 平均 text 量は 2.2 行で商業漫画標準 (5-12 行) の 1/3-1/5
+> - 集計コマンド: `node --import tsx scripts/manga/audit-dialogue-density.ts --slug a07-modern-dungeon --episode 1`
+>
+> ### Sprint 19 候補
+>
+> 1. **(最高 ROI、根本対応)** L04 storyboard 生成 prompt に「page_role 別 dialogue density floor」を明示して再生成 — Sprint 18 audit を生成側にも適用
+> 2. **(高 ROI)** scene_graph (L03.5) の dialogue_plan を増強して L04 を回し直す — 中間表現側で対応 (memory: 中間表現>監視網 原則)
+> 3. **(中)** 致命 5 page の storyboard を手動修正 → 該当 page のみ再 render (Pro 枠 +5)
+> 4. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
+> 5. **(中)** PanelV2 型に effect_lines 正式追加
+> 6. **(中)** prompt size 警告解消 (BIBLE FACTS 抜粋圧縮 or tier 自動切替)
+> 7. **(検証)** dialogue 補強後の page を render して画像レベルで読みやすさ向上を確認
 
 ## 設計原則
 
