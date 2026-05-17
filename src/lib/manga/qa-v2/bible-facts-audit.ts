@@ -102,11 +102,26 @@ function extractAges(text: string): number[] {
 }
 
 export function extractBibleFacts(bible: BibleSnapshotV2): BibleFacts {
+  // 2026-05-17 Sprint 14 案1: bible.meta.quantitative_facts があれば優先参照、
+  // regex 抽出は補完用 fallback として併用する (regex 取りこぼしは構造化で補い、
+  // 構造化未指定の値は regex で拾う)。
+  const structured = bible.meta.quantitative_facts;
   const text = `${bible.world.timeline ?? ""}\n${bible.world.system ?? ""}\n${bible.world.premise ?? ""}`;
-  return {
-    yearsAgo: Array.from(new Set(extractYearsAgo(text))),
-    ages: Array.from(new Set(extractAges(text))),
-  };
+  const regexYears = extractYearsAgo(text);
+  const regexAges = extractAges(text);
+
+  const yearsAgo = Array.from(
+    new Set([...(structured?.years_ago ?? []), ...regexYears]),
+  );
+  const structuredAge = structured?.judgement_age_max;
+  const ages = Array.from(
+    new Set([
+      ...(structuredAge !== undefined ? [structuredAge] : []),
+      ...regexAges,
+    ]),
+  );
+
+  return { yearsAgo, ages };
 }
 
 export function extractStoryboardHits(storyboard: EpisodeStoryboardV2): StoryboardTextHit[] {

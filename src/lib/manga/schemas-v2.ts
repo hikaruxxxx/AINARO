@@ -435,6 +435,19 @@ export type BibleSnapshotV2 = {
     core_hook?: CoreHookV2;
     /** 作品全体の主訴求モード。後方互換 optional */
     primary_appeal_mode?: PrimaryAppealMode;
+    /**
+     * 2026-05-17 Sprint 14 案1 で追加。後方互換 optional。
+     * bible.world.timeline / system / premise からの regex 抽出に依存しない
+     * 構造化された量的事実。bible-facts-audit で優先参照される。
+     * - years_ago: 世界観上「N 年前に発生した」イベントの年代 (例: ダンジョン出現が 20 年前)
+     * - judgement_age_max: 適性ランク判定の上限年齢 (例: 18 歳まで → 18)
+     * - ranks: 制度上のランク一覧 (例: ["S", "A", "B", "C", "D", "E", "F"])
+     */
+    quantitative_facts?: {
+      years_ago?: number[];
+      judgement_age_max?: number;
+      ranks?: string[];
+    };
   };
   world: WorldSpec;
   characters: CharacterEntryV2[];

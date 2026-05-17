@@ -139,4 +139,49 @@ describe("bible-facts-audit", () => {
     const { findings } = auditBibleFacts(bible, sb);
     expect(findings).toHaveLength(0);
   });
+
+  describe("Sprint 14 案1: bible.meta.quantitative_facts 優先参照", () => {
+    it("extractBibleFacts: 構造化 quantitative_facts があれば優先採用 (regex と統合)", () => {
+      const bible = bibleStub({
+        // bible.world.timeline / system からは数値を抜く (regex は何も拾わない)
+        timeline: "ある日、世界は静かに変わった。",
+        system: "誰もが鑑定石で人生を決められる。",
+      });
+      bible.meta.quantitative_facts = {
+        years_ago: [20],
+        judgement_age_max: 18,
+        ranks: ["S", "A", "B", "C", "D", "E", "F"],
+      };
+      const facts = extractBibleFacts(bible);
+      expect(facts.yearsAgo).toContain(20);
+      expect(facts.ages).toContain(18);
+    });
+
+    it("extractBibleFacts: 構造化と regex の値が両方あればマージされる", () => {
+      const bible = bibleStub({
+        timeline: "30年前にもう一つの事件があった。",
+        system: "別の世界では15歳までに判定する。",
+      });
+      bible.meta.quantitative_facts = {
+        years_ago: [20],
+        judgement_age_max: 18,
+      };
+      const facts = extractBibleFacts(bible);
+      expect(facts.yearsAgo).toContain(20); // 構造化
+      expect(facts.yearsAgo).toContain(30); // regex
+      expect(facts.ages).toContain(18); // 構造化
+      expect(facts.ages).toContain(15); // regex
+    });
+
+    it("auditBibleFacts: 構造化 facts のみで storyboard の bible 逸脱を検出", () => {
+      const bible = bibleStub({ timeline: "", system: "", premise: "" });
+      bible.meta.quantitative_facts = { years_ago: [20], judgement_age_max: 18 };
+      const sb = storyboardWithNarration(["三年前、世界中の都市の地下にダンジョンが現れた。"]);
+      const { findings } = auditBibleFacts(bible, sb);
+      const yearsFinding = findings.find((f) => f.kind === "years_ago_mismatch");
+      expect(yearsFinding).toBeDefined();
+      expect(yearsFinding?.found).toBe(3);
+      expect(yearsFinding?.expected).toContain(20);
+    });
+  });
 });
