@@ -4149,7 +4149,8 @@
           "narration": [
             "次の経験値倍化条件、開示します。"
           ],
-          "sfx": []
+          "sfx": [],
+          "effect_lines": null
         }
       ]
     }
