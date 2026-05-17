@@ -49,6 +49,7 @@
 > - `b18c404` Sprint 10 案1: bible-facts-audit を新設 (storyboard narration の bible 整合性検証 CLI)
 > - `1280fb5` Sprint 10 案2: ROW LAYOUT に行高 % と幅×高さの 2D 指定を追加
 > - `8359f3e` Sprint 11 案1: L9 prompt に ESTABLISHING RESTRICTIONS section を追加 (overlay 数制限 + negative list)
+> - `0c93d73` Sprint 12 案1+5: SCENE PANEL RESTRICTIONS に拡張 (wide shot_type 対応 + 文字数 800→300 字圧縮)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -87,15 +88,21 @@
 > - **商業漫画品質: v8 B+ → v9 A〜A-** (本セッション内 1-2 段階上昇)
 > - prompt size 8532 > 8000 threshold で警告、render 自体は成功
 >
-> ### Sprint 12 候補
+> ### Sprint 12 案1+5 結果 (Pro 枠 +2 枚)
 >
-> 1. **(高 ROI)** ESTABLISHING RESTRICTIONS の文字数圧縮 (現状 800 字、200-300 字目標)、または applies-to を panel 単位に分割
-> 2. **(中)** bible.meta に `quantitative_facts` 構造化フィールド追加 — 個人時間軸と世界観事実を別 facet で管理、audit 誤検出減
-> 3. **(中)** L11 audit に「panel area % が page_plan と実画像で乖離」検出 (vision 解析必須)
-> 4. **(中)** 残作品の storyboard 一括 audit
-> 5. **(中)** `wide` shot_type にも overlay 数制限を拡張 (establishing と同等の情景描写、不要 overlay の温床)
-> 6. **(低)** PanelV2 型に effect_lines 正式追加
-> 7. **(検証)** p12 / p05 / p19 を v9 で再 render、Sprint 7-11 全効果を全 page 測定 (Pro 枠 +3 枚)
+> - **a07 ep01 p01 v10**: overlay が v9 の 1 個から v10 で 2 個に微増 (確率揺らぎ or 文字数圧縮で directive 強度低下、品質 v9 A〜A- → v10 B+〜A-)
+> - **a07 ep01 p12 v10**: wide 抑制効果で公社入口ゲート panel の描き込みが整理、本セッション初の p12 高品質出力 (B+ レベル)
+> - 文字数圧縮 (8532 → 8310) で p01 の prompt warning 緩和、p12 は依然 9995 字で超過
+>
+> ### Sprint 13 候補
+>
+> 1. **(高 ROI)** SCENE PANEL RESTRICTIONS の directive 強度補強 — 「Max 1」を「Max 0 for purely atmospheric establishing」のように細分化、または MUST not 表現格上げ
+> 2. **(中)** bible.meta に `quantitative_facts` 構造化フィールド追加 (audit 誤検出減)
+> 3. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
+> 4. **(中)** 残作品 storyboard 一括 audit
+> 5. **(低)** PanelV2 型に effect_lines 正式追加
+> 6. **(検証)** p05 / p19 を v10 で再 render、全 page 効果測定 (Pro 枠 +2 枚)
+> 7. **(検証)** p12 v10 と既存 V1 (p12.png) との比較で wide 拡張の実効性を再評価
 
 ## 設計原則
 
