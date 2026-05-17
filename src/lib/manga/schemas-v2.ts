@@ -447,6 +447,18 @@ export type BibleSnapshotV2 = {
       years_ago?: number[];
       judgement_age_max?: number;
       ranks?: string[];
+      /**
+       * 2026-05-17 Sprint 16 案1 で追加。
+       * 個人時間軸の reference 値。世界観 timeline と区別して audit するための facet。
+       * 例: レン (18歳) が 3年前 (= 15歳のとき) に鑑定を受けた → reference_years_ago: [3]
+       * これらの値は世界観事実とは独立で、bible-facts-audit の誤検出抑制に使われる。
+       */
+      personal_timeline_facts?: {
+        /** キャラの個人時間軸として参照される「N 年前」の値 (世界観 yearsAgo と区別)。 */
+        reference_years_ago?: number[];
+        /** キャラの個人時間軸として参照される「N 歳」の値 (世界観 ages と区別)。 */
+        reference_ages?: number[];
+      };
     };
   };
   world: WorldSpec;

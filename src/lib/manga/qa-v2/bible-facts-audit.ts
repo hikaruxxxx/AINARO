@@ -32,6 +32,11 @@ export type BibleFacts = {
   /** 制度上のランク一覧 (例: ["S","A","B","C","D","E","F"])。
    *  bible.meta.quantitative_facts.ranks があれば優先採用。 */
   ranks: string[];
+  /** 2026-05-17 Sprint 16 案1: 個人時間軸 reference (世界観 yearsAgo と区別)。
+   *  これらの値は storyboard で出現しても mismatch 扱いしない。 */
+  personalYearsAgo: number[];
+  /** 同上、年齢の個人 reference。 */
+  personalAges: number[];
 };
 
 export type StoryboardTextHit = {
@@ -137,8 +142,11 @@ export function extractBibleFacts(bible: BibleSnapshotV2): BibleFacts {
     ]),
   );
   const ranks = Array.from(new Set(structured?.ranks ?? []));
+  const personal = structured?.personal_timeline_facts;
+  const personalYearsAgo = Array.from(new Set(personal?.reference_years_ago ?? []));
+  const personalAges = Array.from(new Set(personal?.reference_ages ?? []));
 
-  return { yearsAgo, ages, ranks };
+  return { yearsAgo, ages, ranks, personalYearsAgo, personalAges };
 }
 
 export function extractStoryboardHits(storyboard: EpisodeStoryboardV2): StoryboardTextHit[] {
@@ -185,6 +193,8 @@ export function auditBibleFacts(
 
   for (const hit of hits) {
     for (const n of hit.yearsAgo) {
+      // Sprint 16 案1: personal_timeline_facts.reference_years_ago に含まれる値は誤検出として skip
+      if (facts.personalYearsAgo.includes(n)) continue;
       if (facts.yearsAgo.length > 0 && !facts.yearsAgo.includes(n)) {
         findings.push({
           severity: "warning",
@@ -195,11 +205,13 @@ export function auditBibleFacts(
           kind: "years_ago_mismatch",
           found: n,
           expected: facts.yearsAgo,
-          message: `「${n}年前」が bible.world で確認できる「${facts.yearsAgo.join("/")}年前」と一致しない。個人時間軸 (キャラの過去回想等) なら誤検出だが、世界観 narration なら設定逸脱の可能性あり。`,
+          message: `「${n}年前」が bible.world で確認できる「${facts.yearsAgo.join("/")}年前」と一致しない。bible.meta.quantitative_facts.personal_timeline_facts.reference_years_ago に追加すれば誤検出を抑制可能。`,
         });
       }
     }
     for (const n of hit.ages) {
+      // Sprint 16 案1: personal_timeline_facts.reference_ages も誤検出 skip
+      if (facts.personalAges.includes(n)) continue;
       if (facts.ages.length > 0 && !facts.ages.includes(n)) {
         // bible「18歳まで」は範囲指定なので、N <= 18 なら整合と見做す簡易ルール
         const bibleMaxAge = Math.max(...facts.ages);

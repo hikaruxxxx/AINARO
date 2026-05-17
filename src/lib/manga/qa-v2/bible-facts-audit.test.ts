@@ -185,6 +185,44 @@ describe("bible-facts-audit", () => {
     });
   });
 
+  describe("Sprint 16 案1: personal_timeline_facts で個人時間軸誤検出を抑制", () => {
+    it("auditBibleFacts: reference_years_ago に [3] を登録すると「三年前」誤検出が消える", () => {
+      const bible = bibleStub();
+      bible.meta.quantitative_facts = {
+        years_ago: [20],
+        judgement_age_max: 18,
+        personal_timeline_facts: { reference_years_ago: [3] },
+      };
+      // panel: レンの個人時間軸 3 年前の回想
+      const sb = storyboardWithNarration(["三年前。公社、鑑定窓口。"]);
+      const { findings } = auditBibleFacts(bible, sb);
+      const yearsFindings = findings.filter((f) => f.kind === "years_ago_mismatch");
+      expect(yearsFindings).toHaveLength(0);
+    });
+
+    it("auditBibleFacts: reference_years_ago 未登録なら「三年前」は依然 mismatch warning", () => {
+      const bible = bibleStub();
+      bible.meta.quantitative_facts = { years_ago: [20], judgement_age_max: 18 };
+      const sb = storyboardWithNarration(["三年前。公社、鑑定窓口。"]);
+      const { findings } = auditBibleFacts(bible, sb);
+      const yearsFindings = findings.filter((f) => f.kind === "years_ago_mismatch");
+      expect(yearsFindings.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("auditBibleFacts: reference_ages に [25] を登録すると 25歳 mismatch が消える", () => {
+      const bible = bibleStub();
+      bible.meta.quantitative_facts = {
+        years_ago: [20],
+        judgement_age_max: 18,
+        personal_timeline_facts: { reference_ages: [25] },
+      };
+      const sb = storyboardWithNarration(["25歳のレンは、過去を振り返る。"]);
+      const { findings } = auditBibleFacts(bible, sb);
+      const ageFindings = findings.filter((f) => f.kind === "age_mismatch");
+      expect(ageFindings).toHaveLength(0);
+    });
+  });
+
   describe("Sprint 15 案4: ranks 値の audit", () => {
     it("auditBibleFacts: ranks 設定済の bible で storyboard 内「SS級」を検出 (S は OK)", () => {
       const bible = bibleStub();
