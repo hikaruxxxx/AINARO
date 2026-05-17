@@ -55,6 +55,7 @@
 > - `cce9743` Sprint 15 案4: bible-facts-audit に ranks 値検証を追加 (架空 rank「SS級」等の検出)
 > - `e89883d` Sprint 16 案1: quantitative_facts に personal_timeline_facts を追加し個人時間軸誤検出を解消
 > - `be51418` Sprint 18: dialogue-density-floor を新設 (page_role 別 dialogue/text 下限 audit)
+> - `62d5303` Sprint 19 案3: a07 ep01 storyboard の dialogue/narration を補強 (12 page → findings 0、商業漫画レベル達成)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -154,15 +155,31 @@
 > - 全 24 page 平均 text 量は 2.2 行で商業漫画標準 (5-12 行) の 1/3-1/5
 > - 集計コマンド: `node --import tsx scripts/manga/audit-dialogue-density.ts --slug a07-modern-dungeon --episode 1`
 >
-> ### Sprint 19 候補
+> ### Sprint 19 案3 結果 (a07 ep01 storyboard 全 12 page 手動補強、Pro 枠 +2 枚で検証)
 >
-> 1. **(最高 ROI、根本対応)** L04 storyboard 生成 prompt に「page_role 別 dialogue density floor」を明示して再生成 — Sprint 18 audit を生成側にも適用
-> 2. **(高 ROI)** scene_graph (L03.5) の dialogue_plan を増強して L04 を回し直す — 中間表現側で対応 (memory: 中間表現>監視網 原則)
-> 3. **(中)** 致命 5 page の storyboard を手動修正 → 該当 page のみ再 render (Pro 枠 +5)
+> phase 1 (致命 5 page):
+> - p3 (コンビニ夜勤): 同僚/TVニュース/客の off-frame dialogue 4 行追加 → total=7
+> - p6 (鑑定回想): 公社窓口員 dialogue 3 行追加 → total=6
+> - p7 (深夜帰宅): 内容上 dialogue 不適のため page_role を buildup に変更
+> - p12 (公社ゲート): システム音声 dialogue 3 + monologue 2 追加 → total=6
+> - p22 (ナビ確認): nav 応答 dialogue 2 追加で物語転換点を明示 → total=6
+>
+> phase 2 (軽症 8 page): p2/p5/p10/p11/p14/p20/p21/p23 を最小修正で補強
+>
+> audit 結果: 全 24 page で **findings 0 達成** (商業漫画下限クリア)
+>
+> 実画像検証 (v12):
+> - **p3 v12 (A)**: 同僚/客/TVニュース dialogue が image overlay として描画、会話 page として商業漫画レベル
+> - **p22 v12 (A-)**: ナビ-レンの会話 dialogue が overlay、物語転換点が v11 比で明示
+>
+> ### Sprint 20 候補 (次セッション以降)
+>
+> 1. **(最高 ROI、根本対応)** L04 storyboard 生成 prompt に density floor 明示 — 手動補強ではなく生成側で予防
+> 2. **(高 ROI)** scene_graph (L03.5) の dialogue_plan を増強 (中間表現>監視網 原則)
+> 3. **(中)** 残 22 page (p1, p2-p21 から p3/p22 除く + p23/p24) を v12 で render してフルエピソード品質測定 (Pro 枠 +22)
 > 4. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
 > 5. **(中)** PanelV2 型に effect_lines 正式追加
-> 6. **(中)** prompt size 警告解消 (BIBLE FACTS 抜粋圧縮 or tier 自動切替)
-> 7. **(検証)** dialogue 補強後の page を render して画像レベルで読みやすさ向上を確認
+> 6. **(中)** prompt size 警告解消 (現在 10000+ chars、BIBLE FACTS 圧縮 or tier 自動切替)
 
 ## 設計原則
 
