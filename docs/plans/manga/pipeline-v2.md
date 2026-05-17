@@ -45,6 +45,7 @@
 > - `84681e1` Sprint 7 追加チューニング: L9 prompt に PANEL SIZE OVERRIDE 追加 (page-specific な panel rect 強制ディレクティブ)
 > - `826acc7` Sprint 8 案1: L9 prompt に ROW LAYOUT 追加 (row-grouping で AI の縦積み bias を矯正)
 > - `3f5bd80` Sprint 8 案2: effect-lines detector で establishing 大コマの radial 誤発火を抑制
+> - `316355f` Sprint 9 案A+B: storyboard narration を bible 準拠に修正 + L9 prompt に BIBLE FACTS section 追加
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
@@ -62,12 +63,22 @@
 > - storyboard の `effect_lines: null` opt-out を尊重 + `shot_type=establishing/wide` での radial 自動発火を抑制
 > - 商業漫画品質: v5 B- → v6 B+ (1 段階上昇)
 >
-> ### Sprint 9 候補 (描き込み密度抑制 + area% 厳密化)
+> ### Sprint 9 案A+B 結果 (a07 ep01 p01 v7、Pro 枠 +1 枚)
 >
-> 1. **(高 ROI)** establishing panel の情報密度抑制 directive: ナレーション 1 行のみ、内訳説明/ランキング表/架空情報パネル禁止
-> 2. **(中)** ROW LAYOUT に行の高さ % を明示 (例: "ROW 2 (BOTTOM, height=24%): each 50% width × 24% height")
+> - **bible 設定逸脱の発見**: storyboard.json panel#1 narration が「三年前」(bible は 20年前)、「十五歳で受ける」(bible は 18歳までに) と二重逸脱。前回 Sprint 9 提案「ナレーション 1 行のみ」は方向が逆 (実際は文章量不足 + bible 数値改変が問題) と判明、撤回。
+> - **A 対症療法**: storyboard.json panel#1 narration を bible 準拠 (「20年前、世界中の都市の地下にダンジョンが現れた。」「18歳までに受ける鑑定石が、S〜Fの一字で人生の入口を決める。」) に書き換え
+> - **B prompt 防御**: L9 prompt に `## BIBLE FACTS (must match exactly)` section 追加。bible.world.timeline + system の先頭 300 字を抜粋して embed、「数値・年代・段階数は新規発明禁止」「narration は仕様通りに描画 (paraphrase 禁止)」を指示
+> - **効果**: v6 まで AI 補完で描かれていた架空ランキング表「S級 0.2% / A級 3.1% / F級 67.3%」が v7 で消失。narration が bible 準拠で正確に描画される。商業漫画品質 v6 B+ → v7 A-
+> - **未解決**: L04 storyboard 生成段階の bible 数値検証は未実装 (a07 ep01 のみ手動修正、他作品は同種逸脱の可能性)
+>
+> ### Sprint 10 候補
+>
+> 1. **(最高 ROI、構造課題)** L04 storyboard 生成段階で bible 量的事実から narration 数値を機械検証 (`scripts/generation/quantitative-audit.py` の漫画版に相当)
+> 2. **(中)** ROW LAYOUT に行の高さ % を明示 (例: "ROW 2 (BOTTOM, height=24%): each 50% width × 24% height") — area% 50/12/12 への厳密化
 > 3. **(中)** L11 audit に「panel area % が page_plan と画像で乖離」検出ルール追加
-> 4. **(低)** PanelV2 型に `effect_lines?: EffectLineSpec | null` を正式追加 (現状 detector の unsafe access を解消)
+> 4. **(中)** 残作品 (a07 以外) の storyboard で同種 bible 逸脱を一括検出するスクリプト
+> 5. **(低)** PanelV2 型に `effect_lines?: EffectLineSpec | null` を正式追加 (detector の unsafe access 解消)
+> 6. **(検証)** p12 / p05 / p19 を v7 で再 render (Pro 枠 +3 枚)、Sprint 7-add + 8 案1+2 + 9 案A+B の全 page 効果測定
 
 ## 設計原則
 
