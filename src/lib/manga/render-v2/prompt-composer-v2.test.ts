@@ -1087,6 +1087,44 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     expect(result.prompt).not.toContain("Quantitative facts excerpted from bible");
   });
 
+  it("emits ESTABLISHING RESTRICTIONS section when page contains an establishing panel (Sprint 11 案1)", () => {
+    const storyPage = page(3);
+    // panel#1 を establishing に変更
+    storyPage.panels[0].shot_type = "establishing";
+    const args = {
+      page: storyPage,
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).toContain("## ESTABLISHING RESTRICTIONS");
+    expect(result.prompt).toContain("ESTABLISHING PANEL RESTRICTIONS (applies to panel#1)");
+    expect(result.prompt).toContain("Maximum 1 in-panel overlay");
+    expect(result.prompt).toContain("DO NOT render: SNS feed overlays, LIVE broadcast tickers");
+    expect(result.prompt).toContain("Information density should be LOW. Less is more.");
+  });
+
+  it("omits ESTABLISHING RESTRICTIONS when no panel is shot_type=establishing", () => {
+    const storyPage = page(3);
+    // 全 panel が medium (デフォルト)
+    const args = {
+      page: storyPage,
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+    };
+    const result = composePagePrompt(args);
+    expect(result.prompt).not.toContain("## ESTABLISHING RESTRICTIONS");
+    expect(result.prompt).not.toContain("ESTABLISHING PANEL RESTRICTIONS");
+  });
+
   it("MANGA_CRAFT_DIRECTIVES_V6 no longer contains the legacy generic 'Panel size variation' directive", () => {
     // page-specific な PANEL SIZE OVERRIDE に役割が移ったため、汎用節は削除済
     const args = {

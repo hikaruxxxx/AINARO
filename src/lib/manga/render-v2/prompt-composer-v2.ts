@@ -782,6 +782,38 @@ function buildBibleFactsBlock(bible: BibleSnapshotV2): string | null {
 }
 
 /**
+ * establishing panel に対する in-panel overlay 数制限ディレクティブを生成する。
+ *
+ * 2026-05-17 追加 (Sprint 11 案1)。a07 ep01 p01 v6-v8 で establishing panel に
+ * AI が「公社アプリ入域実績ランキング表」「LIVE 全国ネット特番放送中」「SNS
+ * #朱 第三ダンジョン踏破がトレンド1位」のような **bible に書かれていない**
+ * 補完情報を overlay として詰め込み、商業漫画品質を下げる問題を解消する。
+ *
+ * 効果: establishing 内の overlay 最大 1 個 + negative list (SNS/LIVE/ranking/
+ * statistics/fake brand) を明示。narration / 吹き出しは「typeset elements」
+ * として overlay カウント外と明記し、混同を防ぐ。
+ *
+ * establishing panel が page 内に無い場合は null。
+ */
+function buildEstablishingRestrictionBlock(page: StoryboardPageV2, localPanelNoByPanelId: Map<string, number>): string | null {
+  const establishingPanels = page.panels.filter((p) => p.shot_type === "establishing");
+  if (establishingPanels.length === 0) return null;
+
+  const panelLabels = establishingPanels
+    .map((p) => `panel#${localPanelNoByPanelId.get(p.panel_id) ?? p.panel_no}`)
+    .join(", ");
+
+  return [
+    `ESTABLISHING PANEL RESTRICTIONS (applies to ${panelLabels}):`,
+    "- Maximum 1 in-panel overlay (single information panel / single billboard text / single signage cluster) per establishing panel.",
+    "- DO NOT render: SNS feed overlays, LIVE broadcast tickers, hashtag trends, ranking charts or percentages, demographic statistics, fictional brand logos beyond the one already specified, sponsored news feeds, fake corporate slogans.",
+    "- Ambient environmental light is encouraged (distant neon glow, building window patterns, illegible signage at small scale), but text must remain blurred / out of focus / sub-readable.",
+    "- Narration boxes and speech bubbles are typeset elements layered OVER the panel — they are NOT counted as in-panel overlays.",
+    "- The establishing panel's primary subject is the location/scene atmosphere itself. Information density should be LOW. Less is more.",
+  ].join("\n");
+}
+
+/**
  * panel rect から行 (row) 構造を推定し、AI に「縦積み vs 横並び」を明示する。
  *
  * 2026-05-17 追加 (Sprint 8 案1 row-grouping)。Sprint 7 追加チューニング後も
@@ -1463,6 +1495,11 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
 
   const bibleFactsBlock: string | null = buildBibleFactsBlock(args.bible);
 
+  const establishingRestrictionBlock: string | null = buildEstablishingRestrictionBlock(
+    page,
+    localPanelNoByPanelId,
+  );
+
   const inlineLabels = args.packet.refs
     .map((r, i) => formatRefLabel(r, i))
     .join("\n");
@@ -1538,6 +1575,9 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     bibleFactsBlock ? "## BIBLE FACTS (must match exactly)" : null,
     bibleFactsBlock,
     bibleFactsBlock ? "" : null,
+    establishingRestrictionBlock ? "## ESTABLISHING RESTRICTIONS" : null,
+    establishingRestrictionBlock,
+    establishingRestrictionBlock ? "" : null,
     "## MANGA CRAFT DIRECTIVES",
     MANGA_CRAFT_DIRECTIVES_V6,
   ];
