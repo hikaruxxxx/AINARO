@@ -1,0 +1,134 @@
+import { describe, expect, it } from "vitest";
+import type { EpisodeStoryboardV2, PageRoleV2, StoryboardPageV2 } from "../schemas-v2";
+import {
+  auditPageDensity,
+  auditStoryboardDensity,
+  DEFAULT_DIALOGUE_DENSITY_FLOORS,
+} from "./dialogue-density-floor";
+
+function buildPage(
+  page_role: PageRoleV2,
+  texts: {
+    dialogue?: string[];
+    monologue?: string[];
+    narration?: string[];
+    sfx?: string[];
+  } = {},
+): StoryboardPageV2 {
+  return {
+    page_no: 1,
+    page_role,
+    panels: [
+      {
+        panel_id: "p1",
+        panel_no: 1,
+        reading_order: 1,
+        shot_type: "medium",
+        camera: "eye_level",
+        bleed: false,
+        silence: false,
+        importance: 3,
+        entities: {
+          characters: [],
+          location_id: "loc_test",
+          props: [],
+          focus_entity_id: "loc_test",
+        },
+        action: "test",
+        key_visual: "test",
+        dialogue: (texts.dialogue ?? []).map((text, i) => ({
+          character_id: `char_${i + 1}`,
+          text,
+        })),
+        monologue: (texts.monologue ?? []).map((text, i) => ({
+          character_id: `char_${i + 1}`,
+          text,
+        })),
+        narration: texts.narration ?? [],
+        sfx: texts.sfx ?? [],
+      },
+    ],
+  } as unknown as StoryboardPageV2;
+}
+
+describe("dialogue-density-floor", () => {
+  it("dialogue page で dialogue 0 行は dialogue_floor_below + text_total_floor_below を検出", () => {
+    const page = buildPage("dialogue", { narration: ["test"] });
+    const findings = auditPageDensity(page);
+    expect(findings.some((f) => f.kind === "dialogue_floor_below")).toBe(true);
+    expect(findings.some((f) => f.kind === "text_total_floor_below")).toBe(true);
+    const dlgFinding = findings.find((f) => f.kind === "dialogue_floor_below")!;
+    expect(dlgFinding.found).toBe(0);
+    expect(dlgFinding.expected_min).toBe(3);
+  });
+
+  it("dialogue page で dialogue 3 + narration 2 行は findings 0 (text_total=5 で floor 5 ぎり通過)", () => {
+    const page = buildPage("dialogue", {
+      dialogue: ["a", "b", "c"],
+      narration: ["x", "y"],
+    });
+    const findings = auditPageDensity(page);
+    expect(findings).toHaveLength(0);
+  });
+
+  it("opening_hook で narration 2 行 + 他なしは narration_min=2 を満たすが text_total_min=3 で warning", () => {
+    const page = buildPage("opening_hook", { narration: ["a", "b"] });
+    const findings = auditPageDensity(page);
+    expect(findings.some((f) => f.kind === "narration_floor_below")).toBe(false);
+    expect(findings.some((f) => f.kind === "text_total_floor_below")).toBe(true);
+  });
+
+  it("action page で SFX 3 + dialogue 1 は OK (擬音メインで text 緩和)", () => {
+    const page = buildPage("action", {
+      dialogue: ["ガッ"],
+      sfx: ["ドン", "ガン", "バキ"],
+    });
+    const findings = auditPageDensity(page);
+    expect(findings).toHaveLength(0);
+  });
+
+  it("action page で SFX 1 件は sfx_floor_below を検出", () => {
+    const page = buildPage("action", { sfx: ["ドン"], narration: ["test"] });
+    const findings = auditPageDensity(page);
+    expect(findings.some((f) => f.kind === "sfx_floor_below")).toBe(true);
+  });
+
+  it("buildup で dialogue+monologue=0 は dialogue_or_monologue_floor_below を検出", () => {
+    const page = buildPage("buildup", { narration: ["x", "y", "z"] });
+    const findings = auditPageDensity(page);
+    expect(findings.some((f) => f.kind === "dialogue_or_monologue_floor_below")).toBe(true);
+  });
+
+  it("auditStoryboardDensity: 複数 page の集計と pageCounts が正しく返る", () => {
+    const sb: EpisodeStoryboardV2 = {
+      pages: [
+        { ...buildPage("dialogue", { narration: ["a"] }), page_no: 1 },
+        { ...buildPage("action", { sfx: ["ドン", "ガン", "バキ"], dialogue: ["a"] }), page_no: 2 },
+      ],
+    } as unknown as EpisodeStoryboardV2;
+
+    const result = auditStoryboardDensity(sb);
+    expect(result.totalPages).toBe(2);
+    expect(result.pageCounts).toHaveLength(2);
+    expect(result.pageCounts[0].total_text).toBe(1);
+    expect(result.pageCounts[1].total_text).toBe(1);
+    expect(result.findings.some((f) => f.page_no === 1)).toBe(true);
+    expect(result.findings.some((f) => f.page_no === 2)).toBe(false);
+  });
+
+  it("DEFAULT_DIALOGUE_DENSITY_FLOORS は全 page_role を網羅", () => {
+    const allRoles: PageRoleV2[] = [
+      "opening_hook",
+      "buildup",
+      "reveal",
+      "cliffhanger",
+      "aftermath",
+      "establishing",
+      "dialogue",
+      "action",
+    ];
+    for (const role of allRoles) {
+      expect(DEFAULT_DIALOGUE_DENSITY_FLOORS[role]).toBeDefined();
+    }
+  });
+});
