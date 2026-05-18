@@ -45,7 +45,9 @@ import type {
   FalsePositives,
 } from "../compliance/types";
 import type { Scene } from "../scene-graph/schema";
-import type { EffectLineSpec } from "../effect-lines/types";
+// EffectLineSpec import: Sprint 22 案B 撤回後も schemas-v2 PanelV2.effect_lines の
+// 型定義として indirect 依存 (削除すると tsc 型解決に影響なしだが、明示性のため残す)
+import type { EffectLineSpec as _EffectLineSpec } from "../effect-lines/types";
 
 const PAGE_W = 1748;
 const PAGE_H = 2480;
@@ -1344,31 +1346,11 @@ function renderPagePanelBlock(args: {
   for (const l of textLines) lines.push(l);
   const bgLine = compactBackgroundDirective(bgTreatment);
   if (bgLine) lines.push(`- ${bgLine}`);
-  // 2026-05-18 Sprint 22 案B: panel.effect_lines が明示されていれば AI に
-  // type/intensity/center 位置を per-panel block で明示する。
-  // a07 ep01 p24 v13 で「片目に青光が戻り」と action にあるのに集中線中心が
-  // panel 中央になっていた問題を解消する目的。
-  const effectLinesDirective = formatEffectLinesDirective(panel.effect_lines ?? undefined);
-  if (effectLinesDirective) lines.push(`- ${effectLinesDirective}`);
+  // 2026-05-18 Sprint 22 案B (撤回): effect_lines per-panel directive を削除。
+  // centerX/Y を AI に明示すると複数中心拡散 (p24 v18 で左右両目から放射) を
+  // 招いた。detector の SVG overlay 経路 (panel.effect_lines が null/明示
+  // EffectLineSpec のときの opt-out / opt-in) は維持、prompt directive は不要。
   return lines.join("\n");
-}
-
-/**
- * panel.effect_lines を per-panel block で AI に伝える human-readable directive。
- * undefined / null の場合は何も返さない (detector のヒューリスティック判定に委ねる)。
- */
-function formatEffectLinesDirective(spec: EffectLineSpec | null | undefined): string | null {
-  if (!spec || typeof spec !== "object") return null;
-  const parts: string[] = [`Effect lines: type=${spec.type}, intensity=${spec.intensity}`];
-  if (typeof spec.centerX === "number" && typeof spec.centerY === "number") {
-    parts.push(
-      `center at (${Math.round(spec.centerX * 100)}%, ${Math.round(spec.centerY * 100)}%) of panel (origin = top-left)`,
-    );
-  }
-  if (typeof spec.direction === "number") {
-    parts.push(`direction=${spec.direction}° (0=right, 90=down)`);
-  }
-  return parts.join(", ");
 }
 
 /**
@@ -1446,7 +1428,9 @@ function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" 
   // manga lettering 行は STYLE digest と被るので削除、background density は SCENE/panel BG に集約。
   // STRICT LAYOUT CONSTRAINTS から移動した汎用ルール (gutter / hero / grid) を 1 行に統合。
   const lines = [
-    "Render: black ink linework + screentone + hatching, hard B/W contrast. Vary tone density by panel emotion.",
+    // 2026-05-18: "hatching" を削除。p10 v20 で背景に水平 hatching が無意味に多用される問題があった。
+    // hatching が必要な場合は AI が judgment で限定使用するに任せる (削減系優位の原則)。
+    "Render: black ink linework + screentone (dots/halftones), hard B/W contrast. Vary tone density by panel emotion. Do NOT use horizontal line patterns or repeating parallel lines as background fill; backgrounds are screentone dots, solid black, or white.",
     "Layout: reproduce panel sizes above (do NOT default to uniform grid); HERO panel dominates; non-bleed panels separated by >=30px white gutter.",
     "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, English in-panel text, >5 fingers per hand.",
   ];
@@ -1475,15 +1459,6 @@ const MANGA_CRAFT_DIRECTIVES_V6 = `The following directives apply to ALL panels 
 - This page must contain at minimum 8 speech bubbles / inner-thought bubbles / SFX combined; aim for 10-15 on conversation pages.
 - Each panel must contain at least one of: speech bubble, inner thought bubble, off-frame voice, SFX, or environmental sound.
 - Empty (zero-text) panels are reserved exclusively for explicit "TAME" panels (max 1 per page).
-
-### Bubble shape taxonomy (use deliberately, do NOT default to all rounded)
-- Speech: rounded smooth bubble.
-- Inner thought: cloud / wavy bubble.
-- Shout / exclamation: jagged spike bubble.
-- Radio / transmission: rough rectangular bubble.
-- TV broadcast: rounded with broadcast bar on top.
-- Off-frame voice: thin small rectangular.
-- Use varied shapes within the same page.
 
 ### Background mer-hari (mandatory variation)
 - Expression close-up panels: WHITE background or single screentone only. NO detailed setting.

@@ -1145,9 +1145,8 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     expect(result.prompt).not.toContain("SCENE PANEL RESTRICTIONS");
   });
 
-  it("Sprint 22 案B: panel.effect_lines が明示されたら per-panel directive が出力される", () => {
+  it("Sprint 22 案B 撤回 (2026-05-18): panel.effect_lines per-panel directive は出力しない (削減系優位、AI 委任)", () => {
     const storyPage = page(3);
-    // panel#1 に effect_lines を明示指定
     (storyPage.panels[0] as unknown as { effect_lines: unknown }).effect_lines = {
       type: "radial",
       intensity: "strong",
@@ -1164,23 +1163,9 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       bibleTier: "minimal" as const,
     };
     const result = composePagePrompt(args);
-    expect(result.prompt).toContain("Effect lines: type=radial, intensity=strong");
-    expect(result.prompt).toContain("center at (65%, 40%) of panel");
-    expect(result.prompt).toContain("origin = top-left");
-  });
-
-  it("Sprint 22 案B: panel.effect_lines が未指定なら per-panel directive は出ない", () => {
-    const args = {
-      page: page(3),
-      packet,
-      bible: brokerBible(),
-      pageDimensions: { width: 1748, height: 2480 },
-      scene: brokerScene(),
-      episodeNo: 5,
-      bibleTier: "minimal" as const,
-    };
-    const result = composePagePrompt(args);
+    // p24 v18 で複数中心拡散の原因と判明したため、prompt directive は撤回済
     expect(result.prompt).not.toContain("Effect lines: type=");
+    expect(result.prompt).not.toContain("center at (");
   });
 
   it("MANGA_CRAFT_DIRECTIVES_V6 no longer contains the legacy generic 'Panel size variation' directive", () => {
