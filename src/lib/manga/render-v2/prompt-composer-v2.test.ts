@@ -786,7 +786,9 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     expect(result.prompt).not.toContain("「台詞1」");
     expect(result.prompt).not.toContain("「台詞2」");
     expect(result.prompt).toContain("Speech bubble shells");
-    expect(result.prompt).toContain("Draw EMPTY speech bubble shells");
+    // 2026-05-19 Sprint 23 Commit 5: shells_only directive を「TYPESET FORBIDDEN」削減系に強化
+    expect(result.prompt).toContain("TYPESET FORBIDDEN");
+    expect(result.prompt).toContain("Do NOT draw ANY speech bubbles");
   });
 
   it("composePagePrompt formatRefLabel omits weight when weight≈1.0", () => {

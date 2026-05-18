@@ -16,6 +16,17 @@ export type SvgBubble = {
   text: string;
   bubble_type: BubbleType;
   reading_order: number;
+  /**
+   * "vertical" (Sprint 23): writing-mode: vertical-rl で縦書き (RTL 列順)。
+   * "horizontal" (default): 既存横書き。
+   * sfx (is_sfx=true) は writing_mode 関係なく専用 katakana 描画。
+   */
+  writing_mode?: "vertical" | "horizontal";
+  /**
+   * SFX (擬音) は shape なし、halo (白縁 + 黒 fill) 付き katakana の単体 text として描画する。
+   * memory feedback_manga_overlay_halo_required.md に従い paint-order=stroke の 2 段重ね。
+   */
+  is_sfx?: boolean;
 };
 
 export type SvgOverlayOptions = {
@@ -47,19 +58,14 @@ function escapeXml(s: string): string {
  * 1 吹き出しの SVG group を返す
  */
 function bubbleGroup(b: SvgBubble, fontFamily: string): string {
+  // sfx は shape なし、halo 付き katakana の text-only として描画
+  if (b.is_sfx) {
+    return sfxGroup(b, fontFamily);
+  }
+
   const { x, y, width, height, tail_x, tail_y } = b.position;
   const cornerRadius = 18;
   const fontSize = b.bubble_type === "shout" ? 36 : 30;
-  const charsPerLine = Math.max(6, Math.floor((width - 32) / fontSize));
-
-  // 簡易ワードラップ（日本語は文字単位で改行可能）
-  const lines: string[] = [];
-  let cursor = 0;
-  while (cursor < b.text.length) {
-    const slice = b.text.slice(cursor, cursor + charsPerLine);
-    lines.push(slice);
-    cursor += charsPerLine;
-  }
 
   // bubble_type で見た目分岐
   const fill = (() => {
@@ -114,19 +120,133 @@ function bubbleGroup(b: SvgBubble, fontFamily: string): string {
     tail = `<polygon points="${baseX - 16},${baseY} ${baseX + 16},${baseY} ${tipX},${tipY}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />`;
   }
 
-  // テキスト（中央揃え）
-  const textX = x + Math.round(width / 2);
-  const textBaseY = y + 24 + (height - lines.length * (fontSize + 6)) / 2;
   const textWeight = b.bubble_type === "shout" ? 800 : 500;
   const textColor = b.bubble_type === "shout" ? "#7f1d1d" : "#111111";
-  const textTags = lines
+
+  // 縦書き / 横書きで text 構築を切替
+  const textTags = b.writing_mode === "vertical"
+    ? buildVerticalText(b.text, x, y, width, height, fontSize, fontFamily, textColor, textWeight)
+    : buildHorizontalText(b.text, x, y, width, height, fontSize, fontFamily, textColor, textWeight);
+
+  return `<g data-reading-order="${b.reading_order}" data-bubble-type="${b.bubble_type}">${body}${tail}${textTags}</g>`;
+}
+
+/**
+ * 横書き text (既存挙動を切り出し)。中央揃えで文字単位に折返す。
+ */
+function buildHorizontalText(
+  text: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  fontSize: number,
+  fontFamily: string,
+  textColor: string,
+  textWeight: number
+): string {
+  const charsPerLine = Math.max(6, Math.floor((width - 32) / fontSize));
+  const lines: string[] = [];
+  let cursor = 0;
+  while (cursor < text.length) {
+    lines.push(text.slice(cursor, cursor + charsPerLine));
+    cursor += charsPerLine;
+  }
+  const textX = x + Math.round(width / 2);
+  const textBaseY = y + 24 + (height - lines.length * (fontSize + 6)) / 2;
+  return lines
     .map((ln, i) => {
       const ty = textBaseY + i * (fontSize + 6) + fontSize;
       return `<text x="${textX}" y="${ty}" text-anchor="middle" font-family='${fontFamily}' font-size="${fontSize}" font-weight="${textWeight}" fill="${textColor}">${escapeXml(ln)}</text>`;
     })
     .join("");
+}
 
-  return `<g data-reading-order="${b.reading_order}" data-bubble-type="${b.bubble_type}">${body}${tail}${textTags}</g>`;
+/**
+ * 縦書き text (RTL 列順、商業漫画スタイル)。
+ *
+ * 2026-05-19 Sprint 23 Commit 5: writing-mode: vertical-rl を librsvg が独自解釈し
+ * 二重 RTL → LTR 結果になる現象が確認されたため、CSS writing-mode を削除し、tspan の
+ * x (列固定) と dy (charHeight 送り) のみで「視覚的縦書き」を完全に組み立てる。
+ * これで librsvg の writing-mode サポート状態に依存せず、決定的に正しい順序で配置される。
+ *
+ * 列幅と行間の経験則:
+ *   - charHeight = fontSize * 1.05 (商業漫画 line-height 中央値)
+ *   - colWidth = fontSize * 1.1 (列間ゆとり 10%)
+ *   - padding = fontSize * 0.6 (bubble 内側余白)
+ *
+ * はみ出し対策: 列数 × colWidth が usableW を超えたら adjColWidth で縮める。
+ */
+function buildVerticalText(
+  text: string,
+  bx: number,
+  by: number,
+  bw: number,
+  bh: number,
+  fontSize: number,
+  fontFamily: string,
+  textColor: string,
+  textWeight: number
+): string {
+  if (!text) return "";
+  const padding = Math.round(fontSize * 0.6);
+  const usableW = Math.max(fontSize, bw - padding * 2);
+  const usableH = Math.max(fontSize, bh - padding * 2);
+  const charHeight = fontSize * 1.05;
+  const colWidth = fontSize * 1.1;
+  const charsPerCol = Math.max(1, Math.floor(usableH / charHeight));
+  const cols = chunkVertical(text, charsPerCol);
+  const colCount = cols.length;
+  const totalColsW = colCount * colWidth;
+  const adjColWidth = totalColsW > usableW && colCount > 1
+    ? Math.max(fontSize * 0.7, usableW / colCount)
+    : colWidth;
+
+  const firstColRightX = bx + bw - padding - colWidth / 2;
+  const colY0 = by + padding + fontSize;
+
+  const out: string[] = [];
+  for (let ci = 0; ci < colCount; ci++) {
+    const colX = firstColRightX - ci * adjColWidth;
+    const tspans = cols[ci]
+      .split("")
+      .map((c, ri) => `<tspan x="${colX.toFixed(1)}" dy="${ri === 0 ? 0 : charHeight.toFixed(1)}">${escapeXml(c)}</tspan>`)
+      .join("");
+    out.push(
+      `<text x="${colX.toFixed(1)}" y="${colY0.toFixed(1)}" text-anchor="middle" font-family='${fontFamily}' font-size="${fontSize}" font-weight="${textWeight}" fill="${textColor}">${tspans}</text>`
+    );
+  }
+  return out.join("");
+}
+
+function chunkVertical(text: string, charsPerCol: number): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < text.length; i += charsPerCol) {
+    out.push(text.slice(i, i + charsPerCol));
+  }
+  return out;
+}
+
+/**
+ * SFX (擬音) group — shape なし、halo 付き katakana の text-only。
+ *
+ * 「白縁背面 (stroke=white, wider) + 黒 fill 前面」の 2 段重ねを paint-order="stroke" で実現。
+ * memory feedback_manga_overlay_halo_required.md に従い stroke-width = fontSize * 0.18 を経験則とする。
+ * 配置は bubble.position の中央 (placer.ts が panel rect 内に配置済み前提)。
+ */
+function sfxGroup(b: SvgBubble, fontFamily: string): string {
+  const { x, y, width, height } = b.position;
+  const fontSize = Math.max(28, Math.min(64, Math.round(Math.min(width, height) * 0.5)));
+  const cx = x + width / 2;
+  const cy = y + height / 2 + fontSize / 3;
+  const haloWidth = Math.max(4, fontSize * 0.18);
+  const safeText = escapeXml(b.text);
+  return [
+    `<g data-reading-order="${b.reading_order}" data-bubble-type="sfx">`,
+    // halo (背面、白縁) — paint-order="stroke" で stroke が背面に
+    `<text x="${cx}" y="${cy}" text-anchor="middle" font-family='${fontFamily}' font-size="${fontSize}" font-weight="900" stroke="#ffffff" stroke-width="${haloWidth.toFixed(1)}" stroke-linejoin="round" fill="#000000" paint-order="stroke" style="opacity: 0.95;">${safeText}</text>`,
+    `</g>`,
+  ].join("");
 }
 
 /**

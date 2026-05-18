@@ -379,7 +379,14 @@ async function main() {
         const bubbleResult = await overlayBubblesOntoPage({
           pagePngPath: outPath,
           outputPath: outPath,
-          pageBubbleInput: { pagePlanPage: page, storyboardPage: sbPage, pageWidth: 1748, pageHeight: 2480 },
+          pageBubbleInput: {
+            pagePlanPage: page,
+            storyboardPage: sbPage,
+            pageWidth: 1748,
+            pageHeight: 2480,
+            typesetMode: args.typesetMode ?? "embed",
+            bible,
+          },
         });
         if (bubbleResult.bubbleCount > 0) console.log(`[L09] bubbles p${page.page_no}: ${bubbleResult.bubbleCount}`);
         await appendRenderManifest({
@@ -474,7 +481,14 @@ async function main() {
         const bubbleResult = await overlayBubblesOntoPage({
           pagePngPath: outPath,
           outputPath: outPath,
-          pageBubbleInput: { pagePlanPage: page, storyboardPage: sbPage, pageWidth: 1748, pageHeight: 2480 },
+          pageBubbleInput: {
+            pagePlanPage: page,
+            storyboardPage: sbPage,
+            pageWidth: 1748,
+            pageHeight: 2480,
+            typesetMode: args.typesetMode ?? "embed",
+            bible,
+          },
         });
         if (bubbleResult.bubbleCount > 0) console.log(`[L09] bubbles p${page.page_no}: ${bubbleResult.bubbleCount}`);
       }

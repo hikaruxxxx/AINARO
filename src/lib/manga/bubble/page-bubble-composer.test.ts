@@ -1,6 +1,47 @@
 import { describe, expect, it } from "vitest";
-import type { EpisodeStoryboardV2, PagePlanV2 } from "../schemas-v2";
+import type { EpisodeStoryboardV2, NarrationKind, PagePlanV2 } from "../schemas-v2";
 import { composePageBubbles } from "./page-bubble-composer";
+
+type SbPanel = EpisodeStoryboardV2["pages"][number]["panels"][number];
+type SbDialogue = SbPanel["dialogue"];
+type SbMonologue = SbPanel["monologue"];
+
+function storyboardPanelFull(fields: {
+  dialogue?: SbDialogue;
+  monologue?: SbMonologue;
+  narration?: string[];
+  narration_kinds?: NarrationKind[];
+  sfx?: string[];
+}): EpisodeStoryboardV2["pages"][number] {
+  const dialogue = fields.dialogue ?? [];
+  return {
+    page_no: 1,
+    page_role: "buildup",
+    panels: [{
+      panel_id: "p1",
+      panel_no: 1,
+      reading_order: 1,
+      shot_type: "medium",
+      camera: "eye_level",
+      bleed: false,
+      silence: dialogue.length === 0 && (fields.monologue?.length ?? 0) === 0,
+      importance: 3,
+      entities: {
+        characters: [{ character_id: "char_1", role: "speaker", on_screen_via: "in_person", expression: "neutral" }],
+        location_id: "loc_test",
+        props: [],
+        focus_entity_id: "char_1",
+      },
+      action: "test action",
+      key_visual: "test visual",
+      dialogue,
+      monologue: fields.monologue ?? [],
+      narration: fields.narration ?? [],
+      narration_kinds: fields.narration_kinds,
+      sfx: fields.sfx ?? [],
+    }],
+  };
+}
 
 function pagePlan(panel: PagePlanV2["pages"][number]["panels"][number]): PagePlanV2["pages"][number] {
   return {
@@ -148,5 +189,110 @@ describe("composePageBubbles", () => {
     expect(result.svg).toContain('data-breakout-target="p2"');
     expect(result.svg).toContain('<polygon points="0,0 408,0 408,200 0,200"');
     expect(result.svg).toContain('x="46"');
+  });
+});
+
+describe("composePageBubbles (shells_only)", () => {
+  const panelRect: PagePlanV2["pages"][number]["panels"][number] = {
+    panel_id: "p1",
+    slot_id: "s1",
+    rect: { x: 100, y: 50, w: 500, h: 500 },
+    reading_order: 1,
+    importance: 3,
+  };
+
+  it("monologue のみの panel は bubble_type=thought (雲型) を 1 個出す", () => {
+    const result = composePageBubbles({
+      pagePlanPage: pagePlan(panelRect),
+      storyboardPage: storyboardPanelFull({
+        monologue: [{ character_id: "char_1", text: "俺は強い。" }],
+      }),
+      pageWidth: 1000,
+      pageHeight: 1200,
+      typesetMode: "shells_only",
+    });
+
+    expect(result.bubbleCount).toBe(1);
+    // cloudPath (data-bubble-type="thought") が出力されるはず
+    expect(result.svg).toContain('data-bubble-type="thought"');
+  });
+
+  it("narration_kinds=protagonist_monologue は thought (雲型) として描画する", () => {
+    const result = composePageBubbles({
+      pagePlanPage: pagePlan(panelRect),
+      storyboardPage: storyboardPanelFull({
+        narration: ["俺は…まだ行ける。"],
+        narration_kinds: ["protagonist_monologue"],
+      }),
+      pageWidth: 1000,
+      pageHeight: 1200,
+      typesetMode: "shells_only",
+    });
+
+    expect(result.bubbleCount).toBe(1);
+    expect(result.svg).toContain('data-bubble-type="thought"');
+  });
+
+  it("narration_kinds 未指定 (omniscient default) は narration (矩形) として描画する", () => {
+    const result = composePageBubbles({
+      pagePlanPage: pagePlan(panelRect),
+      storyboardPage: storyboardPanelFull({
+        narration: ["20年前、世界中の…"],
+      }),
+      pageWidth: 1000,
+      pageHeight: 1200,
+      typesetMode: "shells_only",
+    });
+
+    expect(result.bubbleCount).toBe(1);
+    expect(result.svg).toContain('data-bubble-type="narration"');
+  });
+
+  it("sfx のみの panel も 1 個出す (Commit 2 では bubble_type=normal 暫定)", () => {
+    const result = composePageBubbles({
+      pagePlanPage: pagePlan(panelRect),
+      storyboardPage: storyboardPanelFull({
+        sfx: ["ガッ"],
+      }),
+      pageWidth: 1000,
+      pageHeight: 1200,
+      typesetMode: "shells_only",
+    });
+
+    expect(result.bubbleCount).toBe(1);
+  });
+
+  it("dialogue + monologue + narration + sfx 混在 panel は 4 個 (reading_order 1-4 通し) を出す", () => {
+    const result = composePageBubbles({
+      pagePlanPage: pagePlan(panelRect),
+      storyboardPage: storyboardPanelFull({
+        dialogue: [{ character_id: "char_1", text: "先制で頭部、お願いします。" }],
+        monologue: [{ character_id: "char_1", text: "っ……！" }],
+        narration: ["20年前。"],
+        sfx: ["ブン"],
+      }),
+      pageWidth: 1000,
+      pageHeight: 1200,
+      typesetMode: "shells_only",
+    });
+
+    expect(result.bubbleCount).toBe(4);
+  });
+
+  it("typesetMode=embed (default) は既存挙動 (dialogue のみ拾う) を維持する regression guard", () => {
+    const result = composePageBubbles({
+      pagePlanPage: pagePlan(panelRect),
+      storyboardPage: storyboardPanelFull({
+        dialogue: [{ character_id: "char_1", text: "Hi" }],
+        monologue: [{ character_id: "char_1", text: "心の声" }],
+        narration: ["地の文"],
+        sfx: ["ドン"],
+      }),
+      pageWidth: 1000,
+      pageHeight: 1200,
+      // typesetMode 未指定 → "embed" default
+    });
+
+    expect(result.bubbleCount).toBe(1);
   });
 });

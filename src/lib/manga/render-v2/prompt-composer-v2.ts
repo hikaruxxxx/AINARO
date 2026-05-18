@@ -1432,14 +1432,21 @@ function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" 
     // 強く、bible 修正 + 弱い削減系では不十分。明示的に「ANY line patterns FORBIDDEN」を
     // 強い formulation で記載。
     "Render: black ink character outlines + screentone (dot halftones) ONLY for shading. Hard B/W contrast. Vary tone density by panel emotion.",
-    "BACKGROUND FORBIDDEN LIST (HARD): NO horizontal line patterns anywhere in the image. NO parallel-line patterns. NO diagonal-line patterns. NO cross-strokes for shading. NO motion-blur line fills. NO atmospheric line patterns. Backgrounds are dot screentone, solid black, or pure white ONLY. Motion is shown by character pose and 1-2 speedlines (NOT by hatching the background).",
+    "BACKGROUND FORBIDDEN LIST (HARD): NO horizontal line patterns anywhere in the image. NO parallel-line patterns. NO diagonal-line patterns. NO cross-strokes for shading. NO motion-blur line fills. NO atmospheric line patterns. Backgrounds are dot screentone, solid black, or pure white ONLY.",
+    "MOTION EXPRESSION (alternative to background hatching): For action panels (running, attacking, falling), show motion EXCLUSIVELY by: (a) character pose + dynamic body angle, (b) at most ONE small cluster of 3-5 short speedlines emanating from the character (NOT background fill), (c) optional motion-blur silhouette behind the character. Backgrounds in action panels MUST be plain white or single light dot-screen — do NOT add ambient line patterns, vibration lines, or environmental hatching.",
     // 2026-05-18: 「HERO panel dominates」を削除 — PANEL SIZE OVERRIDE と重複、
     // 追加系。「do NOT default to uniform grid」削減系のみ残す。
     "Layout: reproduce panel sizes above (do NOT default to uniform grid); non-bleed panels separated by >=30px white gutter.",
     "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, English in-panel text, >5 fingers per hand.",
   ];
   if (opts.typesetMode === "shells_only") {
-    lines.push("Draw EMPTY speech bubble shells, narration outlines, SFX outlines only — no text inside (post-typeset adds it).");
+    // 2026-05-19 Sprint 23 Commit 5: 「shells 描いて良い + text 不要」では AI が独自に shells と
+    // text を補完してしまい SVG overlay と二重描画になる。完全な削減系 (FORBIDDEN / DO NOT) に
+    // 変更し、AI が typeset 要素を一切描かない方針に転換。
+    // memory feedback_ai_image_over_prompting.md「削減系 directive のみ有効」原則と整合。
+    lines.push(
+      "TYPESET FORBIDDEN (HARD): Do NOT draw ANY speech bubbles, thought clouds, narration boxes, caption boxes, SFX katakana/onomatopoeia text, dialogue text, or any typeset elements anywhere in the image. Render ONLY character action, environment, props, and background. ALL bubbles, narration boxes, and SFX text are added in a separate post-processing SVG overlay step — leave the canvas areas where they would appear completely clean (background art only, no white space reserved)."
+    );
   }
   return lines.join("\n");
 }
