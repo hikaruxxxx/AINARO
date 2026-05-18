@@ -238,13 +238,26 @@
 > audit-dialogue-density (生成後の検出網) ← Sprint 18
 > ```
 >
-> ### Sprint 23 候補
+> ### Sprint 23 候補 (B-3 SVG overlay 本格復活、PoC 完了で道筋確認済)
 >
-> 1. **(検証)** L03.5 を a07 ep01 で再走行 → key_lines floor directive の実効性測定
-> 2. **(検証)** L04 を a07 ep01 で再走行 → density floor 反映の予防網実効性確認
-> 3. **(検証)** Sprint 22 案3 結果集約 → 全 page 品質測定 (商業漫画 24 page セット完成)
-> 4. **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
-> 5. **(低)** effect_lines schema 拡張後の test fixture 整理 (cast 削除)
+> **PoC 結果 (commit `86134eb`、p17 v31)**:
+> - shells_only モードで AI が空白 bubble shells (narration_box / cloud / oval) のみ描画する仕様を実証
+> - L09 に `--typeset-mode=shells_only` CLI option 追加済
+> - AI text accuracy 問題 (storyboard 指示と違う text を AI が補完する問題) の根治路線が確立
+>
+> **本格復活 タスク**:
+> 1. shell 位置検出: panel rect ベース固定 hint or CV (OpenCV) ベース自動検出
+> 2. `src/lib/manga/effect-lines/svg-overlay.ts` 経路を `bubble-overlay.ts` に拡張
+> 3. dialogue / monologue / narration / SFX type 別 SVG style (oval / cloud / narration_box / hand-drawn)
+> 4. halo 処理 (白縁背面 + 黒線前面、memory `feedback_manga_overlay_halo_required.md` 参照)
+> 5. RTL 縦書き Japanese text rendering
+> 6. post-render hook で SVG を PNG に composite (既存 `overlayEffectLinesOntoPage` パターン流用)
+>
+> **既存併存 sprint 候補** (Sprint 23 内で同時または順次):
+> - **(検証)** L03.5 を a07 ep01 で再走行 → key_lines floor directive 実効性測定
+> - **(検証)** L04 を a07 ep01 で再走行 → density floor 予防網実効性確認
+> - **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
+> - **(低)** effect_lines schema 拡張後の test fixture 整理
 
 ## 設計原則
 
