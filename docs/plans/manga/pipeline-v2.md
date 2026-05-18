@@ -69,6 +69,9 @@
 > - **v20 全 24 page 再 render 完了** (Pro 枠 +24、gen=24/skip=0/fail=0、p01=A〜A+、p24=A+ で本セッション最高品質達成)
 > - `22189fe` Sprint 22 仕上げ削減: 過剰追加系 directive 3 つを削除 (hatching / Bubble shape taxonomy / effect_lines per-panel directive)。p10 v20 の背景水平線問題が解消、p24 は A+ 維持
 > - `bd3287e` Sprint 22 prompt 全体再検証 → 追加 6 directive 削除 (#PAGE hatching / Bubble density / Character acting / TAME panel / PANEL SIZE MUST occupy / HERO panel dominates)。p24 v22 で品質維持実証、Less is more 徹底
+> - `3d46878` p3 二重描画解消: page_role dialogue → buildup、non-bible character_id (tv_news/店長/客 off_frame) dialogue → narration 変換
+> - `68f1daf` p6/p12/p14/p22 二重描画一括解消: 公社_窓口員/公社ゲート_音声/nav dialogue → narration、p22 panel#109 char_桐生 dialogue「ナビ。」→ monologue (thought bubble 1 形式に固定)
+> - **v25 残 16 page 一括再 render** (Pro 枠 +16、Sprint 22 過剰指示削除済 prompt + storyboard 修正反映)。全 24 page が最新 prompt 揃え、商業漫画 A 級達成
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
