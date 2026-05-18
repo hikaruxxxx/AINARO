@@ -778,7 +778,7 @@
     },
     {
       "page_no": 6,
-      "page_role": "dialogue",
+      "page_role": "buildup",
       "panels": [
         {
           "panel_id": "p026",
@@ -804,14 +804,11 @@
           },
           "action": "再判定不可の事務説明紙を見る。",
           "key_visual": "硬い行政文の矩形枠、押印欄、若いレンの影が紙に落ちる。",
-          "dialogue": [
-            {
-              "character_id": "公社_窓口員",
-              "text": "鑑定結果は生涯固定です。再判定は受け付けていません。"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "公社_窓口員 の声:「鑑定結果は生涯固定です。再判定は受け付けていません。」"
+          ],
           "sfx": []
         },
         {
@@ -842,14 +839,11 @@
           },
           "action": "FランクID証を受け取る。",
           "key_visual": "差し出される安いホルダー、受け取る手の震え、背景は白く省略。",
-          "dialogue": [
-            {
-              "character_id": "公社_窓口員",
-              "text": "Fランク。1F限定。装備ローンの審査も別途。"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "公社_窓口員 の声:「Fランク。1F限定。装備ローンの審査も別途。」"
+          ],
           "sfx": [
             "カチ"
           ]
@@ -878,14 +872,11 @@
           },
           "action": "若いレンが窓口から一人で出る。",
           "key_visual": "F列の椅子が少なく、床の導線から外れている。",
-          "dialogue": [
-            {
-              "character_id": "公社_窓口員_off_frame",
-              "text": "次の方どうぞ。"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "公社_窓口員_off_frame の声:「次の方どうぞ。」"
+          ],
           "sfx": [
             "ザッ"
           ]
@@ -1927,7 +1918,7 @@
     },
     {
       "page_no": 12,
-      "page_role": "dialogue",
+      "page_role": "buildup",
       "panels": [
         {
           "panel_id": "p058",
@@ -1957,14 +1948,11 @@
           },
           "action": "Fランク入域ID証を読み取り機へかざす。",
           "key_visual": "硬い電子音、薄灰色の表示枠、手だけが震える。",
-          "dialogue": [
-            {
-              "character_id": "公社ゲート_音声",
-              "text": "ID 確認。桐生 レン、Fランク。"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "公社ゲート_音声 の声:「ID 確認。桐生 レン、Fランク。」"
+          ],
           "sfx": [
             "ピッ"
           ]
@@ -1997,14 +1985,11 @@
           },
           "action": "ゲート表示がFランク、1F限定、仮入域を告げる。",
           "key_visual": "中身後注入用の矩形枠、薄灰色の警告、レンの影が映る。",
-          "dialogue": [
-            {
-              "character_id": "公社ゲート_音声",
-              "text": "1階限定、仮入域 30 分を発行します。"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "公社ゲート_音声 の声:「1階限定、仮入域 30 分を発行します。」"
+          ],
           "sfx": [
             "ピピ"
           ]
@@ -2067,14 +2052,11 @@
           },
           "action": "ゲートを通る。",
           "key_visual": "背後の広告光と前方の暗い通路、黒フードが境界を抜ける。",
-          "dialogue": [
-            {
-              "character_id": "公社ゲート_音声",
-              "text": "上層階への通行は不可。違反時は補償対象外。"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
-          "narration": [],
+          "narration": [
+            "公社ゲート_音声 の声:「上層階への通行は不可。違反時は補償対象外。」"
+          ],
           "sfx": [
             "ウィン"
           ]
@@ -2372,15 +2354,11 @@
           },
           "action": "ナビが北東角までの秒読みを続ける。",
           "key_visual": "角の丸い細枠吹き出し、レンの横顔、背景は白く薄い。",
-          "dialogue": [
-            {
-              "character_id": "nav",
-              "text": "残り 18 秒。北東角。立ち止まらないでください。"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
           "narration": [
-            "北東角まで十五秒。減速しないでください。"
+            "北東角まで十五秒。減速しないでください。",
+            "nav の声:「残り 18 秒。北東角。立ち止まらないでください。」"
           ],
           "sfx": []
         },
@@ -3704,7 +3682,7 @@
     },
     {
       "page_no": 22,
-      "page_role": "dialogue",
+      "page_role": "reveal",
       "panels": [
         {
           "panel_id": "p109",
@@ -3730,18 +3708,16 @@
           },
           "action": "頭の中の声へ意識を向ける。",
           "key_visual": "視線は斜め下、片目の青弧が戻りかける。",
-          "dialogue": [
+          "dialogue": [],
+          "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
               "text": "ナビ。"
-            },
-            {
-              "character_id": "nav",
-              "text": "はい、桐生 レンさん。"
             }
           ],
-          "monologue": [],
-          "narration": [],
+          "narration": [
+            "nav の声:「はい、桐生 レンさん。」"
+          ],
           "sfx": []
         },
         {
@@ -3834,15 +3810,11 @@
           },
           "action": "ナビが次の提案を告げる。",
           "key_visual": "白い背景に細い角丸吹き出し、レンの目がわずかに戻る。",
-          "dialogue": [
-            {
-              "character_id": "nav",
-              "text": "経験値倍化条件、明日 23:40、F4 区画。踏みますか?"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
           "narration": [
-            "明日の予定、組みますか？"
+            "明日の予定、組みますか？",
+            "nav の声:「経験値倍化条件、明日 23:40、F4 区画。踏みますか?」"
           ],
           "sfx": []
         },
