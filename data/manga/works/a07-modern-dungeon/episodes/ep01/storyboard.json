@@ -170,7 +170,7 @@
     },
     {
       "page_no": 3,
-      "page_role": "dialogue",
+      "page_role": "buildup",
       "panels": [
         {
           "panel_id": "p009",
@@ -231,19 +231,16 @@
           },
           "action": "総菜什器の温度を機械的に確認する。",
           "key_visual": "湯気の薄い白、黒袖、疲れた手首だけを濃く描く。",
-          "dialogue": [
-            {
-              "character_id": "店長_off_frame",
-              "text": "桐生くん、温度ログ取ったらレジ頼める?"
-            }
-          ],
+          "dialogue": [],
           "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
               "text": "期待は高ランク用。俺は廃棄前の湯気。"
             }
           ],
-          "narration": [],
+          "narration": [
+            "同僚の声、画面外から:「桐生くん、温度ログ取ったらレジ頼める?」"
+          ],
           "sfx": [
             "ポタ"
           ]
@@ -276,15 +273,11 @@
           },
           "action": "ニュース通知と勤務終了通知が同じ割れた画面に並ぶ。",
           "key_visual": "灯里の報道サムネ風枠と給与明細風の小枠を、ヒビが斜めに裂く。",
-          "dialogue": [
-            {
-              "character_id": "tv_news",
-              "text": "速報。Sランク探索者・朱、第三ダンジョン踏破完了。"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
           "narration": [
-            "店内モニター、トップニュースが切り替わる。"
+            "店内モニター、トップニュースが切り替わる。",
+            "TV 速報:「Sランク探索者・朱、第三ダンジョン踏破完了。」"
           ],
           "sfx": [
             "ブブ"
@@ -314,19 +307,16 @@
           },
           "action": "レンが背中にニュース光を受けて立つ。",
           "key_visual": "店内画面の明るさが背中を照らし、顔はフード影に沈む。",
-          "dialogue": [
-            {
-              "character_id": "tv_news",
-              "text": "公社、史上最年少での偉業を発表。"
-            }
-          ],
+          "dialogue": [],
           "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
               "text": "人生、もう底で止まったと思ってた。"
             }
           ],
-          "narration": [],
+          "narration": [
+            "TV 続報:「公社、史上最年少での偉業を発表。」"
+          ],
           "sfx": []
         },
         {
@@ -353,15 +343,12 @@
           },
           "action": "入口チャイムの余韻だけが残る。",
           "key_visual": "白い余白に横顔だけ、口元は閉じ、目の下の影が残る。",
-          "dialogue": [
-            {
-              "character_id": "客_off_frame",
-              "text": "…お疲れさん。"
-            }
-          ],
+          "dialogue": [],
           "monologue": [],
           "narration": [],
-          "sfx": []
+          "sfx": [
+            "「お疲れさん」(off_frame)"
+          ]
         },
         {
           "panel_id": "p014",
