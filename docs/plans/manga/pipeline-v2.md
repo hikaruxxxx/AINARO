@@ -68,6 +68,7 @@
 > - `49a2b70` Sprint 22 仕上げ: p24 panel#120 の effect_lines を null に明示 (集中線完全消失、v19=A+ 達成、cliffhanger intimate 完成)
 > - **v20 全 24 page 再 render 完了** (Pro 枠 +24、gen=24/skip=0/fail=0、p01=A〜A+、p24=A+ で本セッション最高品質達成)
 > - `22189fe` Sprint 22 仕上げ削減: 過剰追加系 directive 3 つを削除 (hatching / Bubble shape taxonomy / effect_lines per-panel directive)。p10 v20 の背景水平線問題が解消、p24 は A+ 維持
+> - `bd3287e` Sprint 22 prompt 全体再検証 → 追加 6 directive 削除 (#PAGE hatching / Bubble density / Character acting / TAME panel / PANEL SIZE MUST occupy / HERO panel dominates)。p24 v22 で品質維持実証、Less is more 徹底
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
