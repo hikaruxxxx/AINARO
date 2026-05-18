@@ -72,6 +72,7 @@
 > - `3d46878` p3 二重描画解消: page_role dialogue → buildup、non-bible character_id (tv_news/店長/客 off_frame) dialogue → narration 変換
 > - `68f1daf` p6/p12/p14/p22 二重描画一括解消: 公社_窓口員/公社ゲート_音声/nav dialogue → narration、p22 panel#109 char_桐生 dialogue「ナビ。」→ monologue (thought bubble 1 形式に固定)
 > - **v25 残 16 page 一括再 render** (Pro 枠 +16、Sprint 22 過剰指示削除済 prompt + storyboard 修正反映)。全 24 page が最新 prompt 揃え、商業漫画 A 級達成
+> - **bible.style_directives.digest / global の hatching 許容表現を削除** (data/manga/works/ は gitignore で untracked、local 修正のみ反映)。p10/p13 v26 で背景 hatching 60-70% 削減実証、ただし完全消失は構造的限界 (Sprint 23 候補: SVG overlay 復活 or 手動写植)
 >
 > ### Sprint 7 追加チューニング結果 (a07 ep01 p01/p12 で実画像検証)
 >
