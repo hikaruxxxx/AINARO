@@ -986,18 +986,15 @@ function buildPanelSizeOverrideBlock(
   const smallest = Math.min(...areas);
   const ratio = smallest > 0 ? largest / smallest : 0;
 
+  // 2026-05-18: 「MUST occupy X% of page area」の数値強制を削除 (Sprint 10 検証で
+  // AI が area% を無視と実証済、追加系数値は逆効果)。削減系「Equalizing FORBIDDEN」
+  // と role tag (DOMINANT/MID/SMALL_INSET) のみ残す = AI が役割で判断する余地を確保。
+  // ratio 数値も削除 (追加系数値)。
   const lines: string[] = [
-    "PANEL SIZE OVERRIDE (STRICT — variance is the page's visual rhythm):",
+    "PANEL SIZE OVERRIDE (variance is the page's visual rhythm):",
   ];
   for (const e of entries) {
-    lines.push(
-      `- panel#${e.panelNo} MUST occupy ${Math.round(e.areaPct)}% of page area (${e.role}, ${e.roleNote})`,
-    );
-  }
-  if (ratio > 0 && Number.isFinite(ratio)) {
-    lines.push(
-      `Largest panel is ${ratio.toFixed(1)}x the area of smallest. Strictly preserve these proportions.`,
-    );
+    lines.push(`- panel#${e.panelNo}: ${e.role} (${e.roleNote})`);
   }
   lines.push(
     "Equalizing panels into a uniform grid is FORBIDDEN — it destroys manga reading rhythm.",
@@ -1431,7 +1428,9 @@ function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" 
     // 2026-05-18: "hatching" を削除。p10 v20 で背景に水平 hatching が無意味に多用される問題があった。
     // hatching が必要な場合は AI が judgment で限定使用するに任せる (削減系優位の原則)。
     "Render: black ink linework + screentone (dots/halftones), hard B/W contrast. Vary tone density by panel emotion. Do NOT use horizontal line patterns or repeating parallel lines as background fill; backgrounds are screentone dots, solid black, or white.",
-    "Layout: reproduce panel sizes above (do NOT default to uniform grid); HERO panel dominates; non-bleed panels separated by >=30px white gutter.",
+    // 2026-05-18: 「HERO panel dominates」を削除 — PANEL SIZE OVERRIDE と重複、
+    // 追加系。「do NOT default to uniform grid」削減系のみ残す。
+    "Layout: reproduce panel sizes above (do NOT default to uniform grid); non-bleed panels separated by >=30px white gutter.",
     "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, English in-panel text, >5 fingers per hand.",
   ];
   if (opts.typesetMode === "shells_only") {
@@ -1455,32 +1454,12 @@ function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" 
  */
 const MANGA_CRAFT_DIRECTIVES_V6 = `The following directives apply to ALL panels on this page, supplementing the per-panel specs above.
 
-### Bubble density (REQUIRED)
-- This page must contain at minimum 8 speech bubbles / inner-thought bubbles / SFX combined; aim for 10-15 on conversation pages.
-- Each panel must contain at least one of: speech bubble, inner thought bubble, off-frame voice, SFX, or environmental sound.
-- Empty (zero-text) panels are reserved exclusively for explicit "TAME" panels (max 1 per page).
-
 ### Background mer-hari (mandatory variation)
 - Expression close-up panels: WHITE background or single screentone only. NO detailed setting.
-- Pure object / TAME panels: WHITE background only. NO setting elements.
+- Pure object panels: WHITE background only. NO setting elements.
 - Establishing / wide shots: detailed background matching location refs.
 - Information panels (signage, documents, props CU): detailed background where relevant.
 - DO NOT render every panel at uniform background density. The reader needs visual rhythm.
-
-### Character acting (dynamic, not static)
-- Each panel showing a character must include at least one micro-acting beat:
-  - eyes drift down briefly
-  - hand grips an object one beat too long
-  - mouth half-opens before deciding not to speak
-  - shoulders drop before face shows recognition
-  - service-smile holds, then releases when off-camera
-- Static "neutral expression matching ref" is NOT sufficient by itself.
-
-### TAME panel requirement
-- At least one panel per page must be a TAME panel:
-  - pure object close-up (no character)
-  - OR pure character expression close-up with NO background and NO text
-- TAME panels function as "breath" between information-dense panels.
 
 ### Style refs interpretation
 - Style ref images attached are MANGA PAGE COMPOSITION references, NOT pure-illustration style guides.
@@ -1557,7 +1536,7 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
 
   const sections: Array<string | null> = [
     `# PAGE`,
-    `B6 portrait B&W manga page, ${args.pageDimensions.width}x${args.pageDimensions.height} px, narou-kei comicalization style (screentone + hatching, NOT seinen-realism).`,
+    `B6 portrait B&W manga page, ${args.pageDimensions.width}x${args.pageDimensions.height} px, narou-kei comicalization style (screentone-based, NOT seinen-realism).`,
     "",
     "## STYLE",
     styleOverrideBlock(args.scene, args.bible),

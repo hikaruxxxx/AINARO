@@ -929,13 +929,17 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
     };
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("## PANEL SIZE OVERRIDE");
-    expect(result.prompt).toContain("PANEL SIZE OVERRIDE (STRICT");
-    expect(result.prompt).toContain("panel#1 MUST occupy 40% of page area (DOMINANT");
-    expect(result.prompt).toContain("panel#2 MUST occupy 10% of page area (SMALL_INSET");
-    expect(result.prompt).toContain("panel#4 MUST occupy 20% of page area (MID");
-    // ratio = 40 / 10 = 4.0x
-    expect(result.prompt).toContain("Largest panel is 4.0x the area of smallest");
+    // 2026-05-18: 「MUST occupy X%」数値強制を削除 (Sprint 10 で AI 無視実証済)、
+    // role tag (DOMINANT/SMALL_INSET/MID) のみ残す
+    expect(result.prompt).toContain("PANEL SIZE OVERRIDE (variance");
+    expect(result.prompt).toContain("panel#1: DOMINANT");
+    expect(result.prompt).toContain("panel#2: SMALL_INSET");
+    expect(result.prompt).toContain("panel#4: MID");
+    // 削減系「FORBIDDEN」のみ維持
     expect(result.prompt).toContain("FORBIDDEN");
+    // 削除確認: 数値強制と ratio 表記は出ない
+    expect(result.prompt).not.toContain("MUST occupy");
+    expect(result.prompt).not.toContain("Largest panel is");
   });
 
   it("omits PANEL SIZE OVERRIDE when pagePlanPage is not provided", () => {
