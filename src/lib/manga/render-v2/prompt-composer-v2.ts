@@ -476,7 +476,9 @@ function firstChars(text: string, max: number): string {
 function mangaTechniqueMandatoryBlock(): string {
   return [
     "MANGA TECHNIQUE (MANDATORY — do NOT relax):",
-    "- Black ink linework with weight modulation; visible screentone/hatching; no soft or smooth tonal gradients.",
+    // 2026-05-18: hatching を削除 (bible.style_directives.global で「NO hatching of any kind」と
+    // 明示済のため整合)。screentone (dots/halftones) のみで階調表現する。
+    "- Black ink linework with weight modulation; visible screentone (dots/halftones); no soft or smooth tonal gradients. Do NOT use line-based hatching (cross-hatching, parallel lines, horizontal patterns).",
     "- Hard white highlights and strong black/white contrast. Vary screentone density by panel emotion; avoid uniform grey pages.",
   ].join("\n");
 }
@@ -1072,7 +1074,8 @@ function composePanelPromptCore(args: ComposeArgs): ComposeResult {
     .join("\n");
 
   const sections = [
-    `B6 portrait Japanese light novel comicalization PANEL (${args.pageDimensions.width}x${args.pageDimensions.height} px), single panel in BLACK AND WHITE only with screentone and hatching. Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (expressive character-driven art, large emotive eyes, light novel cover lineage), NOT seinen-realism.`,
+    // 2026-05-18: "screentone and hatching" → "screentone" のみに (bible で NO hatching と整合)
+    `B6 portrait Japanese light novel comicalization PANEL (${args.pageDimensions.width}x${args.pageDimensions.height} px), single panel in BLACK AND WHITE only with screentone (dots/halftones). Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (expressive character-driven art, large emotive eyes, light novel cover lineage), NOT seinen-realism. Do NOT use line-based hatching.`,
     "",
     "ART STYLE:",
     styleOverrideBlock(args.scene, args.bible),
@@ -1425,9 +1428,11 @@ function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" 
   // manga lettering 行は STYLE digest と被るので削除、background density は SCENE/panel BG に集約。
   // STRICT LAYOUT CONSTRAINTS から移動した汎用ルール (gutter / hero / grid) を 1 行に統合。
   const lines = [
-    // 2026-05-18: "hatching" を削除。p10 v20 で背景に水平 hatching が無意味に多用される問題があった。
-    // hatching が必要な場合は AI が judgment で限定使用するに任せる (削減系優位の原則)。
-    "Render: black ink linework + screentone (dots/halftones), hard B/W contrast. Vary tone density by panel emotion. Do NOT use horizontal line patterns or repeating parallel lines as background fill; backgrounds are screentone dots, solid black, or white.",
+    // 2026-05-18 強化: AI が「motion / atmosphere」を水平線パターンで表現する習性が
+    // 強く、bible 修正 + 弱い削減系では不十分。明示的に「ANY line patterns FORBIDDEN」を
+    // 強い formulation で記載。
+    "Render: black ink character outlines + screentone (dot halftones) ONLY for shading. Hard B/W contrast. Vary tone density by panel emotion.",
+    "BACKGROUND FORBIDDEN LIST (HARD): NO horizontal line patterns anywhere in the image. NO parallel-line patterns. NO diagonal-line patterns. NO cross-strokes for shading. NO motion-blur line fills. NO atmospheric line patterns. Backgrounds are dot screentone, solid black, or pure white ONLY. Motion is shown by character pose and 1-2 speedlines (NOT by hatching the background).",
     // 2026-05-18: 「HERO panel dominates」を削除 — PANEL SIZE OVERRIDE と重複、
     // 追加系。「do NOT default to uniform grid」削減系のみ残す。
     "Layout: reproduce panel sizes above (do NOT default to uniform grid); non-bleed panels separated by >=30px white gutter.",

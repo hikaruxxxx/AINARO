@@ -3884,12 +3884,12 @@
             ],
             "focus_entity_id": "prop_smartphone_cracked_v1"
           },
-          "action": "端末画面に未分類加算ログが残る。",
+          "action": "端末画面に未分類加算ログが表示される。画面内に UI 要素・通知枠・空白枠を一切描かない、ログテキスト 1 行のみ。",
           "key_visual": "ヒビの向こうに白い記録枠、制度の事務的な冷たさ。",
           "dialogue": [],
           "monologue": [],
           "narration": [
-            "未分類加算ログ、システム上は『該当なし』と表示される。"
+            "画面、加算 0。ログだけが残る。"
           ],
           "sfx": []
         },
@@ -3986,13 +3986,13 @@
           },
           "action": "小さく頼むと返す。",
           "key_visual": "大きな笑顔ではなく、息を吐くような口元と細い目の光。",
-          "dialogue": [
+          "dialogue": [],
+          "monologue": [
             {
               "character_id": "char_桐生_レン_v1",
               "text": "──頼む。"
             }
           ],
-          "monologue": [],
           "narration": [],
           "sfx": []
         }
