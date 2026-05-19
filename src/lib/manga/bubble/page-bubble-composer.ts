@@ -1,33 +1,13 @@
-import type {
-  BibleSnapshotV2,
-  EpisodeStoryboardV2,
-  NarrationKind,
-  PagePlanV2,
-} from "../schemas-v2";
-import type { BubbleType } from "../types";
+import type { EpisodeStoryboardV2, PagePlanV2 } from "../schemas-v2";
 import { detectBreakouts, type BreakoutCandidate } from "./breakout-detector";
 import { placeBubbles, type DialogueInput } from "./placer";
 import { renderBubbleOverlay } from "./svg-overlay";
-
-type StoryboardPanel = EpisodeStoryboardV2["pages"][number]["panels"][number];
-
-/** shells_only branch 内で source 種別を保持するための拡張型 */
-type SpeechItem = DialogueInput & {
-  source: "dialogue" | "monologue" | "narration" | "sfx";
-};
 
 export type PageBubbleInput = {
   pagePlanPage: PagePlanV2["pages"][number];
   storyboardPage: EpisodeStoryboardV2["pages"][number];
   pageWidth: number;
   pageHeight: number;
-  /**
-   * "embed" (default): 既存挙動 (dialogue のみ shape + 横書き text overlay)
-   * "shells_only" (Sprint 23): dialogue/monologue/narration/sfx 全てに shape + 縦書き text overlay
-   */
-  typesetMode?: "embed" | "shells_only";
-  /** typesetMode="shells_only" 時に character role / 名前解決に使用。embed では未参照 OK */
-  bible?: BibleSnapshotV2;
 };
 
 export type PageBubbleOutput = {
@@ -62,15 +42,35 @@ export function composePageBubbles(input: PageBubbleInput): PageBubbleOutput {
       continue;
     }
 
-    const isShellsOnly = input.typesetMode === "shells_only";
-    const speechItems: SpeechItem[] = isShellsOnly
-      ? collectAllSpeechItems(sbPanel, pp.panel_id, warnings)
-      : collectDialogueOnly(sbPanel, pp.panel_id, warnings).map((d) => ({ ...d, source: "dialogue" as const }));
+    const dialogue = sbPanel.dialogue ?? [];
+    if (dialogue.length === 0) {
+      warnings.push(`panel ${pp.panel_id}: dialogue empty`);
+      continue;
+    }
 
-    if (speechItems.length === 0) continue;
+    const panelCharacterIds = new Set(
+      (sbPanel.entities?.characters ?? []).map((c) => c.character_id)
+    );
+    const dialogues: DialogueInput[] = [];
 
-    const orderToSource = new Map(speechItems.map((s) => [s.reading_order, s.source]));
-    const dialogues: DialogueInput[] = speechItems.map(({ source: _source, ...rest }) => rest);
+    for (let j = 0; j < dialogue.length; j++) {
+      const d = dialogue[j];
+      if (!d.character_id) {
+        warnings.push(`panel ${pp.panel_id}: dialogue #${j + 1} speaker_id unresolved`);
+        continue;
+      }
+      if (panelCharacterIds.size > 0 && !panelCharacterIds.has(d.character_id)) {
+        warnings.push(`panel ${pp.panel_id}: speaker ${d.character_id} not listed in panel entities`);
+      }
+      dialogues.push({
+        speaker_id: d.character_id,
+        text: d.text,
+        bubble_type: "normal",
+        reading_order: j + 1,
+      });
+    }
+
+    if (dialogues.length === 0) continue;
 
     const placed = placeBubbles({
       panelWidth: pp.rect.w,
@@ -106,19 +106,12 @@ export function composePageBubbles(input: PageBubbleInput): PageBubbleOutput {
     const panelSvg = renderBubbleOverlay({
       panelWidth: pageWidth,
       panelHeight: pageHeight,
-      bubbles: placed.map((b) => {
-        const source = orderToSource.get(b.reading_order);
-        const isSfx = source === "sfx";
-        return {
-          position: b.position,
-          text: b.text,
-          bubble_type: b.bubble_type,
-          reading_order: b.reading_order,
-          // shells_only mode: sfx 以外は縦書き、sfx は katakana 単体 (writing_mode は無視される)
-          writing_mode: isShellsOnly && !isSfx ? ("vertical" as const) : ("horizontal" as const),
-          is_sfx: isShellsOnly && isSfx,
-        };
-      }),
+      bubbles: placed.map((b) => ({
+        position: b.position,
+        text: b.text,
+        bubble_type: b.bubble_type,
+        reading_order: b.reading_order,
+      })),
       clipPolygon,
       clipPathId: `bubble-clip-p${pagePlanPage.page_no}-${pp.panel_id.replace(/[^A-Za-z0-9_-]/g, "_")}`,
     });
@@ -196,150 +189,4 @@ function escapeXml(s: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
-}
-
-/**
- * embed mode (既存挙動): dialogue のみを拾い、すべて bubble_type="normal" で配置する。
- * 既存テスト regression を避けるため warning メッセージも従来通り保持する。
- */
-function collectDialogueOnly(
-  sbPanel: StoryboardPanel,
-  panelId: string,
-  warnings: string[]
-): DialogueInput[] {
-  const dialogue = sbPanel.dialogue ?? [];
-  if (dialogue.length === 0) {
-    warnings.push(`panel ${panelId}: dialogue empty`);
-    return [];
-  }
-  const panelCharacterIds = new Set(
-    (sbPanel.entities?.characters ?? []).map((c) => c.character_id)
-  );
-  const out: DialogueInput[] = [];
-  for (let j = 0; j < dialogue.length; j++) {
-    const d = dialogue[j];
-    if (!d.character_id) {
-      warnings.push(`panel ${panelId}: dialogue #${j + 1} speaker_id unresolved`);
-      continue;
-    }
-    if (panelCharacterIds.size > 0 && !panelCharacterIds.has(d.character_id)) {
-      warnings.push(`panel ${panelId}: speaker ${d.character_id} not listed in panel entities`);
-    }
-    out.push({
-      speaker_id: d.character_id,
-      text: d.text,
-      bubble_type: "normal",
-      reading_order: j + 1,
-    });
-  }
-  return out;
-}
-
-/**
- * shells_only mode (Sprint 23): dialogue / monologue / narration / sfx をすべて拾い、
- * bubble_shape / narration_kind / source 種別から BubbleType を推定する。
- * reading_order は dialogue → monologue → narration → sfx の順で 1-indexed に振り直す。
- * source 種別は SpeechItem.source で後段に伝搬し、composePageBubbles 側で writing_mode / is_sfx を決定する。
- */
-function collectAllSpeechItems(
-  sbPanel: StoryboardPanel,
-  panelId: string,
-  warnings: string[]
-): SpeechItem[] {
-  const out: SpeechItem[] = [];
-  let order = 0;
-
-  const dialogue = sbPanel.dialogue ?? [];
-  for (let j = 0; j < dialogue.length; j++) {
-    const d = dialogue[j];
-    if (!d.character_id) {
-      warnings.push(`panel ${panelId}: dialogue #${j + 1} speaker_id unresolved`);
-      continue;
-    }
-    order += 1;
-    out.push({
-      source: "dialogue",
-      speaker_id: d.character_id,
-      text: d.text,
-      bubble_type: inferBubbleType("dialogue", d.bubble_shape, undefined),
-      reading_order: order,
-    });
-  }
-
-  const monologue = sbPanel.monologue ?? [];
-  for (let j = 0; j < monologue.length; j++) {
-    const m = monologue[j];
-    if (!m.text) continue;
-    order += 1;
-    out.push({
-      source: "monologue",
-      speaker_id: m.character_id ?? null,
-      text: m.text,
-      bubble_type: inferBubbleType("monologue", m.bubble_shape, undefined),
-      reading_order: order,
-    });
-  }
-
-  const narration = sbPanel.narration ?? [];
-  const narrationKinds = sbPanel.narration_kinds ?? [];
-  for (let j = 0; j < narration.length; j++) {
-    const text = narration[j];
-    if (!text) continue;
-    order += 1;
-    out.push({
-      source: "narration",
-      speaker_id: null,
-      text,
-      bubble_type: inferBubbleType("narration", undefined, narrationKinds[j]),
-      reading_order: order,
-    });
-  }
-
-  const sfx = sbPanel.sfx ?? [];
-  for (let j = 0; j < sfx.length; j++) {
-    const text = sfx[j];
-    if (!text) continue;
-    order += 1;
-    out.push({
-      source: "sfx",
-      speaker_id: null,
-      text,
-      bubble_type: inferBubbleType("sfx", undefined, undefined),
-      reading_order: order,
-    });
-  }
-
-  return out;
-}
-
-/**
- * storyboard の発話アイテムを SVG 描画用 BubbleType に変換する。
- *
- * 優先順位:
- *   1. bubble_shape が明示されていればそれを優先 (設計者の意図を尊重)
- *   2. narration の narration_kind から推定
- *   3. source 種別 (monologue は雲型 default)
- *   4. fallback = "normal"
- *
- * sfx は shape を持たない (Commit 3 で paint-order halo 付き text-only として別経路へ)。
- * 暫定的に "normal" を返すが、svg-overlay 側で sfx-specific 描画に切り替える前提。
- */
-function inferBubbleType(
-  source: "dialogue" | "monologue" | "narration" | "sfx",
-  bubbleShape: string | undefined,
-  narrationKind: NarrationKind | undefined
-): BubbleType {
-  if (bubbleShape === "thought_cloud") return "thought";
-  if (bubbleShape === "narration_box") return "narration";
-  if (bubbleShape === "rounded_square") return "normal";
-  if (bubbleShape === "oval") return "normal";
-  if (source === "sfx") return "normal";
-  if (source === "monologue") return "thought";
-  if (source === "narration") {
-    if (narrationKind === "protagonist_monologue" || narrationKind === "thought_bubble") {
-      return "thought";
-    }
-    return "narration";
-  }
-  return "normal";
 }

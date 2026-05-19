@@ -82,8 +82,6 @@ type Args = {
   panelId?: string;
   /** Phase C: revision_queue.jsonl から id 一致 entry の userInstructions を使う */
   revisionId?: string;
-  /** 2026-05-19 Sprint 23 B-3: shells_only モードで text 描画を AI に任せず空白 bubble shells のみ */
-  typesetMode?: "embed" | "shells_only";
 };
 
 function parseArgs(): Args {
@@ -119,12 +117,6 @@ function parseArgs(): Args {
     else if (key === "version") a.version = val;
     else if (key === "panel-id") a.panelId = val;
     else if (key === "revision-id") a.revisionId = val;
-    else if (key === "typeset-mode") {
-      if (val !== "embed" && val !== "shells_only") {
-        throw new Error(`--typeset-mode must be embed|shells_only (got ${val})`);
-      }
-      a.typesetMode = val;
-    }
   }
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
   if (a.version && !/^v\d+$/.test(a.version)) throw new Error(`--version must be vN (got ${a.version})`);
@@ -329,7 +321,6 @@ async function main() {
         pagePlanPage: page,
         compliance,
         scene: sceneByPage.get(page.page_no),
-        typesetMode: args.typesetMode,
       });
       // 最終 prompt に対する compliance gate (実在企業名/商標が prompt に残っていたら fatal stop)
       const promptCompliance = validatePromptAgainstCompliance(prompt, complianceBlocklist, complianceFp, { treatAsFatal: true });
@@ -379,14 +370,7 @@ async function main() {
         const bubbleResult = await overlayBubblesOntoPage({
           pagePngPath: outPath,
           outputPath: outPath,
-          pageBubbleInput: {
-            pagePlanPage: page,
-            storyboardPage: sbPage,
-            pageWidth: 1748,
-            pageHeight: 2480,
-            typesetMode: args.typesetMode ?? "embed",
-            bible,
-          },
+          pageBubbleInput: { pagePlanPage: page, storyboardPage: sbPage, pageWidth: 1748, pageHeight: 2480 },
         });
         if (bubbleResult.bubbleCount > 0) console.log(`[L09] bubbles p${page.page_no}: ${bubbleResult.bubbleCount}`);
         await appendRenderManifest({
@@ -481,14 +465,7 @@ async function main() {
         const bubbleResult = await overlayBubblesOntoPage({
           pagePngPath: outPath,
           outputPath: outPath,
-          pageBubbleInput: {
-            pagePlanPage: page,
-            storyboardPage: sbPage,
-            pageWidth: 1748,
-            pageHeight: 2480,
-            typesetMode: args.typesetMode ?? "embed",
-            bible,
-          },
+          pageBubbleInput: { pagePlanPage: page, storyboardPage: sbPage, pageWidth: 1748, pageHeight: 2480 },
         });
         if (bubbleResult.bubbleCount > 0) console.log(`[L09] bubbles p${page.page_no}: ${bubbleResult.bubbleCount}`);
       }
