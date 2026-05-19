@@ -110,12 +110,6 @@ type ComposeArgs = {
   scene?: PromptScene;
   /** bible broker summary tier。未指定時は minimal */
   bibleTier?: BibleTier;
-  /**
-   * page_one_shot 用。未指定時 / "embed" の場合は既定挙動 (画像内に台詞テキストを描かせる)。
-   * "shells_only" の場合は台詞本文を prompt に出さず、空の吹き出し/ナレーション枠/SFX outline
-   * のみ生成させる (後段 post-typeset 層が text 合成する前提)。
-   */
-  typesetMode?: "embed" | "shells_only";
 };
 
 type ComposeResult = {
@@ -1197,29 +1191,6 @@ function buildPageSceneContextBlock(
   return lines.join("\n");
 }
 
-function renderPageShellsOnlyText(
-  panel: PanelV2,
-  bible: BibleSnapshotV2,
-): string[] {
-  const lines: string[] = [];
-  const charName = (id: string) => bible.characters.find((c) => c.id === id)?.name ?? id;
-  if (panel.dialogue.length > 0) {
-    const list = panel.dialogue.map((d, i) => `${charName(d.character_id)} bubble #${i + 1}`).join(", ");
-    lines.push(`- Speech bubble shells: ${panel.dialogue.length} (${list}) — empty interior, no text`);
-  }
-  if (panel.monologue.length > 0) {
-    const list = panel.monologue.map((m, i) => `${charName(m.character_id)} thought #${i + 1}`).join(", ");
-    lines.push(`- Inner monologue shells: ${panel.monologue.length} (${list}) — empty interior, no text`);
-  }
-  if (panel.narration.length > 0) {
-    lines.push(`- Narration frame outlines: ${panel.narration.length} (rectangular outline only, no text inside)`);
-  }
-  if (panel.sfx.length > 0) {
-    lines.push(`- SFX glyph outlines: ${panel.sfx.length} (effect shape only, no katakana/hiragana letters)`);
-  }
-  return lines;
-}
-
 function renderPageEmbedText(
   panel: PanelV2,
   bible: BibleSnapshotV2,
@@ -1302,11 +1273,10 @@ function renderPagePanelBlock(args: {
   localNo: number;
   bible: BibleSnapshotV2;
   bgTreatment: BackgroundTreatment | undefined;
-  typesetMode: "embed" | "shells_only";
   compliance?: { blocklist: Blocklist; fp: FalsePositives };
   sharedEntities?: PageSharedEntities | null;
 }): string {
-  const { panel, localNo, bible, bgTreatment, typesetMode, compliance, sharedEntities } = args;
+  const { panel, localNo, bible, bgTreatment, compliance, sharedEntities } = args;
   const screentoneTag = panel.screentone_intensity ? `, screentone=${panel.screentone_intensity}` : "";
   const lines: string[] = [
     // 2026-05-13 圧縮: "reading_order=N" → "ro=N"、長い ", " 区切りを単一空白に
@@ -1340,9 +1310,7 @@ function renderPagePanelBlock(args: {
   }
   const warning = panelTextValidationWarning(panel, bible, compliance);
   if (warning) lines.push(`- ${warning.replace(/\n/g, "\n  ")}`);
-  const textLines = typesetMode === "shells_only"
-    ? renderPageShellsOnlyText(panel, bible)
-    : renderPageEmbedText(panel, bible);
+  const textLines = renderPageEmbedText(panel, bible);
   for (const l of textLines) lines.push(l);
   const bgLine = compactBackgroundDirective(bgTreatment);
   if (bgLine) lines.push(`- ${bgLine}`);
@@ -1423,10 +1391,11 @@ function buildPageContinuityBlock(
   return lines.join("\n");
 }
 
-function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" }): string {
+function buildPageConstraintsBlock(): string {
   // 2026-05-13 圧縮: 旧 5 行 689 字 → 3 行 ~300 字。
   // manga lettering 行は STYLE digest と被るので削除、background density は SCENE/panel BG に集約。
   // STRICT LAYOUT CONSTRAINTS から移動した汎用ルール (gutter / hero / grid) を 1 行に統合。
+  // 2026-05-19 typesetMode 引数撤廃 (Sprint 23 全 revert に伴う死コード掃除)
   const lines = [
     // 2026-05-18 強化: AI が「motion / atmosphere」を水平線パターンで表現する習性が
     // 強く、bible 修正 + 弱い削減系では不十分。明示的に「ANY line patterns FORBIDDEN」を
@@ -1438,9 +1407,6 @@ function buildPageConstraintsBlock(opts: { typesetMode: "embed" | "shells_only" 
     "Layout: reproduce panel sizes above (do NOT default to uniform grid); non-bleed panels separated by >=30px white gutter.",
     "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, English in-panel text, >5 fingers per hand.",
   ];
-  if (opts.typesetMode === "shells_only") {
-    lines.push("Draw EMPTY speech bubble shells, narration outlines, SFX outlines only — no text inside (post-typeset adds it).");
-  }
   return lines.join("\n");
 }
 
@@ -1464,24 +1430,17 @@ const MANGA_CRAFT_DIRECTIVES_V6 = `The following directives apply to ALL panels 
 - Pure object panels: WHITE background only. NO setting elements.
 - Establishing / wide shots: detailed background matching location refs.
 - Information panels (signage, documents, props CU): detailed background where relevant.
-- DO NOT render every panel at uniform background density. The reader needs visual rhythm.
-
-### Style refs interpretation
-- Style ref images attached are MANGA PAGE COMPOSITION references, NOT pure-illustration style guides.
-- Extract: line weight variation, screentone density, bubble-to-image area ratio.
-- If style refs show ~30-40% bubble area coverage, the generated page should match that density.
-
-### Empty typeset frames (FORBIDDEN across all panels)
-- Do NOT add empty rectangles, blank UI cards, decorative bounding boxes, or speculative "atmosphere" frames in ANY panel — including silent panels and panels with no text specified.
-- A typeset shape (rectangle / oval / cloud / narration_box) must appear ONLY if the IN-PANEL TEXT section for that panel lists a corresponding text item.
-- This applies even when a panel's content is purely visual (silent, atmospheric, establishing). Silent panels are silent — no decorative empty frames.`;
+- DO NOT render every panel at uniform background density. The reader needs visual rhythm.`;
+// 2026-05-19 「画像生成に余計な指示は不要」原則徹底:
+// 「Style refs interpretation」(bubble area % 数値) と「Empty typeset frames FORBIDDEN」
+// (must 命令形) は AI 自然描画を歪めるリスクがあるため削除。
+// memory feedback_ai_image_over_prompting.md「数値強制」「mandatory + 追加要素」抵触。
 
 function composePagePromptCore(args: ComposeArgs): ComposeResult {
   if (!args.page) throw new Error("composePagePrompt requires page");
   const page = args.page;
   const episodeNo = args.episodeNo ?? 1;
   const bibleTier = args.bibleTier ?? "minimal";
-  const typesetMode: "embed" | "shells_only" = args.typesetMode ?? "embed";
   const localPanelNoByPanelId = buildLocalPanelNumbers(page);
 
   const geometryBlock: string | null = args.pagePlanPage
@@ -1529,7 +1488,6 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
       localNo,
       bible: args.bible,
       bgTreatment: bg,
-      typesetMode,
       compliance: args.compliance,
       sharedEntities,
     });
@@ -1567,7 +1525,7 @@ function composePagePromptCore(args: ComposeArgs): ComposeResult {
     editorBlock,
     editorBlock ? "" : null,
     "## CONSTRAINTS",
-    buildPageConstraintsBlock({ typesetMode }),
+    buildPageConstraintsBlock(),
     "",
     panelSizeOverrideBlock ? "## PANEL SIZE OVERRIDE" : null,
     panelSizeOverrideBlock,

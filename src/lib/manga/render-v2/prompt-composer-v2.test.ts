@@ -771,23 +771,8 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     expect(result.prompt).not.toContain("EMPTY speech bubble shells");
   });
 
-  it("composePagePrompt shells_only mode strips dialogue text and adds shell directive", () => {
-    const args = {
-      page: page(2),
-      packet,
-      bible: brokerBible(),
-      pageDimensions: { width: 1748, height: 2480 },
-      scene: brokerScene(),
-      episodeNo: 5,
-      bibleTier: "minimal" as const,
-      typesetMode: "shells_only" as const,
-    };
-    const result = composePagePrompt(args);
-    expect(result.prompt).not.toContain("「台詞1」");
-    expect(result.prompt).not.toContain("「台詞2」");
-    expect(result.prompt).toContain("Speech bubble shells");
-    expect(result.prompt).toContain("Draw EMPTY speech bubble shells");
-  });
+  // 2026-05-19 削除: typesetMode (shells_only mode) は Sprint 23 全 revert で撤廃。
+  // 「画像生成に余計な指示は不要」原則徹底。test も削除。
 
   it("composePagePrompt formatRefLabel omits weight when weight≈1.0", () => {
     const args = {
