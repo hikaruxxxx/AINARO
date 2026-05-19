@@ -216,6 +216,11 @@ function adaptWorld(w: V2Concept["world"]): WorldSpec {
 }
 
 function defaultStyleDirectives(artStyle: ArtStyle): StyleDirectivesV2 {
+  // 2026-05-20: Sprint 23 で撤回した SVG overlay 連携前提の directive を template から除去。
+  // 「中身はSVGで後注入」「後でレタリング合成」「後合成しない」「矩形空枠」等は、AI 画像生成時に
+  // 「中身は後で合成するから矩形枠だけ描いて」と誤解され、結果として空白 narration_box / HUD 風要素
+  // が全 page で出る原因になっていた (a07 ep01 で実証、bible 修正で大幅改善)。
+  // memory feedback_ai_image_over_prompting.md「画像生成に余計な指示は不要」原則徹底。
   const isUrban = artStyle === "manga_bw_seinen_urban";
   return {
     global: isUrban
@@ -227,13 +232,9 @@ function defaultStyleDirectives(artStyle: ArtStyle): StyleDirectivesV2 {
       battle: "速度線・効果線・大ゴマ多用。スキル発動時は瞳のクローズアップ+幾何学パターン背景。",
       flashback: "全体トーン落とし、輪郭線をやや薄く。",
       news_broadcast:
-        "テレビ画面越しに見える人物。フレーム枠+ノイズ線+下部テロップ風の矩形空枠 (中身はSVGで後注入)。",
+        "テレビ画面越しに見える人物。モニター光が顔に投影され、視聴距離を演出する構図。",
     },
-    overlay_rules: [
-      "ステータスHUD・スキル発動時の数値・能力名表示は矩形枠のみで描画 (中身はSVGで後注入)",
-      "効果音は擬音文字を画像内に直書きせず、後でレタリング合成",
-      "速度線・集中線は画像生成側で描画 (後合成しない)",
-    ],
+    overlay_rules: [],
   };
 }
 
