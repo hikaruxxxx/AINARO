@@ -183,7 +183,9 @@ function compactBackgroundDirective(t: BackgroundTreatment | undefined): string 
     case "detailed_bg":
       return "BACKGROUND: draw clear location detail; match ref screentone density if provided.";
     case "atmospheric_fade":
-      return "BACKGROUND: atmospheric fade / 抜きコマ. Keep >=90% blank white or sparse tone; no walls, furniture, architecture, crowds, or scenery.";
+      // 2026-05-21: 「sparse tone」が AI に水平 hatching を許可と解釈させていた (Codex 分析 / a07 p8/p10/p11 v43 で観察)。
+      // 純粋な白背景に厳格化し、tone/line/effect いっさい禁止。
+      return "BACKGROUND: pure white paper only; no effect lines, no tone patterns, no walls, no furniture, no architecture, no crowds, no scenery; subject only.";
     case "tone_back":
       return "BACKGROUND: solid screentone only; no drawn environment.";
     case "solid_white":
@@ -1312,6 +1314,12 @@ function renderPagePanelBlock(args: {
   if (warning) lines.push(`- ${warning.replace(/\n/g, "\n  ")}`);
   const textLines = renderPageEmbedText(panel, bible);
   for (const l of textLines) lines.push(l);
+  // 2026-05-21: Codex 3 回目分析「page one-shot の text に shape/binding 拘束が無く、短い決め台詞が
+  // 複数 panel / 複数形式で再描画される」を受け、各 panel block 末尾に近接配置で重複禁止を追加。
+  // 削減系のみ (memory feedback_ai_image_over_prompting.md 形状指定は逆効果原則と整合)。
+  if (textLines.length > 0) {
+    lines.push(`  → All text items above belong to THIS panel#${localNo} ONLY. Do NOT duplicate any line into adjacent panels. Do NOT render the same line as both speech bubble and narration_box.`);
+  }
   const bgLine = compactBackgroundDirective(bgTreatment);
   if (bgLine) lines.push(`- ${bgLine}`);
   // 2026-05-18 Sprint 22 案B (撤回): effect_lines per-panel directive を削除。
@@ -1411,6 +1419,10 @@ function buildPageConstraintsBlock(): string {
     // 追加系。「do NOT default to uniform grid」削減系のみ残す。
     "Layout: reproduce panel sizes above (do NOT default to uniform grid); non-bleed panels separated by >=30px white gutter.",
     "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, English in-panel text, >5 fingers per hand.",
+    // 2026-05-21: style ref 除外 (v45 検証) で AI が「typeset discipline」を失い text 重複描画が再発した。
+    // page one-shot prompt にも panel-level prompt と同等の重複禁止を入れる (削減系)。
+    // Codex 追加分析で「同 text が複数 panel に / 同 panel 内に 2 形式で」描かれる事例を特定。
+    "TEXT BINDING (HARD): Each listed text item (Speech / Monologue / Narration / SFX) must appear EXACTLY ONCE, in EXACTLY ONE panel specified in PANELS, in EXACTLY ONE typeset shape. Do NOT duplicate the same text across multiple panels. Do NOT render the same dialogue as both a speech bubble and a narration_box. Do NOT echo text into nearby panels as residue/afterimage.",
   ];
   return lines.join("\n");
 }
@@ -1433,8 +1445,6 @@ const MANGA_CRAFT_DIRECTIVES_V6 = `The following directives apply to ALL panels 
 ### Background mer-hari (mandatory variation)
 - Expression close-up panels: WHITE background or single screentone only. NO detailed setting.
 - Pure object panels: WHITE background only. NO setting elements.
-- Establishing / wide shots: detailed background matching location refs.
-- Information panels (signage, documents, props CU): detailed background where relevant.
 - DO NOT render every panel at uniform background density. The reader needs visual rhythm.`;
 // 2026-05-19 「画像生成に余計な指示は不要」原則徹底:
 // 「Style refs interpretation」(bubble area % 数値) と「Empty typeset frames FORBIDDEN」
