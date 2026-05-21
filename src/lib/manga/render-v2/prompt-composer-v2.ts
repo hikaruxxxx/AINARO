@@ -1401,7 +1401,12 @@ function buildPageConstraintsBlock(): string {
     // 強く、bible 修正 + 弱い削減系では不十分。明示的に「ANY line patterns FORBIDDEN」を
     // 強い formulation で記載。
     "Render: black ink character outlines + screentone (dot halftones) ONLY for shading. Hard B/W contrast. Vary tone density by panel emotion.",
-    "BACKGROUND FORBIDDEN LIST (HARD): NO horizontal line patterns anywhere in the image. NO parallel-line patterns. NO diagonal-line patterns. NO cross-strokes for shading. NO motion-blur line fills. NO atmospheric line patterns. Backgrounds are dot screentone, solid black, or pure white ONLY. Motion is shown by character pose and 1-2 speedlines (NOT by hatching the background).",
+    // 2026-05-21: 末尾の「Motion is shown by character pose and 1-2 speedlines」を削除。
+    // 追加系 (「speedlines を描いて良い」) として AI が「motion line / 集中線を激しく描く」
+    // 解釈を誘発していた (a07 ep01 p1/p8 で大量集中線、p7/p9/p10/p11 で背景全面 hatching)。
+    // memory feedback_ai_image_over_prompting.md「画像生成に余計な指示は不要」原則徹底。
+    // 純削減系のみ残し、motion 表現は AI 自発判断に任せる。
+    "BACKGROUND FORBIDDEN LIST (HARD): NO horizontal line patterns anywhere in the image. NO parallel-line patterns. NO diagonal-line patterns. NO cross-strokes for shading. NO motion-blur line fills. NO atmospheric line patterns. NO radial speedlines covering the panel. Backgrounds are dot screentone, solid black, or pure white ONLY.",
     // 2026-05-18: 「HERO panel dominates」を削除 — PANEL SIZE OVERRIDE と重複、
     // 追加系。「do NOT default to uniform grid」削減系のみ残す。
     "Layout: reproduce panel sizes above (do NOT default to uniform grid); non-bleed panels separated by >=30px white gutter.",
