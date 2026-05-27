@@ -13,19 +13,14 @@
       },
       "panel_range": {
         "start_panel_no": 1,
-        "end_panel_no": 12
+        "end_panel_no": 15
       },
       "arc_position": {
         "volume": 1,
         "episode_in_volume": 1,
         "arc_phase": "introduce",
-        "arc_position_normalized": 0.005
+        "arc_position_normalized": 0
       },
-      "location_id": "loc_blueway_interior_v1",
-      "sub_locations": [
-        "loc_shinjuku_night_skyline_v1",
-        "loc_shinjuku_third_5f_boss_room_v1"
-      ],
       "beat_type": "introduce",
       "cast": [
         {
@@ -34,127 +29,84 @@
         },
         {
           "character_id": "char_白瀬_灯里_v1",
-          "presence": "tv"
+          "presence": "in_person"
         }
       ],
       "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_白瀬_灯里_v1",
-            "text": "新宿第三、第五層の安全確認は継続します。",
-            "uniqueness": "may_repeat",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "俺が入れるの、一階だけなのにな。",
-            "uniqueness": "scene_exclusive",
-            "intent": "hook"
-          }
-        ]
+        "key_lines": []
       },
-      "foreshadow_setup": [
-        {
-          "token": "F_shinjuku_third_floor_gap",
-          "payoff_episode_hint": "this_episode"
-        },
-        {
-          "token": "F_akari_akane_public_light_pressure",
-          "payoff_episode_hint": "later_in_volume"
-        },
-        {
-          "token": "F_navi_precise_coordinate_seed",
-          "payoff_episode_hint": "later_in_volume"
-        }
-      ],
+      "foreshadow_setup": [],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "自分に許された場所は一階だけで、上位階層の記録は観客として眺めるしかない。",
-        "goal": "勤務を終え、Fランクの制限を忘れるように店内作業を片づける。",
-        "emotion": "despair",
-        "delta_from_prev": "五階の映像と一階限定の自分を並べ、階層差を最初の傷として刻む。"
+        "belief": "夜勤明けのレンは、灯里のSランク戦果ニュースを眺めながら、自分の人生はもうコンビニのレジ前で終わっていると受け入れている。",
+        "goal": "深夜コンビニとSランク戦果ニュースを対比し、レンの現在地と灯里への劣等感を即時に提示する。",
+        "emotion": "tension",
+        "delta_from_prev": "scene 開始"
       },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_白瀬_灯里_v1"
-          ],
-          "direction": "tense",
-          "intensity": -1,
-          "trigger": "灯里の第五層映像が、レンの一階限定許可と同じ新宿第三の中で対比される。"
-        }
-      ],
+      "relationship_state_delta": [],
       "time_axis": {
-        "label": "午前前、店内モニターの凱旋ニュース",
+        "label": "深夜",
         "order": 1,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "moments"
+        "duration_hint": "minutes"
       },
+      "location_id": "loc_blueway_interior_v1",
+      "sub_locations": [],
       "page_budget": {
         "min": 3,
         "max": 3,
         "preferred": 3
       },
-      "mode": "external_social",
+      "mode": "establishing",
       "turn_anchor": {
-        "at_panel_no": 11,
-        "type": "tension_turn"
+        "at_panel_no": null,
+        "type": "none"
       },
-      "layout_pattern_id": "broadcast_bossroom_store_reflection_3p12",
+      "layout_pattern_id": null,
       "subtype_directive": {
-        "external_social": true,
+        "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "panel_composite",
-      "key_visual_intent": "店内モニターの第五層映像をレンのレジ面に反射させ、同じ新宿第三でも立てる階が違う痛みを出す。",
-      "wardrobe_state": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "costume_id": "costume_ren_blueway_uniform_v1"
-        },
-        {
-          "character_id": "char_白瀬_灯里_v1",
-          "costume_id": "costume_akari_akane_public_broadcast_v1"
-        }
-      ],
-      "visual_motif_anchors": [],
-      "world_rules_active": [
-        "入域許可は適性ランク、レベル、直近事故歴、同行者保証、装備認可、保険状態の複合判定で出るが、実務上は適性ランクが最も強く働く。Fランクは1F限定や仮入域が基本で、同じ実績を出しても許可更新が遅い。レンの異常値は、記録上は上位階に届くのに手続",
-        "記録更新は探索者の市場価値と社会信用を一夜で変えるが、同時に追跡の首輪にもなる。世界最速レベルアップ記録、未踏破階層討伐記録、最速踏破記録、単独討伐記録更新はDPC基盤に保存され、階層、時刻、入域者数、素材買取時刻と結びつく。レンは匿名ID",
-        "画面演出では、世界ルールを長い説明図で語らない。白い余白、細い座標線、公社アプリの事務通知、入域ゲートの表示、ナビの短い縦書き吹き出し、レンの半歩を重ねて見せる。読者は設定を読まされるのではなく、条件、実行、判定、記録の四段階を目で追うこと"
-      ],
-      "props_in_play": [],
-      "theme_subtext": "同じ入口でも階は違う",
-      "selection": {
-        "tier": 1,
-        "iterations": 1,
-        "candidate_count": 3,
-        "pairwise_score": 1,
-        "predict_hit": {
-          "v12_ep1": 0,
-          "v12_longform": 0,
-          "ensemble": 0
-        },
-        "anchor_diff": {
-          "top3_anchor_ids": [
-            "n3820ik_106753",
-            "n1105in_09d5c5",
-            "n7332im_1d32d8"
-          ],
-          "cosine_avg": 0,
-          "llm_score": 0.78
-        },
-        "template_collision": {
-          "collision_rate": 0,
-          "nearest_template": null
-        },
-        "decision_log": {
-          "selected_at": "2026-05-12T14:00:20.197Z"
-        }
-      }
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "青白いレジ照明、テレビの灯里、鏡の中で目だけ疲れたレンを一画面に重ねる。",
+      "directing_intent": {
+        "kind": "opening_hook",
+        "hook_pattern": "world_glimpse",
+        "key_visual": "青白いレジ照明、テレビの灯里、鏡の中で目だけ疲れたレンを一画面に重ねる。",
+        "narration_lines": [
+          "十五歳の鑑定石は、俺の人生に薄灰色の札を貼った。"
+        ]
+      },
+      "scene_emotion": {
+        "label": "沈んだ導入の違和感",
+        "intensity": 0.62,
+        "direction": "rise"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている"
+        ],
+        "feels": "静かな痛みと、レンがなぜここまで沈んだのかへの好奇心",
+        "questions": [
+          "Fランクとは具体的にどれほど不利なのか",
+          "レンと灯里には過去に接点があるのか",
+          "レンの人生は本当にここで終わるのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "画面越しの白瀬灯里との距離"
+        ]
+      },
+      "primary_channels": [
+        "ui_screen",
+        "reaction_shot",
+        "narration"
+      ]
     },
     {
       "scene_id": "S02",
@@ -163,20 +115,19 @@
       "next_scene_id": "S03",
       "page_range": {
         "start": 4,
-        "end": 5
+        "end": 6
       },
       "panel_range": {
-        "start_panel_no": 13,
-        "end_panel_no": 22
+        "start_panel_no": 16,
+        "end_panel_no": 30
       },
       "arc_position": {
         "volume": 1,
         "episode_in_volume": 1,
         "arc_phase": "introduce",
-        "arc_position_normalized": 0.012
+        "arc_position_normalized": 0.2
       },
-      "location_id": "loc_blueway_interior_v1",
-      "beat_type": "transition",
+      "beat_type": "setup",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
@@ -184,133 +135,102 @@
         },
         {
           "character_id": "char_白瀬_灯里_v1",
-          "presence": "phone_screen"
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_氷室_玲二_v1",
+          "presence": "in_person"
         }
       ],
       "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "数字がすごいんだろうな。すごいってことしか、俺には分からない。",
-            "uniqueness": "may_repeat",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "閉じよう。見たって、俺の許可は増えない。",
-            "uniqueness": "may_repeat",
-            "intent": "callback"
-          }
-        ]
+        "key_lines": []
       },
-      "foreshadow_setup": [
-        {
-          "token": "F_public_record_numbers_feel_unreadable",
-          "payoff_episode_hint": "next_episode"
-        },
-        {
-          "token": "F_navi_condition_value_gap",
-          "payoff_episode_hint": "this_episode"
-        }
-      ],
+      "foreshadow_setup": [],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "記録や倍率は上位者のための言葉で、自分には価値を測る物差しがないと思っている。",
-        "goal": "ニュース通知を閉じて、Fランク1F限定の現実だけを確認する。",
-        "emotion": "despair",
-        "delta_from_prev": "テレビの遠い栄光からスマホの小さな通知へ移り、数字を読めても意味を掴めない孤立が前面化する。"
+        "belief": "頭の中のナビが、新宿第三1F北東通路、午前6時14分、ゴブリン頭部撃破という経験値倍化条件を開示する。",
+        "goal": "Fランクが日常の制度と世間の言葉で押し戻される世界を提示し、読者の怒りをレンの沈黙へ接続する。",
+        "emotion": "tension",
+        "delta_from_prev": "ニュースの称賛が、直後のFランク蔑視へ反転する。"
       },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_白瀬_灯里_v1"
-          ],
-          "direction": "farther",
-          "intensity": 1,
-          "trigger": "灯里の記録通知がレンの割れた画面に届くが、祝福ではなく距離として読まれる。"
-        }
-      ],
+      "relationship_state_delta": [],
       "time_axis": {
-        "label": "夜勤明け、レジ裏から更衣室へ",
+        "label": "深夜",
         "order": 2,
         "is_flashback": false,
         "is_flashforward": false,
-        "duration_hint": "moments"
+        "duration_hint": "minutes"
       },
+      "location_id": "loc_blueway_interior_v1",
+      "sub_locations": [],
       "page_budget": {
-        "min": 1,
-        "max": 2,
-        "preferred": 2
+        "min": 3,
+        "max": 3,
+        "preferred": 3
       },
-      "mode": "external_social",
+      "mode": "introspection",
       "turn_anchor": {
-        "at_panel_no": 22,
-        "type": "reveal_turn"
+        "at_panel_no": null,
+        "type": "none"
       },
-      "layout_pattern_id": "phone_notification_to_status_close",
+      "layout_pattern_id": null,
       "subtype_directive": {
-        "external_social": true,
+        "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "panel_composite",
-      "key_visual_intent": "灯里の記録通知を閉じた直後、同じ割れた画面にFランク1F限定の許可枠だけが残る。",
-      "wardrobe_state": [
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "テレビの特集で氷室玲二がFランクを戦力外と笑い、レンの勤務評価アプリにも探索者保険対象外と低評価が薄灰色で並ぶ。",
+      "directing_intent": {
+        "kind": "world_anchor",
+        "delivery": "system_text",
+        "target_facts": [
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "公社アプリや勤務評価の薄灰色表示が低ランク者を日常的に押し戻す",
+          "Sランクはニュースと推薦で席が用意され、Fランクは入口で止められる"
+        ]
+      },
+      "scene_emotion": {
+        "label": "屈辱の定着",
+        "intensity": 0.7,
+        "direction": "rise"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている",
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "氷室玲二は公の場でFランクを戦力外として扱う人物である",
+          "レンは侮辱されても反論せず、値引き弁当を袋へ入れる"
+        ],
+        "feels": "レンへの同情と、制度への怒り",
+        "questions": [
+          "レンと灯里には過去に接点があるのか",
+          "レンの人生は本当にここで終わるのか",
+          "この固定されたFランク評価を覆す方法はあるのか",
+          "氷室玲二は今後レンと直接ぶつかるのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "理不尽に黙るレン",
+          "画面越しの白瀬灯里との距離"
+        ]
+      },
+      "episode_spine_links": [
         {
-          "character_id": "char_桐生_レン_v1",
-          "costume_id": "costume_ren_blueway_uniform_v1"
-        },
-        {
-          "character_id": "char_白瀬_灯里_v1",
-          "costume_id": "costume_akari_akane_public_broadcast_v1"
+          "event_kind": "humiliation",
+          "expected_page": 5
         }
       ],
-      "visual_motif_anchors": [
-        {
-          "motif_id": "ひび割れた画面越しの世界",
-          "intensity": "dominant"
-        }
-      ],
-      "world_rules_active": [
-        "作中の記録名は、必ず対象と尺度を含める。『世界最速レベルアップ記録』『未踏破階層討伐記録』『最速踏破記録』『単独討伐記録更新』のように、何がどの基準で更新されたかを明示する。単独で曖昧な記録表現に逃げると、ダンジョン固有の制度感が薄れるため",
-        "公社アプリに表示されるステータスは、公社が発生させた数値ではなく、ダンジョン側が返した観測結果をDPC形式へ翻訳したものである。したがってDPCは表示形式、同期時刻、報奨処理を管理できるが、加算そのものは作れない。レンの未分類加算を公社が消",
-        "本作の力の根幹は『強い肉体を得る』ではなく『ダンジョンが正解と認める行為を、正しい条件で成立させる』ことにある。読者に返す報酬は、底辺Fランクのレンが突然万能化する快感ではない。公社もSランクも見落としていた条件をナビだけが開示し、レンが震"
-      ],
-      "props_in_play": [
-        {
-          "prop_id": "prop_smartphone_cracked_v1",
-          "held_by": "char_桐生_レン_v1"
-        }
-      ],
-      "theme_subtext": "数字は読めても価値は届かない",
-      "selection": {
-        "tier": 1,
-        "iterations": 1,
-        "candidate_count": 3,
-        "pairwise_score": 1,
-        "predict_hit": {
-          "v12_ep1": 0,
-          "v12_longform": 0,
-          "ensemble": 0
-        },
-        "anchor_diff": {
-          "top3_anchor_ids": [
-            "n1105in_09d5c5",
-            "n7332im_1d32d8",
-            "n3820ik_106753"
-          ],
-          "cosine_avg": 0,
-          "llm_score": 0.66
-        },
-        "template_collision": {
-          "collision_rate": 0,
-          "nearest_template": null
-        },
-        "decision_log": {
-          "selected_at": "2026-05-12T14:04:43.271Z"
-        }
-      }
+      "primary_channels": [
+        "ui_screen",
+        "dialogue",
+        "visual_contrast"
+      ]
     },
     {
       "scene_id": "S03",
@@ -318,184 +238,19 @@
       "prev_scene_id": "S02",
       "next_scene_id": "S04",
       "page_range": {
-        "start": 6,
-        "end": 7
-      },
-      "panel_range": {
-        "start_panel_no": 23,
-        "end_panel_no": 28
-      },
-      "arc_position": {
-        "volume": 1,
-        "episode_in_volume": 1,
-        "arc_phase": "introduce",
-        "arc_position_normalized": 0.018
-      },
-      "location_id": "loc_bluewhite_mart_exterior_night_v1",
-      "sub_locations": [
-        "loc_dpc_public_counter_v1",
-        "loc_ren_apartment_v1"
-      ],
-      "beat_type": "introduce",
-      "cast": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "presence": "in_person"
-        },
-        {
-          "character_id": "char_白瀬_灯里_v1",
-          "presence": "phone_screen"
-        }
-      ],
-      "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "同じ画面に出てるのに、住んでる場所が違うみたいだ。",
-            "uniqueness": "may_repeat",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "俺の欄、今日も増えてない。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          }
-        ]
-      },
-      "foreshadow_setup": [
-        {
-          "token": "F_cracked_phone_world_as_broken_window",
-          "payoff_episode_hint": "later_in_volume"
-        },
-        {
-          "token": "F_akari_public_light_vs_ren_unapproved_log",
-          "payoff_episode_hint": "later_in_volume"
-        }
-      ],
-      "foreshadow_payoff": [],
-      "protagonist_arc_state": {
-        "belief": "記録や順位は他人の画面で光るもので、自分の数値は動かない。",
-        "goal": "公社アプリで自分のステータスと入域条件を再確認する。",
-        "emotion": "resignation",
-        "delta_from_prev": "ランキングを閉じた後も、灯里の公的な成功と自分の停滞が同じ端末内で並ぶ。"
-      },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_白瀬_灯里_v1"
-          ],
-          "direction": "farther",
-          "intensity": -1,
-          "trigger": "割れた端末越しに灯里の成功通知と自分の停滞ログを連続して見る。"
-        }
-      ],
-      "time_axis": {
-        "label": "夜勤明けから帰宅直後",
-        "order": 3,
-        "is_flashback": false,
-        "is_flashforward": false,
-        "duration_hint": "minutes"
-      },
-      "page_budget": {
-        "min": 2,
-        "max": 2,
-        "preferred": 2
-      },
-      "mode": "external_social",
-      "turn_anchor": {
-        "at_panel_no": 27,
-        "type": "reveal_turn"
-      },
-      "layout_pattern_id": "l3_5_p06p07_phone_screen_contrast_grid",
-      "subtype_directive": {
-        "external_social": true,
-        "gacha_ui": false,
-        "hybrid": false
-      },
-      "render_strategy": "panel_composite",
-      "key_visual_intent": "灯里の明るい通知枠とレンのFランク表示を、同じヒビ入り画面で分断して見せる。",
-      "wardrobe_state": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "costume_id": "costume_ren_blueway_uniform_v1"
-        },
-        {
-          "character_id": "char_白瀬_灯里_v1",
-          "costume_id": "costume_akari_akane_public_broadcast_v1"
-        }
-      ],
-      "visual_motif_anchors": [
-        {
-          "motif_id": "ひび割れた画面越しの世界",
-          "intensity": "dominant"
-        }
-      ],
-      "world_rules_active": [
-        "公社アプリに表示されるステータスは、公社が発生させた数値ではなく、ダンジョン側が返した観測結果をDPC形式へ翻訳したものである。したがってDPCは表示形式、同期時刻、報奨処理を管理できるが、加算そのものは作れない。レンの未分類加算を公社が消",
-        "作中の記録名は、必ず対象と尺度を含める。『世界最速レベルアップ記録』『未踏破階層討伐記録』『最速踏破記録』『単独討伐記録更新』のように、何がどの基準で更新されたかを明示する。単独で曖昧な記録表現に逃げると、ダンジョン固有の制度感が薄れるため",
-        "国家直轄エース部隊『朱（あかね）』は、Sランクの勝者集団であると同時に、安全神話を支える広告塔でもある。彼らは制度の内側では合理的に強いが、未公開規約や外部音声型には弱い。レンが彼らを上回る場面は、努力の否定ではなく、知らされていた条件の差"
-      ],
-      "props_in_play": [
-        {
-          "prop_id": "prop_smartphone_cracked_v1",
-          "held_by": "char_桐生_レン_v1"
-        },
-        {
-          "prop_id": "prop_app_nav_overlay_screen_v1",
-          "held_by": "char_桐生_レン_v1"
-        }
-      ],
-      "theme_subtext": "同じ情報でも届く未来は等しくない",
-      "selection": {
-        "tier": 1,
-        "iterations": 1,
-        "candidate_count": 3,
-        "pairwise_score": 1,
-        "predict_hit": {
-          "v12_ep1": 0,
-          "v12_longform": 0,
-          "ensemble": 0
-        },
-        "anchor_diff": {
-          "top3_anchor_ids": [
-            "n1105in_09d5c5",
-            "n7332im_1d32d8",
-            "n3820ik_106753"
-          ],
-          "cosine_avg": 0,
-          "llm_score": 0.71
-        },
-        "template_collision": {
-          "collision_rate": 0,
-          "nearest_template": null
-        },
-        "decision_log": {
-          "selected_at": "2026-05-12T14:08:57.876Z"
-        }
-      }
-    },
-    {
-      "scene_id": "S04",
-      "scene_no": 4,
-      "prev_scene_id": "S03",
-      "next_scene_id": "S05",
-      "page_range": {
-        "start": 8,
+        "start": 7,
         "end": 10
       },
       "panel_range": {
-        "start_panel_no": 29,
-        "end_panel_no": 43
+        "start_panel_no": 31,
+        "end_panel_no": 50
       },
       "arc_position": {
         "volume": 1,
         "episode_in_volume": 1,
         "arc_phase": "introduce",
-        "arc_position_normalized": 0.025
+        "arc_position_normalized": 0.4
       },
-      "location_id": "loc_ren_apartment_v1",
       "beat_type": "setup",
       "cast": [
         {
@@ -504,120 +259,214 @@
         }
       ],
       "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "ランキングって、何を見ればすごいんだ。",
-            "uniqueness": "may_repeat",
-            "intent": "establish"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "一階限定のままじゃ、比べる場所にも立てない。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          }
-        ]
+        "key_lines": []
       },
-      "foreshadow_setup": [
-        {
-          "token": "F_cracked_phone_status_window_distorts_value",
-          "payoff_episode_hint": "this_episode"
-        },
-        {
-          "token": "F_app_status_is_dpc_translation_not_origin",
-          "payoff_episode_hint": "later_in_volume"
-        }
-      ],
+      "foreshadow_setup": [],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "記録や順位は自分とは別世界の尺度で、Fランクの自分には価値を測れない。",
-        "goal": "公社アプリで自分の入域許可と伸びない数値を確認し、現実を受け入れる。",
-        "emotion": "resignation",
-        "delta_from_prev": "店外で通知を閉じた諦めが、狭い部屋で数値を直視する諦めへ沈む。"
+        "belief": "頭の中のナビが、新宿第三1F北東通路、午前6時14分、ゴブリン頭部撃破という経験値倍化条件を開示する。",
+        "goal": "レンの生活の閉塞を底まで沈めた直後、ナビの声で隠しルールを初提示し、物語の核心を点火する。",
+        "emotion": "tension",
+        "delta_from_prev": "レンは値引き弁当を買って帰り、諦めの部屋へ沈む。"
       },
       "relationship_state_delta": [],
       "time_axis": {
-        "label": "夜勤明けの帰宅直後",
+        "label": "夜明け前",
+        "order": 3,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_ren_apartment_v1",
+      "sub_locations": [],
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
+      "mode": "dialogue",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "帰宅したレンが床で眠り込むと、女性の声が『経験値倍化条件、開示します』と告げ、午前6時14分、新宿第三1F北東通路、ゴブリン頭部撃破を指定する。",
+      "directing_intent": {
+        "kind": "normal"
+      },
+      "scene_emotion": {
+        "label": "秘密の発火",
+        "intensity": 0.78,
+        "direction": "shock"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている",
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "氷室玲二は公の場でFランクを戦力外として扱う人物である",
+          "レンは侮辱されても反論せず、値引き弁当を袋へ入れる",
+          "レンにだけ聞こえるらしい女性のナビ声が出現した",
+          "ナビは経験値倍化条件として時刻・場所・敵・撃破部位を指定した",
+          "指定条件は午前6時14分、新宿第三1F北東通路、ゴブリン頭部撃破である"
+        ],
+        "feels": "驚きと期待、罠か救いか分からない緊張",
+        "questions": [
+          "レンと灯里には過去に接点があるのか",
+          "この固定されたFランク評価を覆す方法はあるのか",
+          "氷室玲二は今後レンと直接ぶつかるのか",
+          "なぜレンにだけナビの声が聞こえるのか",
+          "ナビの条件は本当に成立するのか",
+          "この声は味方なのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "理不尽に黙るレン",
+          "レンにだけ聞こえる声"
+        ]
+      },
+      "episode_spine_links": [
+        {
+          "event_kind": "secret_or_treasure",
+          "expected_page": 9
+        }
+      ],
+      "primary_channels": [
+        "monologue",
+        "sound_effect",
+        "ui_screen"
+      ]
+    },
+    {
+      "scene_id": "S04",
+      "scene_no": 4,
+      "prev_scene_id": "S03",
+      "next_scene_id": "S05",
+      "page_range": {
+        "start": 11,
+        "end": 14
+      },
+      "panel_range": {
+        "start_panel_no": 51,
+        "end_panel_no": 70
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.6
+      },
+      "beat_type": "turn",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "頭の中のナビが、新宿第三1F北東通路、午前6時14分、ゴブリン頭部撃破という経験値倍化条件を開示する。",
+        "goal": "レンが日常から加算域へ踏み出し、ナビの情報が妄想ではなく実行可能な条件だと読者に信じさせる。",
+        "emotion": "tension",
+        "delta_from_prev": "半信半疑のレンは始発前の新宿第三へ向かう。"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "夜明け前",
         "order": 4,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
+      "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+      "sub_locations": [],
       "page_budget": {
-        "min": 3,
-        "max": 3,
-        "preferred": 3
+        "min": 4,
+        "max": 4,
+        "preferred": 4
       },
-      "mode": "introspection",
+      "mode": "dialogue",
       "turn_anchor": {
-        "at_panel_no": 39,
-        "type": "tension_turn"
+        "at_panel_no": null,
+        "type": "reveal_turn"
       },
-      "layout_pattern_id": "apartment_status_check_3p_thin_ui",
+      "layout_pattern_id": null,
       "subtype_directive": {
-        "external_social": true,
+        "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "panel_composite",
-      "key_visual_intent": "割れた端末越しのFランク表示とランキング欄を、レンの理解できない距離として並置する。",
-      "wardrobe_state": [
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "新宿第三ダンジョンの入域ゲートでFランク1F限定表示が出るが、ナビは残り秒数と北東通路への最短歩幅を淡々と示す。",
+      "directing_intent": {
+        "kind": "midpoint_turn",
+        "reveal": "公社が低ランク用に閉じた1Fの中にも、ナビが読む未公開の判定窓が存在する。",
+        "emotional_shift": "諦めから、失敗すれば死ぬかもしれない能動的な恐怖へ移る。"
+      },
+      "scene_emotion": {
+        "label": "境界を越える緊張",
+        "intensity": 0.84,
+        "direction": "rise"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている",
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "氷室玲二は公の場でFランクを戦力外として扱う人物である",
+          "レンは侮辱されても反論せず、値引き弁当を袋へ入れる",
+          "レンにだけ聞こえるらしい女性のナビ声が出現した",
+          "ナビは経験値倍化条件として時刻・場所・敵・撃破部位を指定した",
+          "指定条件は午前6時14分、新宿第三1F北東通路、ゴブリン頭部撃破である",
+          "Fランクのレンでも新宿第三ダンジョン1F限定なら入域できる",
+          "ナビは残り秒数と歩幅まで指示できる",
+          "公社ゲートの表示とナビの声は別系統の情報である"
+        ],
+        "feels": "条件が本物かもしれない興奮と、レンが死ぬかもしれない不安",
+        "questions": [
+          "レンと灯里には過去に接点があるのか",
+          "この固定されたFランク評価を覆す方法はあるのか",
+          "氷室玲二は今後レンと直接ぶつかるのか",
+          "なぜレンにだけナビの声が聞こえるのか",
+          "ナビの条件は本当に成立するのか",
+          "この声は味方なのか",
+          "公社が知らない判定窓とは何なのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "理不尽に黙るレン",
+          "レンにだけ聞こえる声",
+          "初めて踏み出すレン"
+        ]
+      },
+      "episode_spine_links": [
         {
-          "character_id": "char_桐生_レン_v1",
-          "costume_id": "costume_ren_blueway_uniform_v1"
+          "event_kind": "awakening",
+          "expected_page": 13,
+          "expected_intensity_target": 0.87
         }
       ],
-      "visual_motif_anchors": [
-        {
-          "motif_id": "ヒビ入りのスマートフォン",
-          "intensity": "dominant"
-        },
-        {
-          "motif_id": "ひび割れた画面越しの世界",
-          "intensity": "clear"
-        }
-      ],
-      "world_rules_active": [
-        "レベル・スキル・ステータス上昇は、ダンジョン内の加算域で観測された行為にのみ発生する。地上で筋力訓練、学習、模擬戦、投薬、装備試験を行っても、公社アプリの数値は一切伸びない。地上の努力は無意味ではなく、入域後に失敗しにくい身体と判断を作る準",
-        "公社アプリに表示されるステータスは、公社が発生させた数値ではなく、ダンジョン側が返した観測結果をDPC形式へ翻訳したものである。したがってDPCは表示形式、同期時刻、報奨処理を管理できるが、加算そのものは作れない。レンの未分類加算を公社が消",
-        "入域許可は適性ランク、レベル、直近事故歴、同行者保証、装備認可、保険状態の複合判定で出るが、実務上は適性ランクが最も強く働く。Fランクは1F限定や仮入域が基本で、同じ実績を出しても許可更新が遅い。レンの異常値は、記録上は上位階に届くのに手続",
-        "Fランク差別は、露骨な罵倒だけでなく、保険対象外欄、求人の推奨ランク、入域受付の後回し、素材買取の小窓、住宅審査、家族の心配として積む。加害者に悪意がなくても本人の選択肢が狭まることが重要である。レンはこの小さな停止を記録し続け、その記録癖"
-      ],
-      "props_in_play": [
-        {
-          "prop_id": "prop_smartphone_cracked_v1",
-          "held_by": "char_桐生_レン_v1"
-        }
-      ],
-      "theme_subtext": "数値は見えるのに価値が届かない",
-      "selection": {
-        "tier": 1,
-        "iterations": 1,
-        "candidate_count": 3,
-        "pairwise_score": 1,
-        "predict_hit": {
-          "v12_ep1": 0,
-          "v12_longform": 0,
-          "ensemble": 0
-        },
-        "anchor_diff": {
-          "top3_anchor_ids": [
-            "n3820ik_106753",
-            "n1105in_09d5c5",
-            "n2562ir_becda7"
-          ],
-          "cosine_avg": 0,
-          "llm_score": 0.68
-        },
-        "template_collision": {
-          "collision_rate": 0,
-          "nearest_template": null
-        },
-        "decision_log": {
-          "selected_at": "2026-05-12T14:13:16.681Z"
-        }
-      }
+      "primary_channels": [
+        "establishing_shot",
+        "ui_screen",
+        "silence_panel"
+      ]
     },
     {
       "scene_id": "S05",
@@ -625,929 +474,255 @@
       "prev_scene_id": "S04",
       "next_scene_id": "S06",
       "page_range": {
-        "start": 11,
-        "end": 13
+        "start": 15,
+        "end": 19
       },
       "panel_range": {
-        "start_panel_no": 44,
-        "end_panel_no": 55
+        "start_panel_no": 71,
+        "end_panel_no": 95
       },
       "arc_position": {
         "volume": 1,
         "episode_in_volume": 1,
-        "arc_phase": "rising",
-        "arc_position_normalized": 0.032
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.8
       },
-      "location_id": "loc_ren_apartment_v1",
-      "beat_type": "reveal",
+      "beat_type": "cliff",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
           "presence": "in_person"
-        },
-        {
-          "character_id": "char_獅童_響_v1",
-          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "経験値倍化条件、開示します。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "通知じゃ、ない……？",
-            "uniqueness": "may_repeat",
-            "intent": "hook"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "東都第三、一階北東通路。午前六時十四分。小型魔物三体。頭部撃破時、二・四倍。",
-            "uniqueness": "may_repeat",
-            "intent": "reveal"
-          }
-        ]
+        "key_lines": []
       },
-      "foreshadow_setup": [
-        {
-          "token": "F_navi_xp_multiplier_condition_first_disclosure",
-          "payoff_episode_hint": "this_episode"
-        },
-        {
-          "token": "F_navi_precise_0614_ne_corridor_internal_clock",
-          "payoff_episode_hint": "later_in_volume"
-        },
-        {
-          "token": "F_external_voice_not_phone_app",
-          "payoff_episode_hint": "later_in_volume"
-        }
-      ],
+      "foreshadow_setup": [],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "伸びない数値を眺めるだけだったが、声の条件が具体的すぎて無視しきれない。",
-        "goal": "端末通知ではない声の正体と、提示された条件の意味を確かめる。",
+        "belief": "頭の中のナビが、新宿第三1F北東通路、午前6時14分、ゴブリン頭部撃破という経験値倍化条件を開示する。",
+        "goal": "指定条件を実戦で成立させ、Fランクのレンが初めて世界の数値を動かす反撃の快感を作る。",
         "emotion": "tension",
-        "delta_from_prev": "現実を受け入れる諦めから、説明不能な情報への警戒と好奇心へ移る。"
+        "delta_from_prev": "レンは指定通路へ到達し、予告時刻の直前に息を止める。"
       },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_獅童_響_v1"
-          ],
-          "direction": "tense",
-          "intensity": 1,
-          "trigger": "頭内の声が、端末にも公社アプリにも出ない具体条件を告げる。"
-        }
-      ],
+      "relationship_state_delta": [],
       "time_axis": {
-        "label": "翌朝、仮眠明け",
+        "label": "朝",
         "order": 5,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
+      "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
+      "sub_locations": [],
       "page_budget": {
-        "min": 2,
-        "max": 3,
-        "preferred": 3
+        "min": 5,
+        "max": 5,
+        "preferred": 5
       },
-      "mode": "introspection",
+      "mode": "action",
       "turn_anchor": {
-        "at_panel_no": 51,
-        "type": "reveal_turn"
+        "at_panel_no": null,
+        "type": "none"
       },
-      "layout_pattern_id": "l3_5_reveal_phone_to_white_gap",
+      "layout_pattern_id": null,
       "subtype_directive": {
         "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "panel_composite",
-      "key_visual_intent": "割れた端末に通知がないまま、レンの片目だけに細い青光が差す。",
-      "wardrobe_state": [
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "午前6時14分、予告通り現れたゴブリンにレンが恐怖で崩れかけるが、ナビの半歩指示に従い頭部へ鉄パイプを叩き込む。",
+      "directing_intent": {
+        "kind": "cliffhanger_setup",
+        "build_up": "成功直後の静寂で、勝利より先に公社アプリの異常表示を見せ、次の問いへ引く準備をする。"
+      },
+      "scene_emotion": {
+        "label": "初成功の爆発",
+        "intensity": 0.92,
+        "direction": "release"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている",
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "氷室玲二は公の場でFランクを戦力外として扱う人物である",
+          "レンは侮辱されても反論せず、値引き弁当を袋へ入れる",
+          "レンにだけ聞こえるらしい女性のナビ声が出現した",
+          "ナビは経験値倍化条件として時刻・場所・敵・撃破部位を指定した",
+          "指定条件は午前6時14分、新宿第三1F北東通路、ゴブリン頭部撃破である",
+          "Fランクのレンでも新宿第三ダンジョン1F限定なら入域できる",
+          "ナビは残り秒数と歩幅まで指示できる",
+          "公社ゲートの表示とナビの声は別系統の情報である",
+          "ナビの予告通り新宿第三1F北東通路にゴブリンが出現した",
+          "レンは指定された頭部撃破を実行して初成功した",
+          "ナビの指示に従う間だけレンの行動は成立点へ届く"
+        ],
+        "feels": "強い興奮と解放感、同時に異常が記録される不穏",
+        "questions": [
+          "レンと灯里には過去に接点があるのか",
+          "氷室玲二は今後レンと直接ぶつかるのか",
+          "なぜレンにだけナビの声が聞こえるのか",
+          "この声は味方なのか",
+          "公社が知らない判定窓とは何なのか",
+          "この成功は公社に検知されるのか",
+          "レンは次も同じことができるのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "初めて踏み出すレン",
+          "レンにだけ聞こえる声",
+          "Fランクのまま反撃するレン"
+        ]
+      },
+      "episode_spine_links": [
         {
-          "character_id": "char_桐生_レン_v1",
-          "costume_id": "costume_ren_blueway_uniform_v1"
-        }
-      ],
-      "visual_motif_anchors": [
-        {
-          "motif_id": "ナビ青光",
-          "intensity": "clear"
-        }
-      ],
-      "world_rules_active": [
-        "外部音声型は、契約者の内側から自然発生した能力ではない。大ナビ系統の観測端末が契約者へ接続し、条件、時刻、座標、手順、例外規約を音声として翻訳している状態である。",
-        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。",
-        "隠しルールは攻略の裏技ではなく、ダンジョン側の観測規約に含まれる未公開項目である。",
-        "画面演出では、世界ルールを長い説明図で語らない。白い余白、細い座標線、公社アプリの事務通知、入域ゲートの表示、ナビの短い縦書き吹き出し、レンの半歩を重ねて見せる。"
-      ],
-      "props_in_play": [
-        {
-          "prop_id": "prop_smartphone_cracked_v1",
-          "held_by": "char_桐生_レン_v1"
+          "event_kind": "payback",
+          "expected_page": 18,
+          "expected_intensity_target": 0.93
         },
         {
-          "prop_id": "prop_app_nav_overlay_screen_v1",
-          "held_by": "char_桐生_レン_v1"
+          "event_kind": "title_anchor",
+          "expected_page": 19
         }
       ],
-      "theme_subtext": "壊れた窓の外ではなく内側から声が来る",
-      "selection": {
-        "tier": 1,
-        "iterations": 1,
-        "candidate_count": 3,
-        "pairwise_score": 1,
-        "predict_hit": {
-          "v12_ep1": 0,
-          "v12_longform": 0,
-          "ensemble": 0
-        },
-        "anchor_diff": {
-          "top3_anchor_ids": [
-            "n1105in_09d5c5",
-            "n2562ir_becda7",
-            "n7332im_1d32d8"
-          ],
-          "cosine_avg": 0,
-          "llm_score": 0.74
-        },
-        "template_collision": {
-          "collision_rate": 0,
-          "nearest_template": null
-        },
-        "decision_log": {
-          "selected_at": "2026-05-12T14:17:16.680Z"
-        }
-      }
+      "primary_channels": [
+        "action_sequence",
+        "sound_effect",
+        "reaction_shot"
+      ]
     },
     {
       "scene_id": "S06",
       "scene_no": 6,
       "prev_scene_id": "S05",
-      "next_scene_id": "S07",
+      "next_scene_id": null,
       "page_range": {
-        "start": 14,
-        "end": 14
+        "start": 20,
+        "end": 22
       },
       "panel_range": {
-        "start_panel_no": 56,
-        "end_panel_no": 58
+        "start_panel_no": 96,
+        "end_panel_no": 110
       },
       "arc_position": {
         "volume": 1,
         "episode_in_volume": 1,
-        "arc_phase": "rising",
-        "arc_position_normalized": 0.038
+        "arc_phase": "introduce",
+        "arc_position_normalized": 1
       },
-      "location_id": "loc_bluewhite_mart_exterior_night_v1",
-      "sub_locations": [
-        "loc_shinjuku_night_skyline_v1",
-        "loc_shinjuku_third_dungeon_gate_v1",
-        "loc_shinjuku_third_1f_northeast_corridor_v1"
-      ],
-      "beat_type": "turn",
+      "beat_type": "cliff",
       "cast": [
         {
           "character_id": "char_桐生_レン_v1",
           "presence": "in_person"
-        },
-        {
-          "character_id": "char_獅童_響_v1",
-          "presence": "voice_off"
         }
       ],
       "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "新宿第三、一階北東通路。午前六時十四分。",
-            "uniqueness": "may_repeat",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "……数字が合うなら、行くだけ行く。",
-            "uniqueness": "scene_exclusive",
-            "intent": "hook"
-          }
-        ]
+        "key_lines": []
       },
-      "foreshadow_setup": [
-        {
-          "token": "F_navi_precise_time_coordinate_0614_ne_corridor",
-          "payoff_episode_hint": "later_in_volume"
-        },
-        {
-          "token": "F_ren_tests_information_before_power",
-          "payoff_episode_hint": "this_episode"
-        }
-      ],
+      "foreshadow_setup": [],
       "foreshadow_payoff": [],
       "protagonist_arc_state": {
-        "belief": "声は幻聴かもしれないが、時刻と座標だけは検証できる。",
-        "goal": "午前六時十四分までに新宿第三一階北東通路へ行く。",
+        "belief": "レンは震えながら条件を踏み、初めて世界の数値を動かす。ナビの『明日の予定、組みますか？』に『頼む』と返す。",
+        "goal": "初成功を数値で確定し、レンとナビの契約めいた応答で次話の連続異常値へ読者を引く。",
         "emotion": "tension",
-        "delta_from_prev": "無視する側から、外れても失うものが少ない検証へ一歩寄る。"
+        "delta_from_prev": "公社アプリにあり得ない未分類加算が同期される。"
       },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_獅童_響_v1"
-          ],
-          "direction": "trust+",
-          "intensity": 1,
-          "trigger": "ナビの指定があまりに具体的で、レンが行動で確かめる気になる。"
-        }
-      ],
+      "relationship_state_delta": [],
       "time_axis": {
-        "label": "夜勤明けから早朝",
+        "label": "朝",
         "order": 6,
         "is_flashback": false,
         "is_flashforward": false,
         "duration_hint": "minutes"
       },
-      "page_budget": {
-        "min": 1,
-        "max": 1,
-        "preferred": 1
-      },
-      "mode": "transition_montage",
-      "turn_anchor": {
-        "at_panel_no": 58,
-        "type": "tension_turn"
-      },
-      "layout_pattern_id": "three_panel_departure_to_gate",
-      "subtype_directive": {
-        "external_social": false,
-        "gacha_ui": false,
-        "hybrid": false
-      },
-      "render_strategy": "panel_composite",
-      "key_visual_intent": "青白堂の外灯から新宿第三ゲートへ、黒フードの小さな背中を一直線に運ぶ。",
-      "wardrobe_state": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "costume_id": "costume_ren_blueway_uniform_v1"
-        }
-      ],
-      "visual_motif_anchors": [],
-      "world_rules_active": [
-        "地上の日常では、ダンジョン由来の数値加算は起きない。ナビが睡眠、食事、夜勤シフト、装備購入、支出配分を最適化しても、それは入域成功率を上げる準備であってレベル上昇ではない。この線を守ることで、生活改善の便利さと、加算域へ入る危険を両立させる",
-        "入域許可は適性ランク、レベル、直近事故歴、同行者保証、装備認可、保険状態の複合判定で出るが、実務上は適性ランクが最も強く働く。Fランクは1F限定や仮入域が基本で、同じ実績を出しても許可更新が遅い。レンの異常値は、記録上は上位階に届くのに手続",
-        "隠しルールは攻略の裏技ではなく、ダンジョン側の観測規約に含まれる未公開項目である。公社内では都市伝説扱いだが、Sランクの一部と内部監査室の一部は、未分類加算の異常値として存在を黙認している。作劇上は必ず事前に水滴、時刻、光の明滅、心拍表示な"
-      ],
-      "props_in_play": [],
-      "theme_subtext": "底辺の通勤路が検証の入口に変わる",
-      "selection": {
-        "tier": 1,
-        "iterations": 1,
-        "candidate_count": 3,
-        "pairwise_score": 1,
-        "predict_hit": {
-          "v12_ep1": 0,
-          "v12_longform": 0,
-          "ensemble": 0
-        },
-        "anchor_diff": {
-          "top3_anchor_ids": [
-            "n1105in_09d5c5",
-            "n7332im_1d32d8",
-            "n3820ik_106753"
-          ],
-          "cosine_avg": 0,
-          "llm_score": 0.64
-        },
-        "template_collision": {
-          "collision_rate": 0,
-          "nearest_template": null
-        },
-        "decision_log": {
-          "selected_at": "2026-05-12T14:21:16.148Z"
-        }
-      }
-    },
-    {
-      "scene_id": "S07",
-      "scene_no": 7,
-      "prev_scene_id": "S06",
-      "next_scene_id": "S08",
-      "page_range": {
-        "start": 15,
-        "end": 16
-      },
-      "panel_range": {
-        "start_panel_no": 59,
-        "end_panel_no": 68
-      },
-      "arc_position": {
-        "volume": 1,
-        "episode_in_volume": 1,
-        "arc_phase": "rising",
-        "arc_position_normalized": 0.045
-      },
-      "location_id": "loc_shinjuku_third_dungeon_gate_v1",
-      "sub_locations": [
-        "loc_shinjuku_third_1f_northeast_corridor_v1"
-      ],
-      "beat_type": "reveal",
-      "cast": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "presence": "in_person"
-        },
-        {
-          "character_id": "char_獅童_響_v1",
-          "presence": "voice_off"
-        }
-      ],
-      "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "北東通路、右壁から二歩。六時十四分まで待機してください。",
-            "uniqueness": "may_repeat",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "ここまで細かいなら、外れた方がまだ普通だ。",
-            "uniqueness": "scene_exclusive",
-            "intent": "hook"
-          }
-        ]
-      },
-      "foreshadow_setup": [
-        {
-          "token": "F_internal_clock_spawn_window_0614",
-          "payoff_episode_hint": "later_in_volume"
-        },
-        {
-          "token": "F_navi_body_position_two_steps_from_wall",
-          "payoff_episode_hint": "this_episode"
-        }
-      ],
-      "foreshadow_payoff": [],
-      "protagonist_arc_state": {
-        "belief": "倍率の価値は分からないが、声の精度だけは異常だと感じ始める。",
-        "goal": "指定位置で時刻を待ち、魔物湧きが本当に起きるか確認する。",
-        "emotion": "fear",
-        "delta_from_prev": "ゲートを通る不安から、座標と秒単位の正確さへの恐怖へ焦点が移る。"
-      },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_獅童_響_v1"
-          ],
-          "direction": "tense",
-          "intensity": 1,
-          "trigger": "ナビの指示が具体的すぎ、レンが便利さより不気味さを先に受け取る。"
-        }
-      ],
-      "time_axis": {
-        "label": "午前6時13分、1F北東通路",
-        "order": 7,
-        "is_flashback": false,
-        "is_flashforward": false,
-        "duration_hint": "moments"
-      },
-      "page_budget": {
-        "min": 2,
-        "max": 2,
-        "preferred": 2
-      },
-      "mode": "introspection",
-      "turn_anchor": {
-        "at_panel_no": 66,
-        "type": "reveal_turn"
-      },
-      "layout_pattern_id": "corridor_coordinate_countdown_10panel",
-      "subtype_directive": {
-        "external_social": false,
-        "gacha_ui": false,
-        "hybrid": false
-      },
-      "render_strategy": "panel_composite",
-      "key_visual_intent": "床のひびに沿う薄青の短線とレンの足先を重ね、声が現実の座標へ食い込む瞬間を見せる。",
-      "wardrobe_state": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "costume_id": "costume_ren_dungeon_explorer_v1"
-        }
-      ],
-      "visual_motif_anchors": [],
-      "world_rules_active": [
-        "隠しルールは攻略の裏技ではなく、ダンジョン側の観測規約に含まれる未公開項目である。公社内では都市伝説扱いだが、Sランクの一部と内部監査室の一部は、未分類加算の異常値として存在を黙認している。作劇上は必ず事前に水滴、時刻、光の明滅、心拍表示な",
-        "【ナビ最適解（オプティマル・ナビゲート）】の補正は、ナビが事前に開示した手順にレンが従っている瞬間だけ成立する。『左に半歩』なら半歩であり、足りない移動や余計な踏み込みでは失効する。補正中の出力が高く見えても、素の戦闘力が上がったわけではな",
-        "ナビの失敗条件は、誤読、未開示、過信の三つに分ける。誤読はレンが秒数や方向を外すこと、未開示はナビが規約上言えないこと、過信はレンが指示外の行動まで補正されると誤解することである。失敗は必ず痛みを伴わせ、軽ければ素材破損、重ければ負傷や仲間",
-        "公社アプリに表示されるステータスは、公社が発生させた数値ではなく、ダンジョン側が返した観測結果をDPC形式へ翻訳したものである。したがってDPCは表示形式、同期時刻、報奨処理を管理できるが、加算そのものは作れない。レンの未分類加算を公社が消"
-      ],
-      "props_in_play": [],
-      "theme_subtext": "正確すぎる案内が日常を割る",
-      "selection": {
-        "tier": 1,
-        "iterations": 1,
-        "candidate_count": 3,
-        "pairwise_score": 1,
-        "predict_hit": {
-          "v12_ep1": 0,
-          "v12_longform": 0,
-          "ensemble": 0
-        },
-        "anchor_diff": {
-          "top3_anchor_ids": [
-            "n1105in_09d5c5",
-            "n7332im_1d32d8",
-            "n3820ik_106753"
-          ],
-          "cosine_avg": 0,
-          "llm_score": 0.72
-        },
-        "template_collision": {
-          "collision_rate": 0,
-          "nearest_template": null
-        },
-        "decision_log": {
-          "selected_at": "2026-05-12T14:24:48.968Z"
-        }
-      }
-    },
-    {
-      "scene_id": "S08",
-      "scene_no": 8,
-      "prev_scene_id": "S07",
-      "next_scene_id": "S09",
-      "page_range": {
-        "start": 17,
-        "end": 19
-      },
-      "panel_range": {
-        "start_panel_no": 69,
-        "end_panel_no": 83
-      },
-      "arc_position": {
-        "volume": 1,
-        "episode_in_volume": 1,
-        "arc_phase": "climax",
-        "arc_position_normalized": 0.052
-      },
       "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
-      "beat_type": "reveal",
-      "cast": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "presence": "in_person"
-        },
-        {
-          "character_id": "char_獅童_響_v1",
-          "presence": "voice_off"
-        }
-      ],
-      "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "頭部撃破、三件成立。",
-            "uniqueness": "may_repeat",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "経験値倍率、二・四倍で記録されます。",
-            "uniqueness": "may_repeat",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "俺の数字が、こんな動き方するのか。",
-            "uniqueness": "scene_exclusive",
-            "intent": "reveal"
-          }
-        ]
-      },
-      "foreshadow_setup": [
-        {
-          "token": "F_unclassified_gain_public_record_trace",
-          "payoff_episode_hint": "next_episode"
-        },
-        {
-          "token": "F_navi_precise_0614_northeast_spawn_window",
-          "payoff_episode_hint": "later_in_volume"
-        }
-      ],
-      "foreshadow_payoff": [
-        "F_xp_head_destroy_multiplier_first_confirmation"
-      ],
-      "protagonist_arc_state": {
-        "belief": "倍率の価値はまだ測れないが、自分の常識では説明できない加算が起きたと理解する。",
-        "goal": "経験値欄の跳ねが表示ミスなのか、成立した判定なのかを見極める。",
-        "emotion": "elation",
-        "delta_from_prev": "戦闘の恐怖より、倒した後に動いた数字の異常さがレンの理解を追い越す。"
-      },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_獅童_響_v1"
-          ],
-          "direction": "trust+",
-          "intensity": 1,
-          "trigger": "ナビの手順通りに頭部撃破した直後、公社アプリ側の経験値が跳ねる。"
-        }
-      ],
-      "time_axis": {
-        "label": "午前6時14分直後",
-        "order": 8,
-        "is_flashback": false,
-        "is_flashforward": false,
-        "duration_hint": "minutes"
-      },
+      "sub_locations": [],
       "page_budget": {
         "min": 3,
         "max": 3,
         "preferred": 3
       },
-      "mode": "external_social",
-      "turn_anchor": {
-        "at_panel_no": 80,
-        "type": "reveal_turn"
-      },
-      "layout_pattern_id": "climax_ui_payoff_staggered_numeric_tags",
-      "subtype_directive": {
-        "external_social": true,
-        "gacha_ui": true,
-        "hybrid": true
-      },
-      "render_strategy": "panel_composite",
-      "key_visual_intent": "割れた端末越しの空枠が三段に立ち、レンの黒い袖に消失粒子が白く付く。",
-      "wardrobe_state": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "costume_id": "costume_ren_dungeon_explorer_v1"
-        }
-      ],
-      "visual_motif_anchors": [],
-      "world_rules_active": [
-        "公社アプリに表示されるステータスは、公社が発生させた数値ではなく、ダンジョン側が返した観測結果をDPC形式へ翻訳したものである。したがってDPCは表示形式、同期時刻、報奨処理を管理できるが、加算そのものは作れない。レンの未分類加算を公社が消",
-        "記録更新は探索者の市場価値と社会信用を一夜で変えるが、同時に追跡の首輪にもなる。世界最速レベルアップ記録、未踏破階層討伐記録、最速踏破記録、単独討伐記録更新はDPC基盤に保存され、階層、時刻、入域者数、素材買取時刻と結びつく。レンは匿名ID",
-        "本作の力の根幹は『強い肉体を得る』ではなく『ダンジョンが正解と認める行為を、正しい条件で成立させる』ことにある。読者に返す報酬は、底辺Fランクのレンが突然万能化する快感ではない。公社もSランクも見落としていた条件をナビだけが開示し、レンが震"
-      ],
-      "props_in_play": [
-        {
-          "prop_id": "prop_smartphone_cracked_v1",
-          "held_by": "char_桐生_レン_v1"
-        },
-        {
-          "prop_id": "prop_iron_pipe_v1",
-          "held_by": "char_桐生_レン_v1"
-        }
-      ],
-      "theme_subtext": "壊れた画面にだけ勝利が映る",
-      "selection": {
-        "tier": 1,
-        "iterations": 1,
-        "candidate_count": 3,
-        "pairwise_score": 1,
-        "predict_hit": {
-          "v12_ep1": 0,
-          "v12_longform": 0,
-          "ensemble": 0
-        },
-        "anchor_diff": {
-          "top3_anchor_ids": [
-            "n1105in_09d5c5",
-            "n2562ir_becda7",
-            "n7332im_1d32d8"
-          ],
-          "cosine_avg": 0,
-          "llm_score": 0.78
-        },
-        "template_collision": {
-          "collision_rate": 0,
-          "nearest_template": null
-        },
-        "decision_log": {
-          "selected_at": "2026-05-12T14:29:03.299Z"
-        }
-      }
-    },
-    {
-      "scene_id": "S09",
-      "scene_no": 9,
-      "prev_scene_id": "S08",
-      "next_scene_id": "S10",
-      "page_range": {
-        "start": 20,
-        "end": 21
-      },
-      "panel_range": {
-        "start_panel_no": 84,
-        "end_panel_no": 91
-      },
-      "arc_position": {
-        "volume": 1,
-        "episode_in_volume": 1,
-        "arc_phase": "climax",
-        "arc_position_normalized": 0.058
-      },
-      "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
-      "beat_type": "aftermath",
-      "cast": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "presence": "in_person"
-        },
-        {
-          "character_id": "char_獅童_響_v1",
-          "presence": "voice_off"
-        }
-      ],
-      "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "加算結果を確認してください。",
-            "uniqueness": "may_repeat",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "喜んでいい数字なのか、わからない。",
-            "uniqueness": "scene_exclusive",
-            "intent": "callback"
-          }
-        ]
-      },
-      "foreshadow_setup": [
-        {
-          "token": "F_silence_after_unclassified_gain",
-          "payoff_episode_hint": "later_in_volume"
-        },
-        {
-          "token": "F_cracked_screen_unclassified_warning",
-          "payoff_episode_hint": "next_episode"
-        }
-      ],
-      "foreshadow_payoff": [
-        "F_first_navi_condition_accuracy",
-        "F_headshot_24_multiplier"
-      ],
-      "protagonist_arc_state": {
-        "belief": "得た数字が異常なのは分かるが、記録級なのか警告対象なのか判断する物差しがない。",
-        "goal": "加算ログと通知の意味を読み取り、自分が危険なものに触れたのか確かめる。",
-        "emotion": "fear",
-        "delta_from_prev": "成功の興奮が、数字の意味を知らない怖さへ反転する。"
-      },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_獅童_響_v1"
-          ],
-          "direction": "tense",
-          "intensity": 1,
-          "trigger": "ナビは結果確認だけを促し、レンが知りたい社会的な危険度までは答えない。"
-        }
-      ],
-      "time_axis": {
-        "label": "討伐直後の数十秒",
-        "order": 9,
-        "is_flashback": false,
-        "is_flashforward": false,
-        "duration_hint": "moments"
-      },
-      "page_budget": {
-        "min": 2,
-        "max": 2,
-        "preferred": 2
-      },
       "mode": "silence",
       "turn_anchor": {
-        "at_panel_no": 90,
-        "type": "tension_turn"
+        "at_panel_no": null,
+        "type": "none"
       },
-      "layout_pattern_id": "white_silence_between_ui_notifications_p20_21",
+      "layout_pattern_id": null,
       "subtype_directive": {
-        "external_social": true,
+        "external_social": false,
         "gacha_ui": false,
         "hybrid": false
       },
-      "render_strategy": "panel_composite",
-      "key_visual_intent": "通知の密度が高い端末アップの直後、白い無音コマにレンの親指だけを止める。",
-      "wardrobe_state": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "costume_id": "costume_ren_dungeon_explorer_v1"
-        }
-      ],
-      "visual_motif_anchors": [
-        {
-          "motif_id": "ナビ青光",
-          "intensity": "subtle"
-        }
-      ],
-      "world_rules_active": [
-        "ナビのような外部音声型は、DPCの分類体系に存在しない。通常窓口へ報告した瞬間、本人の入域履歴、同行者証言、公社アプリのログ、素材買取時刻、端末同期差分が機密扱いへ移行する。公社は『保護』と呼ぶが、実務上は本人の自由を狭める拘束であり、レン",
-        "DPC内部監査室は、レンを最初から英雄候補として見ない。彼らにとって未分類加算の連続は、不正、外部干渉、鑑定石異常、外部音声型の疑いであり、記録基盤の信用を守るための調査対象である。戦闘で追うのではなく、書類、ログ、例外審査、素材買取の差分",
-        "ナビの開示には一日単位の上限がある。戦闘条件、採取条件、生活最適化、警告、感情に近い発話のいずれも残量を削る。序盤は便利な制限として、終盤は人格を持つ相棒が話すほど削れていく痛みとして扱う。開示量を使い切ると沈黙モードに入り、レンは本当にF"
-      ],
-      "props_in_play": [
-        {
-          "prop_id": "prop_smartphone_cracked_v1",
-          "held_by": "char_桐生_レン_v1"
-        },
-        {
-          "prop_id": "prop_dpc_rank_id_f_v1",
-          "held_by": "char_桐生_レン_v1"
-        }
-      ],
-      "theme_subtext": "勝利の数字は、同時に追跡される痕跡になる。",
-      "selection": {
-        "tier": 1,
-        "iterations": 1,
-        "candidate_count": 3,
-        "pairwise_score": 1,
-        "predict_hit": {
-          "v12_ep1": 0,
-          "v12_longform": 0,
-          "ensemble": 0
-        },
-        "anchor_diff": {
-          "top3_anchor_ids": [
-            "n1105in_09d5c5",
-            "n2562ir_becda7",
-            "n7332im_1d32d8"
-          ],
-          "cosine_avg": 0,
-          "llm_score": 0.72
-        },
-        "template_collision": {
-          "collision_rate": 0,
-          "nearest_template": null
-        },
-        "decision_log": {
-          "selected_at": "2026-05-12T14:33:14.361Z"
-        }
-      }
-    },
-    {
-      "scene_id": "S10",
-      "scene_no": 10,
-      "prev_scene_id": "S09",
-      "next_scene_id": null,
-      "page_range": {
-        "start": 22,
-        "end": 22
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "朝の北東通路の奥が黒く開き、レンの端末に未分類加算の光だけが残る。",
+      "directing_intent": {
+        "kind": "final_pull",
+        "pull_visual": "朝の北東通路の奥が黒く開き、レンの端末に未分類加算の光だけが残る。",
+        "next_episode_hook": "次話ではナビが組んだ予定に従い、勝利とDPC側の監視が同時に始まる。"
       },
-      "panel_range": {
-        "start_panel_no": 92,
-        "end_panel_no": 93
+      "scene_emotion": {
+        "label": "契約の余韻",
+        "intensity": 0.88,
+        "direction": "hold"
       },
-      "arc_position": {
-        "volume": 1,
-        "episode_in_volume": 1,
-        "arc_phase": "climax",
-        "arc_position_normalized": 0.062
-      },
-      "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
-      "sub_locations": [
-        "loc_dpc_monitor_room_v1"
-      ],
-      "beat_type": "aftermath",
-      "cast": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "presence": "in_person"
-        },
-        {
-          "character_id": "char_獅童_響_v1",
-          "presence": "voice_off"
-        }
-      ],
-      "dialogue_plan": {
-        "key_lines": [
-          {
-            "speaker": "char_獅童_響_v1",
-            "text": "経験値倍率、二・四倍です。",
-            "uniqueness": "may_repeat",
-            "intent": "reveal"
-          },
-          {
-            "speaker": "char_桐生_レン_v1",
-            "text": "強くなった感じより、先に怖い。",
-            "uniqueness": "scene_exclusive",
-            "intent": "callback"
-          }
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている",
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "氷室玲二は公の場でFランクを戦力外として扱う人物である",
+          "レンは侮辱されても反論せず、値引き弁当を袋へ入れる",
+          "レンにだけ聞こえるらしい女性のナビ声が出現した",
+          "ナビは経験値倍化条件として時刻・場所・敵・撃破部位を指定した",
+          "指定条件は午前6時14分、新宿第三1F北東通路、ゴブリン頭部撃破である",
+          "Fランクのレンでも新宿第三ダンジョン1F限定なら入域できる",
+          "ナビは残り秒数と歩幅まで指示できる",
+          "公社ゲートの表示とナビの声は別系統の情報である",
+          "ナビの予告通り新宿第三1F北東通路にゴブリンが出現した",
+          "レンは指定された頭部撃破を実行して初成功した",
+          "ナビの指示に従う間だけレンの行動は成立点へ届く",
+          "公社アプリはレンの通常ではあり得ない経験値加算を表示した",
+          "レンはナビの翌日予定提案に『頼む』と返し、継続を選んだ"
+        ],
+        "feels": "勝利の余韻と、次に何が開くのかを追いたい期待",
+        "questions": [
+          "レンと灯里には過去に接点があるのか",
+          "氷室玲二は今後レンと直接ぶつかるのか",
+          "なぜレンにだけナビの声が聞こえるのか",
+          "この声は味方なのか",
+          "公社が知らない判定窓とは何なのか",
+          "この成功は公社に検知されるのか",
+          "明日の予定ではどんな隠しルールが開くのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "Fランクのまま反撃するレン",
+          "レンにだけ聞こえる声",
+          "レンとナビの契約めいた関係"
         ]
       },
-      "foreshadow_setup": [
-        {
-          "token": "F_navi_multiplier_not_body_power_but_condition",
-          "payoff_episode_hint": "next_episode"
-        },
-        {
-          "token": "F_navi_internal_clock_precision_0614_northeast_corridor",
-          "payoff_episode_hint": "later_in_volume"
-        }
-      ],
-      "foreshadow_payoff": [],
-      "protagonist_arc_state": {
-        "belief": "成功は力の覚醒ではなく、条件を踏んだ結果かもしれない。",
-        "goal": "倍率が偶然ではなく条件成立だったのかを、次の検証材料として覚えておく。",
-        "emotion": "tension",
-        "delta_from_prev": "喜びに寄りかけた感情が、素の強さではないという理解で冷える。"
-      },
-      "relationship_state_delta": [
-        {
-          "pair": [
-            "char_桐生_レン_v1",
-            "char_獅童_響_v1"
-          ],
-          "direction": "trust+",
-          "intensity": 1,
-          "trigger": "ナビが倍率を事務的に確定し、レンが結果を手順として受け止めた。"
-        }
-      ],
-      "time_axis": {
-        "label": "午前6時14分直後",
-        "order": 10,
-        "is_flashback": false,
-        "is_flashforward": false,
-        "duration_hint": "moments"
-      },
-      "page_budget": {
-        "min": 1,
-        "max": 1,
-        "preferred": 1
-      },
-      "mode": "silence",
-      "turn_anchor": {
-        "at_panel_no": 93,
-        "type": "tension_turn"
-      },
-      "layout_pattern_id": "silent_white_after_value_jump",
-      "subtype_directive": {
-        "external_social": false,
-        "gacha_ui": true,
-        "hybrid": false
-      },
-      "render_strategy": "panel_composite",
-      "key_visual_intent": "白い通路に膝をつくレンの目元だけを残し、数値の跳ねを小さな空枠で遅れて見せる。",
-      "wardrobe_state": [
-        {
-          "character_id": "char_桐生_レン_v1",
-          "costume_id": "costume_ren_dungeon_explorer_v1"
-        }
-      ],
-      "visual_motif_anchors": [],
-      "world_rules_active": [
-        "【ナビ最適解（オプティマル・ナビゲート）】の補正は、ナビが事前に開示した手順にレンが従っている瞬間だけ成立する。『左に半歩』なら半歩であり、足りない移動や余計な踏み込みでは失効する。補正中の出力が高く見えても、素の戦闘力が上がったわけではな",
-        "本作の力の根幹は『強い肉体を得る』ではなく『ダンジョンが正解と認める行為を、正しい条件で成立させる』ことにある。読者に返す報酬は、底辺Fランクのレンが突然万能化する快感ではない。公社もSランクも見落としていた条件をナビだけが開示し、レンが震",
-        "隠しルールは攻略の裏技ではなく、ダンジョン側の観測規約に含まれる未公開項目である。公社内では都市伝説扱いだが、Sランクの一部と内部監査室の一部は、未分類加算の異常値として存在を黙認している。作劇上は必ず事前に水滴、時刻、光の明滅、心拍表示な"
-      ],
-      "props_in_play": [],
-      "theme_subtext": "勝ったのに自分の強さとは言えない",
-      "selection": {
-        "tier": 1,
-        "iterations": 1,
-        "candidate_count": 3,
-        "pairwise_score": 1,
-        "predict_hit": {
-          "v12_ep1": 0,
-          "v12_longform": 0,
-          "ensemble": 0
-        },
-        "anchor_diff": {
-          "top3_anchor_ids": [
-            "n1105in_09d5c5",
-            "n3820ik_106753",
-            "n2562ir_becda7"
-          ],
-          "cosine_avg": 0,
-          "llm_score": 0.74
-        },
-        "template_collision": {
-          "collision_rate": 0,
-          "nearest_template": null
-        },
-        "decision_log": {
-          "selected_at": "2026-05-12T14:37:05.244Z"
-        }
-      }
+      "primary_channels": [
+        "ui_screen",
+        "dialogue",
+        "silence_panel"
+      ]
     }
   ],
-  "generated_at": "2026-05-12T14:37:05.244Z",
+  "generated_at": "2026-05-27T02:25:27.928Z",
   "source": {
     "brief_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep01/_brief.v2.md",
-    "shotlist_path": "",
+    "shotlist_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep01/shotlist.json",
     "bible_snapshot_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/bible/snapshot.json",
-    "volume_plot_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/volumes/v01/plot.json"
-  }
+    "volume_plot_path": "volumes/v01/plot.json"
+  },
+  "_note": "Force rebootstrap from L2b SceneSkeleton. dialogue_plan / foreshadow / relationship_delta は空。L03_5 --mode generate --live で肉付け推奨。"
 }

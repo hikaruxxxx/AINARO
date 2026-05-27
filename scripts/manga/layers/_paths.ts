@@ -176,6 +176,14 @@ export function volumePlotPath(slug: string, vol: number): string {
   return path.join(volumeDir(slug, vol), "plot.json");
 }
 
+/**
+ * SeriesPlan (本作レベルの長期計画) の保存パス。
+ * L2b --phase=series で 1 回だけ生成し、各巻の volume-plot 生成時に context として読まれる。
+ */
+export function seriesPlanPath(slug: string): string {
+  return path.join(workDir(slug), "series_plan.json");
+}
+
 /** Phase C-3: volume plot 採用記録 (1 巻 = 1 chosen) */
 export function adoptedVolumePlotPath(slug: string, vol: number): string {
   return path.join(volumeDir(slug, vol), "adopted_plot.json");

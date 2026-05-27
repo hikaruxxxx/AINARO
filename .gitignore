@@ -25,6 +25,9 @@
 .DS_Store
 *.pem
 
+# 編集中の backup file (バックエンド切替 / プリパッチ等)
+*.bak
+
 # debug
 npm-debug.log*
 yarn-debug.log*

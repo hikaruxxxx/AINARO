@@ -328,6 +328,85 @@
         "relationship_change": true,
         "location_change": false
       }
+    },
+    {
+      "id": "M1_series_opener_webtoon_high_density",
+      "name": "シリーズ開幕 (WEBTOON 高密度型)",
+      "distribution": 0.0,
+      "description": "LINEマンガ縦読み出身ヒット作 (累計 1 億 views クラス) の典型 1 話構造を 24P 横読みに圧縮した archetype。『俺だけ最強超越者』『天才マンガ家になった件』等の冒頭話と同じ 5 段階 (侮辱→秘宝→覚醒→反撃→タイトル ROAR) を必ず通す。distribution=0.0、L02b で --archetype-style=webtoon flag が指定された巻冒頭話のみ強制選択。M1_series_opener (情報密度抑え型) と排他。",
+      "structure": [
+        {
+          "phase": "侮辱",
+          "pages": "1-3",
+          "channels": ["dialogue", "reaction_shot", "character_intro"],
+          "required": [
+            "敵対者 (antagonist_profile.public_humiliator) による公開侮辱イベント",
+            "主人公が反論できない制度的不公平の明示 (insult + unfairness)",
+            "読者の感情ターゲット (anger / shame / revenge_desire) を 1 つ確定",
+            "周囲の観衆 (audience) が侮辱を目撃する構図"
+          ]
+        },
+        {
+          "phase": "秘宝",
+          "pages": "4-7",
+          "channels": ["prop_closeup", "ui_screen", "monologue"],
+          "required": [
+            "主人公だけが知る隠しルール / システム音声 / 秘宝の初出 (core_hook 発火)",
+            "secret_type (system_reveal / hidden_rule / ally_secret / treasure / knowledge) のいずれかを満たす視覚 signature",
+            "主人公の内的反応 (期待 + 警戒) を monologue 1-2 行で"
+          ]
+        },
+        {
+          "phase": "覚醒",
+          "pages": "8-12",
+          "channels": ["visual_contrast", "action_sequence", "reaction_shot"],
+          "required": [
+            "awakening_event の発生 (skill / resolve / alliance / knowledge_application)",
+            "intensity 0.85+ の絵的爆発 (色調反転 / 体内光 / 周囲の凍結 等)",
+            "主人公の覚悟が決まる瞬間 (台詞 or monologue 1 行)"
+          ]
+        },
+        {
+          "phase": "反撃",
+          "pages": "13-19",
+          "channels": ["action_sequence", "visual_contrast", "sound_effect"],
+          "required": [
+            "payback_event の遂行 (direct_combat / social_reveal / system_break / unexpected_alliance)",
+            "侮辱を目撃した観衆の驚愕 reaction_shot (侮辱イベントとの呼応)",
+            "intensity 0.90+ の visual_catharsis_signature を 1 つ以上",
+            "敵対者の困惑 / 屈服 / 撤退の描写"
+          ]
+        },
+        {
+          "phase": "タイトル ROAR",
+          "pages": "18-22",
+          "channels": ["silence_panel", "visual_contrast"],
+          "required": [
+            "title_anchor の発火 (反撃成立直後)",
+            "主人公の決定的ポーズ (visual_pose) を見開き or 大ゴマで",
+            "タイトル文字 overlay 用の空白領域を確保 (AI には文字を描かせない、post-process で合成)",
+            "emotional_function (awakening / revenge_start / identity_claim) のいずれかを表現"
+          ]
+        },
+        {
+          "phase": "次話 cliffhanger",
+          "pages": "23-24",
+          "channels": ["reaction_shot", "silence_panel"],
+          "required": [
+            "敵対者 or 新ライバルからの予兆 (次話 hook)",
+            "主人公の決意 (短い台詞 1 行)",
+            "次話で開示される問い (reader_question_schedule.opened_in_episode=ep+1) を視覚で示唆"
+          ]
+        }
+      ],
+      "state_changes": {
+        "world_established": true,
+        "core_hook_revealed": true,
+        "protagonist_goal_set": true,
+        "antagonist_introduced": true,
+        "title_roar_placed": true,
+        "humiliation_to_payback_completed": true
+      }
     }
   ]
 }

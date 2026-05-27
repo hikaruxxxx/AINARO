@@ -13,7 +13,8 @@
  */
 
 import type { BibleSnapshotV2 } from "../schemas-v2";
-import type { DirectingIntent } from "../storyboard-v2/volume-plot";
+import type { EpisodeSpine } from "../storyboard-v2/episode-spine";
+import type { DirectingIntent, SceneEmotion } from "../storyboard-v2/volume-plot";
 
 // ============================================================================
 // Schema Version
@@ -122,6 +123,22 @@ export type Scene = {
    *   - final_pull: 最終 panel に pull_visual と次話 hook を配置
    */
   directing_intent?: DirectingIntent;
+
+  scene_emotion?: SceneEmotion;
+  reader_state_after?: {
+    knows: string[];
+    feels: string;
+    questions: string[];
+    attachments: string[];
+  };
+  /** 1 scene に複数イベントが同居する可能性 (ep01 S05/S06 で payback + title_anchor 等) に備え配列化 */
+  episode_spine_links?: Array<{
+    event_kind: "humiliation" | "secret_or_treasure" | "awakening" | "payback" | "title_anchor";
+    expected_page: number;
+    expected_intensity_target?: number;
+  }>;
+  /** plot.json の SceneSkeleton.primary_channels をそのまま継承 */
+  primary_channels?: string[];
 };
 
 // ============================================================================
@@ -374,7 +391,8 @@ export type RenderConstraintPageStats = {
 
 /**
  * Scene-graph 全体を検証する。
- * 11 ルールの実装は scene-graph-l3-5.md "5. validator" 章を参照。
+ * Rule 1-22 の実装は scene-graph-l3-5.md "5. validator" 章を参照。
+ * (Rule 21/22 は S1 codex-compressed-marshmallow plan で追加、SSoT 更新待ち)
  */
 export function validateSceneGraph(
   sceneGraph: SceneGraphV1,
@@ -394,6 +412,8 @@ export function validateSceneGraph(
     episodeNo?: number;
     /** storyboard/page_plan から呼び出し側が計算した page-level stats。未指定なら Rule 16-18 は deferred として skip。 */
     renderConstraintPageStats?: RenderConstraintPageStats[];
+    /** 当 episode の episode_spine。Rule 22 の ep1 spine 欠落検査で利用。 */
+    episodeSpine?: EpisodeSpine;
   }
 ): ValidationResult {
   const errors: string[] = [];
@@ -594,6 +614,40 @@ export function validateSceneGraph(
     // === Rule 20: cliffhanger_pattern は cliff scene のみ ===
     if (scene.cliffhanger_pattern && scene.beat_type !== "cliff") {
       errors.push(`${sid}: cliffhanger_pattern "${scene.cliffhanger_pattern}" specified but beat_type=${scene.beat_type} (cliff のみ可)`);
+    }
+
+    // === Rule 21: scene_emotion_intensity_below_expected ===
+    if (scene.scene_emotion?.intensity != null) {
+      for (const link of scene.episode_spine_links ?? []) {
+        if (link.expected_intensity_target == null) continue;
+        if (scene.scene_emotion.intensity < link.expected_intensity_target) {
+          warnings.push(
+            `${sid}: Rule 21 scene_emotion_intensity_below_expected event_kind=${link.event_kind} expected=${link.expected_intensity_target} actual=${scene.scene_emotion.intensity}`,
+          );
+        }
+      }
+    }
+  }
+
+  // === Rule 22: ep1_spine_events_missing ===
+  if (options?.episodeNo === 1 && options.episodeSpine) {
+    const expectedKinds = new Set<NonNullable<Scene["episode_spine_links"]>[number]["event_kind"]>();
+    if (options.episodeSpine.humiliation_event) expectedKinds.add("humiliation");
+    if (options.episodeSpine.secret_or_treasure_event) expectedKinds.add("secret_or_treasure");
+    if (options.episodeSpine.awakening_event) expectedKinds.add("awakening");
+    if (options.episodeSpine.payback_event) expectedKinds.add("payback");
+    if (options.episodeSpine.title_anchor) expectedKinds.add("title_anchor");
+
+    const actualKinds = new Set<NonNullable<Scene["episode_spine_links"]>[number]["event_kind"]>();
+    for (const scene of sceneGraph.scenes) {
+      for (const link of scene.episode_spine_links ?? []) {
+        actualKinds.add(link.event_kind);
+      }
+    }
+
+    const missingKinds = Array.from(expectedKinds).filter((kind) => !actualKinds.has(kind));
+    if (missingKinds.length > 0) {
+      warnings.push(`Rule 22 ep1_spine_events_missing: missing event_kind(s) ${missingKinds.join(", ")}`);
     }
   }
 

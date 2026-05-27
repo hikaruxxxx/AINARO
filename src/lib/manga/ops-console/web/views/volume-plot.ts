@@ -2,12 +2,14 @@ import {
   ApiError,
   apiGetAdoptedVolumePlot,
   apiGetVolumePlot,
+  apiGetVolumes,
   apiPostAdoptedVolumePlot,
   apiPostJob,
   apiPutVolumePlot,
   openJobStream,
   type AdoptedVolumePlot,
   type JobEvent,
+  type VolumeInfo,
   type VolumePlot,
 } from "../lib/api";
 import {
@@ -40,6 +42,9 @@ type ViewState = {
   /** Phase C-3: volume plot 採用記録 (chosen_proposal_id="current" は plot.json を指す) */
   adoptedPlot: AdoptedVolumePlot | null;
   adoptingPlot: boolean;
+  /** 作品が持つ巻一覧 (apiGetVolumes 経由)。複数巻切替ピルの描画に使う */
+  volumes: VolumeInfo[];
+  volumesLoading: boolean;
 };
 
 const CSS = `
@@ -50,6 +55,29 @@ const CSS = `
 .vplot-section { display: grid; gap: var(--space-2); }
 .vplot-section h3 { margin: 0; font-size: var(--fs-lg); }
 .vplot-mode { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.vplot-vols { display: inline-flex; gap: var(--space-1); align-items: center; }
+.vplot-vols__label { color: var(--text-tertiary); font-size: var(--fs-xs); }
+.vplot-vols__select {
+  padding: 4px 28px 4px 10px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  font-family: var(--font-mono);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  cursor: pointer;
+  min-width: 72px;
+  /* select の矢印を統一感のあるカスタム▾に */
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M1 3l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+.vplot-vols__select:hover { border-color: var(--color-primary); }
+.vplot-vols__select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); }
+.vplot-vols__missing { color: var(--text-tertiary); font-size: var(--fs-xs); }
 .vp-volume-card { display: grid; gap: var(--space-3); }
 .vp-volume-head { display: flex; gap: var(--space-2); align-items: baseline; flex-wrap: wrap; }
 .vp-volume-head h3 { margin: 0; font-size: var(--fs-xl); }
@@ -72,6 +100,32 @@ const CSS = `
 .vp-beat__episodes { color: var(--text-tertiary); font-size: var(--fs-sm); }
 .vp-intensity { height: 6px; border-radius: var(--radius-pill); background: var(--surface-sunken); overflow: hidden; }
 .vp-intensity__bar { height: 100%; border-radius: inherit; background: var(--color-primary); }
+/* L2b 物語OS再設計 (2026-05-13): belongs_to_arcs / arc_position / scenes / directing_intent */
+.vp-arcs-belong { display: flex; flex-wrap: wrap; gap: var(--space-1); align-items: center; }
+.vp-arc-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--surface-sunken); font-size: var(--fs-xs); border: 1px solid var(--border-default); }
+.vp-arc-pill__coverage { font-size: 10px; color: var(--text-tertiary); }
+.vp-ep-tags { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
+.vp-ep-tag { padding: 2px 8px; border-radius: var(--radius-pill); font-size: var(--fs-xs); border: 1px solid var(--border-default); }
+.vp-ep-tag--arc { background: #eef2ff; color: #3730a3; border-color: #c7d2fe; }
+.vp-ep-tag--volume { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.vp-scenes { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
+.vp-scenes h4 { margin: 0; font-size: var(--fs-md); color: var(--text-secondary); }
+.vp-scene { padding: var(--space-2); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-sunken); }
+.vp-scene__head { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-bottom: 4px; }
+.vp-scene__id { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-tertiary); }
+.vp-scene__pages { font-weight: var(--fw-bold); }
+.vp-scene__purpose { line-height: 1.5; color: var(--text-primary); margin: 0; }
+.vp-scene__meta { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: 4px; color: var(--text-tertiary); font-size: var(--fs-xs); }
+.vp-di-badge { padding: 2px 8px; border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: var(--fw-bold); border: 1px solid transparent; }
+.vp-di--opening_hook { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.vp-di--world_anchor { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+.vp-di--midpoint_turn { background: #fce7f3; color: #9d174d; border-color: #fbcfe8; }
+.vp-di--cliffhanger_setup { background: #fed7aa; color: #9a3412; border-color: #fdba74; }
+.vp-di--final_pull { background: #fecaca; color: #991b1b; border-color: #fca5a5; }
+.vp-di--normal { background: var(--surface-default); color: var(--text-tertiary); border-color: var(--border-default); }
+.vp-di-detail { margin-top: 4px; font-size: var(--fs-xs); color: var(--text-secondary); line-height: 1.5; }
+.vp-di-narration { margin: 4px 0 0; padding-left: 1.4em; }
+.vp-di-narration li { font-style: italic; color: var(--text-secondary); font-size: var(--fs-xs); }
 .vplot-modal-body { display: grid; gap: var(--space-3); padding: var(--space-4); }
 .vplot-modal-head { display: flex; align-items: center; gap: var(--space-2); }
 .vplot-modal-title { margin: 0; font-size: var(--fs-xl); }
@@ -132,6 +186,29 @@ function renderDisplayMode(active: DisplayMode): string {
   </div>`;
 }
 
+/**
+ * 巻切替ドロップダウン。volumes が空でも現在の volume を 1 つだけ含む select を返す。
+ * volumes に現在の volume が含まれていない (新規構築直後など) 場合は補完して active 選択する。
+ */
+function renderVolumeSwitcher(state: ViewState): string {
+  if (state.volumesLoading) {
+    return `<div class="vplot-vols"><span class="vplot-vols__label">巻</span><span class="vplot-vols__missing">読み込み中…</span></div>`;
+  }
+  const known = state.volumes.map((v) => v.volume);
+  const list = known.includes(state.volume) ? known : [...known, state.volume].sort((a, b) => a - b);
+  const ensured = list.length === 0 ? [state.volume] : list;
+  const options = ensured
+    .map((vol) => {
+      const selected = vol === state.volume ? " selected" : "";
+      return `<option value="${vol}"${selected}>v${String(vol).padStart(2, "0")}</option>`;
+    })
+    .join("");
+  return `<div class="vplot-vols">
+    <label class="vplot-vols__label" for="vplot-volume-select">巻</label>
+    <select id="vplot-volume-select" class="vplot-vols__select" data-vp-volume-select aria-label="巻を切り替え">${options}</select>
+  </div>`;
+}
+
 function intensity(value: unknown): number {
   const n = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(n)) return 0;
@@ -177,15 +254,101 @@ function renderChapters(value: unknown): string {
   </section>`;
 }
 
+function renderDirectingIntent(di: unknown): string {
+  if (!di || typeof di !== "object") return "";
+  const d = di as Record<string, unknown>;
+  const kind = typeof d.kind === "string" ? d.kind : "normal";
+  const badge = `<span class="vp-di-badge vp-di--${escapeHtml(kind)}">${escapeHtml(kind)}</span>`;
+  let detail = "";
+  if (kind === "opening_hook") {
+    const lines = Array.isArray(d.narration_lines) ? d.narration_lines : [];
+    detail = `<div class="vp-di-detail">pattern: <strong>${escapeHtml(String(d.hook_pattern ?? "?"))}</strong>${
+      d.key_visual ? ` / 絵: ${escapeHtml(String(d.key_visual))}` : ""
+    }</div>${
+      lines.length > 0
+        ? `<ol class="vp-di-narration">${lines.map((n) => `<li>${escapeHtml(String(n))}</li>`).join("")}</ol>`
+        : ""
+    }`;
+  } else if (kind === "world_anchor") {
+    const facts = Array.isArray(d.target_facts) ? d.target_facts : [];
+    detail = `<div class="vp-di-detail">delivery: <strong>${escapeHtml(String(d.delivery ?? "?"))}</strong> / facts: ${facts.length} 個</div>${
+      facts.length > 0
+        ? `<ol class="vp-di-narration">${facts.map((f) => `<li>${escapeHtml(String(f))}</li>`).join("")}</ol>`
+        : ""
+    }`;
+  } else if (kind === "midpoint_turn") {
+    detail = `<div class="vp-di-detail">reveal: ${escapeHtml(String(d.reveal ?? ""))}<br>shift: ${escapeHtml(String(d.emotional_shift ?? ""))}</div>`;
+  } else if (kind === "cliffhanger_setup") {
+    detail = `<div class="vp-di-detail">${escapeHtml(String(d.build_up ?? ""))}</div>`;
+  } else if (kind === "final_pull") {
+    detail = `<div class="vp-di-detail">引きの絵: ${escapeHtml(String(d.pull_visual ?? ""))}<br>次話 hook: ${escapeHtml(String(d.next_episode_hook ?? ""))}</div>`;
+  }
+  return `<div>${badge}${detail}</div>`;
+}
+
+function renderScenes(scenes: unknown): string {
+  const list = Array.isArray(scenes) ? scenes : [];
+  if (list.length === 0) return "";
+  return `<section class="vp-scenes">
+    <h4>scene skeleton (L2b)</h4>
+    ${list
+      .map((sc) => {
+        const s = asRecord(sc);
+        const range = Array.isArray(s.page_range) ? s.page_range : [];
+        const pages =
+          range.length === 2 ? `p${escapeHtml(String(range[0]))}-p${escapeHtml(String(range[1]))}` : "p?";
+        const cast = Array.isArray(s.cast_ids) ? s.cast_ids : [];
+        return `<article class="vp-scene">
+          <div class="vp-scene__head">
+            <span class="vp-scene__id">${escapeHtml(String(s.scene_id ?? `s${s.scene_no ?? "?"}`))}</span>
+            <span class="vp-scene__pages">${pages}</span>
+            ${s.time_of_day ? `<span class="nc-badge nc-badge--neutral">${escapeHtml(String(s.time_of_day))}</span>` : ""}
+            ${s.location_id ? `<span class="nc-code">@${escapeHtml(String(s.location_id))}</span>` : ""}
+            ${renderDirectingIntent(s.directing_intent)}
+          </div>
+          <p class="vp-scene__purpose">${escapeHtml(String(s.purpose ?? ""))}</p>
+          <div class="vp-scene__meta">
+            ${cast.length > 0 ? `cast: ${cast.map((c) => escapeHtml(String(c))).join(", ")}` : ""}
+            ${s.emotional_beat ? ` · 感情 beat: ${escapeHtml(String(s.emotional_beat))}` : ""}
+          </div>
+          ${
+            s.key_action
+              ? `<div class="vp-scene__meta">key_action: ${escapeHtml(String(s.key_action))}</div>`
+              : ""
+          }
+          ${
+            s.connection_to_next
+              ? `<div class="vp-scene__meta">→ next: ${escapeHtml(String(s.connection_to_next))}</div>`
+              : ""
+          }
+        </article>`;
+      })
+      .join("")}
+  </section>`;
+}
+
 function renderEpisode(ep: unknown): string {
   const item = asRecord(ep);
   const episodeNo = Number(item.episode_no);
   const arc = asRecord(item.protagonist_arc);
+  const arcPosition = asRecord(item.arc_position);
+  const tags: string[] = [];
+  if (arcPosition.arc_id) {
+    tags.push(
+      `<span class="vp-ep-tag vp-ep-tag--arc">arc: ${escapeHtml(String(arcPosition.arc_id))} (${escapeHtml(String(arcPosition.role_in_arc ?? "?"))})</span>`,
+    );
+  }
+  if (item.volume_position) {
+    tags.push(
+      `<span class="vp-ep-tag vp-ep-tag--volume">巻内位置: ${escapeHtml(String(item.volume_position))}</span>`,
+    );
+  }
   return `<article class="nc-card vp-episode-card">
     <div class="vp-episode-head">
       <span class="nc-badge nc-badge--neutral">ep${String(Number.isInteger(episodeNo) ? episodeNo : 0).padStart(2, "0")}</span>
       <h3>${escapeHtml(String(item.title_working ?? "タイトル未設定"))}</h3>
     </div>
+    ${tags.length > 0 ? `<div class="vp-ep-tags">${tags.join("")}</div>` : ""}
     ${asKeyValueTable({
       "テーマ": item.theme,
       "ページ目安": item.page_target,
@@ -195,6 +358,7 @@ function renderEpisode(ep: unknown): string {
       <div class="vp-arc__step"><span class="vp-arc__label">turn</span>${escapeHtml(String(arc.turn ?? ""))}</div>
       <div class="vp-arc__step"><span class="vp-arc__label">end</span>${escapeHtml(String(arc.end ?? ""))}</div>
     </div>
+    ${renderScenes(item.scenes)}
     ${renderBeats(item.beats)}
     <details class="nc-card nc-card--sunken vplot-section">
       <summary>詳細 (must_include_events / cliffhanger_hook / brief_for_L3)</summary>
@@ -207,11 +371,27 @@ function renderEpisode(ep: unknown): string {
   </article>`;
 }
 
+function renderBelongsToArcs(value: unknown): string {
+  const arcs = Array.isArray(value) ? value : [];
+  if (arcs.length === 0) return "";
+  const pills = arcs
+    .map((arc) => {
+      const a = asRecord(arc);
+      return `<span class="vp-arc-pill" title="${escapeHtml(String(a.arc_progression ?? ""))}">${escapeHtml(String(a.arc_id ?? ""))} <span class="vp-arc-pill__coverage">(${escapeHtml(String(a.coverage ?? ""))})</span></span>`;
+    })
+    .join("");
+  return `<section class="vplot-section">
+    <h3 style="font-size:var(--fs-md);color:var(--text-secondary);">この巻が属する arc (SeriesPlan)</h3>
+    <div class="vp-arcs-belong">${pills}</div>
+  </section>`;
+}
+
 function renderReader(plot: unknown): string {
   const obj = asRecord(plot);
   const episodes = Array.isArray(obj.episodes) ? obj.episodes : [];
   const chapters = obj.chapter_structure ?? obj.chapters ?? obj.acts;
   const summary = obj.summary ?? obj.volume_summary ?? obj.synopsis ?? obj.volume_theme;
+  const schemaVersion = Number(obj.schema_version ?? 1);
   return `
     <div class="vplot-body">
       <section class="nc-card vp-volume-card">
@@ -219,12 +399,14 @@ function renderReader(plot: unknown): string {
           <span class="nc-badge nc-badge--neutral">v${String(Number(obj.volume_no ?? obj.volume ?? 1)).padStart(2, "0")}</span>
           <h3>${escapeHtml(String(obj.title_working ?? "巻プロット"))}</h3>
           <span class="nc-badge nc-badge--info">${episodes.length} episodes</span>
+          ${schemaVersion >= 2 ? '<span class="nc-badge nc-badge--success">schema v2 (物語OS)</span>' : '<span class="nc-badge nc-badge--neutral">schema v1 (legacy)</span>'}
         </div>
         ${asKeyValueTable({
           "巻あらすじ": summary,
           "テーマ": obj.volume_theme,
           "推定ページ数": obj.estimated_pages,
         })}
+        ${renderBelongsToArcs(obj.belongs_to_arcs)}
         ${renderChapters(chapters)}
         <section class="vp-episodes">
           <h3>beat list / エピソード一覧</h3>
@@ -367,6 +549,7 @@ function render(container: HTMLElement, state: ViewState): void {
       <div class="nc-toolbar">
         <h2 class="nc-toolbar__title">巻プロット (巻あらすじ・章構成)</h2>
         <span class="vplot-info">${escapeHtml(scope)}</span>
+        ${renderVolumeSwitcher(state)}
         <span class="vplot-spacer"></span>
         ${(() => {
           const adopted = state.adoptedPlot;
@@ -444,6 +627,25 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
     saving: false,
     adoptedPlot: null,
     adoptingPlot: false,
+    volumes: [],
+    volumesLoading: false,
+  };
+
+  /**
+   * 作品の巻一覧を取得し、切替ピル描画に使う。失敗は無視 (ピルが現在巻のみになる)。
+   * 巻リストは作品単位なので refresh ごとに再取得せず、slug 変更時のみ呼ぶ。
+   */
+  const loadVolumes = async (): Promise<void> => {
+    state.volumesLoading = true;
+    render(container, state);
+    try {
+      const result = await apiGetVolumes(state.slug);
+      state.volumes = result.volumes;
+    } catch {
+      state.volumes = [];
+    }
+    state.volumesLoading = false;
+    render(container, state);
   };
 
   /**
@@ -476,6 +678,7 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
   let stream: { close: () => void } | null = null;
 
   void refresh(state, container);
+  void loadVolumes();
 
   container.addEventListener("click", (event) => {
     const target = event.target;
@@ -556,6 +759,26 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
     }
   }, { signal: controller.signal });
 
+  // 巻切替ドロップダウン: change で state.volume を更新して refresh
+  const onVolumeChange = (event: Event): void => {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+    if (!("vpVolumeSelect" in target.dataset)) return;
+    const nextVol = Number(target.value);
+    if (!Number.isInteger(nextVol) || nextVol < 1 || nextVol === state.volume) return;
+    if (state.displayMode === "edit" && state.editDraft !== null) {
+      if (!window.confirm("未保存の変更があります。破棄して巻を切り替えますか？")) {
+        // キャンセル時は select の値を元に戻す
+        target.value = String(state.volume);
+        return;
+      }
+      state.editDraft = null;
+    }
+    state.volume = nextVol;
+    void refresh(state, container);
+  };
+  container.addEventListener("change", onVolumeChange, { signal: controller.signal });
+
   // edit モードの input change を draft へ反映。再 render はせず draft state のみ書き換える
   // (フォーカスが外れないように)。 dirty 表示は次回 render で更新される。
   const onFieldInput = (event: Event): void => {
@@ -600,6 +823,8 @@ export function mountVolumePlotView(container: HTMLElement): () => void {
             stream?.close();
             stream = null;
             void refresh(state, container);
+            // 新規構築後は巻一覧も再取得 (新規 v02 等が pills に出る)
+            void loadVolumes();
           },
           onError: (error) => {
             state.running = false;

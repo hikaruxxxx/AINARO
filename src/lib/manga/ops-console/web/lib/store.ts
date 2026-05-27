@@ -7,10 +7,12 @@ export type ViewName =
   | "revision"
   | "quality"
   | "bible"
+  | "series-plan"
   | "volume-plot"
   | "kdp-metadata"
   | "trademark-gate"
   | "improvements"
+  | "reader-journey"
   | "work-overview"
   | "volumes"
   | "layers";
@@ -82,6 +84,7 @@ export function isViewName(value: string | null | undefined): value is ViewName 
     value === "revision" ||
     value === "quality" ||
     value === "bible" ||
+    value === "series-plan" ||
     value === "volume-plot" ||
     value === "kdp-metadata" ||
     value === "trademark-gate" ||

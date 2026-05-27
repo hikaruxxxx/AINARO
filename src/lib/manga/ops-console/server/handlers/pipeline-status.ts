@@ -12,6 +12,7 @@ import {
   nameManifestPath,
   pagePlanPath,
   resolvedRefsPath,
+  seriesPlanPath,
   storyboardPath,
   workDir,
   volumePlotPath,
@@ -195,8 +196,11 @@ function specs(slug: string, episode: number): LayerSpec[] {
     },
     {
       id: "L02b",
-      label: "L02b Volume Plot",
-      artifacts: [artifact(volumePlotPath(slug, 1), "file")],
+      label: "L02b Story Plot (Series + Volume)",
+      artifacts: [
+        artifact(seriesPlanPath(slug), "file"),
+        artifact(volumePlotPath(slug, 1), "file"),
+      ],
       next_view: "volume-plot",
       next_layer_id: "L02b",
     },

@@ -38,10 +38,16 @@ import type { BibleSnapshotV2 } from "../../../src/lib/manga/schemas-v2";
 import type { VolumePlot } from "../../../src/lib/manga/storyboard-v2/volume-plot";
 
 type Mode = "validate" | "generate" | "bootstrap";
-type Args = { slug: string; episode: number; mode: Mode; live: boolean };
+type Args = {
+  slug: string;
+  episode: number;
+  mode: Mode;
+  live: boolean;
+  forceRebootstrap: boolean;
+};
 
 function parseArgs(): Args {
-  const a: Partial<Args> = { mode: "validate", live: false };
+  const a: Partial<Args> = { mode: "validate", live: false, forceRebootstrap: false };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -67,6 +73,13 @@ function parseArgs(): Args {
       else throw new Error(`unknown --live "${val}", expected true|false`);
       continue;
     }
+    if (key === "force-rebootstrap") {
+      if (val === true) a.forceRebootstrap = true;
+      else if (val === "true") a.forceRebootstrap = true;
+      else if (val === "false") a.forceRebootstrap = false;
+      else throw new Error(`unknown --force-rebootstrap "${val}", expected true|false`);
+      continue;
+    }
     if (typeof val !== "string") continue;
     if (key === "slug") a.slug = val;
     else if (key === "episode") a.episode = Number(val);
@@ -76,6 +89,9 @@ function parseArgs(): Args {
     }
   }
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
+  if (a.forceRebootstrap && a.mode !== "bootstrap") {
+    console.warn(`[L03.5] --force-rebootstrap is only meaningful with --mode bootstrap; ignoring for mode=${a.mode}`);
+  }
   return a as Args;
 }
 
@@ -205,11 +221,13 @@ async function modeValidate(args: Args): Promise<void> {
   }
 
   let volumeForeshadowMap: VolumePlot["foreshadow_map"] | undefined;
+  let episodeSpine: VolumePlot["episodes"][number]["episode_spine"] | undefined;
   try {
     // TODO: 巻番号は arc_position から導出する。現状は v01 固定。
     const vpRaw = await fs.readFile(volumePlotPath(args.slug, 1), "utf-8");
     const vp = JSON.parse(vpRaw) as VolumePlot;
     volumeForeshadowMap = vp.foreshadow_map;
+    episodeSpine = vp.episodes.find((ep) => ep.episode_no === args.episode)?.episode_spine;
   } catch {
     // volume_plot 無しは optional
   }
@@ -219,6 +237,7 @@ async function modeValidate(args: Args): Promise<void> {
     totalPanels,
     volumeForeshadowMap,
     episodeNo: args.episode,
+    episodeSpine,
   });
   const dag = buildForeshadowDag(sceneGraph);
 
@@ -373,12 +392,16 @@ async function modeBootstrap(args: Args): Promise<void> {
     "../../../src/lib/manga/scene-graph/bootstrap-from-skeleton"
   );
   const sgPath = sceneGraphPath(args.slug, args.episode);
-  // 既存ファイルがあれば backup を取って上書き
+  // 既存ファイルがあれば backup を取って上書き。force 時は既存内容を読まずに L2b skeleton から再構築する。
   try {
     await fs.access(sgPath);
-    const backupPath = `${sgPath}.pre-bootstrap.backup`;
-    await fs.copyFile(sgPath, backupPath);
-    console.log(`[L03.5] backup existing scene_graph: ${backupPath}`);
+    if (args.forceRebootstrap) {
+      console.log(`[L03.5] --force-rebootstrap: ignoring existing scene_graph in memory and rebuilding from L2b skeleton`);
+    } else {
+      const backupPath = `${sgPath}.pre-bootstrap.backup`;
+      await fs.copyFile(sgPath, backupPath);
+      console.log(`[L03.5] backup existing scene_graph: ${backupPath}`);
+    }
   } catch {
     // 無ければそのまま進む
   }
@@ -396,6 +419,7 @@ async function modeBootstrap(args: Args): Promise<void> {
       /storyboard\.json$/,
       "shotlist.json",
     ),
+    force: args.forceRebootstrap,
   });
   await fs.writeFile(sgPath, JSON.stringify(sceneGraph, null, 2));
   console.log(

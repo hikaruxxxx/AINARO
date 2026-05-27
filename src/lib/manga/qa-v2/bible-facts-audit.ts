@@ -1,11 +1,15 @@
 /**
  * Bible Quantitative Facts Audit
  *
- * 2026-05-17 Sprint 10 案1 で新設。
+ * 2026-05-17 Sprint 10 案1 で新設、S1 codex-compressed-marshmallow plan で
+ * scene_graph 対応 (auditSceneGraphBibleFacts) を追加。
  *
- * storyboard.json の narration / dialogue / monologue / sfx 内に出現する
- * 数値 (年代・年齢) が bible.world.timeline / system に書かれた数値と一致するか
- * を regex で簡易検証する。
+ * 検査対象:
+ *   - storyboard.json: panel.narration / dialogue / monologue / sfx
+ *   - scene_graph.json: scene.directing_intent.narration_lines / target_facts /
+ *                       key_visual_intent / reader_state_after.knows
+ * これらに出現する数値 (年代・年齢) が bible.world.timeline / system に書かれた
+ * 数値と一致するかを regex で簡易検証する。
  *
  * 目的: a07 ep01 panel#1 で「三年前」「十五歳」と bible (20年前・18歳) から
  * 逸脱した narration が L04 storyboard 段で混入した事例の再発防止。
@@ -23,6 +27,7 @@
  */
 
 import type { BibleSnapshotV2, EpisodeStoryboardV2 } from "../schemas-v2";
+import type { SceneGraphV1 } from "../scene-graph/schema";
 
 export type BibleFacts = {
   /** bible.world.timeline + system から抽出した「N年前」表記 (アラビア数字に正規化) */
@@ -40,6 +45,7 @@ export type BibleFacts = {
 };
 
 export type StoryboardTextHit = {
+  target: "storyboard";
   panel_id: string;
   page_no: number;
   field: "narration" | "dialogue" | "monologue" | "sfx";
@@ -50,11 +56,29 @@ export type StoryboardTextHit = {
   ranks: string[];
 };
 
+export type SceneGraphTextHit = {
+  target: "scene_graph";
+  scene_id: string;
+  field: "narration_lines" | "target_facts" | "key_visual_intent" | "knows";
+  index: number;
+  text: string;
+  yearsAgo: number[];
+  ages: number[];
+  ranks: string[];
+};
+
+type TextHit = StoryboardTextHit | SceneGraphTextHit;
+
 export type Finding = {
   severity: "warning" | "fatal";
-  panel_id: string;
-  page_no: number;
-  field: StoryboardTextHit["field"];
+  target: "storyboard" | "scene_graph";
+  panel_id?: string;
+  page_no?: number;
+  location?: {
+    scene_id: string;
+    field: SceneGraphTextHit["field"];
+  };
+  field: StoryboardTextHit["field"] | SceneGraphTextHit["field"];
   text: string;
   kind: "years_ago_mismatch" | "age_mismatch" | "rank_mismatch";
   found: number | string;
@@ -160,6 +184,7 @@ export function extractStoryboardHits(storyboard: EpisodeStoryboardV2): Storyboa
           const ranks = extractRanks(text);
           if (yearsAgo.length === 0 && ages.length === 0 && ranks.length === 0) return;
           hits.push({
+            target: "storyboard",
             panel_id: panel.panel_id,
             page_no: page.page_no,
             field,
@@ -183,12 +208,64 @@ export function extractStoryboardHits(storyboard: EpisodeStoryboardV2): Storyboa
   return hits;
 }
 
-export function auditBibleFacts(
-  bible: BibleSnapshotV2,
-  storyboard: EpisodeStoryboardV2,
-): { facts: BibleFacts; findings: Finding[] } {
-  const facts = extractBibleFacts(bible);
-  const hits = extractStoryboardHits(storyboard);
+export function extractSceneGraphHits(sceneGraph: SceneGraphV1): SceneGraphTextHit[] {
+  const hits: SceneGraphTextHit[] = [];
+  const collect = (
+    scene_id: string,
+    field: SceneGraphTextHit["field"],
+    texts: string[],
+  ) => {
+    texts.forEach((text, index) => {
+      const yearsAgo = extractYearsAgo(text);
+      const ages = extractAges(text);
+      const ranks = extractRanks(text);
+      if (yearsAgo.length === 0 && ages.length === 0 && ranks.length === 0) return;
+      hits.push({
+        target: "scene_graph",
+        scene_id,
+        field,
+        index,
+        text,
+        yearsAgo,
+        ages,
+        ranks,
+      });
+    });
+  };
+
+  for (const scene of sceneGraph.scenes) {
+    const directing = scene.directing_intent;
+    if (directing?.kind === "opening_hook") {
+      collect(scene.scene_id, "narration_lines", directing.narration_lines ?? []);
+    }
+    if (directing?.kind === "world_anchor") {
+      collect(scene.scene_id, "target_facts", directing.target_facts);
+    }
+    collect(scene.scene_id, "key_visual_intent", scene.key_visual_intent ? [scene.key_visual_intent] : []);
+    collect(scene.scene_id, "knows", scene.reader_state_after?.knows ?? []);
+  }
+  return hits;
+}
+
+function toFindingBase(hit: TextHit): Pick<Finding, "target" | "panel_id" | "page_no" | "location" | "field" | "text"> {
+  if (hit.target === "storyboard") {
+    return {
+      target: "storyboard",
+      panel_id: hit.panel_id,
+      page_no: hit.page_no,
+      field: hit.field,
+      text: hit.text,
+    };
+  }
+  return {
+    target: "scene_graph",
+    location: { scene_id: hit.scene_id, field: hit.field },
+    field: hit.field,
+    text: hit.text,
+  };
+}
+
+function auditTextHits(facts: BibleFacts, hits: TextHit[]): Finding[] {
   const findings: Finding[] = [];
 
   for (const hit of hits) {
@@ -197,11 +274,8 @@ export function auditBibleFacts(
       if (facts.personalYearsAgo.includes(n)) continue;
       if (facts.yearsAgo.length > 0 && !facts.yearsAgo.includes(n)) {
         findings.push({
+          ...toFindingBase(hit),
           severity: "warning",
-          panel_id: hit.panel_id,
-          page_no: hit.page_no,
-          field: hit.field,
-          text: hit.text,
           kind: "years_ago_mismatch",
           found: n,
           expected: facts.yearsAgo,
@@ -217,11 +291,8 @@ export function auditBibleFacts(
         const bibleMaxAge = Math.max(...facts.ages);
         if (n <= bibleMaxAge) continue;
         findings.push({
+          ...toFindingBase(hit),
           severity: "warning",
-          panel_id: hit.panel_id,
-          page_no: hit.page_no,
-          field: hit.field,
-          text: hit.text,
           kind: "age_mismatch",
           found: n,
           expected: facts.ages,
@@ -235,11 +306,8 @@ export function auditBibleFacts(
       for (const rank of hit.ranks) {
         if (!facts.ranks.includes(rank)) {
           findings.push({
+            ...toFindingBase(hit),
             severity: "warning",
-            panel_id: hit.panel_id,
-            page_no: hit.page_no,
-            field: hit.field,
-            text: hit.text,
             kind: "rank_mismatch",
             found: rank,
             expected: facts.ranks,
@@ -249,6 +317,26 @@ export function auditBibleFacts(
       }
     }
   }
+  return findings;
+}
 
+export function auditBibleFacts(
+  bible: BibleSnapshotV2,
+  storyboard: EpisodeStoryboardV2,
+): { facts: BibleFacts; findings: Finding[] } {
+  const facts = extractBibleFacts(bible);
+  const hits = extractStoryboardHits(storyboard);
+  const findings = auditTextHits(facts, hits);
+
+  return { facts, findings };
+}
+
+export function auditSceneGraphBibleFacts(
+  sceneGraph: SceneGraphV1,
+  bible: BibleSnapshotV2,
+): { facts: BibleFacts; findings: Finding[] } {
+  const facts = extractBibleFacts(bible);
+  const hits = extractSceneGraphHits(sceneGraph);
+  const findings = auditTextHits(facts, hits);
   return { facts, findings };
 }

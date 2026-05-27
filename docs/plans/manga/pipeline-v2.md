@@ -238,6 +238,64 @@
 > audit-dialogue-density (生成後の検出網) ← Sprint 18
 > ```
 >
+> ### Sprint 23 (進行中、2026-05-20 着手): L02b 4 ドメイン契約 (10%→90% 引き上げ S1)
+>
+> **背景**: a07 v01 で panel/page 層は商業漫画 A 級到達したが、ユーザ評価で「漫画としての面白さ 10%」。
+> 比較対象 WEBTOON ヒット作『俺だけ最強超越者』(LINEマンガ累計 1 億 views、タテ読みマンガアワード 2025 受賞、7 言語展開) の動画分析で、a07 ep1 は「5 段階 (侮辱→秘宝→覚醒→反撃→ROAR) のうち 2 段階しか通っていない」「侮辱イベントなし」「タイトル ROAR なし」「panel.emotional_intensity が全 0.00」と判明。
+> Codex + Claude 議論 (2 ラウンド) で 4 ドメイン契約に再編。
+> 詳細 plan: `~/.claude/plans/10-90-codex-wild-goblet.md`。
+>
+> #### S1 実装内容 (a07 v02 前、commit 単位)
+>
+> | Step | 内容 | 主ファイル |
+> |---|---|---|
+> | S1.1 | schemas-v2.ts 拡張 | `AntagonistProfile` type 追加、`CharacterRoleV2` に antagonist 含む、`BibleSnapshotV2.antagonists?` 追加 |
+> | S1.2 | 3 新ファイル | `storyboard-v2/{volume-spine,reader-questions,episode-spine}.ts` (type + validator) |
+> | S1.3 | archetype 辞書拡張 | `data/manga/episode_patterns/dungeon_modern.json` に `M1_series_opener_webtoon_high_density` (6 phases, distribution 0.0) を追加 |
+> | S1.4 | L02b prompt + validation 拡張 | `volume-plot.ts` の `VolumePlot` / `VolumeEpisodePlan` / `SceneSkeleton` に新フィールド埋め、`buildMangaCraftRules` に Domain F/G/H 追加、`validateVolumePlotContracts` を新設、`generateVolumePlot` / `generateEpisodeDetail` に `archetypeStyle` 引数 |
+> | S1.5 | cliffhanger 別評価 | `storyboard-v2/cliffhanger-scoring.ts` (新、N=5 + round-robin pairwise tournament)、L02b で巻末 episode のみ呼び出し |
+> | S1.6 | intensity 伝播 | `storyboard-v2/intensity-propagation.ts` (新、beat→scene→panel)、`SceneEmotion` type 追加、`PanelV2.emotional_intensity?` 追加 |
+> | S1.7 | amplitude audit | `qa-v2/emotional-amplitude.ts` (新、5 ルール) + `scripts/manga/audit-emotional-amplitude.ts` (CLI、`--auto-propagate` 対応) |
+> | S1.8 | antagonist migration | `scripts/manga/migrate-bible-antagonist.ts` (新、a07 preset で玲二=public_humiliator + 槇島=institutional_gatekeeper の 2 件追加済) |
+> | S1.9 | SSoT 更新 | 本セクション |
+>
+> #### S1 検証結果 (a07 ep1 への audit 実走、2026-05-20)
+>
+> - intensity 伝播: panel intensity 0% 充填 → 100% (118/118 panels) 充填達成
+> - amplitude audit findings: 6 件検出
+>   - `monologue_cold_open` **hard warn** (p1-p6 dialogue=0, avg intensity=0.47): 動画分析で指摘した「冒頭 7P が monologue だけ」を機械検出
+>   - `episode_amplitude_low` (振幅 0.60 < 0.65)
+>   - `flat_run` × 4 (緩急の欠如)
+>   - `final_peak_missing` は出ず (p21/p23 で intensity 1.00 達成、cliffhanger 強度は確保)
+> - a07 bible.antagonists: 2 件登録 (玲二 + 槇島)、a07 v02 生成 prompt から `humiliator_character_id` 候補として注入される
+>
+> #### S1 CLI 新コマンド
+>
+> ```bash
+> # a07 v02 生成 (WEBTOON ヒット型 5 段階構造強制 + cliffhanger 候補 N=5 選別)
+> node --import tsx scripts/manga/layers/L02b-volume-plot.ts \
+>   --slug a07-modern-dungeon --volume 2 --phase volume \
+>   --archetype-style webtoon --cliffhanger-candidates 5 \
+>   --concept data/manga/_archive/.../A07_v2.json
+>
+> # 既存 storyboard.json への amplitude audit (intensity 伝播フォールバック付き)
+> node --import tsx scripts/manga/audit-emotional-amplitude.ts \
+>   --slug a07-modern-dungeon --episode 1 --auto-propagate
+>
+> # bible に antagonist を追加 (preset hardcoded、a07 は 2 件登録済)
+> node --import tsx scripts/manga/migrate-bible-antagonist.ts \
+>   --slug a07-modern-dungeon
+> ```
+>
+> #### S2 以降に先送り (S1 範囲外)
+>
+> - 巻 outline N=3 並列生成 + rubric LLM 採点 + pairwise tournament (S2)
+> - L4 storyboard-extractor の prompt 拡張で panel.emotional_intensity を LLM 直接出力 (S2)
+> - WEBTOON ヒット 10 作品の anchor pool 構築 (S3)
+> - 巻間ペーシング audit + 関係性 milestone (S4)
+> - migrate-volume-plot-spine.ts (a07 v01 plot.json への 4 ドメイン LLM 逆抽出、S2)
+> - 1 巻 5 話化 (40-50P×5) への構造変更 (v03 以降 A/B 検証)
+>
 > ### Sprint 23 候補 (B-3 SVG overlay 本格復活、PoC 完了で道筋確認済)
 >
 > **PoC 結果 (commit `86134eb`、p17 v31)**:

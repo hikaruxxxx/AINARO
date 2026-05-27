@@ -88,6 +88,11 @@ const CSS = `
 .bib-card { display: grid; gap: var(--space-2); align-content: start; padding: var(--space-2); }
 .bib-section { display: grid; gap: var(--space-2); }
 .bib-section h3 { margin: 0; font-size: var(--fs-lg); }
+.bib-prose { display: grid; gap: 0; line-height: 1.75; }
+.bib-prose p { margin: 0; padding: 0; white-space: pre-wrap; overflow-wrap: anywhere; text-indent: 1em; }
+.bib-prose p + p { margin-top: 0.8em; }
+.bib-prose p:first-child { text-indent: 0; }
+.bib-prose__empty { color: var(--text-tertiary); font-style: italic; }
 .bib-factions,.bib-style-overrides { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-2); }
 .bib-costumes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-3); }
 .bib-costumes-grid .nc-kv__row dd { min-width: 0; word-break: keep-all; overflow-wrap: break-word; }
@@ -442,7 +447,18 @@ function hasRenderableContent(value: unknown): boolean {
 }
 
 function renderPreWrapParagraph(value: unknown): string {
-  return `<p style="white-space: pre-wrap; line-height: 1.6;">${escapeHtml(asText(value))}</p>`;
+  return renderProse(asText(value));
+}
+
+function renderProse(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return `<p class="bib-prose__empty">(未設定)</p>`;
+  const paragraphs = trimmed
+    .split(/\n\s*\n+/)
+    .map((para) => para.trim())
+    .filter((para) => para.length > 0);
+  if (paragraphs.length === 0) return `<p class="bib-prose__empty">(未設定)</p>`;
+  return `<div class="bib-prose">${paragraphs.map((para) => `<p>${escapeHtml(para)}</p>`).join("")}</div>`;
 }
 
 // dict の各 sub-key を <section class="bib-section"> で展開する。
@@ -454,7 +470,7 @@ function renderDictSubsections(obj: Record<string, unknown>, keyLabels?: Record<
     const label = keyLabels?.[key] ?? key;
     let body: string;
     if (typeof value === "string") {
-      body = `<p style="white-space: pre-wrap; line-height: 1.6;">${escapeHtml(value)}</p>`;
+      body = renderProse(value);
     } else if (Array.isArray(value)) {
       body = asList(value);
     } else if (typeof value === "object" && value !== null) {
@@ -861,7 +877,7 @@ function renderWorldReader(world: unknown): string {
       </section>
       ${p1_opening_directive !== undefined ? `<section class="bib-section">
         <h3>P1 冒頭指示 (p1_opening_directive)</h3>
-        <p>${escapeHtml(asText(p1_opening_directive))}</p>
+        ${renderPreWrapParagraph(p1_opening_directive)}
       </section>` : ""}
       ${Object.keys(lexiconRest).length > 0 ? `<section class="bib-section">
         <h3>その他</h3>
@@ -872,7 +888,7 @@ function renderWorldReader(world: unknown): string {
   return `<div class="bib-reader">
     <section class="nc-card bib-section">
       <h3>前提 (Premise)</h3>
-      <p>${escapeHtml(asText(obj.premise))}</p>
+      ${renderPreWrapParagraph(obj.premise)}
       ${detailsRaw("生 JSON", obj.premise)}
     </section>
     <section class="nc-card bib-section">
@@ -882,12 +898,12 @@ function renderWorldReader(world: unknown): string {
     </section>
     <section class="nc-card bib-section">
       <h3>システム (System)</h3>
-      ${typeof obj.system === "object" && obj.system !== null ? asKeyValueTable(asRecord(obj.system)) : `<p>${escapeHtml(asText(obj.system))}</p>`}
+      ${typeof obj.system === "object" && obj.system !== null ? asKeyValueTable(asRecord(obj.system)) : renderPreWrapParagraph(obj.system)}
       ${detailsRaw("生 JSON", obj.system)}
     </section>
     <section class="nc-card bib-section">
       <h3>年表 (Timeline)</h3>
-      ${Array.isArray(obj.timeline) ? `<ol>${obj.timeline.map((item) => `<li>${escapeHtml(asText(item))}</li>`).join("")}</ol>` : `<p>${escapeHtml(asText(obj.timeline))}</p>`}
+      ${Array.isArray(obj.timeline) ? `<ol>${obj.timeline.map((item) => `<li>${escapeHtml(asText(item))}</li>`).join("")}</ol>` : renderPreWrapParagraph(obj.timeline)}
       ${detailsRaw("生 JSON", obj.timeline)}
     </section>
     ${renderHistoryTimeline(history.timeline)}
@@ -920,7 +936,7 @@ function renderStyleReader(bible: BibleAssetView): string {
   return `<div class="bib-reader">
     <section class="nc-card bib-section">
       <h3>全体指示 (global)</h3>
-      ${typeof directives.global === "object" && directives.global !== null ? asKeyValueTable(asRecord(directives.global)) : `<p>${escapeHtml(asText(directives.global))}</p>`}
+      ${typeof directives.global === "object" && directives.global !== null ? asKeyValueTable(asRecord(directives.global)) : renderPreWrapParagraph(directives.global)}
       ${detailsRaw("生 JSON", directives.global)}
     </section>
     <section class="nc-card bib-section">
@@ -1025,7 +1041,7 @@ function renderNavReader(bible: BibleAssetView): string {
   return `<div class="bib-reader">
     <section class="nc-card bib-section">
       <h3>声・口調 (voice_persona)</h3>
-      ${default_tone !== undefined ? `<p>${escapeHtml(asText(default_tone))}</p>` : ""}
+      ${default_tone !== undefined ? renderPreWrapParagraph(default_tone) : ""}
       <section class="bib-section">
         <h3>語尾 (speech_endings)</h3>
         ${asList(speech_endings)}
@@ -1062,9 +1078,9 @@ function renderSynopsisEntry(value: unknown, index?: number): string {
   const cliffhanger = synopsis.cliffhanger;
   return `<section class="nc-card bib-section">
     ${index !== undefined ? `<h3>巻シノプシス ${index + 1}</h3>` : ""}
-    ${theme !== undefined ? `<section class="bib-section"><h3>テーマ (theme)</h3><p>${escapeHtml(asText(theme))}</p></section>` : ""}
-    ${summary !== undefined ? `<section class="bib-section"><h3>あらすじ (summary)</h3><p>${escapeHtml(asText(summary))}</p></section>` : ""}
-    ${cliffhanger !== undefined ? `<section class="bib-section"><h3>引き (cliffhanger)</h3><p>${escapeHtml(asText(cliffhanger))}</p></section>` : ""}
+    ${theme !== undefined ? `<section class="bib-section"><h3>テーマ (theme)</h3>${renderPreWrapParagraph(theme)}</section>` : ""}
+    ${summary !== undefined ? `<section class="bib-section"><h3>あらすじ (summary)</h3>${renderPreWrapParagraph(summary)}</section>` : ""}
+    ${cliffhanger !== undefined ? `<section class="bib-section"><h3>引き (cliffhanger)</h3>${renderPreWrapParagraph(cliffhanger)}</section>` : ""}
     ${detailsRaw("生 JSON", value)}
   </section>`;
 }

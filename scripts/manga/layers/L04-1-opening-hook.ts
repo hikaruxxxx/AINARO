@@ -52,6 +52,8 @@ type Args = {
   pattern: string | null;
   sceneRange: string | null;
   live: boolean;
+  /** L2b directing_intent が既に設計されていても強制実行する (旧 a07 移行用) */
+  force: boolean;
 };
 
 function parseArgs(): Args {
@@ -62,6 +64,7 @@ function parseArgs(): Args {
     pattern: null,
     sceneRange: null,
     live: false,
+    force: false,
   };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
@@ -75,6 +78,9 @@ function parseArgs(): Args {
       continue;
     } else if (arg === "--from-scene-graph") {
       a.fromSceneGraph = true;
+      continue;
+    } else if (arg === "--force") {
+      a.force = true;
       continue;
     } else if (arg === "--live") {
       a.live = true;
@@ -135,6 +141,33 @@ async function main() {
   console.log(
     `[L4.1] opening-hook-pass start: slug=${args.slug} episode=${args.episode} mode=${args.fromSceneGraph ? "scene-graph" : "panel-level"}`
   );
+
+  // L2b 物語OS再設計 (2026-05-13) で opening_hook は L2b で設計される。
+  // scene_graph.json の S01-S02 にいずれかが directing_intent.kind === "opening_hook"
+  // を持っていれば、本パスは補助検証として skip する (--force で強制実行可)。
+  if (!args.force) {
+    try {
+      const sgPath = sceneGraphPath(args.slug, args.episode);
+      const sgRaw = await readJson<unknown>(sgPath);
+      if (isSceneGraphV1(sgRaw)) {
+        const sg = sgRaw as SceneGraphV1;
+        const openingScenes = sg.scenes
+          .slice(0, 2)
+          .filter((s) => (s.directing_intent as { kind?: string } | undefined)?.kind === "opening_hook");
+        if (openingScenes.length > 0) {
+          console.log(
+            `[L4.1] SKIP: L2b directing_intent.kind=opening_hook が既に設定済み (scenes=${openingScenes.map((s) => s.scene_id).join(",")})。`,
+          );
+          console.log(
+            `[L4.1]   再生成したい場合は --force を付けて実行してください。`,
+          );
+          return;
+        }
+      }
+    } catch {
+      // scene_graph.json 不在 or parse 失敗 → 従来通り続行
+    }
+  }
 
   if (args.fromSceneGraph) {
     await runSceneGraphMode(args);

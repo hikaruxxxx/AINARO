@@ -21,13 +21,19 @@ import {
   episodeDir,
   storyboardAltsDir,
   storyboardAltProposalPath,
+  volumePlotPath,
 } from "./_paths";
 import {
   extractStoryboardFromShotlist,
   validateStoryboardEntityBinding,
 } from "../../../src/lib/manga/storyboard-v2/storyboard-extractor";
 import { validateStoryboardPanelCounts } from "../../../src/lib/manga/page-director-v2/panel-count-validator";
-import { buildStoryboardFromSceneGraph, enrichStoryboardWithLLM } from "../../../src/lib/manga/scene-graph/storyboard-from-scenes";
+import {
+  buildStoryboardFromSceneGraph,
+  enrichStoryboardWithLLM,
+  mergeDirectingIntentFromVolumePlot,
+} from "../../../src/lib/manga/scene-graph/storyboard-from-scenes";
+import type { VolumePlot } from "../../../src/lib/manga/storyboard-v2/volume-plot";
 import {
   repoRelativePath,
   saveStoryboardAlts,
@@ -88,6 +94,13 @@ function parseArgs(): Args {
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
   if (!Number.isInteger(a.variants) || a.variants < 1 || a.variants > 99) throw new Error("--variants must be 1-99");
   if (!Number.isInteger(a.concurrency) || a.concurrency < 1 || a.concurrency > 9) throw new Error("--concurrency must be 1-9");
+  // --from-scene-graph は決定論層が panel.narration/dialogue を空で初期化するため、
+  // enrich (Codex 補完) で narration_lines / key_lines を焼き込まないと validatePanelSceneInheritance が FAIL する。
+  // 明示的に --enrich 未指定の場合は auto-enable して FAIL を回避する。
+  if (a.fromSceneGraph && !a.enrich) {
+    console.warn("[L04] --from-scene-graph 指定時は --enrich が必須 (narration_lines / key_lines 焼き込みのため)。--enrich を auto-enable。");
+    a.enrich = true;
+  }
   return a as Args;
 }
 
@@ -160,21 +173,35 @@ async function buildStoryboard(args: Args, bible: BibleSnapshotV2, directive?: s
     if (!isSceneGraphV1(sgRaw)) {
       throw new Error("scene_graph.json is not a valid SceneGraphV1");
     }
-    const sceneGraph = sgRaw as SceneGraphV1;
+    let sceneGraph = sgRaw as SceneGraphV1;
+
+    // L2b directing_intent を scene_graph に merge (上流リカバリ)
+    // volume_plot.json (schema_version 2) が存在し、当 episode に scenes skeleton があれば
+    // SceneGraphV1.scenes[].directing_intent を埋める。
+    try {
+      const volNo = sceneGraph.scenes[0]?.arc_position?.volume ?? 1;
+      const vpRaw = await fs.readFile(volumePlotPath(args.slug, volNo), "utf-8");
+      const vp = JSON.parse(vpRaw) as VolumePlot;
+      const volEp = vp.episodes.find((e) => e.episode_no === args.episode);
+      if (volEp?.scenes && volEp.scenes.length > 0) {
+        const before = sceneGraph.scenes.filter((s) => s.directing_intent).length;
+        sceneGraph = mergeDirectingIntentFromVolumePlot(sceneGraph, volEp);
+        const after = sceneGraph.scenes.filter((s) => s.directing_intent).length;
+        console.log(
+          `[L04] merged directing_intent from volume_plot (vol${volNo} ep${args.episode}): ${before} → ${after} scenes`,
+        );
+      }
+    } catch {
+      // volume_plot 未生成 or schema_version 1 → skip silently
+    }
+
     let storyboard = buildStoryboardFromSceneGraph(sceneGraph, bible, {
       panelRangeProfile: { byBeatType: true },
     });
 
-    // panel-scene 継承検査 (B5-1) を兼ねる
-    const inheritance = validatePanelSceneInheritance(
-      storyboard as unknown as StoryboardLikeShape,
-      sceneGraph
-    );
-    if (!inheritance.ok) {
-      throw new Error(`panel-scene inheritance FAILED:\n${inheritance.errors.join("\n")}`);
-    }
-
     // B5-5b: --enrich で Codex CLI 経由で panel 詳細を本番文化
+    // 注: enrich は決定論層が空で初期化した panel.narration/dialogue に narration_lines / key_lines
+    // を分配する責務を持つため、検証 (validatePanelSceneInheritance) は enrich の後に走らせる必要がある
     if (args.enrich) {
       console.log(`[L04] enriching panel details via Codex CLI (${sceneGraph.scenes.length} scenes)...`);
       const enrichStart = Date.now();
@@ -184,6 +211,15 @@ async function buildStoryboard(args: Args, bible: BibleSnapshotV2, directive?: s
         enforceVisibility: true,
       });
       console.log(`[L04] enrich done in ${((Date.now() - enrichStart) / 1000).toFixed(1)}s`);
+    }
+
+    // panel-scene 継承検査 (B5-1) を兼ねる — enrich 後に検査することで narration_lines / key_lines の焼き込みを確認
+    const inheritance = validatePanelSceneInheritance(
+      storyboard as unknown as StoryboardLikeShape,
+      sceneGraph
+    );
+    if (!inheritance.ok) {
+      throw new Error(`panel-scene inheritance FAILED:\n${inheritance.errors.join("\n")}`);
     }
     return storyboard;
   }

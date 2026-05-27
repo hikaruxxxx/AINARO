@@ -72,6 +72,8 @@ export const DEFAULT_SCORING_CONFIG: ScoringLoopConfig = {
   dry_run: true,
 };
 
+export const SCENE_CANDIDATE_PROMPT_WARN_THRESHOLD = 12000;
+
 // ============================================================================
 // Candidate generation (Tier 1 入口)
 // ============================================================================
@@ -248,12 +250,15 @@ export type VolumeContext = {
     cliffhanger_hook: string;
     /** beats summary を 1 行/beat で連結 (空文字許容) */
     beats_summary_lines: string[];
+    beats?: VolumeEpisodePlan["beats"];
     /** schema_version 2 で追加: 所属 arc 内での位置 */
     arc_position?: EpisodeArcPosition;
     /** schema_version 2 で追加: 巻内位置 */
     volume_position?: EpisodeVolumePosition;
     /** schema_version 2 で追加: L2b 設計の scene skeleton (5-7 個) */
     scenes?: SceneSkeleton[];
+    archetype_id?: string;
+    episode_spine?: VolumeEpisodePlan["episode_spine"];
   } | null;
   /** 周辺 ep (prev / next) の theme + cliffhanger だけ短く */
   prev_episode_brief: { episode_no: number; title_working?: string; theme: string; cliffhanger_hook: string } | null;
@@ -322,9 +327,12 @@ function toCurrentVolumeEpisode(ep: VolumeEpisodePlan): NonNullable<VolumeContex
     must_include_events: ep.must_include_events,
     cliffhanger_hook: ep.cliffhanger_hook,
     beats_summary_lines: ep.beats.map((b) => `[${b.label}] ${b.summary}`),
+    beats: ep.beats,
     arc_position: ep.arc_position,
     volume_position: ep.volume_position,
     scenes: ep.scenes,
+    archetype_id: ep.archetype_id,
+    episode_spine: ep.episode_spine,
   };
 }
 
@@ -373,6 +381,12 @@ export function formatVolumeContextSection(vc: VolumeContext | null): string {
   if (ep.volume_position) {
     arcSection.push(`- volume_position: ${ep.volume_position}`);
   }
+  const episodeSpineSection = formatEpisodeSpineSection(ep.episode_spine);
+  const sceneEmotionSection = formatSceneEmotionSection(ep.scenes);
+  const pacingSection = formatPacingSection(ep.beats);
+  const archetypeSection = ep.archetype_id
+    ? [``, `## archetype 制約`, `- ep${ep.episode_no} archetype_id = ${ep.archetype_id}`]
+    : [];
   // scene skeleton セクション
   const sceneSection: string[] = [];
   if (ep.scenes && ep.scenes.length > 0) {
@@ -420,6 +434,10 @@ export function formatVolumeContextSection(vc: VolumeContext | null): string {
     `- cliffhanger_hook: ${ep.cliffhanger_hook}`,
     `- beats:`,
     ...ep.beats_summary_lines.slice(0, 8).map((line) => `  - ${line}`),
+    ...episodeSpineSection,
+    ...sceneEmotionSection,
+    ...pacingSection,
+    ...archetypeSection,
     ...sceneSection,
     "",
     `### 周辺 episode`,
@@ -444,6 +462,57 @@ export function formatVolumeContextSection(vc: VolumeContext | null): string {
     `  (later_in_volume / cross_volume を選ぶ)`,
     `- 当 ep が payoff 側になっている伏線がある場合、scene の foreshadow_payoff にそれを反映する`,
   ].filter((line): line is string => line !== null).join("\n");
+}
+
+function formatEpisodeSpineSection(spine: VolumeEpisodePlan["episode_spine"]): string[] {
+  if (!spine) return [];
+  const lines = [``, `## 話情緒契約 (episode_spine, Domain B)`];
+  if (spine.humiliation_event) {
+    const e = spine.humiliation_event;
+    lines.push(`- humiliation_event: p${e.page}, ${e.humiliator_character_id}, severity=${e.severity}, "${e.insult}"`);
+  }
+  if (spine.secret_or_treasure_event) {
+    const e = spine.secret_or_treasure_event;
+    lines.push(`- secret_or_treasure_event: p${e.page}, ${e.secret_type}, "${e.visual_signature}"`);
+  }
+  if (spine.awakening_event) {
+    const e = spine.awakening_event;
+    lines.push(`- awakening_event: p${e.page}, ${e.awakening_type}, intensity_target=${e.intensity_target}`);
+  }
+  if (spine.payback_event) {
+    const e = spine.payback_event;
+    lines.push(`- payback_event: p${e.page}, ${e.payback_type}, intensity_target=${e.intensity_target}, "${e.visual_catharsis_signature}"`);
+  }
+  if (spine.title_anchor) {
+    const e = spine.title_anchor;
+    lines.push(`- title_anchor: p${e.page}, ${e.emotional_function}, "${e.visual_pose}"`);
+  }
+  return lines.length > 2 ? lines : [];
+}
+
+function formatSceneEmotionSection(scenes: SceneSkeleton[] | undefined): string[] {
+  if (!scenes?.some((s) => s.scene_emotion || s.reader_state_after || s.primary_channels?.length)) {
+    return [];
+  }
+  const lines = [``, `## scene 情緒値`];
+  for (const s of scenes) {
+    const emotion = s.scene_emotion;
+    const reader = s.reader_state_after;
+    const sceneLabel = `s${String(s.scene_no).padStart(2, "0")}`;
+    lines.push(
+      `- ${sceneLabel}: ${emotion?.label ?? "(none)"} intensity=${emotion?.intensity ?? "n/a"} direction=${emotion?.direction ?? "n/a"} | knows=${reader?.knows.length ?? 0} feels=${(reader?.feels ?? "").slice(0, 30)} q=${reader?.questions.length ?? 0} ch=${(s.primary_channels ?? []).join(",")}`,
+    );
+  }
+  return lines;
+}
+
+function formatPacingSection(beats: VolumeEpisodePlan["beats"] | undefined): string[] {
+  if (!beats?.some((b) => typeof b.emotional_intensity === "number")) return [];
+  return [
+    ``,
+    `## ペーシング (beats[].emotional_intensity 数値)`,
+    `- ${beats.map((b) => `beat#${b.beat_idx} ${b.label}: ${b.emotional_intensity}`).join(" / ")}`,
+  ];
 }
 
 /** DirectingIntent を 1 行表記で要約 (prompt 注入用) */
@@ -557,6 +626,11 @@ export async function generateSceneCandidates(
   const volumeContext = await loadVolumeContext(context.volumePlotPath, context.episode);
 
   const task = buildSceneCandidatePrompt(slot, context, config.candidatesPerScene, bibleContext, feedback, volumeContext);
+  if (task.length > SCENE_CANDIDATE_PROMPT_WARN_THRESHOLD) {
+    console.warn(
+      `[scoring-loop] prompt length ${task.length} > threshold ${SCENE_CANDIDATE_PROMPT_WARN_THRESHOLD}`,
+    );
+  }
   const result = await runCodexText<{ candidates: Partial<Scene>[] }>({
     task,
     format: "json",

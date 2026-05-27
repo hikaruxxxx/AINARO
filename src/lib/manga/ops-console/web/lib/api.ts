@@ -834,6 +834,34 @@ export function apiPutVolumePlot(
   );
 }
 
+/**
+ * L2b 物語OS再設計 (2026-05-13) で追加。
+ * 本作レベル長期計画 (series_plan.json) を取得する。
+ * 未生成 (404) の場合は plan: null を返す (UI 側で「未生成」表示)。
+ */
+export type SeriesPlanResponse = {
+  slug: string;
+  plan: unknown | null;
+  error?: string;
+};
+
+export async function apiGetSeriesPlan(slug: string): Promise<SeriesPlanResponse> {
+  try {
+    const res = await fetch(`/api/works/${encodeURIComponent(slug)}/series-plan`);
+    if (res.status === 404) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      return { slug, plan: null, error: body.error };
+    }
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      throw new Error(body.error ?? `series-plan fetch failed: ${res.status}`);
+    }
+    return (await res.json()) as SeriesPlanResponse;
+  } catch (e) {
+    throw e instanceof Error ? e : new Error(String(e));
+  }
+}
+
 export type VolumeKdpFileStatus = {
   exists: boolean;
   mtime?: string;

@@ -18,6 +18,7 @@ import type {
   SceneSkeleton,
   DirectingIntent,
 } from "../storyboard-v2/volume-plot";
+import type { EpisodeSpine } from "../storyboard-v2/episode-spine";
 import type {
   Scene,
   SceneGraphV1,
@@ -35,6 +36,8 @@ import type {
  *   - L4 で実際の panel 数が決まれば validate で再算出される
  */
 const PANELS_PER_PAGE_DEFAULT = 5;
+
+type EpisodeSpineLink = NonNullable<Scene["episode_spine_links"]>[number];
 
 function inferBeatType(di: DirectingIntent | undefined, isLast: boolean): BeatType {
   if (!di) return isLast ? "cliff" : "setup";
@@ -132,6 +135,55 @@ function pickKeyVisualIntent(skeleton: SceneSkeleton): string {
   return skeleton.key_action ?? skeleton.purpose ?? "";
 }
 
+function buildEpisodeSpineLinksForScene(
+  skeleton: SceneSkeleton,
+  episodeSpine: EpisodeSpine | undefined,
+): EpisodeSpineLink[] | undefined {
+  if (!episodeSpine) return undefined;
+  const [pageStart, pageEnd] = skeleton.page_range;
+  const links: EpisodeSpineLink[] = [];
+  const pushIfInRange = (link: EpisodeSpineLink) => {
+    if (link.expected_page >= pageStart && link.expected_page <= pageEnd) {
+      links.push(link);
+    }
+  };
+
+  if (episodeSpine.humiliation_event) {
+    pushIfInRange({
+      event_kind: "humiliation",
+      expected_page: episodeSpine.humiliation_event.page,
+    });
+  }
+  if (episodeSpine.secret_or_treasure_event) {
+    pushIfInRange({
+      event_kind: "secret_or_treasure",
+      expected_page: episodeSpine.secret_or_treasure_event.page,
+    });
+  }
+  if (episodeSpine.awakening_event) {
+    pushIfInRange({
+      event_kind: "awakening",
+      expected_page: episodeSpine.awakening_event.page,
+      expected_intensity_target: episodeSpine.awakening_event.intensity_target,
+    });
+  }
+  if (episodeSpine.payback_event) {
+    pushIfInRange({
+      event_kind: "payback",
+      expected_page: episodeSpine.payback_event.page,
+      expected_intensity_target: episodeSpine.payback_event.intensity_target,
+    });
+  }
+  if (episodeSpine.title_anchor) {
+    pushIfInRange({
+      event_kind: "title_anchor",
+      expected_page: episodeSpine.title_anchor.page,
+    });
+  }
+
+  return links.length > 0 ? links : undefined;
+}
+
 /**
  * L2b SceneSkeleton[] を scoring-loop slot source の Scene[] に変換する。
  * dialogue_plan / foreshadow_setup 等は空でセットし、後続 LIVE 採点で肉付けする想定。
@@ -143,6 +195,7 @@ export function bootstrapScenesFromSkeleton(
     episodeNo: number;
     volumePosition: VolumeEpisodePlan["volume_position"];
     protagonistArc: VolumeEpisodePlan["protagonist_arc"];
+    episodeSpine?: EpisodeSpine;
   },
 ): Scene[] {
   const total = skeletons.length;
@@ -200,6 +253,10 @@ export function bootstrapScenesFromSkeleton(
       key_visual_intent: pickKeyVisualIntent(sk),
       // E 系: directing_intent を skeleton から継承
       directing_intent: sk.directing_intent,
+      scene_emotion: sk.scene_emotion,
+      reader_state_after: sk.reader_state_after,
+      episode_spine_links: buildEpisodeSpineLinksForScene(sk, context.episodeSpine),
+      primary_channels: sk.primary_channels,
     };
   });
 }
@@ -214,6 +271,7 @@ export function bootstrapSceneGraphFromVolumePlot(args: {
   bibleSnapshotPath: string;
   briefPath: string;
   shotlistPath: string;
+  force?: boolean;
 }): SceneGraphV1 {
   const ep = args.volumePlot.episodes.find((e) => e.episode_no === args.episodeNo);
   if (!ep) {
@@ -231,6 +289,7 @@ export function bootstrapSceneGraphFromVolumePlot(args: {
     episodeNo: args.episodeNo,
     volumePosition: ep.volume_position,
     protagonistArc: ep.protagonist_arc,
+    episodeSpine: ep.episode_spine,
   });
   // pull_link 型は schemas-v2 と scene-graph で is_volume_end の optional 性が異なるため正規化
   const pullLink = ep.pull_link
@@ -254,6 +313,8 @@ export function bootstrapSceneGraphFromVolumePlot(args: {
       volume_plot_path: `volumes/v${String(args.volumePlot.volume_no).padStart(2, "0")}/plot.json`,
     },
     _note:
-      "Bootstrap from L2b SceneSkeleton (2026-05-13). dialogue_plan / foreshadow / relationship_delta は空。L03_5 --mode generate --live で肉付け推奨。",
+      args.force
+        ? "Force rebootstrap from L2b SceneSkeleton. dialogue_plan / foreshadow / relationship_delta は空。L03_5 --mode generate --live で肉付け推奨。"
+        : "Bootstrap from L2b SceneSkeleton (2026-05-13). dialogue_plan / foreshadow / relationship_delta は空。L03_5 --mode generate --live で肉付け推奨。",
   };
 }

@@ -127,7 +127,8 @@ export type CharacterRoleV2 =
   | "deuteragonist"
   | "mentor"
   | "rival"
-  | "love_interest";
+  | "love_interest"
+  | "antagonist";
 
 export type CharacterEntryV2 = {
   /** "char_ren_v1" 形式、bible 内ユニーク */
@@ -407,6 +408,45 @@ export type EpisodeRewardDensity = {
   warnings: string[];
 };
 
+/**
+ * 機能型敵対者プロファイル。
+ *
+ * 「主人公が弱い」だけでは読者の怒りは発火しない。
+ * 「誰かが見下し、周囲が目撃し、読者が怒る」社会的装置として敵対者を構造化する。
+ *
+ * antagonist_type の意味:
+ * - public_humiliator: 公衆で煽動・侮辱する敵 (WEBTOON 初速の起点として最強)
+ * - institutional_gatekeeper: 制度を盾に主人公を縛る (a07 槇島型)
+ * - rival_chosen_one: 同期 / 同階級の天才ライバル (a07 灯里型)
+ * - betrayer: 信頼した相手の裏切り
+ * - predator: 物理的脅威 (戦闘敵)
+ */
+export type AntagonistProfile = {
+  /** bible.characters[].id への参照。該当 character の role は "antagonist" 必須 */
+  character_id: string;
+  antagonist_type:
+    | "public_humiliator"
+    | "institutional_gatekeeper"
+    | "rival_chosen_one"
+    | "betrayer"
+    | "predator";
+  /** どう侮辱するか 80字 */
+  humiliation_style: string;
+  /** 社会的権力の核 60字 */
+  public_power: string;
+  /** 読者が憎む理由 80字 */
+  why_reader_hates_them: string;
+  first_humiliation_volume: number;
+  first_humiliation_episode: number;
+  first_payback_volume: number;
+  first_payback_episode: number;
+  escalation_plan: Array<{
+    volume: number;
+    /** その巻でこの敵対者が果たす役割 60字 */
+    role: string;
+  }>;
+};
+
 export type BibleSnapshotV2 = {
   schema_version: 2;
   generated_at: string;
@@ -474,6 +514,12 @@ export type BibleSnapshotV2 = {
   continuity_seeds: ContinuitySeedV2[];
   narration_style_guide?: NarrationStyleGuideV2;
   nav_full_spec?: NavFullSpecV2;
+  /**
+   * 2026-05-20 S1 で追加。後方互換 optional。
+   * 主人公を社会的に下げる / 制度的に縛る / 戦闘で脅かす 機能型敵対者。
+   * episode_spine.humiliation_event.humiliator_character_id から参照される。
+   */
+  antagonists?: AntagonistProfile[];
   volume_synopsis: {
     theme: string;
     summary: string;
@@ -747,6 +793,13 @@ export type PanelV2 = {
   screentone_intensity?: "light" | "medium" | "dark";
   /** 報酬タグ（panel 単位、optional） */
   reward_tags?: RewardTag[];
+  /**
+   * 2026-05-20 S1 Domain C で追加。
+   * L02b beat → scene → panel に伝播される感情強度 (0-1)。
+   * intensity-propagation.ts が埋める。audit-emotional-amplitude が検査。
+   * 後方互換 optional。
+   */
+  emotional_intensity?: number;
 };
 
 export type StoryboardPageV2 = {

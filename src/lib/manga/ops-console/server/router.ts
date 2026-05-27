@@ -53,11 +53,13 @@ import {
   handleBibleAdoptedVariantsPost,
 } from "./handlers/bible-adopted-variants";
 import { handleVolumePlot, handleVolumePlotPut } from "./handlers/volume-plot";
+import { handleSeriesPlanGet } from "./handlers/series-plan";
 import {
   handleAdoptedVolumePlotGet,
   handleAdoptedVolumePlotPost,
 } from "./handlers/adopted-volume-plot";
 import { handleVolumesList } from "./handlers/volumes";
+import { handleReaderJourney } from "./handlers/reader-journey";
 import {
   handleWorkCreate,
   handleWorkKdpMetadataPut,
@@ -448,6 +450,18 @@ export async function handleApi(
     }
   }
   {
+    // L2b 物語OS再設計: series_plan.json (本作レベル長期計画)
+    const m = p.match(/^\/api\/works\/([^/]+)\/series-plan$/);
+    if (m) {
+      const slug = m[1];
+      if (!isValidSlug(slug)) {
+        return send(res, 400, { error: "作品 ID が不正です" });
+      }
+      if (req.method === "GET") return handleSeriesPlanGet(slug, res);
+      return send(res, 405, { error: "このメソッドは許可されていません" });
+    }
+  }
+  {
     const m = p.match(/^\/api\/works\/([^/]+)\/volumes\/v(\d+)\/plot$/);
     if (m) {
       const slug = m[1];
@@ -641,6 +655,10 @@ export async function handleApi(
     if (tail === "/storyboard-proposals") {
       if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
       return handleStoryboardProposalsGet(scoped.slug, scoped.episode, res);
+    }
+    if (tail === "/reader-journey") {
+      if (req.method !== "GET") return send(res, 405, { error: "このメソッドは許可されていません" });
+      return handleReaderJourney(scoped.slug, scoped.episode, res);
     }
     return send(res, 404, { error: "not found" });
   }

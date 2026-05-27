@@ -31,7 +31,7 @@ export const LAYER_LABELS: Record<LayerKey, LayerInfo> = {
   L01b: { title: "Bible 監査 (Lint)", subtitle: "L01b Bible Lint", hint: "Bible Lint。命名・整合・必須欄の機械チェック" },
   L01c: { title: "Bible 深掘り (Deepen)", subtitle: "L01c Bible Deepen", hint: "Bible Deepen。Bible に深さを足す再生成" },
   L02: { title: "参考画像 (初回バッチ・キャラ/背景)", subtitle: "L02 Bible Images", hint: "Bible refs (キャラ画像・場所画像など参照素材) を生成" },
-  L02b: { title: "巻あらすじ・章構成 (Volume Plot)", subtitle: "L02b", hint: "巻あらすじ・章構成・登場キャラの巻プロットを生成" },
+  L02b: { title: "本作プロット + 巻プロット (Story Plot)", subtitle: "L02b", hint: "--phase=series で本作レベル長期計画 (series_plan.json) を、--phase=volume で巻プロット (scenes + directing_intent 付き) を生成。--phase=all (既定) は両方" },
   L03: { title: "シーン分割 (Shotlist)", subtitle: "L03", hint: "エピソードのシーン・テンポ・shotlist を計画" },
   L04: { title: "ネーム（構成データ）", subtitle: "L04 Storyboard", hint: "scene_graph + bible から storyboard (panel 単位ネーム) を構築" },
   L04_audit: { title: "Storyboard variants 監査", subtitle: "L04_audit", hint: "複数 storyboard 案を 8 軸で比較監査" },

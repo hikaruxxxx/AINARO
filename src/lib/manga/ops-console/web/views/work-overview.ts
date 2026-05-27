@@ -120,7 +120,8 @@ function render(container: HTMLElement, state: ViewState): void {
           <h3>クイックアクション</h3>
           <div class="wo-actions">
             <button type="button" class="nc-button nc-button--secondary" data-view="bible">設定資料を一括生成 <span class="nc-layer-label__sub" style="margin-left:4px">L01</span></button>
-            <button type="button" class="nc-button nc-button--secondary" data-view="volume-plot">巻プロットを構築 <span class="nc-layer-label__sub" style="margin-left:4px">L02b</span></button>
+            <button type="button" class="nc-button nc-button--secondary" data-view="series-plan">本作プロットを確認 <span class="nc-layer-label__sub" style="margin-left:4px">L02b series</span></button>
+            <button type="button" class="nc-button nc-button--secondary" data-view="volume-plot">巻プロットを構築 <span class="nc-layer-label__sub" style="margin-left:4px">L02b vol</span></button>
             <button type="button" class="nc-button nc-button--primary" data-view="kdp-metadata">KDP 入稿メタを編集</button>
             <button type="button" class="nc-button nc-button--secondary" data-view="volumes">巻管理</button>
           </div>
