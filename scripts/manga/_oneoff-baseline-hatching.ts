@@ -1,8 +1,7 @@
 /**
- * Baseline hatching 検証 v8 (検証 3B: composePagePrompt をライブで呼ぶ):
- *   v01-v04 は dump 済 prompt + 手書き refs で hatching が出なかった。
- *   L9-render は composePagePrompt の戻り値 (prompt + refImagePaths) を**そのまま**渡す。
- *   このスクリプトはその経路を完全再現する。
+ * Baseline hatching 検証 v9 (検証 4: 複数ページ、v46 同条件再現):
+ *   p3 (集中線多発), p4 (二重描画) を各 2 枚、live composePagePrompt で生成。
+ *   storyboard は事前に pre-codex-compressed-marshmallow.bak に復元済。
  */
 import "./_env";
 import { promises as fs } from "node:fs";
@@ -28,9 +27,9 @@ import type { SceneGraphV1, Scene } from "../../src/lib/manga/scene-graph/schema
 
 const SLUG = "a07-modern-dungeon";
 const EPISODE = 1;
-const TARGET_PAGE = 10;
+const TARGET_PAGES = [3, 4];
 
-async function genOne(idx: number) {
+async function genOne(idx: number, targetPage: number) {
   const bible = JSON.parse(await fs.readFile(bibleSnapshotPath(SLUG), "utf-8")) as BibleSnapshotV2;
   const storyboard = JSON.parse(await fs.readFile(storyboardPath(SLUG, EPISODE), "utf-8")) as EpisodeStoryboardV2;
   const pagePlan = JSON.parse(await fs.readFile(pagePlanPath(SLUG, EPISODE), "utf-8")) as PagePlanV2;
@@ -48,16 +47,15 @@ async function genOne(idx: number) {
     }
   }
 
-  const sbPage = storyboard.pages.find((p) => p.page_no === TARGET_PAGE)!;
-  const planPage = pagePlan.pages.find((p) => p.page_no === TARGET_PAGE)!;
-  const packet = resolved.packets[`page_${TARGET_PAGE}`];
+  const sbPage = storyboard.pages.find((p) => p.page_no === targetPage)!;
+  const planPage = pagePlan.pages.find((p) => p.page_no === targetPage)!;
+  const packet = resolved.packets[`page_${targetPage}`];
   const pageBgMap = new Map(
     planPage.panels
       .map((pp) => [pp.panel_id, pp.background_treatment])
       .filter(([, v]) => v !== undefined) as [string, NonNullable<typeof planPage.panels[0]["background_treatment"]>][],
   );
 
-  // L9-render と完全同じ引数
   const { prompt, refImagePaths } = composePagePrompt({
     page: sbPage,
     packet,
@@ -66,13 +64,12 @@ async function genOne(idx: number) {
     pageBackgroundTreatments: pageBgMap.size > 0 ? pageBgMap : undefined,
     pagePlanPage: planPage,
     compliance,
-    scene: sceneByPage.get(TARGET_PAGE),
+    scene: sceneByPage.get(targetPage),
   });
-  console.log(`[live v0${idx}] prompt length: ${prompt.length}, refs: ${refImagePaths.length}`);
-  console.log(`[live v0${idx}] refImagePaths order:`, refImagePaths.map((p) => path.basename(p)));
+  console.log(`[live p${targetPage} v0${idx}] prompt: ${prompt.length}, refs: ${refImagePaths.length}`);
 
   const OUT = path.resolve(
-    `data/manga/works/${SLUG}/episodes/ep01/renders/_baseline_live_real_v0${idx}.png`,
+    `data/manga/works/${SLUG}/episodes/ep01/renders/_baseline_live_real_p${String(targetPage).padStart(2, "0")}_v0${idx}.png`,
   );
   const res = await generateMangaImage({
     prompt,
@@ -81,14 +78,16 @@ async function genOne(idx: number) {
     referenceImagePaths: refImagePaths,
     timeoutMs: 15 * 60 * 1000,
     maxRetries: 1,
-    ledgerContext: { slug: SLUG, episode: EPISODE, layer: "render", page: TARGET_PAGE },
+    ledgerContext: { slug: SLUG, episode: EPISODE, layer: "render", page: targetPage },
   });
-  console.log(`[live v0${idx}] DONE`, res);
+  console.log(`[live p${targetPage} v0${idx}] DONE size=${res.sizeBytes}`);
 }
 
 async function main() {
-  for (let i = 1; i <= 2; i++) {
-    await genOne(i);
+  for (const pageNo of TARGET_PAGES) {
+    for (let i = 1; i <= 2; i++) {
+      await genOne(i, pageNo);
+    }
   }
 }
 
