@@ -43,10 +43,14 @@ export function placeBubbles(args: {
   panelWidth: number;
   panelHeight: number;
   dialogues: DialogueInput[];
+  pageOriginX?: number;
+  pageOriginY?: number;
 }): PlacedBubble[] {
   const placed: PlacedBubble[] = [];
   const margin = Math.round(args.panelWidth * 0.06);
   const maxBubbleWidth = Math.round(args.panelWidth * 0.7);
+  const pageOriginX = args.pageOriginX ?? 0;
+  const pageOriginY = args.pageOriginY ?? 0;
 
   // 上から順に並べる。各 bubble の高さはテキスト長さで概算
   let cursorY = Math.round(args.panelHeight * 0.04);
@@ -72,8 +76,8 @@ export function placeBubbles(args: {
     }
 
     const position: BubblePosition = {
-      x,
-      y: cursorY,
+      x: x + pageOriginX,
+      y: cursorY + pageOriginY,
       width: bubbleWidth,
       height: bubbleHeight,
     };
@@ -88,8 +92,8 @@ export function placeBubbles(args: {
       tail_x = x + Math.round(bubbleWidth * 0.8);
       tail_y = cursorY + bubbleHeight + Math.round(args.panelHeight * 0.03);
     }
-    if (tail_x !== undefined) position.tail_x = tail_x;
-    if (tail_y !== undefined) position.tail_y = tail_y;
+    if (tail_x !== undefined) position.tail_x = tail_x + pageOriginX;
+    if (tail_y !== undefined) position.tail_y = tail_y + pageOriginY;
 
     placed.push({
       reading_order: d.reading_order,

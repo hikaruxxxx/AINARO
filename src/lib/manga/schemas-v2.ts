@@ -1,0 +1,1423 @@
+/**
+ * 漫画パイプライン v2 スキーマ集約 (manga-pipeline-v2.md 準拠)
+ *
+ * v1 schemas.ts の primitive 型 (CharacterSpec/LocationSpec/PropSpec/CostumeSpec)
+ * を流用しつつ、v2 で確定した layer 出力型 (BibleSnapshotV2/EpisodeStoryboardV2/
+ * ResolvedRefs/RefsProvenance/PagePlanV2) を新規定義する。
+ *
+ * 既存 BibleSnapshot v1 とは別系統。schema_version で区別。
+ */
+import type {
+  ArtStyle,
+  CharacterRole,
+  LocationType,
+} from "./types";
+import type {
+  CharacterSpec,
+  LocationSpec,
+  PropSpec,
+  CostumeSpec,
+  AttributeClassifierLabels,
+} from "./schemas";
+// 2026-05-18 Sprint 22 案5: effect_lines を PanelV2 に正式追加 (effect-lines/types.ts から import)
+import type { EffectLineSpec } from "./effect-lines/types";
+
+// ============================================================
+// L1 出力: BibleSnapshotV2
+// ============================================================
+
+export type WorldFaction = {
+  name: string;
+  summary: string;
+};
+
+export type WorldSpec = {
+  premise: string;
+  rules: string[];
+  system: string;
+  timeline: string;
+  factions: WorldFaction[];
+  /** bible 深掘り: 作中史の時系列と伏線管理 */
+  history?: {
+    timeline?: Array<{
+      year_or_era: string;
+      event: string;
+      impact?: string;
+    }>;
+    pre_canon_events?: Array<{
+      event: string;
+      significance: string;
+      revealed_in_volume?: number;
+    }>;
+    /** volume_number -> "YYYY-MM-DD" */
+    canonical_dates?: Record<string, string>;
+  };
+  /** bible 深掘り: 能力体系の論理 */
+  power_system_logic?: string;
+  /** bible 深掘り: 宇宙観・神話体系 */
+  cosmology?: string;
+  /** bible 深掘り: 経済構造 */
+  economic_system?: string;
+  /** bible 深掘り: 階層・身分・社会圧 */
+  social_strata?: string;
+  /** bible 深掘り: 日常生活の質感 */
+  daily_life_textures?: string;
+  /** bible 深掘り: 言語・命名規則 */
+  language_and_naming?: string;
+  /** bible 深掘り: 禁忌知識と開示計画 */
+  forbidden_lore?: Array<{
+    secret: string;
+    revealed_in_volume?: number;
+    setup_episodes?: number[];
+  }>;
+  lexicon?: TextQualityLexiconV2;
+};
+
+export type TextQualityLexiconV2 = {
+  forbidden_terms_global?: string[];
+  p1_opening_directive?: string;
+  [key: string]: unknown;
+};
+
+export type CharacterSpeechStyleV2 = {
+  first_person?: string;
+  register?: string;
+  sentence_rhythm?: string;
+  verbosity_dial?: Record<string, string>;
+  preferred_techniques?: string[];
+  characteristic_phrases?: string[];
+  to_navi_dialog_pattern?: string;
+  speech_drift_per_volume?: Record<string, string>;
+  monologue_signature?: string;
+  ban_phrases?: string[];
+  [key: string]: unknown;
+};
+
+export type NarrationStyleGuideV2 = {
+  p1_opening_directive_specific?: {
+    max_lines?: number;
+    max_chars_per_line?: number;
+    must_contain_at_most_one_of?: string[];
+    must_avoid?: string[];
+    preferred_pattern_examples?: string[];
+    rejected_pattern_examples?: string[];
+    [key: string]: unknown;
+  };
+  ban_list_phrases?: string[];
+  monologue_signature_patterns?: string[];
+  [key: string]: unknown;
+};
+
+export type NavFullSpecV2 = {
+  voice_persona?: {
+    default_tone?: string;
+    speech_endings?: string[];
+    emotional_range_per_volume?: Record<string, string>;
+    [key: string]: unknown;
+  };
+  canonical_disclosure_lines_vol_1?: string[];
+  anti_pattern_dialogue?: {
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+};
+
+export type CharacterRoleV2 =
+  | CharacterRole
+  | "deuteragonist"
+  | "mentor"
+  | "rival"
+  | "love_interest"
+  | "antagonist";
+
+export type CharacterEntryV2 = {
+  /** "char_ren_v1" 形式、bible 内ユニーク */
+  id: string;
+  name: string;
+  name_romaji?: string;
+  role: CharacterRoleV2;
+  /** 副軸: heroine / villain_lieutenant / comic_relief 等。role と直交、UI/depth-spec で使う optional 拡張 */
+  subrole?: "heroine" | "villain_lieutenant" | "comic_relief" | "mentor_secondary" | "rival_secondary";
+  age_visual?: string;
+  spec: CharacterSpec;
+  attribute_classifier: AttributeClassifierLabels;
+  /** "always_black_hood" のような不変記述 ID 配列 */
+  continuity_anchors: string[];
+  appears_in_volumes: number[];
+  /** 任意の脚本ノート (storyboard-builder への自由ヒント) */
+  appearance_notes?: string;
+  /** bible 深掘り: 生い立ち */
+  backstory?: string;
+  /** bible 深掘り: 幼少期の具体エピソード */
+  childhood_episodes?: string[];
+  /** bible 深掘り: 心理構造 */
+  psychology_deep?: string;
+  /** bible 深掘り: 防衛機制 */
+  defense_mechanisms?: string;
+  /** bible 深掘り: 世界の見え方フィルタ */
+  worldview_filter?: string;
+  /** bible 深掘り: 場面別の声・台詞サンプル */
+  voice_samples?: Array<{
+    /** どの場面のセリフか */
+    episode_or_scene_hint?: string;
+    line: string;
+    /** "establish" / "reveal" / "cliff" 等 */
+    intent?: string;
+  }>;
+  /** bible 深掘り: 典型的な一日 */
+  typical_day_in_life?: string;
+  /** bible 深掘り: 相手別の関係描写 */
+  relationship_per_partner?: Array<{
+    /** 他 character.id 参照 */
+    partner_id: string;
+    description: string;
+  }>;
+  /** bible 深掘り: 巻ごとの成長変化 */
+  growth_per_volume?: Array<{
+    volume?: number;
+    vol?: number;
+    description?: string;
+    growth?: string;
+  }>;
+  /** antagonist 深掘り: 原初の傷 */
+  origin_wound_deep?: string;
+  /** antagonist 深掘り: 思想の論証 */
+  ideology_argument?: string;
+  /** antagonist 深掘り: 主人公との暗い鏡像性 */
+  dark_mirror_to_protagonist?: string;
+  /** 任意の dialogue / monologue 文体ガード */
+  speech_style?: CharacterSpeechStyleV2;
+};
+
+export type LocationEntryV2 = {
+  /** "loc_lawson_interior_v1" 形式 */
+  id: string;
+  name: string;
+  location_type: LocationType;
+  spec: LocationSpec;
+  continuity_anchors: string[];
+  appears_in_episodes: number[];
+};
+
+export type PropEntryV2 = {
+  /** "prop_smartphone_cracked_v1" 形式 */
+  id: string;
+  name: string;
+  owner_character_id?: string;
+  spec: PropSpec;
+  continuity_anchors: string[];
+};
+
+export type CostumeEntryV2 = {
+  id: string;
+  character_id: string;
+  /** どの話から有効か (1-indexed) */
+  valid_from_episode: number;
+  /** どの話まで有効か (null = 最終巻まで) */
+  valid_until_episode: number | null;
+  spec: CostumeSpec;
+};
+
+export type CharacterRelationV2 = {
+  from_character_id: string;
+  to_character_id: string;
+  relation_type: string;
+  description: string;
+  /** bible 深掘り: from -> to 方向の感情・関係描写 */
+  bidirectional_a_to_b?: string;
+  /** bible 深掘り: to -> from 方向の感情・関係描写 */
+  bidirectional_b_to_a?: string;
+  /** bible 深掘り: 関係を変化させた事件 */
+  catalyst_events?: Array<{
+    description: string;
+    volume?: number;
+    episode?: number;
+  }>;
+  /** bible 深掘り: 巻ごとの関係変化 */
+  per_volume_delta?: string;
+  /** 推し導線の魅力軸（relation_type と独立。enum 外も string で許容するため未知文字列は warn） */
+  appeal_axis?: AppealAxis | string;
+  /** 作者主観の推し度 0-5 */
+  appeal_score_manual?: 0 | 1 | 2 | 3 | 4 | 5;
+  /** 自動推定の推し度 0-5（heuristic） */
+  appeal_score_auto?: number;
+  /** 推し導線として推奨するか */
+  is_recommended_pairing?: boolean;
+  /** 推し評価の根拠（手動 or 自動の証拠スニペット） */
+  appeal_evidence?: string[];
+};
+
+/** 推し導線の魅力軸（14種、relation_type と独立） */
+export type AppealAxis =
+  | "mentor_disciple"
+  | "rivalry"
+  | "loyalty"
+  | "protector_protected"
+  | "forbidden_bond"
+  | "co_conspirator"
+  | "unrequited_love"
+  | "mutual_rescue"
+  | "banter_tension"
+  | "status_gap"
+  | "found_family"
+  | "sibling_like"
+  | "betrayal_repair"
+  | "admiration_envy";
+
+/** primary_appeal_mode: 作品全体の主訴求モード */
+export type PrimaryAppealMode =
+  | "solo_growth"
+  | "ensemble_relation"
+  | "romance"
+  | "mystery";
+
+export type StyleDirectivesV2 = {
+  /** 全話通底の画風 1-2文 (audit / fallback 用に full text を保持) */
+  global: string;
+  /**
+   * 2026-05-12 追加: prompt 注入用の圧縮版 (目標 800-1100 字)。
+   * composer は digest があればそれを使い、なければ global にフォールバック。
+   * load-bearing でない命題・他セクション重複は digest 側で削る。
+   */
+  digest?: string;
+  /** "daily" | "dungeon" | "battle" | "flashback" | "news_broadcast" 等 */
+  scene_overrides: Record<string, string>;
+  /** UI/オーバーレイ要素の禁則 */
+  overlay_rules: string[];
+};
+
+export type VisualMotifV2 = {
+  name: string;
+  meaning: string;
+  draw_directive: string;
+  /** bible 深掘り: 象徴の由来・系譜 */
+  symbolic_lineage?: string;
+  /** bible 深掘り: 参照すべき場面 */
+  reference_scenes?: string[];
+  /** bible 深掘り: 避けるべき描写例 */
+  negative_examples?: string[];
+};
+
+export type ContinuitySeedKind =
+  | "character_face"
+  | "character_outfit"
+  | "character_back"
+  | "location_layout"
+  | "prop"
+  | "tv_variant";
+
+export type ContinuitySeedV2 = {
+  /** "char_ren_face_v1" 形式 */
+  group_id: string;
+  kind: ContinuitySeedKind;
+  /** character.id / location.id / prop.id への参照 */
+  target_id: string;
+  invariant_description: string;
+};
+
+/**
+ * トーン制御パラメータ (Phase X WX-2 で追加、Codex レビュー反映 2026-05-06)
+ *
+ * 「重い入口・重い関係・重い引き」三重奏の解体のため、暗さ強制プロンプトを撤去し、
+ * 代わりに数値パラメータで制御する。各値は 0.0-1.0 の連続値:
+ *
+ *   - darkness:         0=軽快, 1=ヘルモード (light_recovery default 0.3, hellmode default 0.8)
+ *   - comedic_density:  ページあたりギャグ呼吸の頻度 (0=皆無, 1=ほぼ毎page)
+ *   - recovery_cadence: 小報酬/生活感 beat の頻度 (0=皆無, 1=高頻度)
+ *   - sidekick_presence: 相棒/家族の登場頻度 (0=皆無, 1=ほぼ毎話)
+ *
+ * ジャンル別 darkness floor は data/generation/profiles/light_recovery_type/profile.yaml 参照。
+ */
+export type ToneProfile = {
+  darkness: number;
+  comedic_density: number;
+  recovery_cadence: number;
+  sidekick_presence: number;
+};
+
+export type DungeonModernSubtype = "external_social" | "gacha_ui" | "hybrid";
+
+export type CoreHookV2 = {
+  /** 中核ギミック1文。bible-lint で30字以内を必須検証する */
+  one_liner: string;
+  /** A:反復蓄積 / B:接続媒介 / C:視点ずらし */
+  type: "A" | "B" | "C";
+  /** 既存ヒット作との差分確認用。bible-lint で1-3作を検証する */
+  hit_references: string[];
+  /** 下流パイプラインで参照する中核メカニクス slug。free-form なので lint では縛らない */
+  mechanic?: string;
+  /** 読者が追い続ける1文の問い。opening/cliffhanger の反射面として使う */
+  reader_question?: string;
+  /** 読者に約束する主報酬。custom の場合は custom_reward_mode を併用する */
+  reward_mode?: RewardMode;
+  /** reward_mode === "custom" のときの自由記述 */
+  custom_reward_mode?: string;
+};
+
+export type RewardMode =
+  | "reveal"
+  | "intimacy"
+  | "power_growth"
+  | "justice"
+  | "spectacle"
+  | "comfort"
+  | "mystery_progress"
+  | "custom";
+
+/** Reward tag enum（panel 単位の報酬種別、10種） */
+export type RewardTagType =
+  | "achievement"
+  | "secret_revealed"
+  | "relationship_advance"
+  | "power_growth"
+  | "justice_payoff"
+  | "spectacle"
+  | "comic_relief"
+  | "comfort_recovery"
+  | "status_gain"
+  | "mystery_progress";
+
+export type RewardTag = {
+  type: RewardTagType;
+  /** 補足（任意） */
+  note?: string;
+  /** 検出層: explicit=作者明示, deterministic=ヒューリスティック, llm=LLM補助 */
+  source?: "explicit" | "deterministic" | "llm";
+};
+
+/** Episode 単位の報酬密度集計 */
+export type EpisodeRewardDensity = {
+  episode_no: number;
+  total_pages: number;
+  reward_count: number;
+  /** reward_count / total_pages (0-1+) */
+  reward_density: number;
+  /** 連続無報酬ページの最大値 */
+  max_gap_pages: number;
+  /** distinct reward type 数 */
+  variety_score: number;
+  /** episode 内に出現した distinct reward types */
+  reward_types: RewardTagType[];
+  /** ページ単位の reward 検出結果 */
+  per_page_rewards: Array<{
+    page_no: number;
+    reward_types: RewardTagType[];
+    sources: Array<"explicit" | "deterministic" | "llm">;
+  }>;
+  /** 警告メッセージ */
+  warnings: string[];
+};
+
+/**
+ * 機能型敵対者プロファイル。
+ *
+ * 「主人公が弱い」だけでは読者の怒りは発火しない。
+ * 「誰かが見下し、周囲が目撃し、読者が怒る」社会的装置として敵対者を構造化する。
+ *
+ * antagonist_type の意味:
+ * - public_humiliator: 公衆で煽動・侮辱する敵 (WEBTOON 初速の起点として最強)
+ * - institutional_gatekeeper: 制度を盾に主人公を縛る (a07 槇島型)
+ * - rival_chosen_one: 同期 / 同階級の天才ライバル (a07 灯里型)
+ * - betrayer: 信頼した相手の裏切り
+ * - predator: 物理的脅威 (戦闘敵)
+ */
+export type AntagonistProfile = {
+  /** bible.characters[].id への参照。該当 character の role は "antagonist" 必須 */
+  character_id: string;
+  antagonist_type:
+    | "public_humiliator"
+    | "institutional_gatekeeper"
+    | "rival_chosen_one"
+    | "betrayer"
+    | "predator";
+  /** どう侮辱するか 80字 */
+  humiliation_style: string;
+  /** 社会的権力の核 60字 */
+  public_power: string;
+  /** 読者が憎む理由 80字 */
+  why_reader_hates_them: string;
+  first_humiliation_volume: number;
+  first_humiliation_episode: number;
+  first_payback_volume: number;
+  first_payback_episode: number;
+  escalation_plan: Array<{
+    volume: number;
+    /** その巻でこの敵対者が果たす役割 60字 */
+    role: string;
+  }>;
+};
+
+export type BibleSnapshotV2 = {
+  schema_version: 2;
+  generated_at: string;
+  generated_from: {
+    /** "v2_concept_json" | "design_doc_md" */
+    source_type: string;
+    source_path: string;
+  };
+  meta: {
+    slug: string;
+    title: string;
+    title_short?: string;
+    title_en?: string;
+    art_style: ArtStyle;
+    genre: string;
+    target_pages_per_volume: number;
+    target_episodes_per_volume: number;
+    target_pages_per_episode: number;
+    target_audience?: string;
+    estimated_volumes?: number;
+    /** Phase X WX-2 で追加。後方互換 optional。未設定の bible は L01b bible-lint で warning */
+    tone_profile?: ToneProfile;
+    /** どのプロファイルから生成されたか (例: "light_recovery_type" | "hellmode_type") */
+    profile_id?: string;
+    /** ジャンル内サブタイプ (現状 modern_dungeon でのみ使用) */
+    subtype?: DungeonModernSubtype;
+    /** 中核ギミック1点突破。後方互換のため optional、必須化は bible-lint で担保する */
+    core_hook?: CoreHookV2;
+    /** 作品全体の主訴求モード。後方互換 optional */
+    primary_appeal_mode?: PrimaryAppealMode;
+    /**
+     * 2026-05-17 Sprint 14 案1 で追加。後方互換 optional。
+     * bible.world.timeline / system / premise からの regex 抽出に依存しない
+     * 構造化された量的事実。bible-facts-audit で優先参照される。
+     * - years_ago: 世界観上「N 年前に発生した」イベントの年代 (例: ダンジョン出現が 20 年前)
+     * - judgement_age_max: 適性ランク判定の上限年齢 (例: 18 歳まで → 18)
+     * - ranks: 制度上のランク一覧 (例: ["S", "A", "B", "C", "D", "E", "F"])
+     */
+    quantitative_facts?: {
+      years_ago?: number[];
+      judgement_age_max?: number;
+      ranks?: string[];
+      /**
+       * 2026-05-17 Sprint 16 案1 で追加。
+       * 個人時間軸の reference 値。世界観 timeline と区別して audit するための facet。
+       * 例: レン (18歳) が 3年前 (= 15歳のとき) に鑑定を受けた → reference_years_ago: [3]
+       * これらの値は世界観事実とは独立で、bible-facts-audit の誤検出抑制に使われる。
+       */
+      personal_timeline_facts?: {
+        /** キャラの個人時間軸として参照される「N 年前」の値 (世界観 yearsAgo と区別)。 */
+        reference_years_ago?: number[];
+        /** キャラの個人時間軸として参照される「N 歳」の値 (世界観 ages と区別)。 */
+        reference_ages?: number[];
+      };
+    };
+  };
+  world: WorldSpec;
+  characters: CharacterEntryV2[];
+  locations: LocationEntryV2[];
+  props: PropEntryV2[];
+  costumes: CostumeEntryV2[];
+  relations: CharacterRelationV2[];
+  style_directives: StyleDirectivesV2;
+  visual_motifs: VisualMotifV2[];
+  continuity_seeds: ContinuitySeedV2[];
+  narration_style_guide?: NarrationStyleGuideV2;
+  nav_full_spec?: NavFullSpecV2;
+  /**
+   * 2026-05-20 S1 で追加。後方互換 optional。
+   * 主人公を社会的に下げる / 制度的に縛る / 戦闘で脅かす 機能型敵対者。
+   * episode_spine.humiliation_event.humiliator_character_id から参照される。
+   */
+  antagonists?: AntagonistProfile[];
+  volume_synopsis: {
+    theme: string;
+    summary: string;
+    cliffhanger?: string;
+  };
+};
+
+export function isBibleSnapshotV2(v: unknown): v is BibleSnapshotV2 {
+  if (typeof v !== "object" || v === null) return false;
+  const x = v as Partial<BibleSnapshotV2>;
+  return (
+    x.schema_version === 2 &&
+    typeof x.meta === "object" &&
+    Array.isArray(x.characters) &&
+    Array.isArray(x.locations) &&
+    typeof x.world === "object"
+  );
+}
+
+// ============================================================
+// L2 出力: RefsProvenance
+// ============================================================
+
+export type RefSourceType =
+  | "bible_generated"
+  | "manual_upload"
+  | "kindle_archive"
+  | "external_purchased"
+  /** L12 repair で再生成した素材 (bible_generated を上書きする履歴あり) */
+  | "bible_image_repaired_v2"
+  /** Track B 30件競合棚リスト用、Amazon 公開メタデータ (本文画像は含まない) */
+  | "amazon_public_metadata";
+
+export type RefRightsStatus = "ai_use_allowed" | "internal_only" | "blocked";
+
+/** B-1 計画 Track C-1: 商標・既存IP類似チェック結果 */
+export type TrademarkCheckStatus = "pending" | "passed" | "flagged";
+
+/** RefProvenanceEntry の編集履歴 1 entry */
+export type RefEditHistoryEntry = {
+  editor: string;
+  timestamp: string;
+  reason: string;
+};
+
+export type RefProvenanceEntry = {
+  asset_id: string;
+  path: string;
+  source_type: RefSourceType;
+  rights_status: RefRightsStatus;
+  created_by: string;
+  created_at: string;
+  /** この資産が直接派生した親 asset_id 群 (1世代分) */
+  derived_from: string[];
+  license_note: string;
+  qa_score?: number;
+  training_candidate: boolean;
+  /** 紐付け対象 (character.id / location.id / prop.id / "global_style") */
+  target_entity_id: string;
+  target_entity_type: "character" | "location" | "prop" | "style";
+  /** "front" | "side" | "diagonal" | "expr_joy" | "outfit_battle" 等 */
+  variant: string;
+
+  // ── Track C-1 で追加 (Codex指摘: 制作・出版監査用 dossier) ──
+  /** 画像生成プロンプト全文。後で再現性確保するため必須化 */
+  generation_prompt?: string;
+  /** 使用モデル (例: "gpt-image-2") */
+  model_name?: string;
+  /** モデルバージョン (例: "2026-04-21") */
+  model_version?: string;
+  /** 生成タイムスタンプ (created_at と区別: 後段の repair で created_at が更新されても変わらない) */
+  generation_timestamp?: string;
+  /** 編集履歴 (誰が・いつ・なぜ修正したか) */
+  edit_history?: RefEditHistoryEntry[];
+  /** 購入素材のライセンス番号 (external_purchased 用、領収書/契約番号) */
+  purchase_record_id?: string;
+  /** 商用利用条件文 (購入素材のライセンス条文抜粋) */
+  commercial_use_clause?: string;
+  /** 商標・既存IP類似チェック結果 */
+  trademark_check_status?: TrademarkCheckStatus;
+  /**
+   * 学習元素材の transitive 追跡 (祖先 asset_id 群)。
+   * derived_from は1世代だが、learning_source_chain は祖先全部を平坦化して持つ。
+   * kindle_archive が混入していたら isAllowedForProduction で transitive reject。
+   */
+  learning_source_chain?: string[];
+};
+
+export type RefsProvenance = {
+  schema_version: 1;
+  refs: RefProvenanceEntry[];
+};
+
+/**
+ * kindle_archive 由来は L7 で reject。schema 直近 helper。
+ * 詳細な transitive reject + trademark 必須化は src/lib/manga/bible/provenance.ts 側に移行済。
+ */
+export function isAllowedForProduction(entry: RefProvenanceEntry): boolean {
+  if (entry.source_type === "kindle_archive") return false;
+  if (entry.rights_status !== "ai_use_allowed") return false;
+  // transitive: learning_source_chain に kindle_archive 由来が混じっていたら reject
+  // (chain には祖先 asset_id しか入らないので、source_type 直接チェックは provenance.ts 側で全 entry を引いて判定)
+  return true;
+}
+
+// ============================================================
+// L2b 出力: Story Hierarchy (SeriesPlan / ArcPlan)
+// ============================================================
+
+/**
+ * ArcPhase: 章の物語位相。
+ * 商業漫画の 5 段階。複数 arc が同じ phase を持つ場合もある (rising が 2 つ等)。
+ */
+export type ArcPhase = "prologue" | "rising" | "crisis" | "climax" | "epilogue";
+
+/**
+ * ArcPlan: 章レベル (商業漫画の "章 / 編 / saga")。
+ *
+ * 重要: 章境界 ≠ 巻境界。1 つの章は複数巻にまたがる (鬼滅「無限列車編」=Vol7-8 等)。
+ *   - volume_range で巻またぎを明示
+ *   - VolumePlot.belongs_to_arcs[].arc_id で参照される (1 巻が複数章にまたがるケースも可)
+ */
+export type ArcPlan = {
+  arc_id: string;                       // "arc_01_awakening" 形式 (kebab/snake どちらでも)
+  arc_name: string;                     // 表示名 (例: "ナビ覚醒編")
+  arc_phase: ArcPhase;
+  volume_range: [number, number];       // [1, 3] = vol 1-3 にまたがる
+  arc_theme: string;                    // 章テーマ 150字
+  protagonist_growth: string;            // この章で主人公が何を獲得/失うか 150字
+  turning_points: Array<{
+    volume: number;                     // どの巻で
+    episode: number;                    // どの話で
+    event: string;                      // 何が起きるか 80字
+  }>;
+  arc_opening: string;                  // 章開幕の hook 80字
+  arc_climax: string;                   // 章クライマックス 80字
+  arc_resolution: string;               // 章決着 80字
+};
+
+/**
+ * SeriesPlan: 本作レベルの長期計画 (1 シリーズに 1 つ、L2b --phase=series で生成)。
+ *
+ * bible.meta.estimated_volumes に従って全 N 巻の arc 配分・主人公成長弧・
+ * core_hook 進化を一括設計。各巻の VolumePlot 生成時に該当 arc を context
+ * として渡す。SeriesPlan が無いと VolumePlot は arc_position を埋められない。
+ */
+export type SeriesPlan = {
+  schema_version: 1;
+  slug: string;
+  total_volumes: number;                // bible.meta.estimated_volumes と一致
+  series_theme: string;                 // 全シリーズのテーマ 200字+
+  long_arc_outline: string;             // 全N巻でどう進むか 2000字
+  arcs: ArcPlan[];                      // 4-6 個推奨
+  protagonist_long_arc: {
+    starting_state: string;             // 第1巻冒頭の主人公状態 150字
+    arc_endings: string[];              // 各 arc 終了時の主人公状態 (各150字、arcs.length と同数)
+    final_state: string;                // 最終巻終了時の主人公状態 150字
+  };
+  core_hook_evolution: string;          // core_hook が全シリーズでどう進化するか 300字
+  generated_at: string;                 // ISO timestamp
+};
+
+// ============================================================
+// L4 出力: EpisodeStoryboardV2 (entity_id binding 強制)
+// ============================================================
+
+export type ShotType = "close_up" | "medium" | "wide" | "establishing";
+export type CameraType =
+  | "eye_level"
+  | "low_angle"
+  | "high_angle"
+  | "over_shoulder"
+  | "birds_eye";
+
+export type CharacterPanelRole =
+  | "speaker"
+  | "listener"
+  | "background"
+  | "silhouette";
+
+export type OnScreenVia = "in_person" | "tv" | "photo" | "phone" | "voice_off";
+
+export type PanelEntities = {
+  characters: Array<{
+    /** bible.characters[].id への hard ref */
+    character_id: string;
+    role: CharacterPanelRole;
+    on_screen_via: OnScreenVia;
+    expression: string;
+  }>;
+  /** bible.locations[].id への hard ref */
+  location_id: string;
+  props: Array<{
+    prop_id: string;
+    held_by_character_id?: string;
+  }>;
+  /** この panel の主役 (character.id / location.id / prop.id) */
+  focus_entity_id: string;
+};
+
+export type PageRoleV2 =
+  | "opening_hook"
+  | "buildup"
+  | "reveal"
+  | "cliffhanger"
+  | "aftermath"
+  | "establishing"
+  | "dialogue"
+  | "action";
+
+/**
+ * ナレーション種別 (Phase Y WY-2 で追加、Codex レビュー指摘の「独立layer でなく schema 拡張」に従う)
+ *
+ *   - omniscient: 神視点ナレ (「夜だった」「街は静かだった」等)。地の文型
+ *   - protagonist_monologue: 主人公の内的独白 (雲型吹き出しで描画されるべき内容)
+ *   - thought_bubble: 主人公以外のキャラの心情 (補助的、登場頻度低)
+ *   - caption_box: 状況注釈 (「※息子の初バイト帰り」「3年前」等の補足ボックス)
+ */
+export type NarrationKind =
+  | "omniscient"
+  | "protagonist_monologue"
+  | "thought_bubble"
+  | "caption_box";
+
+export type PanelV2 = {
+  panel_id: string;
+  panel_no: number;
+  reading_order: number;
+  shot_type: ShotType;
+  camera: CameraType;
+  bleed: boolean;
+  silence: boolean;
+  importance: 1 | 2 | 3 | 4 | 5;
+  entities: PanelEntities;
+  /**
+   * 2026-05-18 Sprint 22 案5 で正式追加。
+   * - null: 設計者の明示的 opt-out (detector が他 rule を無視して null 返却)
+   * - EffectLineSpec: 設計者の明示的指定 (detector が auto-detect ルールより優先)
+   * - undefined: detector のヒューリスティック (importance/bleed/sfx/silence/expression) で判定
+   */
+  effect_lines?: EffectLineSpec | null;
+  action: string;
+  key_visual: string;
+  dialogue: Array<{
+    character_id: string;
+    text: string;
+    /** 2026-05-07 追加: 吹き出し形状 */
+    bubble_shape?: "oval" | "rounded_square" | "thought_cloud" | "narration_box";
+    /** 2026-05-07 追加: tail 方向 (引き出し線の出る方向、speaker から panel 中心への方向) */
+    tail_direction?: "left" | "right" | "up" | "down";
+  }>;
+  monologue: Array<{
+    character_id: string;
+    text: string;
+    /** 2026-05-07 追加: 吹き出し形状 */
+    bubble_shape?: "oval" | "rounded_square" | "thought_cloud" | "narration_box";
+    /** 2026-05-07 追加: tail 方向 (引き出し線の出る方向、speaker から panel 中心への方向) */
+    tail_direction?: "left" | "right" | "up" | "down";
+  }>;
+  narration: string[];
+  /**
+   * Phase Y WY-2 で追加 (後方互換 optional)。narration[i] と同じ index で対応する種別。
+   * 未指定時は audit/render 側で "caption_box" にフォールバック。
+   * storyboard-extractor / opening-hook-pass / cliffhanger-architect は kind を明示推奨。
+   */
+  narration_kinds?: NarrationKind[];
+  sfx: string[];
+  /** L6 Continuity Resolve で注入される */
+  continuity_group_ids?: string[];
+  /** 2026-05-07 追加: panel-level screentone 濃度。L9 prompt が反映 */
+  screentone_intensity?: "light" | "medium" | "dark";
+  /** 報酬タグ（panel 単位、optional） */
+  reward_tags?: RewardTag[];
+  /**
+   * 2026-05-20 S1 Domain C で追加。
+   * L02b beat → scene → panel に伝播される感情強度 (0-1)。
+   * intensity-propagation.ts が埋める。audit-emotional-amplitude が検査。
+   * 後方互換 optional。
+   */
+  emotional_intensity?: number;
+};
+
+export type StoryboardPageV2 = {
+  page_no: number;
+  page_role: PageRoleV2;
+  panels: PanelV2[];
+};
+
+export type EpisodeStoryboardV2 = {
+  schema_version: 2;
+  episode_id: string;
+  total_pages: number;
+  pages: StoryboardPageV2[];
+  /** Phase Y WY-3 で追加。後方互換 optional。cliffhanger architect で割り当てる */
+  pull_link?: PullLink;
+};
+
+/**
+ * Phase Y WY-3: cliffhanger 引きパターン (manga_craft_guide v2 + a07 商業引き分析より7種)
+ *
+ * 各話/各巻の最終 panel に割り当てる「次を読みたくなる引き」の典型構造。
+ * KU 読者の次話/次巻購読率を最大化するための定型パターン辞書。
+ */
+export type CliffhangerPatternId =
+  /** 未知の脅威がシルエットで現れる (「Sランクの戦力が…」「監査室の異常検知」等) */
+  | "unknown_threat_silhouette"
+  /** 主人公の決意/能動的モノローグで終わる (「次は俺が」「まだ、行ける」等) */
+  | "protagonist_resolve_monologue"
+  /** 日常に異物が侵入する (普段の日常 → 異常な来訪者/通知/光) */
+  | "daily_intrusion"
+  /** 次巻表紙への伏線 (新キャラのシルエット/新組織のロゴ/予告コマ) */
+  | "next_volume_foreshadow"
+  /** 仲間/相棒との関係に変化 (告白未満の温度上昇/相棒の去り際) */
+  | "relationship_shift"
+  /** 主人公の能力/正体が明かされる片鱗 (新スキル/隠しステータス/制度の真実) */
+  | "ability_or_identity_glimpse"
+  /** ヒロイン格の消滅リスク/危機 (a07 のナビ消滅リスク型) */
+  | "heroine_jeopardy";
+
+/**
+ * 1 episode の最終 panel と次 episode/巻の opening_hook を繋ぐリンク情報。
+ * EpisodeStoryboardV2.pull_link / VolumePlot.episodes[].pull_link で使う。
+ */
+export type PullLink = {
+  /** 当該 episode の cliffhanger パターン */
+  current_episode_cliff: CliffhangerPatternId;
+  /** 次 episode の opening_hook の予告メモ (1-2文、storyboard-extractor が次話 ep0+1 の opening 設計に使う) */
+  next_opening_hook_hint: string;
+  /**
+   * 巻末か否か (vol.last_episode === true なら、cliffhanger の重みが「次巻 buy」になる、
+   * そうでなければ「次話 read-through」)。最終巻 vol13 の last_ep は最終回判定。
+   */
+  is_volume_end?: boolean;
+  /** 巻末の場合、次巻表紙への伏線テキスト (next_volume_foreshadow パターン用) */
+  next_volume_teaser?: string;
+};
+
+// ============================================================
+// L5 出力: PagePlanV2
+// ============================================================
+
+export type RenderStrategy = "panel_composite" | "page_one_shot" | "hybrid";
+
+/**
+ * パネル内側の背景表現種別 (2026-05-06 追加、reference pool 分離用)
+ *
+ * 「コマの中身が背景としてどう描かれるか」の分類。L02 bible-images の背景生成
+ * reference (描き込み背景の学習) と L05 page-director の構図 reference (トーンバック
+ * 含む全 panel) を取り違えないために必要。
+ *
+ *   - detailed_bg:       描き込まれた背景。L02 の背景 reference になる
+ *   - atmospheric_fade:  境界がフェード/抜け、背景一部のみ描き込み
+ *   - tone_back:         全面スクリーントーン (背景描写ゼロ、心情/間用途)
+ *   - solid_white:       全面白 (背景描写ゼロ、衝撃/フラッシュ)
+ *   - solid_black:       全面黒 (背景描写ゼロ、暗転/不在)
+ *   - floating_ui:       UI/HUD/ステータス画面が panel そのもの
+ *   - unspecified:       未指定 (bootstrap 未実施 or learner 待ち)
+ */
+export type BackgroundTreatment =
+  | "detailed_bg"
+  | "atmospheric_fade"
+  | "tone_back"
+  | "solid_white"
+  | "solid_black"
+  | "floating_ui"
+  | "unspecified";
+
+/** density profile distribution (BackgroundTreatment 各値の比率) */
+export type DensityDistribution = Record<BackgroundTreatment, number>;
+
+/** density profile (ジャンル別 bg_treatment 分布統計) */
+export type DensityProfile = {
+  schema_version: 1;
+  genre: string;
+  sources: string[];
+  panel_count: number;
+  page_count: number;
+  generated_at: string;
+  method: "llm-vision-v1-aggregate";
+  overall: DensityDistribution;
+  by_spread: {
+    single_page: DensityDistribution;
+    spread: DensityDistribution;
+  };
+  by_panel_position: {
+    top: DensityDistribution;
+    middle: DensityDistribution;
+    bottom: DensityDistribution;
+  };
+  policy: {
+    max_detailed_bg_per_page: number;
+    require_atmospheric_or_tone_each_page: boolean;
+    detailed_bg_target_ratio: number;
+    atmospheric_fade_target_ratio: number;
+    solid_color_target_ratio: number;
+  };
+};
+
+/**
+ * background_treatment が L02 の「背景描き込み reference」として使えるか?
+ * detailed_bg のみ true。atmospheric_fade はフェードで形が読み取れず除外。
+ */
+export function isBackgroundReferenceCandidate(t: BackgroundTreatment | undefined): boolean {
+  return t === "detailed_bg";
+}
+
+export type PagePlanPanel = {
+  panel_id: string;
+  slot_id: string;
+  rect: { x: number; y: number; w: number; h: number };
+  reading_order: number;
+  importance: 1 | 2 | 3 | 4 | 5;
+  /** Phase 1 v3: 視覚的傾き（コマ枠の中心回転、単位:度、符号付き、外接rectは不変） */
+  tilt_deg?: number;
+  /** Phase B v3: 実際のコマ枠 polygon。頂点列 [[x,y],...] (時計回り)。未指定なら rect から派生。
+   *  polygon 指定時は tilt_deg は無視される。凹多角形可（隣接切り欠きで発生）*/
+  polygon?: [number, number][];
+  /** Phase B3 v3: 枠線描画スキップ (atmospheric panel 用) */
+  is_borderless?: boolean;
+  /** Phase B3 v3: ページ縁まで延長する panel (枠線スキップ) */
+  bleed_polygon?: boolean;
+  /** 2026-05-06 追加。pattern-applier が slot.background_treatment から伝播 */
+  background_treatment?: BackgroundTreatment;
+  /** L6 で注入 */
+  continuity_group_ids?: string[];
+};
+
+export type PagePlanPage = {
+  page_no: number;
+  layout_template_id: string;
+  page_role: PageRoleV2;
+  render_strategy: RenderStrategy;
+  panels: PagePlanPanel[];
+  /** Phase 2A: name-gate UI で次ページと見開き 1 unit として扱う */
+  is_spread?: boolean;
+  /** F-2 page_one_shot 用 */
+  page_continuity_group_ids?: string[];
+};
+
+export type PagePlanV2 = {
+  schema_version: 2;
+  episode_id: string;
+  capability_profile_id: string;
+  pages: PagePlanPage[];
+};
+
+// ============================================================
+// L7 出力: ResolvedRefs
+// ============================================================
+
+export type RefRole =
+  | "style"
+  | "character_face"
+  | "character_full"
+  | "character_back"
+  | "character_outfit"
+  | "character_3view"
+  | "location"
+  | "prop"
+  | "continuity_anchor"
+  | "previous_panel"
+  | "negative";
+
+export type RefSource =
+  | "deterministic"
+  | "continuity_forced"
+  | "llm_judged"
+  | "repair_forced";
+
+export type ResolvedRef = {
+  asset_id: string;
+  path: string;
+  weight: number; // 0.0-1.0 (capability で weighting 不可なら 1.0 固定)
+  role: RefRole;
+  target_entity_id?: string;
+  source: RefSource;
+  rationale: string;
+};
+
+export type ResolvedRefPacket = {
+  scope: "panel" | "page";
+  refs: ResolvedRef[];
+  budget: { max: number; optimal: number; used: number };
+  truncated: boolean;
+  unresolved_entities: string[];
+  warnings: string[];
+};
+
+export type ResolvedRefs = {
+  schema_version: 1;
+  episode_id: string;
+  capability_profile_id: string;
+  render_strategy: RenderStrategy;
+  /** key = panel_id (or page_id when scope=page) */
+  packets: Record<string, ResolvedRefPacket>;
+};
+
+// ============================================================
+// L11 出力: AuditReport
+// ============================================================
+
+export type AuditCheckResult = {
+  panel_id: string;
+  check_kind:
+    | "face_consistency"
+    | "dialogue_count"
+    | "continuity_anchor"
+    | "background_invariant"
+    | "regulation_violation"
+    /** 2026-05-06 追加。pattern dictionary 由来 background_treatment と
+     *  実 ref/render の整合性検査 (RULE 11 が遵守されているか) */
+    | "bg_treatment_compliance"
+    /** 2026-05-08 追加。vision audit で拾う軽量な構図違和感 flag */
+    | "composition_flag";
+  passed: boolean;
+  score?: number;
+  threshold?: number;
+  detail?: string;
+};
+
+export type BgTreatmentComplianceCheck = {
+  panel_id: string;
+  specified: BackgroundTreatment;
+  observed: BackgroundTreatment;
+  compliance: "match" | "minor_drift" | "major_violation";
+  /** LLM vision 判定の根拠。人間レビュー時に読むため自然文を保持する */
+  evidence: string;
+};
+
+export type CompositionFlags = {
+  panel_id: string;
+  character_placement_feels_impossible?: boolean;
+  speech_bubble_overlaps_face_or_action?: boolean;
+  tail_points_to_wrong_speaker?: boolean;
+  perspective_or_location_continuity_broken?: boolean;
+  over_detailed_background_contradicts_expected_treatment?: boolean;
+  /** flag だけでは判断しづらい場合の補足。正常なら省略可 */
+  notes?: string;
+};
+
+export type VisionAuditResult = {
+  bg_treatment_compliance: BgTreatmentComplianceCheck[];
+  composition_flags: CompositionFlags[];
+};
+
+export type AuditReport = {
+  schema_version: 1;
+  episode_id: string;
+  audited_at: string;
+  panels_total: number;
+  panels_passed: number;
+  panels_failed: number;
+  checks: AuditCheckResult[];
+  /** 任意の重い vision audit 結果。CLI opt-in 時のみ付与する */
+  vision?: VisionAuditResult;
+  /** 任意の compliance scan 結果。L11 で商標等の残留を episode 単位で監査する */
+  compliance_report?: {
+    schema_version: 1;
+    fatal_count: number;
+    warn_count: number;
+    findings: Array<{
+      severity: "fatal" | "warn";
+      category: string;
+      matched_term: string;
+      source: "storyboard" | "page_plan" | "resolved_refs" | "scene_graph";
+      field_path: string;
+      line?: number;
+      text_excerpt: string;
+      suggestion?: {
+        type: string;
+        fictional_name_hint?: string;
+        description: string;
+      };
+    }>;
+  };
+  failed_panel_ids: string[];
+};
+
+// ============================================================
+// L12 出力: RepairLog
+// ============================================================
+
+export type RepairAction =
+  | "regenerate_with_stronger_refs"
+  | "switch_render_strategy"
+  | "swap_to_silhouette"
+  | "rebuild_layout_slot"
+  | "manual_review_required";
+
+export type RepairAttempt = {
+  panel_id: string;
+  attempt_no: number;
+  triggered_by_check: string;
+  action: RepairAction;
+  rationale: string;
+  before_score?: number;
+  after_score?: number;
+  succeeded: boolean;
+};
+
+export type RepairLog = {
+  schema_version: 1;
+  episode_id: string;
+  attempts: RepairAttempt[];
+};
+
+// ============================================================
+// L13 出力: KdpMetadata / KdpRelease / KdpSeries
+// ============================================================
+
+/**
+ * KDP公式 AI 申告 5 区分
+ * https://kdp.amazon.com/help/topic/G200672390 (Content Guidelines: AI-Generated Content)
+ *
+ * - text: 本文テキスト (台詞・ナレーションを含む)
+ * - images: 内側の画像 (コマ・イラスト)
+ * - translation: 翻訳 (元言語が別の場合)
+ * - cover: 表紙画像
+ * - interior: 本文ページレイアウト全体 (KDP用語のinterior)
+ *
+ * 全項目をbool化して KDP管理画面のチェックリストに 1:1 対応させる。
+ * 自由文ではなく構造化することでアカウント停止リスクを下げる。
+ */
+export type AiDisclosureFlags = {
+  text: boolean;
+  images: boolean;
+  translation: boolean;
+  cover: boolean;
+  interior: boolean;
+};
+
+export type KdpMetadata = {
+  schema_version: 2; // ← 1 → 2 (AI開示構造化対応)
+  slug: string;
+  volume_no: number;
+  title: string;
+  subtitle?: string;
+  author_pen_name: string;
+  isbn?: string;
+  asin?: string;
+  bisac_categories: string[];
+  /** 旧形式の自由文。後方互換のため残すが、新規入稿では ai_disclosure を使う */
+  ai_disclosure_text?: string;
+  /** KDP公式5区分にbool対応 (Codex指摘で必須化) */
+  ai_disclosure: AiDisclosureFlags;
+  /** AI生成に使ったモデル名一覧 (例: ["gpt-image-2", "claude-opus-4-7"]) */
+  ai_tools_used: string[];
+  /** 著者による人手編集が行われたか */
+  human_review_performed: boolean;
+  page_count: number;
+  spine_width_mm: number;
+  publication_date: string;
+  manuscript_pdf_path: string;
+  cover_pdf_path: string;
+
+  // ── kdp-modular-plum.md (検索最適化拡張、全 optional / 後方互換) ──
+  /** タイトル/サブタイトル候補 (最終1案決定前のドラフト履歴) */
+  title_candidates?: string[];
+  /** シリーズ名の完全文字列 (大文字小文字・句読点厳密一致が必要) */
+  series_name_canonical?: string;
+  /** 7キーワード手動キュレーション結果 (kdp_inputs.keywords へ反映する source of truth) */
+  keyword_picks_7?: string[];
+  /** ghost判定済みカテゴリ候補 (実際にbrowseable確認済の3カテゴリ) */
+  categories_validated?: string[];
+};
+
+/**
+ * KDP入稿台帳 (kdp-release.json)
+ *
+ * 各巻の入稿に関する全情報を1ファイルに集約。
+ * - 防衛資産: アカウント停止時の弁明・EXIT監査・税務記録
+ * - LLM進化と無関係に資産化される
+ */
+export type KdpReleaseStatus =
+  | "draft"           // 未preflight
+  | "preflight_ok"    // ローカル検証パス
+  | "submitted"       // KDP管理画面に投入済
+  | "published"       // 販売開始
+  | "unpublished";    // 非公開化
+
+export type KdpReleaseInputs = {
+  title: string;
+  subtitle?: string;
+  description_html: string;
+  /** 7キーワード (KDP上限7、各≤50字) */
+  keywords: string[];
+  /** 3カテゴリ (KDP上限3、2023年中盤からダッシュボード選択のみ。サポート経由追加申請は廃止) */
+  categories: string[];
+  isbn?: string;
+  asin?: string;
+};
+
+export type KdpReleasePricing = {
+  price_jpy: number;
+  ku_enrolled: boolean;
+  /** 35% or 70% royalty plan */
+  royalty_plan: "35" | "70";
+};
+
+export type KdpReleaseSchedule = {
+  published_at?: string;
+  ad_start_at?: string;
+};
+
+export type KdpReleaseRightsCheck = {
+  trademark_passed: boolean;
+  ip_similarity_passed: boolean;
+  checked_at: string;
+  notes?: string;
+};
+
+export type KdpReleasePreviewLog = {
+  reviewed_at: string;
+  issues: string[];
+  resolved: boolean;
+};
+
+export type KdpReleaseEditHistoryEntry = {
+  timestamp: string;
+  field: string;
+  old: unknown;
+  new: unknown;
+  reason?: string;
+};
+
+export type KdpRelease = {
+  schema_version: 1;
+  slug: string;
+  volume_no: number;
+  status: KdpReleaseStatus;
+  manuscript_pdf_path: string;
+  cover_pdf_path: string;
+  ai_disclosure: AiDisclosureFlags;
+  ai_tools_used: string[];
+  human_review_performed: boolean;
+  rights_check: KdpReleaseRightsCheck;
+  kdp_inputs: KdpReleaseInputs;
+  pricing: KdpReleasePricing;
+  schedule: KdpReleaseSchedule;
+  preview_log: KdpReleasePreviewLog[];
+  edit_history: KdpReleaseEditHistoryEntry[];
+  /** 任意メモ (KDP管理画面のスクショ位置等) */
+  notes?: string;
+};
+
+/**
+ * シリーズ設定 (kdp-series.json) — 同一slugの複数巻を束ねる。
+ * 永続先: data/manga/works/{slug}/kdp-series.json
+ */
+export type KdpSeries = {
+  schema_version: 1;
+  slug: string;
+  series_title: string;
+  series_title_en?: string;
+  estimated_total_volumes: number;
+  /** vol_no -> ASIN (Amazonがpublish時に発番) */
+  asin_by_volume: Record<number, string>;
+  /** vol_no -> ISBN (任意) */
+  isbn_by_volume?: Record<number, string>;
+  publication_schedule: { volume_no: number; planned_date: string }[];
+};
+
+// ============================================================
+// L1 出力: BibleSnapshotV3 (fact-based layered schema)
+// ============================================================
+
+export type Layer =
+  | "in_world_belief"
+  | "revealed_at_volume"
+  | "meta_truth"
+  | "system_specification"
+  | "character_arc_state";
+
+export type Aspect =
+  | "identity"
+  | "appearance"
+  | "psychology"
+  | "backstory"
+  | "speech"
+  | "relationship"
+  | "location_layout"
+  | "location_history"
+  | "prop_function"
+  | "prop_provenance"
+  | "world_rule"
+  | "system_param"
+  | "history_event"
+  | "faction_dynamics"
+  | "motif_meaning"
+  | "motif_directive";
+
+export type FactPov =
+  | "author_omniscient"
+  | "protagonist"
+  | "specific_character"
+  | "in_world_public"
+  | "in_world_secret";
+
+export type FactNode = {
+  fact_id: string;
+  entity_id: string | null;
+  aspect: Aspect;
+  layer: Layer;
+  revealed_at_volume?: number | null;
+  arc_at_volume?: number;
+  episode_range?: { from: number; to: number | null };
+  pov?: FactPov;
+  pov_character_id?: string | null;
+  confidence?: number;
+  body: string;
+  references?: string[];
+  invalidates?: string[];
+  supersedes?: string[];
+  priority?: number;
+  evidence: {
+    source_path?: string;
+    json_pointer?: string;
+    source_span?: [number, number];
+    generated_by?: { stage: string; model: string; ts: string };
+    confidence: number;
+  };
+};
+
+export type EntityKind =
+  | "character"
+  | "location"
+  | "faction"
+  | "prop"
+  | "costume"
+  | "motif"
+  | "event"
+  | "rule"
+  | "system_param";
+
+export type EntityNode = {
+  id: string;
+  kind: EntityKind;
+  name: string;
+  spec?: unknown;
+  fact_ids: string[];
+  appears_in_volumes: number[];
+  appears_in_episodes?: number[];
+};
+
+export type EntityRelation = {
+  rel_id: string;
+  from_id: string;
+  to_id: string;
+  rel_type:
+    | "interpersonal"
+    | "owns"
+    | "lives_in"
+    | "member_of"
+    | "knows_about"
+    | "child_of"
+    | "rivals_with";
+  fact_ids: string[];
+  /** V2 round-trip preservation during adapter dual-read period. */
+  spec?: unknown;
+};
+
+export type VolumeSpec = {
+  volume_no: number;
+  theme: string;
+  summary: string;
+  cliffhanger: string;
+  reveals_fact_ids: string[];
+  invalidates_fact_ids: string[];
+};
+
+export type VolumeMap = Record<number, VolumeSpec>;
+
+export type BibleSnapshotV3 = {
+  schema_version: 3;
+  meta: BibleSnapshotV2["meta"];
+  generated_from?: BibleSnapshotV2["generated_from"];
+  narration_style_guide?: NarrationStyleGuideV2;
+  nav_full_spec?: NavFullSpecV2;
+  style_directives: StyleDirectivesV2;
+  world_lexicon?: TextQualityLexiconV2;
+  entities: EntityNode[];
+  relations: EntityRelation[];
+  facts: FactNode[];
+  volumes: VolumeMap;
+  continuity_seeds: ContinuitySeedV2[];
+  generated_at: string;
+};
+
+export function isBibleSnapshotV3(v: unknown): v is BibleSnapshotV3 {
+  if (typeof v !== "object" || v === null) return false;
+  const x = v as Partial<BibleSnapshotV3>;
+  return (
+    x.schema_version === 3 &&
+    typeof x.meta === "object" &&
+    x.meta !== null &&
+    Array.isArray(x.entities) &&
+    Array.isArray(x.facts) &&
+    typeof x.volumes === "object" &&
+    x.volumes !== null
+  );
+}

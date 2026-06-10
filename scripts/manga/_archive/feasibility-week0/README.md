@@ -3,7 +3,7 @@
 横読み白黒漫画パイプライン (2026-04-30 ピボット) の Week 0 実験スクリプト群。
 gpt-image-2 で日本漫画白黒様式がどこまで再現できるかを実測し、`ModelCapabilityProfile` を確定する。
 
-**実行計画SSoT**: `~/.claude/plans/codex-swift-kettle.md`
+**実行計画SSoT**: `docs/plans/manga/_archive/pipeline-v1-2026-05-02.md`
 
 ## 二段構造
 

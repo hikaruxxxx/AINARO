@@ -1,0 +1,412 @@
+{
+  "version": "v1",
+  "subtype": "dungeon_modern",
+  "description": "現代ダンジョン系の漫画エピソードパターン辞書。小説v3 P1-P5の漫画版",
+  "patterns": [
+    {
+      "id": "M1_series_opener",
+      "name": "シリーズ開幕",
+      "distribution": 0.05,
+      "description": "読者が初めて世界に触れる話。世界観確立→主人公日常→異変→core_hook初回発動→引き。情報密度を抑え、ビジュアルで世界を語る。",
+      "structure": [
+        {
+          "phase": "世界確立",
+          "pages": "2-3",
+          "channels": ["establishing_shot", "narration"],
+          "required": [
+            "世界の「今」を1枚絵で見せる (見開き or splash)",
+            "ナレーション 1-2 行で時代設定"
+          ]
+        },
+        {
+          "phase": "日常描写",
+          "pages": "3-4",
+          "channels": ["dialogue", "prop_closeup"],
+          "required": [
+            "主人公の「普通の一面」を見せる",
+            "生活感のある小道具 (スマホ/コンビニ/電車 等)"
+          ]
+        },
+        {
+          "phase": "異変",
+          "pages": "2-3",
+          "channels": ["ui_screen", "visual_contrast"],
+          "required": [
+            "core_hook 要素の初出 (ステータス画面/システム音声 等)",
+            "日常との視覚コントラスト (色調/トーン変化)"
+          ]
+        },
+        {
+          "phase": "初回発動",
+          "pages": "4-5",
+          "channels": ["action_sequence", "ui_screen"],
+          "required": [
+            "core_hook メカニクスの動作を見せる",
+            "主人公のリアクション (驚き→好奇心)"
+          ]
+        },
+        {
+          "phase": "引き",
+          "pages": "2-3",
+          "channels": ["reaction_shot", "silence_panel"],
+          "required": [
+            "次話への問いを視覚で残す"
+          ]
+        }
+      ],
+      "state_changes": {
+        "world_established": true,
+        "core_hook_revealed": true,
+        "protagonist_goal_set": false
+      }
+    },
+    {
+      "id": "M2_skill_discover",
+      "name": "新能力発見",
+      "distribution": 0.25,
+      "description": "新スキル/アイテム/敵に遭遇→ステータス画面で観察→仮説→検証→結果確認。主人公の分析思考を最も色濃く出すパターン。",
+      "structure": [
+        {
+          "phase": "遭遇",
+          "pages": "2-3",
+          "channels": ["establishing_shot", "reaction_shot"],
+          "required": [
+            "未知の状況/新スキル/新敵の視覚インパクト"
+          ]
+        },
+        {
+          "phase": "観察",
+          "pages": "2-3",
+          "channels": ["ui_screen", "monologue"],
+          "required": [
+            "ステータス画面/解析画面を大きく表示",
+            "主人公の内的分析 (数値読み取り)"
+          ]
+        },
+        {
+          "phase": "仮説",
+          "pages": "2-3",
+          "channels": ["monologue", "dialogue"],
+          "required": [
+            "「もし〇〇なら」型の仮説立て"
+          ]
+        },
+        {
+          "phase": "検証",
+          "pages": "5-7",
+          "channels": ["action_sequence", "ui_screen", "sound_effect"],
+          "required": [
+            "仮説を試す戦闘/実験のアクション描写",
+            "スキル発動の視覚エフェクト"
+          ]
+        },
+        {
+          "phase": "結果",
+          "pages": "2-3",
+          "channels": ["ui_screen", "reaction_shot"],
+          "required": [
+            "数値変化の確認 (経験値/レベル)",
+            "次への伏線を1つ"
+          ]
+        }
+      ],
+      "state_changes": {
+        "status_increase": true,
+        "skill_acquisition": 0.5,
+        "relationship_change": false,
+        "location_change": false
+      }
+    },
+    {
+      "id": "M3_combat_optimize",
+      "name": "戦闘最適化",
+      "distribution": 0.25,
+      "description": "既知のスキル/敵を相手に組み合わせを最適化。数値計算による戦闘描写の中心パターン。",
+      "structure": [
+        {
+          "phase": "敵の登場",
+          "pages": "2-3",
+          "channels": ["establishing_shot", "ui_screen"],
+          "required": [
+            "敵のステータス (推定) をビジュアルで明示"
+          ]
+        },
+        {
+          "phase": "手札確認",
+          "pages": "2-3",
+          "channels": ["monologue", "ui_screen"],
+          "required": [
+            "手持ちスキルの内的列挙",
+            "計算/比較する独白"
+          ]
+        },
+        {
+          "phase": "組み合わせ選択",
+          "pages": "2-3",
+          "channels": ["monologue", "visual_contrast"],
+          "required": [
+            "選択理由の独白 (なぜこの組み合わせか)"
+          ]
+        },
+        {
+          "phase": "戦闘実行",
+          "pages": "6-8",
+          "channels": ["action_sequence", "sound_effect", "ui_screen"],
+          "required": [
+            "スキル名明示のアクション",
+            "ダメージ/効果の数値表現"
+          ]
+        },
+        {
+          "phase": "反省",
+          "pages": "2-3",
+          "channels": ["monologue", "reaction_shot"],
+          "required": [
+            "想定通り or 想定外の振り返り",
+            "次戦への計画"
+          ]
+        }
+      ],
+      "state_changes": {
+        "status_increase": true,
+        "skill_acquisition": false,
+        "relationship_change": false,
+        "location_change": false
+      }
+    },
+    {
+      "id": "M4_relationship_shift",
+      "name": "関係性変化",
+      "distribution": 0.20,
+      "description": "仲間の加入/離脱/信頼の深化/対立。感情面の山場を作るパターン。",
+      "structure": [
+        {
+          "phase": "日常の一幕",
+          "pages": "3-4",
+          "channels": ["dialogue", "prop_closeup"],
+          "required": [
+            "既存の関係性を示す何気ない場面"
+          ]
+        },
+        {
+          "phase": "試練/共闘",
+          "pages": "5-7",
+          "channels": ["action_sequence", "dialogue"],
+          "required": [
+            "2人以上で困難に立ち向かう場面",
+            "互いの能力/性格の相補性を見せる"
+          ]
+        },
+        {
+          "phase": "本音",
+          "pages": "3-4",
+          "channels": ["dialogue", "reaction_shot", "silence_panel"],
+          "required": [
+            "感情が露出する場面 (怒り/感謝/告白)",
+            "無言コマで余韻"
+          ]
+        },
+        {
+          "phase": "新しい均衡",
+          "pages": "2-3",
+          "channels": ["dialogue", "establishing_shot"],
+          "required": [
+            "関係性の変化を示す新しい呼び方/距離感"
+          ]
+        }
+      ],
+      "state_changes": {
+        "status_increase": false,
+        "skill_acquisition": false,
+        "relationship_change": true,
+        "location_change": false
+      }
+    },
+    {
+      "id": "M5_world_expand",
+      "name": "世界拡張",
+      "distribution": 0.15,
+      "description": "新エリア/新勢力/隠された歴史の発見。世界の広がりと謎を提示。",
+      "structure": [
+        {
+          "phase": "移動/到達",
+          "pages": "3-4",
+          "channels": ["establishing_shot", "narration"],
+          "required": [
+            "新エリアの全景を大コマで見せる",
+            "ナレーションで規模/歴史を示唆"
+          ]
+        },
+        {
+          "phase": "探索",
+          "pages": "5-7",
+          "channels": ["establishing_shot", "prop_closeup", "monologue"],
+          "required": [
+            "新しい環境のディテール描写",
+            "主人公の好奇心/警戒"
+          ]
+        },
+        {
+          "phase": "発見",
+          "pages": "3-4",
+          "channels": ["ui_screen", "reaction_shot", "visual_contrast"],
+          "required": [
+            "世界の謎/法則に関する新情報",
+            "主人公の驚き or 理解"
+          ]
+        },
+        {
+          "phase": "影響",
+          "pages": "2-3",
+          "channels": ["monologue", "dialogue"],
+          "required": [
+            "発見が今後の行動/目標にどう影響するか"
+          ]
+        }
+      ],
+      "state_changes": {
+        "status_increase": false,
+        "skill_acquisition": false,
+        "relationship_change": false,
+        "location_change": true
+      }
+    },
+    {
+      "id": "M6_climax",
+      "name": "章クライマックス",
+      "distribution": 0.10,
+      "description": "arc の山場。伏線回収 + 最大戦闘 + 感情のピーク。全能力の総動員。",
+      "structure": [
+        {
+          "phase": "集結",
+          "pages": "2-3",
+          "channels": ["establishing_shot", "dialogue"],
+          "required": [
+            "味方の集結 or 最終対峙の構図"
+          ]
+        },
+        {
+          "phase": "激突",
+          "pages": "7-9",
+          "channels": ["action_sequence", "sound_effect", "ui_screen"],
+          "required": [
+            "これまでに獲得した全スキルの組み合わせ",
+            "見開き or splash で最大の見せ場"
+          ]
+        },
+        {
+          "phase": "転換点",
+          "pages": "2-3",
+          "channels": ["visual_contrast", "silence_panel", "reaction_shot"],
+          "required": [
+            "形勢逆転 or 犠牲 or 覚醒",
+            "感情のピーク (見開き推奨)"
+          ]
+        },
+        {
+          "phase": "決着",
+          "pages": "3-4",
+          "channels": ["action_sequence", "ui_screen"],
+          "required": [
+            "勝敗の決定",
+            "伏線回収 (蒔きの episode を明示参照)"
+          ]
+        },
+        {
+          "phase": "余韻",
+          "pages": "2-3",
+          "channels": ["silence_panel", "narration", "establishing_shot"],
+          "required": [
+            "戦後の静寂",
+            "次 arc への橋渡し"
+          ]
+        }
+      ],
+      "state_changes": {
+        "status_increase": true,
+        "skill_acquisition": true,
+        "relationship_change": true,
+        "location_change": false
+      }
+    },
+    {
+      "id": "M1_series_opener_webtoon_high_density",
+      "name": "シリーズ開幕 (WEBTOON 高密度型)",
+      "distribution": 0.0,
+      "description": "LINEマンガ縦読み出身ヒット作 (累計 1 億 views クラス) の典型 1 話構造を 24P 横読みに圧縮した archetype。『俺だけ最強超越者』『天才マンガ家になった件』等の冒頭話と同じ 5 段階 (侮辱→秘宝→覚醒→反撃→タイトル ROAR) を必ず通す。distribution=0.0、L02b で --archetype-style=webtoon flag が指定された巻冒頭話のみ強制選択。M1_series_opener (情報密度抑え型) と排他。",
+      "structure": [
+        {
+          "phase": "侮辱",
+          "pages": "1-3",
+          "channels": ["dialogue", "reaction_shot", "character_intro"],
+          "required": [
+            "敵対者 (antagonist_profile.public_humiliator) による公開侮辱イベント",
+            "主人公が反論できない制度的不公平の明示 (insult + unfairness)",
+            "読者の感情ターゲット (anger / shame / revenge_desire) を 1 つ確定",
+            "周囲の観衆 (audience) が侮辱を目撃する構図"
+          ]
+        },
+        {
+          "phase": "秘宝",
+          "pages": "4-7",
+          "channels": ["prop_closeup", "ui_screen", "monologue"],
+          "required": [
+            "主人公だけが知る隠しルール / システム音声 / 秘宝の初出 (core_hook 発火)",
+            "secret_type (system_reveal / hidden_rule / ally_secret / treasure / knowledge) のいずれかを満たす視覚 signature",
+            "主人公の内的反応 (期待 + 警戒) を monologue 1-2 行で"
+          ]
+        },
+        {
+          "phase": "覚醒",
+          "pages": "8-12",
+          "channels": ["visual_contrast", "action_sequence", "reaction_shot"],
+          "required": [
+            "awakening_event の発生 (skill / resolve / alliance / knowledge_application)",
+            "intensity 0.85+ の絵的爆発 (色調反転 / 体内光 / 周囲の凍結 等)",
+            "主人公の覚悟が決まる瞬間 (台詞 or monologue 1 行)"
+          ]
+        },
+        {
+          "phase": "反撃",
+          "pages": "13-19",
+          "channels": ["action_sequence", "visual_contrast", "sound_effect"],
+          "required": [
+            "payback_event の遂行 (direct_combat / social_reveal / system_break / unexpected_alliance)",
+            "侮辱を目撃した観衆の驚愕 reaction_shot (侮辱イベントとの呼応)",
+            "intensity 0.90+ の visual_catharsis_signature を 1 つ以上",
+            "敵対者の困惑 / 屈服 / 撤退の描写"
+          ]
+        },
+        {
+          "phase": "タイトル ROAR",
+          "pages": "18-22",
+          "channels": ["silence_panel", "visual_contrast"],
+          "required": [
+            "title_anchor の発火 (反撃成立直後)",
+            "主人公の決定的ポーズ (visual_pose) を見開き or 大ゴマで",
+            "タイトル文字 overlay 用の空白領域を確保 (AI には文字を描かせない、post-process で合成)",
+            "emotional_function (awakening / revenge_start / identity_claim) のいずれかを表現"
+          ]
+        },
+        {
+          "phase": "次話 cliffhanger",
+          "pages": "23-24",
+          "channels": ["reaction_shot", "silence_panel"],
+          "required": [
+            "敵対者 or 新ライバルからの予兆 (次話 hook)",
+            "主人公の決意 (短い台詞 1 行)",
+            "次話で開示される問い (reader_question_schedule.opened_in_episode=ep+1) を視覚で示唆"
+          ]
+        }
+      ],
+      "state_changes": {
+        "world_established": true,
+        "core_hook_revealed": true,
+        "protagonist_goal_set": true,
+        "antagonist_introduced": true,
+        "title_roar_placed": true,
+        "humiliation_to_payback_completed": true
+      }
+    }
+  ]
+}

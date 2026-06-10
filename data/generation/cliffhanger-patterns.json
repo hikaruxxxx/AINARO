@@ -1,0 +1,277 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-06",
+  "_source": "Plan groovy-wishing-castle.md WY-3 + manga_craft_guide.md v2 + Codex KDP統一案 (a07 vol_1: ナビ消滅リスク型採用)",
+  "_purpose": "L4.9 Cliffhanger Architect で参照する引きパターン辞書。各話/各巻ラストの「次を読みたくなる引き」典型構造",
+  "_audit_pass_criteria": {
+    "page_role_must_be_cliffhanger": "話末ページ (last_page) の page_role は cliffhanger 必須",
+    "last_panel_importance": "最終 panel.importance === 5 必須 (manga_craft_guide v2 panel_importance_pattern: cliffhanger 強化)",
+    "pull_link_must_match_pattern": "pull_link.current_episode_cliff が patterns.id 内のいずれかと一致",
+    "next_opening_hook_hint_min_chars": 30
+  },
+
+  "patterns": [
+    {
+      "id": "unknown_threat_silhouette",
+      "name": "未知の脅威シルエット",
+      "description": "シルエット/暗影で新たな敵・脅威を提示する古典的引き。詳細を見せず想像力で読者を吸引。次話で正体判明する設計",
+      "best_for_genres": ["modern_dungeon", "battle_dungeon", "battle_modern_power", "isekai_high_fantasy"],
+      "best_for_volume_position": ["mid", "late"],
+      "best_for_tone": ["balanced", "hellmode"],
+      "structure": {
+        "last_page_panel_count": 5,
+        "last_page_importance_pattern": [4, 3, 3, 2, 5],
+        "last_panel_design": {
+          "shot_type": "wide",
+          "key_visual": "暗影/シルエット/輪郭のみの脅威 (体長・武器・組織記号が部分的に見える)",
+          "speech": "narration 0 / monologue 0-1 / dialogue 0-1 (敵側の意味深な独白可)",
+          "sfx": "「ザッ」「ガシャ」「ドクン」など重低音"
+        }
+      },
+      "next_opening_hook_examples": [
+        "シルエットの正体が判明し、主人公が対峙する",
+        "シルエットの動向を別キャラ視点で追跡し、組織の全貌が見える"
+      ],
+      "examples": {
+        "best": "Solo Leveling 各話末の影系敵登場、a07 ep10 末の海外ランカー登場",
+        "worst": "シルエットだけで次話に何の手掛かりもない (謎の引き伸ばしと取られる)"
+      },
+      "expected_effect": "next_episode_pull +0.5 / mystery +0.4 / character_depth +0.0",
+      "valid_core_hook_types": ["A", "B"],
+      "valid_mechanics": [],
+      "reward_modes": ["mystery_progress", "spectacle", "reveal"],
+      "produces_reader_question": true
+    },
+
+    {
+      "id": "protagonist_resolve_monologue",
+      "name": "主人公の決意モノローグ",
+      "description": "主人公の能動的な決意・覚悟・宣言で締める引き。受動的な被害ではなく、次話への自発的アクションを予告",
+      "best_for_genres": ["isekai_tensei_cheat", "isekai_tsuiho_zamaa", "battle_dungeon", "modern_dungeon"],
+      "best_for_volume_position": ["early", "mid"],
+      "best_for_tone": ["light_recovery", "balanced"],
+      "structure": {
+        "last_page_panel_count": 5,
+        "last_page_importance_pattern": [3, 3, 4, 4, 5],
+        "last_panel_design": {
+          "shot_type": "close_up",
+          "key_visual": "主人公の顔/瞳のクローズアップ + 雲型独白",
+          "speech": "narration 0 / monologue 1-2 (短い決意「まだ、行ける」「次は俺が」型) / dialogue 0",
+          "sfx": "「キン」「ふっ」軽め or 無音 (silence_panel 候補)"
+        }
+      },
+      "next_opening_hook_examples": [
+        "主人公が決意を行動に移す establishing (新しい朝/新しい場所)",
+        "決意を周囲に表明する場面 (ヒロイン/相棒との対話)"
+      ],
+      "examples": {
+        "best": "「Fランクの俺にだけ聞こえる」 ep01 末の「まだ、行ける」型 (Phase X 適用済)",
+        "worst": "決意モノローグが3行以上連続でくどい / 受動的すぎて能動性が見えない"
+      },
+      "expected_effect": "next_episode_pull +0.4 / character_agency +0.5 / likability +0.2",
+      "valid_core_hook_types": ["A", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["power_growth", "justice", "comfort"],
+      "produces_reader_question": true
+    },
+
+    {
+      "id": "daily_intrusion",
+      "name": "日常への異物侵入",
+      "description": "穏やかな日常シーンの最後に、異常な来訪者・通知・光・音が侵入する引き。緊張感の落差で吸引",
+      "best_for_genres": ["modern_school", "isekai_slowlife", "modern_romance", "modern_dungeon"],
+      "best_for_volume_position": ["early", "mid"],
+      "best_for_tone": ["light_recovery", "balanced"],
+      "structure": {
+        "last_page_panel_count": 5,
+        "last_page_importance_pattern": [3, 2, 3, 3, 5],
+        "last_panel_design": {
+          "shot_type": "medium",
+          "key_visual": "日常の小道具 (机・湯気・カーテン) と異物 (光・通知・足音・郵便) を同一画面に",
+          "speech": "narration 0-1 (短い場面注釈) / monologue 0-1 / dialogue 0",
+          "sfx": "「ピンポーン」「ブーブー」「ザァァ」など日常→異常の音"
+        }
+      },
+      "next_opening_hook_examples": [
+        "侵入した異物の正体を主人公が確認するシーン",
+        "異物が呼び込んだ事件の establishing"
+      ],
+      "examples": {
+        "best": "薬屋のひとりごと型の各話末 (穏やかな会話 → 異変通知)",
+        "worst": "異物が予測可能で驚きがない"
+      },
+      "expected_effect": "next_episode_pull +0.4 / world_immersion +0.3 / tension +0.3",
+      "valid_core_hook_types": ["B"],
+      "valid_mechanics": [],
+      "reward_modes": ["mystery_progress", "comfort", "reveal"],
+      "produces_reader_question": true
+    },
+
+    {
+      "id": "next_volume_foreshadow",
+      "name": "次巻表紙への伏線",
+      "description": "巻末に新キャラのシルエット/新組織のロゴ/予告コマを配置する。次巻表紙とリンクさせ、Vol+1 の購買意欲を直接刺激",
+      "best_for_genres": ["all"],
+      "best_for_volume_position": ["volume_end_only"],
+      "best_for_tone": ["all"],
+      "structure": {
+        "last_page_panel_count": 5,
+        "last_page_importance_pattern": [4, 3, 4, 3, 5],
+        "last_panel_design": {
+          "shot_type": "establishing",
+          "key_visual": "次巻表紙の中央構図と一致する predict コマ (新キャラ全身/新ロケ全景/新組織記号)",
+          "speech": "narration 1 (短い予告ナレ「次巻、第◯巻にて」可、ただし作中台詞でなくキャプション扱い) / monologue 0 / dialogue 0",
+          "sfx": "無音 or 余韻系「・・・」"
+        }
+      },
+      "next_opening_hook_examples": [
+        "Vol.N+1 の冒頭で、Vol.N 末に予告した新キャラ/新ロケから始める"
+      ],
+      "examples": {
+        "best": "Solo Leveling 各巻末の予告コマ (新階層/新影/新敵)",
+        "worst": "予告コマだけで次巻まで主人公が進展しない"
+      },
+      "expected_effect": "next_volume_buy +0.6 / commercial_pull +0.5",
+      "valid_core_hook_types": ["A", "B", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["spectacle", "mystery_progress", "reveal"],
+      "produces_reader_question": true
+    },
+
+    {
+      "id": "relationship_shift",
+      "name": "関係性のシフト",
+      "description": "仲間/相棒/ヒロインとの関係に小さな変化が起きる引き。告白未満の温度上昇、相棒の去り際、新しい呼び方など",
+      "best_for_genres": ["modern_romance", "isekai_slowlife", "otome_isekai_pure", "modern_school"],
+      "best_for_volume_position": ["early", "mid"],
+      "best_for_tone": ["light_recovery"],
+      "structure": {
+        "last_page_panel_count": 5,
+        "last_page_importance_pattern": [3, 3, 4, 4, 5],
+        "last_panel_design": {
+          "shot_type": "medium",
+          "key_visual": "二人の距離感が分かる構図 (横並びの夕焼け/手元のクローズアップ/視線の交差)",
+          "speech": "narration 0 / monologue 0-1 / dialogue 1-2 (関係性の温度を示す短い台詞)",
+          "sfx": "無音 or 環境音「サァ」「コトン」"
+        }
+      },
+      "next_opening_hook_examples": [
+        "翌日の朝、関係性の変化が日常の中で確認される",
+        "新しい呼び方/触れ方が定着するシーン"
+      ],
+      "examples": {
+        "best": "本好きの下剋上型の各巻末 (家族・仲間との温度上昇)",
+        "worst": "関係性の進展が急すぎて違和感"
+      },
+      "expected_effect": "next_episode_pull +0.3 / sidekick_warmth +0.5 / character_depth +0.3",
+      "valid_core_hook_types": ["B", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["intimacy", "comfort", "reveal"],
+      "produces_reader_question": true
+    },
+
+    {
+      "id": "ability_or_identity_glimpse",
+      "name": "能力/正体の片鱗",
+      "description": "主人公の新スキル発現、隠しステータス開示、世界制度の真実の片鱗を提示する引き。なろう系で典型",
+      "best_for_genres": ["modern_dungeon", "battle_dungeon", "battle_vrmmo", "isekai_tensei_cheat"],
+      "best_for_volume_position": ["mid", "late"],
+      "best_for_tone": ["balanced", "hellmode"],
+      "structure": {
+        "last_page_panel_count": 5,
+        "last_page_importance_pattern": [3, 4, 3, 4, 5],
+        "last_panel_design": {
+          "shot_type": "close_up",
+          "key_visual": "ステータス画面 panel / スキル発動エフェクト / 世界 UI が変動する瞬間",
+          "speech": "narration 0 / monologue 1 (主人公の驚き「これは…」) / dialogue 0-1 (ナビ等の能力解説)",
+          "sfx": "「ピロン」「カチッ」「ヴゥン」UI 起動音"
+        }
+      },
+      "next_opening_hook_examples": [
+        "新能力を主人公が検証するシーン (P6_status_window_reveal hook と整合)",
+        "能力解放が周囲にもたらす変化 (S/A ランクの反応)"
+      ],
+      "examples": {
+        "best": "「世界最速のレベルアップ」「Solo Leveling」各話末の新スキル開示",
+        "worst": "能力開示だけで主人公の感情が動かない"
+      },
+      "expected_effect": "next_episode_pull +0.5 / world_immersion +0.4 / commercial_pull +0.3",
+      "valid_core_hook_types": ["A"],
+      "valid_mechanics": ["status_window", "gacha", "exp_multiplier", "skill_reveal"],
+      "reward_modes": ["power_growth", "reveal", "mystery_progress"],
+      "produces_reader_question": true
+    },
+
+    {
+      "id": "heroine_jeopardy",
+      "name": "ヒロイン消滅リスク",
+      "description": "ヒロイン格 (相棒/ナビ/家族) に消滅・離脱・危機が訪れる引き。読者の感情移入を最大化、次話/次巻必読化",
+      "best_for_genres": ["modern_dungeon", "battle_dungeon", "modern_romance", "isekai_tensei_cheat"],
+      "best_for_volume_position": ["volume_end", "late"],
+      "best_for_tone": ["balanced", "light_recovery"],
+      "structure": {
+        "last_page_panel_count": 5,
+        "last_page_importance_pattern": [3, 3, 4, 4, 5],
+        "last_panel_design": {
+          "shot_type": "close_up",
+          "key_visual": "ヒロインの表情/手/シルエット (危機の瞬間、消えかける残像、フェードアウト)",
+          "speech": "narration 0 / monologue 0-1 (主人公の驚愕「待て…!」) / dialogue 1 (ヒロインの最後の一言)",
+          "sfx": "「フッ」「・・・」消失感のある SFX"
+        }
+      },
+      "next_opening_hook_examples": [
+        "主人公がヒロインを救う行動を起こす establishing",
+        "ヒロインの正体/真実が明かされる回想"
+      ],
+      "examples": {
+        "best": "a07-modern-dungeon Vol.1 末: 「ナビの声が途切れる。契約者上限に接近。私の優先順位が下がります」",
+        "worst": "ヒロインの危機が頻発しすぎて読者が慣れる (狼少年化)"
+      },
+      "expected_effect": "next_volume_buy +0.7 / sidekick_warmth +0.6 / emotional_pull +0.6",
+      "valid_core_hook_types": ["B", "C"],
+      "valid_mechanics": [],
+      "reward_modes": ["intimacy", "reveal", "mystery_progress"],
+      "produces_reader_question": true
+    }
+  ],
+
+  "selection_guide": {
+    "by_volume_position": {
+      "early": ["protagonist_resolve_monologue", "daily_intrusion", "ability_or_identity_glimpse", "relationship_shift"],
+      "mid": ["unknown_threat_silhouette", "ability_or_identity_glimpse", "relationship_shift", "protagonist_resolve_monologue"],
+      "late": ["unknown_threat_silhouette", "ability_or_identity_glimpse", "heroine_jeopardy"],
+      "volume_end": ["heroine_jeopardy", "next_volume_foreshadow", "unknown_threat_silhouette"]
+    },
+    "by_tone_profile": {
+      "darkness_lt_0_3": ["protagonist_resolve_monologue", "daily_intrusion", "relationship_shift", "ability_or_identity_glimpse"],
+      "darkness_0_3_to_0_5": ["protagonist_resolve_monologue", "daily_intrusion", "ability_or_identity_glimpse", "heroine_jeopardy"],
+      "darkness_0_5_to_0_7": ["unknown_threat_silhouette", "ability_or_identity_glimpse", "heroine_jeopardy"],
+      "darkness_gte_0_7": ["unknown_threat_silhouette", "heroine_jeopardy", "ability_or_identity_glimpse"]
+    },
+    "by_genre": {
+      "modern_dungeon": ["ability_or_identity_glimpse", "heroine_jeopardy", "protagonist_resolve_monologue", "unknown_threat_silhouette"],
+      "battle_dungeon": ["ability_or_identity_glimpse", "unknown_threat_silhouette", "protagonist_resolve_monologue"],
+      "isekai_tensei_cheat": ["ability_or_identity_glimpse", "protagonist_resolve_monologue", "next_volume_foreshadow"],
+      "isekai_tsuiho_zamaa": ["protagonist_resolve_monologue", "unknown_threat_silhouette"],
+      "isekai_slowlife": ["relationship_shift", "daily_intrusion"],
+      "modern_romance": ["relationship_shift", "heroine_jeopardy"],
+      "modern_school": ["daily_intrusion", "relationship_shift", "protagonist_resolve_monologue"],
+      "battle_vrmmo": ["ability_or_identity_glimpse", "unknown_threat_silhouette"],
+
+      "_aliases_note": "WY-1 と同じく日本語自由文字列も支援",
+      "主人公最強無双": ["ability_or_identity_glimpse", "heroine_jeopardy", "protagonist_resolve_monologue", "unknown_threat_silhouette"],
+      "現代ダンジョン": ["ability_or_identity_glimpse", "heroine_jeopardy", "protagonist_resolve_monologue", "unknown_threat_silhouette"],
+      "ダンジョン探索": ["ability_or_identity_glimpse", "unknown_threat_silhouette", "protagonist_resolve_monologue"],
+      "異世界転生": ["ability_or_identity_glimpse", "protagonist_resolve_monologue", "next_volume_foreshadow"],
+      "追放ざまぁ": ["protagonist_resolve_monologue", "unknown_threat_silhouette"],
+      "領地経営": ["relationship_shift", "next_volume_foreshadow"],
+      "スローライフ": ["relationship_shift", "daily_intrusion"]
+    }
+  },
+
+  "_phase_y_notes": [
+    "L4.9 Cliffhanger Architect で、bible.meta.tone_profile + bible.meta.genre + episode の volume_position から候補パターンを selection_guide で絞り、Codex に「last_page を構造に従って再設計」を依頼する",
+    "WY-1 (Opening Hook) と組み合わせて、ep_N の cliffhanger と ep_N+1 の opening_hook が pull_link で繋がる",
+    "Phase Z WZ-2 で実 KENP 取得後、各パターンの次話 read-through 寄与を計測"
+  ]
+}

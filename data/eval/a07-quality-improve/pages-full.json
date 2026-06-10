@@ -1,0 +1,1990 @@
+{
+  "schema_version": 1,
+  "slug": "a07-modern-dungeon",
+  "episode": 1,
+  "total_pages": 22,
+  "pages": [
+    {
+      "page_no": 1,
+      "page_role": "opening_hook",
+      "panels": [
+        {
+          "panel_no": 1,
+          "shot_type": "establishing",
+          "importance": 5,
+          "silence": false,
+          "action": "深夜の新宿にローソン看板だけが白く浮く。",
+          "key_visual": "墨色の空とビル群、白いコンビニ看板だけが浮く初回導入の大ゴマ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "午前二時。新宿西口。"
+          ],
+          "sfx": [
+            "ジジ…"
+          ],
+          "text": "  narration: 〔午前二時。新宿西口。〕\n  sfx: ジジ…"
+        },
+        {
+          "panel_no": 2,
+          "shot_type": "wide",
+          "importance": 3,
+          "silence": false,
+          "action": "レンがレジに立ち、誰もいない通路を見る。",
+          "key_visual": "白い蛍光灯、黒パーカー、眠そうな目元の対比。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "夜勤だけが、俺の生活をつないでいた。"
+          ],
+          "sfx": [
+            "ピッ"
+          ],
+          "text": "  narration: 〔夜勤だけが、俺の生活をつないでいた。〕\n  sfx: ピッ"
+        },
+        {
+          "panel_no": 3,
+          "shot_type": "close_up",
+          "importance": 2,
+          "silence": false,
+          "action": "前髪越しの目元が動かない。",
+          "key_visual": "前髪が目にかかり、眠気だけが表情に出る顔アップ。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "眠い。けど、寝たら終わる。"
+            }
+          ],
+          "narration": [],
+          "sfx": [],
+          "text": "  monologue [char_桐生_レン_v1]: (眠い。けど、寝たら終わる。)"
+        },
+        {
+          "panel_no": 4,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "半額弁当を袋へ詰める手だけが機械的に動く。",
+          "key_visual": "レジ袋、半額シール、擦れた袖口で生活感を出す。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "カサ"
+          ],
+          "text": "  sfx: カサ"
+        },
+        {
+          "panel_no": 5,
+          "shot_type": "close_up",
+          "importance": 2,
+          "silence": false,
+          "action": "ヒビ入りスマホに公社ニュース通知が灯る。",
+          "key_visual": "上端に細かなヒビ、空の通知枠、指先の荒れ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "その名前は、見ないようにしていた。"
+          ],
+          "sfx": [
+            "ピコン"
+          ],
+          "text": "  narration: 〔その名前は、見ないようにしていた。〕\n  sfx: ピコン"
+        }
+      ]
+    },
+    {
+      "page_no": 2,
+      "page_role": "opening_hook",
+      "panels": [
+        {
+          "panel_no": 6,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "店内テレビにSランク探索者として灯里が映る。",
+          "key_visual": "テレビ枠越しの灯里、左肩の朱部隊章、下部テロップ空枠。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "Sランク探索者、白瀬灯里。単独討伐記録を更新。"
+          ],
+          "sfx": [
+            "ザ…"
+          ],
+          "text": "  narration: 〔Sランク探索者、白瀬灯里。単独討伐記録を更新。〕\n  sfx: ザ…"
+        },
+        {
+          "panel_no": 7,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "朱の部隊章と握り込む手袋が強調される。",
+          "key_visual": "朱の部隊章と握り込む手元、英雄の笑顔は画面端。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "朱の章は、選ばれた者だけが着ける。"
+          ],
+          "sfx": [],
+          "text": "  narration: 〔朱の章は、選ばれた者だけが着ける。〕"
+        },
+        {
+          "panel_no": 8,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "レンがレジ越しにテレビを見る。",
+          "key_visual": "手前にレンの黒い背中、奥の小さな画面に白い英雄。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ザザ"
+          ],
+          "text": "  sfx: ザザ"
+        },
+        {
+          "panel_no": 9,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "レンの瞳にテレビの白い光が映る。",
+          "key_visual": "無表情だが瞳だけが揺れ、縦書きモノローグ用の白場を残す。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "同じ場所から、ずいぶん遠くへ行ったな。"
+            }
+          ],
+          "narration": [],
+          "sfx": [],
+          "text": "  monologue [char_桐生_レン_v1]: (同じ場所から、ずいぶん遠くへ行ったな。)"
+        },
+        {
+          "panel_no": 10,
+          "shot_type": "wide",
+          "importance": 2,
+          "silence": false,
+          "action": "無人の店内にニュース音だけが残る。",
+          "key_visual": "無人通路、蛍光灯、レジの小さなレン。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ジー…"
+          ],
+          "text": "  sfx: ジー…"
+        }
+      ]
+    },
+    {
+      "page_no": 3,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_no": 11,
+          "shot_type": "close_up",
+          "importance": 2,
+          "silence": false,
+          "action": "財布の隙間からFランクID証が覗く。",
+          "key_visual": "擦れたカード、Fランク枠だけが視線を引く。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "俺のほうは、Fランク。"
+          ],
+          "sfx": [],
+          "text": "  narration: 〔俺のほうは、Fランク。〕"
+        },
+        {
+          "panel_no": 12,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "期限前の商品を棚から下げる。",
+          "key_visual": "機械的な手つきと黒パーカーの袖。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "スッ"
+          ],
+          "text": "  sfx: スッ"
+        },
+        {
+          "panel_no": 13,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "テレビの灯里がインタビューに応じる。",
+          "key_visual": "ノイズ線入りテレビ枠、氷青の瞳と朱色リボン。",
+          "dialogue": [
+            {
+              "character_id": "char_白瀬_灯里_v1",
+              "text": "守れる人を、増やしたいんです。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ザ…"
+          ],
+          "text": "  dialogue [char_白瀬_灯里_v1]: 「守れる人を、増やしたいんです。」\n  sfx: ザ…"
+        },
+        {
+          "panel_no": 14,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "レンの口元がわずかにこわばる。",
+          "key_visual": "笑わない口元、白場に過去へのモノローグを置く。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "昔から、あいつはそういう顔ができた。"
+            }
+          ],
+          "narration": [],
+          "sfx": [],
+          "text": "  monologue [char_桐生_レン_v1]: (昔から、あいつはそういう顔ができた。)"
+        },
+        {
+          "panel_no": 15,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "レンがスマホを裏返し通知を隠す。",
+          "key_visual": "ヒビ入りスマホの黒い画面、レジ台の白さ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "コト"
+          ],
+          "text": "  sfx: コト"
+        }
+      ]
+    },
+    {
+      "page_no": 4,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_no": 16,
+          "shot_type": "wide",
+          "importance": 2,
+          "silence": false,
+          "action": "テレビの栄光とレジ作業が同じ画面に並ぶ。",
+          "key_visual": "画面上部に灯里、下部にレンのレジ作業を配置。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "片方は英雄。片方は夜勤明けのFランク。"
+          ],
+          "sfx": [],
+          "text": "  narration: 〔片方は英雄。片方は夜勤明けのFランク。〕"
+        },
+        {
+          "panel_no": 17,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "蛍光灯を見上げ、眠気を飲み込む。",
+          "key_visual": "白光で目を細める顔、黒髪のベタ。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "比べるだけ、無駄だ。"
+            }
+          ],
+          "narration": [],
+          "sfx": [
+            "ジジ"
+          ],
+          "text": "  monologue [char_桐生_レン_v1]: (比べるだけ、無駄だ。)\n  sfx: ジジ"
+        },
+        {
+          "panel_no": 18,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "レジ締めの伝票を引き寄せる。",
+          "key_visual": "細い主線の事務作業、空欄の伝票。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ペラ"
+          ],
+          "text": "  sfx: ペラ"
+        },
+        {
+          "panel_no": 19,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "ニュース音を背にレンが視線を落とす。",
+          "key_visual": "背後のテレビ光がレンの頬に細く当たる。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "俺には、聞こえるものなんて何もない。"
+            }
+          ],
+          "narration": [],
+          "sfx": [],
+          "text": "  monologue [char_桐生_レン_v1]: (俺には、聞こえるものなんて何もない。)"
+        },
+        {
+          "panel_no": 20,
+          "shot_type": "medium",
+          "importance": 4,
+          "silence": true,
+          "action": "レンがFランクID証を胸元へしまう。",
+          "key_visual": "音を抜いた白いコマ、入口で止まっている感覚を手元だけで見せる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  (silence panel)"
+        }
+      ]
+    },
+    {
+      "page_no": 5,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_no": 21,
+          "shot_type": "wide",
+          "importance": 2,
+          "silence": false,
+          "action": "夜勤明けのレンが店外へ出る。",
+          "key_visual": "チカチカする看板、自販機の白光、黒い背中。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "午前五時すぎ。"
+          ],
+          "sfx": [
+            "ウィン"
+          ],
+          "text": "  narration: 〔午前五時すぎ。〕\n  sfx: ウィン"
+        },
+        {
+          "panel_no": 22,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "中古探索バッグの肩紐を直して歩く。",
+          "key_visual": "くたびれたバッグと黒パーカーの擦れ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ギシ"
+          ],
+          "text": "  sfx: ギシ"
+        },
+        {
+          "panel_no": 23,
+          "shot_type": "close_up",
+          "importance": 2,
+          "silence": false,
+          "action": "スマホのシフト表に夜勤だけが詰まっている。",
+          "key_visual": "割れた画面に空のスケジュール枠、親指の影。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "探索だけじゃ、家賃にもならない。"
+            }
+          ],
+          "narration": [],
+          "sfx": [],
+          "text": "  monologue [char_桐生_レン_v1]: (探索だけじゃ、家賃にもならない。)"
+        },
+        {
+          "panel_no": 24,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "回想。槇島主任が書類を押し返す。",
+          "key_visual": "窓口の無機質な仕切り、赤い承認印、レンの背中。",
+          "dialogue": [
+            {
+              "character_id": "char_槇島_主任_v1",
+              "text": "制度上、再鑑定は認められません。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "スッ"
+          ],
+          "text": "  dialogue [char_槇島_主任_v1]: 「制度上、再鑑定は認められません。」\n  sfx: スッ"
+        },
+        {
+          "panel_no": 25,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "再鑑定同意書に赤印が押される。",
+          "key_visual": "空の署名欄と赤印だけを強く見せる制度の記号。",
+          "dialogue": [
+            {
+              "character_id": "char_槇島_主任_v1",
+              "text": "判定は確定です。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ドン"
+          ],
+          "text": "  dialogue [char_槇島_主任_v1]: 「判定は確定です。」\n  sfx: ドン"
+        }
+      ]
+    },
+    {
+      "page_no": 6,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_no": 26,
+          "shot_type": "close_up",
+          "importance": 2,
+          "silence": false,
+          "action": "FランクID証が手渡される記憶。",
+          "key_visual": "無表情な手に渡るFランクカード、背景は白抜き。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "十五歳で、俺の上限は決まった。"
+          ],
+          "sfx": [],
+          "text": "  narration: 〔十五歳で、俺の上限は決まった。〕"
+        },
+        {
+          "panel_no": 27,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "現在のレンが通知を消して歩く。",
+          "key_visual": "回想から現実へ戻る足元、濡れたアスファルト。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "タッ"
+          ],
+          "text": "  sfx: タッ"
+        },
+        {
+          "panel_no": 28,
+          "shot_type": "establishing",
+          "importance": 3,
+          "silence": false,
+          "action": "狭い1Kの自室に帰り着く。",
+          "key_visual": "直敷き布団、PC、壁の公社アプリ印刷ログ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "部屋は、寝るためだけにある。"
+          ],
+          "sfx": [
+            "ガチャ"
+          ],
+          "text": "  narration: 〔部屋は、寝るためだけにある。〕\n  sfx: ガチャ"
+        },
+        {
+          "panel_no": 29,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "中古探索バッグを床に落とす。",
+          "key_visual": "狭い部屋にバッグの金具だけが軽く鳴る構図。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ゴト"
+          ],
+          "text": "  sfx: ゴト"
+        },
+        {
+          "panel_no": 30,
+          "shot_type": "close_up",
+          "importance": 2,
+          "silence": false,
+          "action": "錆びた鉄パイプがバッグから覗く。",
+          "key_visual": "中古装備の頼りなさを細い線と軽いトーンで見せる。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "Fランクには、これで十分らしい。"
+            }
+          ],
+          "narration": [],
+          "sfx": [],
+          "text": "  monologue [char_桐生_レン_v1]: (Fランクには、これで十分らしい。)"
+        }
+      ]
+    },
+    {
+      "page_no": 7,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_no": 31,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "壁の印刷ログに低い経験値履歴が並ぶ。",
+          "key_visual": "読み文字なしの矩形ログ行が壁に貼られている。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "何度潜っても、数字は動かなかった。"
+          ],
+          "sfx": [],
+          "text": "  narration: 〔何度潜っても、数字は動かなかった。〕"
+        },
+        {
+          "panel_no": 32,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "公社アプリのFランク表示枠を見る。",
+          "key_visual": "スマホ内は空の矩形HUD、ヒビがランク枠にかかる。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "見飽きた表示だ。"
+            }
+          ],
+          "narration": [],
+          "sfx": [
+            "ピ"
+          ],
+          "text": "  monologue [char_桐生_レン_v1]: (見飽きた表示だ。)\n  sfx: ピ"
+        },
+        {
+          "panel_no": 33,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "黒パーカーのまま布団へ倒れ込む。",
+          "key_visual": "六畳の床に身体が収まりきらない窮屈さ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "バサ"
+          ],
+          "text": "  sfx: バサ"
+        },
+        {
+          "panel_no": 34,
+          "shot_type": "close_up",
+          "importance": 2,
+          "silence": false,
+          "action": "片目だけ開けて天井を見る。",
+          "key_visual": "白い天井、眠れない目、長い前髪。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "明日も夜勤。明後日も夜勤。"
+            }
+          ],
+          "narration": [],
+          "sfx": [],
+          "text": "  monologue [char_桐生_レン_v1]: (明日も夜勤。明後日も夜勤。)"
+        },
+        {
+          "panel_no": 35,
+          "shot_type": "wide",
+          "importance": 2,
+          "silence": false,
+          "action": "床のスマホだけが暗い部屋で光る。",
+          "key_visual": "小さな白光と直敷き布団、生活の狭さ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ブー"
+          ],
+          "text": "  sfx: ブー"
+        }
+      ]
+    },
+    {
+      "page_no": 8,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_no": 36,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "FランクID証を指先で弾く。",
+          "key_visual": "乾いた小さな動き、制度に慣れた諦め。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "俺は、入口で止まったままだ。"
+            }
+          ],
+          "narration": [],
+          "sfx": [
+            "ピン"
+          ],
+          "text": "  monologue [char_桐生_レン_v1]: (俺は、入口で止まったままだ。)\n  sfx: ピン"
+        },
+        {
+          "panel_no": 37,
+          "shot_type": "medium",
+          "importance": 4,
+          "silence": true,
+          "action": "眠れないまま朝の薄明かりを待つ。",
+          "key_visual": "背景を白く抜き、無音の部屋と開いた目だけを残す。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  (silence panel)"
+        },
+        {
+          "panel_no": 38,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "午前6時、耳元に薄い青光が差す。",
+          "key_visual": "ナビ青光が耳元だけに入り、細い角丸枠の空吹き出しを置く。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "条件一致。案内を開始します。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "キン"
+          ],
+          "text": "  dialogue [char_獅童_響_v1]: 「条件一致。案内を開始します。」\n  sfx: キン"
+        },
+        {
+          "panel_no": 39,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "スマホ縁に青い薄光が走る。",
+          "key_visual": "割れた画面の縁にだけ淡い青、文字は後注入用に空白。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "現在時刻、六時零分。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「現在時刻、六時零分。」"
+        },
+        {
+          "panel_no": 40,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "レンが幻聴かと眉を寄せる。",
+          "key_visual": "目元の隈と驚き、口だけが小さく開く。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "……誰だ？"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_桐生_レン_v1]: 「……誰だ？」"
+        }
+      ]
+    },
+    {
+      "page_no": 9,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_no": 41,
+          "shot_type": "close_up",
+          "importance": 5,
+          "silence": false,
+          "action": "ナビが経験値倍化条件を秒単位で告げる。",
+          "key_visual": "スマホ上に空の矩形HUD、耳元に青光、角丸枠を大きめに確保。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "六時十四分三十二秒、北東通路で三体撃破。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「六時十四分三十二秒、北東通路で三体撃破。」"
+        },
+        {
+          "panel_no": 42,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "時計と地図アプリを同時に確認する。",
+          "key_visual": "片手にスマホ、壁時計、床に散らばるログ紙。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "第三ゲートまで、走れば……"
+            }
+          ],
+          "narration": [],
+          "sfx": [
+            "ガバ"
+          ],
+          "text": "  monologue [char_桐生_レン_v1]: (第三ゲートまで、走れば……)\n  sfx: ガバ"
+        },
+        {
+          "panel_no": 43,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "徒歩ルートの地図画面を親指で拡大する。",
+          "key_visual": "地図は読めない空枠、ルート線だけを抽象的に描く。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "シュッ"
+          ],
+          "text": "  sfx: シュッ"
+        },
+        {
+          "panel_no": 44,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "混雑時間と認証秒数を書き出す。",
+          "key_visual": "紙の上に空の表枠、レンの手元だけが高速に動く。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "列が短ければ、間に合う。"
+            }
+          ],
+          "narration": [],
+          "sfx": [
+            "カリカリ"
+          ],
+          "text": "  monologue [char_桐生_レン_v1]: (列が短ければ、間に合う。)\n  sfx: カリカリ"
+        },
+        {
+          "panel_no": 45,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "レンの口角がわずかに上がる。",
+          "key_visual": "面白いものを見つけた時だけ出る微かな笑み。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "……抜け道、あるじゃねえか。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_桐生_レン_v1]: 「……抜け道、あるじゃねえか。」"
+        }
+      ]
+    },
+    {
+      "page_no": 10,
+      "page_role": "reveal",
+      "panels": [
+        {
+          "panel_no": 46,
+          "shot_type": "wide",
+          "importance": 2,
+          "silence": false,
+          "action": "バッグに鉄パイプとペットボトルを押し込む。",
+          "key_visual": "中古装備の即席準備、狭い部屋の散らかり。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ドサ"
+          ],
+          "text": "  sfx: ドサ"
+        },
+        {
+          "panel_no": 47,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "錆びた鉄パイプを握り直す。",
+          "key_visual": "頼りない武器を強く握る手、余白に悪態用吹き出し。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "これで三体とか、正気かよ。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ギュ"
+          ],
+          "text": "  dialogue [char_桐生_レン_v1]: 「これで三体とか、正気かよ。」\n  sfx: ギュ"
+        },
+        {
+          "panel_no": 48,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "レンがナビへ問い返す。",
+          "key_visual": "通常吹き出しと角丸ナビ枠を明確に分ける。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "従えば、勝てるのか？"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_桐生_レン_v1]: 「従えば、勝てるのか？」"
+        },
+        {
+          "panel_no": 49,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "ナビが生存率の上昇を返す。",
+          "key_visual": "青光は薄く、レンの目元だけを縁取る。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "勝率ではなく、生存率が上昇します。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「勝率ではなく、生存率が上昇します。」"
+        },
+        {
+          "panel_no": 50,
+          "shot_type": "medium",
+          "importance": 4,
+          "silence": false,
+          "action": "FランクID証を首に下げて立ち上がる。",
+          "key_visual": "黒パーカーの胸元でFランクカードが揺れる。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "今の俺には、それで十分だ。"
+            }
+          ],
+          "narration": [],
+          "sfx": [
+            "チャ"
+          ],
+          "text": "  monologue [char_桐生_レン_v1]: (今の俺には、それで十分だ。)\n  sfx: チャ"
+        }
+      ]
+    },
+    {
+      "page_no": 11,
+      "page_role": "action",
+      "panels": [
+        {
+          "panel_no": 51,
+          "shot_type": "wide",
+          "importance": 2,
+          "silence": false,
+          "action": "朝の薄い光の中、レンが路地を走る。",
+          "key_visual": "コンビニ外観を背にした小さな疾走、速度線控えめ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ダッ"
+          ],
+          "text": "  sfx: ダッ"
+        },
+        {
+          "panel_no": 52,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "スマホ時計で指定時刻までの余裕を確認する。",
+          "key_visual": "数字は空HUD化し、割れた画面と走る指だけを見せる。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "あと少し。信号、渡れる。"
+            }
+          ],
+          "narration": [],
+          "sfx": [],
+          "text": "  monologue [char_桐生_レン_v1]: (あと少し。信号、渡れる。)"
+        },
+        {
+          "panel_no": 53,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "最短路地を斜めに抜ける。",
+          "key_visual": "都市の隙間を攻略マップのように切る鳥瞰構図。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "街が、初めて攻略マップに見えた。"
+          ],
+          "sfx": [
+            "タタタ"
+          ],
+          "text": "  narration: 〔街が、初めて攻略マップに見えた。〕\n  sfx: タタタ"
+        },
+        {
+          "panel_no": 54,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "息を切らしながら計算を止めない。",
+          "key_visual": "汗、前髪、わずかな笑みで情報強者への転換を見せる。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "認証で、八秒削る。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ハッ"
+          ],
+          "text": "  dialogue [char_桐生_レン_v1]: 「認証で、八秒削る。」\n  sfx: ハッ"
+        },
+        {
+          "panel_no": 55,
+          "shot_type": "wide",
+          "importance": 4,
+          "silence": true,
+          "action": "新宿第三ダンジョン入域ゲート前へ滑り込む。",
+          "key_visual": "巨大な公共施設の前にFランクIDを握る小さな背中。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  (silence panel)"
+        }
+      ]
+    },
+    {
+      "page_no": 12,
+      "page_role": "establishing",
+      "panels": [
+        {
+          "panel_no": 56,
+          "shot_type": "establishing",
+          "importance": 5,
+          "silence": false,
+          "action": "新宿第三ダンジョン入域ゲートの全景を見せる。",
+          "key_visual": "明るいSランク専用ゲートと古いFランク端末の格差を一望。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "新宿第三ダンジョン。公社管理区域。"
+          ],
+          "sfx": [
+            "ザワ"
+          ],
+          "text": "  narration: 〔新宿第三ダンジョン。公社管理区域。〕\n  sfx: ザワ"
+        },
+        {
+          "panel_no": 57,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "Fランク列の最後尾に並ぶ。",
+          "key_visual": "古い端末、くすんだ案内板、黒パーカーの孤立。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ザッ"
+          ],
+          "text": "  sfx: ザッ"
+        },
+        {
+          "panel_no": 58,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "FランクID証が古い端末に読み込まれる。",
+          "key_visual": "カード、端末スリット、処理中の空矩形枠。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ピッ"
+          ],
+          "text": "  sfx: ピッ"
+        },
+        {
+          "panel_no": 59,
+          "shot_type": "close_up",
+          "importance": 2,
+          "silence": false,
+          "action": "認証待ちの秒数をスマホで確認する。",
+          "key_visual": "割れた画面に空のタイマー枠、爪を噛まない硬い指。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "詰まるな……詰まるなよ。"
+            }
+          ],
+          "narration": [],
+          "sfx": [],
+          "text": "  monologue [char_桐生_レン_v1]: (詰まるな……詰まるなよ。)"
+        },
+        {
+          "panel_no": 60,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "ナビが通過可能な残り秒数を告げる。",
+          "key_visual": "耳元の青光、背後に列、角丸枠は縦に細く配置。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "残り二十六秒。通過可能です。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「残り二十六秒。通過可能です。」"
+        }
+      ]
+    },
+    {
+      "page_no": 13,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_no": 61,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "一階限定許可のゲートを抜ける。",
+          "key_visual": "許可ランプの空表示枠と低く頭を下げる動き。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ウィン"
+          ],
+          "text": "  sfx: ウィン"
+        },
+        {
+          "panel_no": 62,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "警備チェックで鉄パイプが一瞬止められる。",
+          "key_visual": "錆びた鉄パイプと冷たい検査トレー。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "登録済みの装備です。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "カン"
+          ],
+          "text": "  dialogue [char_桐生_レン_v1]: 「登録済みの装備です。」\n  sfx: カン"
+        },
+        {
+          "panel_no": 63,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "バッグ内の軽装備が見える。",
+          "key_visual": "装備の貧弱さと公共施設の清潔さの対比。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "装備と呼べるものは、ほとんどない。"
+          ],
+          "sfx": [],
+          "text": "  narration: 〔装備と呼べるものは、ほとんどない。〕"
+        },
+        {
+          "panel_no": 64,
+          "shot_type": "wide",
+          "importance": 3,
+          "silence": false,
+          "action": "初心者階層の明るい通路へ入る。",
+          "key_visual": "明るい整備通路、奥へ伸びる北東通路、片手の鉄パイプ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "一階北東通路。初心者向け、とされる場所。"
+          ],
+          "sfx": [
+            "コツ"
+          ],
+          "text": "  narration: 〔一階北東通路。初心者向け、とされる場所。〕\n  sfx: コツ"
+        },
+        {
+          "panel_no": 65,
+          "shot_type": "close_up",
+          "importance": 2,
+          "silence": false,
+          "action": "スマホの地図と現在地を照合する。",
+          "key_visual": "空の地図枠、画面右上のヒビ、薄い青光なし。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ピ"
+          ],
+          "text": "  sfx: ピ"
+        }
+      ]
+    },
+    {
+      "page_no": 14,
+      "page_role": "buildup",
+      "panels": [
+        {
+          "panel_no": 66,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "ナビが北東通路までの歩数を補正する。",
+          "key_visual": "通路の消失点、耳元の青光、空の角丸枠。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "右壁沿い、四十三歩で停止。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「右壁沿い、四十三歩で停止。」"
+        },
+        {
+          "panel_no": 67,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "濡れた床の端を踏む。",
+          "key_visual": "足元の水膜、後の壁反射戦法の伏線。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ピチャ"
+          ],
+          "text": "  sfx: ピチャ"
+        },
+        {
+          "panel_no": 68,
+          "shot_type": "medium",
+          "importance": 2,
+          "silence": false,
+          "action": "鉄パイプを肩の高さへ構える。",
+          "key_visual": "緊張で硬い肩、余白に短い悪態用吹き出し。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "心臓、うるせえ。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ギリ"
+          ],
+          "text": "  dialogue [char_桐生_レン_v1]: 「心臓、うるせえ。」\n  sfx: ギリ"
+        },
+        {
+          "panel_no": 69,
+          "shot_type": "wide",
+          "importance": 3,
+          "silence": false,
+          "action": "朝6時14分の光が亀裂から差す。",
+          "key_visual": "通路の一点だけ薄く明るく、他は公共地下道の白さ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "指定時刻が近づく。"
+          ],
+          "sfx": [],
+          "text": "  narration: 〔指定時刻が近づく。〕"
+        },
+        {
+          "panel_no": 70,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "ナビが接敵までの秒数を告げる。",
+          "key_visual": "目元の青光、瞳のアップ、空HUD枠を横に配置。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "接敵まで、三、二、一。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「接敵まで、三、二、一。」"
+        }
+      ]
+    },
+    {
+      "page_no": 15,
+      "page_role": "action",
+      "panels": [
+        {
+          "panel_no": 71,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "指定位置へ半歩ずれる。",
+          "key_visual": "強さを筋力ではなく正しい位置取りで見せる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "スッ"
+          ],
+          "text": "  sfx: スッ"
+        },
+        {
+          "panel_no": 72,
+          "shot_type": "wide",
+          "importance": 4,
+          "silence": false,
+          "action": "通路奥の影が三つに割れて湧く。",
+          "key_visual": "ゴブリン本体は影と爪だけで予兆、レンを手前に小さく置く。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ズ…"
+          ],
+          "text": "  sfx: ズ…"
+        },
+        {
+          "panel_no": 73,
+          "shot_type": "wide",
+          "importance": 5,
+          "silence": false,
+          "action": "予告通り三体が現れる。",
+          "key_visual": "三つの小型影、鉄パイプを握るレン、角丸ナビ枠。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "対象三体。予測通りです。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ギャッ"
+          ],
+          "text": "  dialogue [char_獅童_響_v1]: 「対象三体。予測通りです。」\n  sfx: ギャッ"
+        },
+        {
+          "panel_no": 74,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "レンが恐怖で小さく悪態をつく。",
+          "key_visual": "汗、引きつった口、吹き出しは短く縦に。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "本当に来やがった。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_桐生_レン_v1]: 「本当に来やがった。」"
+        },
+        {
+          "panel_no": 75,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "ナビが先制で頭部を狙うよう告げる。",
+          "key_visual": "青光が瞳に入り、空HUD枠がゴブリン頭部位置を示す。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "先制。右前方、頭部。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「先制。右前方、頭部。」"
+        }
+      ]
+    },
+    {
+      "page_no": 16,
+      "page_role": "action",
+      "panels": [
+        {
+          "panel_no": 76,
+          "shot_type": "medium",
+          "importance": 4,
+          "silence": false,
+          "action": "一体目へ鉄パイプを振り抜く。",
+          "key_visual": "速度線、鉄パイプの軌道、白場を残した爽快な打撃前。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ブン"
+          ],
+          "text": "  sfx: ブン"
+        },
+        {
+          "panel_no": 77,
+          "shot_type": "close_up",
+          "importance": 5,
+          "silence": false,
+          "action": "鉄パイプが一体目の頭部を撃ち抜く。",
+          "key_visual": "致命位置のアップ、効果音は入れず衝撃線のみ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ガン"
+          ],
+          "text": "  sfx: ガン"
+        },
+        {
+          "panel_no": 78,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "反動で体勢が崩れ、残り二体が迫る。",
+          "key_visual": "足元が滑り、残り二体の影が左右から迫る。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "重い、止まらな――"
+            }
+          ],
+          "narration": [],
+          "sfx": [
+            "ズル"
+          ],
+          "text": "  monologue [char_桐生_レン_v1]: (重い、止まらな――)\n  sfx: ズル"
+        },
+        {
+          "panel_no": 79,
+          "shot_type": "close_up",
+          "importance": 3,
+          "silence": false,
+          "action": "濡れた床を踏み替える。",
+          "key_visual": "水膜と靴底、次の回避の伏線を明確化。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ピチャ"
+          ],
+          "text": "  sfx: ピチャ"
+        },
+        {
+          "panel_no": 80,
+          "shot_type": "medium",
+          "importance": 4,
+          "silence": false,
+          "action": "ナビが壁反射を使うよう指示する。",
+          "key_visual": "通路壁に空の軌道枠、耳元に薄青い縁取り。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "左壁に当て、反射角を利用。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「左壁に当て、反射角を利用。」"
+        }
+      ]
+    },
+    {
+      "page_no": 17,
+      "page_role": "action",
+      "panels": [
+        {
+          "panel_no": 81,
+          "shot_type": "wide",
+          "importance": 4,
+          "silence": false,
+          "action": "壁際へ流れて二体目の突進角度をずらす。",
+          "key_visual": "鳥瞰でレン、壁、水たまり、敵影の位置関係を読ませる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ザッ"
+          ],
+          "text": "  sfx: ザッ"
+        },
+        {
+          "panel_no": 82,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": true,
+          "action": "一瞬だけ呼吸を止めて頭部位置を測る。",
+          "key_visual": "白抜き背景、瞳と汗だけ、効果音なし。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  (silence panel)"
+        },
+        {
+          "panel_no": 83,
+          "shot_type": "medium",
+          "importance": 5,
+          "silence": false,
+          "action": "壁に当てた反動で二体目を撃つ。",
+          "key_visual": "壁反射の軌道、集中線、正しい角度だけで勝つ構図。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ガキン"
+          ],
+          "text": "  sfx: ガキン"
+        },
+        {
+          "panel_no": 84,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "鉄パイプ先端が二体目の頭部へ入る。",
+          "key_visual": "頭部位置と鉄パイプ先端の近接アップ、黒を増やしすぎない。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ゴッ"
+          ],
+          "text": "  sfx: ゴッ"
+        },
+        {
+          "panel_no": 85,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "残り一体が背後へ回る。",
+          "key_visual": "レンの背中、黒パーカー、画面端から伸びる爪影。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "サッ"
+          ],
+          "text": "  sfx: サッ"
+        }
+      ]
+    },
+    {
+      "page_no": 18,
+      "page_role": "action",
+      "panels": [
+        {
+          "panel_no": 86,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "ナビが足場の濡れを使えと告げる。",
+          "key_visual": "耳元の青光と足元の水膜を同一コマで結ぶ。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "足場。濡れを使ってください。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「足場。濡れを使ってください。」"
+        },
+        {
+          "panel_no": 87,
+          "shot_type": "wide",
+          "importance": 4,
+          "silence": false,
+          "action": "水たまりを踏み、敵の足を滑らせる位置へ誘導する。",
+          "key_visual": "床の反射、足運び、敵影の重心崩れを鳥瞰気味に。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ザバ"
+          ],
+          "text": "  sfx: ザバ"
+        },
+        {
+          "panel_no": 88,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "水を跳ね上げ、三体目の視界を切る。",
+          "key_visual": "水しぶきは白く、速度線で瞬間を見せる。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "バシャ"
+          ],
+          "text": "  sfx: バシャ"
+        },
+        {
+          "panel_no": 89,
+          "shot_type": "medium",
+          "importance": 5,
+          "silence": false,
+          "action": "最後の一体へ鉄パイプを突き上げる。",
+          "key_visual": "低い重心、突き上げ軌道、通路奥へ抜ける速度線。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "ここだ。"
+            }
+          ],
+          "narration": [],
+          "sfx": [
+            "ドッ"
+          ],
+          "text": "  monologue [char_桐生_レン_v1]: (ここだ。)\n  sfx: ドッ"
+        },
+        {
+          "panel_no": 90,
+          "shot_type": "close_up",
+          "importance": 5,
+          "silence": false,
+          "action": "三体目の頭部撃破が決まる。",
+          "key_visual": "鉄パイプ先端と敵影の頭部、余白に後合成用のSEスペース。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ガン"
+          ],
+          "text": "  sfx: ガン"
+        }
+      ]
+    },
+    {
+      "page_no": 19,
+      "page_role": "aftermath",
+      "panels": [
+        {
+          "panel_no": 91,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "膝をつき、鉄パイプで身体を支える。",
+          "key_visual": "息切れ、床の水、倒れた影を背景に小さく。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ハァ"
+          ],
+          "text": "  sfx: ハァ"
+        },
+        {
+          "panel_no": 92,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "自分の手の震えを見る。",
+          "key_visual": "震える指、黒袖、白い床。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "俺が……倒した？"
+            }
+          ],
+          "narration": [],
+          "sfx": [
+            "カタ"
+          ],
+          "text": "  monologue [char_桐生_レン_v1]: (俺が……倒した？)\n  sfx: カタ"
+        },
+        {
+          "panel_no": 93,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "スマホに経験値加算の通知枠が立ち上がる。",
+          "key_visual": "未分類ではない通常経験値の大幅加算を空ログ枠で表現。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "通常ではありえない加算ログ。"
+          ],
+          "sfx": [
+            "ピピピ"
+          ],
+          "text": "  narration: 〔通常ではありえない加算ログ。〕\n  sfx: ピピピ"
+        },
+        {
+          "panel_no": 94,
+          "shot_type": "close_up",
+          "importance": 5,
+          "silence": false,
+          "action": "スマホ光を映した瞳が数値の異常を理解する。",
+          "key_visual": "スマホ光を映す瞳、口角がわずかに上がる。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "跳ねた。桁が、違う。"
+            }
+          ],
+          "narration": [],
+          "sfx": [],
+          "text": "  monologue [char_桐生_レン_v1]: (跳ねた。桁が、違う。)"
+        },
+        {
+          "panel_no": 95,
+          "shot_type": "medium",
+          "importance": 4,
+          "silence": false,
+          "action": "ナビが条件達成を告げる。",
+          "key_visual": "スマホ縁と耳元の青光、空の角丸枠を重ねない配置。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "条件達成。経験値倍率、適用済み。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「条件達成。経験値倍率、適用済み。」"
+        }
+      ]
+    },
+    {
+      "page_no": 20,
+      "page_role": "aftermath",
+      "panels": [
+        {
+          "panel_no": 96,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "レンが笑いそうになって咳き込む。",
+          "key_visual": "恐怖の後の安堵と興奮を崩れた姿勢で出す。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "は、はは……げほっ。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ゲホ"
+          ],
+          "text": "  dialogue [char_桐生_レン_v1]: 「は、はは……げほっ。」\n  sfx: ゲホ"
+        },
+        {
+          "panel_no": 97,
+          "shot_type": "wide",
+          "importance": 3,
+          "silence": false,
+          "action": "倒れた三つの影と座り込むレンを通路全体で見せる。",
+          "key_visual": "公共地下道の明るさの中、Fランク単独勝利の異常さ。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "Fランクが、単独で三体。"
+          ],
+          "sfx": [],
+          "text": "  narration: 〔Fランクが、単独で三体。〕"
+        },
+        {
+          "panel_no": 98,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": true,
+          "action": "スマホ画面を見たまま言葉を失う。",
+          "key_visual": "白抜き背景、目と割れたスマホだけの余韻。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  (silence panel)"
+        },
+        {
+          "panel_no": 99,
+          "shot_type": "close_up",
+          "importance": 5,
+          "silence": false,
+          "action": "公社アプリに大幅加算ログが並ぶ。",
+          "key_visual": "空の矩形ログ行が通常経験値枠として連続表示される。",
+          "dialogue": [],
+          "monologue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "これ、次も使えるのか？"
+            }
+          ],
+          "narration": [],
+          "sfx": [
+            "ピ"
+          ],
+          "text": "  monologue [char_桐生_レン_v1]: (これ、次も使えるのか？)\n  sfx: ピ"
+        },
+        {
+          "panel_no": 100,
+          "shot_type": "medium",
+          "importance": 4,
+          "silence": false,
+          "action": "ナビが明日の予定を組むかと尋ねる。",
+          "key_visual": "青光は穏やかに、角丸枠をスマホ横に置く。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "明日の最適攻略予定を作成しますか？"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_獅童_響_v1]: 「明日の最適攻略予定を作成しますか？」"
+        }
+      ]
+    },
+    {
+      "page_no": 21,
+      "page_role": "cliffhanger",
+      "panels": [
+        {
+          "panel_no": 101,
+          "shot_type": "close_up",
+          "importance": 5,
+          "silence": false,
+          "action": "レンが初めて攻める意思で答える。",
+          "key_visual": "疲労と笑みが同居する顔、黒髪の影は軽め。",
+          "dialogue": [
+            {
+              "character_id": "char_桐生_レン_v1",
+              "text": "頼む。次は、こっちから取りに行く。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  dialogue [char_桐生_レン_v1]: 「頼む。次は、こっちから取りに行く。」"
+        },
+        {
+          "panel_no": 102,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "鉄パイプとバッグを引き寄せ、立ち上がろうとする。",
+          "key_visual": "弱い装備でも次へ向かう手元。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ズッ"
+          ],
+          "text": "  sfx: ズッ"
+        },
+        {
+          "panel_no": 103,
+          "shot_type": "wide",
+          "importance": 3,
+          "silence": false,
+          "action": "北東通路の奥に下降階段の影が見える。",
+          "key_visual": "地下へ降りる階段を小さく見せ、次の攻略対象を示す。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "地下へ降りるほど、数字は上がる。"
+          ],
+          "sfx": [],
+          "text": "  narration: 〔地下へ降りるほど、数字は上がる。〕"
+        },
+        {
+          "panel_no": 104,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": true,
+          "action": "耳元の青光が一瞬だけ消える。",
+          "key_visual": "白い沈黙コマ、耳元に光なし、表情だけで緊張を残す。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  (silence panel)"
+        },
+        {
+          "panel_no": 105,
+          "shot_type": "medium",
+          "importance": 3,
+          "silence": false,
+          "action": "青光が戻り、ナビが次の予定を計算し始める。",
+          "key_visual": "スマホ上に空の予定表HUD、角丸枠は細く整える。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "計算開始。最短成長経路を提示します。"
+            }
+          ],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "キィ"
+          ],
+          "text": "  dialogue [char_獅童_響_v1]: 「計算開始。最短成長経路を提示します。」\n  sfx: キィ"
+        }
+      ]
+    },
+    {
+      "page_no": 22,
+      "page_role": "cliffhanger",
+      "panels": [
+        {
+          "panel_no": 106,
+          "shot_type": "establishing",
+          "importance": 4,
+          "silence": false,
+          "action": "無人のDPC内部監査室でモニターだけが点いている。",
+          "key_visual": "窓のない解析室、壁一面の空ログ枠、椅子は空。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "同時刻。DPC新宿支部、内部監査室。"
+          ],
+          "sfx": [
+            "ヴン"
+          ],
+          "text": "  narration: 〔同時刻。DPC新宿支部、内部監査室。〕\n  sfx: ヴン"
+        },
+        {
+          "panel_no": 107,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": false,
+          "action": "監査室モニターにFランク一階限定入域者の戦闘ログが浮かぶ。",
+          "key_visual": "実名なしの空ログ行、異常値だけが枠で強調される。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [
+            "制度は、異常値を見逃さない。"
+          ],
+          "sfx": [
+            "ピ"
+          ],
+          "text": "  narration: 〔制度は、異常値を見逃さない。〕\n  sfx: ピ"
+        },
+        {
+          "panel_no": 108,
+          "shot_type": "medium",
+          "importance": 4,
+          "silence": false,
+          "action": "壁一面のモニターの一つだけが異常ログで点滅する。",
+          "key_visual": "人のいない部屋に制度の視線だけが迫る。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [
+            "ピピ"
+          ],
+          "text": "  sfx: ピピ"
+        },
+        {
+          "panel_no": 109,
+          "shot_type": "close_up",
+          "importance": 4,
+          "silence": true,
+          "action": "無人監視画面の異常枠だけが白く浮く。",
+          "key_visual": "完全無音の監視画面、空の矩形枠を中央に大きく。",
+          "dialogue": [],
+          "monologue": [],
+          "narration": [],
+          "sfx": [],
+          "text": "  (silence panel)"
+        },
+        {
+          "panel_no": 110,
+          "shot_type": "establishing",
+          "importance": 5,
+          "silence": false,
+          "action": "レンの背後で下降階段が暗く伸び、上向きの空HUDが浮かぶ。",
+          "key_visual": "下降階段と上向きの数値枠、レンの耳元に薄い青光を入れた次回への見せゴマ。",
+          "dialogue": [
+            {
+              "character_id": "char_獅童_響_v1",
+              "text": "次の隠し条件を開示します。"
+            }
+          ],
+          "monologue": [],
+          "narration": [
+            "Fランクの停滞は、この日終わった。"
+          ],
+          "sfx": [
+            "キン"
+          ],
+          "text": "  dialogue [char_獅童_響_v1]: 「次の隠し条件を開示します。」\n  narration: 〔Fランクの停滞は、この日終わった。〕\n  sfx: キン"
+        }
+      ]
+    }
+  ]
+}

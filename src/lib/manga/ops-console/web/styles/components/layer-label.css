@@ -1,0 +1,27 @@
+/* Layer 名 + 薄字 ID の併記表示。
+   pipeline.ts の旧 pipe-step__id/__label を一般化したもの。
+   - inline (既定): 横並び
+   - stacked: 縦積み (見出しに使用) */
+
+.nc-layer-label {
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.nc-layer-label--stacked {
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+
+.nc-layer-label__main {
+  color: var(--text-primary);
+  font-weight: var(--fw-medium);
+}
+
+.nc-layer-label__sub {
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+}

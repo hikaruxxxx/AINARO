@@ -24,6 +24,32 @@ npx tsx scripts/generation/coherence-checker.ts {slug} {ep_number}
 
 スクリプトは以下のチェックを行い、結果を `audit_*.json` に保存:
 
+### Step 1.5: 量的整合性監査の実行 (Phase A 台帳照合)
+
+`quantitative_facts.yaml` が存在する場合のみ実行:
+
+```bash
+python3 scripts/generation/quantitative-audit.py {slug} {ep_number}
+```
+
+このスクリプトは以下を検査:
+
+- **forbidden_claims**: 台帳に登録された禁止表現が本文にあれば即 FAIL
+- **linguistic_red_flags**: 通常化表現 (「いつも」「毎回」等) の出現を WARN (文脈確認は人間 or LLM)
+- **quantitative_growth**: 月間加算/レベル間隔/4年累積の検算
+- **exp_counter_continuity**: 前話 state.json から経験値カウンタ後退検出
+- **text_numerical_claims**: 本文中の数値主張を抽出して台帳と照合
+
+Exit code:
+- 0: PASS (or PASS_WITH_WARN)
+- 1: FAIL (forbidden_claims 違反 or 量的矛盾)
+
+出力:
+- `data/generation/works/{slug}/longform/episodes/ep{N:04d}_quant_audit.json`
+- `data/generation/works/{slug}/longform/episodes/ep{N:04d}_quant_audit.md`
+
+`quantitative_facts.yaml` がない場合はスキップして従来監査のみ実行。
+
 #### 1-1. スキル名の表記揺れ
 - `world_bible/ability_system.json` の `skills[].name` と本文中のスキル名を照合
 - 例: 「召喚術」と書かれているが正式名は「召喚」 → 違反
@@ -142,6 +168,8 @@ npx tsx scripts/generation/coherence-checker.ts {slug} {ep_number}
 - ステータス単調性違反: 全話で **0件**
 - スキル名表記揺れ: 全話で **0件**（軽微な揺れは自動修正）
 - 口癖密度: 全話で **平均 2.0回/話 以上**
+- **量的整合性監査**: 全話で `quant_audit.judgment == "PASS"` または `"PASS_WITH_WARN"`
+  - `FAIL` 判定の話は L6 retry を推奨 (or `/longform-fix-loop` 起動)
 
 ## 重要事項
 

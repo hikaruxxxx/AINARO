@@ -1,0 +1,235 @@
+# エピソードパターン辞書 (light_recovery 型・5パターン)
+#
+# Layer 5 (build-episode-patterns) で参照
+# Layer 6 (generate-longform-episode) で各話に1パターン割り当てる
+#
+# 設計方針 (2026-05-06):
+#   hellmode (S1=3 戦闘 / C8=3 成長) の循環構造とは異なり、
+#   light_recovery は recovery (回復感) / sidekick_presence (相棒) / character likability を
+#   循環で支える 5 パターン。
+#
+#   profile.yaml の episode_pattern_distribution と整合:
+#     - P1_daily_warmth        : 0.30
+#     - P2_small_victory       : 0.25
+#     - P3_relationship_warmth : 0.25
+#     - P4_world_unfold        : 0.15
+#     - P5_chapter_climax      : 0.05
+
+patterns:
+  # ─────────────────────────────────────────
+  - id: P1_daily_warmth
+    name: 日常温度
+    distribution: 0.30  # 全80話の30% (約24話)
+    description: |
+      街の日常を主人公が体験するパターン。市場/食堂/家の朝食/散歩 などの
+      生活シーンが中心。新しい事件や戦闘は起きない。
+      読者にとっての「読み心地の良さ」「居場所感」を作る循環の核。
+
+    structure:
+      - phase: 開始の風景
+        what: 街/部屋/食堂の establishing。季節感・温度・匂いを描写
+        words: 300-500
+        required:
+          - 5感のうち最低2つ (匂い/音/温度/光/触感) を描写
+      - phase: 相棒/家族との会話
+        what: 何気ない会話、関心ごとの共有、相棒/家族の小さな悩み
+        words: 500-800
+        required:
+          - 相棒/家族のキャラの「らしさ」が出る台詞
+      - phase: 主人公の小さな仕事
+        what: 普段の業務 (調合/巡回/手伝い)、達成感小
+        words: 400-600
+      - phase: 締めの余韻
+        what: 1日の終わり、家での独白、明日への小さな期待
+        words: 300-500
+        required:
+          - 主人公の「今日もよかった」の感覚を間接表現で
+
+    state_changes:
+      relationship_change: 0.5      # 50%の確率で関係性に小さな進展
+      status_increase: 0            # ステータスは変わらない
+      skill_acquisition: 0          # スキル習得もない
+      location_change: 0            # 場所も普段の範囲
+
+    forbidden:
+      - 戦闘
+      - 重い独白 (3行以上のトラウマ系)
+      - 章替え相当のイベント
+
+  # ─────────────────────────────────────────
+  - id: P2_small_victory
+    name: 小報酬
+    distribution: 0.25  # 全80話の25% (約20話)
+    description: |
+      主人公の能力で小さな問題を解決するパターン。難病ではなく、
+      街の人の困りごと (薬の調合/迷子探し/品物の鑑定 等) を1話で解決。
+      「主人公が役に立った」「街の人から感謝された」の達成感が読者報酬になる。
+
+    structure:
+      - phase: 困りごとの提示
+        what: 街の人 (mob 含む) が抱える小さな問題
+        words: 300-500
+        required:
+          - 困りごとを抱える人物が共感できるキャラとして描かれる
+      - phase: 主人公の観察と判断
+        what: 主人公が問題を観察、共感思考/観察思考で解決策を見つける
+        words: 400-600
+        required:
+          - 主人公の温度ある判断 (損得勘定でなく、人を助けたい動機)
+      - phase: 解決の実行
+        what: スキル/知識を使って問題を解決
+        words: 500-800
+      - phase: 感謝と余韻
+        what: 街の人からの感謝、主人公の小さな喜び、相棒からの一言
+        words: 400-600
+        required:
+          - 感謝の場面に「ありがとう」「助かった」など言語化された感謝が入る
+          - 相棒/家族が「主人公らしい」とコメントする
+
+    state_changes:
+      relationship_change: required # 街の人との関係が1段深まる
+      status_increase: 0
+      skill_acquisition: 0.2        # 20%の確率で生活スキルが少し成長
+      location_change: 0
+
+    forbidden:
+      - 大きな対立/戦闘
+      - 主人公の能力が突然強くなる展開
+
+  # ─────────────────────────────────────────
+  - id: P3_relationship_warmth
+    name: 関係性の温度
+    distribution: 0.25  # 全80話の25% (約20話)
+    description: |
+      相棒/家族/親友との関係性が深まるパターン。一緒に何かをする/
+      悩みを聞く/思い出を共有する など、関係性の深化が中心。
+      light_recovery の sidekick_presence 軸を支える主軸。
+
+    structure:
+      - phase: 相棒/家族との時間
+        what: 一緒に食事/散歩/仕事/趣味 などの共有時間
+        words: 400-600
+        required:
+          - 相棒/家族のキャラの「らしさ」が複数表れる
+      - phase: 相手の内面が見える瞬間
+        what: 相棒/家族の悩み・喜び・過去の一端が見える
+        words: 600-1000
+        required:
+          - 相手キャラの感情の温度が伝わる描写
+      - phase: 主人公の応答
+        what: 主人公が共感/支える/一緒に考える
+        words: 400-600
+        required:
+          - 主人公の応答に「上から目線」「説教」がない
+      - phase: 関係性の深化
+        what: 関係性が1段深まったことを示す小さな描写 (距離感の変化、新しい呼び方等)
+        words: 200-400
+
+    state_changes:
+      relationship_change: required # 関係性 1段深化
+      status_increase: 0
+      skill_acquisition: 0
+      location_change: 0
+
+    forbidden:
+      - 関係性の急激な進展 (突然の告白/絶縁等)
+      - 相棒/家族の「敵キャラ化」
+
+  # ─────────────────────────────────────────
+  - id: P4_world_unfold
+    name: 世界の小さな開示
+    distribution: 0.15  # 全80話の15% (約12話)
+    description: |
+      街の伝承/季節の行事/世界の歴史 などを生活密着で開示するパターン。
+      hellmode の「世界の真実」のような重厚な開示ではなく、
+      街の老人から伝承を聞く/祭りで歴史に触れる などの軽い接点。
+      読者に「この世界には奥行きがある」と感じさせるが、深掘りしすぎない。
+
+    structure:
+      - phase: きっかけ
+        what: 街の祭り/古い建物/伝承の本 などとの遭遇
+        words: 300-500
+      - phase: 開示の場
+        what: 老人/書物/口承で世界の一端が語られる
+        words: 600-1000
+        required:
+          - 開示は会話または視覚的に。ナレーション専用枠は使わない (craft_guide 準拠)
+      - phase: 主人公の受け取り
+        what: 主人公が興味を持つ、相棒と感想を共有する
+        words: 400-600
+      - phase: 余韻
+        what: 主人公の中に小さな興味が残る、いつか深く知りたい感
+        words: 200-400
+
+    state_changes:
+      relationship_change: 0.3      # 開示してくれた相手と関係性微増
+      status_increase: 0
+      skill_acquisition: 0
+      location_change: 0.5          # 開示の場が街の特定の場所なら、新しい場所として記憶
+
+    forbidden:
+      - 世界の真実の重厚開示 (絶望/破滅/陰謀)
+      - 主人公が「世界を救う使命」を背負う展開
+
+  # ─────────────────────────────────────────
+  - id: P5_chapter_climax
+    name: 章クライマックス (居場所の確立)
+    distribution: 0.05  # 全80話の5% (約4話、各章末に1回)
+    description: |
+      章末で「居場所の確立」「関係性のマイルストーン」を達成するパターン。
+      hellmode の「社会階層上昇」とは異なり、light_recovery では
+      「街の人みんなで小さな危機を乗り越える」「主人公が街の正式メンバーになる」
+      「相棒と家族同然の関係になる」などのマイルストーンを置く。
+
+    structure:
+      - phase: 状況の収束
+        what: 章を通して積み上げてきた要素が1点に集まる
+        words: 600-1000
+      - phase: 小さな危機 (任意)
+        what: 病気の子供を治す/迷子を探す/街の祭りの準備 等の集合的な事件
+        words: 800-1200
+      - phase: 相棒/街の人と一緒に
+        what: 主人公一人ではなく、相棒/家族/街の人と協力して解決
+        words: 1000-1500
+        required:
+          - 主人公が「一人で完結しない」、誰かと一緒に動く描写
+      - phase: 居場所/関係性の確立
+        what: 章末の到達点。主人公が「ここが自分の場所」と感じる瞬間
+        words: 500-800
+        required:
+          - 居場所感を具体的描写で (相棒の言葉/街の風景/主人公の独白)
+      - phase: 次章の引き
+        what: 次章の新しいフェーズへの予感
+        words: 200-400
+        required:
+          - 引きは「期待感」「温かい予感」(緊張・絶望系は禁則)
+
+    state_changes:
+      relationship_change: required # 関係性のマイルストーン
+      status_increase: 0.5          # 50%でステータス微増 (ある場合は装飾的)
+      skill_acquisition: 0.3        # 30%で新スキル
+      location_change: 0.5          # 50%で居場所/役職が拡張
+
+    forbidden:
+      - 戦闘での勝利を章末トリガーにする (関係性/居場所を主軸に)
+      - 「世界の真実が判明して破滅展開」(light_recovery 不適)
+      - 引きで重い謎/絶望を投げる
+
+# ─────────────────────────────────────────
+# 整合性監査 (Layer 7) でチェックする条件
+audit_pass_criteria:
+  recovery_beat_per_episode_min: 1
+  trauma_dominant_violations_max: 0
+  sidekick_appearance_per_episode_min: 1
+  comedic_relief_per_episode_min: 1
+  pattern_distribution_tolerance: 0.05  # 上記比率の ±0.05 以内なら合格
+
+# ─────────────────────────────────────────
+# light_recovery vs hellmode の使い分け
+notes:
+  - "hellmode: P1-P5 が戦闘/スキル中心 (S1=3 を支える)。light_recovery: 関係性/生活感中心 (recovery/sidekick_presence を支える)。"
+  - "hellmode P1_skill_detect (新スキル発見) → light_recovery P1_daily_warmth (日常温度) に対応"
+  - "hellmode P2_combat_optimize (戦闘最適化) → light_recovery P2_small_victory (小報酬) に対応"
+  - "hellmode P3_relationship_advance (関係性進展) ≒ light_recovery P3_relationship_warmth"
+  - "hellmode P4_world_unfold (世界の謎開示) → light_recovery P4_world_unfold (生活密着開示)"
+  - "hellmode P5_chapter_climax (社会階層上昇) → light_recovery P5_chapter_climax (居場所確立)"

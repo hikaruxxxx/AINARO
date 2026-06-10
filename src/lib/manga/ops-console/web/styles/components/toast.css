@@ -1,0 +1,28 @@
+.nc-toast {
+  position: fixed;
+  top: 64px;
+  right: 18px;
+  z-index: 50;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+
+.nc-toast--success {
+  background: var(--color-success);
+}
+
+.nc-toast--warning {
+  background: var(--color-warning);
+}
+
+.nc-toast--danger {
+  background: var(--color-danger);
+}
+
+.nc-toast--info {
+  background: var(--color-info);
+}

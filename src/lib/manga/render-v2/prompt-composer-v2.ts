@@ -1,0 +1,1753 @@
+/**
+ * L9 Render: prompt composer v2
+ *
+ * panel (storyboard) + resolved_refs + bible.style_directives →
+ *   gpt-image-2 / RenderAdapter に渡す英語プロンプト + image_inputs paths
+ *
+ * 重要:
+ * - capability.ref_role_tagging=false なので image_inputs はフラット配列
+ * - inline label を prompt に書く (capability.ref_role_tagging_note 通り「弱いが読まれる」)
+ * - dialogue/monologue/narration/sfx は **画像内に直接描画** する (吹き出しごと, ナレーション枠ごと, 擬音ごと)
+ *   旧 SVG overlay 方式は撤回。AI に typesetting/レイアウトを任せる。
+ */
+import type {
+  BackgroundTreatment,
+  PanelV2,
+  PagePlanPage,
+  PagePlanPanel,
+  ResolvedRefPacket,
+  StoryboardPageV2,
+  BibleSnapshotV2,
+} from "../schemas-v2";
+import {
+  activeCostumeFor,
+  sceneOverrideTextFor,
+  summarizeCharacterForEpisode,
+  summarizeLocationForScene,
+  summarizeMotifForPanel,
+  summarizeWorldRulesForScene,
+} from "../bible/broker";
+import {
+  activeCostumeForV3FromV2,
+  sceneOverrideTextForV3FromV2,
+  summarizeCharacterForEpisodeV3FromV2,
+  summarizeLocationForSceneV3FromV2,
+  summarizeMotifForPanelV3FromV2,
+  summarizeWorldRulesForSceneV3FromV2,
+} from "../bible/broker-v3";
+import {
+  scanPrompt,
+  scanText,
+} from "../compliance/scanner";
+import type {
+  Blocklist,
+  ComplianceFinding,
+  FalsePositives,
+} from "../compliance/types";
+import type { Scene } from "../scene-graph/schema";
+// EffectLineSpec import: Sprint 22 案B 撤回後も schemas-v2 PanelV2.effect_lines の
+// 型定義として indirect 依存 (削除すると tsc 型解決に影響なしだが、明示性のため残す)
+import type { EffectLineSpec as _EffectLineSpec } from "../effect-lines/types";
+
+const PAGE_W = 1748;
+const PAGE_H = 2480;
+const MAX_PROMPT_CHARS = 8000;
+/**
+ * 2026-05-18 Sprint 21 案6: warning 専用閾値。
+ * 実態として 8000-12000 chars の prompt でも render は問題なく成功している。
+ * MAX_PROMPT_CHARS (=8000) は tier=full → minimal の downgrade トリガーに据え置き、
+ * warning は実害が出やすい水準 (12000+) に引き上げて noise を削減。
+ */
+const PROMPT_WARN_THRESHOLD = 12000;
+
+type BibleTier = "deep" | "medium" | "minimal";
+type PromptScene = Pick<
+  Scene,
+  | "beat_type"
+  | "location_id"
+  | "mode"
+  | "key_visual_intent"
+  | "time_axis"
+  | "cast"
+  | "wardrobe_state"
+  | "world_rules_active"
+  | "props_in_play"
+> & {
+  visual_motif_anchors?: Array<{
+    motif_id?: string;
+    motif_name?: string;
+    intensity?: number;
+  }>;
+  theme_subtext?: Scene["theme_subtext"] | string;
+};
+
+/**
+ * 2026-06-02 v57「読めなさ」改修: コマ割りの委任度。
+ * - "semifree" (既定): コマ割り座標 (LAYOUT / ROW LAYOUT / PANEL SIZE OVERRIDE /
+ *   per-panel rect・shot_type・camera) を prompt に注入せず、シーン内容 + セリフ +
+ *   最小ヒントだけ渡して AI にコマ割りを委ねる。
+ *   根拠: scripts/manga/_oneoff-freehand-experiment.ts の対比生成で対話/内省/会話/戦闘の
+ *   4 シーンタイプ全部で半委任が現行 (座標注入) を上回った (2026-06-02 実画像検証)。
+ *   座標注入がコマの緩急・視線誘導を殺し「説明文付き一枚絵の羅列」を生んでいた。
+ * - "coordinate": 旧経路 (座標注入)。フォールバック用に残置。
+ * 詳細: docs/plans/manga/v57-readability-montage-redesign.md
+ */
+export type PanelingMode = "semifree" | "coordinate";
+
+type ComposeArgs = {
+  panel?: PanelV2;            // panel スコープ
+  page?: StoryboardPageV2;    // page_one_shot スコープ
+  /** page_one_shot のみ有効。未指定時は "semifree" (v57 改修後の既定) */
+  paneling?: PanelingMode;
+  packet: ResolvedRefPacket;
+  bible: BibleSnapshotV2;
+  pageDimensions: { width: number; height: number };
+  /**
+   * Phase C: 修正指示 UI から渡されるユーザー追加指示。
+   * panel スコープでは "ADDITIONAL DIRECTIVE FROM EDITOR"、page スコープ
+   * (coordinate / semifree とも) では "## EDITOR" セクションとして注入。
+   * 既存 prompt 構造には影響しないので、未指定時は従来出力と完全一致。
+   */
+  userInstructions?: string;
+  /**
+   * 2026-05-06 追加。panel スコープでは単一値、page_one_shot スコープでは
+   * panel_id → BackgroundTreatment の Map。両方 undefined OK (現行挙動)。
+   * RULE 11 と整合した「背景描き込みの粒度」を prompt に直接書き込む。
+   */
+  backgroundTreatment?: BackgroundTreatment;
+  pageBackgroundTreatments?: Map<string, BackgroundTreatment>;
+  /** page_one_shot 用。指定時は LAYOUT GEOMETRY セクションをプロンプトに注入 */
+  pagePlanPage?: PagePlanPage;
+  /** Phase 0-5: panel text compliance hard fail を有効にする場合のみ渡す */
+  compliance?: { blocklist: Blocklist; fp: FalsePositives };
+  /** bible broker 用。未指定時は episode 1 として圧縮要約を作る */
+  episodeNo?: number;
+  /** scene graph 由来の文脈。panel スコープでは undefined OK */
+  scene?: PromptScene;
+  /** bible broker summary tier。未指定時は minimal */
+  bibleTier?: BibleTier;
+};
+
+type ComposeResult = {
+  prompt: string;
+  refImagePaths: string[];
+  tierUsed?: BibleTier;
+};
+
+function useBibleV3(): boolean {
+  return process.env.USE_BIBLE_V3 !== "false";
+}
+
+/**
+ * background_treatment 別のプロンプト直接指示。pattern dictionary 由来の slot
+ * メタ + RULE 11 の ref 抑制と一致した「LLM への描画指令」を出す。
+ */
+function backgroundDirective(t: BackgroundTreatment | undefined): string | null {
+  switch (t) {
+    case "detailed_bg":
+      return "BACKGROUND DIRECTIVE: Draw the location/environment with clear, iconographic background detail (interior fixtures, dungeon walls, urban silhouettes, etc.). Match the screentone density of the location reference if provided.";
+    case "atmospheric_fade":
+      return [
+        "BACKGROUND DIRECTIVE (atmospheric_fade — CRITICAL, NON-NEGOTIABLE):",
+        "",
+        "This panel is a manga 'atmospheric fade' / '抜きコマ' panel. The world drops away around the subject. ≥90% of the panel area MUST be blank white paper or simple screentone — NOT a drawn environment.",
+        "",
+        "ABSOLUTELY DO NOT DRAW:",
+        "- Walls (interior or exterior), ceilings, floors, doorframes, windows",
+        "- Room interiors (furniture, fixtures, posters, decorations)",
+        "- Building exteriors, street scenes, urban silhouettes",
+        "- Distant scenery (skyline, horizon, landscape, ground plane)",
+        "- Architectural details of any kind (tiles, panels, beams, lighting fixtures)",
+        "- Crowds, NPCs, or any background characters",
+        "",
+        "FAILURE EXAMPLES (these will be REJECTED by quality control):",
+        "- Drawing a doorframe behind the character → REJECT",
+        "- Drawing wall posters, signs, or decorations → REJECT",
+        "- Drawing ceiling tiles or floor patterns → REJECT",
+        "- Drawing a 'busy' detailed indoor environment → REJECT",
+        "- Filling >10% of background with environment detail → REJECT",
+        "",
+        "ALLOWED IN BACKGROUND (use sparingly):",
+        "- White/blank paper (this should be the dominant treatment)",
+        "- Sparse speedlines (集中線) radiating from or around the subject",
+        "- Screentone bursts (small clusters of dots, max 2-3 areas)",
+        "- Radial focus lines pointing inward to the subject",
+        "- 1-2 minimal silhouette HINTS touching the subject area only (e.g., a single short line suggesting an edge), NOT a full silhouette",
+        "",
+        "POSITIVE INSTRUCTION:",
+        "- Think '寄りコマ' (close-up with the world cropped away) or '抜きコマ' (subject extracted onto blank paper).",
+        "- The subject (character or object) is the ONLY fully drawn element.",
+        "- The eye should rest on the subject; the background should fade INSTANTLY to white/tone.",
+        "- Less is more. Empty space is the point — it amplifies emotion and reading rhythm.",
+      ].join("\n");
+    case "tone_back":
+      return "BACKGROUND DIRECTIVE: SOLID SCREENTONE ONLY. No drawn environment, no walls, no scenery, no horizon line. The entire background is a flat tone (uniform dot pattern or simple gradient) used to convey emotion or pause. The subject (character/object) is the only drawn element on top of the tone.";
+    case "solid_white":
+      return "BACKGROUND DIRECTIVE: PURE WHITE paper background. No drawing in the background area at all. Only the subject is rendered.";
+    case "solid_black":
+      return "BACKGROUND DIRECTIVE: PURE BLACK void as background. No drawn environment. Only minimal subject silhouette or text on the black field.";
+    case "floating_ui":
+      return "BACKGROUND DIRECTIVE: This panel IS a UI/HUD/SNS/news artifact (status screen, app interface, posted message, etc.). Render the UI element ITSELF as the entire panel content. Do NOT include character or location around the UI; the UI is the picture.";
+    case "unspecified":
+    case undefined:
+      return null;
+  }
+}
+
+function compactBackgroundDirective(t: BackgroundTreatment | undefined): string | null {
+  switch (t) {
+    case "detailed_bg":
+      return "BACKGROUND: draw clear location detail; match ref screentone density if provided.";
+    case "atmospheric_fade":
+      // 2026-05-21: 「sparse tone」が AI に水平 hatching を許可と解釈させていた (Codex 分析 / a07 p8/p10/p11 v43 で観察)。
+      // 純粋な白背景に厳格化し、tone/line/effect いっさい禁止。
+      return "BACKGROUND: pure white paper only; no effect lines, no tone patterns, no walls, no furniture, no architecture, no crowds, no scenery; subject only.";
+    case "tone_back":
+      return "BACKGROUND: solid screentone only; no drawn environment.";
+    case "solid_white":
+      return "BACKGROUND: pure white paper; subject only.";
+    case "solid_black":
+      return "BACKGROUND: pure black void; minimal subject silhouette/text only.";
+    case "floating_ui":
+      return "BACKGROUND: panel is the UI/HUD/SNS/news artifact itself; no surrounding character/location.";
+    case "unspecified":
+    case undefined:
+      return null;
+  }
+}
+
+function userInstructionsBlock(s: string | undefined): string | null {
+  if (!s || !s.trim()) return null;
+  return [
+    "## ADDITIONAL DIRECTIVE FROM EDITOR (override conflicting defaults above):",
+    s.trim(),
+  ].join("\n");
+}
+
+function characterRefDescription(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+  args: { episodeNo: number; tier?: BibleTier },
+): string {
+  const blocks: string[] = [];
+  for (const ch of panel.entities.characters) {
+    const summary = useBibleV3()
+      ? summarizeCharacterForEpisodeV3FromV2(
+          bible,
+          args.episodeNo,
+          ch.character_id,
+          { tier: args.tier ?? "minimal" },
+        )
+      : summarizeCharacterForEpisode(
+          bible,
+          args.episodeNo,
+          ch.character_id,
+          { tier: args.tier ?? "minimal" },
+        );
+    blocks.push(`- ${summary} (role=${ch.role}, on_screen_via=${ch.on_screen_via}, expression=${ch.expression})`);
+  }
+  return blocks.join("\n");
+}
+
+function locationSceneForPanel(panel: PanelV2, scene?: PromptScene): Pick<Scene, "location_id" | "mode" | "beat_type"> {
+  return {
+    location_id: scene?.location_id ?? panel.entities.location_id,
+    mode: scene?.mode ?? "dialogue",
+    beat_type: scene?.beat_type ?? "setup",
+  };
+}
+
+function locationDescription(panel: PanelV2, bible: BibleSnapshotV2, scene?: PromptScene, tier: BibleTier = "minimal"): string {
+  return useBibleV3()
+    ? summarizeLocationForSceneV3FromV2(bible, locationSceneForPanel(panel, scene), { tier })
+    : summarizeLocationForScene(bible, locationSceneForPanel(panel, scene), { tier });
+}
+
+function styleOverrideBlock(scene: Pick<Scene, "mode" | "beat_type"> | undefined, bible: BibleSnapshotV2): string {
+  // 2026-05-12: digest があれば優先、無ければ global (full text) にフォールバック
+  const base = (bible.style_directives.digest && bible.style_directives.digest.trim().length > 0)
+    ? bible.style_directives.digest
+    : bible.style_directives.global;
+  const blocks = [base];
+  if (scene) {
+    const override = useBibleV3()
+      ? sceneOverrideTextForV3FromV2(bible, scene)
+      : sceneOverrideTextFor(bible, scene);
+    if (override) blocks.push(override);
+  }
+  return blocks.filter((block) => block.trim().length > 0).join("\n");
+}
+
+function motifBlock(
+  scene: Pick<Scene, "beat_type" | "location_id" | "mode" | "key_visual_intent"> & {
+    visual_motif_anchors?: PromptScene["visual_motif_anchors"];
+  } | undefined,
+  bible: BibleSnapshotV2,
+  tier: BibleTier = "minimal",
+  panel: { panel_no: number },
+): string | null {
+  if (!scene) return null;
+  const summary = useBibleV3()
+    ? summarizeMotifForPanelV3FromV2(bible, panel, scene, { tier })
+    : summarizeMotifForPanel(bible, panel, scene, { tier });
+  if (!summary) return null;
+  return [
+    "RECURRING VISUAL MOTIFS (must include):",
+    summary,
+  ].join("\n");
+}
+
+function costumeBlock(
+  panel: PanelV2,
+  episodeNo: number,
+  bible: BibleSnapshotV2,
+  tier: BibleTier = "minimal",
+): string | null {
+  const lines: string[] = [];
+  for (const ch of panel.entities.characters) {
+    const active = useBibleV3()
+      ? activeCostumeForV3FromV2(bible, episodeNo, ch.character_id)
+      : activeCostumeFor(bible, episodeNo, ch.character_id);
+    if (active.source === "costume" && active.spec) {
+      const outfit = [active.spec.outerwear, active.spec.top].filter(Boolean).join(" ");
+      const state = tier === "minimal"
+        ? firstChars(active.spec.state_description ?? "", 70)
+        : active.spec.state_description ?? "";
+      lines.push(`- ${ch.character_id} wears ${outfit} (state: ${state})`);
+    }
+  }
+  if (lines.length === 0) return null;
+  return [
+    "ACTIVE COSTUMES (override outfit_default):",
+    ...lines,
+  ].join("\n");
+}
+
+function worldRuleBlock(
+  scene: Pick<Scene, "location_id" | "beat_type" | "mode" | "time_axis"> | undefined,
+  bible: BibleSnapshotV2,
+  tier: BibleTier = "minimal",
+): string | null {
+  if (!scene) return null;
+  const summary = useBibleV3()
+    ? summarizeWorldRulesForSceneV3FromV2(bible, scene, { tier })
+    : summarizeWorldRulesForScene(bible, scene, { tier });
+  if (!summary) return null;
+  return [
+    "WORLD CONSTRAINTS:",
+    summary,
+  ].join("\n");
+}
+
+function wardrobeStateBlock(
+  scene: PromptScene | undefined,
+  bible: BibleSnapshotV2,
+  panel: PanelV2,
+  tier: BibleTier = "minimal",
+): string | null {
+  if (!scene?.wardrobe_state || scene.wardrobe_state.length === 0) return null;
+  const panelCharIds = new Set(panel.entities.characters.map((c) => c.character_id));
+  const maxEntries = tier === "minimal" ? 3 : tier === "medium" ? 5 : scene.wardrobe_state.length;
+  const entries = scene.wardrobe_state
+    .filter((ws) => panelCharIds.has(ws.character_id))
+    .slice(0, maxEntries)
+    .map((ws) => {
+      const costume = bible.costumes.find((c) => c.id === ws.costume_id);
+      const charName = bible.characters.find((c) => c.id === ws.character_id)?.name ?? ws.character_id;
+      const outfit = costume?.spec
+        ? [costume.spec.outerwear, costume.spec.top].filter(Boolean).join(" ")
+        : ws.costume_id;
+      return `- ${charName} (${ws.character_id}): ${firstChars(outfit || ws.costume_id, 90)}`;
+    });
+  if (entries.length === 0) return null;
+  return ["SCENE WARDROBE STATE (must match):", ...entries].join("\n");
+}
+
+function activeWorldRulesBlock(
+  scene: PromptScene | undefined,
+  tier: BibleTier = "minimal",
+): string | null {
+  if (!scene?.world_rules_active || scene.world_rules_active.length === 0) return null;
+  const limit = tier === "minimal" ? 2 : tier === "medium" ? 3 : 4;
+  const rules = scene.world_rules_active.slice(0, limit).map((rule) => firstChars(rule, 140));
+  return [
+    "ACTIVE WORLD RULES IN THIS SCENE (must respect; do not contradict):",
+    ...rules.map((r) => `- ${r}`),
+  ].join("\n");
+}
+
+function propsInPlayBlock(
+  scene: PromptScene | undefined,
+  bible: BibleSnapshotV2,
+  panel: PanelV2,
+): string | null {
+  if (!scene?.props_in_play || scene.props_in_play.length === 0) return null;
+  const panelCharIds = new Set(panel.entities.characters.map((c) => c.character_id));
+  const entries = scene.props_in_play.slice(0, 4).map((p) => {
+    const prop = bible.props.find((bp) => bp.id === p.prop_id);
+    const propName = prop?.name ?? p.prop_id;
+    const propDesc = prop?.spec.visual_description
+      ? firstChars(prop.spec.visual_description, 80)
+      : "";
+    const heldByName = p.held_by && panelCharIds.has(p.held_by)
+      ? bible.characters.find((c) => c.id === p.held_by)?.name ?? p.held_by
+      : null;
+    const holderText = heldByName ? ` (held by ${heldByName})` : "";
+    return `- ${propName}${holderText}${propDesc ? `: ${propDesc}` : ""}`;
+  });
+  return ["PROPS IN PLAY (include if visually relevant):", ...entries].join("\n");
+}
+
+function themeSubtextBlock(scene: PromptScene | undefined): string | null {
+  if (!scene?.theme_subtext) return null;
+  const ts = scene.theme_subtext;
+  const text = typeof ts === "string" ? ts : ts.how_it_surfaces;
+  if (!text || !text.trim()) return null;
+  return [
+    "SCENE EMOTIONAL THEME (subtext, render to convey this mood):",
+    `- ${firstChars(text, 160)}`,
+  ].join("\n");
+}
+
+function compactPageBibleContext(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+  args: { episodeNo: number; scene?: PromptScene; tier: BibleTier; maxChars: number },
+): string {
+  const characters = firstChars(
+    characterRefDescription(panel, bible, { episodeNo: args.episodeNo, tier: args.tier }).replace(/\n/gu, " / "),
+    Math.max(70, Math.floor(args.maxChars * 0.35)),
+  );
+  const location = firstChars(
+    locationDescription(panel, bible, args.scene, args.tier),
+    Math.max(45, Math.floor(args.maxChars * 0.18)),
+  );
+  const costume = firstChars(
+    (costumeBlock(panel, args.episodeNo, bible, args.tier) ?? "").replace(/\n/gu, " / "),
+    Math.max(0, Math.floor(args.maxChars * 0.12)),
+  );
+  const motif = firstChars(
+    (motifBlock(args.scene, bible, args.tier, { panel_no: panel.panel_no }) ?? "")
+      .replace("RECURRING VISUAL MOTIFS (must include):", "")
+      .replace(/\n/gu, " / "),
+    Math.max(90, Math.floor(args.maxChars * 0.25)),
+  );
+
+  return firstChars(
+    [
+      `PANEL #${panel.panel_no} BIBLE:`,
+      `Characters: ${characters}`,
+      `Location: ${location}`,
+      motif ? `Motif: ${motif}` : null,
+      costume ? `Costume: ${costume}` : null,
+    ].filter((line): line is string => line !== null).join("\n"),
+    args.maxChars,
+  );
+}
+
+function warnIfPromptTooLarge(prompt: string): void {
+  if (prompt.length > PROMPT_WARN_THRESHOLD) {
+    console.warn(
+      `[prompt-composer-v2] prompt size ${prompt.length} exceeds warn threshold ${PROMPT_WARN_THRESHOLD}. Consider trimming bible/scene context.`,
+    );
+  }
+}
+
+function warnTierDowngrade(tier: BibleTier, promptLength: number): void {
+  console.warn(
+    `[prompt-composer-v2] tier=${tier} size=${promptLength} > ${MAX_PROMPT_CHARS}, downgrading`,
+  );
+}
+
+function composeWithSizeFallback(
+  args: ComposeArgs,
+  composeCore: (args: ComposeArgs) => ComposeResult,
+): ComposeResult {
+  const tiers: BibleTier[] = args.bibleTier ? [args.bibleTier, "minimal"] : ["minimal"];
+  const seen = new Set<BibleTier>();
+  let last: ComposeResult | null = null;
+
+  for (const tier of tiers) {
+    if (seen.has(tier)) continue;
+    seen.add(tier);
+    const result = composeCore({ ...args, bibleTier: tier });
+    last = { ...result, tierUsed: tier };
+    if (result.prompt.length <= MAX_PROMPT_CHARS) return last;
+    if (tier !== "minimal") warnTierDowngrade(tier, result.prompt.length);
+  }
+
+  return last ?? { ...composeCore({ ...args, bibleTier: "minimal" }), tierUsed: "minimal" };
+}
+
+function firstChars(text: string, max: number): string {
+  const normalized = text.replace(/\s+/gu, " ").trim();
+  if (normalized.length <= max) return normalized;
+  return `${normalized.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
+}
+
+function mangaTechniqueMandatoryBlock(): string {
+  return [
+    "MANGA TECHNIQUE (MANDATORY — do NOT relax):",
+    // 2026-05-18: hatching を削除 (bible.style_directives.global で「NO hatching of any kind」と
+    // 明示済のため整合)。screentone (dots/halftones) のみで階調表現する。
+    "- Black ink linework with weight modulation; visible screentone (dots/halftones); no soft or smooth tonal gradients. Do NOT use line-based hatching (cross-hatching, parallel lines, horizontal patterns).",
+    "- Hard white highlights and strong black/white contrast. Vary screentone density by panel emotion; avoid uniform grey pages.",
+  ].join("\n");
+}
+
+function negativesBlock(): string {
+  return [
+    "NEGATIVES (must avoid):",
+    "- No color, 3D shading, photorealism, page numbers, signatures, watermarks, or logos.",
+    "- Natural hands only, max five fingers per hand. No English dialogue; all in-panel text must be Japanese manga lettering.",
+    "- Background density follows scene role: establishing/world panels can be moderate; dialogue-only panels stay minimal.",
+  ].join("\n");
+}
+
+export type PanelTextValidationResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason: string;
+      severity: "fatal" | "warn";
+      findings?: ComplianceFinding[];
+    };
+
+export function extractForbiddenKeywords(term: string): string[] {
+  const withoutNotes = term.replace(/[（(].*?[）)]/g, "");
+  return withoutNotes
+    .split(/[／/]/)
+    .map((part) => part.replace(/[『』「」【】]/g, "").trim())
+    .filter(Boolean);
+}
+
+export function validatePanelText(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+  options?: {
+    /** 既定 false。true にすると forbidden_terms_global 違反を fatal severity で返す。 */
+    treatForbiddenAsFatal?: boolean;
+  },
+): PanelTextValidationResult {
+  const forbidden = bible.world.lexicon?.forbidden_terms_global ?? [];
+  const textEntries: Array<{ field: string; text: string }> = [
+    ...panel.dialogue.map((d) => ({ field: "dialogue", text: d.text })),
+    ...panel.monologue.map((m) => ({ field: "monologue", text: m.text })),
+    ...panel.narration.map((text) => ({ field: "narration", text })),
+    ...panel.sfx.map((text) => ({ field: "sfx", text })),
+  ];
+
+  for (const entry of textEntries) {
+    for (const term of forbidden) {
+      for (const keyword of extractForbiddenKeywords(term)) {
+        if (entry.text.includes(keyword)) {
+          return {
+            ok: false,
+            reason: `forbidden term in ${entry.field}: ${term}`,
+            severity: options?.treatForbiddenAsFatal ? "fatal" : "warn",
+          };
+        }
+      }
+    }
+  }
+  return { ok: true };
+}
+
+function textComplianceEntries(panel: PanelV2): Array<{ fieldPath: string; text: string }> {
+  return [
+    ...panel.dialogue.map((d, index) => ({
+      fieldPath: `panel.${panel.panel_id}.dialogue[${index}]`,
+      text: d.text,
+    })),
+    ...panel.monologue.map((m, index) => ({
+      fieldPath: `panel.${panel.panel_id}.monologue[${index}]`,
+      text: m.text,
+    })),
+    ...panel.narration.map((text, index) => ({
+      fieldPath: `panel.${panel.panel_id}.narration[${index}]`,
+      text,
+    })),
+    ...panel.sfx.map((text, index) => ({
+      fieldPath: `panel.${panel.panel_id}.sfx[${index}]`,
+      text,
+    })),
+  ];
+}
+
+function complianceResult(
+  findings: ComplianceFinding[],
+  options?: { treatAsFatal?: boolean },
+): PanelTextValidationResult {
+  if (findings.length === 0) return { ok: true };
+
+  const hasFatal = findings.some((finding) => finding.severity === "fatal");
+  const severity = hasFatal && options?.treatAsFatal !== false ? "fatal" : "warn";
+  const summary = findings
+    .slice(0, 3)
+    .map((finding) => `${finding.field_path}: ${finding.matched_term} (${finding.category})`)
+    .join("; ");
+  const suffix = findings.length > 3 ? `; +${findings.length - 3} more` : "";
+  return {
+    ok: false,
+    severity,
+    reason: `compliance ${severity}: ${summary}${suffix}`,
+    findings,
+  };
+}
+
+export function validateAgainstCompliance(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+  blocklist: Blocklist,
+  fp: FalsePositives,
+  options?: {
+    /** false にすると warn 相当のみ (test/dev 用)、既定 true で fatal stop */
+    treatAsFatal?: boolean;
+  },
+): PanelTextValidationResult {
+  void bible;
+  const findings = textComplianceEntries(panel).flatMap((entry) =>
+    scanText(entry.text, blocklist, fp, { fieldPath: entry.fieldPath })
+  );
+  return complianceResult(findings, options);
+}
+
+export function validatePromptAgainstCompliance(
+  prompt: string,
+  blocklist: Blocklist,
+  fp: FalsePositives,
+  options?: { treatAsFatal?: boolean },
+): PanelTextValidationResult {
+  return complianceResult(
+    scanPrompt(prompt, blocklist, fp, { fieldPath: "render_prompt" }),
+    options,
+  );
+}
+
+function panelTextValidationWarning(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+  compliance?: { blocklist: Blocklist; fp: FalsePositives },
+): string | null {
+  const validation = validatePanelText(panel, bible);
+  if (compliance) {
+    const complianceValidation = validateAgainstCompliance(
+      panel,
+      bible,
+      compliance.blocklist,
+      compliance.fp,
+      { treatAsFatal: true },
+    );
+    if (!complianceValidation.ok && complianceValidation.severity === "fatal") {
+      throw new Error(
+        `[prompt-composer-v2] panel ${panel.panel_id}: COMPLIANCE FATAL — ${complianceValidation.reason}`,
+      );
+    }
+  }
+
+  if (validation.ok) return null;
+  const message = `[prompt-composer-v2] panel ${panel.panel_id}: ${validation.reason}. Storyboard L4 text should be regenerated or corrected before render.`;
+  console.warn(message);
+  return [
+    "TEXT QUALITY WARNING:",
+    `- ${message}`,
+    "- Do not normalize or preserve this forbidden wording in final in-panel text. Fix the storyboard upstream before production render.",
+  ].join("\n");
+}
+
+/**
+ * page_plan の rect / polygon 情報を page_one_shot prompt に注入する。
+ * panel#N は Storyboard 側の panel_no と一致させる。
+ */
+function buildLayoutGeometryBlock(
+  pagePlanPage: PagePlanPage,
+  panelNoByPanelId: Map<string, number>,
+): string {
+  type Slot = {
+    ro: number;
+    panelNo: number;
+    col: string;
+    row: string;
+    wPct: number;
+    hPct: number;
+    areaPct: number;
+    poly: number;
+    bleed: boolean;
+    imp: number;
+    bg: string | undefined;
+    isHero: boolean;
+    tilt: number | undefined;
+    borderless: boolean;
+    bleedPoly: boolean;
+  };
+
+  const slots: Slot[] = pagePlanPage.panels.map((pp: PagePlanPanel) => {
+    const wPct = (pp.rect.w / PAGE_W) * 100;
+    const hPct = (pp.rect.h / PAGE_H) * 100;
+    const areaPct = ((pp.rect.w * pp.rect.h) / (PAGE_W * PAGE_H)) * 100;
+    const cx = pp.rect.x + pp.rect.w / 2;
+    const cy = pp.rect.y + pp.rect.h / 2;
+    const col = wPct >= 85
+      ? "FULL_WIDTH"
+      : cx < PAGE_W * 0.4
+        ? "LEFT"
+        : cx > PAGE_W * 0.6
+          ? "RIGHT"
+          : "CENTER";
+    const row = cy < PAGE_H * 0.33
+      ? "TOP"
+      : cy < PAGE_H * 0.66
+        ? "MIDDLE"
+        : "BOTTOM";
+    const poly = pp.polygon?.length ?? 4;
+    const bleed =
+      pp.rect.x < 30 ||
+      pp.rect.y < 30 ||
+      pp.rect.x + pp.rect.w > PAGE_W - 30 ||
+      pp.rect.y + pp.rect.h > PAGE_H - 30;
+    return {
+      ro: pp.reading_order,
+      panelNo: panelNoByPanelId.get(pp.panel_id) ?? pp.reading_order,
+      col,
+      row,
+      wPct: Math.round(wPct),
+      hPct: Math.round(hPct),
+      areaPct: Math.round(areaPct),
+      poly,
+      bleed,
+      imp: pp.importance,
+      bg: pp.background_treatment,
+      isHero: false,
+      tilt: pp.tilt_deg,
+      borderless: !!pp.is_borderless,
+      bleedPoly: !!pp.bleed_polygon,
+    };
+  }).sort((a, b) => a.ro - b.ro);
+
+  // hero 判定: importance + areaPct 上位1コマ
+  const sortedByPriority = [...slots].sort(
+    (a, b) => (b.imp * 10 + b.areaPct) - (a.imp * 10 + a.areaPct),
+  );
+  if (sortedByPriority[0]) {
+    const hero = slots.find((s) => s.ro === sortedByPriority[0].ro);
+    if (hero) hero.isHero = true;
+  }
+
+  const panelLabel = (s: Slot) => `panel#${s.panelNo}`;
+  const lines: string[] = [
+    "Geometry (panel# = importance/5, row col, area W%xH%, tags):",
+  ];
+
+  // 2026-05-13 圧縮: 旧 1 行 130-170字 → 記号化で 50-70字に。
+  // row: TOP/MIDDLE/BOTTOM → T/M/B、col: LEFT/RIGHT/CENTER/FULL_WIDTH → L/R/C/FW、
+  // size: FULL-PAGE SPLASH/LARGE/medium/SMALL inset → XL/L/M/S。
+  const shortRow = (r: string) => r === "TOP" ? "T" : r === "MIDDLE" ? "M" : r === "BOTTOM" ? "B" : r;
+  const shortCol = (c: string) => c === "LEFT" ? "L" : c === "RIGHT" ? "R" : c === "CENTER" ? "C" : c === "FULL_WIDTH" ? "FW" : c;
+  for (const s of slots) {
+    const polyTag = s.poly > 4 ? `,poly${s.poly}` : "";
+    const bleedTag = (s.bleed || s.bleedPoly) ? ",bleed" : "";
+    const tiltTag = (s.tilt && Math.abs(s.tilt) >= 1) ? `,tilt${s.tilt > 0 ? "+" : ""}${s.tilt}°` : "";
+    const borderlessTag = s.borderless ? ",borderless" : "";
+    const heroTag = s.isHero ? " HERO" : "";
+    const sizeWord = s.areaPct >= 50 ? "XL" : s.areaPct >= 25 ? "L" : s.areaPct >= 12 ? "M" : "S";
+    lines.push(
+      `- ${panelLabel(s)} ${s.imp}/5${heroTag} ${shortRow(s.row)}${shortCol(s.col)} ${sizeWord} ${s.wPct}x${s.hPct}${polyTag}${tiltTag}${bleedTag}${borderlessTag}`,
+    );
+  }
+
+  const flow = slots.map(panelLabel).join(" → ");
+  lines.push("");
+  lines.push(`READING FLOW (RTL, top→bottom): ${flow}.`);
+  lines.push("");
+  // 2026-05-13 圧縮: 汎用ルール (gutter / hero支配 / grid 回避) は CONSTRAINTS に
+  // 集約して page ごとには出さない。panel 固有 (polygon / bleed) のみ条件出力。
+  const polyPanels = slots.filter((s) => s.poly > 4);
+  if (polyPanels.length > 0) {
+    lines.push(`- ${polyPanels.map(panelLabel).join(", ")}: non-rectangular border (angled cut / slanted edge / bleeding into adjacent panel).`);
+  }
+  const bleedPanels = slots.filter((s) => s.bleed || s.bleedPoly);
+  if (bleedPanels.length > 0) {
+    lines.push(`- ${bleedPanels.map(panelLabel).join(", ")}: artwork bleeds to the page edge on bleed side (no margin).`);
+  }
+
+  return lines.join("\n");
+}
+
+/**
+ * bible の量的事実 (年代/年齢/段階数/期間等) を prompt に embed して AI の数値改変を抑制する。
+ *
+ * 2026-05-17 追加。a07 ep01 p001 の narration で storyboard 自体が
+ * 「三年前」(bible は 20年前)、「十五歳で受ける」(bible は 18歳までに) と
+ * bible 設定逸脱しているケースを検出。設定逸脱の根本対応は L04 storyboard
+ * 生成側の修正だが、L09 prompt 側でも bible 量的事実を明示することで AI に
+ * 「設定改変禁止」を伝え、prompt 段階での再生成防止層とする。
+ *
+ * 機械的事実抽出ではなく bible.world.timeline / system の先頭抜粋を embed
+ * する単純実装。AI に「これらと一致厳守、新規発明禁止」と明示。
+ */
+function buildBibleFactsBlock(
+  bible: BibleSnapshotV2,
+  /** テキスト仕様を載せている section 名。coordinate=PANELS、semifree=LINES */
+  textSectionName: "PANELS" | "LINES" = "PANELS",
+): string | null {
+  const timeline = (bible.world.timeline ?? "").trim();
+  const system = (bible.world.system ?? "").trim();
+  if (!timeline && !system) return null;
+
+  // 2026-05-18 Sprint 21 案6: 300 → 150 字に圧縮。
+  // a07 timeline は冒頭 150 字で「20年前、地表世界の複数都市地下に...被害を止めたのは、
+  // 人類側の完全な勝利ではない。鑑定石...」と必要 facts を概ね含む。
+  // system は冒頭 150 字で「18歳まで判定 / S〜F 七段階」を含む。
+  const MAX = 150;
+  const tShort = timeline.length > MAX ? `${timeline.slice(0, MAX)}…` : timeline;
+  const sShort = system.length > MAX ? `${system.slice(0, MAX)}…` : system;
+
+  const lines = [
+    "Quantitative facts excerpted from bible (narration / dialogue / SFX / in-panel text 内の年代・年齢・期間・段階数・人数・割合はこれらの抜粋値と一致厳守):",
+  ];
+  if (timeline) lines.push(`Timeline excerpt: ${tShort}`);
+  if (system) lines.push(`System excerpt: ${sShort}`);
+  lines.push(
+    `Do NOT invent alternative numbers (years, ages, ranks, percentages, counts). If a number is required and not present above, omit it rather than fabricate. Render text in panels exactly as specified in ${textSectionName} section — do not paraphrase or rewrite narration.`,
+  );
+  return lines.join("\n");
+}
+
+/**
+ * 情景描写 panel (shot_type=establishing/wide) に対する in-panel overlay 数制限。
+ *
+ * 2026-05-17 Sprint 11 案1 で establishing 専用として追加、Sprint 12 で:
+ *  - shot_type=wide も対象に拡張 (情景描写 panel は establishing / wide で機能類似)
+ *  - 文字数を 800 → 約 300 字に圧縮 (prompt size warning 解消)
+ *
+ * 抑制対象 (a07 ep01 v6-v8 で頻出): 公社アプリ入域実績ランキング表、LIVE 全国
+ * ネット特番、SNS トレンド、報奨内定、demographic statistics、架空ブランドロゴ。
+ * narration / 吹き出しは typeset elements として overlay カウント外。
+ *
+ * 対象 panel が page 内に無い場合は null。
+ */
+function buildScenePanelRestrictionBlock(page: StoryboardPageV2, localPanelNoByPanelId: Map<string, number>): string | null {
+  const TARGET_SHOT_TYPES = new Set(["establishing", "wide"]);
+  const targets = page.panels.filter((p) => TARGET_SHOT_TYPES.has(p.shot_type));
+  if (targets.length === 0) return null;
+
+  const labels = targets
+    .map((p) => `panel#${localPanelNoByPanelId.get(p.panel_id) ?? p.panel_no}`)
+    .join(", ");
+
+  return [
+    `SCENE PANEL RESTRICTIONS (${labels} — establishing/wide, MANDATORY):`,
+    "- Overlay budget: ZERO for atmospheric establishing/wide. Exactly 1 ONLY if PANELS action/visual_focus names a single key signage as the narrative subject. Never 2+.",
+    "- MUST NOT: SNS feeds, LIVE tickers, hashtag trends, ranking charts, percentages, statistics, fake brand logos (beyond bible-specified), corporate slogans, readable ad posters.",
+    "- Ambient light OK (distant neon, window glow), but ALL text must be blurred/illegible/≤12px.",
+    "- Narration boxes + speech bubbles + SFX are typeset OVER the panel — NOT counted toward overlay budget.",
+    "- Primary subject = location atmosphere itself. Information density LOW. Less is more — when in doubt, omit overlays.",
+  ].join("\n");
+}
+
+/**
+ * panel rect から行 (row) 構造を推定し、AI に「縦積み vs 横並び」を明示する。
+ *
+ * 2026-05-17 追加 (Sprint 8 案1 row-grouping)。Sprint 7 追加チューニング後も
+ * AI が「3 panel page = 上1 中1 下1」の縦積みプリミティブに引きずられて、
+ * page_plan の中下行 2 panel 横並び (例: panel#2=右半, panel#3=左半) を
+ * 「中段+下段の縦積み」に読み替える事例 (a07 ep01 p01) を解消するため。
+ *
+ * 行検出: y range overlap >= 50% かつ x range が重複しない panel 群を 1 行とみなす。
+ *
+ * 1 panel page、または全 panel が縦積み (1 panel/row × N rows) なら null。
+ */
+function buildRowGroupingBlock(
+  pagePlanPage: PagePlanPage,
+  panelNoByPanelId: Map<string, number>,
+): string | null {
+  if (pagePlanPage.panels.length <= 1) return null;
+
+  type Entry = {
+    panelNo: number;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    cx: number;
+    wPct: number;
+    hPct: number;
+  };
+
+  const entries: Entry[] = pagePlanPage.panels.map((pp: PagePlanPanel) => ({
+    panelNo: panelNoByPanelId.get(pp.panel_id) ?? pp.reading_order,
+    x: pp.rect.x,
+    y: pp.rect.y,
+    w: pp.rect.w,
+    h: pp.rect.h,
+    cx: pp.rect.x + pp.rect.w / 2,
+    wPct: (pp.rect.w / PAGE_W) * 100,
+    hPct: (pp.rect.h / PAGE_H) * 100,
+  }));
+
+  // y range overlap >= 50% を「同じ行」と判定
+  const yOverlapRatio = (a: Entry, b: Entry): number => {
+    const aTop = a.y;
+    const aBot = a.y + a.h;
+    const bTop = b.y;
+    const bBot = b.y + b.h;
+    const overlap = Math.max(0, Math.min(aBot, bBot) - Math.max(aTop, bTop));
+    const minH = Math.min(a.h, b.h);
+    return minH > 0 ? overlap / minH : 0;
+  };
+
+  // 行ごとに panels をグループ化 (greedy)
+  const rows: Entry[][] = [];
+  const sorted = [...entries].sort((a, b) => a.y - b.y);
+  for (const entry of sorted) {
+    const existingRow = rows.find((row) => row.some((member) => yOverlapRatio(member, entry) >= 0.5));
+    if (existingRow) existingRow.push(entry);
+    else rows.push([entry]);
+  }
+
+  // 全行が 1 panel ずつ (= 完全縦積み) なら row-grouping 情報は不要
+  if (rows.every((row) => row.length === 1)) return null;
+
+  // 行内で RTL (右→左) に sort、表示用 row label を計算
+  const rowLines: string[] = [];
+  rows.forEach((row, idx) => {
+    row.sort((a, b) => b.cx - a.cx);
+    const rowLabel =
+      rows.length <= 2 ? (idx === 0 ? "TOP" : "BOTTOM") : idx === 0 ? "TOP" : idx === rows.length - 1 ? "BOTTOM" : `MIDDLE${rows.length > 3 ? `_${idx}` : ""}`;
+    // 行高は row 内の panel の最大 hPct (= 行全体の縦幅) を採用
+    const rowHeightPct = Math.round(Math.max(...row.map((p) => p.hPct)));
+    // 2026-05-18 Sprint 22 案6: 1 行 compact 化。"BOTTOM,h=24%" のように短縮、
+    // 各 panel は "panel#N RIGHT 50%w×24%h" 形式。AI に対する意味は維持しつつ
+    // 30-40% 文字数削減。
+    if (row.length === 1) {
+      const p = row[0];
+      const widthNote = p.w >= PAGE_W * 0.85 ? "full" : p.cx < PAGE_W * 0.5 ? "L" : "R";
+      rowLines.push(
+        `- ROW${idx + 1} (${rowLabel},h=${rowHeightPct}%): panel#${p.panelNo} ${widthNote} ${Math.round(p.wPct)}%w×${rowHeightPct}%h`,
+      );
+    } else {
+      const items = row
+        .map((p) => {
+          const pos = p.cx < PAGE_W * 0.4 ? "L" : p.cx > PAGE_W * 0.6 ? "R" : "C";
+          return `panel#${p.panelNo} ${pos} ${Math.round(p.wPct)}%w×${Math.round(p.hPct)}%h`;
+        })
+        .join(", ");
+      rowLines.push(
+        `- ROW${idx + 1} (${rowLabel},h=${rowHeightPct}%) ${row.length}-up SIDE-BY-SIDE: ${items} (RTL: R first)`,
+      );
+    }
+  });
+
+  const horizontalRows = rows.filter((row) => row.length >= 2);
+  const warning =
+    horizontalRows.length > 0
+      ? `\nWARN: side-by-side rows ${horizontalRows.map((row) => `${rows.indexOf(row) + 1}`).join(",")} must NOT stack vertically — each panel must occupy exactly the indicated w×h%, do not expand a small panel to fill the row.`
+      : "";
+
+  return [
+    `ROW LAYOUT (${rows.length} row${rows.length > 1 ? "s" : ""}):`,
+    ...rowLines,
+    warning,
+  ]
+    .filter((s) => s.length > 0)
+    .join("\n");
+}
+
+/**
+ * panel rect の強制ディレクティブを page-specific に生成する。
+ *
+ * 2026-05-17 追加。Sprint 7 で L05 enforceVarianceRule により page_plan.json は
+ * variance ≥3.0x 達成済だが、L09 → image_gen で AI が rect を「ヒント」として
+ * 緩く解釈する事例多発 (a07 ep01 で 5 ページ中 3 ページが均等化したまま)。
+ *
+ * MANGA_CRAFT_DIRECTIVES_V6 内の汎用 "smallest <= 12%, largest >= 35%" 節では
+ * page-specific な数値と紐づかないため、ここで panel ごとに「MUST occupy X% of
+ * page area (ROLE_TAG)」と命令形で書き出す。
+ *
+ * 1 panel page (splash) は null を返してスキップ。
+ */
+function buildPanelSizeOverrideBlock(
+  pagePlanPage: PagePlanPage,
+  panelNoByPanelId: Map<string, number>,
+): string | null {
+  if (pagePlanPage.panels.length <= 1) return null;
+
+  type Entry = {
+    panelNo: number;
+    areaPct: number;
+    role: "DOMINANT" | "MID" | "SMALL_INSET";
+    roleNote: string;
+  };
+
+  const entries: Entry[] = pagePlanPage.panels
+    .map((pp: PagePlanPanel) => {
+      const areaPct = ((pp.rect.w * pp.rect.h) / (PAGE_W * PAGE_H)) * 100;
+      const role: Entry["role"] =
+        areaPct >= 35 ? "DOMINANT" : areaPct >= 12 ? "MID" : "SMALL_INSET";
+      const roleNote =
+        role === "DOMINANT"
+          ? "hero panel"
+          : role === "SMALL_INSET"
+            ? "tame/breath"
+            : "mid-rhythm";
+      return {
+        panelNo: panelNoByPanelId.get(pp.panel_id) ?? pp.reading_order,
+        areaPct,
+        role,
+        roleNote,
+      };
+    })
+    .sort((a, b) => a.panelNo - b.panelNo);
+
+  const areas = entries.map((e) => e.areaPct);
+  const largest = Math.max(...areas);
+  const smallest = Math.min(...areas);
+  const ratio = smallest > 0 ? largest / smallest : 0;
+
+  // 2026-05-18: 「MUST occupy X% of page area」の数値強制を削除 (Sprint 10 検証で
+  // AI が area% を無視と実証済、追加系数値は逆効果)。削減系「Equalizing FORBIDDEN」
+  // と role tag (DOMINANT/MID/SMALL_INSET) のみ残す = AI が役割で判断する余地を確保。
+  // ratio 数値も削除 (追加系数値)。
+  const lines: string[] = [
+    "PANEL SIZE OVERRIDE (variance is the page's visual rhythm):",
+  ];
+  for (const e of entries) {
+    lines.push(`- panel#${e.panelNo}: ${e.role} (${e.roleNote})`);
+  }
+  lines.push(
+    "Equalizing panels into a uniform grid is FORBIDDEN — it destroys manga reading rhythm.",
+  );
+  return lines.join("\n");
+}
+
+/**
+ * panel.dialogue / monologue / narration / sfx を「画像内に直接描く」指示文に変換。
+ * 吹き出し・ナレーション枠・擬音を AI 側で typeset させる方針 (旧 SVG overlay は撤回)。
+ */
+function inPanelTextBlock(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+  compliance?: { blocklist: Blocklist; fp: FalsePositives },
+): string | null {
+  const hasAny =
+    panel.dialogue.length > 0 ||
+    panel.monologue.length > 0 ||
+    panel.narration.length > 0 ||
+    panel.sfx.length > 0;
+  if (!hasAny) return null;
+
+  const charName = (id: string) => bible.characters.find((c) => c.id === id)?.name ?? id;
+  const lines: string[] = [
+    "IN-PANEL TEXT (must be drawn INSIDE the image as part of the manga page):",
+  ];
+  const warning = panelTextValidationWarning(panel, bible, compliance);
+  if (warning) lines.push(warning);
+
+  if (panel.dialogue.length > 0) {
+    lines.push("Speech bubbles (rounded oval bubbles with tail pointing to speaker, Japanese vertical text right-to-left):");
+    for (const d of panel.dialogue) {
+      const shapeTag = d.bubble_shape ? ` [bubble: ${d.bubble_shape}]` : "";
+      const tailTag = d.tail_direction ? ` [tail toward ${d.tail_direction}]` : "";
+      lines.push(`  - ${charName(d.character_id)}: 「${d.text}」${shapeTag}${tailTag}`);
+    }
+  }
+  if (panel.monologue.length > 0) {
+    lines.push("Inner monologue (square/angular bubbles WITHOUT tail, or thought-cloud, vertical Japanese text):");
+    for (const m of panel.monologue) {
+      const shapeTag = m.bubble_shape ? ` [bubble: ${m.bubble_shape}]` : "";
+      lines.push(`  - ${charName(m.character_id)} (thinks): 「${m.text}」${shapeTag}`);
+    }
+  }
+  if (panel.narration.length > 0) {
+    lines.push("Narration boxes (rectangular caption boxes, typically top or bottom of panel, vertical Japanese):");
+    for (const n of panel.narration) {
+      lines.push(`  - ${n}`);
+    }
+  }
+  if (panel.sfx.length > 0) {
+    lines.push("Sound effects / onomatopoeia (hand-drawn katakana/hiragana, dynamic shape, integrated into the artwork):");
+    for (const s of panel.sfx) {
+      lines.push(`  - ${s}`);
+    }
+  }
+  lines.push(
+    "Each dialogue / monologue / narration / sfx item is associated with EXACTLY ONE panel (the one listed above). Do NOT duplicate the same bubble or caption across multiple panels — each speech bubble appears ONLY in its assigned panel.",
+    "Each text item in this panel MUST appear EXACTLY ONCE in EXACTLY ONE typeset shape. Do NOT render the same dialogue / monologue / narration text in two different bubble shapes (e.g. once as narration_box AND once as oval). If bubble_shape is specified above, use ONLY that shape.",
+    "All text MUST be drawn INSIDE the image. Use authentic Japanese manga lettering style. Do NOT translate to English. Do NOT leave blank balloons.",
+    "Do NOT add empty typeset frames (white rectangles, blank UI cards, decorative bounding boxes) that are not listed above. Every typeset shape in the image MUST correspond to a specific text item above; speculative empty frames as 'UI atmosphere' are FORBIDDEN.",
+  );
+  return lines.join("\n");
+}
+
+function composePanelPromptCore(args: ComposeArgs): ComposeResult {
+  if (!args.panel) throw new Error("composePanelPrompt requires panel");
+  const p = args.panel;
+  const episodeNo = args.episodeNo ?? 1;
+  const bibleTier = args.bibleTier ?? "minimal";
+  const screentoneTag = p.screentone_intensity ? `, screentone=${p.screentone_intensity}` : "";
+  const inlineLabels = args.packet.refs
+    .map((r, i) => `<ref#${i + 1}> (${r.role}${r.target_entity_id ? ` for ${r.target_entity_id}` : ""}, weight ${r.weight.toFixed(2)})`)
+    .join("\n");
+
+  const sections = [
+    // 2026-05-18: "screentone and hatching" → "screentone" のみに (bible で NO hatching と整合)
+    `B6 portrait Japanese light novel comicalization PANEL (${args.pageDimensions.width}x${args.pageDimensions.height} px), single panel in BLACK AND WHITE only with screentone (dots/halftones). Style tradition: Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (expressive character-driven art, large emotive eyes, light novel cover lineage), NOT seinen-realism. Do NOT use line-based hatching.`,
+    "",
+    "ART STYLE:",
+    styleOverrideBlock(args.scene, args.bible),
+    "",
+    "REFERENCE IMAGES (passed via image_inputs in this order):",
+    inlineLabels,
+    "",
+    `SHOT: ${p.shot_type} / camera=${p.camera}${p.bleed ? " / BLEED edges" : ""}${p.silence ? " / SILENT atmospheric" : ""}, importance=${p.importance}/5${screentoneTag}`,
+    "",
+    "CHARACTERS IN PANEL:",
+    characterRefDescription(p, args.bible, { episodeNo, tier: bibleTier }),
+    "",
+    locationDescription(p, args.bible, args.scene, bibleTier),
+    "",
+    costumeBlock(p, episodeNo, args.bible, bibleTier),
+    "",
+    worldRuleBlock(args.scene, args.bible, bibleTier),
+    "",
+    motifBlock(args.scene, args.bible, bibleTier, { panel_no: p.panel_no }),
+    "",
+    wardrobeStateBlock(args.scene, args.bible, p, bibleTier),
+    "",
+    activeWorldRulesBlock(args.scene, bibleTier),
+    "",
+    propsInPlayBlock(args.scene, args.bible, p),
+    "",
+    themeSubtextBlock(args.scene),
+    "",
+    `Action: ${p.action}`,
+    `Visual focus: ${p.key_visual}`,
+    "",
+    backgroundDirective(args.backgroundTreatment),
+    "",
+    inPanelTextBlock(p, args.bible, args.compliance),
+    "",
+    "MUST PRESERVE invariants from continuity refs (face geometry, outfit details, location layout). Match line weight and screentone density of refs.",
+    "",
+    userInstructionsBlock(args.userInstructions),
+    mangaTechniqueMandatoryBlock(),
+    negativesBlock(),
+  ];
+  const prompt = sections.filter(Boolean).join("\n");
+  warnIfPromptTooLarge(prompt);
+
+  return {
+    prompt,
+    refImagePaths: args.packet.refs.map((r) => r.path),
+  };
+}
+
+export function composePanelPrompt(args: ComposeArgs): ComposeResult {
+  return composeWithSizeFallback(args, composePanelPromptCore);
+}
+
+// page_one_shot 専用ヘルパー (panel スコープには影響しない)
+function buildLocalPanelNumbers(page: StoryboardPageV2): Map<string, number> {
+  const map = new Map<string, number>();
+  page.panels.forEach((p, idx) => {
+    map.set(p.panel_id, idx + 1);
+  });
+  return map;
+}
+
+function formatRefLabel(
+  r: ResolvedRefPacket["refs"][number],
+  index: number,
+): string {
+  // 2026-05-13 圧縮: "<ref#1> (style)" → "ref1=style"、weight=1.0 は省略
+  const target = r.target_entity_id ? `:${r.target_entity_id}` : "";
+  const weight = r.weight >= 0.999 ? "" : `@${r.weight.toFixed(2)}`;
+  return `ref${index + 1}=${r.role}${target}${weight}`;
+}
+
+function buildPageSceneContextBlock(
+  scene: PromptScene | undefined,
+  bible: BibleSnapshotV2,
+  representativePanel: PanelV2 | undefined,
+  tier: BibleTier,
+): string | null {
+  if (!scene) return null;
+  // 2026-05-13 圧縮: 旧 5 sub-block (各 100-200字) を 1 行ずつに集約。
+  // SCENE WARDROBE STATE は CONTINUITY (Active costumes) と被るので削除。
+  // World rules / Active rules は長文 1 件 130字 × 2 → 70字 × 2 に切り詰め。
+  const lines: string[] = [];
+
+  // World rules (worldRuleBlock のヘッダーを剥がし bullet を 1 行ずつ truncate)
+  const wr = worldRuleBlock(scene, bible, tier);
+  if (wr) {
+    const bullets = wr.split("\n").filter((l) => l.startsWith("- "));
+    const truncated = bullets.slice(0, 2).map((b) => firstChars(b, 90));
+    if (truncated.length > 0) lines.push(`World rules:\n${truncated.join("\n")}`);
+  }
+
+  // Active world rules
+  const awr = activeWorldRulesBlock(scene, tier);
+  if (awr) {
+    const bullets = awr.split("\n").filter((l) => l.startsWith("- "));
+    const truncated = bullets.slice(0, 2).map((b) => firstChars(b, 90));
+    if (truncated.length > 0) lines.push(`Active rules this scene:\n${truncated.join("\n")}`);
+  }
+
+  // Props (元から短い、1-2 行)
+  if (representativePanel) {
+    const props = propsInPlayBlock(scene, bible, representativePanel);
+    if (props) {
+      const bullets = props.split("\n").filter((l) => l.startsWith("- "));
+      if (bullets.length > 0) lines.push(`Props: ${bullets.map((b) => b.replace(/^- /, "")).join("; ")}`);
+    }
+  }
+
+  // Theme (1 行)
+  const theme = themeSubtextBlock(scene);
+  if (theme) {
+    const body = theme.split("\n").filter((l) => l.startsWith("- ")).map((l) => l.replace(/^- /, "")).join(" / ");
+    if (body) lines.push(`Theme: ${body}`);
+  }
+
+  if (lines.length === 0) return null;
+  return lines.join("\n");
+}
+
+function renderPageEmbedText(
+  panel: PanelV2,
+  bible: BibleSnapshotV2,
+): string[] {
+  // 2026-05-13 圧縮: 旧 4 ヘッダー行を 1 行ずつ短縮 (style 系説明は STYLE digest と
+  // CONSTRAINTS で扱い済み)。
+  const lines: string[] = [];
+  const charName = (id: string) => bible.characters.find((c) => c.id === id)?.name ?? id;
+  if (panel.dialogue.length > 0) {
+    lines.push(`- Speech:`);
+    for (const d of panel.dialogue) lines.push(`  - ${charName(d.character_id)}: 「${d.text}」`);
+  }
+  if (panel.monologue.length > 0) {
+    lines.push(`- Monologue:`);
+    for (const m of panel.monologue) lines.push(`  - ${charName(m.character_id)}: 「${m.text}」`);
+  }
+  if (panel.narration.length > 0) {
+    lines.push(`- Narration:`);
+    for (const n of panel.narration) lines.push(`  - ${n}`);
+  }
+  if (panel.sfx.length > 0) {
+    lines.push(`- SFX: ${panel.sfx.join(", ")}`);
+  }
+  return lines;
+}
+
+/**
+ * 2026-05-13: page 内の全 panel で entities (characters + location) が完全同一なら
+ * page-shared header に括り出して panel block の冗長を削る。
+ * 比較キー: character の (id, role, on_screen_via) tuple set + location_id。
+ * expression は panel ごとに変わるので shared 判定から除外し panel block に残す。
+ */
+type PageSharedEntities = {
+  characters: Array<{ character_id: string; role: string; on_screen_via: string; name: string }>;
+  location_id: string;
+  location_name: string;
+};
+
+function computePageSharedEntities(
+  page: StoryboardPageV2,
+  bible: BibleSnapshotV2,
+): PageSharedEntities | null {
+  if (page.panels.length < 2) return null;
+  const keyOf = (p: PanelV2) =>
+    p.entities.characters
+      .map((c) => `${c.character_id}|${c.role}|${c.on_screen_via}`)
+      .sort()
+      .join(",");
+  const firstKey = keyOf(page.panels[0]);
+  const firstLoc = page.panels[0].entities.location_id;
+  for (let i = 1; i < page.panels.length; i += 1) {
+    if (keyOf(page.panels[i]) !== firstKey) return null;
+    if (page.panels[i].entities.location_id !== firstLoc) return null;
+  }
+  return {
+    characters: page.panels[0].entities.characters.map((c) => ({
+      character_id: c.character_id,
+      role: c.role,
+      on_screen_via: c.on_screen_via,
+      name: bible.characters.find((x) => x.id === c.character_id)?.name ?? c.character_id,
+    })),
+    location_id: firstLoc,
+    location_name: bible.locations.find((x) => x.id === firstLoc)?.name ?? firstLoc,
+  };
+}
+
+function renderPageSharedEntitiesHeader(s: PageSharedEntities): string {
+  const charList = s.characters
+    .map((c) => `${c.name} (${c.role}, ${c.on_screen_via})`)
+    .join("; ");
+  return [
+    "(All panels on this page share these characters and location; expressions vary per panel.)",
+    `- Shared characters: ${charList}`,
+    `- Shared location: ${s.location_name}`,
+  ].join("\n");
+}
+
+function renderPagePanelBlock(args: {
+  panel: PanelV2;
+  localNo: number;
+  bible: BibleSnapshotV2;
+  bgTreatment: BackgroundTreatment | undefined;
+  compliance?: { blocklist: Blocklist; fp: FalsePositives };
+  sharedEntities?: PageSharedEntities | null;
+}): string {
+  const { panel, localNo, bible, bgTreatment, compliance, sharedEntities } = args;
+  const screentoneTag = panel.screentone_intensity ? `, screentone=${panel.screentone_intensity}` : "";
+  const lines: string[] = [
+    // 2026-05-13 圧縮: "reading_order=N" → "ro=N"、長い ", " 区切りを単一空白に
+    `### panel#${localNo} (ro=${panel.reading_order} ${panel.shot_type} ${panel.camera}${panel.bleed ? " BLEED" : ""}${panel.silence ? " SILENT" : ""}${screentoneTag})`,
+  ];
+  if (sharedEntities) {
+    // shared 経路: expression のみ panel に出す (Characters/Location は page-shared header に集約済み)
+    const expr = panel.entities.characters
+      .map((c) => {
+        const name = bible.characters.find((x) => x.id === c.character_id)?.name ?? c.character_id;
+        return `${name}=${c.expression}`;
+      })
+      .join(", ");
+    if (expr) lines.push(`- Expressions: ${expr}`);
+  } else {
+    const cs = panel.entities.characters
+      .map((c) => {
+        const ent = bible.characters.find((x) => x.id === c.character_id);
+        return `${ent?.name ?? c.character_id} (${c.role}, ${c.on_screen_via}, expr=${c.expression})`;
+      })
+      .join("; ");
+    const loc = bible.locations.find((x) => x.id === panel.entities.location_id)?.name ?? panel.entities.location_id;
+    lines.push(`- Characters: ${cs || "none"}`);
+    lines.push(`- Location: ${loc}`);
+  }
+  lines.push(`- Action: ${panel.action}`);
+  // 2026-05-13: Action と Visual focus が同一文字列のとき重複出力を抑制
+  // (a07 ep01 で 5 panel 全部同値ケース多発、storyboard 上流の variation 不足が真因)
+  if (panel.key_visual.trim() !== panel.action.trim()) {
+    lines.push(`- Visual focus: ${panel.key_visual}`);
+  }
+  const warning = panelTextValidationWarning(panel, bible, compliance);
+  if (warning) lines.push(`- ${warning.replace(/\n/g, "\n  ")}`);
+  const textLines = renderPageEmbedText(panel, bible);
+  for (const l of textLines) lines.push(l);
+  // 2026-05-21: Codex 3 回目分析「page one-shot の text に shape/binding 拘束が無く、短い決め台詞が
+  // 複数 panel / 複数形式で再描画される」を受け、各 panel block 末尾に近接配置で重複禁止を追加。
+  // 削減系のみ (memory feedback_ai_image_over_prompting.md 形状指定は逆効果原則と整合)。
+  if (textLines.length > 0) {
+    lines.push(`  → All text items above belong to THIS panel#${localNo} ONLY. Do NOT duplicate any line into adjacent panels. Do NOT render the same line as both speech bubble and narration_box.`);
+  }
+  const bgLine = compactBackgroundDirective(bgTreatment);
+  if (bgLine) lines.push(`- ${bgLine}`);
+  // 2026-05-18 Sprint 22 案B (撤回): effect_lines per-panel directive を削除。
+  // centerX/Y を AI に明示すると複数中心拡散 (p24 v18 で左右両目から放射) を
+  // 招いた。detector の SVG overlay 経路 (panel.effect_lines が null/明示
+  // EffectLineSpec のときの opt-out / opt-in) は維持、prompt directive は不要。
+  return lines.join("\n");
+}
+
+/**
+ * 2026-05-13: page-level CONTINUITY block (NovelAI V4 base+character 方式)。
+ * page 内 unique character_id ごとに 1 回 summary、location は最初の panel から、
+ * motif は scene_graph から page-level に 1 回。
+ * panel 数だけ反復していた旧方式に比べ ~50-70% の文字数削減を狙う。
+ */
+function buildPageContinuityBlock(
+  page: StoryboardPageV2,
+  bible: BibleSnapshotV2,
+  scene: PromptScene | undefined,
+  tier: BibleTier,
+  episodeNo: number,
+): string {
+  const lines: string[] = [];
+
+  // unique characters (panel 横断で character_id を集約)
+  const seenIds = new Set<string>();
+  const uniqueChars: { character_id: string; firstPanel: PanelV2 }[] = [];
+  for (const p of page.panels) {
+    for (const c of p.entities.characters) {
+      if (!seenIds.has(c.character_id)) {
+        seenIds.add(c.character_id);
+        uniqueChars.push({ character_id: c.character_id, firstPanel: p });
+      }
+    }
+  }
+  if (uniqueChars.length > 0) {
+    lines.push("Characters (face/outfit invariants across this page):");
+    for (const { character_id, firstPanel } of uniqueChars) {
+      const tempPanel: PanelV2 = {
+        ...firstPanel,
+        entities: {
+          ...firstPanel.entities,
+          characters: firstPanel.entities.characters.filter((c) => c.character_id === character_id),
+        },
+      };
+      const summary = characterRefDescription(tempPanel, bible, { episodeNo, tier });
+      // 2026-05-13: 1 キャラあたり 200 字以内に truncate (顔/服の継続性 anchor として
+      // 必要な要素は冒頭にあるので末尾を切っても継続性ハッシュとして機能する)
+      lines.push(firstChars(summary.replace(/\n/g, " / "), 200));
+    }
+  }
+
+  // location: 最初の panel から 1 回 (panel-shared の場合はこれが唯一の location)
+  const firstPanelLoc = locationDescription(page.panels[0], bible, scene, tier);
+  if (firstPanelLoc) lines.push(`Location: ${firstPanelLoc}`);
+
+  // costume: 全 panel で active costume を 1 回ずつ集約 (panel ごと反復しない)
+  const costumeLines = new Set<string>();
+  for (const p of page.panels) {
+    const c = costumeBlock(p, episodeNo, bible, tier);
+    if (c) {
+      // costumeBlock は "ACTIVE COSTUMES (override outfit_default):\n- ..." を返す
+      // header 行を除いて bullet だけ集約
+      const bullets = c.split("\n").filter((l) => l.startsWith("- "));
+      for (const b of bullets) costumeLines.add(b);
+    }
+  }
+  if (costumeLines.size > 0) {
+    lines.push("Active costumes:");
+    for (const b of costumeLines) lines.push(b);
+  }
+
+  // motif: page 単位 1 回。最初の panel の panel_no を代表値として渡す。
+  const motif = motifBlock(scene, bible, tier, { panel_no: page.panels[0].panel_no });
+  if (motif) lines.push(motif);
+
+  return lines.join("\n");
+}
+
+function buildPageConstraintsBlock(): string {
+  // 2026-05-13 圧縮: 旧 5 行 689 字 → 3 行 ~300 字。
+  // manga lettering 行は STYLE digest と被るので削除、background density は SCENE/panel BG に集約。
+  // STRICT LAYOUT CONSTRAINTS から移動した汎用ルール (gutter / hero / grid) を 1 行に統合。
+  // 2026-05-19 typesetMode 引数撤廃 (Sprint 23 全 revert に伴う死コード掃除)
+  const lines = [
+    // 2026-05-18 強化: AI が「motion / atmosphere」を水平線パターンで表現する習性が
+    // 強く、bible 修正 + 弱い削減系では不十分。明示的に「ANY line patterns FORBIDDEN」を
+    // 強い formulation で記載。
+    "Render: black ink character outlines + screentone (dot halftones) ONLY for shading. Hard B/W contrast. Vary tone density by panel emotion.",
+    // 2026-05-21: 末尾の「Motion is shown by character pose and 1-2 speedlines」を削除。
+    // 追加系 (「speedlines を描いて良い」) として AI が「motion line / 集中線を激しく描く」
+    // 解釈を誘発していた (a07 ep01 p1/p8 で大量集中線、p7/p9/p10/p11 で背景全面 hatching)。
+    // memory feedback_ai_image_over_prompting.md「画像生成に余計な指示は不要」原則徹底。
+    // 純削減系のみ残し、motion 表現は AI 自発判断に任せる。
+    "BACKGROUND FORBIDDEN LIST (HARD): NO horizontal line patterns anywhere in the image. NO parallel-line patterns. NO diagonal-line patterns. NO cross-strokes for shading. NO motion-blur line fills. NO atmospheric line patterns. NO radial speedlines covering the panel. Backgrounds are dot screentone, solid black, or pure white ONLY.",
+    // 2026-05-18: 「HERO panel dominates」を削除 — PANEL SIZE OVERRIDE と重複、
+    // 追加系。「do NOT default to uniform grid」削減系のみ残す。
+    "Layout: reproduce panel sizes above (do NOT default to uniform grid); non-bleed panels separated by >=30px white gutter.",
+    "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, English in-panel text, >5 fingers per hand.",
+    // 2026-05-21: style ref 除外 (v45 検証) で AI が「typeset discipline」を失い text 重複描画が再発した。
+    // page one-shot prompt にも panel-level prompt と同等の重複禁止を入れる (削減系)。
+    // Codex 追加分析で「同 text が複数 panel に / 同 panel 内に 2 形式で」描かれる事例を特定。
+    "TEXT BINDING (HARD): Each listed text item (Speech / Monologue / Narration / SFX) must appear EXACTLY ONCE, in EXACTLY ONE panel specified in PANELS, in EXACTLY ONE typeset shape. Do NOT duplicate the same text across multiple panels. Do NOT render the same dialogue as both a speech bubble and a narration_box. Do NOT echo text into nearby panels as residue/afterimage.",
+  ];
+  return lines.join("\n");
+}
+
+/**
+ * MANGA CRAFT DIRECTIVES (v6 lessons)
+ *
+ * 2026-05-17 追加。a07-novel manga_pilot_v5 で発生した「絵本的・吹き出し希薄・背景一律詳細・
+ * キャラ芝居静止」の問題を構造的に解消するための appendix。L9 全プロンプトに付与される。
+ *
+ * 由来:
+ * - v5 で 1P あたり吹き出し平均 4.2 個 (商業漫画標準 8-15 個の半分以下)
+ * - スタイル参照は線質には効くが「漫画文法 (吹き出し配置/コマ割り/背景省略)」までは伝わらない
+ * - ref 静止画では「視線下に逃がす」「指が一拍止まる」のような芝居が出ない
+ *
+ * したがってプロンプト側で明示的に補完する。
+ */
+const MANGA_CRAFT_DIRECTIVES_V6 = `The following directives apply to ALL panels on this page, supplementing the per-panel specs above.
+
+### Background mer-hari (mandatory variation)
+- Expression close-up panels: WHITE background or single screentone only. NO detailed setting.
+- Pure object panels: WHITE background only. NO setting elements.
+- DO NOT render every panel at uniform background density. The reader needs visual rhythm.`;
+// 2026-05-19 「画像生成に余計な指示は不要」原則徹底:
+// 「Style refs interpretation」(bubble area % 数値) と「Empty typeset frames FORBIDDEN」
+// (must 命令形) は AI 自然描画を歪めるリスクがあるため削除。
+// memory feedback_ai_image_over_prompting.md「数値強制」「mandatory + 追加要素」抵触。
+
+// ============================================================
+// 2026-06-02 v57 半委任 (semifree) モード
+// 実装の正典は scripts/manga/_oneoff-freehand-experiment.ts の semifree(_tight)
+// プロンプト構成。production 移植にあたり以下だけ追加で残す:
+//   compliance gate / BIBLE FACTS (数値固定) / CONTINUITY (名前↔ref 対応) / EDITOR 指示
+// ============================================================
+
+/** ページで起きる出来事 (panel.action を読み順に連結) + 見せ場の明示注入 */
+function buildSemifreeSceneBlock(
+  page: StoryboardPageV2,
+  scene: PromptScene | undefined,
+  pageBackgroundTreatments?: Map<string, BackgroundTreatment>,
+): string {
+  const events = page.panels
+    .map((p) => p.action?.trim())
+    .filter((s): s is string => !!s);
+  const lines: string[] = [
+    `page_role=${page.page_role}. ${events.join(" / ")}`,
+  ];
+  // 抑制ヒント (DIRECTION) の上書き: 見せ場 (大ゴマ・見せたい異常値) は SCENE から明示注入。
+  // 一律抑制で p22 灯里大ゴマ / p20 異常値の見せ場まで消えた実験結果への対処。
+  const showcase = typeof scene?.key_visual_intent === "string" ? scene.key_visual_intent.trim() : "";
+  if (showcase) {
+    lines.push(`Showcase (this page's key moment — give it the dominant panel): ${showcase}`);
+  }
+  // background_treatment のうち floating_ui だけは「そのビートが UI 画面そのものである」
+  // という内容情報なので、座標注入とは別物として 1 行で保持する (2026-06-10 codex review 部分採用)。
+  // atmospheric_fade / tone_back / solid_white 等の描画スタイル系 bg 指示は、検証済み実験
+  // (bg 指示なしで 4 シーンタイプ全勝) と Less is more 原則に基づき意図的に渡さない —
+  // 余白・背景省略の判断は DIRECTION の最小ヒントの範囲で AI に委ねる。
+  const uiBeats = page.panels
+    .filter((p) => pageBackgroundTreatments?.get(p.panel_id) === "floating_ui")
+    .map((p) => firstChars(p.action?.trim() ?? "", 80))
+    .filter((s) => s.length > 0);
+  if (uiBeats.length > 0) {
+    lines.push(`UI beat (this beat IS the UI/screen artifact itself — render the UI as that panel's whole content, no character/location around it): ${uiBeats.join(" / ")}`);
+  }
+  return lines.join("\n");
+}
+
+/**
+ * セリフ・モノローグ・ナレーション・擬音をページ単位で読み順に列挙する (embed 前提)。
+ * どのコマに置くかは AI に委ねる。compliance fatal はここで従来通り throw する。
+ */
+function buildSemifreeLinesBlock(
+  page: StoryboardPageV2,
+  bible: BibleSnapshotV2,
+  compliance?: { blocklist: Blocklist; fp: FalsePositives },
+): string {
+  const charName = (id: string) => bible.characters.find((c) => c.id === id)?.name ?? id;
+  const lines: string[] = [];
+  const warnings: string[] = [];
+  for (const panel of page.panels) {
+    const warning = panelTextValidationWarning(panel, bible, compliance);
+    if (warning) warnings.push(warning);
+    for (const d of panel.dialogue) lines.push(`- ${charName(d.character_id)}(台詞): 「${d.text}」`);
+    for (const m of panel.monologue) lines.push(`- ${charName(m.character_id)}(内心モノローグ): 「${m.text}」`);
+    for (const n of panel.narration) lines.push(`- ナレーション(地の文ボックス): 「${n}」`);
+    for (const s of panel.sfx) lines.push(`- SFX(擬音・手描き文字): ${s}`);
+  }
+  const body = lines.length > 0 ? lines.join("\n") : "(なし — 無音ページ。絵だけで語る)";
+  return [body, ...warnings].join("\n");
+}
+
+/** 最小ヒントのみの演出指示。指示を足すと元の木阿弥なので追加禁止 (Less is more)。 */
+function buildSemifreeDirectionBlock(page: StoryboardPageV2): string {
+  const n = page.panels.length;
+  const panelHint = n <= 1
+    ? "This page is a full-page splash: one dominant panel (a small inset is allowed only if the moment demands it)."
+    : `Use roughly ${Math.max(2, n - 1)}-${n + 1} panels (hint from the storyboard — merge or split beats if the page reads better).`;
+  const rhythmHint = n >= 4
+    ? "You choose every panel's size, shape, and camera — vary them for rhythm: include at least one wide / establishing beat, at least one close-up emotional beat, and at least one dominant (large) panel."
+    : "You choose every panel's size, shape, and camera — vary them for rhythm.";
+  return [
+    "You are a professional narou-kei manga artist. YOU decide the paneling.",
+    panelHint,
+    "Keep strict right-to-left, top-to-bottom flow.",
+    rhythmHint,
+    "Use silence / empty white paper for breathing room. Less is more — do not fill every panel with detail.",
+    // 残課題3 (AI 過剰演出) の抑制ヒント。p08/p20/p22 で有効と確認済の 2 行のみ。
+    // 見せ場は SCENE の Showcase 行が上書きする。
+    "- Keep in-frame UI / screen / phone text and numbers MINIMAL: at most 1-2 readable values per page; do NOT draw detailed app interfaces or long digit strings (exception: a value explicitly named as Showcase in SCENE).",
+    "- System / device voices are typeset voice bubbles ONLY — do NOT embody them as a person or character.",
+  ].join("\n");
+}
+
+/** 検証済み実験スクリプトの STYLE_CONSTRAINTS を本番化 (座標再現の指示は持たない) */
+function buildSemifreeConstraintsBlock(): string {
+  return [
+    "Render: black ink character outlines + dot screentone ONLY for shading. Hard B/W contrast. NO line-based shading anywhere (no parallel / diagonal / cross-hatch / speedline fills). Backgrounds are dot screentone, solid black, or pure white ONLY.",
+    "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, English in-panel text, >5 fingers per hand.",
+    "TEXT: render the Japanese lines listed in LINES, each EXACTLY ONCE, in natural speech bubbles / thought clouds / narration boxes. No duplicates, no empty balloons, no invented extra text. Reading order strictly right-to-left, top-to-bottom (Japanese manga).",
+    // 2026-06-11 v59 通し読みで観測した形式漏れ対策 (p12: 話者ラベルごと描画 / p16: カギ括弧ごと描画)
+    "Bubble content = ONLY the quoted line itself. Do NOT draw the LINES list formatting: no speaker names as prefixes, no (台詞)/(内心モノローグ)/(地の文ボックス) tags, no list dashes, no 「」 quotation brackets.",
+  ].join("\n");
+}
+
+function composePagePromptSemifreeCore(args: ComposeArgs): ComposeResult {
+  if (!args.page) throw new Error("composePagePrompt requires page");
+  const page = args.page;
+  const episodeNo = args.episodeNo ?? 1;
+  const bibleTier = args.bibleTier ?? "minimal";
+
+  const inlineLabels = args.packet.refs
+    .map((r, i) => formatRefLabel(r, i))
+    .join("\n");
+  const continuityBlocks = buildPageContinuityBlock(page, args.bible, args.scene, bibleTier, episodeNo);
+  const sceneContext = buildPageSceneContextBlock(args.scene, args.bible, page.panels[0], bibleTier);
+  const bibleFactsBlock = buildBibleFactsBlock(args.bible, "LINES");
+  const editorBlock = args.userInstructions && args.userInstructions.trim()
+    ? `## EDITOR\n${args.userInstructions.trim()}`
+    : null;
+
+  const sections: Array<string | null> = [
+    `# PAGE`,
+    `B6 portrait B&W manga page, ${args.pageDimensions.width}x${args.pageDimensions.height} px, narou-kei comicalization style (screentone-based, NOT seinen-realism).`,
+    "",
+    "## STYLE",
+    styleOverrideBlock(args.scene, args.bible),
+    "",
+    "## REFERENCES",
+    inlineLabels.length > 0 ? inlineLabels : "(style/character references provided as image inputs)",
+    "Keep faces and outfits consistent with the character references.",
+    "",
+    "## SCENE (what happens on this page)",
+    buildSemifreeSceneBlock(page, args.scene, args.pageBackgroundTreatments),
+    sceneContext,
+    "",
+    "## CONTINUITY",
+    continuityBlocks,
+    "",
+    "## LINES (place each line in the most natural panel, speaker attribution exact, RTL reading order)",
+    buildSemifreeLinesBlock(page, args.bible, args.compliance),
+    "",
+    "## DIRECTION (composition free, light hints only)",
+    buildSemifreeDirectionBlock(page),
+    "",
+    editorBlock,
+    editorBlock ? "" : null,
+    bibleFactsBlock ? "## BIBLE FACTS (must match exactly)" : null,
+    bibleFactsBlock,
+    bibleFactsBlock ? "" : null,
+    "## CONSTRAINTS",
+    buildSemifreeConstraintsBlock(),
+  ];
+  const prompt = sections
+    .filter((s): s is string => s !== null && s !== undefined)
+    .join("\n");
+  warnIfPromptTooLarge(prompt);
+
+  return {
+    prompt,
+    refImagePaths: args.packet.refs.map((r) => r.path),
+  };
+}
+
+function composePagePromptCore(args: ComposeArgs): ComposeResult {
+  if (!args.page) throw new Error("composePagePrompt requires page");
+  // v57 改修: 既定は半委任。座標注入 (旧経路) は paneling: "coordinate" 明示時のみ。
+  if ((args.paneling ?? "semifree") === "semifree") {
+    return composePagePromptSemifreeCore(args);
+  }
+  const page = args.page;
+  const episodeNo = args.episodeNo ?? 1;
+  const bibleTier = args.bibleTier ?? "minimal";
+  const localPanelNoByPanelId = buildLocalPanelNumbers(page);
+
+  const geometryBlock: string | null = args.pagePlanPage
+    ? buildLayoutGeometryBlock(args.pagePlanPage, localPanelNoByPanelId)
+    : null;
+
+  const panelSizeOverrideBlock: string | null = args.pagePlanPage
+    ? buildPanelSizeOverrideBlock(args.pagePlanPage, localPanelNoByPanelId)
+    : null;
+
+  const rowGroupingBlock: string | null = args.pagePlanPage
+    ? buildRowGroupingBlock(args.pagePlanPage, localPanelNoByPanelId)
+    : null;
+
+  const bibleFactsBlock: string | null = buildBibleFactsBlock(args.bible);
+
+  const scenePanelRestrictionBlock: string | null = buildScenePanelRestrictionBlock(
+    page,
+    localPanelNoByPanelId,
+  );
+
+  const inlineLabels = args.packet.refs
+    .map((r, i) => formatRefLabel(r, i))
+    .join("\n");
+
+  // 2026-05-13: NovelAI V4 base+character 方式に再設計。
+  // 旧: 各 panel に同じキャラ summary を反復 (panel 数だけ重複) → ~1500字
+  // 新: page 内 unique character ごとに 1 回 summary (顔/服/役割) + location 1 回 + motif 1 回 → ~500-700字
+  const continuityBlocks = buildPageContinuityBlock(page, args.bible, args.scene, bibleTier, episodeNo);
+
+  const representativePanel = page.panels[0];
+  const sceneBlock = buildPageSceneContextBlock(args.scene, args.bible, representativePanel, bibleTier);
+
+  // 2026-05-13: page 内全 panel で characters + location が完全同一なら page-shared
+  // header に括り出し panel block では expression だけ出す。a07 ep01 で全 panel 同値
+  // ケースが多発 (page 17 で 5 panel 完全同値) → -800〜1500 字 / page 期待。
+  const sharedEntities = computePageSharedEntities(page, args.bible);
+  const sharedHeader = sharedEntities ? renderPageSharedEntitiesHeader(sharedEntities) : null;
+
+  const panelBlocks = page.panels.map((p) => {
+    const localNo = localPanelNoByPanelId.get(p.panel_id) ?? p.panel_no;
+    const bg = args.pageBackgroundTreatments?.get(p.panel_id);
+    return renderPagePanelBlock({
+      panel: p,
+      localNo,
+      bible: args.bible,
+      bgTreatment: bg,
+      compliance: args.compliance,
+      sharedEntities,
+    });
+  }).join("\n\n");
+
+  const editorBlock = args.userInstructions && args.userInstructions.trim()
+    ? `## EDITOR\n${args.userInstructions.trim()}`
+    : null;
+
+  const sections: Array<string | null> = [
+    `# PAGE`,
+    `B6 portrait B&W manga page, ${args.pageDimensions.width}x${args.pageDimensions.height} px, narou-kei comicalization style (screentone-based, NOT seinen-realism).`,
+    "",
+    "## STYLE",
+    styleOverrideBlock(args.scene, args.bible),
+    "",
+    "## REFERENCES",
+    inlineLabels,
+    "",
+    "## LAYOUT",
+    `${page.panels.length} panels, RTL reading order, page_role=${page.page_role}.`,
+    geometryBlock,
+    "",
+    sceneBlock ? "## SCENE" : null,
+    sceneBlock,
+    sceneBlock ? "" : null,
+    "## CONTINUITY",
+    continuityBlocks,
+    "",
+    "## PANELS",
+    sharedHeader,
+    sharedHeader ? "" : null,
+    panelBlocks,
+    "",
+    editorBlock,
+    editorBlock ? "" : null,
+    "## CONSTRAINTS",
+    buildPageConstraintsBlock(),
+    "",
+    panelSizeOverrideBlock ? "## PANEL SIZE OVERRIDE" : null,
+    panelSizeOverrideBlock,
+    panelSizeOverrideBlock ? "" : null,
+    rowGroupingBlock ? "## ROW LAYOUT" : null,
+    rowGroupingBlock,
+    rowGroupingBlock ? "" : null,
+    bibleFactsBlock ? "## BIBLE FACTS (must match exactly)" : null,
+    bibleFactsBlock,
+    bibleFactsBlock ? "" : null,
+    scenePanelRestrictionBlock ? "## SCENE PANEL RESTRICTIONS" : null,
+    scenePanelRestrictionBlock,
+    scenePanelRestrictionBlock ? "" : null,
+    "## MANGA CRAFT DIRECTIVES",
+    MANGA_CRAFT_DIRECTIVES_V6,
+  ];
+  const prompt = sections
+    .filter((s): s is string => s !== null && s !== undefined)
+    .join("\n");
+  warnIfPromptTooLarge(prompt);
+
+  return {
+    prompt,
+    refImagePaths: args.packet.refs.map((r) => r.path),
+  };
+}
+
+export function composePagePrompt(args: ComposeArgs): ComposeResult {
+  return composeWithSizeFallback(args, composePagePromptCore);
+}

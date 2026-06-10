@@ -1,0 +1,52 @@
+.nc-code,
+.nc-code-block {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+}
+
+.nc-code {
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+}
+
+.nc-code-block {
+  max-height: 480px;
+  overflow: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-code);
+  color: #e5e7eb;
+}
+
+.nc-kv {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.nc-kv__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+}
+
+.nc-kv dt {
+  color: var(--text-tertiary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+
+.nc-kv dd {
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.nc-raw-details {
+  display: grid;
+  gap: var(--space-2);
+}

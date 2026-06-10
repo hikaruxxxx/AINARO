@@ -1,0 +1,728 @@
+{
+  "schema_version": 1,
+  "episode_id": "a07-modern-dungeon-ep01",
+  "scenes": [
+    {
+      "scene_id": "S01",
+      "scene_no": 1,
+      "prev_scene_id": null,
+      "next_scene_id": "S02",
+      "page_range": {
+        "start": 1,
+        "end": 3
+      },
+      "panel_range": {
+        "start_panel_no": 1,
+        "end_panel_no": 15
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0
+      },
+      "beat_type": "introduce",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_白瀬_灯里_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "夜勤明けのレンは、灯里のSランク戦果ニュースを眺めながら、自分の人生はもうコンビニのレジ前で終わっていると受け入れている。",
+        "goal": "深夜コンビニとSランク戦果ニュースを対比し、レンの現在地と灯里への劣等感を即時に提示する。",
+        "emotion": "tension",
+        "delta_from_prev": "scene 開始"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "深夜",
+        "order": 1,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_blueway_interior_v1",
+      "sub_locations": [],
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "establishing",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "青白いレジ照明、テレビの灯里、鏡の中で目だけ疲れたレンを一画面に重ねる。",
+      "directing_intent": {
+        "kind": "opening_hook",
+        "hook_pattern": "world_glimpse",
+        "key_visual": "青白いレジ照明、テレビの灯里、鏡の中で目だけ疲れたレンを一画面に重ねる。",
+        "narration_lines": [
+          "十五歳の鑑定石は、俺の人生に薄灰色の札を貼った。"
+        ]
+      },
+      "scene_emotion": {
+        "label": "沈んだ導入の違和感",
+        "intensity": 0.62,
+        "direction": "rise"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている"
+        ],
+        "feels": "静かな痛みと、レンがなぜここまで沈んだのかへの好奇心",
+        "questions": [
+          "Fランクとは具体的にどれほど不利なのか",
+          "レンと灯里には過去に接点があるのか",
+          "レンの人生は本当にここで終わるのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "画面越しの白瀬灯里との距離"
+        ]
+      },
+      "primary_channels": [
+        "ui_screen",
+        "reaction_shot",
+        "narration"
+      ]
+    },
+    {
+      "scene_id": "S02",
+      "scene_no": 2,
+      "prev_scene_id": "S01",
+      "next_scene_id": "S03",
+      "page_range": {
+        "start": 4,
+        "end": 6
+      },
+      "panel_range": {
+        "start_panel_no": 16,
+        "end_panel_no": 30
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.2
+      },
+      "beat_type": "setup",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_白瀬_灯里_v1",
+          "presence": "in_person"
+        },
+        {
+          "character_id": "char_氷室_玲二_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "頭の中のナビが、新宿第三1F北東通路、午前6時14分、ゴブリン頭部撃破という経験値倍化条件を開示する。",
+        "goal": "Fランクが日常の制度と世間の言葉で押し戻される世界を提示し、読者の怒りをレンの沈黙へ接続する。",
+        "emotion": "tension",
+        "delta_from_prev": "ニュースの称賛が、直後のFランク蔑視へ反転する。"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "深夜",
+        "order": 2,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_blueway_interior_v1",
+      "sub_locations": [],
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "introspection",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "テレビの特集で氷室玲二がFランクを戦力外と笑い、レンの勤務評価アプリにも探索者保険対象外と低評価が薄灰色で並ぶ。",
+      "directing_intent": {
+        "kind": "world_anchor",
+        "delivery": "system_text",
+        "target_facts": [
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "公社アプリや勤務評価の薄灰色表示が低ランク者を日常的に押し戻す",
+          "Sランクはニュースと推薦で席が用意され、Fランクは入口で止められる"
+        ]
+      },
+      "scene_emotion": {
+        "label": "屈辱の定着",
+        "intensity": 0.7,
+        "direction": "rise"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている",
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "氷室玲二は公の場でFランクを戦力外として扱う人物である",
+          "レンは侮辱されても反論せず、値引き弁当を袋へ入れる"
+        ],
+        "feels": "レンへの同情と、制度への怒り",
+        "questions": [
+          "レンと灯里には過去に接点があるのか",
+          "レンの人生は本当にここで終わるのか",
+          "この固定されたFランク評価を覆す方法はあるのか",
+          "氷室玲二は今後レンと直接ぶつかるのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "理不尽に黙るレン",
+          "画面越しの白瀬灯里との距離"
+        ]
+      },
+      "episode_spine_links": [
+        {
+          "event_kind": "humiliation",
+          "expected_page": 5
+        }
+      ],
+      "primary_channels": [
+        "ui_screen",
+        "dialogue",
+        "visual_contrast"
+      ]
+    },
+    {
+      "scene_id": "S03",
+      "scene_no": 3,
+      "prev_scene_id": "S02",
+      "next_scene_id": "S04",
+      "page_range": {
+        "start": 7,
+        "end": 10
+      },
+      "panel_range": {
+        "start_panel_no": 31,
+        "end_panel_no": 50
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.4
+      },
+      "beat_type": "setup",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "頭の中のナビが、新宿第三1F北東通路、午前6時14分、ゴブリン頭部撃破という経験値倍化条件を開示する。",
+        "goal": "レンの生活の閉塞を底まで沈めた直後、ナビの声で隠しルールを初提示し、物語の核心を点火する。",
+        "emotion": "tension",
+        "delta_from_prev": "レンは値引き弁当を買って帰り、諦めの部屋へ沈む。"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "夜明け前",
+        "order": 3,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_ren_apartment_v1",
+      "sub_locations": [],
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
+      "mode": "dialogue",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "帰宅したレンが床で眠り込むと、女性の声が『経験値倍化条件、開示します』と告げ、午前6時14分、新宿第三1F北東通路、ゴブリン頭部撃破を指定する。",
+      "directing_intent": {
+        "kind": "normal"
+      },
+      "scene_emotion": {
+        "label": "秘密の発火",
+        "intensity": 0.78,
+        "direction": "shock"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている",
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "氷室玲二は公の場でFランクを戦力外として扱う人物である",
+          "レンは侮辱されても反論せず、値引き弁当を袋へ入れる",
+          "レンにだけ聞こえるらしい女性のナビ声が出現した",
+          "ナビは経験値倍化条件として時刻・場所・敵・撃破部位を指定した",
+          "指定条件は午前6時14分、新宿第三1F北東通路、ゴブリン頭部撃破である"
+        ],
+        "feels": "驚きと期待、罠か救いか分からない緊張",
+        "questions": [
+          "レンと灯里には過去に接点があるのか",
+          "この固定されたFランク評価を覆す方法はあるのか",
+          "氷室玲二は今後レンと直接ぶつかるのか",
+          "なぜレンにだけナビの声が聞こえるのか",
+          "ナビの条件は本当に成立するのか",
+          "この声は味方なのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "理不尽に黙るレン",
+          "レンにだけ聞こえる声"
+        ]
+      },
+      "episode_spine_links": [
+        {
+          "event_kind": "secret_or_treasure",
+          "expected_page": 9
+        }
+      ],
+      "primary_channels": [
+        "monologue",
+        "sound_effect",
+        "ui_screen"
+      ]
+    },
+    {
+      "scene_id": "S04",
+      "scene_no": 4,
+      "prev_scene_id": "S03",
+      "next_scene_id": "S05",
+      "page_range": {
+        "start": 11,
+        "end": 14
+      },
+      "panel_range": {
+        "start_panel_no": 51,
+        "end_panel_no": 70
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.6
+      },
+      "beat_type": "turn",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "頭の中のナビが、新宿第三1F北東通路、午前6時14分、ゴブリン頭部撃破という経験値倍化条件を開示する。",
+        "goal": "レンが日常から加算域へ踏み出し、ナビの情報が妄想ではなく実行可能な条件だと読者に信じさせる。",
+        "emotion": "tension",
+        "delta_from_prev": "半信半疑のレンは始発前の新宿第三へ向かう。"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "夜明け前",
+        "order": 4,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_shinjuku_third_dungeon_gate_v1",
+      "sub_locations": [],
+      "page_budget": {
+        "min": 4,
+        "max": 4,
+        "preferred": 4
+      },
+      "mode": "dialogue",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "reveal_turn"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "新宿第三ダンジョンの入域ゲートでFランク1F限定表示が出るが、ナビは残り秒数と北東通路への最短歩幅を淡々と示す。",
+      "directing_intent": {
+        "kind": "midpoint_turn",
+        "reveal": "公社が低ランク用に閉じた1Fの中にも、ナビが読む未公開の判定窓が存在する。",
+        "emotional_shift": "諦めから、失敗すれば死ぬかもしれない能動的な恐怖へ移る。"
+      },
+      "scene_emotion": {
+        "label": "境界を越える緊張",
+        "intensity": 0.84,
+        "direction": "rise"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている",
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "氷室玲二は公の場でFランクを戦力外として扱う人物である",
+          "レンは侮辱されても反論せず、値引き弁当を袋へ入れる",
+          "レンにだけ聞こえるらしい女性のナビ声が出現した",
+          "ナビは経験値倍化条件として時刻・場所・敵・撃破部位を指定した",
+          "指定条件は午前6時14分、新宿第三1F北東通路、ゴブリン頭部撃破である",
+          "Fランクのレンでも新宿第三ダンジョン1F限定なら入域できる",
+          "ナビは残り秒数と歩幅まで指示できる",
+          "公社ゲートの表示とナビの声は別系統の情報である"
+        ],
+        "feels": "条件が本物かもしれない興奮と、レンが死ぬかもしれない不安",
+        "questions": [
+          "レンと灯里には過去に接点があるのか",
+          "この固定されたFランク評価を覆す方法はあるのか",
+          "氷室玲二は今後レンと直接ぶつかるのか",
+          "なぜレンにだけナビの声が聞こえるのか",
+          "ナビの条件は本当に成立するのか",
+          "この声は味方なのか",
+          "公社が知らない判定窓とは何なのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "理不尽に黙るレン",
+          "レンにだけ聞こえる声",
+          "初めて踏み出すレン"
+        ]
+      },
+      "episode_spine_links": [
+        {
+          "event_kind": "awakening",
+          "expected_page": 13,
+          "expected_intensity_target": 0.87
+        }
+      ],
+      "primary_channels": [
+        "establishing_shot",
+        "ui_screen",
+        "silence_panel"
+      ]
+    },
+    {
+      "scene_id": "S05",
+      "scene_no": 5,
+      "prev_scene_id": "S04",
+      "next_scene_id": "S06",
+      "page_range": {
+        "start": 15,
+        "end": 19
+      },
+      "panel_range": {
+        "start_panel_no": 71,
+        "end_panel_no": 95
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 0.8
+      },
+      "beat_type": "cliff",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "頭の中のナビが、新宿第三1F北東通路、午前6時14分、ゴブリン頭部撃破という経験値倍化条件を開示する。",
+        "goal": "指定条件を実戦で成立させ、Fランクのレンが初めて世界の数値を動かす反撃の快感を作る。",
+        "emotion": "tension",
+        "delta_from_prev": "レンは指定通路へ到達し、予告時刻の直前に息を止める。"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "朝",
+        "order": 5,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
+      "sub_locations": [],
+      "page_budget": {
+        "min": 5,
+        "max": 5,
+        "preferred": 5
+      },
+      "mode": "action",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "午前6時14分、予告通り現れたゴブリンにレンが恐怖で崩れかけるが、ナビの半歩指示に従い頭部へ鉄パイプを叩き込む。",
+      "directing_intent": {
+        "kind": "cliffhanger_setup",
+        "build_up": "成功直後の静寂で、勝利より先に公社アプリの異常表示を見せ、次の問いへ引く準備をする。"
+      },
+      "scene_emotion": {
+        "label": "初成功の爆発",
+        "intensity": 0.92,
+        "direction": "release"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている",
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "氷室玲二は公の場でFランクを戦力外として扱う人物である",
+          "レンは侮辱されても反論せず、値引き弁当を袋へ入れる",
+          "レンにだけ聞こえるらしい女性のナビ声が出現した",
+          "ナビは経験値倍化条件として時刻・場所・敵・撃破部位を指定した",
+          "指定条件は午前6時14分、新宿第三1F北東通路、ゴブリン頭部撃破である",
+          "Fランクのレンでも新宿第三ダンジョン1F限定なら入域できる",
+          "ナビは残り秒数と歩幅まで指示できる",
+          "公社ゲートの表示とナビの声は別系統の情報である",
+          "ナビの予告通り新宿第三1F北東通路にゴブリンが出現した",
+          "レンは指定された頭部撃破を実行して初成功した",
+          "ナビの指示に従う間だけレンの行動は成立点へ届く"
+        ],
+        "feels": "強い興奮と解放感、同時に異常が記録される不穏",
+        "questions": [
+          "レンと灯里には過去に接点があるのか",
+          "氷室玲二は今後レンと直接ぶつかるのか",
+          "なぜレンにだけナビの声が聞こえるのか",
+          "この声は味方なのか",
+          "公社が知らない判定窓とは何なのか",
+          "この成功は公社に検知されるのか",
+          "レンは次も同じことができるのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "初めて踏み出すレン",
+          "レンにだけ聞こえる声",
+          "Fランクのまま反撃するレン"
+        ]
+      },
+      "episode_spine_links": [
+        {
+          "event_kind": "payback",
+          "expected_page": 18,
+          "expected_intensity_target": 0.93
+        },
+        {
+          "event_kind": "title_anchor",
+          "expected_page": 19
+        }
+      ],
+      "primary_channels": [
+        "action_sequence",
+        "sound_effect",
+        "reaction_shot"
+      ]
+    },
+    {
+      "scene_id": "S06",
+      "scene_no": 6,
+      "prev_scene_id": "S05",
+      "next_scene_id": null,
+      "page_range": {
+        "start": 20,
+        "end": 22
+      },
+      "panel_range": {
+        "start_panel_no": 96,
+        "end_panel_no": 110
+      },
+      "arc_position": {
+        "volume": 1,
+        "episode_in_volume": 1,
+        "arc_phase": "introduce",
+        "arc_position_normalized": 1
+      },
+      "beat_type": "cliff",
+      "cast": [
+        {
+          "character_id": "char_桐生_レン_v1",
+          "presence": "in_person"
+        }
+      ],
+      "dialogue_plan": {
+        "key_lines": []
+      },
+      "foreshadow_setup": [],
+      "foreshadow_payoff": [],
+      "protagonist_arc_state": {
+        "belief": "レンは震えながら条件を踏み、初めて世界の数値を動かす。ナビの『明日の予定、組みますか？』に『頼む』と返す。",
+        "goal": "初成功を数値で確定し、レンとナビの契約めいた応答で次話の連続異常値へ読者を引く。",
+        "emotion": "tension",
+        "delta_from_prev": "公社アプリにあり得ない未分類加算が同期される。"
+      },
+      "relationship_state_delta": [],
+      "time_axis": {
+        "label": "朝",
+        "order": 6,
+        "is_flashback": false,
+        "is_flashforward": false,
+        "duration_hint": "minutes"
+      },
+      "location_id": "loc_shinjuku_third_1f_northeast_corridor_v1",
+      "sub_locations": [],
+      "page_budget": {
+        "min": 3,
+        "max": 3,
+        "preferred": 3
+      },
+      "mode": "silence",
+      "turn_anchor": {
+        "at_panel_no": null,
+        "type": "none"
+      },
+      "layout_pattern_id": null,
+      "subtype_directive": {
+        "external_social": false,
+        "gacha_ui": false,
+        "hybrid": false
+      },
+      "render_strategy": "page_one_shot",
+      "key_visual_intent": "朝の北東通路の奥が黒く開き、レンの端末に未分類加算の光だけが残る。",
+      "directing_intent": {
+        "kind": "final_pull",
+        "pull_visual": "朝の北東通路の奥が黒く開き、レンの端末に未分類加算の光だけが残る。",
+        "next_episode_hook": "次話ではナビが組んだ予定に従い、勝利とDPC側の監視が同時に始まる。"
+      },
+      "scene_emotion": {
+        "label": "契約の余韻",
+        "intensity": 0.88,
+        "direction": "hold"
+      },
+      "reader_state_after": {
+        "knows": [
+          "桐生レンは深夜コンビニで働く青年である",
+          "白瀬灯里はSランク探索者としてニュースになる成功者である",
+          "レンは15歳の鑑定でFランクと判定された",
+          "レンは灯里の成功を画面越しに眺め、自分の人生を諦めかけている",
+          "適性ランクはS/A/B/C/D/E/Fの七段階で社会評価へ接続されている",
+          "Fランクは探索者保険や入域許可で不利に扱われる",
+          "氷室玲二は公の場でFランクを戦力外として扱う人物である",
+          "レンは侮辱されても反論せず、値引き弁当を袋へ入れる",
+          "レンにだけ聞こえるらしい女性のナビ声が出現した",
+          "ナビは経験値倍化条件として時刻・場所・敵・撃破部位を指定した",
+          "指定条件は午前6時14分、新宿第三1F北東通路、ゴブリン頭部撃破である",
+          "Fランクのレンでも新宿第三ダンジョン1F限定なら入域できる",
+          "ナビは残り秒数と歩幅まで指示できる",
+          "公社ゲートの表示とナビの声は別系統の情報である",
+          "ナビの予告通り新宿第三1F北東通路にゴブリンが出現した",
+          "レンは指定された頭部撃破を実行して初成功した",
+          "ナビの指示に従う間だけレンの行動は成立点へ届く",
+          "公社アプリはレンの通常ではあり得ない経験値加算を表示した",
+          "レンはナビの翌日予定提案に『頼む』と返し、継続を選んだ"
+        ],
+        "feels": "勝利の余韻と、次に何が開くのかを追いたい期待",
+        "questions": [
+          "レンと灯里には過去に接点があるのか",
+          "氷室玲二は今後レンと直接ぶつかるのか",
+          "なぜレンにだけナビの声が聞こえるのか",
+          "この声は味方なのか",
+          "公社が知らない判定窓とは何なのか",
+          "この成功は公社に検知されるのか",
+          "明日の予定ではどんな隠しルールが開くのか"
+        ],
+        "attachments": [
+          "桐生レン",
+          "Fランクのまま反撃するレン",
+          "レンにだけ聞こえる声",
+          "レンとナビの契約めいた関係"
+        ]
+      },
+      "primary_channels": [
+        "ui_screen",
+        "dialogue",
+        "silence_panel"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-27T02:25:27.928Z",
+  "source": {
+    "brief_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep01/_brief.v2.md",
+    "shotlist_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep01/shotlist.json",
+    "bible_snapshot_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/bible/snapshot.json",
+    "volume_plot_path": "volumes/v01/plot.json"
+  },
+  "_note": "Force rebootstrap from L2b SceneSkeleton. dialogue_plan / foreshadow / relationship_delta は空。L03_5 --mode generate --live で肉付け推奨。"
+}

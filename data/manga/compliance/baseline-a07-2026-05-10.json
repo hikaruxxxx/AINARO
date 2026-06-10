@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "scanned_at": "2026-05-10",
+  "scanner_version": "phase0-baseline-simple-grep",
+  "_note": "scanner.ts 実装前の Phase 0 baseline 計測。簡易 substring match なので誤検出を含む。Phase 0-2 で scanner.ts に context check を実装後、再走して fatal=0 (かつ true positive 漏れなし) を達成すること。",
+  "target": {
+    "slug": "a07-modern-dungeon",
+    "path": "data/manga/works/a07-modern-dungeon/bible/snapshot.json",
+    "size_chars": 67499
+  },
+  "summary": {
+    "fatal_match_instances": 4,
+    "warn_match_instances": 0,
+    "true_positive_estimated": 2,
+    "false_positive_estimated": 2
+  },
+  "findings": [
+    {
+      "severity": "fatal",
+      "category": "trademarks.convenience_stores",
+      "term": "ローソン",
+      "line": 706,
+      "excerpt": "..._interior_v1\", \"name\": \"ローソン新宿西 店内レジ\", \"location_typ...",
+      "judgement": "true_positive",
+      "action_required": "loc_id rename + name を架空コンビニ名に置換 (safe_substitutes.ローソン 参照)"
+    },
+    {
+      "severity": "fatal",
+      "category": "trademarks.convenience_stores",
+      "term": "ローソン",
+      "line": 764,
+      "excerpt": "...ior_night_v1\", \"name\": \"ローソン新宿西 外観 (深夜)\", \"location_...",
+      "judgement": "true_positive",
+      "action_required": "上記と同一 location の別 angle、同様に置換"
+    },
+    {
+      "severity": "fatal",
+      "category": "trademarks.fast_food",
+      "term": "マック",
+      "line": 2000,
+      "excerpt": "...l\": [ \"ナビの完全な正体 (3巻クライマックスで開示)\" ], \"vol_unt...",
+      "judgement": "false_positive",
+      "reason": "「クライマックス」という一般語の部分一致。scanner.ts では前後文字 (英字/カタカナの境界) で word boundary check 必要"
+    },
+    {
+      "severity": "fatal",
+      "category": "ip_works.anime_manga",
+      "term": "ワンピース",
+      "line": 700,
+      "excerpt": "...が矩形ノイズと青白い粒子へ変わる。大きな淡青の瞳、白い研究用ワンピース、首筋の薄い回路線、壊れた実験タグが基本記号。",
+      "judgement": "false_positive",
+      "reason": "「ワンピース」という服飾の一般語。scanner.ts では context window で『漫画 / アニメ / 海賊』等の同時出現語を見て IP かを判定する追加ロジックが必要"
+    }
+  ],
+  "next_steps": [
+    "Phase 0-2: scanner.ts 実装で word boundary + context check 追加",
+    "Phase 0-3: bible-lint に統合",
+    "true positive (ローソン x 2) を safe_substitutes で手動置換",
+    "false positive (マック / ワンピース) は scanner 側で誤検出回避するか、false-positives.json に context_excludes として登録",
+    "Phase 1-1 着手前に再 scan、fatal=0 を gate"
+  ]
+}

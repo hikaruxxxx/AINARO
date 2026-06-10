@@ -19,10 +19,14 @@
 
 # production
 /build
+/dist/ops-console/
 
 # misc
 .DS_Store
 *.pem
+
+# 編集中の backup file (バックエンド切替 / プリパッチ等)
+*.bak
 
 # debug
 npm-debug.log*
@@ -34,7 +38,20 @@ yarn-error.log*
 .env*
 
 # crawled data
-/data/
+/data/*
+
+# 例外: 運用辞書 (コンプラ・商標) は git 管理
+!/data/manga/
+/data/manga/*
+!/data/manga/compliance/
+# 2026-05-17 追加: コード級アセット (L05/L00 辞書、model capability) を track
+!/data/manga/layout_patterns/
+!/data/manga/episode_patterns/
+!/data/manga/capability/
+# ただし draft / backup は除外
+/data/manga/layout_patterns/_drafts/
+/data/manga/layout_patterns/*.backup
+/data/manga/episode_patterns/_drafts/
 
 # vercel
 .vercel
@@ -58,3 +75,20 @@ __pycache__/
 /data/manga/raw/kindle-references/
 /data/manga/raw/manual/
 /data/manga/_archive/
+# 漫画パイプライン v2 生成物 (PNG/PDF は git に乗せない、JSON は乗せる)
+/data/manga/style-plates/*.png
+/data/manga/works/*/bible/refs/characters/
+/data/manga/works/*/bible/refs/locations/
+/data/manga/works/*/bible/refs/props/
+/data/manga/works/*/episodes/*/renders/
+/data/manga/works/*/episodes/*/bubbles/
+/data/manga/works/*/episodes/*/_incremental_refs/
+/data/manga/works/*/volumes/*/kdp/*.pdf
+/data/manga/works/*/volumes/*/kdp/_colophon.png
+# Layer 入力 hash キャッシュ (SHA256 のみ、再生成可能)
+/data/manga/works/*/_cache/
+
+# 事業台帳 (B-1 Track D-2): 構造ドキュメント (README/_template) は
+# docs/business/ledger/ に配置し git 管理。
+# 実数値月次台帳と契約スキャンは data/business/ledger/ (/data/ で除外済) に
+# 置きローカル管理する。

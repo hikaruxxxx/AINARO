@@ -11,8 +11,11 @@
  */
 
 import { spawn } from "child_process";
-import { existsSync, statSync } from "fs";
+import { existsSync, statSync, mkdtempSync, rmSync, copyFileSync } from "fs";
+import os from "os";
 import path from "path";
+
+import { checkAndReserveQuota, recordGeneration } from "../_ledger/quota";
 
 export type MangaImageSize = {
   width: number;
@@ -36,6 +39,13 @@ export type GenerateMangaImageOptions = {
   minFileSize?: number;
   /** リトライ回数 */
   maxRetries?: number;
+  /** ChatGPT Pro 枠 ledger 用コンテキスト */
+  ledgerContext?: {
+    slug: string;
+    episode?: number;
+    layer: string;
+    page?: number;
+  };
 };
 
 export type GenerateMangaImageResult = {
@@ -57,15 +67,18 @@ function buildTask(args: {
     args.referenceImagePaths && args.referenceImagePaths.length > 0
       ? [
           "",
-          "## 参照画像（一貫性のため必ず内容と画風を踏襲）",
-          ...args.referenceImagePaths.map((p, i) => `${i + 1}. \`${p}\``),
+          "## 参照画像（このプロンプトに添付済み = `-i` でマルチモーダル入力されている）",
+          `添付された ${args.referenceImagePaths.length} 枚の画像を **必ず** \`image_gen\` ツールの reference として使い、`,
+          "キャラの顔・髪型・衣装・ロケのレイアウト・プロップのデザイン・画風(線/トーン)を一致させること。",
+          "添付順とロール対応:",
+          ...args.referenceImagePaths.map((p, i) => `  ${i + 1}. \`${p}\``),
         ].join("\n")
       : "";
 
   return [
     "次のタスクを実行してください。報告は最小限で構いません。",
     "",
-    "1. `image_gen` ツールを使って下記の英語プロンプトで画像を1枚生成する。",
+    "1. `image_gen` ツールを使って下記の英語プロンプトで画像を1枚生成する。**添付画像を reference として image_gen に必ず渡すこと**。",
     `2. サイズは ${args.size.width}x${args.size.height} ピクセル。`,
     `3. 生成した画像を必ず次の絶対パスに保存する: \`${args.outputPath}\``,
     "4. 保存後、ファイルが実際に存在しサイズが 50KB 以上あることを `ls -la` で確認する。",
@@ -85,20 +98,34 @@ async function runCodexOnce(opts: {
   task: string;
   cwd: string;
   timeoutMs: number;
+  referenceImagePaths?: string[];
 }): Promise<{ stdout: string; stderr: string; exitCode: number | null }> {
   return new Promise((resolve, reject) => {
-    const args = [
+    // codex CLI 0.125+ では cwd が git repo であっても session 経由で
+    // "Not inside a trusted directory" を返すケースがあるため、
+    // 明示的に --skip-git-repo-check を渡す (Pro 定額枠で課金ゼロ、安全)。
+    const args: string[] = [
       "exec",
       "--sandbox",
       "workspace-write",
+      "--skip-git-repo-check",
       "--cd",
       opts.cwd,
-      "-",
     ];
+    // -i FILE で参照画像をマルチモーダル添付。codex agent (gpt-5.5) が
+    // image_gen ツールに reference として渡すよう prompt 内で明示。
+    for (const p of opts.referenceImagePaths ?? []) {
+      args.push("-i", p);
+    }
+    args.push("-");
 
+    // detached: true で新しい process group を作る → タイムアウト時に
+    // process group 全体を kill して grandchild (codex バイナリ) が
+    // orphan 化するのを防ぐ (orphan が残ると同一 ChatGPT セッションで衝突する)。
     const child = spawn("codex", args, {
       cwd: opts.cwd,
       stdio: ["pipe", "pipe", "pipe"],
+      detached: true,
     });
 
     let stdout = "";
@@ -108,7 +135,15 @@ async function runCodexOnce(opts: {
     child.stderr.on("data", (chunk) => (stderr += chunk.toString()));
 
     const timer = setTimeout(() => {
-      child.kill("SIGKILL");
+      if (child.pid) {
+        try {
+          // 負の PID で process group 全体に SIGKILL
+          process.kill(-child.pid, "SIGKILL");
+        } catch {
+          // process group が既に消えていれば無視
+          try { child.kill("SIGKILL"); } catch {}
+        }
+      }
       reject(new Error(`Codex CLI タイムアウト (${opts.timeoutMs}ms)`));
     }, opts.timeoutMs);
 
@@ -133,18 +168,41 @@ async function runCodexOnce(opts: {
 export async function generateMangaImage(
   options: GenerateMangaImageOptions
 ): Promise<GenerateMangaImageResult> {
-  const cwd = options.cwd ?? process.cwd();
+  // 2026-06-11: 並列実行時の成果物衝突対策。cwd 未指定時は呼び出しごとに専用の
+  // 一時ディレクトリを作る。従来は process.cwd() を全並列コールで共有しており、
+  // codex agent の image_gen 中間生成物が衝突して別ページに同一画像が保存される
+  // race が発生した (a07 ep01 v59 一括 render で p05 と p06 がバイト同一)。
+  const ownsCwd = !options.cwd;
+  const cwd = options.cwd ?? mkdtempSync(path.join(os.tmpdir(), "manga-imgen-"));
   const timeoutMs = options.timeoutMs ?? 5 * 60 * 1000;
+  // codex は --sandbox workspace-write のため cwd 配下にしか書き込めない。
+  // tmpdir 隔離時は agent には tmpdir 内の一時ファイルへ保存させ、最終的な
+  // outputPath への配置は Node 側 (sandbox 外) でコピーする。これにより
+  // 「最終書込は必ず呼び出し元プロセスが行う」構造になり、agent 側の挙動に
+  // 依存しない衝突排除になる。
   const minFileSize = options.minFileSize ?? 50 * 1024;
   const maxRetries = options.maxRetries ?? 1;
 
   const absOutput = path.isAbsolute(options.outputPath)
     ? options.outputPath
     : path.resolve(cwd, options.outputPath);
+  // agent に書かせるパス: tmpdir 隔離時は sandbox 内 (cwd/out.png)、cwd 指定時は従来通り直接
+  const agentOutput = ownsCwd ? path.join(cwd, "out.png") : absOutput;
+
+  const ledgerDecision = options.ledgerContext
+    ? await checkAndReserveQuota({
+        ...options.ledgerContext,
+        estimatedCalls: 1,
+      })
+    : null;
+  const ledgerAccount = ledgerDecision?.account ?? "pro";
+  if (ledgerAccount === "api" && process.env.OPENAI_API_KEY_BACKUP) {
+    process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY_BACKUP;
+  }
 
   const task = buildTask({
     prompt: options.prompt,
-    outputPath: absOutput,
+    outputPath: agentOutput,
     size: options.size,
     referenceImagePaths: options.referenceImagePaths,
   });
@@ -152,12 +210,30 @@ export async function generateMangaImage(
   const startedAt = Date.now();
   let lastError: Error | null = null;
 
+  // 専用 tmpdir を作った場合のみ後始末する (cwd 指定時は触らない)
+  const cleanupTempCwd = () => {
+    if (!ownsCwd) return;
+    try { rmSync(cwd, { recursive: true, force: true }); } catch { /* 後始末失敗は無視 */ }
+  };
+
+  async function recordLedgerSuccess(durationMs: number, retryCount: number): Promise<void> {
+    if (!options.ledgerContext) return;
+    await recordGeneration({
+      ...options.ledgerContext,
+      account: ledgerAccount,
+      durationMs,
+      outputPath: absOutput,
+      retry_count: retryCount,
+    });
+  }
+
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     try {
       const { stdout, stderr, exitCode } = await runCodexOnce({
         task,
         cwd,
         timeoutMs,
+        referenceImagePaths: options.referenceImagePaths,
       });
 
       if (exitCode !== 0) {
@@ -166,26 +242,30 @@ export async function generateMangaImage(
         );
       }
 
-      if (!existsSync(absOutput)) {
+      if (!existsSync(agentOutput)) {
         throw new Error(
-          `画像ファイルが生成されていません: ${absOutput}\n--- Codex stdout (末尾) ---\n${stdout.slice(-800)}`
+          `画像ファイルが生成されていません: ${agentOutput}\n--- Codex stdout (末尾) ---\n${stdout.slice(-800)}`
         );
       }
 
-      const stat = statSync(absOutput);
+      const stat = statSync(agentOutput);
       if (stat.size < minFileSize) {
         throw new Error(
-          `画像ファイルが小さすぎます (${stat.size} bytes < ${minFileSize}): ${absOutput}`
+          `画像ファイルが小さすぎます (${stat.size} bytes < ${minFileSize}): ${agentOutput}`
         );
       }
 
+      if (agentOutput !== absOutput) copyFileSync(agentOutput, absOutput);
+      const totalDurationMs = Date.now() - startedAt;
+      await recordLedgerSuccess(totalDurationMs, attempt - 1);
+      cleanupTempCwd();
       return {
         outputPath: absOutput,
         sizeBytes: stat.size,
         width: options.size.width,
         height: options.size.height,
         attempts: attempt,
-        totalDurationMs: Date.now() - startedAt,
+        totalDurationMs,
       };
     } catch (err) {
       lastError = err as Error;
@@ -193,21 +273,25 @@ export async function generateMangaImage(
       // ファイル救済: タイムアウト時など codex CLI が exit しなくても
       // image_gen 自体は完了して PNG が保存されているケースがある。
       // 出力ファイルが存在し最低サイズを満たしていれば成功扱いにする。
-      if (existsSync(absOutput)) {
+      if (existsSync(agentOutput)) {
         try {
-          const stat = statSync(absOutput);
+          const stat = statSync(agentOutput);
           if (stat.size >= minFileSize) {
             console.warn(
               `[manga-codex-image] 試行 ${attempt} が "${lastError.message}" で失敗したが、` +
                 `出力ファイルは保存済 (${(stat.size / 1024).toFixed(0)}KB)。成功扱いで返却。`
             );
+            if (agentOutput !== absOutput) copyFileSync(agentOutput, absOutput);
+            const totalDurationMs = Date.now() - startedAt;
+            await recordLedgerSuccess(totalDurationMs, attempt - 1);
+            cleanupTempCwd();
             return {
               outputPath: absOutput,
               sizeBytes: stat.size,
               width: options.size.width,
               height: options.size.height,
               attempts: attempt,
-              totalDurationMs: Date.now() - startedAt,
+              totalDurationMs,
             };
           }
         } catch {
@@ -222,6 +306,7 @@ export async function generateMangaImage(
     }
   }
 
+  cleanupTempCwd();
   throw new Error(
     `Codex 画像生成に失敗（${maxRetries + 1}回試行）: ${lastError?.message}`
   );

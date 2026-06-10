@@ -96,12 +96,12 @@ function styleDirective(artStyle: ArtStyle): string {
       ].join(" ");
     case "manga_bw_seinen_dark":
       return [
-        "Japanese dark fantasy seinen manga in PURE BLACK-AND-WHITE — NO color, NO grayscale gradient, NO airbrush.",
-        "Dense detailed ink work with heavy hatching and cross-hatching for shadow rendering. Line weight varies dramatically — fine details for faces, thick decisive strokes for silhouettes and creatures.",
-        "Extensive use of solid black (beta) for environmental shadow, monster fur/scales, and oppressive atmosphere. Dark interiors with selective light pools.",
-        "Realistic mature anatomy with weight and gravitas. Monster designs detailed, anatomically grounded but unsettling.",
-        "Screentone sparingly used — primarily for stone texture, fog, and gradient atmosphere. Avoid clean screentone in favor of hand-hatched gradation.",
-        "Aesthetic of Berserk / Vagabond / Battle Angel Alita / Bastard!! — gothic dungeon fantasy, kinetic combat with weight, brooding tone.",
+        "Japanese isekai-dungeon-exploration narou-kei light novel comicalization in PURE BLACK-AND-WHITE — NO color, NO grayscale gradient, NO airbrush.",
+        "Confident expressive ink work with character-first composition. Line weight varies — fine details for emotive faces, decisive strokes for action and creatures.",
+        "Beta usage for environmental shadow, monster forms, and dramatic atmosphere — but characters stay readable and approachable, not gothic-grim.",
+        "Light-novel-cover lineage: large emotive eyes, expressive heroines, readable protagonists. NOT Berserk/Vagabond gothic-realism.",
+        "Screentone for stone texture, fog, magical effects, and skin highlights. Magic circles, status windows, and skill callouts are genre-iconic visual elements.",
+        "Aesthetic of Young Ace / Comic Walker / カドコミ系 narou-kei comicalization (蜘蛛ですが / 転スラ (川上泰樹) / ヘルモード / 第七王子 lineage) — adventurous isekai with party dynamics, kinetic combat with character-driven hero poses.",
       ].join(" ");
     case "manga_bw_shoujo_classic":
       return [
@@ -114,12 +114,12 @@ function styleDirective(artStyle: ArtStyle): string {
       ].join(" ");
     case "manga_bw_seinen_urban":
       return [
-        "Japanese contemporary urban seinen manga in PURE BLACK-AND-WHITE — NO color, NO grayscale gradient, NO airbrush.",
-        "Confident realistic line work with fluid weight variation. Modern cityscapes drawn with architectural precision (buildings, signs, train stations, dungeon entrance overlays).",
-        "Photorealistic anatomy and contemporary fashion. Faces leaner and more grounded than shounen, but readable at panel-size.",
-        "Strong use of beta for night scenes, shadow on faces, and dramatic mood. Screentone for daytime sky, concrete texture, and dungeon interior gradient.",
-        "Action sequences fast and sharp — speed lines, motion blur, impact lines, but composition remains realistic.",
-        "Aesthetic of Solo Leveling (Korean style adapted to monochrome JP manga) / Tokyo Ghoul / Ajin / Spy x Family adult panels — modern Japan with supernatural intrusion, kinetic urban fantasy.",
+        "Japanese contemporary modern-dungeon narou-kei light novel comicalization in PURE BLACK-AND-WHITE — NO color, NO grayscale gradient, NO airbrush.",
+        "Confident expressive line work with character-driven composition. Modern cityscapes drawn with clear silhouettes and genre iconography (buildings, dungeon-gate signage, contemporary fixtures).",
+        "Light-novel-cover lineage: large emotive eyes, readable expressions at panel-size, fashionable contemporary outfits. NOT seinen-realism photorealism.",
+        "Use of beta for night scenes, shadow on faces, and dramatic mood. Screentone gradients for sky, concrete texture, and dungeon interior — sparingly for skin highlights and blush.",
+        "Action sequences fast and sharp — speed lines, motion blur, impact lines, dynamic composition with hero-pose keyframes.",
+        "Aesthetic of Young Ace / Comic Walker / カドコミ系 narou-kei comicalization tradition (Dジェネシス / 壊れスキル / 凡人探索者 lineage) — modern Japan with dungeon intrusion, character-driven urban fantasy.",
       ].join(" ");
     case "webtoon":
       return [

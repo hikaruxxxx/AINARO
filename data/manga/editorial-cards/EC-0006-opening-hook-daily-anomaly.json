@@ -1,0 +1,49 @@
+{
+  "card_id": "EC-0006",
+  "version": "1.0",
+  "title": "現代/学園系 opening_hook を「日常×異変」型で再構成",
+  "scope": "episode",
+  "trigger": {
+    "layer": "L4.1",
+    "flag": "opening_hook_no_focus",
+    "pattern_id": "P1_daily_anomaly",
+    "min_severity": "warn"
+  },
+  "preconditions": {
+    "tone_profile.darkness": "<0.5",
+    "genre": ["modern_dungeon", "battle_modern_power", "modern_school", "modern_romance"],
+    "page_role": "opening_hook"
+  },
+  "contraindications": {
+    "tone_profile.darkness": ">=0.7",
+    "genre": ["mystery_horror", "battle_war_chronicle"],
+    "_note": "重厚系では世界観一文ナレ型 (P2) や戦闘中盤型 (P7) を推奨"
+  },
+  "diagnosis": "現代/学園系で opening_hook が掴み弱い時、平凡な日常 establishing → 異変侵入 の構造で読者の感情移入を作る",
+  "decision_type": "rewrite",
+  "instruction": "pages[0..2] を P1_daily_anomaly パターンの structure に従って再生成 (L4.1 Opening Hook 編集パスを呼ぶ)。page 1 で日常 establishing + 主人公の底辺生活、page 2 で異変侵入、page 3 で検証/決意",
+  "target_axis": ["hook", "character", "likability"],
+  "expected_delta": {
+    "reader_friction": "-0.3",
+    "hook_strength": "+0.4",
+    "familiar_entry_point": "+0.5"
+  },
+  "success_metric": "L8.6 audit opening_hook_no_focus 解消 + page 1 第1 panel importance >= 4 + 異変panel が page 2 に存在",
+  "examples": [
+    {
+      "kind": "after",
+      "asset_id": "a07-modern-dungeon/ep01/_opening_alts/proposals-2026-05-06.json (P1 候補生成済)",
+      "snippet": "page 1: 深夜の新宿西口 establishing → 夜勤コンビニのレン (背景キャラ) → 諦めた目元 close_up → page 2: 朝6時に響く女性の声 → page 3: ナビとの対話 + 決意"
+    }
+  ],
+  "applied_to": [],
+  "reviewer_decision": "pending",
+  "outcome": null,
+  "learned_from": {
+    "source": "Phase Y WY-1 + Codex 全体クオリティ診断 (a07)",
+    "context": "「無料試し読み離脱を考えると ナビ登場 p08 / 戦闘 p15 は遅い」を解決するための hook パターン化"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T07:00:00Z",
+  "created_by": "Phase Y WY-1 + WY-6"
+}

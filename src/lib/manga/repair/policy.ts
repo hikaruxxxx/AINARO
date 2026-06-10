@@ -1,7 +1,7 @@
 /**
  * Repair Policy (純関数)
  *
- * SSoT: ~/.claude/plans/codex-swift-kettle.md "Month 3 repair policy 最小実装"
+ * SSoT: docs/plans/manga/_archive/pipeline-v1-2026-05-02.md "Month 3 repair policy 最小実装"
  *
  * 役割:
  *   1. face_consistency 計測結果から「再生成すべきか」を判定 (judgePanelRepair)

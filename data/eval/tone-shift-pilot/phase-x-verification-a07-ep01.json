@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-06T08:02:54.024Z",
+  "target_slug": "a07-modern-dungeon",
+  "target_episode": 1,
+  "target_storyboard_path": "/Users/hikarumori/Developer/AINARO/data/manga/works/a07-modern-dungeon/episodes/ep01/storyboard.json",
+  "bible_meta_original": {
+    "title": "Fランク探索者の俺にだけ聞こえるんだけど　～システム音声【ナビ】が現代ダンジョンの隠しルール全部教えてくれるから、世界最速でレベルアップした件～",
+    "genre": "modern_dungeon",
+    "art_style": "manga_bw_seinen_urban",
+    "tone_profile": null,
+    "profile_id": null
+  },
+  "schema_compat_test": {
+    "tone_profile_after_add": {
+      "darkness": 0.3,
+      "comedic_density": 0.8,
+      "recovery_cadence": 0.9,
+      "sidekick_presence": 0.9
+    },
+    "profile_id_after_add": "light_recovery_type",
+    "add_destroyed_existing_fields": false,
+    "typecheck_passed": true
+  },
+  "audit_summary": {
+    "pages_total": 22,
+    "panels_total": 112,
+    "total_findings": 1,
+    "total_findings_panel_scope": 1,
+    "total_findings_volume_scope_light": 0,
+    "total_findings_volume_scope_hellmode": 0,
+    "total_findings_volume_scope_no_tone": 0,
+    "counts_by_severity": {
+      "warn": 1
+    },
+    "counts_by_rule": {
+      "cliffhanger_role_mismatch": 1
+    },
+    "new_rules_findings_count": 0,
+    "old_rules_findings_count": 1
+  },
+  "new_rules_breakdown": {
+    "narration_dominant": 0,
+    "face_only_emotion_run": 0,
+    "mascot_temperature_pair_missing": 0,
+    "recovery_beat_missing": 0,
+    "expectation_reality_gap_absent": 0
+  },
+  "craft_directives_compare": {
+    "light_recovery_chars": 2724,
+    "hellmode_chars": 2428,
+    "light_recovery_has_required_section": true,
+    "hellmode_has_required_section": true,
+    "both_share_panel_craft_rules": true,
+    "external_social_has_sns": true,
+    "gacha_ui_has_status_spread": true,
+    "hybrid_has_section": true
+  },
+  "sample_new_rule_findings": [],
+  "interpretation": {
+    "narration_dominant_per_episode": 0,
+    "narration_dominant_threshold_warn": 5,
+    "recovery_beat_missing_present": false,
+    "expectation_reality_gap_absent_present": false,
+    "verdict": "INCONCLUSIVE: 新ルールが何も検出せず。a07 が既に「軽い」状態か、ルール閾値が緩すぎる可能性"
+  }
+}

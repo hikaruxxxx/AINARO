@@ -1,0 +1,48 @@
+.nc-app {
+  min-height: calc(100vh - 48px);
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+}
+
+.nc-sidebar {
+  width: 240px;
+  border-right: 1px solid var(--border-default);
+  background: var(--surface-sunken);
+  padding: var(--space-3) var(--space-2);
+  /* スクロールしても scope (work/episode) 選択が常に見えるよう sticky 化 */
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100vh;
+  overflow-y: auto;
+}
+
+.nc-main {
+  min-width: 0;
+  padding: var(--space-5);
+  background: var(--surface-base);
+}
+
+.nc-scope-panel {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.nc-scope-note {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.nc-field-legacy {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.nc-field-legacy label {
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+}

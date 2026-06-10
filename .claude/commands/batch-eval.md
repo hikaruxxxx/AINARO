@@ -1,10 +1,22 @@
 あなたはWeb小説の品質評価エージェントです。
 
+**v3 対応方針 (2026-05-06 Phase X WX-1b)**:
+- 評価軸 v3 (data/generation/eval-weights-by-genre.json) は 8軸に拡張済 (`recovery` / `comedic_relief` / `likability` 追加)
+- ただし本コマンド (batch-eval) は **データ互換性のため当面 v2 (6軸) 形式を維持**
+- v3 への全面切替は Phase Y で WY-5 (predict-completion v0) と統合して実施予定
+- v3 軸データを蓄積したい場合は新規スクリプトを別途立てる (旧データと混ぜない)
+
+**注意 (2026-05-06)**: `scripts/save-llm-scores.ts` は本リポジトリに存在しない (過去削除/移動)。
+本コマンドを実行する前に、以下のいずれかで保存処理を確定する:
+1. `scripts/save-llm-scores.ts` を新規作成 (Phase Y で実施予定)
+2. 各エージェントが結果 JSON を保存するだけにし、後段で別 script (例: `scripts/eval/llm-feature-eval.ts`) で集計
+3. 本コマンド使用を一時停止 (Phase Y の v3 統合まで)
+
 ## 手順
 
 1. 引数からバッチ数とオフセットを取得（デフォルト: 4バッチ×50作品、offset は引数 or キュー内の nextOffset）
 2. 複数バッチのキューを生成し、並行でサブエージェントに評価させる
-3. 各エージェントが結果をJSONに保存し `scripts/save-llm-scores.ts` で追記する
+3. 各エージェントが結果をJSONに保存し `scripts/save-llm-scores.ts` で追記する (上記注意参照)
 
 ## 実行フロー
 
@@ -28,7 +40,7 @@ done
 ### 3. 次のキュー準備
 全エージェント完了後、次のオフセットで次回用キューを生成。
 
-## 評価基準
+## 評価基準 (v2、6軸 — データ蓄積互換性のため維持)
 
 各作品の `text` を読み、「この作品を続けて読みたいか」の観点で評価する。
 
@@ -46,6 +58,19 @@ done
 - 4-6: 普通 / 及第点
 - 7-8: 良い / 印象的
 - 9-10: 非常に優れている / 読者を強く惹きつける
+
+## v3 軸 (Phase Y で全面切替予定、現時点では参考)
+
+eval-weights-by-genre.json v3 に追加された3軸 (KDP+KU 完読率最適化のため):
+
+| 項目 | 説明 |
+|------|------|
+| recovery | 主人公が「明日も頑張れる」と思える小報酬・生活感・相棒の存在 |
+| comedic_relief | ページあたりギャグ呼吸の頻度。読者の疲労を抜く役割 |
+| likability | 主人公への好感度バランス。毒舌/冷酷の禁則ではなく温度バランス |
+
+将来的には `originality` を v3 軸群に置換 (memory: feedback_originality_not_fun.md「独自性≠面白さ」) する流れ。
+切替タイミングは Phase Y の WY-5 (KU完読率リスク分類器 v0) 着手時。
 
 ## サブエージェントへの指示テンプレート
 

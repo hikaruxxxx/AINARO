@@ -38,6 +38,8 @@ export interface GenreEvalWeights {
 export interface EvalWeightsFile {
   version: string;
   commonAxes: string[];
+  // v3 で追加: 軸名だけだとLLMが誤解する可能性があるため、各軸の意味を定義
+  axisDefinitions?: Record<string, string>;
   genres: Record<string, GenreEvalWeights>;
 }
 
@@ -56,18 +58,27 @@ export function loadEvalWeights(path = "data/generation/eval-weights-by-genre.js
 export function buildAxesPrompt(genre: string, weightsFile?: EvalWeightsFile): string {
   const weights = weightsFile ?? loadEvalWeights();
   const g = weights.genres[genre];
+  const defs = weights.axisDefinitions;
+  // 軸名に定義がある場合は併記してLLMの誤解を防ぐ
+  const formatAxis = (k: string, v: number): string => {
+    const def = defs?.[k];
+    return def ? `${k}=${def}(重み${v})` : `${k}(重み${v})`;
+  };
   if (!g) {
-    return `共通軸: ${weights.commonAxes.join(" / ")}`;
+    const axesStr = weights.commonAxes
+      .map((k) => (defs?.[k] ? `${k}=${defs[k]}` : k))
+      .join(" / ");
+    return `共通軸: ${axesStr}`;
   }
   const commonOrdered = Object.entries(g.common)
     .sort((a, b) => b[1] - a[1])
-    .map(([k, v]) => `${k}(重み${v})`)
-    .join(" / ");
+    .map(([k, v]) => formatAxis(k, v))
+    .join("\n  - ");
   const specificOrdered = Object.entries(g.specific)
     .sort((a, b) => b[1] - a[1])
     .map(([k, v]) => `${k}(重み${v})`)
     .join(" / ");
-  return `共通軸: ${commonOrdered}\nジャンル特化軸: ${specificOrdered}`;
+  return `共通軸:\n  - ${commonOrdered}\nジャンル特化軸: ${specificOrdered}`;
 }
 
 /** ペアワイズ比較プロンプトを構築 */

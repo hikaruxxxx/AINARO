@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-06T06:28:01.144Z",
+  "slug": "a07-modern-dungeon",
+  "episode": 1,
+  "target_tone": {
+    "darkness": 0.3,
+    "comedic_density": 0.8,
+    "recovery_cadence": 0.9,
+    "sidekick_presence": 0.9
+  },
+  "target_tone_rationale": "Phase A 標準 light_recovery (現代ダンジョンの「軽快な読み心地」を狙う)",
+  "total_findings": 6,
+  "findings_detailed": [
+    {
+      "rule": "importance_imbalance",
+      "severity": "info",
+      "message": "全コマ importance ≥ 4 (強調しすぎでメリハリが消える)",
+      "page_no": 18,
+      "panel_no": null
+    },
+    {
+      "rule": "shot_repetition",
+      "severity": "warn",
+      "message": "close_up が 3 コマ連続 (panels 92..94)",
+      "page_no": 19,
+      "panel_no": 94,
+      "page_role": "aftermath",
+      "panel_shot_type": "close_up",
+      "panel_importance": 5,
+      "panel_silence": false,
+      "panel_action": "スマホ光を映した瞳が数値の異常を理解する。",
+      "panel_dialogue_chars": 0,
+      "panel_monologue_chars": 10,
+      "panel_narration_chars": 0,
+      "panel_text": "  monologue [char_桐生_レン_v1]: (跳ねた。桁が、違う。)"
+    },
+    {
+      "rule": "importance_imbalance",
+      "severity": "info",
+      "message": "全コマ importance ≥ 4 (強調しすぎでメリハリが消える)",
+      "page_no": 22,
+      "panel_no": null
+    },
+    {
+      "rule": "narration_dominant",
+      "severity": "warn",
+      "message": "panel#110: ナレーション 17字 が会話 13字 を上回る (manga_craft_guide v2 ナレーション禁則)",
+      "page_no": 22,
+      "panel_no": 110,
+      "page_role": "cliffhanger",
+      "panel_shot_type": "establishing",
+      "panel_importance": 5,
+      "panel_silence": false,
+      "panel_action": "レンの背後で下降階段が暗く伸び、上向きの空HUDが浮かぶ。",
+      "panel_dialogue_chars": 13,
+      "panel_monologue_chars": 0,
+      "panel_narration_chars": 17,
+      "panel_text": "  dialogue [char_獅童_響_v1]: 「次の隠し条件を開示します。」\n  narration: 〔Fランクの停滞は、この日終わった。〕\n  sfx: キン"
+    },
+    {
+      "rule": "recovery_beat_missing",
+      "severity": "warn",
+      "message": "episode a07-modern-dungeon-ep01: 「小報酬/生活感/相棒との温度」beat が検出されない (light_recovery では1話1回以上必須)",
+      "page_no": 0,
+      "panel_no": null
+    },
+    {
+      "rule": "expectation_reality_gap_absent",
+      "severity": "info",
+      "message": "巻全体で「期待 vs 現実」のギャップ panel が検出されない (manga_craft_guide v2 の typical pattern #4 推奨)",
+      "page_no": 0,
+      "panel_no": null
+    }
+  ]
+}

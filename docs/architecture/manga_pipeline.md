@@ -1,346 +1,178 @@
-# 縦読み漫画パイプライン アーキテクチャ
+# 漫画パイプライン v2 アーキテクチャ (2026-05-02 全面再設計)
 
-> 対応プラン: `~/.claude/plans/codex-encapsulated-knuth.md`
-> 対応マイグレーション: `supabase/migrations/20260501000000_manga_pipeline.sql`
-> 対応型定義: `src/lib/manga/types.ts`, `src/lib/manga/schemas.ts`
+> SSoT (実装): `docs/plans/manga/pipeline-v2.md`
+> 上位戦略 (投資配分・陳腐化耐性): `docs/plans/manga/strategy.md`
+> 旧 SSoT (縦読み + 横読み 17層): `docs/plans/manga/_archive/pipeline-v1-2026-05-02.md`
+> 対応型定義: `src/lib/manga/schemas-v2.ts`, `src/lib/manga/schemas.ts` (primitive 型)
 
 ## 1. 位置づけ
 
-AINARO の小説IPを縦読み漫画として二次展開するためのパイプライン。EXIT戦略上、Year2 に予定していた漫画ピボットを **2026年内に最小パイプラインを稼働** させる方針に転換した結果。
+AINARO 横読み白黒漫画パイプライン (B6判 KDP+KU 専売) の本流アーキテクチャ。
+2026-05-02 に Codex + Claude エージェントの red-team レビューを経て、L0-L17 の旧設計を **12 layer / Phase 1-4 境界** に圧縮した v2 設計。
 
-このドキュメントは Phase 0 アーキテクチャを定義する正典。Phase 1 の実装はこの設計に従う。
+旧 stage1-8 の手作業は `data/manga/_archive/2026-05-02-pre-redesign/` に退避済み。
 
-## 2. 設計原則（Codex 3度のレビューを反映）
+## 2. 設計原則
 
-1. **連載CMSファースト** — 生成パイプラインは1コンポーネント。中核は権利/規約/編集ワークフロー/版管理/KPI
-2. **聖書（Bible）駆動** — キャラ・ロケ・衣装・小物・関係を構造化資産として最初に固める
-3. **画像モデルは作品単位で主モデル固定** — 本編混在禁止、サブはref画像生成と背景素材のみ
-4. **検査は合議制** — ArcFace単独禁止、CLIP+属性のMVP→Phase 2でDINOv2/ArcFace追加→Phase 3でLoRA
-5. **投稿は規約遵守** — Playwright自動投稿は永久不採用、手動投稿用パッケージを自動生成
-6. **段階スケール** — 各Phase出口条件をKPIで明示、満たなければ次Phaseに進まない
-7. **既存資産流用** — Phase1パイプライン/ヒット予測v12/anchor pool v1を最大活用
+1. **Single source of truth per layer** — 各 layer は 1 モジュール / 1 スキーマ / 1 CLI
+2. **No legacy compat** — stage1-8 / 旧 DB 経路 / 自由文字列 subjects は完全破棄
+3. **Hard fail over silent skip** — bible 未登録キャラ・refs 解決失敗・schema 不一致は即停止
+4. **Asset by ID** — ファイルパス直指定禁止、`asset_id` を主キーに `source_provenance` 強制
+5. **Snapshot-only** — Phase A は JSON snapshot 経路に集約 (DB は Phase B で再評価)
+6. **Idempotent layer rerun** — 各 layer は input hash でキャッシュ、変更分のみ再実行
+7. **Explicit capability dependency** — render 前に `data/manga/capability/{model}.json` 読込必須
+8. **Bible-first ordering** — bible (キャラ・ロケ・style) → shotlist (bible 参照) の順を厳守
 
-## 3. 11層アーキテクチャ
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 0: 漫画化適性スクリーニング                                │
-│   既存 predictions_v12 + 漫画特化特徴量 → manga_aptitude_score │
-│   入力: 小説IP / 出力: 優先順位付きキャンディデート               │
-└──────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 1: 構造化層                                              │
-│   scene-splitter / shotlist-generator                          │
-│   character-bible-builder / location-bible-builder             │
-│   costume-timeline / props-tracker / character-graph           │
-└──────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 2: 権利・規約層                                          │
-│   AI利用可否 / 商用可否 / プラットフォーム別NG表現               │
-│   レーティングエンジン / 権利帰属台帳 / プロンプト監査ログ        │
-└──────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 3: 生成層                                                │
-│   panel-generator (gpt-image-1.5 主、Flux Pro 写実サブ)         │
-│   reroll-orchestrator / asset-version-manager                  │
-│   ※ LoRA/SDXL自前は Phase 3 以降の併用オプション                 │
-└──────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 4: 検証層                                                │
-│   cv-inspector (CLIP + 属性のMVP、Phase 2でDINOv2/ArcFace追加)  │
-│   consistency-checker / regulation-checker                     │
-│   hand-finger-checker / text-garbage-detector                  │
-└──────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 5: 合成層                                                │
-│   bubble-placer (MVPは候補矩形+スコアリング、SAT solverは将来)   │
-│   typesetter / panel-assembler / format-adapter                │
-└──────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 6: 編集運用層                                            │
-│   qa-console (人間レビュー/差し戻し/承認)                        │
-│   publish-scheduler / version-history / revision-management    │
-└──────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 7: ローカライズ層 (Phase 4)                              │
-│   translation / typesetting-replacement / bubble-relayout      │
-│   glossary / character-tone / cultural-hook-adapter            │
-└──────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 8: 配信層                                                │
-│   self-host-publisher (Phase 1 のみ自社限定)                    │
-│   manual-publish-package-generator (Phase 2 で WEBTOON/pixiv)   │
-│   sns-shorts-generator (Phase 2 で ffmpeg)                     │
-└──────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 9: 実験管理層 (Phase 3)                                  │
-│   cover-ab / title-ab / opening-ab / sns-thumbnail-ab           │
-└──────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────────────────────────────────────────────────────┐
-│ Layer 10: 計測層                                               │
-│   kpi-collector / hit-predictor-v2 (漫画版)                     │
-│   data-warehouse / dashboard                                   │
-└──────────────────────────────────────────────────────────────┘
-```
-
-## 4. データフロー（Phase 1 MVP）
+## 3. 12 Layer 全体図
 
 ```
-┌────────────────────┐
-│ novels (既存)        │ ─── Layer 0 漫画化適性 ──▶ manga_works.manga_aptitude_score
-│ episodes (既存)      │
-└────────────────────┘
-          ↓
-┌────────────────────┐
-│ Layer 1 構造化       │
-│  ・extract-world-facts (既存スキル流用)
-│  ・scene-splitter
-│  ・shotlist-generator
-│  ・character-bible-builder
-│  ・location-bible-builder
-│  ・costume-timeline
-│  ・props-tracker
-│  ・character-graph
-└────────────────────┘
-          ↓ DB
-character_bibles / costume_states / location_bibles / props /
-character_relations / shotlists
-          ↓
-┌────────────────────┐
-│ Layer 3 生成        │
-│  ・gpt-image-1.5 主モデル
-│  ・reference image を聖書から注入
-│  ・1コマ最大2キャラ制約
-│  ・assets テーブルで版管理
-└────────────────────┘
-          ↓ DB
-manga_panels / panel_characters / assets
-          ↓
-┌────────────────────┐
-│ Layer 4 検査        │
-│  ・CLIP 類似度 (主)
-│  ・属性分類器
-│  ・手指 (Mediapipe Hands)
-│  ・OCR文字化け検査
-└────────────────────┘
-          ↓ DB
-qa_logs (decision: pass/warn/reroll/manual_review)
-          ↓
-┌────────────────────┐
-│ Layer 6 編集運用     │
-│  ・qa-console
-│  ・ワンクリックリロール
-│  ・人間承認/差し戻し
-└────────────────────┘
-          ↓ DB
-manga_panels.qa_status (pass)
-          ↓
-┌────────────────────┐
-│ Layer 5 合成        │
-│  ・bubbles 配置
-│  ・縦結合 WebP 出力
-└────────────────────┘
-          ↓ DB
-bubbles / publish_packages (platform=self)
-          ↓
-┌────────────────────┐
-│ Layer 8 配信 (自社のみ)
-│  ・WebPストリーミング
-│  ・PostHog 計測埋込
-└────────────────────┘
-          ↓
-┌────────────────────┐
-│ Layer 10 計測       │
-│  ・完読率/離脱位置/2話遷移率
-└────────────────────┘
-          ↓ DB
-manga_kpi
-          ↓
-[漫画化適性モデル v1 の訓練データに供給]
+═══ PHASE 1: WORK SETUP (once / 作品) ═══
+L01 Bible Snapshot         V2企画書 → bible/snapshot.json
+L02 Bible Images           snapshot → bible/refs/{characters,locations,props}/
+
+═══ PHASE 2: EPISODE PLANNING (per ep) ═══
+L03 Shotlist               bible + ep_brief → episodes/epNN/shotlist.json
+L04 Storyboard             shotlist + bible → storyboard.json (entity_id binding hard required)
+L05 Page Director          storyboard + capability → page_plan.json
+L06 Continuity Resolve     page_plan + bible → page_plan + continuity_group_ids
+L07 Refs Resolution        page_plan + bible/refs → resolved_refs.json (RULE 1-10)
+L08 Incremental Refs       resolved_refs.unresolved → bible/refs/_ep{N}/
+
+═══ PHASE 3: RENDER (per ep) ═══
+L09 Render                 page_plan + resolved_refs → renders/p{NN}.png
+L10 Bubble Overlay         renders + storyboard.dialogue → bubbles/p{NN}.png
+L11 Audit                  bubbles + bible → audit.json
+L12 Repair                 audit.failed → re-run L7-L10 for failed pages
+
+═══ PHASE 4: PUBLISH (per volume) ═══
+L13 KDP Package            volumes/vNN/episodes 全部 → kdp/{manuscript,cover}.pdf + metadata.json
 ```
 
-## 5. データモデル概観
+## 4. Phase 境界の責務
 
-主要テーブル（詳細は SQL マイグレーション参照）:
+| Phase | 単位 | 主成果物 | 再実行頻度 |
+|---|---|---|---|
+| Phase 1 | 作品 (slug) | bible/snapshot.json + bible/refs/ | once/work (重大変更時のみ再実行) |
+| Phase 2 | 話 (episode) | shotlist / storyboard / page_plan / resolved_refs | per ep |
+| Phase 3 | 話 (episode) | renders / bubbles / audit / repair | per ep (失敗時 L12 で部分再実行) |
+| Phase 4 | 巻 (volume) | manuscript.pdf / cover.pdf / metadata.json | per volume |
 
-| テーブル | 役割 | Phase |
-|---------|------|-------|
-| `manga_works` | 作品マスタ。novels への二次展開 | Phase 0 |
-| `manga_episodes` | エピソード。既存 episodes へ任意リンク | Phase 0 |
-| `manga_panels` | パネル本体。生成画像本体は assets へ分離 | Phase 0 |
-| `panel_characters` | パネル登場キャラの正規化（多対多） | Phase 0 |
-| `assets` | 画像/動画/パッケージの版管理 | Phase 0 |
-| `character_bibles` | キャラ聖書（CV検査用埋め込み込み） | Phase 0 |
-| `costume_states` | 衣装タイムライン | Phase 0 |
-| `location_bibles` | ロケーション聖書 | Phase 0 |
-| `props` | 小物・持ち物の所有履歴 | Phase 0 |
-| `character_relations` | キャラ関係グラフ | Phase 0 |
-| `shotlists` | ショットリスト | Phase 0 |
-| `bubbles` | 吹き出し | Phase 0 |
-| `manga_kpi` | KPI 集計 | Phase 0 |
-| `qa_logs` | 合議CV検査ログ | Phase 0 |
-| `publish_packages` | 手動投稿パッケージ | Phase 0 |
-
-## 6. 主モデル戦略（Codex 最終指摘）
-
-### Phase 1 MVP
-- **主モデル: `gpt-image-1.5`** (OpenAI公式 docs で 2026年4月時点に提供されているモデル名)
-- 主モデルは **作品単位で固定**、本編混在は禁止
-- reference image は character_bibles / location_bibles から注入
-- **1コマ最大2キャラ制約** (3人以上は遠景/シルエット/分割コマ)
-
-### Phase 3 以降
-- Flux Pro Ultra: 写実シーン・複雑構図のサブ
-- SDXL自前ホスト + IP-Adapter + アニメ特化LoRA: 月100話超のスケール期コスト圧縮
-- 主要キャラ LoRA 訓練: 一貫性の最終手段
-
-### 永久不採用
-- NovelAI サブスク並列運用 (規約上グレー)
-- Playwright 自動投稿 (規約違反)
-- スクレイピングによる外部KPI取得 (規約違反)
-
-## 7. CV検査合議制の段階展開
+## 5. ディレクトリ構造
 
 ```
-Phase 1 MVP:
-  CLIP 類似度 ───────┐
-  属性分類器 ────────┼──▶ pass / warn / fail (3段階)
-  手指検出 ──────────┤
-  OCR文字化け ───────┘
-
-Phase 2:
-  + DINOv2 類似度
-  + ArcFace 顔同定 (warn 補助扱い、漫画顔では弱いため最後)
-
-Phase 3 以降:
-  + キャラ別小型分類器 (人間QAラベルから訓練)
-  + 衣装・髪色・髪型属性分類器
-  + 構図品質・カメラ整合性チェック
+data/manga/
+├── _archive/2026-05-02-pre-redesign/   ← 旧 stage1-8 / work-1 bible
+├── capability/
+│   └── gpt-image-2.json
+├── style-plates/
+│   └── manga_bw_seinen_*.png
+└── works/{slug}/
+    ├── meta.json
+    ├── bible/
+    │   ├── snapshot.json
+    │   └── refs/
+    │       ├── characters/{char_id}/{variant}.png
+    │       ├── locations/{loc_id}/{variant}.png
+    │       ├── props/{prop_id}/{variant}.png
+    │       └── _provenance.json
+    ├── volumes/v{NN}/
+    │   ├── plot.json
+    │   └── kdp/{manuscript,cover}.pdf + metadata.json
+    └── episodes/ep{NN}/
+        ├── _brief.md
+        ├── shotlist.json
+        ├── storyboard.json
+        ├── page_plan.json
+        ├── resolved_refs.json
+        ├── renders/p{NN}.png
+        ├── bubbles/p{NN}.png
+        ├── audit.json
+        ├── repair_log.json
+        └── _incremental_refs/
 ```
 
-閾値はキャラごとの分布から動的決定。固定閾値は使わない（Codex指摘）。
+## 6. 確定スキーマ要点
 
-## 8. 配信プラットフォーム戦略
+### BibleSnapshotV2 (L1)
+- meta / world (premise+rules+system+timeline+factions) / characters[] / locations[] / props[] / costumes[] / relations[] / style_directives / visual_motifs / continuity_seeds / volume_synopsis
+- characters[].id 等は `char_xxx_v1` 形式、bible 内ユニーク
 
-| プラットフォーム | Phase | 投稿方式 |
-|--------------|------|---------|
-| 自社サイト (novelis.tokyo) | Phase 1 | Supabase + R2 直接 |
-| WEBTOON CANVAS | Phase 2 | パッケージ自動生成 + 手動投稿 |
-| pixiv コミック | Phase 2 | 公式API + AI明示 |
-| LINE マンガ インディーズ | Phase 2 | 手動投稿 |
-| YouTube Shorts / TikTok / Reels | Phase 2 | ffmpeg + 手動投稿 |
-| ピッコマ INDIES / comico PLUS / ジャンプルーキー | Phase 3 | 手動投稿 |
+### RefsProvenance (L2)
+- 各 ref に `source_type: bible_generated|manual_upload|kindle_archive|external_purchased` を必須
+- `kindle_archive` は L7 で自動 reject (`isAllowedForProduction` ガード)
 
-**重要**: 外部プラットフォームは「収益化先」ではなく「**発見チャネル**」。収益とデータは自社側に寄せる。
+### EpisodeStoryboardV2 (L4)
+- panel.entities.{characters[].character_id, location_id, props[], focus_entity_id} は bible.id への hard ref
+- dialogue.character_id は panel.entities.characters に含まれていなければならない
 
-## 9. KPI と North Star
+### ResolvedRefs (L7)
+- panel_id (or page_id) → ResolvedRefPacket
+- 各 ref に role / target_entity_id / source / rationale 必須
+- weight は capability.ref_weighting に応じる (現 gpt-image-2 = false → 1.0 固定)
 
-### Phase 1 (自社のみ)
-- 1話完読率
-- 離脱位置（パネル単位）
-- 2話遷移率
-- お気に入り率
+## 7. L7 Refs Resolution 決定論ルール (RULE 1-10)
 
-### Phase 2 (外部も)
-- + 各プラットフォーム別 view / completion / next_ep / bookmark
-- + SNS動画CTR
-- + 原作小説への逆流入率
+```
+RULE 1  常時: + style_plate (weight 1.0)
+RULE 2  close_up & 1キャラ: + char_face_front + char_face_diagonal(0.5)
+RULE 3  medium & 1キャラ: + char_full_front + char_face_front(0.5)
+RULE 4  wide & no character focus: + loc wide_establishing
+RULE 5  over_shoulder: + char_full_back(0.5) + loc interior_eye_level
+RULE 6  establishing & bleed: + loc wide_establishing のみ
+RULE 7  on_screen_via=tv: + char tv_variant (なければ face_front)
+RULE 8  continuity_group_ids 指定: 該当refを weight 1.0 で強制 (RULE 2-7 上書き)
+RULE 9  multi-character (3+): focus_entity face/full + 脇役 outfit/full + その他 silhouette
+RULE 10 budget 超過時優先: style > continuity_forced > focus_entity > キャラ > location
+```
 
-### Phase 3 以降
-- + 漫画化適性スコア vs 実測KPIの相関
-- + 1有望IP発見コスト
-- + ジャンル別ヒット率
+## 8. Capability Profile
 
-主KPI（既存 CLAUDE.md に従う）: **月間完走者数** を漫画版 work_completions として実装する。
+`data/manga/capability/gpt-image-2.json` を render 前に必ず読込:
+- ref_role_tagging / ref_weighting / ref_mask_binding / ref_negative — 全 false (現 gpt-image-2 image_gen API 経由では未対応)
+- recommended_strategy = hybrid
+- reference_image_optimal = 5 (Pilot 既知値)
+- page_one_shot_success_rate = 0.95、panel_composite_success_rate = 0.88
 
-## 10. 既存資産との連携
+## 9. KDP B6 仕様
 
-| 既存資産 | 連携箇所 |
-|---------|----------|
-| novels / episodes (既存スキーマ) | manga_works.novel_id / manga_episodes.source_episode_id |
-| Phase1パイプライン | 漫画化候補の優先選別 |
-| ヒット予測v12 (`scripts/predict/predict-hit-v12.py`) | manga_aptitude_score の入力特徴量 |
-| anchor pool v1 (`data/generation/anchors/`) | 漫画化適性の品質基準 |
-| `extract-world-facts` スキル | location-bible-builder の前段 |
-| `generate-cover` スキル | character-bible-builder の参考実装 |
-| `validate-foreshadowing` スキル | shotlist のエピソード構成検証 |
-| `audit-voices` スキル | bubbles のセリフ振り分け検証 |
-| `pairwise-judge` スキル | 漫画版品質ペアワイズ評価 |
-| `src/lib/cover/codex-image.ts` | gpt-image-1.5 アダプタの参考実装 |
-| `src/lib/cover/prompt-builder.ts` | プロンプト組み立て構造の流用 |
-| `update_updated_at()` 関数 (既存) | manga_works/episodes/panels の updated_at trigger に再利用 |
+- 本文ページ: 128×182mm = 1748×2480 px @ 350dpi
+- 塗り足し込み: 138×192mm = 1843×2587 px
+- 背幅 (POD 白黒): ページ数 × 0.0795 mm
+- 表紙 PDF: 表+背+裏 一体、1748*2 + spine + 塗り足し
+- 奥付ページ必須 (AI 使用開示文 含む)
 
-## 11. 後回しと永久不採用
-
-### Phase 2 へ延期
-- WEBTOON CANVAS / pixiv 投稿パッケージ正式版
-- SNS動画化（ffmpeg）
-- DINOv2 / ArcFace 追加合議
-- 外部プラットフォームKPI収集（CSV/許可された範囲のみ）
-
-### Phase 3 以降
-- 主要キャラ LoRA 訓練
-- 実験管理層 A/B 基盤
-- 顔差し替え inpaint/edit フロー
-
-### Phase 4 以降
-- ローカライズ層
-- 完全自動規約判定（人間レビューで補完）
-
-### 永久不採用
-- Playwright 自動投稿（規約違反・BANリスク）
-- スクレイピングによる外部KPI取得
-
-### 将来検討（要件成熟次第）
-- SAT solver 吹き出し配置
-- World Model 統合（2027年以降）
-- 複数モデル高度fallback
-
-## 12. リスクと対策
-
-| リスク | 対策 |
-|--------|------|
-| `gpt-image-1.5` 仕様/価格/規約変動 | Phase 3でSDXL自前併用、設定ファイルで切替容易化、月次で公式docs確認 |
-| 複数キャラ同時登場で一貫性破綻 | ショットリスト側で1コマ最大2人ルール、3人以上は遠景/シルエット |
-| WEBTOON BAN | 手動投稿厳守、Playwright禁止、外部KPIもスクレイピング禁止 |
-| キャラ一貫性破綻 | CLIP+属性のMVP→Phase 2でDINOv2/ArcFace追加、Phase 3で主要キャラLoRA |
-| 衣装/状態管理破綻 | costume_states テーブルで時間軸管理、QA console で警告表示 |
-| 規約違反コンテンツ | Layer 2 規約層 + Layer 4 検査層 + 人間QA の三重 |
-| 著作権紛争 | Layer 2 で人間関与記録、商用ライセンスモデルのみ使用 |
-| AI忌避による読者離反 | SNSブランディング、自社サイトを主、外部は発見チャネル |
-| WEBTOON本体赤字 = 黒字化困難 | MAUではなくP/L実績で判定、Phase 5長編化で粗利改善 |
-| 1人開発で全部抱えて止まる | 人間QA / 翻訳 / SNS運用 / 法務 / 会計を最初から外注前提に |
-
-## 13. Verification
-
-### Phase 0 完了確認
+## 10. CLI
 
 ```bash
-# 1. DBマイグレーション適用（本番反映前にローカル/preview で確認）
-psql $DATABASE_URL -f supabase/migrations/20260501000000_manga_pipeline.sql
+# end-to-end
+npx tsx scripts/manga/pipeline.ts \
+  --slug a07-modern-dungeon --episode 1 \
+  --concept data/manga/_archive/.../A07_v2.json \
+  --brief-file data/manga/works/a07-modern-dungeon/episodes/ep01/_brief.md
 
-# 2. テーブル作成確認
-psql $DATABASE_URL -c "\dt manga_*"
-psql $DATABASE_URL -c "\dt character_bibles"
-psql $DATABASE_URL -c "\dt location_bibles"
-psql $DATABASE_URL -c "\dt costume_states"
-psql $DATABASE_URL -c "\dt props"
-psql $DATABASE_URL -c "\dt assets"
+# 単 layer 再実行
+npx tsx scripts/manga/pipeline.ts --slug a07-modern-dungeon --episode 1 --layer L09 --force
 
-# 3. 型定義のtsc通過
-npx tsc --noEmit
+# Phase 4 KDP
+npx tsx scripts/manga/pipeline.ts \
+  --slug a07-modern-dungeon --volume 1 --episodes 1 \
+  --layer L13 --author "AINARO" --publication-date 2026-06-01
 ```
 
-### Phase 1 完了確認
+## 11. Codex/Claude red-team で撤回した設計
 
-`~/.claude/plans/codex-encapsulated-knuth.md` の Verification セクション参照。
+- ✗ Pre-Phase Capability Verification 12-24 枚 (API 側に role-tag/weight/mask 不在のため)
+- ✗ L0 Init 独立 layer (meta.json + bible に集約)
+- ✗ L4 Aux Bible 細分化 (snapshot 1ファイルで十分)
+- ✗ L6 Episode Plot 独立 layer (shotlist で扱える)
+- ✗ L10 Ref Selector 独立 layer (continuity-refs/resolver の拡張で十分)
+- ✗ ResolvedRefs に mask/negative/bind を最初から含める (capability 確定後 optional 追加)
+- ✗ stage4 storyboard JSON 変換器 (1週 vs 半日再生成、捨てて再生成判断)
+
+## 12. 関連
+
+- SSoT: `docs/plans/manga/pipeline-v2.md`
+- 作法: `docs/strategy/manga_craft_guide.md`
+- 戦略: `docs/strategy/platform_strategy_v4.md`, `project_kdp_strategy.md` (memory)
+- ライブラリ: `src/lib/manga/README.md`
+- スクリプト: `scripts/manga/README.md`

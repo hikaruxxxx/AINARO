@@ -1,0 +1,719 @@
+{
+  "version": "3.0",
+  "generated_at": "2026-05-06",
+  "description": "Manga Craft Guide v3 - 機械可読タグ index。各要素は階層 (tier) / 場面 (scene) / ジャンル (genre) / 機能 (function) の 4 軸でタグ付け。storyboard-extractor が場面別に必要なルールセットを load する際の契約。",
+
+  "schema": {
+    "tier": ["L0", "L1", "L2", "L3"],
+    "scene": [
+      "all",
+      "chapter_opener",
+      "establishing",
+      "dialogue",
+      "monologue",
+      "item_analysis",
+      "combat",
+      "social_reaction",
+      "cliffhanger"
+    ],
+    "genre": [
+      "universal",
+      "modern_dungeon",
+      "battle_dungeon",
+      "isekai_tensei_cheat",
+      "isekai_slowlife",
+      "kindle-test-1-only"
+    ],
+    "function": [
+      "structure",
+      "emotion",
+      "worldbuilding",
+      "decoration",
+      "mechanics"
+    ]
+  },
+
+  "source_works": [
+    {
+      "id": "kindle-test-1",
+      "title": "現代ダンジョンで最強になる物語 (缶詰ガチャ) Vol.1",
+      "pages": 156,
+      "genre": "modern_dungeon",
+      "subtype": "external_social",
+      "read_date": "2026-05-01",
+      "method": "全 156p フル精読",
+      "status": "completed"
+    },
+    {
+      "id": "level-gacha-vol1",
+      "title": "レベルガチャ ~ハズレステータス『運』が結局一番重要だった件~ Vol.1",
+      "authors": "兎杜ちあ (漫画) / 皇雪火 (原作) / 夜ノみつき (キャラ原案)",
+      "protagonist": "アマチショウタ / 天地翔太",
+      "genre": "modern_dungeon",
+      "subtype": "gacha_ui",
+      "read_date": "2026-05-06",
+      "method": "ScreenRecording → extract-pages-from-recording.ts (plateau 検出) で 88 spread 抽出 + per-page 精読",
+      "source_video": "ScreenRecording_04-30-2026 21-30-47_1.MP4",
+      "extracted_pages": "data/manga/raw/page-flip/level-gacha-vol1/page_NNNN.jpg (88 枚)",
+      "key_findings": [
+        "spread 5: 本編冒頭 2 ページ見開き opening establishing (大コマ + ナレーション枠 4 個で「ダンジョン NO.777 / 通称アンラッキーホール」を一気提示)",
+        "spread 18: スキルオーブ使用判断 (灰色背景 + 6 種スキル icon + UI prompt + ナレーション 5+ 個)",
+        "spread 36: 冒険者カード型プロフィール UI (簡易版ステータス表示) + レベル数値変化矢印「31 → 3」",
+        "spread 44: 戦闘 → リボン型ドロップ UI (「鉄のナイフ×1」「極小魔石×1」) → 鑑定スキル発動の繋ぎ",
+        "spread 85: 巻末「描き下ろし漫画」セクションの独立章扉 (白背景 grid + マスコット散布)",
+        "本編 5 話の章扉は 1 ページ全面ではなく「第N話」小枠 + 同ページ establishing のハイブリッド型"
+      ],
+      "status": "deep_read_completed"
+    },
+    {
+      "id": "level-gacha-vol2",
+      "title": "レベルガチャ Vol.2",
+      "authors": "兎杜ちあ / 皇雪火 / 夜ノみつき",
+      "genre": "modern_dungeon",
+      "subtype": "gacha_ui",
+      "read_date": "2026-05-06",
+      "method": "ScreenRecording → extract-pages-from-recording.ts で 93 spread 抽出 + per-page 精読",
+      "source_video": "ScreenRecording_04-30-2026 21-33-16_1.MP4",
+      "extracted_pages": "data/manga/raw/page-flip/level-gacha-vol2/page_NNNN.jpg (93 枚)",
+      "key_findings": [
+        "spread 25: 第 8 話冒頭でハイブリッド型章扉「第8話」小枠 + 第二層突入 establishing (主人公全身 + マップ UI + ナレーション 3-4 個)",
+        "Vol.1 より dialogue / heroines との掛け合いが多い (ヒロイン展開の核巻)",
+        "マップ UI panel (タブレット風) で新階層空間を提示する独自演出"
+      ],
+      "status": "deep_read_completed"
+    },
+    {
+      "id": "level-gacha-vol3",
+      "title": "レベルガチャ Vol.3",
+      "authors": "兎杜ちあ / 皇雪火 / 夜ノみつき",
+      "genre": "modern_dungeon",
+      "subtype": "gacha_ui",
+      "read_date": "2026-05-06",
+      "method": "ScreenRecording → extract-pages-from-recording.ts で 92 spread 抽出 + per-page 精読",
+      "source_video": "ScreenRecording_04-30-2026 21-34-34_1.MP4",
+      "extracted_pages": "data/manga/raw/page-flip/level-gacha-vol3/page_NNNN.jpg (92 枚)",
+      "key_findings": [
+        "spread 25: ヒロインアキの過去回想 (PC 作業 + 室内 establishing + ナレーション枠 5-6 個 = L0-2 例外)",
+        "spread 25 RIGHT: 主人公甲冑 vs ヒロイン現代服 の対比 panel + 何気ない褒め (温度近接型対話)",
+        "spread 75 付近 (vid3 t45s): 2 ページ全面ステータス画面 (スキル一覧 + 数値矢印 + rarity + New マーカー)",
+        "spread 88 付近 (vid3 t58s): combat 進行中 cliffhanger (Murder Rabbit 戦)。SNS / 強敵シルエット不使用"
+      ],
+      "status": "deep_read_completed"
+    },
+    {
+      "id": "kindle-vol-future-3",
+      "title": "(要選定 - battle_dungeon 系)",
+      "genre": "battle_dungeon",
+      "status": "pending"
+    },
+    {
+      "id": "kindle-vol-future-4",
+      "title": "(要選定 - isekai_tensei_cheat 系)",
+      "genre": "isekai_tensei_cheat",
+      "status": "pending"
+    }
+  ],
+
+  "subtype_schema": {
+    "modern_dungeon": {
+      "external_social": "SNS / ニュース / 配信 panel で社会的反応を表現。kindle-test-1 型",
+      "gacha_ui": "ガチャ rarity / 2 ページステータス画面 / 数値矢印で完結。レベルガチャ型",
+      "hybrid": "両方を半々で。難易度高、Phase A では避ける"
+    }
+  },
+
+  "principles": [
+    {
+      "id": "L0-1",
+      "name": "panel = 物語進行単位",
+      "tier": "L0",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "00_principles.md"
+    },
+    {
+      "id": "L0-2",
+      "name": "ナレーション禁則",
+      "tier": "L0",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["worldbuilding"],
+      "module": "00_principles.md"
+    },
+    {
+      "id": "L0-3",
+      "name": "RTL 読み順を panel 番号と位置で明示",
+      "tier": "L0",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "00_principles.md"
+    },
+    {
+      "id": "L0-4",
+      "name": "静と動のリズム (silence_panel + focal_panel)",
+      "tier": "L0",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "00_principles.md"
+    },
+    {
+      "id": "L0-5",
+      "name": "場所転換時の establishing 必須",
+      "tier": "L0",
+      "scene": ["establishing"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "00_principles.md"
+    }
+  ],
+
+  "rules": [
+    {
+      "id": "chapter-volume-budget",
+      "name": "1 巻 = 5 話 × 約 30 ページ = 160 ページ",
+      "tier": "L1",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "10_chapter_structure.md"
+    },
+    {
+      "id": "chapter-beat-structure",
+      "name": "各話 6 ビート構造 (扉→復帰→中心前半→中心後半→山場→引き)",
+      "tier": "L1",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "10_chapter_structure.md"
+    },
+    {
+      "id": "page-density-rhythm",
+      "name": "1 ページの密度リズム (1 大コマ・2-3 中ゴマ・1-2 クローズアップ・1 引き)",
+      "tier": "L1",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "10_chapter_structure.md"
+    },
+    {
+      "id": "minimalism-pure-white",
+      "name": "各ページに最低 1 panel: 50% 以上ピュアホワイト (silence_panel)",
+      "tier": "L1",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["structure", "emotion"],
+      "module": "10_chapter_structure.md"
+    },
+    {
+      "id": "dense-focal-point",
+      "name": "各ページに最低 1 panel: 高密度フォーカルポイント",
+      "tier": "L1",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "10_chapter_structure.md"
+    },
+    {
+      "id": "panel-connection-narrative",
+      "name": "panel 連結は物語駆動 10 種から 1 つ選ぶ",
+      "tier": "L2",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "10_chapter_structure.md"
+    },
+    {
+      "id": "panel-connection-visual",
+      "name": "panel 連結の視覚的繋ぎ 5 種",
+      "tier": "L3",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "10_chapter_structure.md"
+    },
+
+    {
+      "id": "char-protagonist-cool",
+      "name": "主人公は冷静側、独白で読者と感情共有",
+      "tier": "L1",
+      "scene": ["all"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "20_characters.md"
+    },
+    {
+      "id": "char-temperature-contrast",
+      "name": "温度差ペア (爆発キャラ vs 冷静主人公)",
+      "tier": "L1",
+      "scene": ["dialogue", "monologue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "20_characters.md"
+    },
+    {
+      "id": "char-mascot-required",
+      "name": "マスコット (軽い + 読者代理問いかけ)",
+      "tier": "L1",
+      "scene": ["dialogue", "monologue"],
+      "genre": ["universal"],
+      "function": ["emotion", "worldbuilding"],
+      "module": "20_characters.md"
+    },
+    {
+      "id": "char-heroine",
+      "name": "ヒロイン (動機キャラ・並走関係)",
+      "tier": "L2",
+      "scene": ["dialogue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "20_characters.md"
+    },
+    {
+      "id": "char-family",
+      "name": "家族 (現実への接地・温度ペア)",
+      "tier": "L2",
+      "scene": ["dialogue"],
+      "genre": ["modern_dungeon"],
+      "function": ["emotion"],
+      "module": "20_characters.md"
+    },
+    {
+      "id": "char-antagonist-team",
+      "name": "敵チーム (1 巻終盤 cliffhanger で初登場)",
+      "tier": "L3",
+      "scene": ["cliffhanger"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "20_characters.md"
+    },
+
+    {
+      "id": "chapter-opener-full-page",
+      "name": "章扉は 1 ページ全面 = 1 panel",
+      "tier": "L1",
+      "scene": ["chapter_opener"],
+      "genre": ["universal"],
+      "function": ["decoration", "structure"],
+      "module": "30_scenes/chapter_opener.md"
+    },
+    {
+      "id": "chapter-opener-essentials",
+      "name": "章扉必須要素 (章番号+タイトル+主人公全身+マスコット+ロゴ)",
+      "tier": "L1",
+      "scene": ["chapter_opener"],
+      "genre": ["universal"],
+      "function": ["decoration"],
+      "module": "30_scenes/chapter_opener.md"
+    },
+    {
+      "id": "intro-box",
+      "name": "キャラ紹介ボックス (重要キャラ初登場 1 回)",
+      "tier": "L3",
+      "scene": ["chapter_opener"],
+      "genre": ["modern_dungeon"],
+      "function": ["decoration", "worldbuilding"],
+      "module": "30_scenes/chapter_opener.md"
+    },
+
+    {
+      "id": "establishing-three-tier",
+      "name": "establishing 3 段 (全景→中景→近景)",
+      "tier": "L1",
+      "scene": ["establishing"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "30_scenes/establishing.md"
+    },
+    {
+      "id": "establishing-recap",
+      "name": "復帰 establishing (各話 2-3 ページ目)",
+      "tier": "L1",
+      "scene": ["establishing"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "30_scenes/establishing.md"
+    },
+    {
+      "id": "time-of-day-sign",
+      "name": "時間帯のサイン (光・影・色調)",
+      "tier": "L2",
+      "scene": ["establishing"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "30_scenes/establishing.md"
+    },
+    {
+      "id": "situation-annotation-box",
+      "name": "状況注釈ボックス (1 ページ 0-1 個)",
+      "tier": "L3",
+      "scene": ["establishing"],
+      "genre": ["modern_dungeon"],
+      "function": ["worldbuilding"],
+      "module": "30_scenes/establishing.md"
+    },
+
+    {
+      "id": "dialogue-one-turn-per-panel",
+      "name": "1 panel = 1 会話ターン",
+      "tier": "L1",
+      "scene": ["dialogue"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "30_scenes/dialogue.md"
+    },
+    {
+      "id": "dialogue-rtl-bubble-order",
+      "name": "吹き出しは panel 内でも RTL 配置",
+      "tier": "L1",
+      "scene": ["dialogue"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "30_scenes/dialogue.md"
+    },
+    {
+      "id": "exposition-via-dialogue",
+      "name": "setup info はすべて会話で",
+      "tier": "L1",
+      "scene": ["dialogue"],
+      "genre": ["universal"],
+      "function": ["worldbuilding"],
+      "module": "30_scenes/dialogue.md"
+    },
+    {
+      "id": "expectation-reality-gap",
+      "name": "派手 vs 地味のギャップ (expectation vs reality)",
+      "tier": "L2",
+      "scene": ["dialogue", "monologue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/dialogue.md"
+    },
+    {
+      "id": "mascot-reader-proxy",
+      "name": "マスコットによる読者代理問いかけ",
+      "tier": "L2",
+      "scene": ["dialogue"],
+      "genre": ["universal"],
+      "function": ["worldbuilding", "emotion"],
+      "module": "30_scenes/dialogue.md"
+    },
+    {
+      "id": "face-free-emotion",
+      "name": "顔以外の部位で感情 (足・手・背中)",
+      "tier": "L2",
+      "scene": ["dialogue", "monologue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/dialogue.md"
+    },
+    {
+      "id": "rapid-bubbles-panic",
+      "name": "連続吹き出しで動揺を表現",
+      "tier": "L2",
+      "scene": ["dialogue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/dialogue.md"
+    },
+    {
+      "id": "danger-warning-style-note",
+      "name": "危険警告風の注釈",
+      "tier": "L3",
+      "scene": ["dialogue", "item_analysis"],
+      "genre": ["modern_dungeon"],
+      "function": ["worldbuilding"],
+      "module": "30_scenes/dialogue.md"
+    },
+    {
+      "id": "photo-frame-flashback",
+      "name": "写真フレーム / 過去回想 (1 巻 2-3 回まで)",
+      "tier": "L3",
+      "scene": ["dialogue", "monologue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/dialogue.md"
+    },
+
+    {
+      "id": "monologue-cloud-bubble",
+      "name": "主人公独白は雲型吹き出しで識別",
+      "tier": "L1",
+      "scene": ["monologue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/monologue.md"
+    },
+    {
+      "id": "monologue-one-emotion-per-panel",
+      "name": "独白も 1 panel = 1 感情ビート",
+      "tier": "L1",
+      "scene": ["monologue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/monologue.md"
+    },
+    {
+      "id": "monologue-frequency-tone",
+      "name": "独白頻度の tone_profile 別調整 (light_recovery 抑制)",
+      "tier": "L1",
+      "scene": ["monologue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/monologue.md"
+    },
+    {
+      "id": "mascot-protagonist-contrast",
+      "name": "マスコット軽 vs 主人公重",
+      "tier": "L2",
+      "scene": ["monologue", "dialogue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/monologue.md"
+    },
+    {
+      "id": "gag-face-burst",
+      "name": "表情の極端化 (ギャグ顔・友人爆発)",
+      "tier": "L3",
+      "scene": ["dialogue", "monologue"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/monologue.md"
+    },
+
+    {
+      "id": "item-card-overlay",
+      "name": "アイテム説明枠 (灰色矩形・別レイヤー)",
+      "tier": "L1",
+      "scene": ["item_analysis"],
+      "genre": ["modern_dungeon", "battle_dungeon", "isekai_tensei_cheat"],
+      "function": ["worldbuilding", "decoration"],
+      "module": "30_scenes/item_analysis.md"
+    },
+    {
+      "id": "status-window-chapter-transition",
+      "name": "ステータス画面 panel は章末・章頭で更新",
+      "tier": "L1",
+      "scene": ["item_analysis", "cliffhanger", "chapter_opener"],
+      "genre": ["modern_dungeon", "battle_dungeon", "isekai_tensei_cheat"],
+      "function": ["worldbuilding", "decoration"],
+      "module": "30_scenes/item_analysis.md"
+    },
+    {
+      "id": "item-reaction-pair",
+      "name": "アイテム説明枠の直後に主人公リアクション panel",
+      "tier": "L1",
+      "scene": ["item_analysis"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/item_analysis.md"
+    },
+    {
+      "id": "item-solo-large-panel",
+      "name": "新アイテム単体大コマ",
+      "tier": "L2",
+      "scene": ["item_analysis"],
+      "genre": ["universal"],
+      "function": ["decoration"],
+      "module": "30_scenes/item_analysis.md"
+    },
+
+    {
+      "id": "combat-action-split",
+      "name": "戦闘の動作分割 3-5 panel",
+      "tier": "L1",
+      "scene": ["combat"],
+      "genre": ["universal"],
+      "function": ["mechanics"],
+      "module": "30_scenes/combat.md"
+    },
+    {
+      "id": "combat-sound-effects",
+      "name": "効果音 (オノマトペ) 必須",
+      "tier": "L1",
+      "scene": ["combat"],
+      "genre": ["universal"],
+      "function": ["mechanics"],
+      "module": "30_scenes/combat.md"
+    },
+    {
+      "id": "combat-rtl-strict",
+      "name": "戦闘 panel の RTL 順序厳守",
+      "tier": "L1",
+      "scene": ["combat"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "30_scenes/combat.md"
+    },
+    {
+      "id": "combat-weakness-disclosure",
+      "name": "弱点描写 (戦闘前 or 中盤に明示)",
+      "tier": "L2",
+      "scene": ["combat"],
+      "genre": ["universal"],
+      "function": ["mechanics"],
+      "module": "30_scenes/combat.md"
+    },
+    {
+      "id": "combat-climax-large-panel",
+      "name": "必殺技解放 = ページの 50% 以上の大コマ",
+      "tier": "L2",
+      "scene": ["combat"],
+      "genre": ["universal"],
+      "function": ["mechanics", "emotion"],
+      "module": "30_scenes/combat.md"
+    },
+    {
+      "id": "combat-buildup-silence",
+      "name": "buildup の構え panel を silence_panel に",
+      "tier": "L2",
+      "scene": ["combat"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/combat.md"
+    },
+
+    {
+      "id": "social-reaction-frame-overlay",
+      "name": "SNS / ニュース / 配信は矩形フレームの別レイヤー",
+      "tier": "L1",
+      "scene": ["social_reaction"],
+      "genre": ["modern_dungeon"],
+      "function": ["decoration", "worldbuilding"],
+      "module": "30_scenes/social_reaction.md"
+    },
+    {
+      "id": "social-reaction-platform-id",
+      "name": "プラットフォーム識別 (Twitter / ニュース / 配信)",
+      "tier": "L1",
+      "scene": ["social_reaction"],
+      "genre": ["modern_dungeon"],
+      "function": ["decoration"],
+      "module": "30_scenes/social_reaction.md"
+    },
+    {
+      "id": "social-reaction-protagonist-watch",
+      "name": "SNS panel の前後に主人公スマホ視聴シーン",
+      "tier": "L2",
+      "scene": ["social_reaction"],
+      "genre": ["modern_dungeon"],
+      "function": ["emotion"],
+      "module": "30_scenes/social_reaction.md"
+    },
+
+    {
+      "id": "cliffhanger-position",
+      "name": "cliffhanger は各話最後 3-5 ページに配置",
+      "tier": "L1",
+      "scene": ["cliffhanger"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "30_scenes/cliffhanger.md"
+    },
+    {
+      "id": "cliffhanger-unresolved-question",
+      "name": "未解決の問いを残して終わる",
+      "tier": "L1",
+      "scene": ["cliffhanger"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/cliffhanger.md"
+    },
+    {
+      "id": "cliffhanger-end-logo",
+      "name": "章末ロゴ or 引きで明確に区切る",
+      "tier": "L1",
+      "scene": ["cliffhanger"],
+      "genre": ["universal"],
+      "function": ["decoration"],
+      "module": "30_scenes/cliffhanger.md"
+    },
+    {
+      "id": "cliffhanger-silhouette",
+      "name": "強敵 / 新キャラのシルエット",
+      "tier": "L2",
+      "scene": ["cliffhanger"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/cliffhanger.md"
+    },
+    {
+      "id": "cliffhanger-determination",
+      "name": "主人公の決意 panel (silence_panel + 独白)",
+      "tier": "L2",
+      "scene": ["cliffhanger"],
+      "genre": ["universal"],
+      "function": ["emotion"],
+      "module": "30_scenes/cliffhanger.md"
+    },
+    {
+      "id": "cliffhanger-scene-shift",
+      "name": "場面転換型 cliffhanger",
+      "tier": "L2",
+      "scene": ["cliffhanger"],
+      "genre": ["universal"],
+      "function": ["structure"],
+      "module": "30_scenes/cliffhanger.md"
+    }
+  ],
+
+  "stats": {
+    "total_principles": 5,
+    "total_rules": 47,
+    "by_tier": {
+      "L0": 5,
+      "L1": 24,
+      "L2": 16,
+      "L3": 7
+    },
+    "by_genre": {
+      "universal": 36,
+      "modern_dungeon": 10,
+      "battle_dungeon": 2,
+      "isekai_tensei_cheat": 2
+    },
+    "stub_modules": [
+      "40_genres/battle_dungeon.md",
+      "40_genres/isekai_tensei_cheat.md",
+      "40_genres/isekai_slowlife.md"
+    ],
+    "scene_density": {
+      "all": 12,
+      "chapter_opener": 4,
+      "establishing": 5,
+      "dialogue": 11,
+      "monologue": 8,
+      "item_analysis": 5,
+      "combat": 7,
+      "social_reaction": 4,
+      "cliffhanger": 7
+    }
+  },
+
+  "notes": [
+    "stats は手動メンテ。新規要素を追加した時に rules 配列を更新し stats を再計算すること",
+    "scene_density は scene タグの出現回数。多重タグ要素は各々にカウントされる",
+    "stub_modules は将来精読対象を選定後に充実させる対象",
+    "subtype は genre 内のサブパターン分類。bible 設計時に明示し、storyboard-builder が場面別 directives を切り替える前提"
+  ],
+
+  "revision_log": [
+    {
+      "date": "2026-05-06",
+      "change": "v3.0 → v3.1: レベルガチャ Vol.1-3 per-page 精読 (273 spreads) に基づく訂正",
+      "details": [
+        "chapter_opener: 「本編章扉省略」判定を訂正 → 「ハイブリッド型 (第N話小枠 + 同ページ establishing)」",
+        "establishing: 2 ページ見開き opening establishing パターンを追加 (L0-2 例外)",
+        "dialogue: 過去回想ダイアログのナレーション 5-6 個許容を追加",
+        "monologue: gacha_ui は長方形ナレーション枠主軸、雲型は感情ピークのみに変更",
+        "item_analysis: 冒険者カード型プロフィール / リボン型ドロップ UI / レベル数値矢印を追加",
+        "combat: 2 ページ見開き戦闘 + リボン型ドロップ UI + 鑑定スキル繋ぎを追加",
+        "cliffhanger: gacha_ui のタイム制ミッション提示型 cliffhanger を追加",
+        "00_principles: L0-2 ナレーション禁則の例外パターン (opening establishing / 過去回想 / アイテム解析) を追加"
+      ],
+      "extraction_method": "scripts/manga/extract-pages-from-recording.ts (新規作成)、fps=12 / threshold=3 / min-frames=2"
+    }
+  ]
+}

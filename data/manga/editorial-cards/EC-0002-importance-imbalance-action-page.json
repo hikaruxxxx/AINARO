@@ -1,0 +1,68 @@
+{
+  "card_id": "EC-0002",
+  "version": "1.0",
+  "title": "action ページの importance 凸凹化で視線の山を作る",
+  "scope": "page",
+  "trigger": {
+    "layer": "L8.6",
+    "flag": "importance_imbalance",
+    "min_severity": "warn"
+  },
+  "preconditions": {
+    "page_role": ["action", "cliffhanger"],
+    "panel_count_per_page": ">=4"
+  },
+  "contraindications": {
+    "page_role": ["dialogue", "establishing"],
+    "panel_count_per_page": "<4"
+  },
+  "diagnosis": "action/cliffhanger page で全 panel が importance 4-5 だと視覚的山がなく、撃破/cliffhanger の決定打が埋もれる",
+  "decision_type": "rewrite",
+  "instruction": "中継 panel (誘導/水しぶき/監査室の情報提示等) を importance 3-2 に下げ、決定打 panel に視線を集中させる。理想配分: 4/3/3/5/5 または 4/3/3/2/5 (cliffhanger は最終 panel に最大の山)",
+  "target_axis": ["pull", "tension"],
+  "expected_delta": {
+    "importance_pattern": "flat → wavy",
+    "action_readability": "+0.2",
+    "cliffhanger_contrast": "+0.3"
+  },
+  "success_metric": "L8.6 audit importance_imbalance 解消 + 決定打 panel が周辺より importance +2 以上",
+  "examples": [
+    {
+      "kind": "before",
+      "asset_id": "a07-modern-dungeon/ep01/page-18",
+      "panel_ids": ["p86", "p87", "p88", "p89", "p90"],
+      "snippet": "importance: 4/4/4/5/5 (中継コマと撃破コマの差が小さい)"
+    },
+    {
+      "kind": "after",
+      "asset_id": "a07-modern-dungeon/ep01/page-18",
+      "panel_ids": ["p86", "p87", "p88", "p89", "p90"],
+      "snippet": "importance: 4/3/3/5/5 (中継落として撃破に集中)"
+    },
+    {
+      "kind": "before",
+      "asset_id": "a07-modern-dungeon/ep01/page-22",
+      "panel_ids": ["p106", "p107", "p108", "p109", "p110"],
+      "snippet": "importance: 4/4/4/4/5 (cliffhanger ページがフラット)"
+    },
+    {
+      "kind": "after",
+      "asset_id": "a07-modern-dungeon/ep01/page-22",
+      "panel_ids": ["p106", "p107", "p108", "p109", "p110"],
+      "snippet": "importance: 4/3/3/2/5 (溜めとして p109 を最低化、最終 p110 を最大の山に)"
+    }
+  ],
+  "applied_to": [
+    { "asset_id": "a07-modern-dungeon/ep01/page-18", "applied_at": "2026-05-06T06:30:00Z" },
+    { "asset_id": "a07-modern-dungeon/ep01/page-22", "applied_at": "2026-05-06T06:30:00Z" }
+  ],
+  "reviewer_decision": "accepted",
+  "outcome": null,
+  "learned_from": {
+    "source": "Codex MCP review (Phase X effective verification followup)",
+    "context": "a07-modern-dungeon ep01 quality improvement"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T06:30:00Z",
+  "created_by": "Phase X verification + Codex"
+}

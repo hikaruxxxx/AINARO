@@ -1,0 +1,49 @@
+{
+  "card_id": "EC-0007",
+  "version": "1.0",
+  "title": "なろう系ゲーム化 opening_hook を「ステータス画面」型で再構成",
+  "scope": "episode",
+  "trigger": {
+    "layer": "L4.1",
+    "flag": "opening_hook_no_focus",
+    "pattern_id": "P6_status_window_reveal",
+    "min_severity": "warn"
+  },
+  "preconditions": {
+    "tone_profile.darkness": "0.3-0.7",
+    "genre": ["battle_vrmmo", "modern_dungeon", "isekai_tensei_cheat", "battle_dungeon"],
+    "page_role": "opening_hook",
+    "world_features": ["status_window", "skill_system", "rank_hierarchy"]
+  },
+  "contraindications": {
+    "world_features_missing": "ステータス画面/数値化システムが世界観に存在しない場合",
+    "genre": ["modern_human_drama", "modern_romance", "isekai_slowlife"]
+  },
+  "diagnosis": "ステータス画面/能力可視化を世界観装置として持つ作品で、opening_hook で数値による位置づけを早期提示すると読者が即座に主人公の状況を理解できる",
+  "decision_type": "rewrite",
+  "instruction": "page 1 で establishing → 主人公 → ステータス画面 panel (UI 全画面) → 数値への反応、で構成。page 2 で他者との比較 (Sランク等)、page 3 で異変 (新スキル/隠しステータス)",
+  "target_axis": ["hook", "world_immersion", "commercial_pull"],
+  "expected_delta": {
+    "hook_strength": "+0.4",
+    "world_immersion": "+0.4",
+    "commercial_pull": "+0.4"
+  },
+  "success_metric": "page 1-3 内に status_window panel が最低1個 + Sランク/上位者対比 panel が page 2 に存在",
+  "examples": [
+    {
+      "kind": "best",
+      "asset_id": "「Solo Leveling」「世界最速のレベルアップ」冒頭",
+      "snippet": "ステータス画面 + 主人公独白 + Sランク対比"
+    }
+  ],
+  "applied_to": [],
+  "reviewer_decision": "pending",
+  "outcome": null,
+  "learned_from": {
+    "source": "Phase Y WY-1 + manga_craft_guide v2 (kindle-test-1 ステータス画面装置)",
+    "context": "なろう系ゲーム化作品の典型 hook パターン"
+  },
+  "status": "active",
+  "created_at": "2026-05-06T07:00:00Z",
+  "created_by": "Phase Y WY-1 + WY-6"
+}
