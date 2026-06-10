@@ -1563,6 +1563,8 @@ function buildSemifreeConstraintsBlock(): string {
     "Render: black ink character outlines + dot screentone ONLY for shading. Hard B/W contrast. NO line-based shading anywhere (no parallel / diagonal / cross-hatch / speedline fills). Backgrounds are dot screentone, solid black, or pure white ONLY.",
     "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, English in-panel text, >5 fingers per hand.",
     "TEXT: render the Japanese lines listed in LINES, each EXACTLY ONCE, in natural speech bubbles / thought clouds / narration boxes. No duplicates, no empty balloons, no invented extra text. Reading order strictly right-to-left, top-to-bottom (Japanese manga).",
+    // 2026-06-11 v59 通し読みで観測した形式漏れ対策 (p12: 話者ラベルごと描画 / p16: カギ括弧ごと描画)
+    "Bubble content = ONLY the quoted line itself. Do NOT draw the LINES list formatting: no speaker names as prefixes, no (台詞)/(内心モノローグ)/(地の文ボックス) tags, no list dashes, no 「」 quotation brackets.",
   ].join("\n");
 }
 

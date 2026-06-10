@@ -11,7 +11,8 @@
  */
 
 import { spawn } from "child_process";
-import { existsSync, statSync } from "fs";
+import { existsSync, statSync, mkdtempSync, rmSync } from "fs";
+import os from "os";
 import path from "path";
 
 import { checkAndReserveQuota, recordGeneration } from "../_ledger/quota";
@@ -167,7 +168,12 @@ async function runCodexOnce(opts: {
 export async function generateMangaImage(
   options: GenerateMangaImageOptions
 ): Promise<GenerateMangaImageResult> {
-  const cwd = options.cwd ?? process.cwd();
+  // 2026-06-11: 並列実行時の成果物衝突対策。cwd 未指定時は呼び出しごとに専用の
+  // 一時ディレクトリを作る。従来は process.cwd() を全並列コールで共有しており、
+  // codex agent の image_gen 中間生成物が衝突して別ページに同一画像が保存される
+  // race が発生した (a07 ep01 v59 一括 render で p05 と p06 がバイト同一)。
+  const ownsCwd = !options.cwd;
+  const cwd = options.cwd ?? mkdtempSync(path.join(os.tmpdir(), "manga-imgen-"));
   const timeoutMs = options.timeoutMs ?? 5 * 60 * 1000;
   const minFileSize = options.minFileSize ?? 50 * 1024;
   const maxRetries = options.maxRetries ?? 1;
@@ -196,6 +202,12 @@ export async function generateMangaImage(
 
   const startedAt = Date.now();
   let lastError: Error | null = null;
+
+  // 専用 tmpdir を作った場合のみ後始末する (cwd 指定時は触らない)
+  const cleanupTempCwd = () => {
+    if (!ownsCwd) return;
+    try { rmSync(cwd, { recursive: true, force: true }); } catch { /* 後始末失敗は無視 */ }
+  };
 
   async function recordLedgerSuccess(durationMs: number, retryCount: number): Promise<void> {
     if (!options.ledgerContext) return;
@@ -238,6 +250,7 @@ export async function generateMangaImage(
 
       const totalDurationMs = Date.now() - startedAt;
       await recordLedgerSuccess(totalDurationMs, attempt - 1);
+      cleanupTempCwd();
       return {
         outputPath: absOutput,
         sizeBytes: stat.size,
@@ -262,6 +275,7 @@ export async function generateMangaImage(
             );
             const totalDurationMs = Date.now() - startedAt;
             await recordLedgerSuccess(totalDurationMs, attempt - 1);
+            cleanupTempCwd();
             return {
               outputPath: absOutput,
               sizeBytes: stat.size,
@@ -283,6 +297,7 @@ export async function generateMangaImage(
     }
   }
 
+  cleanupTempCwd();
   throw new Error(
     `Codex 画像生成に失敗（${maxRetries + 1}回試行）: ${lastError?.message}`
   );
