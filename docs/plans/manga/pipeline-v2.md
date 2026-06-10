@@ -317,6 +317,27 @@
 > - **(中)** L11 audit に area % 乖離検出 (vision 解析必須)
 > - **(低)** effect_lines schema 拡張後の test fixture 整理
 
+> ### 2026-06-10 v57「読めなさ」改修 P1-P4 実装完了 (コマ割り半委任への転換)
+>
+> 詳細 plan: `docs/plans/manga/v57-readability-montage-redesign.md`。実画像検証 (4 シーンタイプ全勝) に基づき本番切替。
+>
+> - **P1**: `composePagePrompt` に `paneling: "semifree" | "coordinate"` を新設、**既定 semifree**。
+>   semifree は LAYOUT / ROW LAYOUT / PANEL SIZE OVERRIDE / per-panel rect・shot_type・camera の
+>   座標注入を一切行わず、`## SCENE` (出来事 + Showcase 見せ場注入) + `## LINES` (セリフ話者付き列挙) +
+>   `## DIRECTION` (最小ヒント: コマ数参考値 / RTL / 緩急 / 余白 / UI 抑制 / システム声非実体化) 構成。
+>   compliance fatal gate / BIBLE FACTS (数値固定) / CONTINUITY / EDITOR 指示は維持。
+>   旧経路は `paneling: "coordinate"` 明示でフォールバック可。
+> - **P2**: セリフ embed 一本化は 2026-05-28 済 (SVG overlay 停止)。semifree では polygon frames overlay
+>   (page_plan 座標のコマ枠後描き) も skip (AI 委任コマ割りと構造矛盾)。L09 `--paneling=coordinate` でのみ適用。
+> - **P3**: dialogue-density-floor を半委任前提に緩和 (text_total_min 一段引き下げ) + 前半 page_role
+>   (opening_hook/establishing/buildup) に `mono_narration_max` 上限を導入 (monologue_cold_open の構造予防)。
+>   dialogue page の dialogue_min=3 は不変。
+> - **P4**: page_plan (rect/polygon) は KDP 入稿・name preview・reading_order 用に残すが、semifree では
+>   render prompt に渡さない。L05 テンプレ拡張は停止 (strategy.md「L05 薄く」に復帰)。
+> - timeout/retry: L09 page_one_shot の maxRetries 1→2 (生成タイムアウト頻発対策)。
+> - prompt size: 座標注入撤去で約 8-10k chars → 約 5-5.6k chars (a07 p04/p17 実測)。
+> - 検証残: 全 22-24 page 半委任一括 render → V57 と通し読み比較 (合格基準: コマを追って読めるか)。
+
 ## 設計原則
 
 1. Single source of truth per layer — 各 layer は 1 モジュール / 1 スキーマ / 1 CLI エントリ
@@ -745,6 +766,7 @@ RULE 10 budget 超過時の優先: style > continuity_forced > focus_entity > �
 
 ## 関連ドキュメント
 
+- 読めなさ改修計画 (2026-06): `docs/plans/manga/v57-readability-montage-redesign.md` — コマ送り IR (transition/eyeline) + density 再設計 (L3.5→L4→L9)
 - 旧 SSoT (アーカイブ): `docs/plans/manga/_archive/pipeline-v1-2026-05-02.md`
 - メモリ: project_horizontal_manga_pivot / project_kdp_strategy / project_pilot_complete_2026-05-01 / project_chatgpt_pro_image_gen / feedback_no_anthropic_api / feedback_quality_over_novelty
 - 作品メタ: `data/manga/works/a07-modern-dungeon/meta.json`

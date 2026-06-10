@@ -58,6 +58,10 @@ const SECTION_HEADERS = [
   "## SCENE",
   "## CONTINUITY",
   "## PANELS",
+  // 2026-06-10 v57 semifree 形式の新セクション
+  "## LINES",
+  "## DIRECTION",
+  "## BIBLE FACTS",
   "## EDITOR",
   "## CONSTRAINTS",
 ] as const;
@@ -70,7 +74,9 @@ function splitSections(prompt: string): Record<SectionHeader, number> {
   for (const h of SECTION_HEADERS) result[h] = 0;
   let current: SectionHeader | null = null;
   for (const line of lines) {
-    const matched = SECTION_HEADERS.find((h) => line === h);
+    // semifree は "## SCENE (what happens on this page)" のように括弧付き注記が
+    // 付くため、完全一致に加えて "<header> (" の前方一致も許容する
+    const matched = SECTION_HEADERS.find((h) => line === h || line.startsWith(`${h} (`));
     if (matched) {
       current = matched;
       result[current] += line.length + 1; // 行末改行込み

@@ -94,9 +94,15 @@ function categorize(prompt: string): {
     else if (line === "## STYLE") { currentSection = "STYLE"; insidePanel = false; insideContinuity = false; }
     else if (line === "## REFERENCES") { currentSection = "REFERENCES"; insidePanel = false; insideContinuity = false; }
     else if (line === "## LAYOUT") { currentSection = "LAYOUT"; insidePanel = false; insideContinuity = false; }
-    else if (line === "## SCENE") { currentSection = "SCENE"; insidePanel = false; insideContinuity = false; }
+    // v57 semifree は "## SCENE (what happens on this page)" 形式 → 前方一致
+    else if (line === "## SCENE" || line.startsWith("## SCENE (")) { currentSection = "SCENE"; insidePanel = false; insideContinuity = false; }
     else if (line === "## CONTINUITY") { currentSection = "CONTINUITY"; insidePanel = false; insideContinuity = true; }
     else if (line === "## PANELS") { currentSection = "PANELS"; insidePanel = false; insideContinuity = false; }
+    // v57 semifree: LINES (セリフ列挙) はコンテンツ行なので panel_specific 相当に分類
+    else if (line.startsWith("## LINES")) { currentSection = "LINES"; insidePanel = true; insideContinuity = false; }
+    // v57 semifree: DIRECTION / BIBLE FACTS は global 扱い
+    else if (line.startsWith("## DIRECTION")) { currentSection = "DIRECTION"; insidePanel = false; insideContinuity = false; }
+    else if (line.startsWith("## BIBLE FACTS")) { currentSection = "BIBLE_FACTS"; insidePanel = false; insideContinuity = false; }
     else if (line === "## EDITOR") { currentSection = "EDITOR"; insidePanel = false; insideContinuity = false; }
     else if (line === "## CONSTRAINTS") { currentSection = "CONSTRAINTS"; insidePanel = false; insideContinuity = false; }
     else if (line.startsWith("### panel#")) { insidePanel = true; }

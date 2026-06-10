@@ -63,20 +63,51 @@ describe("dialogue-density-floor", () => {
     expect(dlgFinding.expected_min).toBe(3);
   });
 
-  it("dialogue page で dialogue 3 + narration 2 行は findings 0 (text_total=5 で floor 5 ぎり通過)", () => {
+  it("dialogue page で dialogue 3 + narration 1 行は findings 0 (text_total=4 で v57 floor 4 ぎり通過)", () => {
     const page = buildPage("dialogue", {
       dialogue: ["a", "b", "c"],
-      narration: ["x", "y"],
+      narration: ["x"],
     });
     const findings = auditPageDensity(page);
     expect(findings).toHaveLength(0);
   });
 
-  it("opening_hook で narration 2 行 + 他なしは narration_min=2 を満たすが text_total_min=3 で warning", () => {
-    const page = buildPage("opening_hook", { narration: ["a", "b"] });
+  it("opening_hook で narration 1 行のみは narration_min=1 を満たすが text_total_min=2 で warning", () => {
+    const page = buildPage("opening_hook", { narration: ["a"] });
     const findings = auditPageDensity(page);
     expect(findings.some((f) => f.kind === "narration_floor_below")).toBe(false);
     expect(findings.some((f) => f.kind === "text_total_floor_below")).toBe(true);
+  });
+
+  it("v57: opening_hook で monologue+narration が上限 4 を超えると mono_narration_over_cap を検出", () => {
+    const page = buildPage("opening_hook", {
+      monologue: ["a", "b", "c"],
+      narration: ["x", "y"],
+    });
+    const findings = auditPageDensity(page);
+    const cap = findings.find((f) => f.kind === "mono_narration_over_cap");
+    expect(cap).toBeDefined();
+    expect(cap!.found).toBe(5);
+    expect(cap!.expected_min).toBe(4);
+  });
+
+  it("v57: opening_hook で monologue+narration が上限ちょうど (4) なら cap finding なし", () => {
+    const page = buildPage("opening_hook", {
+      dialogue: ["a"],
+      monologue: ["m", "n"],
+      narration: ["x", "y"],
+    });
+    const findings = auditPageDensity(page);
+    expect(findings.some((f) => f.kind === "mono_narration_over_cap")).toBe(false);
+  });
+
+  it("v57: dialogue page には mono_narration_max がない (会話 page の narration は floor のみ)", () => {
+    const page = buildPage("dialogue", {
+      dialogue: ["a", "b", "c"],
+      narration: ["1", "2", "3", "4", "5", "6"],
+    });
+    const findings = auditPageDensity(page);
+    expect(findings.some((f) => f.kind === "mono_narration_over_cap")).toBe(false);
   });
 
   it("action page で SFX 3 + dialogue 1 は OK (擬音メインで text 緩和)", () => {
@@ -140,9 +171,12 @@ describe("dialogue-density-floor", () => {
       expect(directive).toContain("opening_hook");
       expect(directive).toContain("dialogue (会話で物語進行)");
       expect(directive).toContain("dialogue ≥ 3");
-      expect(directive).toContain("text 合計 (dialogue+monologue+narration) ≥ 5");
+      expect(directive).toContain("text 合計 (dialogue+monologue+narration) ≥ 4");
       expect(directive).toContain("action");
       expect(directive).toContain("SFX ≥ 3");
+      // v57: 前半 page_role の独白・地の文上限が directive に出る
+      expect(directive).toContain("monologue+narration ≤ 4 (上限)");
+      expect(directive).toContain("monologue+narration ≤ 3 (上限)");
     });
 
     it("directive に不足時の補強パターン (off-frame voice / システム音声等) を含む", () => {

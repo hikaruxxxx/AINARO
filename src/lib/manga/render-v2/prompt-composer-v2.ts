@@ -81,16 +81,32 @@ type PromptScene = Pick<
   theme_subtext?: Scene["theme_subtext"] | string;
 };
 
+/**
+ * 2026-06-02 v57「読めなさ」改修: コマ割りの委任度。
+ * - "semifree" (既定): コマ割り座標 (LAYOUT / ROW LAYOUT / PANEL SIZE OVERRIDE /
+ *   per-panel rect・shot_type・camera) を prompt に注入せず、シーン内容 + セリフ +
+ *   最小ヒントだけ渡して AI にコマ割りを委ねる。
+ *   根拠: scripts/manga/_oneoff-freehand-experiment.ts の対比生成で対話/内省/会話/戦闘の
+ *   4 シーンタイプ全部で半委任が現行 (座標注入) を上回った (2026-06-02 実画像検証)。
+ *   座標注入がコマの緩急・視線誘導を殺し「説明文付き一枚絵の羅列」を生んでいた。
+ * - "coordinate": 旧経路 (座標注入)。フォールバック用に残置。
+ * 詳細: docs/plans/manga/v57-readability-montage-redesign.md
+ */
+export type PanelingMode = "semifree" | "coordinate";
+
 type ComposeArgs = {
   panel?: PanelV2;            // panel スコープ
   page?: StoryboardPageV2;    // page_one_shot スコープ
+  /** page_one_shot のみ有効。未指定時は "semifree" (v57 改修後の既定) */
+  paneling?: PanelingMode;
   packet: ResolvedRefPacket;
   bible: BibleSnapshotV2;
   pageDimensions: { width: number; height: number };
   /**
    * Phase C: 修正指示 UI から渡されるユーザー追加指示。
-   * 指定時は negatives 直前に "ADDITIONAL DIRECTIVE FROM EDITOR" として注入。
-   * 既存 prompt 構造には影響しないので、未指定時は v2 出力と完全一致。
+   * panel スコープでは "ADDITIONAL DIRECTIVE FROM EDITOR"、page スコープ
+   * (coordinate / semifree とも) では "## EDITOR" セクションとして注入。
+   * 既存 prompt 構造には影響しないので、未指定時は従来出力と完全一致。
    */
   userInstructions?: string;
   /**
@@ -769,7 +785,11 @@ function buildLayoutGeometryBlock(
  * 機械的事実抽出ではなく bible.world.timeline / system の先頭抜粋を embed
  * する単純実装。AI に「これらと一致厳守、新規発明禁止」と明示。
  */
-function buildBibleFactsBlock(bible: BibleSnapshotV2): string | null {
+function buildBibleFactsBlock(
+  bible: BibleSnapshotV2,
+  /** テキスト仕様を載せている section 名。coordinate=PANELS、semifree=LINES */
+  textSectionName: "PANELS" | "LINES" = "PANELS",
+): string | null {
   const timeline = (bible.world.timeline ?? "").trim();
   const system = (bible.world.system ?? "").trim();
   if (!timeline && !system) return null;
@@ -788,7 +808,7 @@ function buildBibleFactsBlock(bible: BibleSnapshotV2): string | null {
   if (timeline) lines.push(`Timeline excerpt: ${tShort}`);
   if (system) lines.push(`System excerpt: ${sShort}`);
   lines.push(
-    "Do NOT invent alternative numbers (years, ages, ranks, percentages, counts). If a number is required and not present above, omit it rather than fabricate. Render text in panels exactly as specified in PANELS section — do not paraphrase or rewrite narration.",
+    `Do NOT invent alternative numbers (years, ages, ranks, percentages, counts). If a number is required and not present above, omit it rather than fabricate. Render text in panels exactly as specified in ${textSectionName} section — do not paraphrase or rewrite narration.`,
   );
   return lines.join("\n");
 }
@@ -1451,8 +1471,166 @@ const MANGA_CRAFT_DIRECTIVES_V6 = `The following directives apply to ALL panels 
 // (must 命令形) は AI 自然描画を歪めるリスクがあるため削除。
 // memory feedback_ai_image_over_prompting.md「数値強制」「mandatory + 追加要素」抵触。
 
+// ============================================================
+// 2026-06-02 v57 半委任 (semifree) モード
+// 実装の正典は scripts/manga/_oneoff-freehand-experiment.ts の semifree(_tight)
+// プロンプト構成。production 移植にあたり以下だけ追加で残す:
+//   compliance gate / BIBLE FACTS (数値固定) / CONTINUITY (名前↔ref 対応) / EDITOR 指示
+// ============================================================
+
+/** ページで起きる出来事 (panel.action を読み順に連結) + 見せ場の明示注入 */
+function buildSemifreeSceneBlock(
+  page: StoryboardPageV2,
+  scene: PromptScene | undefined,
+  pageBackgroundTreatments?: Map<string, BackgroundTreatment>,
+): string {
+  const events = page.panels
+    .map((p) => p.action?.trim())
+    .filter((s): s is string => !!s);
+  const lines: string[] = [
+    `page_role=${page.page_role}. ${events.join(" / ")}`,
+  ];
+  // 抑制ヒント (DIRECTION) の上書き: 見せ場 (大ゴマ・見せたい異常値) は SCENE から明示注入。
+  // 一律抑制で p22 灯里大ゴマ / p20 異常値の見せ場まで消えた実験結果への対処。
+  const showcase = typeof scene?.key_visual_intent === "string" ? scene.key_visual_intent.trim() : "";
+  if (showcase) {
+    lines.push(`Showcase (this page's key moment — give it the dominant panel): ${showcase}`);
+  }
+  // background_treatment のうち floating_ui だけは「そのビートが UI 画面そのものである」
+  // という内容情報なので、座標注入とは別物として 1 行で保持する (2026-06-10 codex review 部分採用)。
+  // atmospheric_fade / tone_back / solid_white 等の描画スタイル系 bg 指示は、検証済み実験
+  // (bg 指示なしで 4 シーンタイプ全勝) と Less is more 原則に基づき意図的に渡さない —
+  // 余白・背景省略の判断は DIRECTION の最小ヒントの範囲で AI に委ねる。
+  const uiBeats = page.panels
+    .filter((p) => pageBackgroundTreatments?.get(p.panel_id) === "floating_ui")
+    .map((p) => firstChars(p.action?.trim() ?? "", 80))
+    .filter((s) => s.length > 0);
+  if (uiBeats.length > 0) {
+    lines.push(`UI beat (this beat IS the UI/screen artifact itself — render the UI as that panel's whole content, no character/location around it): ${uiBeats.join(" / ")}`);
+  }
+  return lines.join("\n");
+}
+
+/**
+ * セリフ・モノローグ・ナレーション・擬音をページ単位で読み順に列挙する (embed 前提)。
+ * どのコマに置くかは AI に委ねる。compliance fatal はここで従来通り throw する。
+ */
+function buildSemifreeLinesBlock(
+  page: StoryboardPageV2,
+  bible: BibleSnapshotV2,
+  compliance?: { blocklist: Blocklist; fp: FalsePositives },
+): string {
+  const charName = (id: string) => bible.characters.find((c) => c.id === id)?.name ?? id;
+  const lines: string[] = [];
+  const warnings: string[] = [];
+  for (const panel of page.panels) {
+    const warning = panelTextValidationWarning(panel, bible, compliance);
+    if (warning) warnings.push(warning);
+    for (const d of panel.dialogue) lines.push(`- ${charName(d.character_id)}(台詞): 「${d.text}」`);
+    for (const m of panel.monologue) lines.push(`- ${charName(m.character_id)}(内心モノローグ): 「${m.text}」`);
+    for (const n of panel.narration) lines.push(`- ナレーション(地の文ボックス): 「${n}」`);
+    for (const s of panel.sfx) lines.push(`- SFX(擬音・手描き文字): ${s}`);
+  }
+  const body = lines.length > 0 ? lines.join("\n") : "(なし — 無音ページ。絵だけで語る)";
+  return [body, ...warnings].join("\n");
+}
+
+/** 最小ヒントのみの演出指示。指示を足すと元の木阿弥なので追加禁止 (Less is more)。 */
+function buildSemifreeDirectionBlock(page: StoryboardPageV2): string {
+  const n = page.panels.length;
+  const panelHint = n <= 1
+    ? "This page is a full-page splash: one dominant panel (a small inset is allowed only if the moment demands it)."
+    : `Use roughly ${Math.max(2, n - 1)}-${n + 1} panels (hint from the storyboard — merge or split beats if the page reads better).`;
+  const rhythmHint = n >= 4
+    ? "You choose every panel's size, shape, and camera — vary them for rhythm: include at least one wide / establishing beat, at least one close-up emotional beat, and at least one dominant (large) panel."
+    : "You choose every panel's size, shape, and camera — vary them for rhythm.";
+  return [
+    "You are a professional narou-kei manga artist. YOU decide the paneling.",
+    panelHint,
+    "Keep strict right-to-left, top-to-bottom flow.",
+    rhythmHint,
+    "Use silence / empty white paper for breathing room. Less is more — do not fill every panel with detail.",
+    // 残課題3 (AI 過剰演出) の抑制ヒント。p08/p20/p22 で有効と確認済の 2 行のみ。
+    // 見せ場は SCENE の Showcase 行が上書きする。
+    "- Keep in-frame UI / screen / phone text and numbers MINIMAL: at most 1-2 readable values per page; do NOT draw detailed app interfaces or long digit strings (exception: a value explicitly named as Showcase in SCENE).",
+    "- System / device voices are typeset voice bubbles ONLY — do NOT embody them as a person or character.",
+  ].join("\n");
+}
+
+/** 検証済み実験スクリプトの STYLE_CONSTRAINTS を本番化 (座標再現の指示は持たない) */
+function buildSemifreeConstraintsBlock(): string {
+  return [
+    "Render: black ink character outlines + dot screentone ONLY for shading. Hard B/W contrast. NO line-based shading anywhere (no parallel / diagonal / cross-hatch / speedline fills). Backgrounds are dot screentone, solid black, or pure white ONLY.",
+    "Avoid: color, 3D shading, photorealism, page numbers, signatures, watermarks, English in-panel text, >5 fingers per hand.",
+    "TEXT: render the Japanese lines listed in LINES, each EXACTLY ONCE, in natural speech bubbles / thought clouds / narration boxes. No duplicates, no empty balloons, no invented extra text. Reading order strictly right-to-left, top-to-bottom (Japanese manga).",
+  ].join("\n");
+}
+
+function composePagePromptSemifreeCore(args: ComposeArgs): ComposeResult {
+  if (!args.page) throw new Error("composePagePrompt requires page");
+  const page = args.page;
+  const episodeNo = args.episodeNo ?? 1;
+  const bibleTier = args.bibleTier ?? "minimal";
+
+  const inlineLabels = args.packet.refs
+    .map((r, i) => formatRefLabel(r, i))
+    .join("\n");
+  const continuityBlocks = buildPageContinuityBlock(page, args.bible, args.scene, bibleTier, episodeNo);
+  const sceneContext = buildPageSceneContextBlock(args.scene, args.bible, page.panels[0], bibleTier);
+  const bibleFactsBlock = buildBibleFactsBlock(args.bible, "LINES");
+  const editorBlock = args.userInstructions && args.userInstructions.trim()
+    ? `## EDITOR\n${args.userInstructions.trim()}`
+    : null;
+
+  const sections: Array<string | null> = [
+    `# PAGE`,
+    `B6 portrait B&W manga page, ${args.pageDimensions.width}x${args.pageDimensions.height} px, narou-kei comicalization style (screentone-based, NOT seinen-realism).`,
+    "",
+    "## STYLE",
+    styleOverrideBlock(args.scene, args.bible),
+    "",
+    "## REFERENCES",
+    inlineLabels.length > 0 ? inlineLabels : "(style/character references provided as image inputs)",
+    "Keep faces and outfits consistent with the character references.",
+    "",
+    "## SCENE (what happens on this page)",
+    buildSemifreeSceneBlock(page, args.scene, args.pageBackgroundTreatments),
+    sceneContext,
+    "",
+    "## CONTINUITY",
+    continuityBlocks,
+    "",
+    "## LINES (place each line in the most natural panel, speaker attribution exact, RTL reading order)",
+    buildSemifreeLinesBlock(page, args.bible, args.compliance),
+    "",
+    "## DIRECTION (composition free, light hints only)",
+    buildSemifreeDirectionBlock(page),
+    "",
+    editorBlock,
+    editorBlock ? "" : null,
+    bibleFactsBlock ? "## BIBLE FACTS (must match exactly)" : null,
+    bibleFactsBlock,
+    bibleFactsBlock ? "" : null,
+    "## CONSTRAINTS",
+    buildSemifreeConstraintsBlock(),
+  ];
+  const prompt = sections
+    .filter((s): s is string => s !== null && s !== undefined)
+    .join("\n");
+  warnIfPromptTooLarge(prompt);
+
+  return {
+    prompt,
+    refImagePaths: args.packet.refs.map((r) => r.path),
+  };
+}
+
 function composePagePromptCore(args: ComposeArgs): ComposeResult {
   if (!args.page) throw new Error("composePagePrompt requires page");
+  // v57 改修: 既定は半委任。座標注入 (旧経路) は paneling: "coordinate" 明示時のみ。
+  if ((args.paneling ?? "semifree") === "semifree") {
+    return composePagePromptSemifreeCore(args);
+  }
   const page = args.page;
   const episodeNo = args.episodeNo ?? 1;
   const bibleTier = args.bibleTier ?? "minimal";

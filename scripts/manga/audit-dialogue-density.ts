@@ -81,7 +81,9 @@ async function main() {
     const severity = `[${fs_.length} warning${fs_.length > 1 ? "s" : ""}]`;
     console.log(`  page ${page_no} (role=${role}) ${severity}`);
     for (const f of fs_) {
-      console.log(`    - ${f.kind}: found=${f.found} expected_min=${f.expected_min}`);
+      // mono_narration_over_cap は上限違反なので expected_min 表記だと逆向きで紛らわしい
+      const bound = f.kind === "mono_narration_over_cap" ? `max=${f.expected_min}` : `expected_min=${f.expected_min}`;
+      console.log(`    - ${f.kind}: found=${f.found} ${bound}`);
       console.log(`      ${f.message}`);
     }
   }

@@ -37,11 +37,10 @@ function pickPanelSize(rect: { w: number; h: number }): MangaImageSize {
   if (ratio < 0.77) return MANGA_SIZE_PRESETS.panel_portrait;
   return MANGA_SIZE_PRESETS.panel_square;
 }
-import { composePagePrompt, composePanelPrompt, validatePromptAgainstCompliance } from "../../../src/lib/manga/render-v2/prompt-composer-v2";
+import { composePagePrompt, composePanelPrompt, validatePromptAgainstCompliance, type PanelingMode } from "../../../src/lib/manga/render-v2/prompt-composer-v2";
 import { loadBlocklist, loadFalsePositives } from "../../../src/lib/manga/compliance/scanner";
 import { composePanelsIntoPage } from "../../../src/lib/manga/render-v2/page-composer";
-import { overlayEffectLinesOntoPage } from "../../../src/lib/manga/render/page-with-effect-lines";
-import { overlayBubblesOntoPage } from "../../../src/lib/manga/render/page-with-bubbles";
+// 2026-05-28: effect lines / bubbles overlay は embed mode 一本化のため停止 (import 削除済)。
 import { overlayPolygonFramesOntoPage } from "../../../src/lib/manga/render/page-with-polygon-frames";
 import type {
   BibleSnapshotV2,
@@ -82,10 +81,15 @@ type Args = {
   panelId?: string;
   /** Phase C: revision_queue.jsonl から id 一致 entry の userInstructions を使う */
   revisionId?: string;
+  /**
+   * v57 改修: コマ割り委任度。既定 semifree (AI 委任)。
+   * coordinate 指定で旧座標注入経路にフォールバック。
+   */
+  paneling: PanelingMode;
 };
 
 function parseArgs(): Args {
-  const a: Partial<Args> = { concurrency: 2, skipNameGate: false, autoVersion: false, version: "v1" };
+  const a: Partial<Args> = { concurrency: 2, skipNameGate: false, autoVersion: false, version: "v1", paneling: "semifree" };
   const argv = process.argv.slice(2);
   const BOOLEAN_FLAGS = new Set(["skip-name-gate", "auto-version"]);
   for (let i = 0; i < argv.length; i++) {
@@ -117,6 +121,10 @@ function parseArgs(): Args {
     else if (key === "version") a.version = val;
     else if (key === "panel-id") a.panelId = val;
     else if (key === "revision-id") a.revisionId = val;
+    else if (key === "paneling") {
+      if (val !== "semifree" && val !== "coordinate") throw new Error(`--paneling must be semifree|coordinate (got ${val})`);
+      a.paneling = val;
+    }
   }
   if (!a.slug || !a.episode) throw new Error("--slug and --episode required");
   if (a.version && !/^v\d+$/.test(a.version)) throw new Error(`--version must be vN (got ${a.version})`);
@@ -314,11 +322,15 @@ async function main() {
       const packet = resolved.packets[`page_${page.page_no}`];
       if (!packet) { console.warn(`[L09] missing packet for page_${page.page_no}`); failed++; return; }
       const pageBgMap = new Map(page.panels.map((pp) => [pp.panel_id, pp.background_treatment]).filter(([, v]) => v !== undefined) as [string, NonNullable<typeof page.panels[0]["background_treatment"]>][]);
+      // v57 改修: semifree では page_plan の座標 (rect/polygon/ROW構造) を render prompt に
+      // 渡さない (page_plan 自体は KDP/name-gate 用に残る)。coordinate 時のみ従来注入。
+      // pageBackgroundTreatments は常に渡す — semifree 側は floating_ui (内容情報) のみ利用する。
       const { prompt, refImagePaths } = composePagePrompt({
         page: sbPage, packet, bible, pageDimensions: { width: 1748, height: 2480 },
+        paneling: args.paneling,
         userInstructions,
         pageBackgroundTreatments: pageBgMap.size > 0 ? pageBgMap : undefined,
-        pagePlanPage: page,
+        pagePlanPage: args.paneling === "coordinate" ? page : undefined,
         compliance,
         scene: sceneByPage.get(page.page_no),
       });
@@ -344,35 +356,30 @@ async function main() {
           size: { width: 1024, height: 1536 },
           referenceImagePaths: refImagePaths,
           timeoutMs: 15 * 60 * 1000,
-          maxRetries: 1,
+          maxRetries: 2,
         });
         await sharp(tmpPath)
           .resize({ width: 1748, height: 2480, fit: "fill" })
           .png()
           .toFile(outPath);
         try { await fs.unlink(tmpPath); } catch {}
-        const polygonResult = await overlayPolygonFramesOntoPage({
-          pagePngPath: outPath,
-          outputPath: outPath,
-          pagePlanPage: page,
-          pageWidth: 1748,
-          pageHeight: 2480,
-        });
-        if (polygonResult.framedCount > 0) console.log(`[L09] polygon frames p${page.page_no}: ${polygonResult.framedCount}`);
-        const effectResult = await overlayEffectLinesOntoPage({
-          pageOutputPath: outPath,
-          pagePlanPage: page,
-          storyboardPage: sbPage,
-          pageWidth: 1748,
-          pageHeight: 2480,
-        });
-        if (effectResult.effectCount > 0) console.log(`[L09] effects p${page.page_no}: ${effectResult.effectCount}`);
-        const bubbleResult = await overlayBubblesOntoPage({
-          pagePngPath: outPath,
-          outputPath: outPath,
-          pageBubbleInput: { pagePlanPage: page, storyboardPage: sbPage, pageWidth: 1748, pageHeight: 2480 },
-        });
-        if (bubbleResult.bubbleCount > 0) console.log(`[L09] bubbles p${page.page_no}: ${bubbleResult.bubbleCount}`);
+        // v57 改修: polygon frames overlay は page_plan の座標でコマ枠を後描きするため、
+        // AI がコマ割りを決める semifree とは構造的に矛盾する。coordinate 時のみ適用。
+        if (args.paneling === "coordinate") {
+          const polygonResult = await overlayPolygonFramesOntoPage({
+            pagePngPath: outPath,
+            outputPath: outPath,
+            pagePlanPage: page,
+            pageWidth: 1748,
+            pageHeight: 2480,
+          });
+          if (polygonResult.framedCount > 0) console.log(`[L09] polygon frames p${page.page_no}: ${polygonResult.framedCount}`);
+        }
+        // 2026-05-28: effect lines / bubbles の SVG overlay を停止 (embed mode 一本化)。
+        // prompt 側 (renderPageEmbedText) が dialogue/monologue/narration/SFX の実テキストを
+        // AI に描かせているため、overlay で同じ吹き出しを重ねると二重描画になっていた。
+        // a07 ep01 p10 で AI 描画 1 個 + SVG overlay 1 個 = 2 個の実証あり (real_v01 vs v55)。
+        // コマ枠 (polygon frames) はテキストと無関係なので残す。
         await appendRenderManifest({
           schema_version: 1,
           ts: new Date().toISOString(),
@@ -447,28 +454,15 @@ async function main() {
           done++;
         } catch (e) { console.warn(`[L09] FAIL panel ${pp.panel_id}: ${(e as Error).message}`); failed++; }
       }
-      const composed = await composePanelsIntoPage({
+      // composePanelsIntoPage はパネル画像をページに合成して outPath に書き出す副作用が主目的。
+      await composePanelsIntoPage({
         pageNo: page.page_no,
         rendersDir: rendersDir(args.slug, args.episode),
         pagePlanPage: page,
         outputPath: outPath,
       });
-      if (composed.missingPanels.length === 0) {
-        const effectResult = await overlayEffectLinesOntoPage({
-          pageOutputPath: outPath,
-          pagePlanPage: page,
-          storyboardPage: sbPage,
-          pageWidth: 1748,
-          pageHeight: 2480,
-        });
-        if (effectResult.effectCount > 0) console.log(`[L09] effects p${page.page_no}: ${effectResult.effectCount}`);
-        const bubbleResult = await overlayBubblesOntoPage({
-          pagePngPath: outPath,
-          outputPath: outPath,
-          pageBubbleInput: { pagePlanPage: page, storyboardPage: sbPage, pageWidth: 1748, pageHeight: 2480 },
-        });
-        if (bubbleResult.bubbleCount > 0) console.log(`[L09] bubbles p${page.page_no}: ${bubbleResult.bubbleCount}`);
-      }
+      // 2026-05-28: panel_composite 経路でも effect lines / bubbles overlay を停止 (embed mode 一本化)。
+      // 詳細は page_one_shot 経路のコメント参照。
     }
   });
 

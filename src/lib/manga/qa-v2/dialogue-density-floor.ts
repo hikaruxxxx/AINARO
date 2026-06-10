@@ -37,6 +37,12 @@ export type DialogueDensityRule = {
   dialogue_or_monologue_min?: number;
   /** dialogue + monologue + narration 合算の page 単位最小 (text 総量) */
   text_total_min?: number;
+  /**
+   * monologue + narration 合算の page 単位 **上限** (2026-06 v57 改修で追加)。
+   * 半委任コマ割りでは絵が物語を語る分、前半 page_role での独白・地の文の
+   * 詰め込みが「説明文付き一枚絵」化と AI 臭さ (monologue_cold_open) を招く。
+   */
+  mono_narration_max?: number;
 };
 
 /**
@@ -44,15 +50,22 @@ export type DialogueDensityRule = {
  *
  * 「action」は SFX で持つので text は緩め、それ以外は会話/内省/ナレーションで
  * 物語を進めることを期待。
+ *
+ * 2026-06 v57 改修 (半委任コマ割り前提):
+ * - text_total_min を一段引き下げ (絵が語る分、text で埋める必要が減る)
+ * - 前半 page_role (opening_hook / establishing / buildup) に monologue+narration の
+ *   上限 (mono_narration_max) を導入。Sprint 23 amplitude audit の monologue_cold_open
+ *   (p1-p6 が独白だけ) を構造的に予防する。
+ * - dialogue page の dialogue_min=3 は維持 (「会話していない会話シーン」禁止は不変)
  */
 export const DEFAULT_DIALOGUE_DENSITY_FLOORS: Record<PageRoleV2, DialogueDensityRule> = {
-  opening_hook: { narration_min: 2, text_total_min: 3 },
-  establishing: { text_total_min: 2 },
-  dialogue: { dialogue_min: 3, text_total_min: 5 },
-  buildup: { dialogue_or_monologue_min: 1, text_total_min: 3 },
+  opening_hook: { narration_min: 1, text_total_min: 2, mono_narration_max: 4 },
+  establishing: { text_total_min: 1, mono_narration_max: 3 },
+  dialogue: { dialogue_min: 3, text_total_min: 4 },
+  buildup: { dialogue_or_monologue_min: 1, text_total_min: 2, mono_narration_max: 4 },
   reveal: { dialogue_or_monologue_min: 2, text_total_min: 3 },
   action: { sfx_min: 3, text_total_min: 1 },
-  aftermath: { dialogue_or_monologue_min: 2, text_total_min: 3 },
+  aftermath: { dialogue_or_monologue_min: 2, text_total_min: 2 },
   cliffhanger: { text_total_min: 2 },
 };
 
@@ -66,8 +79,10 @@ export type DensityFinding = {
     | "narration_floor_below"
     | "sfx_floor_below"
     | "dialogue_or_monologue_floor_below"
-    | "text_total_floor_below";
+    | "text_total_floor_below"
+    | "mono_narration_over_cap";
   found: number;
+  /** mono_narration_over_cap の場合は「上限値」が入る (下限系 finding と共有) */
   expected_min: number;
   message: string;
 };
@@ -175,6 +190,17 @@ export function auditPageDensity(
       );
     }
   }
+  if (rule.mono_narration_max !== undefined) {
+    const monoNarr = c.monologue + c.narration;
+    if (monoNarr > rule.mono_narration_max) {
+      push(
+        "mono_narration_over_cap",
+        monoNarr,
+        rule.mono_narration_max,
+        `page_role=${role} は monologue + narration 合算 ${rule.mono_narration_max} 行以下推奨だが、現状 ${monoNarr} 行。独白過多は「説明文付き一枚絵」化を招く。絵 (構図・表情・間) と dialogue で語ること。`,
+      );
+    }
+  }
 
   return findings;
 }
@@ -218,6 +244,8 @@ export function buildDialogueDensityFloorDirective(
       parts.push(`dialogue+monologue ≥ ${rule.dialogue_or_monologue_min}`);
     if (rule.text_total_min !== undefined)
       parts.push(`text 合計 (dialogue+monologue+narration) ≥ ${rule.text_total_min}`);
+    if (rule.mono_narration_max !== undefined)
+      parts.push(`monologue+narration ≤ ${rule.mono_narration_max} (上限)`);
     lines.push(`- **${roleLabels[role]}**: ${parts.join(", ")}`);
   }
   lines.push("");
@@ -226,6 +254,8 @@ export function buildDialogueDensityFloorDirective(
   lines.push("- システム音声 / アナウンス: 公社 / ナビ / ゲート / ID 端末など");
   lines.push("- 状況描写 narration: 時刻 / 気温 / 場所 / 通知音の地の文");
   lines.push("- リアクション dialogue: 短い応答 (「了解」「待って」「……は?」など)");
+  lines.push("");
+  lines.push("**上限について (2026-06 v57)**: コマ割りは AI 半委任になり、絵 (構図・表情・間) が物語を語ります。前半 page_role で monologue / narration を上限超で詰め込むと「説明文付き一枚絵」化と独白だらけの冒頭 (monologue_cold_open) を招くため、上限を超えないでください。情報は絵と dialogue に逃がすこと。");
   lines.push("");
   lines.push("この directive は qa-v2/dialogue-density-floor の audit 基準と同期しており、生成後の audit-dialogue-density が検出する findings をゼロにできる水準で出力してください。");
   return lines.join("\n");

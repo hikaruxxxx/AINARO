@@ -727,7 +727,7 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     expect(v3.tierUsed).toBe(legacy.tierUsed);
   });
 
-  it("composePagePrompt outputs new markdown section structure with unified panel#N numbering", () => {
+  it("composePagePrompt outputs new markdown section structure with unified panel#N numbering (coordinate)", () => {
     const args = {
       page: page(3),
       packet,
@@ -736,6 +736,7 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     expect(result.prompt).toMatch(/^# PAGE\n/);
@@ -818,7 +819,7 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     expect(fallback.prompt).not.toContain("DIGEST_SENTINEL_STYLE");
   });
 
-  it("composePagePrompt extracts page-shared Characters/Location when all panels share them", () => {
+  it("composePagePrompt extracts page-shared Characters/Location when all panels share them (coordinate)", () => {
     // fixture の page(N) は全 panel が char_ren + loc_dungeon を共有 → shared 認定されるはず
     const args = {
       page: page(3),
@@ -828,6 +829,7 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     // page-shared header が出ている
@@ -841,7 +843,7 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
     expect(panelsChunk).not.toMatch(/^- Location: /m);
   });
 
-  it("composePagePrompt keeps per-panel Characters/Location when any panel differs", () => {
+  it("composePagePrompt keeps per-panel Characters/Location when any panel differs (coordinate)", () => {
     // panel#2 だけ Location を別にする → shared 不成立
     const p = page(3);
     p.panels[1].entities = {
@@ -856,6 +858,7 @@ describe("prompt-composer-v2 USE_BIBLE_V3 parity", () => {
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     expect(result.prompt).not.toContain("All panels on this page share these characters and location");
@@ -911,6 +914,7 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("## PANEL SIZE OVERRIDE");
@@ -936,6 +940,7 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     expect(result.prompt).not.toContain("## PANEL SIZE OVERRIDE");
@@ -985,6 +990,7 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("## ROW LAYOUT");
@@ -1027,6 +1033,7 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     expect(result.prompt).not.toContain("## ROW LAYOUT");
@@ -1088,6 +1095,7 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("## SCENE PANEL RESTRICTIONS");
@@ -1110,6 +1118,7 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     expect(result.prompt).toContain("## SCENE PANEL RESTRICTIONS");
@@ -1128,6 +1137,7 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     expect(result.prompt).not.toContain("## SCENE PANEL RESTRICTIONS");
@@ -1150,6 +1160,7 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     // p24 v18 で複数中心拡散の原因と判明したため、prompt directive は撤回済
@@ -1167,9 +1178,142 @@ describe("prompt-composer-v2 PANEL SIZE OVERRIDE (Sprint 7 追加チューニン
       scene: brokerScene(),
       episodeNo: 5,
       bibleTier: "minimal" as const,
+      paneling: "coordinate" as const,
     };
     const result = composePagePrompt(args);
     expect(result.prompt).not.toContain("Panel size variation (CRITICAL)");
     expect(result.prompt).not.toContain("smallest <= 12%, largest >= 35%");
+  });
+});
+
+describe("prompt-composer-v2 semifree paneling (2026-06 v57 読めなさ改修)", () => {
+  function semifreeArgs(overrides: Partial<Parameters<typeof composePagePrompt>[0]> = {}) {
+    return {
+      page: page(5),
+      packet,
+      bible: brokerBible(),
+      pageDimensions: { width: 1748, height: 2480 },
+      scene: brokerScene(),
+      episodeNo: 5,
+      bibleTier: "minimal" as const,
+      ...overrides,
+    };
+  }
+
+  it("既定 (paneling 未指定) は semifree: 座標注入セクションを一切出さない", () => {
+    // pagePlanPage を渡しても semifree では無視される (P4: page_plan は render prompt に渡さない)
+    const storyPage = page(5);
+    const PAGE_W = 1748;
+    const PAGE_H = 2480;
+    const plan: PagePlanPage = {
+      page_no: storyPage.page_no,
+      layout_template_id: "v4_test",
+      page_role: storyPage.page_role,
+      render_strategy: "page_one_shot",
+      panels: storyPage.panels.map((p, i) => ({
+        panel_id: p.panel_id,
+        slot_id: `s${i + 1}`,
+        rect: { x: 0, y: (PAGE_H / 5) * i, w: PAGE_W, h: PAGE_H / 5 },
+        reading_order: p.reading_order,
+        importance: 3 as const,
+      })),
+    };
+    const result = composePagePrompt(semifreeArgs({ page: storyPage, pagePlanPage: plan }));
+    expect(result.prompt).not.toContain("## LAYOUT");
+    expect(result.prompt).not.toContain("## PANELS");
+    expect(result.prompt).not.toContain("### panel#");
+    expect(result.prompt).not.toContain("## PANEL SIZE OVERRIDE");
+    expect(result.prompt).not.toContain("## ROW LAYOUT");
+    expect(result.prompt).not.toContain("## SCENE PANEL RESTRICTIONS");
+    expect(result.prompt).not.toContain("## MANGA CRAFT DIRECTIVES");
+    expect(result.prompt).not.toContain("Geometry (panel#");
+    // 半委任の中核セクションが揃っている
+    expect(result.prompt).toContain("## SCENE (what happens on this page)");
+    expect(result.prompt).toContain("## LINES");
+    expect(result.prompt).toContain("## DIRECTION (composition free, light hints only)");
+    expect(result.prompt).toContain("## CONSTRAINTS");
+  });
+
+  it("semifree は全セリフを話者付きで列挙し、CONTINUITY/STYLE を保持する", () => {
+    const result = composePagePrompt(semifreeArgs());
+    for (let n = 1; n <= 5; n += 1) {
+      expect(result.prompt).toContain(`桐生 レン(台詞): 「台詞${n}」`);
+    }
+    expect(result.prompt).toContain("## STYLE");
+    expect(result.prompt).toContain("## CONTINUITY");
+    expect(result.prompt).toContain("Characters (face/outfit invariants");
+    expect(result.prompt).toContain("EXACTLY ONCE");
+    expect(result.prompt).toContain("right-to-left");
+  });
+
+  it("semifree はコマ数を storyboard 由来の参考値ヒントとして渡す (強制しない)", () => {
+    const result = composePagePrompt(semifreeArgs({ page: page(5) }));
+    expect(result.prompt).toContain("Use roughly 4-6 panels");
+    expect(result.prompt).toContain("hint from the storyboard");
+    // 1 panel page は splash 扱い
+    const splash = composePagePrompt(semifreeArgs({ page: page(1) }));
+    expect(splash.prompt).toContain("full-page splash");
+  });
+
+  it("semifree は BIBLE FACTS (数値固定) を維持する", () => {
+    const bibleWithFacts = brokerBible();
+    bibleWithFacts.world.timeline = "20年前、世界中の都市の地下に巨大な接続口が同時に開いた。";
+    bibleWithFacts.world.system = "全人類は18歳までに鑑定石で七段階の適性ランクを判定される。";
+    const result = composePagePrompt(semifreeArgs({ bible: bibleWithFacts }));
+    expect(result.prompt).toContain("## BIBLE FACTS (must match exactly)");
+    expect(result.prompt).toContain("Do NOT invent alternative numbers");
+  });
+
+  it("semifree は scene.key_visual_intent を Showcase (見せ場の上書き) として注入する", () => {
+    const result = composePagePrompt(semifreeArgs());
+    // brokerScene().key_visual_intent = "Ren weighs an unsafe exit"
+    expect(result.prompt).toContain("Showcase (this page's key moment");
+    expect(result.prompt).toContain("Ren weighs an unsafe exit");
+    // 過剰演出の抑制ヒント (default) も入る
+    expect(result.prompt).toContain("UI / screen / phone text and numbers MINIMAL");
+    expect(result.prompt).toContain("do NOT embody them as a person or character");
+  });
+
+  it("semifree でも compliance fatal は throw する (gate 維持)", () => {
+    const storyPage = page(1);
+    storyPage.panels[0].dialogue = [{ character_id: "char_ren", text: "ローソンで待ってる。" }];
+    expect(() =>
+      composePagePrompt(semifreeArgs({
+        page: storyPage,
+        compliance: { blocklist: complianceBlocklist, fp: complianceFalsePositives },
+      })),
+    ).toThrow(/COMPLIANCE FATAL/);
+  });
+
+  it("semifree は floating_ui の panel を UI beat (内容情報) として SCENE に保持する", () => {
+    const storyPage = page(3);
+    storyPage.panels[1].action = "公社アプリの鑑定結果画面が表示される";
+    const bgMap = new Map([[storyPage.panels[1].panel_id, "floating_ui" as const]]);
+    const result = composePagePrompt(semifreeArgs({ page: storyPage, pageBackgroundTreatments: bgMap }));
+    expect(result.prompt).toContain("UI beat (this beat IS the UI/screen artifact itself");
+    expect(result.prompt).toContain("公社アプリの鑑定結果画面");
+    // 描画スタイル系 bg directive は semifree では出ない (意図的省略)
+    expect(result.prompt).not.toContain("BACKGROUND DIRECTIVE");
+    expect(result.prompt).not.toContain("BACKGROUND: pure white paper only");
+  });
+
+  it("semifree は無音ページを明示する", () => {
+    const storyPage = page(3);
+    for (const p of storyPage.panels) {
+      p.dialogue = [];
+      p.monologue = [];
+      p.narration = [];
+      p.sfx = [];
+    }
+    const result = composePagePrompt(semifreeArgs({ page: storyPage }));
+    expect(result.prompt).toContain("無音ページ");
+  });
+
+  it("paneling: 'coordinate' 明示で旧座標注入経路に戻る", () => {
+    const result = composePagePrompt(semifreeArgs({ paneling: "coordinate" }));
+    expect(result.prompt).toContain("## LAYOUT");
+    expect(result.prompt).toContain("## PANELS");
+    expect(result.prompt).toContain("### panel#1");
+    expect(result.prompt).not.toContain("## DIRECTION (composition free");
   });
 });
