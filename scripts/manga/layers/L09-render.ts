@@ -358,8 +358,11 @@ async function main() {
           timeoutMs: 15 * 60 * 1000,
           maxRetries: 2,
         });
+        // 2026-06-10: fit:"fill" は 1024x1536 (2:3) → 1748x2480 (B6) のアスペクト差で
+        // 全ページを横に +5.7% 引き伸ばし、顔比率・グリフ・吹き出し正円を恒常歪みさせていた。
+        // 比率保存 (contain) + 左右白 padding (~47px/側 ≈ 3.4mm、B6 余白として許容) に変更。
         await sharp(tmpPath)
-          .resize({ width: 1748, height: 2480, fit: "fill" })
+          .resize({ width: 1748, height: 2480, fit: "contain", background: { r: 255, g: 255, b: 255, alpha: 1 } })
           .png()
           .toFile(outPath);
         try { await fs.unlink(tmpPath); } catch {}

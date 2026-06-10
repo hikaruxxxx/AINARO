@@ -87,3 +87,5 @@ V57 は絵の破綻・文字化け・二重描画がほぼ消えたが、**漫�
   - P4: L09 は semifree 時 pagePlanPage / pageBackgroundTreatments を composer に渡さない。
   - 数値揺らぎ (§6-4): BIBLE FACTS block を semifree でも維持 (参照 section 名を LINES に修正)。
   - prompt size 実測: a07 p17=5030 chars / p04=5601 chars (旧 8-10k から削減)。テスト 568 件 pass。
+  - 本番経路 smoke render (p04/p17 v58、Pro 枠 +2): 両ページとも成立。p04 は引き→中景→寄り→超アップのズーム演出、p17 は構え→ヒット→余韻→内省の動作分解 + 大ゴマ見せ場を AI が自律構成。RTL 読み順・話者帰属・SFX embed いずれも破綻なし。観測された embed 誤差: p17「俺の力じゃない。手順だ」の句点→読点揺れ (→ roadmap X1 vision gate の検出対象)。
+- 2026-06-10 同日: 多エージェント監査 → `commercial-quality-roadmap-2026-06.md` 策定。N1 (render の fit:"fill" 全ページ +5.7% 横伸び歪み) を即日修正 (contain + 白 padding)。

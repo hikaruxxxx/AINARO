@@ -19,6 +19,8 @@ docs/plans/
 |---|---|---|
 | [strategy.md](manga/strategy.md) | **上位戦略**: 投資配分 (厚く/薄く)・陳腐化耐性 | Active (2026-05-05) |
 | [pipeline-v2.md](manga/pipeline-v2.md) | **実装 SSoT**: 12 layer・スキーマ・CLI | Active (2026-05-02) |
+| [commercial-quality-roadmap-2026-06.md](manga/commercial-quality-roadmap-2026-06.md) | **商業品質ロードマップ**: 監査 23 findings → now/next/later | Active (2026-06-10) |
+| [v57-readability-montage-redesign.md](manga/v57-readability-montage-redesign.md) | 読めなさ改修: コマ割り半委任 | P1-P4 完了 (2026-06-10) |
 | [kdp.md](manga/kdp.md) | KDP/B-1 領域詳細 (Codex レビュー反映版) | Active |
 | [name-gate.md](manga/name-gate.md) | L8.5/L8.7/L9 ネーム gate 導入計画 | Draft (2026-05-05) |
 | [name-gate-refactor.md](manga/name-gate-refactor.md) | L8.5 Name Preview 後のリファクタ整理 | Active |

@@ -766,6 +766,7 @@ RULE 10 budget 超過時の優先: style > continuity_forced > focus_entity > �
 
 ## 関連ドキュメント
 
+- 商業品質ロードマップ (2026-06): `docs/plans/manga/commercial-quality-roadmap-2026-06.md` — 多エージェント監査による now/next/later 改修リスト (vision gate / 未配線装置 / 紙品質)
 - 読めなさ改修計画 (2026-06): `docs/plans/manga/v57-readability-montage-redesign.md` — コマ送り IR (transition/eyeline) + density 再設計 (L3.5→L4→L9)
 - 旧 SSoT (アーカイブ): `docs/plans/manga/_archive/pipeline-v1-2026-05-02.md`
 - メモリ: project_horizontal_manga_pivot / project_kdp_strategy / project_pilot_complete_2026-05-01 / project_chatgpt_pro_image_gen / feedback_no_anthropic_api / feedback_quality_over_novelty
