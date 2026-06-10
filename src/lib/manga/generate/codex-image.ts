@@ -11,7 +11,7 @@
  */
 
 import { spawn } from "child_process";
-import { existsSync, statSync, mkdtempSync, rmSync } from "fs";
+import { existsSync, statSync, mkdtempSync, rmSync, copyFileSync } from "fs";
 import os from "os";
 import path from "path";
 
@@ -175,12 +175,19 @@ export async function generateMangaImage(
   const ownsCwd = !options.cwd;
   const cwd = options.cwd ?? mkdtempSync(path.join(os.tmpdir(), "manga-imgen-"));
   const timeoutMs = options.timeoutMs ?? 5 * 60 * 1000;
+  // codex は --sandbox workspace-write のため cwd 配下にしか書き込めない。
+  // tmpdir 隔離時は agent には tmpdir 内の一時ファイルへ保存させ、最終的な
+  // outputPath への配置は Node 側 (sandbox 外) でコピーする。これにより
+  // 「最終書込は必ず呼び出し元プロセスが行う」構造になり、agent 側の挙動に
+  // 依存しない衝突排除になる。
   const minFileSize = options.minFileSize ?? 50 * 1024;
   const maxRetries = options.maxRetries ?? 1;
 
   const absOutput = path.isAbsolute(options.outputPath)
     ? options.outputPath
     : path.resolve(cwd, options.outputPath);
+  // agent に書かせるパス: tmpdir 隔離時は sandbox 内 (cwd/out.png)、cwd 指定時は従来通り直接
+  const agentOutput = ownsCwd ? path.join(cwd, "out.png") : absOutput;
 
   const ledgerDecision = options.ledgerContext
     ? await checkAndReserveQuota({
@@ -195,7 +202,7 @@ export async function generateMangaImage(
 
   const task = buildTask({
     prompt: options.prompt,
-    outputPath: absOutput,
+    outputPath: agentOutput,
     size: options.size,
     referenceImagePaths: options.referenceImagePaths,
   });
@@ -235,19 +242,20 @@ export async function generateMangaImage(
         );
       }
 
-      if (!existsSync(absOutput)) {
+      if (!existsSync(agentOutput)) {
         throw new Error(
-          `画像ファイルが生成されていません: ${absOutput}\n--- Codex stdout (末尾) ---\n${stdout.slice(-800)}`
+          `画像ファイルが生成されていません: ${agentOutput}\n--- Codex stdout (末尾) ---\n${stdout.slice(-800)}`
         );
       }
 
-      const stat = statSync(absOutput);
+      const stat = statSync(agentOutput);
       if (stat.size < minFileSize) {
         throw new Error(
-          `画像ファイルが小さすぎます (${stat.size} bytes < ${minFileSize}): ${absOutput}`
+          `画像ファイルが小さすぎます (${stat.size} bytes < ${minFileSize}): ${agentOutput}`
         );
       }
 
+      if (agentOutput !== absOutput) copyFileSync(agentOutput, absOutput);
       const totalDurationMs = Date.now() - startedAt;
       await recordLedgerSuccess(totalDurationMs, attempt - 1);
       cleanupTempCwd();
@@ -265,14 +273,15 @@ export async function generateMangaImage(
       // ファイル救済: タイムアウト時など codex CLI が exit しなくても
       // image_gen 自体は完了して PNG が保存されているケースがある。
       // 出力ファイルが存在し最低サイズを満たしていれば成功扱いにする。
-      if (existsSync(absOutput)) {
+      if (existsSync(agentOutput)) {
         try {
-          const stat = statSync(absOutput);
+          const stat = statSync(agentOutput);
           if (stat.size >= minFileSize) {
             console.warn(
               `[manga-codex-image] 試行 ${attempt} が "${lastError.message}" で失敗したが、` +
                 `出力ファイルは保存済 (${(stat.size / 1024).toFixed(0)}KB)。成功扱いで返却。`
             );
+            if (agentOutput !== absOutput) copyFileSync(agentOutput, absOutput);
             const totalDurationMs = Date.now() - startedAt;
             await recordLedgerSuccess(totalDurationMs, attempt - 1);
             cleanupTempCwd();
