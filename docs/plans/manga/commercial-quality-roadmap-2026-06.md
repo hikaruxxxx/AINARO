@@ -23,7 +23,7 @@ N1-N4 を入れずに再走 (N5) すると、歪んだ画像・台帳外ファ�
 | N2 | **render 来歴記録** — RenderManifestEntry に prompt_sha256 / paneling mode / storyboard page hash を追加し、送信 prompt 全文を `renders/_prompts/p{NN}_{vN}.txt` に保存。無いと A/B・staleness 判定が timestamp 考古学に戻る | S-M | 未 |
 | N3 | **name gate の再定義** — rect SVG レイアウト承認は半委任 render と構造的に不一致の虚構ゲート。exit 3/4 ブロックを外し「出来事+セリフ正解列+コマ数目安」のテキスト確認票に縮小 | M | 未 |
 | N4 | **rect 前提検査の撤去・降格** — audit-vision の rect crop / bg_treatment_compliance / shot・camera 系 lint は semifree で「何も検査していないのに pass/fail を返す」偽データ化。削除 or info 降格。テキスト内容系 lint (dialogue_dedup / speaker_absent 等) は embed 正解データの lint として残す | M | 未 |
-| N5 | **§7 通し読み検証** — 全 22p を L09 正規経路 (semifree) で再走 → V57 と通し読み比較。代表ページで SFX あり/なし A/B (実験は SFX 52 行を落として勝った = 検証構成と出荷構成の不一致)。storyboard の SFX を物語情報のみ 52→20 程度に厳選 | M + Pro枠22+ | 一部 (p04/p17 v58 smoke 済、ともに成立) |
+| N5 | **§7 通し読み検証** — 全 22p を L09 正規経路 (semifree) で再走 → V57 と通し読み比較。代表ページで SFX あり/なし A/B (実験は SFX 52 行を落として勝った = 検証構成と出荷構成の不一致)。storyboard の SFX を物語情報のみ 52→20 程度に厳選 | M + Pro枠22+ | ✅ 2026-06-11 合格 (v59 全 22p、詳細は v57 plan §9)。副産物: 並列 render race 発見→根治。SFX A/B は未 |
 | N6 | **adopted-resolver default 反転 + L13 staleness 検査** — KDP package が v1 固定 fallback のため、今日 L13 を走らせると座標命令時代の旧画像が出荷される。manifest 最新既定 + resolved < 最新 を fatal に | S | 未 |
 | N7 | **scene_overrides の key 整合** — bible の場面別アートディレクションが SceneMode 語彙不一致で一度も prompt に届いていない死データ。リネーム + トーン記述のみ採用 (コマ構成命令と HUD 言及は削除) | S | 未 |
 

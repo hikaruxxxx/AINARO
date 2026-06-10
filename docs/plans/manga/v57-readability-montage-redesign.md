@@ -1,6 +1,6 @@
 # 漫画 V57「読めなさ」改修計画 — コマ割り半委任への転換
 
-**Status**: P1-P4 実装完了 (2026-06-10)。残: 全ページ一括 render での通し読み検証 (§7)
+**Status**: P1-P4 実装完了 (2026-06-10)、§7 通し読み検証 **合格** (2026-06-11、v59 全 22p)
 **Scope**: 横読み白黒漫画 v2 パイプライン L5(page-director) → L9(prompt-composer / render)
 **起点**: a07-modern-dungeon ep01 V57 診断 + 半委任 vs 現行の対比生成実験
 **関連**: SSoT `pipeline-v2.md` / 戦略 `strategy.md` / メモリ `feedback_manga_freehand_paneling` `project_manga_v57_diagnosis`
@@ -89,3 +89,10 @@ V57 は絵の破綻・文字化け・二重描画がほぼ消えたが、**漫�
   - prompt size 実測: a07 p17=5030 chars / p04=5601 chars (旧 8-10k から削減)。テスト 568 件 pass。
   - 本番経路 smoke render (p04/p17 v58、Pro 枠 +2): 両ページとも成立。p04 は引き→中景→寄り→超アップのズーム演出、p17 は構え→ヒット→余韻→内省の動作分解 + 大ゴマ見せ場を AI が自律構成。RTL 読み順・話者帰属・SFX embed いずれも破綻なし。観測された embed 誤差: p17「俺の力じゃない。手順だ」の句点→読点揺れ (→ roadmap X1 vision gate の検出対象)。
 - 2026-06-10 同日: 多エージェント監査 → `commercial-quality-roadmap-2026-06.md` 策定。N1 (render の fit:"fill" 全ページ +5.7% 横伸び歪み) を即日修正 (contain + 白 padding)。
+- 2026-06-11 §7 通し読み検証 **合格** (v59 全 22p 一括 render、Pro 枠 +24):
+  - **判定: 「コマを追って物語を読める」を全 22p で達成**。引き→寄りのズーム演出 (p4)、無音のタメ (p13 水滴)、戦闘の動作分解 (p17-19)、社会格差の絵示 (p11-12)、cliffhanger (p22) まで通読成立。V57 の「説明文付き一枚絵の羅列」から質的転換。
+  - 発見した不具合と対処:
+    1. **並列 render の画像衝突 race**: p05/p06 がバイト同一 (codex agent の最終書込が衝突)。tmpdir 隔離 + Node 側 copyFileSync 方式で根治、p05 再生成成功 (commit b62b576 + d6d671b)。
+    2. **LINES 形式漏れ**: p12 で話者ラベル「獅童 雪（台詞）：」ごと、p16 でカギ括弧ごと吹き出しに描画 → CONSTRAINTS に書式禁止 1 文追加 (b62b576)。
+    3. **embed 誤字** (roadmap X1 vision gate の検出対象実例): p07「倍化→倍信化」、p19「膝→鳩」、p17 v58 句読点揺れ。
+    4. 軽微: p10 時計が 06:14 (到着前なのに目標時刻)、p21 TV 内灯里の顔 drift、響 (on_screen_via=photo) が光るアバターとして実体寄りに描画 (演出としては成立、意図確認は要ユーザ判断)。
